@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\ModShelf.Domain\ModShelf.Domain.csproj" />
+    <ProjectReference Include="..\ModShelf.Sources.Abstractions\ModShelf.Sources.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

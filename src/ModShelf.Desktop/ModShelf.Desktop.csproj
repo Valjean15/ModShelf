@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="Avalonia.Fonts.Inter" />
+    <PackageReference Include="AvaloniaUI.DiagnosticsSupport">
+      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+
+  <!-- Composition root: references every library, for DI registration only. -->
+  <ItemGroup>
+    <ProjectReference Include="..\ModShelf.Application\ModShelf.Application.csproj" />
+    <ProjectReference Include="..\ModShelf.Domain\ModShelf.Domain.csproj" />
+    <ProjectReference Include="..\ModShelf.Infrastructure\ModShelf.Infrastructure.csproj" />
+    <ProjectReference Include="..\ModShelf.Platform\ModShelf.Platform.csproj" />
+    <ProjectReference Include="..\ModShelf.Presentation\ModShelf.Presentation.csproj" />
+    <ProjectReference Include="..\ModShelf.Sources.Abstractions\ModShelf.Sources.Abstractions.csproj" />
+    <ProjectReference Include="..\ModShelf.Sources.Nexus\ModShelf.Sources.Nexus.csproj" />
+  </ItemGroup>
+</Project>

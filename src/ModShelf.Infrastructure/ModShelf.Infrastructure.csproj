@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\ModShelf.Application\ModShelf.Application.csproj" />
+  </ItemGroup>
+
+</Project>

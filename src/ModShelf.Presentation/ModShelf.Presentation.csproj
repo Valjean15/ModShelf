@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Strings.resx holds the English text; other cultures come from satellite assemblies (CA1824). -->
+    <NeutralLanguage>en</NeutralLanguage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ModShelf.Application\ModShelf.Application.csproj" />
+  </ItemGroup>
+
+  <!--
+    MSBuild generates the Strings class from Strings.resx, so there is no checked-in Designer.cs
+    and it works the same in every IDE and in CI. Running PrepareResources before CoreCompile lets
+    IDE design-time builds see the class too, and MSBuild:Compile regenerates it when the .resx changes.
+  -->
+  <PropertyGroup>
+    <CoreCompileDependsOn>PrepareResources;$(CoreCompileDependsOn)</CoreCompileDependsOn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Strings.resx">
+      <Generator>MSBuild:Compile</Generator>
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedNamespace>ModShelf.Presentation.Resources</StronglyTypedNamespace>
+      <StronglyTypedClassName>Strings</StronglyTypedClassName>
+      <StronglyTypedFileName>$(IntermediateOutputPath)Strings.Designer.cs</StronglyTypedFileName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\ModShelf.Sources.Abstractions\ModShelf.Sources.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

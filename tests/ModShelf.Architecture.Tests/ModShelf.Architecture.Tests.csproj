@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3.mtp-v2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      Every project under src except Desktop, the Avalonia composition root, which no rule
+      restricts. Globbing means a new source project is checked without editing this file.
+    -->
+    <ProjectReference Include="..\..\src\*\*.csproj" Exclude="..\..\src\ModShelf.Desktop\ModShelf.Desktop.csproj" />
+  </ItemGroup>
+
+</Project>

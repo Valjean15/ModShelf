@@ -1,0 +1,23 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ModShelf.Application/ModShelf.Application.csproj" />
+    <Project Path="src/ModShelf.Cli/ModShelf.Cli.csproj" />
+    <Project Path="src/ModShelf.Desktop/ModShelf.Desktop.csproj" />
+    <Project Path="src/ModShelf.Domain/ModShelf.Domain.csproj" />
+    <Project Path="src/ModShelf.Infrastructure/ModShelf.Infrastructure.csproj" />
+    <Project Path="src/ModShelf.Platform/ModShelf.Platform.csproj" />
+    <Project Path="src/ModShelf.Presentation/ModShelf.Presentation.csproj" />
+    <Project Path="src/ModShelf.Sources.Abstractions/ModShelf.Sources.Abstractions.csproj" />
+    <Project Path="src/ModShelf.Sources.Nexus/ModShelf.Sources.Nexus.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ModShelf.Application.Tests/ModShelf.Application.Tests.csproj" />
+    <Project Path="tests/ModShelf.Architecture.Tests/ModShelf.Architecture.Tests.csproj" />
+    <Project Path="tests/ModShelf.Domain.Tests/ModShelf.Domain.Tests.csproj" />
+    <Project Path="tests/ModShelf.Infrastructure.Tests/ModShelf.Infrastructure.Tests.csproj" />
+    <Project Path="tests/ModShelf.Platform.Tests/ModShelf.Platform.Tests.csproj" />
+    <Project Path="tests/ModShelf.Presentation.Tests/ModShelf.Presentation.Tests.csproj" />
+    <Project Path="tests/ModShelf.Sources.Abstractions.Tests/ModShelf.Sources.Abstractions.Tests.csproj" />
+    <Project Path="tests/ModShelf.Sources.Nexus.Tests/ModShelf.Sources.Nexus.Tests.csproj" />
+  </Folder>
+</Solution>
