@@ -6,7 +6,8 @@ using ModShelf.Presentation.ViewModels;
 
 namespace ModShelf.Desktop;
 
-public sealed partial class App : Application
+// Qualified because the ModShelf.Application namespace would otherwise hide Avalonia's Application class.
+public sealed partial class App : Avalonia.Application
 {
     private readonly Func<MainWindowViewModel>? _createMainWindowViewModel;
 
