@@ -4,7 +4,7 @@ using ModShelf.Sources.Abstractions.Accounts;
 namespace ModShelf.Application.Accounts;
 
 /// <summary>
-/// The <see cref="ICredentialProvider"/> half: current credentials for requests, and refreshing them.
+/// The <see cref="ICredentialProvider"/> half: adding credentials to requests, and refreshing them.
 /// </summary>
 internal sealed partial class AccountService
 {
@@ -14,29 +14,32 @@ internal sealed partial class AccountService
     /// </summary>
     private static readonly TimeSpan RefreshBeforeExpiry = TimeSpan.FromMinutes(1);
 
-    public async Task<AccountCredentials?> GetAsync(SourceId source, CancellationToken cancellationToken)
+    /// <summary>
+    /// The source whose account the current call flow is linking or refreshing, if any. Requests that flow sends to
+    /// the same source are left alone: the strategy adds the credentials it is checking itself, and waiting for the
+    /// source's lock, which a refresh holds, would never end.
+    /// </summary>
+    private static readonly AsyncLocal<SourceId?> ManagedSource = new();
+
+    public async Task<AccountCredentials?> AuthorizeAsync(SourceId source, HttpRequestMessage request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(request);
 
-        // Most requests find good credentials in memory and never wait for the lock.
-        if (_vault.TryGetCached(source, out VaultEntry? cached) && Usable(cached) is { } fresh && !IsAboutToExpire(fresh))
+        if (source == ManagedSource.Value
+            || await GetUsableAsync(source, cancellationToken).ConfigureAwait(false) is not { } entry)
         {
-            return fresh;
+            return null;
         }
 
-        using (await _vault.LockAsync(source, cancellationToken).ConfigureAwait(false))
+        if (StrategyFor(source, entry.Kind) is not { } strategy)
         {
-            VaultEntry? entry = await _vault.GetAsync(source, cancellationToken).ConfigureAwait(false);
-            if (Usable(entry) is not { } credentials)
-            {
-                return null;
-            }
-
-            // Another request may have refreshed them while this one waited for the lock.
-            return IsAboutToExpire(credentials)
-                ? await RefreshAsync(source, entry!, beforeUse: true, cancellationToken).ConfigureAwait(false)
-                : credentials;
+            LogCannotAuthorize(_logger, source, entry.Kind);
+            return null;
         }
+
+        strategy.Authorize(request, entry.Credentials);
+        return entry.Credentials;
     }
 
     public async Task<AccountCredentials?> RefreshAsync(SourceId source, AccountCredentials rejected, CancellationToken cancellationToken)
@@ -62,6 +65,55 @@ internal sealed partial class AccountService
     private static AccountCredentials? Usable(VaultEntry? entry) => entry is { NeedsRelink: false } ? entry.Credentials : null;
 
     /// <summary>
+    /// Runs <paramref name="work"/> as linking or refreshing <paramref name="source"/>'s account, so the requests it
+    /// sends to that source are left alone.
+    /// </summary>
+    private static async Task<T> WhileManagingAsync<T>(SourceId source, Func<Task<T>> work)
+    {
+        SourceId? outer = ManagedSource.Value;
+        ManagedSource.Value = source;
+        try
+        {
+            return await work().ConfigureAwait(false);
+        }
+        finally
+        {
+            ManagedSource.Value = outer;
+        }
+    }
+
+    /// <summary>
+    /// The source's entry with credentials that are good to use, refreshed first when they're about to expire.
+    /// </summary>
+    /// <returns>Null when there are no credentials to use.</returns>
+    private async Task<VaultEntry?> GetUsableAsync(SourceId source, CancellationToken cancellationToken)
+    {
+        // Most requests find good credentials in memory and never wait for the lock.
+        if (_vault.TryGetCached(source, out VaultEntry? cached) && cached is { NeedsRelink: false } && !IsAboutToExpire(cached.Credentials))
+        {
+            return cached;
+        }
+
+        using (await _vault.LockAsync(source, cancellationToken).ConfigureAwait(false))
+        {
+            VaultEntry? entry = await _vault.GetAsync(source, cancellationToken).ConfigureAwait(false);
+            if (entry is not { NeedsRelink: false })
+            {
+                return null;
+            }
+
+            // Another request may have refreshed them while this one waited for the lock.
+            if (!IsAboutToExpire(entry.Credentials))
+            {
+                return entry;
+            }
+
+            AccountCredentials? refreshed = await RefreshAsync(source, entry, beforeUse: true, cancellationToken).ConfigureAwait(false);
+            return refreshed is null ? null : entry with { Credentials = refreshed };
+        }
+    }
+
+    /// <summary>
     /// Refreshes the entry's credentials. Call while holding the source's lock.
     /// </summary>
     /// <param name="beforeUse">
@@ -70,8 +122,7 @@ internal sealed partial class AccountService
     /// </param>
     private async Task<AccountCredentials?> RefreshAsync(SourceId source, VaultEntry entry, bool beforeUse, CancellationToken cancellationToken)
     {
-        IAuthStrategy? strategy = _sources.Find<IAccountLinker>(source)?.Strategies.FirstOrDefault(offered => offered.Kind == entry.Kind);
-        if (strategy is null)
+        if (StrategyFor(source, entry.Kind) is not { } strategy)
         {
             LogNoStrategy(_logger, source, entry.Kind);
             return beforeUse ? entry.Credentials : null;
@@ -80,7 +131,8 @@ internal sealed partial class AccountService
         AccountCredentials? refreshed;
         try
         {
-            refreshed = await strategy.RefreshAsync(entry.Credentials, cancellationToken).ConfigureAwait(false);
+            refreshed = await WhileManagingAsync(source, () => strategy.RefreshAsync(entry.Credentials, cancellationToken))
+                .ConfigureAwait(false);
         }
         catch (AuthenticationFailedException)
         {
@@ -103,6 +155,9 @@ internal sealed partial class AccountService
         LogRefreshed(_logger, source);
         return refreshed;
     }
+
+    private IAuthStrategy? StrategyFor(SourceId source, AuthKind kind)
+        => _sources.Find<IAccountLinker>(source)?.Strategies.FirstOrDefault(offered => offered.Kind == kind);
 
     private bool IsAboutToExpire(AccountCredentials credentials)
         => credentials.ExpiresAt is { } expiresAt && expiresAt - _timeProvider.GetUtcNow() <= RefreshBeforeExpiry;

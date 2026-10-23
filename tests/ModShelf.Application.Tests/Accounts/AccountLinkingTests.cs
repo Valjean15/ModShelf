@@ -161,7 +161,7 @@ public sealed class AccountLinkingTests
 
         Assert.Empty(_harness.Accounts.Accounts);
         Assert.Empty(_harness.Secrets.Secrets);
-        Assert.Null(await _harness.Service.GetAsync(TestData.Nexus, TestContext.Current.CancellationToken));
+        Assert.Null(await CredentialsAsync(TestData.Nexus));
     }
 
     [Fact]
@@ -205,6 +205,12 @@ public sealed class AccountLinkingTests
         Assert.DoesNotContain(_harness.Logger.Entries, entry => entry.Contains("Jean", StringComparison.Ordinal));
     }
 
-    private Task<AccountCredentials?> CredentialsAsync(SourceId source)
-        => _harness.Service.GetAsync(source, TestContext.Current.CancellationToken);
+    /// <summary>
+    /// The credentials the service adds to a request to <paramref name="source"/>.
+    /// </summary>
+    private async Task<AccountCredentials?> CredentialsAsync(SourceId source)
+    {
+        using HttpRequestMessage request = new(HttpMethod.Get, "https://api.example.com/v1/users/validate.json");
+        return await _harness.Service.AuthorizeAsync(source, request, TestContext.Current.CancellationToken);
+    }
 }

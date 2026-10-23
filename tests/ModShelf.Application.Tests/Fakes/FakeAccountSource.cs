@@ -18,8 +18,20 @@ internal sealed class FakeAccountSource(SourceId id, params FakeStrategy[] strat
 
     public bool RefusesProfiles { get; set; }
 
-    public Task<AccountProfile> GetProfileAsync(AccountCredentials credentials, CancellationToken cancellationToken)
-        => RefusesProfiles
+    /// <summary>
+    /// Runs while <see cref="GetProfileAsync"/> asks the site, before it answers.
+    /// </summary>
+    public Func<Task>? WhileLookingUpProfile { get; set; }
+
+    public async Task<AccountProfile> GetProfileAsync(AccountCredentials credentials, CancellationToken cancellationToken)
+    {
+        if (WhileLookingUpProfile is not null)
+        {
+            await WhileLookingUpProfile();
+        }
+
+        return RefusesProfiles
             ? throw new AuthenticationFailedException("The site refused the token.")
-            : Task.FromResult(new AccountProfile("Jean", new Uri("https://avatars.example.com/jean.png"), "Premium"));
+            : new AccountProfile("Jean", new Uri("https://avatars.example.com/jean.png"), "Premium");
+    }
 }

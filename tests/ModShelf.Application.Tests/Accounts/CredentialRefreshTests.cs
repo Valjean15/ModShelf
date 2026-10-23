@@ -4,7 +4,7 @@ using ModShelf.Sources.Abstractions.Accounts;
 namespace ModShelf.Application.Tests.Accounts;
 
 /// <summary>
-/// The <see cref="ICredentialProvider"/> side: handing out credentials and refreshing them.
+/// The <see cref="ICredentialProvider"/> side: which credentials requests get, and refreshing them.
 /// </summary>
 public sealed class CredentialRefreshTests
 {
@@ -13,7 +13,7 @@ public sealed class CredentialRefreshTests
     [Fact]
     public async Task HasNoCredentialsForASourceWithoutAnAccount()
     {
-        Assert.Null(await GetAsync());
+        Assert.Null(await AuthorizeAsync());
     }
 
     [Fact]
@@ -23,7 +23,7 @@ public sealed class CredentialRefreshTests
 
         _harness.Restart();
 
-        Assert.Equal("access-1", (await GetAsync())?.AccessToken);
+        Assert.Equal("access-1", (await AuthorizeAsync())?.AccessToken);
         Assert.Equal(0, _harness.NexusOAuth.RefreshCalls);
     }
 
@@ -33,7 +33,7 @@ public sealed class CredentialRefreshTests
         await _harness.LinkAsync(TestData.Nexus, AuthKind.OAuthPkce);
         _harness.Time.Advance(TimeSpan.FromMinutes(58));
 
-        Assert.Equal("access-1", (await GetAsync())?.AccessToken);
+        Assert.Equal("access-1", (await AuthorizeAsync())?.AccessToken);
         Assert.Equal(0, _harness.NexusOAuth.RefreshCalls);
     }
 
@@ -43,12 +43,12 @@ public sealed class CredentialRefreshTests
         await _harness.LinkAsync(TestData.Nexus, AuthKind.OAuthPkce);
         _harness.Time.Advance(TimeSpan.FromMinutes(59.5));
 
-        AccountCredentials? credentials = await GetAsync();
+        AccountCredentials? credentials = await AuthorizeAsync();
 
         Assert.Equal("access-2", credentials?.AccessToken);
         Assert.Equal(1, _harness.NexusOAuth.RefreshCalls);
         _harness.Restart();
-        Assert.Equal("access-2", (await GetAsync())?.AccessToken);
+        Assert.Equal("access-2", (await AuthorizeAsync())?.AccessToken);
     }
 
     [Fact]
@@ -57,7 +57,7 @@ public sealed class CredentialRefreshTests
         await _harness.LinkAsync(TestData.Nexus, AuthKind.ApiKey);
         _harness.Time.Advance(TimeSpan.FromDays(400));
 
-        Assert.Equal("token-for-good-key", (await GetAsync())?.AccessToken);
+        Assert.Equal("token-for-good-key", (await AuthorizeAsync())?.AccessToken);
         Assert.Equal(0, _harness.NexusApiKey.RefreshCalls);
     }
 
@@ -65,19 +65,19 @@ public sealed class CredentialRefreshTests
     public async Task RefusedCredentialsAreRefreshed()
     {
         await _harness.LinkAsync(TestData.Nexus, AuthKind.OAuthPkce);
-        AccountCredentials refused = (await GetAsync())!;
+        AccountCredentials refused = (await AuthorizeAsync())!;
 
         AccountCredentials? refreshed = await RefreshAsync(refused);
 
         Assert.Equal("access-2", refreshed?.AccessToken);
-        Assert.Equal("access-2", (await GetAsync())?.AccessToken);
+        Assert.Equal("access-2", (await AuthorizeAsync())?.AccessToken);
     }
 
     [Fact]
     public async Task CredentialsRefusedAfterAnotherRequestRefreshedThemAreNotRefreshedAgain()
     {
         await _harness.LinkAsync(TestData.Nexus, AuthKind.OAuthPkce);
-        AccountCredentials refused = (await GetAsync())!;
+        AccountCredentials refused = (await AuthorizeAsync())!;
         await RefreshAsync(refused);
 
         AccountCredentials? second = await RefreshAsync(refused);
@@ -90,7 +90,7 @@ public sealed class CredentialRefreshTests
     public async Task RequestsRefusedAtTheSameMomentShareOneRefresh()
     {
         await _harness.LinkAsync(TestData.Nexus, AuthKind.OAuthPkce);
-        AccountCredentials refused = (await GetAsync())!;
+        AccountCredentials refused = (await AuthorizeAsync())!;
         TaskCompletionSource<AccountCredentials?> siteAnswers = new(TaskCreationOptions.RunContinuationsAsynchronously);
         _harness.NexusOAuth.Refresh = _ => siteAnswers.Task;
 
@@ -106,27 +106,27 @@ public sealed class CredentialRefreshTests
     public async Task CredentialsThatCannotBeRefreshedNeedTheAccountLinkedAgain()
     {
         await _harness.LinkAsync(TestData.Nexus, AuthKind.OAuthPkce);
-        AccountCredentials refused = (await GetAsync())!;
+        AccountCredentials refused = (await AuthorizeAsync())!;
         _harness.NexusOAuth.Refresh = _ => Task.FromResult<AccountCredentials?>(null);
 
         Assert.Null(await RefreshAsync(refused));
-        Assert.Null(await GetAsync());
+        Assert.Null(await AuthorizeAsync());
         Assert.Null(await RefreshAsync(refused));
         Assert.Equal(1, _harness.NexusOAuth.RefreshCalls);
 
         await _harness.LinkAsync(TestData.Nexus, AuthKind.ApiKey);
-        Assert.Equal("token-for-good-key", (await GetAsync())?.AccessToken);
+        Assert.Equal("token-for-good-key", (await AuthorizeAsync())?.AccessToken);
     }
 
     [Fact]
     public async Task ARefreshTheSiteRefusesNeedsTheAccountLinkedAgain()
     {
         await _harness.LinkAsync(TestData.Nexus, AuthKind.OAuthPkce);
-        AccountCredentials refused = (await GetAsync())!;
+        AccountCredentials refused = (await AuthorizeAsync())!;
         _harness.NexusOAuth.Refresh = _ => throw new AuthenticationFailedException("The refresh token was revoked.");
 
         Assert.Null(await RefreshAsync(refused));
-        Assert.Null(await GetAsync());
+        Assert.Null(await AuthorizeAsync());
     }
 
     [Fact]
@@ -136,7 +136,7 @@ public sealed class CredentialRefreshTests
         _harness.Time.Advance(TimeSpan.FromMinutes(59.5));
         _harness.NexusOAuth.Refresh = _ => throw new HttpRequestException("The site didn't answer.");
 
-        Assert.Equal("access-1", (await GetAsync())?.AccessToken);
+        Assert.Equal("access-1", (await AuthorizeAsync())?.AccessToken);
         Assert.Contains(_harness.Logger.Entries, entry => entry.Contains("Couldn't refresh", StringComparison.Ordinal));
     }
 
@@ -144,11 +144,11 @@ public sealed class CredentialRefreshTests
     public async Task ANetworkErrorAfterARefusalReachesTheCaller()
     {
         await _harness.LinkAsync(TestData.Nexus, AuthKind.OAuthPkce);
-        AccountCredentials refused = (await GetAsync())!;
+        AccountCredentials refused = (await AuthorizeAsync())!;
         _harness.NexusOAuth.Refresh = _ => throw new HttpRequestException("The site didn't answer.");
 
         await Assert.ThrowsAsync<HttpRequestException>(() => RefreshAsync(refused));
-        Assert.Equal("access-1", (await GetAsync())?.AccessToken);
+        Assert.Equal("access-1", (await AuthorizeAsync())?.AccessToken);
     }
 
     [Fact]
@@ -159,7 +159,7 @@ public sealed class CredentialRefreshTests
 
         _harness.Restart();
 
-        Assert.Null(await GetAsync());
+        Assert.Null(await AuthorizeAsync());
         Assert.Contains(_harness.Logger.Entries, entry => entry.Contains("can't be read", StringComparison.Ordinal));
     }
 
@@ -172,10 +172,17 @@ public sealed class CredentialRefreshTests
     {
         _harness.Secrets.Secrets["account/nexus"] = stored;
 
-        Assert.Null(await GetAsync());
+        Assert.Null(await AuthorizeAsync());
     }
 
-    private Task<AccountCredentials?> GetAsync() => _harness.Service.GetAsync(TestData.Nexus, TestContext.Current.CancellationToken);
+    /// <summary>
+    /// The credentials the service adds to a request to Nexus.
+    /// </summary>
+    private async Task<AccountCredentials?> AuthorizeAsync()
+    {
+        using HttpRequestMessage request = new(HttpMethod.Get, "https://api.example.com/v1/users/validate.json");
+        return await _harness.Service.AuthorizeAsync(TestData.Nexus, request, TestContext.Current.CancellationToken);
+    }
 
     private Task<AccountCredentials?> RefreshAsync(AccountCredentials refused)
         => _harness.Service.RefreshAsync(TestData.Nexus, refused, TestContext.Current.CancellationToken);

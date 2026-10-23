@@ -28,4 +28,7 @@ internal sealed partial class AccountService
 
     [LoggerMessage(EventId = 406, Level = LogLevel.Warning, Message = "Can't refresh the credentials for {Source}: the source isn't registered or no longer offers {Kind}")]
     private static partial void LogNoStrategy(ILogger logger, SourceId source, AuthKind kind);
+
+    [LoggerMessage(EventId = 407, Level = LogLevel.Warning, Message = "Can't add the account to requests for {Source}: the source isn't registered or no longer offers {Kind}; link the account again")]
+    private static partial void LogCannotAuthorize(ILogger logger, SourceId source, AuthKind kind);
 }

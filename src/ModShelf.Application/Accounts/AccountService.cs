@@ -83,14 +83,10 @@ internal sealed partial class AccountService : IAccountService, ICredentialProvi
         IAuthStrategy strategy = linker.Strategies.FirstOrDefault(offered => offered.Kind == kind)
             ?? throw new ArgumentException($"Source '{source}' doesn't offer {kind}.", nameof(kind));
 
-        AccountCredentials credentials = kind switch
-        {
-            AuthKind.ApiKey => await LinkWithApiKeyAsync(source, strategy, prompt, cancellationToken).ConfigureAwait(false),
-            AuthKind.EmailCode => await LinkWithEmailedCodeAsync(source, strategy, prompt, cancellationToken).ConfigureAwait(false),
-            AuthKind.OAuthPkce => await LinkInBrowserAsync(source, strategy, prompt, cancellationToken).ConfigureAwait(false),
-            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Unknown kind of authentication."),
-        };
-        AccountProfile profile = await linker.GetProfileAsync(credentials, cancellationToken).ConfigureAwait(false);
+        (AccountCredentials credentials, AccountProfile profile) = await WhileManagingAsync(
+                source,
+                () => GetCredentialsAndProfileAsync(source, linker, strategy, prompt, cancellationToken))
+            .ConfigureAwait(false);
         LinkedAccount account = new(source, kind, profile, _timeProvider.GetUtcNow());
 
         using (await _vault.LockAsync(source, cancellationToken).ConfigureAwait(false))
@@ -143,6 +139,27 @@ internal sealed partial class AccountService : IAccountService, ICredentialProvi
 
     private static string Entered(string answer, string messageWhenBlank)
         => string.IsNullOrWhiteSpace(answer) ? throw new ArgumentException(messageWhenBlank, nameof(answer)) : answer.Trim();
+
+    /// <summary>
+    /// Gets credentials through the strategy and the prompt, then looks up whose account they belong to.
+    /// </summary>
+    private async Task<(AccountCredentials Credentials, AccountProfile Profile)> GetCredentialsAndProfileAsync(
+        SourceId source,
+        IAccountLinker linker,
+        IAuthStrategy strategy,
+        IAuthPrompt prompt,
+        CancellationToken cancellationToken)
+    {
+        AccountCredentials credentials = strategy.Kind switch
+        {
+            AuthKind.ApiKey => await LinkWithApiKeyAsync(source, strategy, prompt, cancellationToken).ConfigureAwait(false),
+            AuthKind.EmailCode => await LinkWithEmailedCodeAsync(source, strategy, prompt, cancellationToken).ConfigureAwait(false),
+            AuthKind.OAuthPkce => await LinkInBrowserAsync(source, strategy, prompt, cancellationToken).ConfigureAwait(false),
+            _ => throw new ArgumentOutOfRangeException(nameof(strategy), strategy.Kind, "Unknown kind of authentication."),
+        };
+        AccountProfile profile = await linker.GetProfileAsync(credentials, cancellationToken).ConfigureAwait(false);
+        return (credentials, profile);
+    }
 
     private async Task<AccountCredentials> LinkInBrowserAsync(
         SourceId source,

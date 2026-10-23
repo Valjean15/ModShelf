@@ -15,6 +15,7 @@ internal sealed class FakeStrategy : IAuthStrategy
     public const string GoodApiKey = "good-key";
     public const string GoodEmailCode = "123456";
     public const string GoodOAuthCode = "c0de";
+    public const string ApiKeyHeader = "X-Api-Key";
 
     private int _refreshCalls;
     private int _issued;
@@ -39,6 +40,11 @@ internal sealed class FakeStrategy : IAuthStrategy
     /// What a refresh returns. By default a new token valid for an hour, or for an API key nothing, as keys don't refresh.
     /// </summary>
     public Func<AccountCredentials, Task<AccountCredentials?>> Refresh { get; set; } = null!;
+
+    /// <summary>
+    /// Runs while <see cref="CompleteAsync"/> checks the answer with the site, before it answers.
+    /// </summary>
+    public Func<Task>? WhileCompleting { get; set; }
 
     public static FakeStrategy ApiKey(TimeProvider timeProvider)
         => new(AuthKind.ApiKey, timeProvider) { Refresh = _ => Task.FromResult<AccountCredentials?>(null) };
@@ -83,9 +89,14 @@ internal sealed class FakeStrategy : IAuthStrategy
         });
     }
 
-    public Task<AccountCredentials> CompleteAsync(AuthChallenge challenge, string answer, CancellationToken cancellationToken)
+    public async Task<AccountCredentials> CompleteAsync(AuthChallenge challenge, string answer, CancellationToken cancellationToken)
     {
         Answers.Enqueue(answer);
+        if (WhileCompleting is not null)
+        {
+            await WhileCompleting();
+        }
+
         bool accepted = Kind switch
         {
             AuthKind.ApiKey => answer == GoodApiKey,
@@ -99,11 +110,23 @@ internal sealed class FakeStrategy : IAuthStrategy
             throw new AuthenticationFailedException("The site refused that.");
         }
 
-        return Task.FromResult(Kind == AuthKind.OAuthPkce ? NewTokens() : new AccountCredentials($"token-for-{answer}"));
+        return Kind == AuthKind.OAuthPkce ? NewTokens() : new AccountCredentials($"token-for-{answer}");
     }
 
+    /// <summary>
+    /// Sends an API key in <see cref="ApiKeyHeader"/>, and any other credentials as a bearer token, as sites do.
+    /// </summary>
     public void Authorize(HttpRequestMessage request, AccountCredentials credentials)
-        => request.Headers.Authorization = new("Bearer", credentials.AccessToken);
+    {
+        if (Kind == AuthKind.ApiKey)
+        {
+            request.Headers.Add(ApiKeyHeader, credentials.AccessToken);
+        }
+        else
+        {
+            request.Headers.Authorization = new("Bearer", credentials.AccessToken);
+        }
+    }
 
     public Task<AccountCredentials?> RefreshAsync(AccountCredentials expired, CancellationToken cancellationToken)
     {
