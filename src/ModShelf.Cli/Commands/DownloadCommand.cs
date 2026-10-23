@@ -15,7 +15,7 @@ namespace ModShelf.Cli.Commands;
 /// </summary>
 internal static class DownloadCommand
 {
-    public static Command Create()
+    public static Command Create(CliEnvironment environment)
     {
         Argument<string> link = new("link")
         {
@@ -40,29 +40,34 @@ internal static class DownloadCommand
             name,
         };
         command.SetAction((parsed, cancellationToken)
-            => RunAsync(parsed.GetValue(link)!, parsed.GetValue(to)!, parsed.GetValue(name), cancellationToken));
+            => RunAsync(environment, parsed.GetValue(link)!, parsed.GetValue(to)!, parsed.GetValue(name), cancellationToken));
         return command;
     }
 
-    private static async Task<int> RunAsync(string linkText, DirectoryInfo folder, string? fileName, CancellationToken cancellationToken)
+    private static async Task<int> RunAsync(
+        CliEnvironment environment,
+        string linkText,
+        DirectoryInfo folder,
+        string? fileName,
+        CancellationToken cancellationToken)
     {
         if (!Uri.TryCreate(linkText, UriKind.Absolute, out Uri? link))
         {
-            await Console.Error.WriteLineAsync("That isn't a complete web link, such as https://example.com/file.zip.").ConfigureAwait(false);
+            await environment.Error.WriteLineAsync("That isn't a complete web link, such as https://example.com/file.zip.").ConfigureAwait(false);
             return ExitCodes.BadInput;
         }
 
         string targetDirectory = Path.TrimEndingDirectorySeparator(folder.FullName);
 
-        using IHost host = CliHost.Build(runDownloads: true);
+        using IHost host = environment.BuildHost(true);
         try
         {
             await host.StartAsync(cancellationToken).ConfigureAwait(false);
-            return await DownloadAsync(host.Services, link, targetDirectory, fileName, cancellationToken).ConfigureAwait(false);
+            return await DownloadAsync(environment, host.Services, link, targetDirectory, fileName, cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            return await StoppedAsync().ConfigureAwait(false);
+            return await StoppedAsync(environment).ConfigureAwait(false);
         }
         finally
         {
@@ -72,6 +77,7 @@ internal static class DownloadCommand
     }
 
     private static async Task<int> DownloadAsync(
+        CliEnvironment environment,
         IServiceProvider services,
         Uri link,
         string targetDirectory,
@@ -91,20 +97,20 @@ internal static class DownloadCommand
         }
         catch (UnsupportedLinkException)
         {
-            await Console.Error.WriteLineAsync("No source can download that link.").ConfigureAwait(false);
+            await environment.Error.WriteLineAsync("No source can download that link.").ConfigureAwait(false);
             return ExitCodes.BadInput;
         }
         catch (ArgumentException exception)
         {
             string hint = exception.ParamName == "fileName" ? " Choose one with --name." : string.Empty;
-            await Console.Error.WriteLineAsync(MessageOf(exception) + hint).ConfigureAwait(false);
+            await environment.Error.WriteLineAsync(MessageOf(exception) + hint).ConfigureAwait(false);
             return ExitCodes.BadInput;
         }
 
         DownloadJobSnapshot job = added.Job;
         if (added.AlreadyQueued)
         {
-            Console.WriteLine($"Continuing the download of {job.FileName} added earlier.");
+            environment.Output.WriteLine($"Continuing the download of {job.FileName} added earlier.");
             if (job.Status == DownloadJobStatus.Paused)
             {
                 await downloads.ResumeAsync(job.Id, cancellationToken).ConfigureAwait(false);
@@ -116,10 +122,10 @@ internal static class DownloadCommand
         }
         else
         {
-            Console.WriteLine($"Downloading {job.FileName} to {job.TargetDirectory}");
+            environment.Output.WriteLine($"Downloading {job.FileName} to {job.TargetDirectory}");
         }
 
-        ProgressDisplay display = new(Console.Out, interactive: !Console.IsOutputRedirected);
+        ProgressDisplay display = new(environment.Output, interactive: environment.OutputIsTerminal);
         await foreach (DownloadJobSnapshot update in updates.ConfigureAwait(false))
         {
             if (update.Id != job.Id)
@@ -132,17 +138,17 @@ internal static class DownloadCommand
             {
                 case DownloadJobStatus.Completed:
                     display.Finish();
-                    Console.WriteLine($"Saved {Path.Combine(update.TargetDirectory, update.FileName)}");
+                    environment.Output.WriteLine($"Saved {Path.Combine(update.TargetDirectory, update.FileName)}");
                     return ExitCodes.Done;
 
                 case DownloadJobStatus.Failed:
                     display.Finish();
-                    await Console.Error.WriteLineAsync(FailureMessage(update.FailureReason)).ConfigureAwait(false);
+                    await environment.Error.WriteLineAsync(FailureMessage(update.FailureReason)).ConfigureAwait(false);
                     return ExitCodes.Failed;
 
                 case DownloadJobStatus.Cancelled:
                     display.Finish();
-                    await Console.Error.WriteLineAsync("The download was cancelled.").ConfigureAwait(false);
+                    await environment.Error.WriteLineAsync("The download was cancelled.").ConfigureAwait(false);
                     return ExitCodes.Failed;
 
                 default:
@@ -154,16 +160,16 @@ internal static class DownloadCommand
         display.Finish();
         if (cancellationToken.IsCancellationRequested)
         {
-            return await StoppedAsync().ConfigureAwait(false);
+            return await StoppedAsync(environment).ConfigureAwait(false);
         }
 
-        await Console.Error.WriteLineAsync("The download engine stopped before the download finished.").ConfigureAwait(false);
+        await environment.Error.WriteLineAsync("The download engine stopped before the download finished.").ConfigureAwait(false);
         return ExitCodes.Failed;
     }
 
-    private static async Task<int> StoppedAsync()
+    private static async Task<int> StoppedAsync(CliEnvironment environment)
     {
-        await Console.Error.WriteLineAsync("Stopped. The partly downloaded file is kept; run the same command again to continue.")
+        await environment.Error.WriteLineAsync("Stopped. The partly downloaded file is kept; run the same command again to continue.")
             .ConfigureAwait(false);
         return ExitCodes.Interrupted;
     }

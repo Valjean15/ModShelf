@@ -14,20 +14,18 @@ namespace ModShelf.Cli.Commands;
 /// </summary>
 internal static class QueueCommand
 {
-    private const string Gap = "  ";
-
-    public static Command Create()
+    public static Command Create(CliEnvironment environment)
     {
         Command list = new("list", "Shows every download in the queue, oldest first. Nothing starts downloading.");
-        list.SetAction((_, cancellationToken) => ListAsync(cancellationToken));
+        list.SetAction((_, cancellationToken) => ListAsync(environment, cancellationToken));
 
         return new Command("queue", "Shows the download queue.") { list };
     }
 
-    private static async Task<int> ListAsync(CancellationToken cancellationToken)
+    private static async Task<int> ListAsync(CliEnvironment environment, CancellationToken cancellationToken)
     {
         // Without background downloads, starting the host only creates or migrates the database.
-        using IHost host = CliHost.Build(runDownloads: false);
+        using IHost host = environment.BuildHost(false);
         await host.StartAsync(cancellationToken).ConfigureAwait(false);
         try
         {
@@ -36,7 +34,7 @@ internal static class QueueCommand
                 .ConfigureAwait(false);
             if (jobs.Count == 0)
             {
-                Console.WriteLine("The queue is empty.");
+                environment.Output.WriteLine("The queue is empty.");
                 return ExitCodes.Done;
             }
 
@@ -52,11 +50,7 @@ internal static class QueueCommand
                     job.TargetDirectory,
                 }),
             ];
-            int[] widths = [.. Enumerable.Range(0, rows[0].Length).Select(column => rows.Max(row => row[column].Length))];
-            foreach (string[] row in rows)
-            {
-                Console.WriteLine(string.Join(Gap, row.Select((cell, column) => cell.PadRight(widths[column]))).TrimEnd());
-            }
+            TextTable.Write(environment.Output, rows);
 
             return ExitCodes.Done;
         }

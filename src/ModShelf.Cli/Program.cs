@@ -1,14 +1,10 @@
 using System.CommandLine;
 
 using ModShelf.Cli.Commands;
+using ModShelf.Cli.Hosting;
 
-// Headless host for exercising the download engine end to end. Each command builds its own generic host
-// (see CliHost), so DI, configuration and logging are wired as in the desktop app.
-RootCommand root = new("ModShelf from the command line: download files and look at the download queue.")
-{
-    DownloadCommand.Create(),
-    QueueCommand.Create(),
-};
+// Headless host for exercising the download engine end to end.
+RootCommand root = CliCommands.Create(CliEnvironment.ForConsole());
 
 // On Ctrl+C the command cancels its token, then stops the engine so the running download is saved for later;
 // give that time before System.CommandLine ends the process.
