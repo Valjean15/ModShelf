@@ -15,7 +15,7 @@ public sealed class SecretStoresTests : IDisposable
     [Fact]
     public void PicksTheStoreForThisSystem()
     {
-        ISecretStore store = SecretStores.ForThisSystem(_folder.Path, NullLogger.Instance);
+        ISecretStore store = SecretStores.ForThisSystem(_folder.Path, SecretStoreOptions.DefaultScope, NullLogger.Instance);
 
         Type expected = OperatingSystem.IsWindows() ? typeof(DpapiSecretStore)
             : OperatingSystem.IsMacOS() ? typeof(KeychainSecretStore)
@@ -26,6 +26,29 @@ public sealed class SecretStoresTests : IDisposable
     }
 
     [Fact]
+    public async Task ScopesKeepSecretsApartInTheSystemKeyring()
+    {
+        string scope = $"ModShelf.Tests.{Guid.NewGuid():N}";
+        ISecretStore store = SecretStores.ForThisSystem(_folder.Path, scope, NullLogger.Instance);
+        Assert.SkipUnless(
+            store.IsProtectedByOs && !OperatingSystem.IsWindows(),
+            "Scopes apply to the Keychain and the Secret Service; files are kept apart by their folder.");
+        ISecretStore otherScope = SecretStores.ForThisSystem(_folder.Path, scope + ".other", NullLogger.Instance);
+        CancellationToken cancellation = TestContext.Current.CancellationToken;
+
+        await store.WriteAsync("account/test", "secret", cancellation);
+        try
+        {
+            Assert.Null(await otherScope.ReadAsync("account/test", cancellation));
+            Assert.Equal("secret", await store.ReadAsync("account/test", cancellation));
+        }
+        finally
+        {
+            await store.DeleteAsync("account/test", cancellation);
+        }
+    }
+
+        [Fact]
     public void TheDefaultFolderIsUnderTheUsersLocalAppData()
     {
         Assert.Equal(

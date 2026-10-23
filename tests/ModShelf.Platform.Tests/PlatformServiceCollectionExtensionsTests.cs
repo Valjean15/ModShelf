@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Platform.Browser;
 using ModShelf.Platform.OAuth;
+using ModShelf.Platform.Secrets;
 using ModShelf.Testing;
 
 namespace ModShelf.Platform.Tests;
@@ -23,7 +24,7 @@ public sealed class PlatformServiceCollectionExtensionsTests : IDisposable
     public void RegistersTheSecretStoreListenerAndLauncher()
     {
         ServiceCollection services = new();
-        services.AddPlatformServices(_folder.Path);
+        services.AddPlatformServices(new SecretStoreOptions { Folder = _folder.Path });
         StubServiceProvider provider = new();
 
         object store = Single<ISecretStore>(services).ImplementationFactory!(provider);
@@ -35,7 +36,13 @@ public sealed class PlatformServiceCollectionExtensionsTests : IDisposable
         Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
     }
 
-    private static ServiceDescriptor Single<TService>(ServiceCollection services)
+    [Fact]
+    public void ABlankScopeIsRefused()
+    {
+        Assert.Throws<ArgumentException>(() => new ServiceCollection().AddPlatformServices(new SecretStoreOptions { Scope = " " }));
+    }
+
+        private static ServiceDescriptor Single<TService>(ServiceCollection services)
         => Assert.Single(services, descriptor => descriptor.ServiceType == typeof(TService));
 
     private sealed class StubServiceProvider : IServiceProvider

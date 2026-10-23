@@ -16,16 +16,16 @@ public static class PlatformServiceCollectionExtensions
     /// <summary>
     /// Registers the secret store for this system, the OAuth loopback redirect listener and the browser launcher.
     /// </summary>
-    /// <param name="secretsFolder">
-    /// The folder for secret files on Windows and in the Linux fallback; by default ModShelf's folder under the
-    /// user's local application data.
-    /// </param>
-    public static IServiceCollection AddPlatformServices(this IServiceCollection services, string? secretsFolder = null)
+    /// <param name="secrets">Where the secret store keeps its secrets; by default the user's own ModShelf secrets.</param>
+    public static IServiceCollection AddPlatformServices(this IServiceCollection services, SecretStoreOptions? secrets = null)
     {
         ArgumentNullException.ThrowIfNull(services);
+        SecretStoreOptions settings = secrets ?? new SecretStoreOptions();
+        ArgumentException.ThrowIfNullOrWhiteSpace(settings.Scope, nameof(secrets));
 
         services.AddSingleton(provider => SecretStores.ForThisSystem(
-            secretsFolder ?? SecretStores.GetDefaultFolder(),
+            settings.Folder ?? SecretStores.GetDefaultFolder(),
+            settings.Scope,
             provider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(SecretStores).FullName!)));
         services.AddSingleton<IOAuthRedirectListener, LoopbackRedirectListener>();
         services.AddSingleton<IBrowserLauncher>(_ => new SystemBrowserLauncher());

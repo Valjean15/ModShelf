@@ -27,9 +27,11 @@ internal static partial class SecretStores
     /// the encrypted-file fallback, which logs a warning and reports <see cref="ISecretStore.IsProtectedByOs"/> as false.
     /// </summary>
     /// <param name="folder">The folder for secret files, used by the Windows store and the fallback.</param>
-    public static ISecretStore ForThisSystem(string folder, ILogger logger)
+    /// <param name="scope">What keeps these secrets apart in the Keychain and the Secret Service.</param>
+    public static ISecretStore ForThisSystem(string folder, string scope, ILogger logger)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(folder);
+        ArgumentException.ThrowIfNullOrWhiteSpace(scope);
         ArgumentNullException.ThrowIfNull(logger);
 
         if (OperatingSystem.IsWindows())
@@ -39,12 +41,12 @@ internal static partial class SecretStores
 
         if (OperatingSystem.IsMacOS())
         {
-            return new KeychainSecretStore();
+            return new KeychainSecretStore(scope);
         }
 
         if (OperatingSystem.IsLinux() && LibSecretSecretStore.IsAvailable())
         {
-            return new LibSecretSecretStore();
+            return new LibSecretSecretStore(scope);
         }
 
         LogNoKeyring(logger);
