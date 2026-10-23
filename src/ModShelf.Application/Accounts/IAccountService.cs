@@ -20,7 +20,10 @@ public interface IAccountService
     /// for the user to approve.
     /// </summary>
     /// <exception cref="KeyNotFoundException">No registered source with that ID can link accounts.</exception>
-    /// <exception cref="ArgumentException">The source doesn't offer <paramref name="kind"/>.</exception>
+    /// <exception cref="ArgumentException">
+    /// The source doesn't offer <paramref name="kind"/>, or the user's answer can't be used, such as a blank API key or
+    /// an email address without an @. The message says which, in words the user can act on.
+    /// </exception>
     /// <exception cref="AuthenticationFailedException">The source refused what the user entered.</exception>
     Task<LinkedAccount> LinkAsync(SourceId source, AuthKind kind, IAuthPrompt prompt, CancellationToken cancellationToken);
 
