@@ -3,6 +3,7 @@
 The rules for this repository live in [CLAUDE.md](CLAUDE.md). They apply to people and coding agents alike, so read that file before your first change. In short:
 
 - Work on the current phase of `docs/implementation-plan.md` only, and keep each change to one task.
+- Put new files where [docs/code-organization.md](docs/code-organization.md) says. The build fails when a namespace doesn't match its folder.
 - Respect the dependency rules. The architecture tests enforce them; never weaken a test to make a build pass.
 - Before you open a pull request, `dotnet build` must finish with 0 warnings and `dotnet test` must be green. CI checks both on Windows, macOS and Linux.
 - Every behavior change comes with tests. Tests never call live mod-site APIs.
