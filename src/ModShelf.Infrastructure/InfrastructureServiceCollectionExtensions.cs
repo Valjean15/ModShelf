@@ -8,8 +8,8 @@ using Microsoft.Extensions.Http.Resilience;
 
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Infrastructure.Downloads;
-using ModShelf.Infrastructure.Persistence.Repositories;
 using ModShelf.Infrastructure.Persistence;
+using ModShelf.Infrastructure.Persistence.Repositories;
 
 using Polly;
 

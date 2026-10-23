@@ -5,8 +5,8 @@ using Microsoft.Extensions.Hosting;
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Mods;
-using ModShelf.Infrastructure.Persistence.Repositories;
 using ModShelf.Infrastructure.Persistence;
+using ModShelf.Infrastructure.Persistence.Repositories;
 
 namespace ModShelf.Infrastructure.Tests.Persistence;
 
