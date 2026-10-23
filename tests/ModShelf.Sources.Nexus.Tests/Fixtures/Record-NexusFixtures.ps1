@@ -295,7 +295,8 @@ try {
 
         $list = @((ConvertTo-Node $files.Text)['files'])
         $main = @($list | Where-Object { (Get-Text $_['category_name']) -eq 'MAIN' })
-        $pick = (@(if ($main) { $main } else { $list }) | Sort-Object { [long](Get-Text $_['uploaded_timestamp']) } -Descending)[0]
+        # @() keeps a single result a list, so [0] picks the file rather than indexing into it.
+        $pick = @(@(if ($main) { $main } else { $list }) | Sort-Object { [long](Get-Text $_['uploaded_timestamp']) } -Descending)[0]
         $fileId = Get-Text $pick['file_id']
 
         Save-Fixture 'files' $files
