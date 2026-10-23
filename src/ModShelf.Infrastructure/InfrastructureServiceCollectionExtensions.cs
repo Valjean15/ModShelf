@@ -1,11 +1,14 @@
 using System.Net.Http.Headers;
 
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http.Resilience;
 
 using ModShelf.Application.Downloads;
 using ModShelf.Infrastructure.Downloads;
+using ModShelf.Infrastructure.Persistence;
 
 using Polly;
 
@@ -49,6 +52,36 @@ public static class InfrastructureServiceCollectionExtensions
                     });
                 }
             });
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the library database at <paramref name="databasePath"/>: the <see cref="ModShelfDbContext"/>
+    /// factory, <see cref="DownloadJobRepository"/> as the <see cref="IDownloadJobRepository"/>, and a hosted
+    /// service that creates or migrates the database before any other hosted service starts.
+    /// </summary>
+    /// <param name="databasePath">The absolute path of the database file. Its folder is created if missing.</param>
+    public static IServiceCollection AddLibraryDatabase(this IServiceCollection services, string databasePath)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentException.ThrowIfNullOrWhiteSpace(databasePath);
+        if (!Path.IsPathFullyQualified(databasePath))
+        {
+            throw new ArgumentException($"'{databasePath}' is not an absolute path.", nameof(databasePath));
+        }
+
+        // The builder quotes the path, so spaces and semicolons in it are safe.
+        string connectionString = new SqliteConnectionStringBuilder
+        {
+            DataSource = databasePath,
+            Mode = SqliteOpenMode.ReadWriteCreate,
+        }.ToString();
+
+        services.AddSingleton(new LibraryDatabaseOptions(databasePath));
+        services.AddDbContextFactory<ModShelfDbContext>(options => options.UseSqlite(connectionString));
+        services.AddSingleton<IDownloadJobRepository, DownloadJobRepository>();
+        services.AddHostedService<LibraryDatabaseMigrator>();
 
         return services;
     }

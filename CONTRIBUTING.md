@@ -10,3 +10,4 @@ The rules for this repository live in [CLAUDE.md](CLAUDE.md). They apply to peop
 - Use [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `chore:`), one logical change per commit.
 - Record significant design decisions as an ADR in `docs/adr/NNNN-short-title.md`.
 - Ask before adding a project or package, changing a public interface in `Sources.Abstractions` or `Application`, or changing the database schema.
+- Change the schema only through a new EF Core migration: run `dotnet tool restore` once, then `dotnet ef migrations add <Name> --project src/ModShelf.Infrastructure`. Never edit a migration that's already committed.

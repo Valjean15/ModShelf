@@ -79,16 +79,67 @@ public sealed class DownloadJob
     /// </summary>
     public static DownloadJob Create(ModFileRef file, string targetDirectory, string fileName, DateTimeOffset createdAt)
     {
-        ArgumentNullException.ThrowIfNull(file);
-        ArgumentException.ThrowIfNullOrWhiteSpace(targetDirectory);
-        if (!Path.IsPathFullyQualified(targetDirectory))
-        {
-            throw new ArgumentException($"'{targetDirectory}' is not an absolute path.", nameof(targetDirectory));
-        }
-
-        FileNames.EnsureSingleSegment(fileName);
+        EnsureValidDestination(file, targetDirectory, fileName);
 
         return new DownloadJob(DownloadJobId.New(), file, targetDirectory, fileName, createdAt);
+    }
+
+    /// <summary>
+    /// Rebuilds a job that was stored earlier, such as one loaded from the library database.
+    /// </summary>
+    /// <remarks>
+    /// Applies the same checks as <see cref="Create"/>. Also rejects state that no sequence of transitions
+    /// can produce: an unknown status or reason, a failure reason on a job that isn't Failed, a Failed job
+    /// without one, or a byte count outside the file.
+    /// </remarks>
+    public static DownloadJob Restore(
+        DownloadJobId id,
+        ModFileRef file,
+        string targetDirectory,
+        string fileName,
+        DateTimeOffset createdAt,
+        DownloadJobStatus status,
+        long bytesDownloaded,
+        long? totalBytes,
+        DownloadFailureReason? failureReason)
+    {
+        ArgumentNullException.ThrowIfNull(id);
+        EnsureValidDestination(file, targetDirectory, fileName);
+        if (!Enum.IsDefined(status))
+        {
+            throw new ArgumentOutOfRangeException(nameof(status), status, "Unknown status.");
+        }
+
+        ArgumentOutOfRangeException.ThrowIfNegative(bytesDownloaded);
+        if (totalBytes is { } total)
+        {
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(bytesDownloaded, total);
+        }
+
+        if (failureReason is { } reason)
+        {
+            if (!Enum.IsDefined(reason))
+            {
+                throw new ArgumentOutOfRangeException(nameof(failureReason), reason, "Unknown failure reason.");
+            }
+
+            if (status != Failed)
+            {
+                throw new ArgumentException($"A job that is {status} has no failure reason.", nameof(failureReason));
+            }
+        }
+        else if (status == Failed)
+        {
+            throw new ArgumentException("A failed job needs a failure reason.", nameof(failureReason));
+        }
+
+        return new DownloadJob(id, file, targetDirectory, fileName, createdAt)
+        {
+            Status = status,
+            BytesDownloaded = bytesDownloaded,
+            TotalBytes = totalBytes,
+            FailureReason = failureReason,
+        };
     }
 
     /// <summary>
@@ -226,6 +277,18 @@ public sealed class DownloadJob
         EnsureStatus(nameof(Cancel), Queued, Resolving, AwaitingHandoff, Downloading, Verifying, Paused, Failed);
         FailureReason = null;
         Status = Cancelled;
+    }
+
+    private static void EnsureValidDestination(ModFileRef file, string targetDirectory, string fileName)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+        ArgumentException.ThrowIfNullOrWhiteSpace(targetDirectory);
+        if (!Path.IsPathFullyQualified(targetDirectory))
+        {
+            throw new ArgumentException($"'{targetDirectory}' is not an absolute path.", nameof(targetDirectory));
+        }
+
+        FileNames.EnsureSingleSegment(fileName);
     }
 
     private void EnsureStatus(string action, params ReadOnlySpan<DownloadJobStatus> allowed)
