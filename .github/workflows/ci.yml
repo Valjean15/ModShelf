@@ -38,6 +38,17 @@ jobs:
       - name: Build
         run: dotnet build --no-restore
 
+      # The Linux secret store talks to a Secret Service, which GitHub's runners don't run, so install GNOME Keyring.
+      - name: Install a keyring
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y gnome-keyring dbus
+
       # global.json selects Microsoft.Testing.Platform, so this runs every test project in the solution.
       - name: Test
+        if: runner.os != 'Linux'
         run: dotnet test --no-build
+
+      # The same tests inside a D-Bus session with an unlocked keyring, so the Secret Service tests run too.
+      - name: Test (with a keyring)
+        if: runner.os == 'Linux'
+        run: dbus-run-session -- sh -c 'echo -n ci | gnome-keyring-daemon --unlock --components=secrets >/dev/null && dotnet test --no-build'
