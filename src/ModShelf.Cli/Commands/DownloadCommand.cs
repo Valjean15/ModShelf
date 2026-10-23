@@ -103,7 +103,7 @@ internal static class DownloadCommand
         catch (ArgumentException exception)
         {
             string hint = exception.ParamName == "fileName" ? " Choose one with --name." : string.Empty;
-            await environment.Error.WriteLineAsync(MessageOf(exception) + hint).ConfigureAwait(false);
+            await environment.Error.WriteLineAsync(exception.MessageForUser() + hint).ConfigureAwait(false);
             return ExitCodes.BadInput;
         }
 
@@ -183,12 +183,4 @@ internal static class DownloadCommand
         DownloadFailureReason.HashMismatch => "The download failed: the file doesn't match the expected hash, so it was deleted.",
         _ => "The download failed unexpectedly. Set the environment variable Logging__LogLevel__Default=Debug and run it again for details.",
     };
-
-    /// <summary>
-    /// The exception's message without the "(Parameter 'x')" that .NET appends, which means nothing to users.
-    /// </summary>
-    private static string MessageOf(ArgumentException exception)
-        => exception.ParamName is null
-            ? exception.Message
-            : exception.Message.Replace($" (Parameter '{exception.ParamName}')", string.Empty, StringComparison.Ordinal);
 }
