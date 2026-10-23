@@ -9,6 +9,7 @@ using ModShelf.Infrastructure;
 using ModShelf.Platform;
 using ModShelf.Platform.Secrets;
 using ModShelf.Sources.DirectUrl;
+using ModShelf.Sources.Nexus;
 
 namespace ModShelf.Cli.Hosting;
 
@@ -78,6 +79,7 @@ internal static class CliHost
         builder.Services.AddDownloadEngine();
         builder.Services.AddAccounts();
         builder.Services.AddDirectUrlSource();
+        builder.Services.AddNexusSource();
         if (runDownloads)
         {
             builder.Services.AddBackgroundDownloads();
