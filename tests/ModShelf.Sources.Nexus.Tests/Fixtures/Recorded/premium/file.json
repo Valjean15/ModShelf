@@ -1,0 +1,44 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/v1/games/stardewvalley/mods/2400/files/160380.json",
+    "query": ""
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8",
+      "x-rl-hourly-limit": "2000",
+      "x-rl-hourly-remaining": "1994",
+      "x-rl-hourly-reset": "2026-10-23 23:00:00 +0000",
+      "x-rl-daily-limit": "20000",
+      "x-rl-daily-remaining": "19994",
+      "x-rl-daily-reset": "2026-10-24 00:00:00 +0000"
+    },
+    "body": {
+      "id": [
+        160380,
+        1303
+      ],
+      "uid": 5596342547068,
+      "file_id": 160380,
+      "name": "SMAPI 4.5.2",
+      "version": "4.5.2",
+      "category_id": 1,
+      "category_name": "MAIN",
+      "is_primary": false,
+      "size": 40907,
+      "file_name": "SMAPI 4.5.2-2400-4-5-2-1773515243.zip",
+      "detected_file_extension": null,
+      "uploaded_timestamp": 1773515243,
+      "uploaded_time": "2026-03-14T19:07:23.000+00:00",
+      "mod_version": "4.5.2",
+      "external_virus_scan_url": "https://www.virustotal.com/gui/file/dd01ddca7b566bfe0d3b3d2d03833496abc56c53da976241f2ab443f5484acc4",
+      "description": "For Stardew Valley 1.6.14 or later. See [URL=https://www.patreon.com/posts/149054246]what's new in 4.5[/URL] and [URL=https://smapi.io/release/452]release notes + attestations[/URL].",
+      "size_kb": 40907,
+      "size_in_bytes": 41889142,
+      "changelog_html": null,
+      "content_preview_link": "https://file-metadata.nexusmods.com/file/nexus-files-s3-meta/1303/2400/SMAPI 4.5.2-2400-4-5-2-1773515243.zip.json"
+    }
+  }
+}

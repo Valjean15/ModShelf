@@ -1,0 +1,146 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/v1/games/stardewvalley/mods/updated.json",
+    "query": "period=1d"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8",
+      "x-rl-hourly-limit": "2000",
+      "x-rl-hourly-remaining": "1991",
+      "x-rl-hourly-reset": "2026-10-23 23:00:00 +0000",
+      "x-rl-daily-limit": "20000",
+      "x-rl-daily-remaining": "19991",
+      "x-rl-daily-reset": "2026-10-24 00:00:00 +0000"
+    },
+    "body": [
+      {
+        "mod_id": 4040,
+        "latest_file_update": 1792731178,
+        "latest_mod_activity": 1792731178
+      },
+      {
+        "mod_id": 4856,
+        "latest_file_update": 1744771543,
+        "latest_mod_activity": 1792772903
+      },
+      {
+        "mod_id": 6001,
+        "latest_file_update": 1792382623,
+        "latest_mod_activity": 1792731303
+      },
+      {
+        "mod_id": 6546,
+        "latest_file_update": 1792715959,
+        "latest_mod_activity": 1792715960
+      },
+      {
+        "mod_id": 8785,
+        "latest_file_update": 1777657974,
+        "latest_mod_activity": 1792781501
+      },
+      {
+        "mod_id": 16877,
+        "latest_file_update": 1792752559,
+        "latest_mod_activity": 1792787689
+      },
+      {
+        "mod_id": 20943,
+        "latest_file_update": 1792754737,
+        "latest_mod_activity": 1792754774
+      },
+      {
+        "mod_id": 24680,
+        "latest_file_update": 1792729254,
+        "latest_mod_activity": 1792729254
+      },
+      {
+        "mod_id": 27078,
+        "latest_file_update": 1792666474,
+        "latest_mod_activity": 1792720746
+      },
+      {
+        "mod_id": 28267,
+        "latest_file_update": 1792733306,
+        "latest_mod_activity": 1792733306
+      },
+      {
+        "mod_id": 28365,
+        "latest_file_update": 1792753699,
+        "latest_mod_activity": 1792753699
+      },
+      {
+        "mod_id": 29425,
+        "latest_file_update": 1792610800,
+        "latest_mod_activity": 1792768221
+      },
+      {
+        "mod_id": 29784,
+        "latest_file_update": 1761237463,
+        "latest_mod_activity": 1792716347
+      },
+      {
+        "mod_id": 30023,
+        "latest_file_update": 1792709880,
+        "latest_mod_activity": 1792709882
+      },
+      {
+        "mod_id": 30982,
+        "latest_file_update": 1792731387,
+        "latest_mod_activity": 1792754226
+      },
+      {
+        "mod_id": 32169,
+        "latest_file_update": 1792736650,
+        "latest_mod_activity": 1792769883
+      },
+      {
+        "mod_id": 35013,
+        "latest_file_update": 1792782758,
+        "latest_mod_activity": 1792782778
+      },
+      {
+        "mod_id": 35432,
+        "latest_file_update": 1792780796,
+        "latest_mod_activity": 1792781311
+      },
+      {
+        "mod_id": 36255,
+        "latest_file_update": 1787042792,
+        "latest_mod_activity": 1792756348
+      },
+      {
+        "mod_id": 36672,
+        "latest_file_update": 1792785598,
+        "latest_mod_activity": 1792785638
+      },
+      {
+        "mod_id": 36798,
+        "latest_file_update": 1786621503,
+        "latest_mod_activity": 1792715499
+      },
+      {
+        "mod_id": 37226,
+        "latest_file_update": 1792713583,
+        "latest_mod_activity": 1792713583
+      },
+      {
+        "mod_id": 37665,
+        "latest_file_update": 1792712542,
+        "latest_mod_activity": 1792712543
+      },
+      {
+        "mod_id": 37800,
+        "latest_file_update": 1792710803,
+        "latest_mod_activity": 1792710803
+      },
+      {
+        "mod_id": 41150,
+        "latest_file_update": 1792757239,
+        "latest_mod_activity": 1792757240
+      }
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/v1/games/stardewvalley/mods/2400/files/160380/download_link.json",
+    "query": ""
+  },
+  "response": {
+    "status": 403,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8",
+      "x-rl-hourly-limit": "2000",
+      "x-rl-hourly-remaining": "1999",
+      "x-rl-hourly-reset": "2026-10-23 23:00:00 +0000",
+      "x-rl-daily-limit": "20000",
+      "x-rl-daily-remaining": "19999",
+      "x-rl-daily-reset": "2026-10-24 00:00:00 +0000"
+    },
+    "body": {
+      "code": 403,
+      "message": "You don't have permission to get download links from the API without visting nexusmods.com -\n                          this is for premium users only."
+    }
+  }
+}
