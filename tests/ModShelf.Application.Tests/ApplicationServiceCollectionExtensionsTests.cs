@@ -1,0 +1,72 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging.Abstractions;
+
+using ModShelf.Application.Downloads;
+using ModShelf.Application.Sources;
+using ModShelf.Application.Tests.Fakes;
+
+namespace ModShelf.Application.Tests;
+
+/// <summary>
+/// Checks the registrations by calling their factories against a stub container, since this test project
+/// has the DI abstractions but not the container itself.
+/// </summary>
+public sealed class ApplicationServiceCollectionExtensionsTests
+{
+    [Fact]
+    public void TheDownloadServiceIsTheScheduler()
+    {
+        ServiceCollection services = new();
+        services.AddDownloadEngine();
+        DownloadScheduler scheduler = NewScheduler();
+
+        object service = Single<IDownloadService>(services).ImplementationFactory!(new StubServiceProvider(scheduler));
+
+        Assert.Same(scheduler, service);
+        Assert.Equal(typeof(DownloadScheduler), Single<DownloadScheduler>(services).ImplementationType);
+        Assert.Equal(typeof(LinkDownloads), Single<ILinkDownloads>(services).ImplementationType);
+        Assert.Equal(typeof(SourceRegistry), Single<ISourceRegistry>(services).ImplementationType);
+        Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
+    }
+
+    [Fact]
+    public void TheEngineAloneDownloadsNothing()
+    {
+        ServiceCollection services = new();
+        services.AddDownloadEngine();
+
+        Assert.DoesNotContain(services, descriptor => descriptor.ServiceType == typeof(IHostedService));
+    }
+
+    [Fact]
+    public void BackgroundDownloadsRunTheSameScheduler()
+    {
+        ServiceCollection services = new();
+        services.AddDownloadEngine();
+        services.AddBackgroundDownloads();
+        services.AddBackgroundDownloads();
+        DownloadScheduler scheduler = NewScheduler();
+
+        object hosted = Single<IHostedService>(services).ImplementationFactory!(new StubServiceProvider(scheduler));
+
+        Assert.Same(scheduler, hosted);
+    }
+
+    private static ServiceDescriptor Single<TService>(ServiceCollection services)
+        => Assert.Single(services, descriptor => descriptor.ServiceType == typeof(TService));
+
+    private static DownloadScheduler NewScheduler()
+        => new(
+            new InMemoryDownloadJobRepository([]),
+            new SourceRegistry([]),
+            new ControlledFileTransfer(),
+            TimeProvider.System,
+            new DownloadSchedulerOptions(),
+            NullLogger<DownloadScheduler>.Instance);
+
+    private sealed class StubServiceProvider(DownloadScheduler scheduler) : IServiceProvider
+    {
+        public object? GetService(Type serviceType) => serviceType == typeof(DownloadScheduler) ? scheduler : null;
+    }
+}

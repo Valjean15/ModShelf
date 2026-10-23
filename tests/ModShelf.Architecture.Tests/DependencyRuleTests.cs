@@ -21,6 +21,7 @@ public sealed class DependencyRuleTests
         ProjectNames.Platform,
         ProjectNames.Presentation,
         ProjectNames.SourcesNexus,
+        ProjectNames.SourcesDirectUrl,
         ProjectNames.Cli,
     ];
 

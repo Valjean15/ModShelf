@@ -8,6 +8,7 @@
     <Project Path="src/ModShelf.Platform/ModShelf.Platform.csproj" />
     <Project Path="src/ModShelf.Presentation/ModShelf.Presentation.csproj" />
     <Project Path="src/ModShelf.Sources.Abstractions/ModShelf.Sources.Abstractions.csproj" />
+    <Project Path="src/ModShelf.Sources.DirectUrl/ModShelf.Sources.DirectUrl.csproj" />
     <Project Path="src/ModShelf.Sources.Nexus/ModShelf.Sources.Nexus.csproj" />
   </Folder>
   <Folder Name="/tests/">
@@ -18,6 +19,7 @@
     <Project Path="tests/ModShelf.Platform.Tests/ModShelf.Platform.Tests.csproj" />
     <Project Path="tests/ModShelf.Presentation.Tests/ModShelf.Presentation.Tests.csproj" />
     <Project Path="tests/ModShelf.Sources.Abstractions.Tests/ModShelf.Sources.Abstractions.Tests.csproj" />
+    <Project Path="tests/ModShelf.Sources.DirectUrl.Tests/ModShelf.Sources.DirectUrl.Tests.csproj" />
     <Project Path="tests/ModShelf.Sources.Nexus.Tests/ModShelf.Sources.Nexus.Tests.csproj" />
   </Folder>
 </Solution>
