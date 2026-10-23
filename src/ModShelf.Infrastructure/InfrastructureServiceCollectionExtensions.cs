@@ -39,6 +39,10 @@ public static class InfrastructureServiceCollectionExtensions
             .AddHttpClient(
                 HttpFileTransfer.HttpClientName,
                 client => client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("ModShelf", Version)))
+
+            // The factory's built-in request logging writes each URL's host and path, which can carry
+            // signatures. HttpFileTransfer logs what's needed (the host and the file name) itself.
+            .RemoveAllLoggers()
             .AddResilienceHandler("file-transfer", pipeline =>
             {
                 if (settings.MaxRetryAttempts > 0)
