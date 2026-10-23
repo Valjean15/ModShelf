@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 
 using Microsoft.Extensions.Logging;
 
-namespace ModShelf.Infrastructure.Tests.Fakes;
+namespace ModShelf.Testing;
 
 /// <summary>
 /// Records every log entry from every category, including the structured values a log sink would write.

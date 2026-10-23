@@ -11,6 +11,7 @@
   <!-- Test helpers several test projects share (tests/Shared). -->
   <ItemGroup>
     <Compile Include="..\Shared\RecordingLogger.cs" Link="Shared\RecordingLogger.cs" />
+    <Compile Include="..\Shared\RecordingLoggerProvider.cs" Link="Shared\RecordingLoggerProvider.cs" />
     <Compile Include="..\Shared\TempFolder.cs" Link="Shared\TempFolder.cs" />
   </ItemGroup>
 
