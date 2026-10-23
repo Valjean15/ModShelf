@@ -1,6 +1,6 @@
 using System.CommandLine;
 
-using ModShelf.Cli;
+using ModShelf.Cli.Commands;
 
 // Headless host for exercising the download engine end to end. Each command builds its own generic host
 // (see CliHost), so DI, configuration and logging are wired as in the desktop app.

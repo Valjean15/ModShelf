@@ -3,7 +3,7 @@ using System.Net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using ModShelf.Application.Downloads;
+using ModShelf.Application.Downloads.Ports;
 using ModShelf.Infrastructure.Downloads;
 using ModShelf.Infrastructure.Tests.Fakes;
 using ModShelf.Sources.Abstractions.Downloads;

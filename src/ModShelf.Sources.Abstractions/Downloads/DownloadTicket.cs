@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 
 using ModShelf.Domain.Mods;
+using ModShelf.Sources.Abstractions.Common;
 
 namespace ModShelf.Sources.Abstractions.Downloads;
 

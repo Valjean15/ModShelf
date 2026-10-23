@@ -3,6 +3,7 @@ using System.Threading.Channels;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Sources;
 using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Mods;
@@ -109,6 +110,18 @@ public sealed partial class DownloadScheduler : BackgroundService, IDownloadServ
     public IAsyncEnumerable<DownloadJobSnapshot> WatchAsync(CancellationToken cancellationToken)
         => _watchers.Watch(cancellationToken);
 
+    public override async Task StopAsync(CancellationToken cancellationToken)
+    {
+        await base.StopAsync(cancellationToken).ConfigureAwait(false);
+
+        // BackgroundService skips ExecuteAsync entirely when the host stops before it got to run. Nothing
+        // else would then answer pending requests, so close the inbox here unless the loop is still busy.
+        if (ExecuteTask is null || ExecuteTask.IsCompleted)
+        {
+            CloseInbox();
+        }
+    }
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
@@ -136,17 +149,11 @@ public sealed partial class DownloadScheduler : BackgroundService, IDownloadServ
         }
     }
 
-    public override async Task StopAsync(CancellationToken cancellationToken)
-    {
-        await base.StopAsync(cancellationToken).ConfigureAwait(false);
+    private static TaskCompletionSource<T> NewReply<T>()
+        => new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        // BackgroundService skips ExecuteAsync entirely when the host stops before it got to run. Nothing
-        // else would then answer pending requests, so close the inbox here unless the loop is still busy.
-        if (ExecuteTask is null || ExecuteTask.IsCompleted)
-        {
-            CloseInbox();
-        }
-    }
+    private static string DestinationOf(DownloadJob job)
+        => Path.Combine(job.TargetDirectory, job.FileName);
 
     /// <summary>
     /// Refuses all further messages, fails the requests still waiting, and ends every watch stream.
@@ -162,12 +169,6 @@ public sealed partial class DownloadScheduler : BackgroundService, IDownloadServ
 
         _watchers.Complete();
     }
-
-    private static TaskCompletionSource<T> NewReply<T>()
-        => new(TaskCreationOptions.RunContinuationsAsynchronously);
-
-    private static string DestinationOf(DownloadJob job)
-        => Path.Combine(job.TargetDirectory, job.FileName);
 
     private async Task ControlAsync(DownloadJobId id, JobControl control, CancellationToken cancellationToken)
     {
@@ -203,7 +204,7 @@ public sealed partial class DownloadScheduler : BackgroundService, IDownloadServ
 
         if (requeued > 0)
         {
-            _logger.RequeuedInterruptedJobs(requeued);
+            LogRequeuedInterruptedJobs(_logger, requeued);
         }
     }
 
@@ -231,7 +232,7 @@ public sealed partial class DownloadScheduler : BackgroundService, IDownloadServ
             IDownloadResolver? resolver = _sources.Find<IDownloadResolver>(source);
             if (resolver is null)
             {
-                _logger.NoResolver(job.Id, source);
+                LogNoResolver(_logger, job.Id, source);
                 job.Fail(DownloadFailureReason.LinkUnavailable);
                 await SaveAsync(job).ConfigureAwait(false);
                 continue;
@@ -298,7 +299,7 @@ public sealed partial class DownloadScheduler : BackgroundService, IDownloadServ
         }
         catch (Exception exception) when (message is Report report)
         {
-            _logger.UpdateRejected(exception, report.Id);
+            LogUpdateRejected(_logger, exception, report.Id);
         }
     }
 
@@ -425,7 +426,7 @@ public sealed partial class DownloadScheduler : BackgroundService, IDownloadServ
             catch (Exception exception) when (exception is InvalidOperationException or ArgumentException)
             {
                 // The transfer broke its reporting contract, for example by completing without verifying.
-                _logger.UpdateRejected(exception, job.Id);
+                LogUpdateRejected(_logger, exception, job.Id);
                 job.Fail(DownloadFailureReason.Unexpected);
             }
 
@@ -461,7 +462,7 @@ public sealed partial class DownloadScheduler : BackgroundService, IDownloadServ
             case AttemptEnd.Failed:
                 DownloadFailureReason reason = result.FailureReason ?? DownloadFailureReason.Unexpected;
                 job.Fail(reason);
-                _logger.JobFailed(job.Id, reason);
+                LogJobFailed(_logger, job.Id, reason);
                 break;
 
             case AttemptEnd.Stopped when stopReason == StopReason.Cancel:

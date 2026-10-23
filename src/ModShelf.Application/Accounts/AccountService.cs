@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 
+using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Sources;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Accounts;
@@ -140,6 +141,9 @@ public sealed partial class AccountService : IAccountService, ICredentialProvide
         return await strategy.CompleteAsync(challenge, code, cancellationToken).ConfigureAwait(false);
     }
 
+    private static string Entered(string answer, string messageWhenBlank)
+        => string.IsNullOrWhiteSpace(answer) ? throw new ArgumentException(messageWhenBlank, nameof(answer)) : answer.Trim();
+
     private async Task<AccountCredentials> LinkInBrowserAsync(
         SourceId source,
         IAuthStrategy strategy,
@@ -161,7 +165,4 @@ public sealed partial class AccountService : IAccountService, ICredentialProvide
             return await strategy.CompleteAsync(challenge, returned.AbsoluteUri, cancellationToken).ConfigureAwait(false);
         }
     }
-
-    private static string Entered(string answer, string messageWhenBlank)
-        => string.IsNullOrWhiteSpace(answer) ? throw new ArgumentException(messageWhenBlank, nameof(answer)) : answer.Trim();
 }

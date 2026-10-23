@@ -46,28 +46,6 @@ internal static partial class KeychainInterop
     [LibraryImport(CoreFoundationFramework)]
     public static partial IntPtr CFDataGetBytePtr(IntPtr data);
 
-    [LibraryImport(SecurityFramework)]
-    private static partial IntPtr SecCopyErrorMessageString(int status, IntPtr reserved);
-
-    [LibraryImport(CoreFoundationFramework, StringMarshalling = StringMarshalling.Utf8)]
-    private static partial IntPtr CFStringCreateWithCString(IntPtr allocator, string value, uint encoding);
-
-    [LibraryImport(CoreFoundationFramework)]
-    private static partial IntPtr CFDataCreate(IntPtr allocator, byte[] bytes, nint length);
-
-    [LibraryImport(CoreFoundationFramework)]
-    private static partial IntPtr CFDictionaryCreate(
-        IntPtr allocator,
-        IntPtr[] keys,
-        IntPtr[] values,
-        nint count,
-        IntPtr keyCallBacks,
-        IntPtr valueCallBacks);
-
-    [LibraryImport(CoreFoundationFramework)]
-    [return: MarshalAs(UnmanagedType.U1)]
-    private static partial bool CFStringGetCString(IntPtr value, byte[] buffer, nint bufferSize, uint encoding);
-
     /// <summary>
     /// A CFDictionary of the given keys and values, which it retains. Values are CoreFoundation objects or
     /// <see cref="string"/>s and <see cref="byte"/> arrays, converted and released here.
@@ -126,6 +104,28 @@ internal static partial class KeychainInterop
             CFRelease(message);
         }
     }
+
+    [LibraryImport(SecurityFramework)]
+    private static partial IntPtr SecCopyErrorMessageString(int status, IntPtr reserved);
+
+    [LibraryImport(CoreFoundationFramework, StringMarshalling = StringMarshalling.Utf8)]
+    private static partial IntPtr CFStringCreateWithCString(IntPtr allocator, string value, uint encoding);
+
+    [LibraryImport(CoreFoundationFramework)]
+    private static partial IntPtr CFDataCreate(IntPtr allocator, byte[] bytes, nint length);
+
+    [LibraryImport(CoreFoundationFramework)]
+    private static partial IntPtr CFDictionaryCreate(
+        IntPtr allocator,
+        IntPtr[] keys,
+        IntPtr[] values,
+        nint count,
+        IntPtr keyCallBacks,
+        IntPtr valueCallBacks);
+
+    [LibraryImport(CoreFoundationFramework)]
+    [return: MarshalAs(UnmanagedType.U1)]
+    private static partial bool CFStringGetCString(IntPtr value, byte[] buffer, nint bufferSize, uint encoding);
 
     private static IntPtr Track(IntPtr value, List<IntPtr> created)
     {

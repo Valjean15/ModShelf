@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Runtime.Versioning;
 
-using ModShelf.Application.Accounts;
+using ModShelf.Application.Accounts.Ports;
 using ModShelf.Platform.Secrets;
 
 namespace ModShelf.Platform.Tests.Secrets;

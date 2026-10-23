@@ -3,7 +3,7 @@ using System.Net;
 
 using Microsoft.Extensions.Time.Testing;
 
-using ModShelf.Application.Downloads;
+using ModShelf.Application.Downloads.Ports;
 using ModShelf.Domain.Mods;
 using ModShelf.Infrastructure.Downloads;
 using ModShelf.Infrastructure.Tests.Fakes;

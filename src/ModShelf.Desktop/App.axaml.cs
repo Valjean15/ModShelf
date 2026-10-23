@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 
+using ModShelf.Desktop.Views;
 using ModShelf.Presentation.ViewModels;
 
 namespace ModShelf.Desktop;

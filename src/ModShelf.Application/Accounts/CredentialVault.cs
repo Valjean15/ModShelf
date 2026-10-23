@@ -3,6 +3,7 @@ using System.Text.Json;
 
 using Microsoft.Extensions.Logging;
 
+using ModShelf.Application.Accounts.Ports;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Accounts;
 
@@ -127,9 +128,6 @@ internal sealed partial class CredentialVault(ISecretStore store, ILogger logger
         LogUnreadable(logger, source);
         return null;
     }
-
-    [LoggerMessage(EventId = 405, Level = LogLevel.Warning, Message = "The stored credentials for {Source} can't be read; the account has to be linked again")]
-    private static partial void LogUnreadable(ILogger logger, SourceId source);
 
     /// <summary>
     /// The secret's JSON. Versioned, so a later format can still read this one.

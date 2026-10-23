@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
-using ModShelf.Application.Accounts;
+using ModShelf.Application.Accounts.Ports;
 
 using static ModShelf.Platform.Secrets.LibSecretInterop;
 

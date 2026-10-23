@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using ModShelf.Application.Downloads;
+using ModShelf.Application.Downloads.Ports;
 using ModShelf.Infrastructure.Persistence;
 using ModShelf.Infrastructure.Tests.Fakes;
 

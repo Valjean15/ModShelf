@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
 
-using ModShelf.Application.Accounts;
+using ModShelf.Application.Accounts.Ports;
 
 using static ModShelf.Platform.Secrets.KeychainInterop;
 
@@ -53,6 +53,14 @@ public sealed class KeychainSecretStore : ISecretStore
         SecretNames.Validate(name);
 
         return Task.Run(() => Delete(name), cancellationToken);
+    }
+
+    private static void ThrowIfFailed(int status, string action)
+    {
+        if (status != ErrSecSuccess)
+        {
+            throw new InvalidOperationException($"The Keychain couldn't {action}: {Describe(status)}");
+        }
     }
 
     private string? Read(string name)
@@ -146,14 +154,6 @@ public sealed class KeychainSecretStore : ISecretStore
             {
                 CFRelease(query);
             }
-        }
-    }
-
-    private static void ThrowIfFailed(int status, string action)
-    {
-        if (status != ErrSecSuccess)
-        {
-            throw new InvalidOperationException($"The Keychain couldn't {action}: {Describe(status)}");
         }
     }
 }

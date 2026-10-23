@@ -10,11 +10,11 @@ namespace ModShelf.Platform.Secrets;
 [SupportedOSPlatform("linux")]
 internal static partial class LibSecretInterop
 {
-    private const string LibSecret = "libsecret-1.so.0";
-    private const string GLib = "libglib-2.0.so.0";
-
     /// <summary>SECRET_SCHEMA_NONE: items must match the schema name too.</summary>
     public const int SchemaFlagsNone = 0;
+
+    private const string LibSecret = "libsecret-1.so.0";
+    private const string GLib = "libglib-2.0.so.0";
 
     /// <summary>SECRET_SCHEMA_ATTRIBUTE_STRING, as the pointer-sized value GLib hash tables hold.</summary>
     public static readonly IntPtr AttributeTypeString = IntPtr.Zero;
@@ -48,18 +48,6 @@ internal static partial class LibSecretInterop
 
     [LibraryImport(LibSecret, EntryPoint = "secret_password_clearv_sync")]
     public static partial int PasswordClear(IntPtr schema, IntPtr attributes, IntPtr cancellable, out IntPtr error);
-
-    [LibraryImport(GLib, EntryPoint = "g_hash_table_new")]
-    private static partial IntPtr HashTableNew(IntPtr hashFunction, IntPtr equalFunction);
-
-    [LibraryImport(GLib, EntryPoint = "g_hash_table_insert")]
-    private static partial int HashTableInsert(IntPtr table, IntPtr key, IntPtr value);
-
-    [LibraryImport(GLib, EntryPoint = "g_hash_table_unref")]
-    private static partial void HashTableUnref(IntPtr table);
-
-    [LibraryImport(GLib, EntryPoint = "g_error_free")]
-    private static partial void ErrorFree(IntPtr error);
 
     /// <summary>
     /// Calls <paramref name="use"/> with a GLib string hash table holding <paramref name="entries"/>, then frees the
@@ -110,4 +98,16 @@ internal static partial class LibSecretInterop
         ErrorFree(error);
         throw new InvalidOperationException($"The Secret Service couldn't {action}: {message}");
     }
+
+    [LibraryImport(GLib, EntryPoint = "g_hash_table_new")]
+    private static partial IntPtr HashTableNew(IntPtr hashFunction, IntPtr equalFunction);
+
+    [LibraryImport(GLib, EntryPoint = "g_hash_table_insert")]
+    private static partial int HashTableInsert(IntPtr table, IntPtr key, IntPtr value);
+
+    [LibraryImport(GLib, EntryPoint = "g_hash_table_unref")]
+    private static partial void HashTableUnref(IntPtr table);
+
+    [LibraryImport(GLib, EntryPoint = "g_error_free")]
+    private static partial void ErrorFree(IntPtr error);
 }

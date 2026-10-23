@@ -1,4 +1,4 @@
-using ModShelf.Application.Downloads;
+using ModShelf.Application.Downloads.Ports;
 
 namespace ModShelf.Infrastructure.Downloads;
 

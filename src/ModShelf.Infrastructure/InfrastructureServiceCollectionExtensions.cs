@@ -6,8 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http.Resilience;
 
-using ModShelf.Application.Downloads;
+using ModShelf.Application.Downloads.Ports;
 using ModShelf.Infrastructure.Downloads;
+using ModShelf.Infrastructure.Persistence.Repositories;
 using ModShelf.Infrastructure.Persistence;
 
 using Polly;

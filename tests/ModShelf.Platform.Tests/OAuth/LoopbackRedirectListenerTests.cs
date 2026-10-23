@@ -3,7 +3,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 
-using ModShelf.Application.Accounts;
+using ModShelf.Application.Accounts.Ports;
 using ModShelf.Platform.OAuth;
 
 namespace ModShelf.Platform.Tests.OAuth;

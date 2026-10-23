@@ -2,9 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using ModShelf.Application.Downloads;
+using ModShelf.Application.Downloads.Ports;
 using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Mods;
+using ModShelf.Infrastructure.Persistence.Repositories;
 using ModShelf.Infrastructure.Persistence;
 
 namespace ModShelf.Infrastructure.Tests.Persistence;

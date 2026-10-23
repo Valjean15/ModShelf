@@ -1,3 +1,5 @@
+using ModShelf.Sources.Abstractions.Common;
+
 namespace ModShelf.Sources.Abstractions.Downloads;
 
 /// <summary>

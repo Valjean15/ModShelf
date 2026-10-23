@@ -34,6 +34,17 @@ public sealed partial class DownloadScheduler
         Stopped,
     }
 
+    private readonly record struct AttemptResult(AttemptEnd End, DownloadFailureReason? FailureReason = null)
+    {
+        public static AttemptResult Completed => new(AttemptEnd.Completed);
+
+        public static AttemptResult HandoffRequired => new(AttemptEnd.HandoffRequired);
+
+        public static AttemptResult Stopped => new(AttemptEnd.Stopped);
+
+        public static AttemptResult Failed(DownloadFailureReason reason) => new(AttemptEnd.Failed, reason);
+    }
+
     private abstract record Message;
 
     /// <summary>
@@ -73,17 +84,6 @@ public sealed partial class DownloadScheduler
     private sealed record LinkExpired(DownloadJobId Id) : Report(Id);
 
     private sealed record AttemptFinished(DownloadJobId Id, AttemptResult Result) : Report(Id);
-
-    private readonly record struct AttemptResult(AttemptEnd End, DownloadFailureReason? FailureReason = null)
-    {
-        public static AttemptResult Completed => new(AttemptEnd.Completed);
-
-        public static AttemptResult HandoffRequired => new(AttemptEnd.HandoffRequired);
-
-        public static AttemptResult Stopped => new(AttemptEnd.Stopped);
-
-        public static AttemptResult Failed(DownloadFailureReason reason) => new(AttemptEnd.Failed, reason);
-    }
 
     private sealed class RunningJob(SourceId source) : IDisposable
     {

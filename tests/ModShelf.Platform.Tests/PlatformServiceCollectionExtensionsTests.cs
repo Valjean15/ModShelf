@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-using ModShelf.Application.Accounts;
+using ModShelf.Application.Accounts.Ports;
 using ModShelf.Platform.Browser;
 using ModShelf.Platform.OAuth;
 using ModShelf.Platform.Tests.Fakes;

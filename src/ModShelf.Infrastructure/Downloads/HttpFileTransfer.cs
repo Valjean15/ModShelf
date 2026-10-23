@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 
 using Microsoft.Extensions.Logging;
 
-using ModShelf.Application.Downloads;
+using ModShelf.Application.Downloads.Ports;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Downloads;
 
@@ -20,7 +20,7 @@ namespace ModShelf.Infrastructure.Downloads;
 /// <see cref="InfrastructureServiceCollectionExtensions.AddHttpFileTransfer"/>). A connection that drops or
 /// stalls mid-file is resumed here, from the bytes already on disk.
 /// </remarks>
-public sealed class HttpFileTransfer : IFileTransfer
+public sealed partial class HttpFileTransfer : IFileTransfer
 {
     /// <summary>
     /// The name of the <see cref="HttpClient"/> this transfer asks <see cref="IHttpClientFactory"/> for.
@@ -91,7 +91,7 @@ public sealed class HttpFileTransfer : IFileTransfer
         string fileName = Path.GetFileName(destinationPath);
         if (File.Exists(destinationPath))
         {
-            _logger.DestinationExists(fileName);
+            LogDestinationExists(_logger, fileName);
             return TransferOutcome.StorageError;
         }
 
@@ -101,7 +101,7 @@ public sealed class HttpFileTransfer : IFileTransfer
         }
         catch (Exception exception) when (IsStorageFailure(exception))
         {
-            _logger.StorageFailed(exception, fileName);
+            LogStorageFailed(_logger, exception, fileName);
             return TransferOutcome.StorageError;
         }
 
@@ -227,7 +227,7 @@ public sealed class HttpFileTransfer : IFileTransfer
             catch (Exception exception) when (IsNetworkFailure(exception, cancellationToken))
             {
                 // The resilience pipeline has already retried, so the connection keeps failing.
-                _logger.ConnectionFailed(exception, host);
+                LogConnectionFailed(_logger, exception, host);
                 return TransferOutcome.NetworkError;
             }
 
@@ -236,11 +236,11 @@ public sealed class HttpFileTransfer : IFileTransfer
                 switch (Classify(response, offset))
                 {
                     case ResponseKind.LinkRejected:
-                        _logger.LinkRejected(host, response.StatusCode);
+                        LogLinkRejected(_logger, host, response.StatusCode);
                         return TransferOutcome.LinkExpired;
 
                     case ResponseKind.ServerError:
-                        _logger.ServerError(host, response.StatusCode);
+                        LogServerError(_logger, host, response.StatusCode);
                         return TransferOutcome.NetworkError;
 
                     case ResponseKind.AlreadyComplete:
@@ -254,11 +254,11 @@ public sealed class HttpFileTransfer : IFileTransfer
                         return null;
 
                     case ResponseKind.CannotResume:
-                        _logger.PartialFileDiscarded(fileName, "the server can't continue it");
+                        LogPartialFileDiscarded(_logger, fileName, "the server can't continue it");
                         File.Delete(partialPath);
                         if (++interruptions > _options.MaxResumeAttempts)
                         {
-                            _logger.TooManyInterruptions(host, interruptions);
+                            LogTooManyInterruptions(_logger, host, interruptions);
                             return TransferOutcome.NetworkError;
                         }
 
@@ -270,7 +270,7 @@ public sealed class HttpFileTransfer : IFileTransfer
                 long? totalBytes = append ? response.Content.Headers.ContentRange!.Length : response.Content.Headers.ContentLength;
                 if (!append && offset > 0)
                 {
-                    _logger.PartialFileDiscarded(fileName, "the server sent the whole file again");
+                    LogPartialFileDiscarded(_logger, fileName, "the server sent the whole file again");
                 }
 
                 if (!started)
@@ -300,12 +300,12 @@ public sealed class HttpFileTransfer : IFileTransfer
                 reporter.Flush();
                 if (++interruptions > _options.MaxResumeAttempts)
                 {
-                    _logger.TooManyInterruptions(host, interruptions);
+                    LogTooManyInterruptions(_logger, host, interruptions);
                     return TransferOutcome.NetworkError;
                 }
 
                 long resumeAt = PartialFiles.LengthOf(partialPath);
-                _logger.Resuming(host, resumeAt, interruptions);
+                LogResuming(_logger, host, resumeAt, interruptions);
             }
         }
     }
@@ -333,7 +333,7 @@ public sealed class HttpFileTransfer : IFileTransfer
         }
         catch (Exception exception) when (IsStorageFailure(exception))
         {
-            _logger.StorageFailed(exception, fileName);
+            LogStorageFailed(_logger, exception, fileName);
             return CopyResult.StorageFailed;
         }
 
@@ -379,7 +379,7 @@ public sealed class HttpFileTransfer : IFileTransfer
                         }
                         catch (Exception exception) when (IsStorageFailure(exception))
                         {
-                            _logger.StorageFailed(exception, fileName);
+                            LogStorageFailed(_logger, exception, fileName);
                             return CopyResult.StorageFailed;
                         }
 
@@ -409,7 +409,7 @@ public sealed class HttpFileTransfer : IFileTransfer
                 FileHash actual = await ComputeHashAsync(partialPath, expectedHash.Algorithm, cancellationToken).ConfigureAwait(false);
                 if (actual != expectedHash)
                 {
-                    _logger.HashMismatch(fileName, expectedHash.Algorithm);
+                    LogHashMismatch(_logger, fileName, expectedHash.Algorithm);
                     File.Delete(partialPath);
                     return TransferOutcome.HashMismatch;
                 }
@@ -421,7 +421,7 @@ public sealed class HttpFileTransfer : IFileTransfer
         }
         catch (Exception exception) when (IsStorageFailure(exception))
         {
-            _logger.StorageFailed(exception, fileName);
+            LogStorageFailed(_logger, exception, fileName);
             return TransferOutcome.StorageError;
         }
     }

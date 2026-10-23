@@ -1,4 +1,4 @@
-using ModShelf.Application.Downloads;
+using ModShelf.Application.Downloads.Ports;
 using ModShelf.Sources.Abstractions.Downloads;
 
 namespace ModShelf.Application.Tests.Fakes;

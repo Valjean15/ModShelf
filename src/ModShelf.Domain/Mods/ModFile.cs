@@ -1,3 +1,5 @@
+using ModShelf.Domain.Common;
+
 namespace ModShelf.Domain.Mods;
 
 /// <summary>

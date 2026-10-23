@@ -1,7 +1,7 @@
 using System.Runtime.Versioning;
 using System.Text;
 
-using ModShelf.Application.Accounts;
+using ModShelf.Application.Accounts.Ports;
 using ModShelf.Platform.Secrets;
 using ModShelf.Platform.Tests.Fakes;
 

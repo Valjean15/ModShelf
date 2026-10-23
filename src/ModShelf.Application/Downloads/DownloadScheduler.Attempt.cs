@@ -1,3 +1,4 @@
+using ModShelf.Application.Downloads.Ports;
 using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Downloads;
@@ -42,7 +43,7 @@ public sealed partial class DownloadScheduler
         }
         catch (Exception exception)
         {
-            _logger.AttemptCrashed(exception, id);
+            LogAttemptCrashed(_logger, exception, id);
             result = AttemptResult.Failed(DownloadFailureReason.Unexpected);
         }
 

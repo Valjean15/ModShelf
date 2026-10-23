@@ -3,6 +3,7 @@ using Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+using ModShelf.Desktop.Hosting;
 using ModShelf.Presentation.ViewModels;
 
 namespace ModShelf.Desktop;

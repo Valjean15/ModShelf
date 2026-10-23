@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 
-using ModShelf.Application.Accounts;
+using ModShelf.Application.Accounts.Ports;
 
 namespace ModShelf.Platform.OAuth;
 

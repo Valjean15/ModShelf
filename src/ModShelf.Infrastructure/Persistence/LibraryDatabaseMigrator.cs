@@ -12,7 +12,7 @@ namespace ModShelf.Infrastructure.Persistence;
 /// <c>StartAsync</c>. Services that read the database at startup, such as the download scheduler,
 /// therefore always find the schema ready, whatever order they were registered in.
 /// </remarks>
-internal sealed class LibraryDatabaseMigrator(
+internal sealed partial class LibraryDatabaseMigrator(
     LibraryDatabaseOptions options,
     IDbContextFactory<ModShelfDbContext> contextFactory,
     ILogger<LibraryDatabaseMigrator> logger) : IHostedLifecycleService
@@ -32,11 +32,11 @@ internal sealed class LibraryDatabaseMigrator(
             List<string> pending = [.. await context.Database.GetPendingMigrationsAsync(cancellationToken).ConfigureAwait(false)];
             if (pending.Count == 0)
             {
-                logger.UpToDate();
+                LogUpToDate(logger);
                 return;
             }
 
-            logger.ApplyingMigrations(pending.Count, pending[^1]);
+            LogApplyingMigrations(logger, pending.Count, pending[^1]);
             await context.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
         }
     }

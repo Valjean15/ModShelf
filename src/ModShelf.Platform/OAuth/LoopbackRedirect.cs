@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-using ModShelf.Application.Accounts;
+using ModShelf.Application.Accounts.Ports;
 using ModShelf.Platform.Resources;
 
 namespace ModShelf.Platform.OAuth;
@@ -38,31 +38,6 @@ internal sealed class LoopbackRedirect(TcpListener listener, Uri redirectUri) : 
     {
         listener.Dispose();
         return ValueTask.CompletedTask;
-    }
-
-    /// <returns>The redirect, or null for any other request, which gets an error reply.</returns>
-    private async Task<Uri?> HandleAsync(TcpClient client, CancellationToken cancellationToken)
-    {
-        using CancellationTokenSource timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(RequestTimeout);
-        NetworkStream stream = client.GetStream();
-        try
-        {
-            string? target = await ReadRequestTargetAsync(stream, timeout.Token).ConfigureAwait(false);
-            if (target is null || !string.Equals(target.Split('?', 2)[0], RedirectUri.AbsolutePath, StringComparison.Ordinal))
-            {
-                await RespondAsync(stream, "404 Not Found", string.Empty, timeout.Token).ConfigureAwait(false);
-                return null;
-            }
-
-            await RespondAsync(stream, "200 OK", Page(), timeout.Token).ConfigureAwait(false);
-            return new Uri(RedirectUri, target);
-        }
-        catch (Exception exception) when (exception is IOException || (exception is OperationCanceledException && !cancellationToken.IsCancellationRequested))
-        {
-            // A connection that broke off or stayed silent; keep waiting for the browser.
-            return null;
-        }
     }
 
     /// <returns>The target of a GET request, such as <c>/?code=…&amp;state=…</c>; null for anything else.</returns>
@@ -108,4 +83,29 @@ internal sealed class LoopbackRedirect(TcpListener listener, Uri redirectUri) : 
             <html><head><meta charset="utf-8"><title>{WebUtility.HtmlEncode(Strings.RedirectPageTitle)}</title></head>
             <body style="font-family: sans-serif; text-align: center; margin-top: 20vh;"><p>{WebUtility.HtmlEncode(Strings.RedirectPageMessage)}</p></body></html>
             """;
+
+    /// <returns>The redirect, or null for any other request, which gets an error reply.</returns>
+    private async Task<Uri?> HandleAsync(TcpClient client, CancellationToken cancellationToken)
+    {
+        using CancellationTokenSource timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeout.CancelAfter(RequestTimeout);
+        NetworkStream stream = client.GetStream();
+        try
+        {
+            string? target = await ReadRequestTargetAsync(stream, timeout.Token).ConfigureAwait(false);
+            if (target is null || !string.Equals(target.Split('?', 2)[0], RedirectUri.AbsolutePath, StringComparison.Ordinal))
+            {
+                await RespondAsync(stream, "404 Not Found", string.Empty, timeout.Token).ConfigureAwait(false);
+                return null;
+            }
+
+            await RespondAsync(stream, "200 OK", Page(), timeout.Token).ConfigureAwait(false);
+            return new Uri(RedirectUri, target);
+        }
+        catch (Exception exception) when (exception is IOException || (exception is OperationCanceledException && !cancellationToken.IsCancellationRequested))
+        {
+            // A connection that broke off or stayed silent; keep waiting for the browser.
+            return null;
+        }
+    }
 }

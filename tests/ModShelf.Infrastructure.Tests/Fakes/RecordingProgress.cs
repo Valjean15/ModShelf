@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using System.Globalization;
 
-using ModShelf.Application.Downloads;
+using ModShelf.Application.Downloads.Ports;
 
 namespace ModShelf.Infrastructure.Tests.Fakes;
 

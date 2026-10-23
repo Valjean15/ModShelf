@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 
-using ModShelf.Application.Accounts;
+using ModShelf.Application.Accounts.Ports;
 
 namespace ModShelf.Platform.Browser;
 

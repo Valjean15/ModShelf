@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
+using ModShelf.Infrastructure.Persistence.Tables;
+
 namespace ModShelf.Infrastructure.Persistence;
 
 /// <summary>
