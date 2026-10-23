@@ -30,7 +30,7 @@ public sealed class DependencyRuleTests
     {
         string[] missing = [.. ExpectedProjects.Except(Graph.Projects.Select(project => project.Name))];
 
-        AssertNoViolations("The architecture tests must reference every project under src except Desktop", missing);
+        Violations.AssertNone("The architecture tests must reference every project under src except Desktop", missing);
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public sealed class DependencyRuleTests
             .Where(dependency => !IsModShelf(dependency))
             .Select(dependency => $"it references the package {dependency}"));
 
-        AssertNoViolations($"{ProjectNames.Domain} may not reference any project or package", violations);
+        Violations.AssertNone($"{ProjectNames.Domain} may not reference any project or package", violations);
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public sealed class DependencyRuleTests
                 .Select(host => $"{project.Name}'s compiled code uses {host}"));
         }
 
-        AssertNoViolations("Only the hosts are composition roots, so no project may reference them", violations);
+        Violations.AssertNone("Only the hosts are composition roots, so no project may reference them", violations);
     }
 
     [Fact]
@@ -115,12 +115,12 @@ public sealed class DependencyRuleTests
                 .Select(assembly => $"{project.Name}'s compiled code uses {assembly}"));
         }
 
-        AssertNoViolations($"Only {ProjectNames.Desktop} may reference Avalonia", violations);
+        Violations.AssertNone($"Only {ProjectNames.Desktop} may reference Avalonia", violations);
     }
 
     private static void AssertReferencesOnly(string project, params string[] allowed)
     {
-        AssertNoViolations(
+        Violations.AssertNone(
             $"{project} may reference only {string.Join(" and ", allowed)}",
             FindViolations(project, allowed));
     }
@@ -156,12 +156,4 @@ public sealed class DependencyRuleTests
 
     private static bool IsAvalonia(string name)
         => name.StartsWith(ProjectNames.AvaloniaPrefix, StringComparison.OrdinalIgnoreCase);
-
-    private static void AssertNoViolations(string rule, IReadOnlyCollection<string> violations)
-    {
-        if (violations.Count > 0)
-        {
-            Assert.Fail($"{rule}, but:{Environment.NewLine}- {string.Join(Environment.NewLine + "- ", violations)}");
-        }
-    }
 }
