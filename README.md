@@ -57,10 +57,10 @@ tests/
   ModShelf.<Library>.Tests        one test project per library
   ModShelf.Architecture.Tests     enforces the dependency rules
   ModShelf.Cli.Tests              runs the built CLI end to end: stop, kill and resume a download
-  Shared/SourceContractTests.cs   checks every source's test project compiles in
+  Shared                          code several test projects compile in: SourceContractTests, TempFolder, RecordingLogger
 ```
 
-Dependencies point inward toward Domain, and each mod site lives in its own source project that sees only `Sources.Abstractions`. The architecture tests fail, locally and in CI, if a project gains a reference it isn't allowed to have. See [ADR 0001](docs/adr/0001-layered-architecture.md) for the rules and the reasoning behind them.
+Dependencies point inward toward Domain, and each mod site lives in its own source project that sees only `Sources.Abstractions`. The architecture tests fail, locally and in CI, if a project gains a reference it isn't allowed to have. See [ADR 0001](docs/adr/0001-layered-architecture.md) for the rules and the reasoning behind them. Where files, types and members go inside each project is in [docs/code-organization.md](docs/code-organization.md).
 
 ## Contributing
 

@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace ModShelf.Platform.Tests.Fakes;
+namespace ModShelf.Testing;
 
 /// <summary>
 /// A fresh, empty folder under the system temp folder, deleted again on dispose.

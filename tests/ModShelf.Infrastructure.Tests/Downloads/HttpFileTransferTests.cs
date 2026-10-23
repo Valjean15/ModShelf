@@ -8,6 +8,7 @@ using ModShelf.Domain.Mods;
 using ModShelf.Infrastructure.Downloads;
 using ModShelf.Infrastructure.Tests.Fakes;
 using ModShelf.Sources.Abstractions.Downloads;
+using ModShelf.Testing;
 
 namespace ModShelf.Infrastructure.Tests.Downloads;
 

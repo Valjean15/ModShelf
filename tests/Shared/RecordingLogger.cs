@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 
 using Microsoft.Extensions.Logging;
 
-namespace ModShelf.Infrastructure.Tests.Fakes;
+namespace ModShelf.Testing;
 
 /// <summary>
 /// A logger that keeps every entry, so tests can check what was (and wasn't) logged.

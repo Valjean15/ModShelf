@@ -20,4 +20,9 @@
     <ProjectReference Include="..\..\src\ModShelf.Platform\ModShelf.Platform.csproj" />
   </ItemGroup>
 
+  <!-- Test helpers several test projects share (tests/Shared). -->
+  <ItemGroup>
+    <Compile Include="..\Shared\TempFolder.cs" Link="Shared\TempFolder.cs" />
+  </ItemGroup>
+
 </Project>

@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Platform.Secrets;
-using ModShelf.Platform.Tests.Fakes;
+using ModShelf.Testing;
 
 namespace ModShelf.Platform.Tests.Secrets;
 

@@ -1,7 +1,7 @@
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Downloads;
 using ModShelf.Sources.Abstractions.Links;
-using ModShelf.Sources.Testing;
+using ModShelf.Testing;
 
 namespace ModShelf.Sources.DirectUrl.Tests;
 

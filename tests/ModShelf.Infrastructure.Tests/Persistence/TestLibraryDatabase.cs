@@ -5,7 +5,7 @@ using Microsoft.Extensions.Hosting;
 
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Infrastructure.Persistence;
-using ModShelf.Infrastructure.Tests.Fakes;
+using ModShelf.Testing;
 
 namespace ModShelf.Infrastructure.Tests.Persistence;
 

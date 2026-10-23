@@ -7,6 +7,7 @@ using ModShelf.Application.Downloads.Ports;
 using ModShelf.Infrastructure.Downloads;
 using ModShelf.Infrastructure.Tests.Fakes;
 using ModShelf.Sources.Abstractions.Downloads;
+using ModShelf.Testing;
 
 namespace ModShelf.Infrastructure.Tests.Downloads;
 

@@ -1,9 +1,11 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
 
+using ModShelf.Cli.Tests.Common;
 using ModShelf.Cli.Tests.Fakes;
+using ModShelf.Testing;
 
-namespace ModShelf.Cli.Tests;
+namespace ModShelf.Cli.Tests.Commands;
 
 /// <summary>
 /// Phase 1's promise, end to end on each operating system: the built CLI, run as its own process against a local

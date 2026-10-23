@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Net.Http.Headers;
 
 namespace ModShelf.Infrastructure.Tests.Fakes;
 
@@ -48,8 +47,3 @@ internal sealed class ScriptedHttpHandler : HttpMessageHandler
         return Task.FromResult(next());
     }
 }
-
-/// <summary>
-/// The parts of a request the tests look at.
-/// </summary>
-internal sealed record RecordedRequest(string? Range, string? Authorization, string UserAgent);

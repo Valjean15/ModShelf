@@ -50,6 +50,10 @@ internal sealed class ScriptedStream(byte[] data, int stopAfter, StreamEnding en
 
     public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
 
+    public override void SetLength(long value) => throw new NotSupportedException();
+
+    public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
     private int ReadChunk(Span<byte> buffer)
     {
         if (_position >= stopAfter)
@@ -62,20 +66,4 @@ internal sealed class ScriptedStream(byte[] data, int stopAfter, StreamEnding en
         _position += count;
         return count;
     }
-
-    public override void SetLength(long value) => throw new NotSupportedException();
-
-    public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
-}
-
-internal enum StreamEnding
-{
-    /// <summary>The body ends normally.</summary>
-    End,
-
-    /// <summary>The connection resets with an <see cref="IOException"/>.</summary>
-    Drop,
-
-    /// <summary>No more data arrives until the read is cancelled.</summary>
-    Stall,
 }

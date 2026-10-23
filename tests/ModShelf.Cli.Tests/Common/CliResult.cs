@@ -1,4 +1,4 @@
-namespace ModShelf.Cli.Tests.Fakes;
+namespace ModShelf.Cli.Tests.Common;
 
 /// <summary>
 /// How a run of the CLI ended, and what it wrote.

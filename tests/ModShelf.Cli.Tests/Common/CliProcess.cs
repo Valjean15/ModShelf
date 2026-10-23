@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 
-namespace ModShelf.Cli.Tests.Fakes;
+namespace ModShelf.Cli.Tests.Common;
 
 /// <summary>
 /// The ModShelf CLI built next to these tests, running as its own process the way a user runs it, with the

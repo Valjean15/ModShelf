@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Mods;
 
-namespace ModShelf.Infrastructure.Tests.Persistence;
+namespace ModShelf.Infrastructure.Tests.Persistence.Repositories;
 
 public sealed class DownloadJobRepositoryTests : IAsyncLifetime
 {

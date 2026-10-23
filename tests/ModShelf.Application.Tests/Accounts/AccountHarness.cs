@@ -6,6 +6,7 @@ using ModShelf.Application.Tests.Fakes;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Accounts;
+using ModShelf.Testing;
 
 namespace ModShelf.Application.Tests.Accounts;
 

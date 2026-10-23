@@ -3,7 +3,7 @@ using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Downloads;
 using ModShelf.Sources.Abstractions.Links;
 
-namespace ModShelf.Sources.Testing;
+namespace ModShelf.Testing;
 
 /// <summary>
 /// What every source must do, whatever its site. Each source's test project derives one class from this, so

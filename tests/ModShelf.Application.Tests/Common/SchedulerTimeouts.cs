@@ -1,4 +1,4 @@
-namespace ModShelf.Application.Tests;
+namespace ModShelf.Application.Tests.Common;
 
 internal static class SchedulerTimeouts
 {

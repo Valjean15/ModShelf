@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Threading.Channels;
 
 using ModShelf.Application.Downloads.Ports;
+using ModShelf.Application.Tests.Common;
 using ModShelf.Sources.Abstractions.Downloads;
 
 namespace ModShelf.Application.Tests.Fakes;
