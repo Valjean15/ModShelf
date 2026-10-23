@@ -1,0 +1,371 @@
+using System.Diagnostics;
+using System.Net;
+
+using Microsoft.Extensions.Time.Testing;
+
+using ModShelf.Application.Downloads;
+using ModShelf.Domain.Mods;
+using ModShelf.Infrastructure.Downloads;
+using ModShelf.Infrastructure.Tests.Fakes;
+using ModShelf.Sources.Abstractions.Downloads;
+
+namespace ModShelf.Infrastructure.Tests.Downloads;
+
+/// <summary>
+/// The transfer itself, against a scripted server with no retry pipeline in between.
+/// </summary>
+public sealed class HttpFileTransferTests : IDisposable
+{
+    private const string UrlSecret = "signature-0f9e8d7c";
+
+    private static readonly byte[] File1000 = Responses.SampleFile(1000);
+
+    private readonly TempFolder _folder = new();
+    private readonly ScriptedHttpHandler _server = new();
+    private readonly RecordingProgress _progress = new();
+    private readonly RecordingLogger<HttpFileTransfer> _logger = new();
+
+    private string Destination => Path.Combine(_folder.Path, "SkyUI_5_2_SE.7z");
+
+    private string PartialFile => Destination + ".part";
+
+    public void Dispose() => _folder.Dispose();
+
+    [Fact]
+    public async Task DownloadsTheWholeFileAndMovesItIntoPlace()
+    {
+        _server.Respond(Responses.Whole(File1000));
+
+        TransferOutcome outcome = await DownloadAsync();
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+        Assert.Equal(File1000, File.ReadAllBytes(Destination));
+        Assert.False(File.Exists(PartialFile));
+        Assert.Null(Assert.Single(_server.Requests).Range);
+        string[] expected = ["Started 0/1000", "Advanced 1000", "Verifying"];
+        Assert.Equal(expected, _progress.Events);
+    }
+
+    [Fact]
+    public async Task ResumesThePartialFileWithARangeRequest()
+    {
+        File.WriteAllBytes(PartialFile, File1000[..400]);
+        _server.Respond(Responses.Rest(File1000, from: 400));
+
+        TransferOutcome outcome = await DownloadAsync();
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+        Assert.Equal(File1000, File.ReadAllBytes(Destination));
+        Assert.Equal("bytes=400-", Assert.Single(_server.Requests).Range);
+        Assert.Equal("Started 400/1000", _progress.Events[0]);
+    }
+
+    [Fact]
+    public async Task StartsOverWhenTheServerIgnoresTheRange()
+    {
+        File.WriteAllBytes(PartialFile, Enumerable.Repeat((byte)0xFF, 400).ToArray());
+        _server.Respond(Responses.Whole(File1000));
+
+        TransferOutcome outcome = await DownloadAsync();
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+        Assert.Equal(File1000, File.ReadAllBytes(Destination));
+        Assert.Equal("Started 0/1000", _progress.Events[0]);
+    }
+
+    [Fact]
+    public async Task StartsOverWhenTheServerSendsADifferentRange()
+    {
+        File.WriteAllBytes(PartialFile, File1000[..400]);
+        _server.Respond(Responses.Rest(File1000, from: 0)).Respond(Responses.Whole(File1000));
+
+        TransferOutcome outcome = await DownloadAsync();
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+        Assert.Equal(File1000, File.ReadAllBytes(Destination));
+        string?[] ranges = [.. _server.Requests.Select(request => request.Range)];
+        string?[] expected = ["bytes=400-", null];
+        Assert.Equal(expected, ranges);
+    }
+
+    [Fact]
+    public async Task FinishesWhenThePartialFileIsAlreadyComplete()
+    {
+        File.WriteAllBytes(PartialFile, File1000);
+        _server.Respond(Responses.RangeNotSatisfiable(1000));
+
+        TransferOutcome outcome = await DownloadAsync();
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+        Assert.Equal(File1000, File.ReadAllBytes(Destination));
+        Assert.Single(_server.Requests);
+    }
+
+    [Fact]
+    public async Task StartsOverWhenThePartialFileIsLongerThanTheServersFile()
+    {
+        File.WriteAllBytes(PartialFile, Responses.SampleFile(1200));
+        _server.Respond(Responses.RangeNotSatisfiable(1000)).Respond(Responses.Whole(File1000));
+
+        TransferOutcome outcome = await DownloadAsync();
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+        Assert.Equal(File1000, File.ReadAllBytes(Destination));
+    }
+
+    [Fact]
+    public async Task ResumesAfterTheConnectionDrops()
+    {
+        _server
+            .Respond(Responses.Whole(File1000, stopAfter: 500, ending: StreamEnding.Drop))
+            .Respond(Responses.Rest(File1000, from: 500));
+
+        TransferOutcome outcome = await DownloadAsync();
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+        Assert.Equal(File1000, File.ReadAllBytes(Destination));
+        Assert.Equal("bytes=500-", _server.Requests[1].Range);
+        Assert.Single(_progress.Events, e => e.StartsWith("Started", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task ResumesAfterTheConnectionStalls()
+    {
+        _server
+            .Respond(Responses.Whole(File1000, stopAfter: 300, ending: StreamEnding.Stall))
+            .Respond(Responses.Rest(File1000, from: 300));
+
+        TransferOutcome outcome = await DownloadAsync(new FileTransferOptions { ReadTimeout = TimeSpan.FromMilliseconds(200) });
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+        Assert.Equal(File1000, File.ReadAllBytes(Destination));
+        Assert.Equal("bytes=300-", _server.Requests[1].Range);
+    }
+
+    [Fact]
+    public async Task ResumesWhenTheBodyEndsBeforeTheWholeFileArrived()
+    {
+        _server
+            .Respond(Responses.Whole(File1000, stopAfter: 600))
+            .Respond(Responses.Rest(File1000, from: 600));
+
+        TransferOutcome outcome = await DownloadAsync();
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+        Assert.Equal(File1000, File.ReadAllBytes(Destination));
+    }
+
+    [Fact]
+    public async Task GivesUpAfterTooManyInterruptionsButKeepsThePartialFile()
+    {
+        _server.RespondAlways(Responses.Whole(File1000, stopAfter: 100, ending: StreamEnding.Drop));
+
+        TransferOutcome outcome = await DownloadAsync(new FileTransferOptions { MaxResumeAttempts = 2 });
+
+        Assert.Equal(TransferOutcome.NetworkError, outcome);
+        Assert.Equal(3, _server.Requests.Count);
+        Assert.True(File.Exists(PartialFile));
+        Assert.False(File.Exists(Destination));
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.Unauthorized)]
+    [InlineData(HttpStatusCode.Forbidden)]
+    [InlineData(HttpStatusCode.NotFound)]
+    [InlineData(HttpStatusCode.Gone)]
+    public async Task ReportsAnExpiredLinkAndKeepsThePartialFile(HttpStatusCode status)
+    {
+        File.WriteAllBytes(PartialFile, File1000[..400]);
+        _server.Respond(Responses.Status(status));
+
+        TransferOutcome outcome = await DownloadAsync();
+
+        Assert.Equal(TransferOutcome.LinkExpired, outcome);
+        Assert.Equal(File1000[..400], File.ReadAllBytes(PartialFile));
+    }
+
+    [Fact]
+    public async Task ReportsServerErrorsAsNetworkErrors()
+    {
+        _server.Respond(Responses.Status(HttpStatusCode.ServiceUnavailable));
+
+        Assert.Equal(TransferOutcome.NetworkError, await DownloadAsync());
+    }
+
+    [Fact]
+    public async Task ReportsConnectionFailuresAsNetworkErrors()
+    {
+        _server.Throw(new HttpRequestException("No such host is known."));
+
+        Assert.Equal(TransferOutcome.NetworkError, await DownloadAsync());
+    }
+
+    [Theory]
+    [InlineData(FileHashAlgorithm.Md5, "900150983cd24fb0d6963f7d28e17f72")]
+    [InlineData(FileHashAlgorithm.Sha1, "a9993e364706816aba3e25717850c26c9cd0d89d")]
+    [InlineData(FileHashAlgorithm.Sha256, "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad")]
+    [InlineData(FileHashAlgorithm.Sha512, "ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f")]
+    public async Task AcceptsAFileThatMatchesItsHash(FileHashAlgorithm algorithm, string digestOfAbc)
+    {
+        _server.Respond(Responses.Whole("abc"u8.ToArray()));
+
+        TransferOutcome outcome = await DownloadAsync(expectedHash: new FileHash(algorithm, digestOfAbc));
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+        Assert.Equal("abc"u8.ToArray(), File.ReadAllBytes(Destination));
+    }
+
+    [Fact]
+    public async Task DiscardsAFileThatDoesNotMatchItsHash()
+    {
+        _server.Respond(Responses.Whole(File1000));
+
+        TransferOutcome outcome = await DownloadAsync(
+            expectedHash: new FileHash(FileHashAlgorithm.Sha256, new string('0', 64)));
+
+        Assert.Equal(TransferOutcome.HashMismatch, outcome);
+        Assert.False(File.Exists(PartialFile));
+        Assert.False(File.Exists(Destination));
+        Assert.Equal("Verifying", _progress.Events[^1]);
+    }
+
+    [Fact]
+    public async Task NeverOverwritesAnExistingFile()
+    {
+        File.WriteAllText(Destination, "Mine.");
+
+        TransferOutcome outcome = await DownloadAsync();
+
+        Assert.Equal(TransferOutcome.StorageError, outcome);
+        Assert.Equal("Mine.", File.ReadAllText(Destination));
+        Assert.Empty(_server.Requests);
+    }
+
+    [Fact]
+    public async Task NeverOverwritesAFileThatAppearsDuringTheDownload()
+    {
+        _server.Respond(Responses.Whole(File1000));
+        RecordingProgress progress = new() { OnVerifying = () => File.WriteAllText(Destination, "Mine.") };
+
+        TransferOutcome outcome = await CreateTransfer().DownloadAsync(
+            Ticket(), Destination, progress, TestContext.Current.CancellationToken);
+
+        Assert.Equal(TransferOutcome.StorageError, outcome);
+        Assert.Equal("Mine.", File.ReadAllText(Destination));
+        Assert.Equal(File1000, File.ReadAllBytes(PartialFile));
+    }
+
+    [Fact]
+    public async Task ReportsAStorageErrorWhenTheFolderCannotBeCreated()
+    {
+        string blocker = Path.Combine(_folder.Path, "Downloads");
+        File.WriteAllText(blocker, "A file where a folder should be.");
+        string destination = Path.Combine(blocker, "Skyrim", "SkyUI_5_2_SE.7z");
+
+        TransferOutcome outcome = await CreateTransfer().DownloadAsync(
+            Ticket(), destination, _progress, TestContext.Current.CancellationToken);
+
+        Assert.Equal(TransferOutcome.StorageError, outcome);
+        Assert.Empty(_server.Requests);
+    }
+
+    [Fact]
+    public async Task SendsTheTicketsHeaders()
+    {
+        _server.Respond(Responses.Whole(File1000));
+
+        await DownloadAsync(headers: new Dictionary<string, string> { ["Authorization"] = "Bearer abc" });
+
+        Assert.Equal("Bearer abc", Assert.Single(_server.Requests).Authorization);
+    }
+
+    [Fact]
+    public async Task KeepsThePartialFileWhenCancelled()
+    {
+        _server.Respond(Responses.Whole(File1000, stopAfter: 300, ending: StreamEnding.Stall));
+        using CancellationTokenSource cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+
+        Task<TransferOutcome> download = CreateTransfer().DownloadAsync(Ticket(), Destination, _progress, cancellation.Token);
+        await WaitUntilAsync(() => _progress.LastAdvanced == 300);
+        await cancellation.CancelAsync();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => download);
+        Assert.Equal(File1000[..300], File.ReadAllBytes(PartialFile));
+    }
+
+    [Fact]
+    public async Task DeletePartialFileRemovesOnlyThePartialFile()
+    {
+        File.WriteAllText(Destination, "Finished.");
+        File.WriteAllText(PartialFile, "Half");
+        HttpFileTransfer transfer = CreateTransfer();
+
+        await transfer.DeletePartialFileAsync(Destination, TestContext.Current.CancellationToken);
+        await transfer.DeletePartialFileAsync(Destination, TestContext.Current.CancellationToken);
+
+        Assert.False(File.Exists(PartialFile));
+        Assert.Equal("Finished.", File.ReadAllText(Destination));
+    }
+
+    [Fact]
+    public async Task ReportsProgressAtMostOncePerInterval()
+    {
+        _server.Respond(Responses.Whole(File1000, chunkSize: 100));
+
+        // The fake clock never moves, so after the first report only the final one gets through.
+        await DownloadAsync(timeProvider: new FakeTimeProvider(DateTimeOffset.UnixEpoch));
+
+        long[] expected = [100, 1000];
+        Assert.Equal(expected, _progress.Advances);
+    }
+
+    [Fact]
+    public async Task NeverLogsTheUrlOrTheHeaders()
+    {
+        _server
+            .Respond(Responses.Whole(File1000, stopAfter: 500, ending: StreamEnding.Drop))
+            .Respond(Responses.Status(HttpStatusCode.Forbidden));
+
+        await DownloadAsync(headers: new Dictionary<string, string> { ["Authorization"] = "Bearer abc" });
+
+        Assert.NotEmpty(_logger.Entries);
+        Assert.DoesNotContain(_logger.Entries, entry => entry.Contains(UrlSecret, StringComparison.Ordinal));
+        Assert.DoesNotContain(_logger.Entries, entry => entry.Contains("Bearer", StringComparison.Ordinal));
+        Assert.Contains(_logger.Entries, entry => entry.Contains("cdn.example.com", StringComparison.Ordinal));
+    }
+
+    private static DownloadTicket Ticket(FileHash? expectedHash = null, IReadOnlyDictionary<string, string>? headers = null)
+        => new(new Uri($"https://cdn.example.com/files/SkyUI_5_2_SE.7z?{UrlSecret}"), headers, expectedHash);
+
+    private static async Task WaitUntilAsync(Func<bool> condition)
+    {
+        Stopwatch waited = Stopwatch.StartNew();
+        while (!condition())
+        {
+            if (waited.Elapsed > TimeSpan.FromSeconds(10))
+            {
+                throw new TimeoutException("The condition never became true.");
+            }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(5));
+        }
+    }
+
+    private HttpFileTransfer CreateTransfer(FileTransferOptions? options = null, TimeProvider? timeProvider = null)
+        => new(
+            new SingleHandlerHttpClientFactory(_server),
+            timeProvider ?? TimeProvider.System,
+            options ?? new FileTransferOptions(),
+            _logger);
+
+    private Task<TransferOutcome> DownloadAsync(
+        FileTransferOptions? options = null,
+        FileHash? expectedHash = null,
+        IReadOnlyDictionary<string, string>? headers = null,
+        TimeProvider? timeProvider = null)
+        => CreateTransfer(options, timeProvider).DownloadAsync(
+            Ticket(expectedHash, headers),
+            Destination,
+            _progress,
+            TestContext.Current.CancellationToken);
+}
