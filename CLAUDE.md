@@ -64,7 +64,7 @@ Never add a reference that breaks these rules. Never weaken or skip an architect
 
 - Put files, types and members where `docs/code-organization.md` says: feature folders, the namespace matching the folder, `Ports/` for what Application needs from other layers, `Common/` for helpers several features share, member order.
 - C# latest, nullable enabled, file-scoped namespaces, one type per file.
-- Classes are `sealed` unless designed for inheritance. Use `record` or `record struct` for value objects and DTOs.
+- Classes are `sealed` unless designed for inheritance, and `internal` unless another project may use them: share behaviour through interfaces and data through records. Use `record` or `record struct` for value objects and DTOs.
 - Async all the way: `Async` suffix, `CancellationToken` as the last parameter, no `.Result` or `.Wait()`.
 - Get the time from `TimeProvider`, never from `DateTime.Now` or `DateTime.UtcNow` directly.
 - Build paths with `Path.Combine` and validate names with `Path.GetInvalidFileNameChars()`. Never hard-code `\` or `/`, and never assume a case-insensitive file system.
