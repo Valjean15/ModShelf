@@ -15,10 +15,13 @@ internal sealed class ModShelfDbContext(DbContextOptions<ModShelfDbContext> opti
 {
     internal DbSet<DownloadJobRecord> DownloadJobs => Set<DownloadJobRecord>();
 
+    internal DbSet<LinkedAccountRecord> LinkedAccounts => Set<LinkedAccountRecord>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);
 
         modelBuilder.ApplyConfiguration(new DownloadJobRecordConfiguration());
+        modelBuilder.ApplyConfiguration(new LinkedAccountRecordConfiguration());
     }
 }

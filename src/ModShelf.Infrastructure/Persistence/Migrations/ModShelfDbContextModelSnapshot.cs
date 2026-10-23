@@ -17,7 +17,7 @@ namespace ModShelf.Infrastructure.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.13");
 
-            modelBuilder.Entity("ModShelf.Infrastructure.Persistence.DownloadJobRecord", b =>
+            modelBuilder.Entity("ModShelf.Infrastructure.Persistence.Tables.DownloadJobRecord", b =>
                 {
                     b.Property<long>("Sequence")
                         .ValueGeneratedOnAdd()
@@ -71,6 +71,32 @@ namespace ModShelf.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("DownloadJobs", (string)null);
+                });
+
+            modelBuilder.Entity("ModShelf.Infrastructure.Persistence.Tables.LinkedAccountRecord", b =>
+                {
+                    b.Property<string>("SourceId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AvatarUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset>("LinkedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Tier")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("SourceId");
+
+                    b.ToTable("LinkedAccounts", (string)null);
                 });
 #pragma warning restore 612, 618
         }

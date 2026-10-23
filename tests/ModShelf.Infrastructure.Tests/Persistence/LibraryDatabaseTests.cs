@@ -1,7 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Mods;
@@ -15,6 +18,8 @@ namespace ModShelf.Infrastructure.Tests.Persistence;
 /// </summary>
 public sealed class LibraryDatabaseTests
 {
+    private const string InitialCreate = "20261023144452_InitialCreate";
+
     [Fact]
     public async Task StartingCreatesTheFolderAndTheSchema()
     {
@@ -25,6 +30,7 @@ public sealed class LibraryDatabaseTests
 
         Assert.True(File.Exists(database.DatabasePath));
         Assert.Equal(1L, await database.QueryAsync("SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'DownloadJobs'"));
+        Assert.Equal(1L, await database.QueryAsync("SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'LinkedAccounts'"));
 
         await using ModShelfDbContext context = await database.CreateContextAsync();
         Assert.NotEmpty(context.Database.GetMigrations());
@@ -48,7 +54,34 @@ public sealed class LibraryDatabaseTests
         await database.RestartAsync();
 
         Assert.Equal(job.Id, Assert.Single(await database.Repository.ListAsync(TestContext.Current.CancellationToken)).Id);
-        Assert.Equal(1L, await database.QueryAsync("SELECT COUNT(*) FROM __EFMigrationsHistory"));
+
+        // Each migration ran once, on the first start.
+        await using ModShelfDbContext context = await database.CreateContextAsync();
+        Assert.Equal((long)context.Database.GetMigrations().Count(), await database.QueryAsync("SELECT COUNT(*) FROM __EFMigrationsHistory"));
+    }
+
+    [Fact]
+    public async Task ADatabaseFromBeforeLinkedAccountsIsUpgradedWithItsJobs()
+    {
+        await using TestLibraryDatabase database = new();
+        await using (ModShelfDbContext context = await database.CreateContextAsync())
+        {
+            // The schema Phase 1 shipped with.
+            await context.GetService<IMigrator>().MigrateAsync(InitialCreate, TestContext.Current.CancellationToken);
+        }
+
+        DownloadJob job = DownloadJob.Create(
+            new ModFileRef(new ModRef(new GameRef(new SourceId("nexus"), "skyrimspecialedition"), "12604"), "35407"),
+            Path.GetDirectoryName(database.DatabasePath)!,
+            "SkyUI_5_2_SE.7z",
+            DateTimeOffset.UnixEpoch);
+        await database.Repository.AddAsync(job, TestContext.Current.CancellationToken);
+        Assert.Equal(0L, await database.QueryAsync("SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'LinkedAccounts'"));
+
+        await database.StartAsync();
+
+        Assert.Equal(1L, await database.QueryAsync("SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'LinkedAccounts'"));
+        Assert.Equal(job.Id, Assert.Single(await database.Repository.ListAsync(TestContext.Current.CancellationToken)).Id);
     }
 
     [Fact]
@@ -94,6 +127,14 @@ public sealed class LibraryDatabaseTests
 
         ServiceDescriptor options = Assert.Single(services, descriptor => descriptor.ServiceType == typeof(LibraryDatabaseOptions));
         Assert.Equal(LibraryDatabaseLocation.GetDefaultPath(), Assert.IsType<LibraryDatabaseOptions>(options.ImplementationInstance).DatabasePath);
+    }
+
+    [Fact]
+    public async Task RegistersTheLinkedAccountRepository()
+    {
+        await using TestLibraryDatabase database = new();
+
+        Assert.IsType<LinkedAccountRepository>(database.Services.GetRequiredService<ILinkedAccountRepository>());
     }
 
     [Theory]

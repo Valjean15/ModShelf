@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Infrastructure.Persistence;
 using ModShelf.Testing;
@@ -28,6 +29,8 @@ internal sealed class TestLibraryDatabase : IAsyncDisposable
     public string DatabasePath { get; }
 
     public IDownloadJobRepository Repository => _services.GetRequiredService<IDownloadJobRepository>();
+
+    public ILinkedAccountRepository LinkedAccounts => _services.GetRequiredService<ILinkedAccountRepository>();
 
     public IServiceProvider Services => _services;
 
