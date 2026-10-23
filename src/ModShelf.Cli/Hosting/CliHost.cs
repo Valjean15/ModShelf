@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging.Console;
 
 using ModShelf.Application;
 using ModShelf.Infrastructure;
-using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.DirectUrl;
 
 namespace ModShelf.Cli.Hosting;
@@ -51,7 +50,7 @@ internal static class CliHost
 
         builder.Services.AddHttpFileTransfer();
         builder.Services.AddDownloadEngine();
-        builder.Services.AddSingleton<IModSource, DirectUrlSource>();
+        builder.Services.AddDirectUrlSource();
         if (runDownloads)
         {
             builder.Services.AddBackgroundDownloads();
