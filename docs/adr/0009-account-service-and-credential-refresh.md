@@ -1,6 +1,6 @@
 # 9. Account service and credential refresh
 
-- Status: Accepted
+- Status: Accepted; `GetAsync` replaced by `AuthorizeAsync` in [ADR 0010](0010-linked-accounts-on-source-requests.md)
 - Date: 2026-10-23
 
 ## Context
