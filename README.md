@@ -23,7 +23,21 @@ dotnet run --project src/ModShelf.Desktop    # opens the desktop app
 
 `dotnet test` runs on Microsoft.Testing.Platform, which `global.json` selects for the whole repository.
 
-The headless host in `src/ModShelf.Cli` builds the same dependency-injection container as the desktop app. Its first commands (`download`, `queue list`) arrive in Phase 1.
+### Command line
+
+The headless host in `src/ModShelf.Cli` builds the same dependency-injection container as the desktop app and drives the download engine directly:
+
+```powershell
+dotnet run --project src/ModShelf.Cli -- download <link> --to <folder> [--name <file>]
+dotnet run --project src/ModShelf.Cli -- queue list
+```
+
+- `download` queues the file and shows its progress until it's done. Put the link in quotes, since shells treat characters such as `&` specially. To check the file against a hash, end the link with `#sha256=<hex>` (or `md5`, `sha1`, `sha512`); the fragment is never sent to the server.
+- Ctrl+C stops the download and keeps the partial file. Running the same command again continues where it stopped, including after a crash.
+- `queue list` shows every saved job without starting any download.
+- Exit codes: 0 done, 1 failed, 2 bad input, 130 stopped with Ctrl+C.
+- Jobs live in the library database, `library.db` under the user's local application data folder (`%LOCALAPPDATA%\ModShelf` on Windows). To use another file, for example while testing, set the environment variable `ModShelf__DatabasePath`.
+- Logs go to stderr and show warnings only; set `Logging__LogLevel__Default=Debug` for more.
 
 ## Solution layout
 
@@ -35,12 +49,14 @@ src/
   ModShelf.Infrastructure         storage, HTTP file transfer, settings, logging
   ModShelf.Platform               OS integration (secret stores, nxm:// handler, notifications)
   ModShelf.Sources.Nexus          the Nexus Mods source
+  ModShelf.Sources.DirectUrl      plain web links, with no mod site involved
   ModShelf.Presentation           ViewModels, no Avalonia reference
   ModShelf.Desktop                Avalonia views and the desktop composition root
   ModShelf.Cli                    headless composition root
 tests/
   ModShelf.<Library>.Tests        one test project per library
   ModShelf.Architecture.Tests     enforces the dependency rules
+  Shared/SourceContractTests.cs   checks every source's test project compiles in
 ```
 
 Dependencies point inward toward Domain, and each mod site lives in its own source project that sees only `Sources.Abstractions`. The architecture tests fail, locally and in CI, if a project gains a reference it isn't allowed to have. See [ADR 0001](docs/adr/0001-layered-architecture.md) for the rules and the reasoning behind them.

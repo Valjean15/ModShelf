@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="System.CommandLine" />
   </ItemGroup>
 
   <!-- Composition root: references every library, for DI registration only. -->
@@ -16,7 +17,12 @@
     <ProjectReference Include="..\ModShelf.Platform\ModShelf.Platform.csproj" />
     <ProjectReference Include="..\ModShelf.Presentation\ModShelf.Presentation.csproj" />
     <ProjectReference Include="..\ModShelf.Sources.Abstractions\ModShelf.Sources.Abstractions.csproj" />
+    <ProjectReference Include="..\ModShelf.Sources.DirectUrl\ModShelf.Sources.DirectUrl.csproj" />
     <ProjectReference Include="..\ModShelf.Sources.Nexus\ModShelf.Sources.Nexus.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

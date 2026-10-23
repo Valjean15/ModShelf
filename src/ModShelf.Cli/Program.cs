@@ -1,14 +1,15 @@
-using Microsoft.Extensions.Hosting;
+using System.CommandLine;
 
-// Headless composition root. Phase 1 adds the `download` and `queue list` commands;
-// for now it only builds the host, so DI and logging are wired the same way as the desktop app.
-// Configuration is read next to the executable, not from whatever directory the shell is in.
-HostApplicationBuilder builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
+using ModShelf.Cli;
+
+// Headless host for exercising the download engine end to end. Each command builds its own generic host
+// (see CliHost), so DI, configuration and logging are wired as in the desktop app.
+RootCommand root = new("ModShelf from the command line: download files and look at the download queue.")
 {
-    Args = args,
-    ContentRootPath = AppContext.BaseDirectory,
-});
+    DownloadCommand.Create(),
+    QueueCommand.Create(),
+};
 
-using IHost host = builder.Build();
-
-return 0;
+// On Ctrl+C the command cancels its token, then stops the engine so the running download is saved for later;
+// give that time before System.CommandLine ends the process.
+return await root.Parse(args).InvokeAsync(new InvocationConfiguration { ProcessTerminationTimeout = TimeSpan.FromSeconds(10) });
