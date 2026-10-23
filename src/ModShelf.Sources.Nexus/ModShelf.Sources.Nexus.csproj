@@ -1,7 +1,35 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <!-- Strings.resx holds the English text; other cultures come from satellite assemblies (CA1824). -->
+    <NeutralLanguage>en</NeutralLanguage>
+  </PropertyGroup>
+
+  <!--
+    The API client: IHttpClientFactory, retries and timeouts, logging, and AddNexusSource() for the hosts. The
+    client's name comes from Sources.Abstractions, so the app adds the linked account to its requests.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\ModShelf.Sources.Abstractions\ModShelf.Sources.Abstractions.csproj" />
+  </ItemGroup>
+
+  <!-- The Strings class is generated from Strings.resx at build time, as in ModShelf.Sources.DirectUrl. -->
+  <PropertyGroup>
+    <CoreCompileDependsOn>PrepareResources;$(CoreCompileDependsOn)</CoreCompileDependsOn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Strings.resx">
+      <Generator>MSBuild:Compile</Generator>
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedNamespace>ModShelf.Sources.Nexus.Resources</StronglyTypedNamespace>
+      <StronglyTypedClassName>Strings</StronglyTypedClassName>
+      <StronglyTypedFileName>$(IntermediateOutputPath)Strings.Designer.cs</StronglyTypedFileName>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

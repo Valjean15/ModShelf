@@ -4,4 +4,22 @@
     <ProjectReference Include="..\..\src\ModShelf.Sources.Nexus\ModShelf.Sources.Nexus.csproj" />
   </ItemGroup>
 
+  <!-- Serves the recorded Nexus Mods API responses, so the tests never call the live API. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    <PackageReference Include="WireMock.Net" />
+  </ItemGroup>
+
+  <!-- The checks every source shares, and the helpers several test projects use. -->
+  <ItemGroup>
+    <Compile Include="..\Shared\RecordingLoggerProvider.cs" Link="Shared\RecordingLoggerProvider.cs" />
+    <Compile Include="..\Shared\SourceContractTests.cs" Link="Shared\SourceContractTests.cs" />
+  </ItemGroup>
+
+  <!-- The recordings Fixtures/Record-NexusFixtures.ps1 makes. -->
+  <ItemGroup>
+    <None Include="Fixtures\Recorded\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Fixtures\Recorded\**\*.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
