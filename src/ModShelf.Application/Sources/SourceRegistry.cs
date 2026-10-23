@@ -6,7 +6,7 @@ namespace ModShelf.Application.Sources;
 /// <summary>
 /// The <see cref="ISourceRegistry"/> over the sources registered in the DI container.
 /// </summary>
-public sealed class SourceRegistry : ISourceRegistry
+internal sealed class SourceRegistry : ISourceRegistry
 {
     private readonly IModSource[] _sources;
 

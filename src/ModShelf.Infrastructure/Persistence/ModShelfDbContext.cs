@@ -11,7 +11,7 @@ namespace ModShelf.Infrastructure.Persistence;
 /// <remarks>
 /// Create one per unit of work through <see cref="IDbContextFactory{TContext}"/>; a context isn't thread-safe.
 /// </remarks>
-public sealed class ModShelfDbContext(DbContextOptions<ModShelfDbContext> options) : DbContext(options)
+internal sealed class ModShelfDbContext(DbContextOptions<ModShelfDbContext> options) : DbContext(options)
 {
     internal DbSet<DownloadJobRecord> DownloadJobs => Set<DownloadJobRecord>();
 

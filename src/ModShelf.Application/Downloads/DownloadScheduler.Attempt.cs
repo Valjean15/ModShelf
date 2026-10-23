@@ -9,7 +9,7 @@ namespace ModShelf.Application.Downloads;
 /// One download attempt: resolve a ticket, transfer the file, and refresh the ticket when it expires.
 /// It runs outside the scheduler's loop and only reports back to it; it never touches the job itself.
 /// </summary>
-public sealed partial class DownloadScheduler
+internal sealed partial class DownloadScheduler
 {
     private void Start(DownloadJob job, IDownloadResolver resolver)
     {

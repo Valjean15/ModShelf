@@ -7,7 +7,7 @@ namespace ModShelf.Platform.Secrets;
 /// <summary>
 /// Picks the secret store for the system the app runs on.
 /// </summary>
-public static partial class SecretStores
+internal static partial class SecretStores
 {
     /// <summary>
     /// ModShelf's folder for secret files under the user's local application data, such as

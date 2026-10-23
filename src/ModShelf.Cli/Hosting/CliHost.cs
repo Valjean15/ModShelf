@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging.Console;
 
 using ModShelf.Application;
 using ModShelf.Infrastructure;
-using ModShelf.Infrastructure.Persistence;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.DirectUrl;
 
@@ -41,11 +40,15 @@ internal static class CliHost
         builder.Services.AddSingleton<IHostLifetime, CliHostLifetime>();
 
         string? configuredPath = builder.Configuration[DatabasePathKey];
-        string databasePath = string.IsNullOrWhiteSpace(configuredPath)
-            ? LibraryDatabaseLocation.GetDefaultPath()
-            : Path.GetFullPath(configuredPath);
+        if (string.IsNullOrWhiteSpace(configuredPath))
+        {
+            builder.Services.AddLibraryDatabase();
+        }
+        else
+        {
+            builder.Services.AddLibraryDatabase(Path.GetFullPath(configuredPath));
+        }
 
-        builder.Services.AddLibraryDatabase(databasePath);
         builder.Services.AddHttpFileTransfer();
         builder.Services.AddDownloadEngine();
         builder.Services.AddSingleton<IModSource, DirectUrlSource>();

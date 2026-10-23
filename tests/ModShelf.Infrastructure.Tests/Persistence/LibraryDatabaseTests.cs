@@ -85,6 +85,17 @@ public sealed class LibraryDatabaseTests
         Assert.IsType<DownloadJobRepository>(database.Services.GetRequiredService<IDownloadJobRepository>());
     }
 
+    [Fact]
+    public void WithoutAPathTheDatabaseGoesToItsDefaultLocation()
+    {
+        ServiceCollection services = new();
+
+        services.AddLibraryDatabase();
+
+        ServiceDescriptor options = Assert.Single(services, descriptor => descriptor.ServiceType == typeof(LibraryDatabaseOptions));
+        Assert.Equal(LibraryDatabaseLocation.GetDefaultPath(), Assert.IsType<LibraryDatabaseOptions>(options.ImplementationInstance).DatabasePath);
+    }
+
     [Theory]
     [InlineData("library.db")]
     [InlineData("data/library.db")]

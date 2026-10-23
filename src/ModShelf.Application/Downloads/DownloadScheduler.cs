@@ -27,7 +27,7 @@ namespace ModShelf.Application.Downloads;
 /// jobs that were interrupted mid-download; on stop it requeues the running ones, so they continue next time.
 /// </para>
 /// </remarks>
-public sealed partial class DownloadScheduler : BackgroundService, IDownloadService
+internal sealed partial class DownloadScheduler : BackgroundService, IDownloadService
 {
     private readonly IDownloadJobRepository _repository;
     private readonly ISourceRegistry _sources;

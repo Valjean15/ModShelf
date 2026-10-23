@@ -16,7 +16,7 @@ namespace ModShelf.Platform.Secrets;
 /// keyring tools labelled "ModShelf: name". libsecret's calls block, so they run on the thread pool, one at a time.
 /// </remarks>
 [SupportedOSPlatform("linux")]
-public sealed class LibSecretSecretStore : ISecretStore
+internal sealed class LibSecretSecretStore : ISecretStore
 {
     private const string SchemaName = "app.modshelf.Secret";
 

@@ -10,7 +10,7 @@ namespace ModShelf.Infrastructure.Downloads;
 /// The file transfer's log messages. They name the host and the file name only: never the URL, its query
 /// string or the request headers, which can contain keys and signatures.
 /// </summary>
-public sealed partial class HttpFileTransfer
+internal sealed partial class HttpFileTransfer
 {
     [LoggerMessage(EventId = 100, Level = LogLevel.Information, Message = "Download from {Host} was refused with HTTP {StatusCode}; the link needs refreshing")]
     private static partial void LogLinkRejected(ILogger logger, string host, HttpStatusCode statusCode);

@@ -8,7 +8,7 @@ namespace ModShelf.Application.Downloads;
 /// <summary>
 /// The scheduler's log messages. They name jobs and sources only: never URLs, tickets or headers.
 /// </summary>
-public sealed partial class DownloadScheduler
+internal sealed partial class DownloadScheduler
 {
     [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Requeued {Count} download jobs interrupted when the app last closed")]
     private static partial void LogRequeuedInterruptedJobs(ILogger logger, int count);

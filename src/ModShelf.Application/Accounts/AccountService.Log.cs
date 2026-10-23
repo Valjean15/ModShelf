@@ -9,7 +9,7 @@ namespace ModShelf.Application.Accounts;
 /// The account service's log messages. They name sources and kinds only: never credentials, answers or the
 /// account's profile.
 /// </summary>
-public sealed partial class AccountService
+internal sealed partial class AccountService
 {
     [LoggerMessage(EventId = 400, Level = LogLevel.Information, Message = "Linked an account on {Source} with {Kind}")]
     private static partial void LogLinked(ILogger logger, SourceId source, AuthKind kind);

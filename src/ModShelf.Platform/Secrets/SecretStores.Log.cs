@@ -5,7 +5,7 @@ namespace ModShelf.Platform.Secrets;
 /// <summary>
 /// The secret store choice's log messages.
 /// </summary>
-public static partial class SecretStores
+internal static partial class SecretStores
 {
     [LoggerMessage(
         EventId = 300,

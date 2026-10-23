@@ -62,6 +62,19 @@ public static class InfrastructureServiceCollectionExtensions
     }
 
     /// <summary>
+    /// Registers the library database at its default location: <c>library.db</c> in a ModShelf folder under the
+    /// user's local application data (<c>%LOCALAPPDATA%\ModShelf</c> on Windows,
+    /// <c>~/Library/Application Support/ModShelf</c> on macOS, <c>~/.local/share/ModShelf</c> on Linux).
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The system has no local application data folder for this user.</exception>
+    public static IServiceCollection AddLibraryDatabase(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        return services.AddLibraryDatabase(LibraryDatabaseLocation.GetDefaultPath());
+    }
+
+    /// <summary>
     /// Registers the library database at <paramref name="databasePath"/>: the <see cref="ModShelfDbContext"/>
     /// factory, <see cref="DownloadJobRepository"/> as the <see cref="IDownloadJobRepository"/>, and a hosted
     /// service that creates or migrates the database before any other hosted service starts.

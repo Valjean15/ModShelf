@@ -14,7 +14,7 @@ namespace ModShelf.Platform.Secrets;
 /// Each secret's name is mixed into its encryption, so a file copied over another secret's file doesn't decrypt.
 /// </remarks>
 [SupportedOSPlatform("windows")]
-public sealed class DpapiSecretStore : ISecretStore
+internal sealed class DpapiSecretStore : ISecretStore
 {
     private readonly string _folder;
 

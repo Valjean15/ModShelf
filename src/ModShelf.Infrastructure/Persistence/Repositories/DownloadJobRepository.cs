@@ -9,7 +9,7 @@ namespace ModShelf.Infrastructure.Persistence.Repositories;
 /// <summary>
 /// Stores download jobs in the library database. Each call uses its own short-lived context.
 /// </summary>
-public sealed class DownloadJobRepository : IDownloadJobRepository
+internal sealed class DownloadJobRepository : IDownloadJobRepository
 {
     private readonly IDbContextFactory<ModShelfDbContext> _contextFactory;
 

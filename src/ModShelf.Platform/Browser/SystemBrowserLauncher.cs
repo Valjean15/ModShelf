@@ -9,7 +9,7 @@ namespace ModShelf.Platform.Browser;
 /// Opens web pages in the default browser: through the shell on Windows, <c>open</c> on macOS and <c>xdg-open</c>
 /// on Linux. The URL is passed as a single argument, never through a command line a shell would parse.
 /// </summary>
-public sealed class SystemBrowserLauncher : IBrowserLauncher
+internal sealed class SystemBrowserLauncher : IBrowserLauncher
 {
     private readonly Func<ProcessStartInfo, Process?> _start;
 

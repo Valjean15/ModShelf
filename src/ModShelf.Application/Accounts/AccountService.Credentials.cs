@@ -6,7 +6,7 @@ namespace ModShelf.Application.Accounts;
 /// <summary>
 /// The <see cref="ICredentialProvider"/> half: current credentials for requests, and refreshing them.
 /// </summary>
-public sealed partial class AccountService
+internal sealed partial class AccountService
 {
     /// <summary>
     /// Credentials this close to expiring are refreshed before use, so a request doesn't start with a token

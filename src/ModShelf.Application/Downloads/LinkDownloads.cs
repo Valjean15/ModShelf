@@ -11,7 +11,7 @@ namespace ModShelf.Application.Downloads;
 /// The check for an existing job and the enqueue are two steps, so two callers adding the same link at the
 /// same moment can still both add it. The CLI and a single desktop window never do.
 /// </remarks>
-public sealed class LinkDownloads : ILinkDownloads
+internal sealed class LinkDownloads : ILinkDownloads
 {
     private readonly ISourceRegistry _sources;
     private readonly IDownloadService _downloads;

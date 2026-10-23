@@ -17,7 +17,7 @@ namespace ModShelf.Platform.Secrets;
 /// one at a time. An unsigned build that changes, such as after an update, may get one such prompt.
 /// </remarks>
 [SupportedOSPlatform("macos")]
-public sealed class KeychainSecretStore : ISecretStore
+internal sealed class KeychainSecretStore : ISecretStore
 {
     private static readonly Lock Gate = new();
 

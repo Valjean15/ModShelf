@@ -20,7 +20,7 @@ namespace ModShelf.Infrastructure.Downloads;
 /// <see cref="InfrastructureServiceCollectionExtensions.AddHttpFileTransfer"/>). A connection that drops or
 /// stalls mid-file is resumed here, from the bytes already on disk.
 /// </remarks>
-public sealed partial class HttpFileTransfer : IFileTransfer
+internal sealed partial class HttpFileTransfer : IFileTransfer
 {
     /// <summary>
     /// The name of the <see cref="HttpClient"/> this transfer asks <see cref="IHttpClientFactory"/> for.

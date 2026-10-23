@@ -14,7 +14,7 @@ namespace ModShelf.Platform.Secrets;
 /// leaves this computer. It doesn't protect them from programs running as the same user, which can derive
 /// the same key; only a keyring does. <see cref="IsProtectedByOs"/> is therefore false, and Settings says so.
 /// </remarks>
-public sealed class EncryptedFileSecretStore : ISecretStore
+internal sealed class EncryptedFileSecretStore : ISecretStore
 {
     private const byte FormatVersion = 1;
     private const int NonceSize = 12;

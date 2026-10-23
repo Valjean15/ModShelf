@@ -12,7 +12,7 @@ namespace ModShelf.Platform.OAuth;
 /// A plain TCP listener with a minimal HTTP reply rather than <c>HttpListener</c>, which on Windows needs URL
 /// reservations. Only this computer can connect, and the strategy checks the OAuth state of whatever arrives.
 /// </remarks>
-public sealed class LoopbackRedirectListener : IOAuthRedirectListener
+internal sealed class LoopbackRedirectListener : IOAuthRedirectListener
 {
     public Task<IOAuthRedirect> StartAsync(CancellationToken cancellationToken)
     {

@@ -6,7 +6,7 @@ namespace ModShelf.Application.Downloads;
 /// <summary>
 /// The messages the scheduler's loop handles, and the bookkeeping for running jobs.
 /// </summary>
-public sealed partial class DownloadScheduler
+internal sealed partial class DownloadScheduler
 {
     private enum JobControl
     {

@@ -22,7 +22,7 @@ namespace ModShelf.Application.Accounts;
 /// <see cref="ILinkedAccountRepository"/>. Logs name sources and kinds only, never credentials or answers.
 /// </para>
 /// </remarks>
-public sealed partial class AccountService : IAccountService, ICredentialProvider
+internal sealed partial class AccountService : IAccountService, ICredentialProvider
 {
     private readonly ISourceRegistry _sources;
     private readonly ILinkedAccountRepository _accounts;
