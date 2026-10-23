@@ -4,13 +4,17 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Http.Resilience;
 
+using ModShelf.Application.Accounts;
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Infrastructure.Downloads;
 using ModShelf.Infrastructure.Persistence;
 using ModShelf.Infrastructure.Persistence.Repositories;
+using ModShelf.Infrastructure.Sources;
+using ModShelf.Sources.Abstractions.Http;
 
 using Polly;
 
@@ -59,6 +63,20 @@ public static class InfrastructureServiceCollectionExtensions
                 }
             });
 
+        return services;
+    }
+
+    /// <summary>
+    /// Sets up the HTTP client each source asks for by <see cref="SourceHttpClients.NameFor"/>: every request gets the
+    /// source's linked account through <see cref="ICredentialProvider"/>, and a request refused with a 401 is sent
+    /// once more with refreshed credentials. Needs the provider, which Application's <c>AddAccounts()</c> registers.
+    /// </summary>
+    public static IServiceCollection AddSourceHttpClients(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddHttpClient();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, SourceHttpClientFilter>());
         return services;
     }
 

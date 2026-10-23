@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Text;
 
 namespace ModShelf.Infrastructure.Tests.Fakes;
 
@@ -34,16 +35,35 @@ internal sealed class ScriptedHttpHandler : HttpMessageHandler
         return this;
     }
 
-    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         _requests.Enqueue(new RecordedRequest(
             request.Headers.Range?.ToString(),
             request.Headers.Authorization?.ToString(),
-            request.Headers.UserAgent.ToString()));
+            request.Headers.UserAgent.ToString(),
+            request.RequestUri,
+            request.Headers.ToDictionary(header => header.Key, header => string.Join(", ", header.Value), StringComparer.OrdinalIgnoreCase),
+            await ReadBodyAsync(request.Content, cancellationToken)));
 
         Func<HttpResponseMessage> next = _script.TryDequeue(out Func<HttpResponseMessage>? scripted)
             ? scripted
             : _fallback ?? throw new InvalidOperationException("The test didn't expect another request.");
-        return Task.FromResult(next());
+        return next();
+    }
+
+    /// <summary>
+    /// Reads the body the way a connection sends it. Unlike <see cref="HttpContent.ReadAsStringAsync()"/>, this doesn't
+    /// buffer the content, so a body that can be read only once fails the second time, as it would on the network.
+    /// </summary>
+    private static async Task<string?> ReadBodyAsync(HttpContent? content, CancellationToken cancellationToken)
+    {
+        if (content is null)
+        {
+            return null;
+        }
+
+        using MemoryStream body = new();
+        await content.CopyToAsync(body, cancellationToken);
+        return Encoding.UTF8.GetString(body.ToArray());
     }
 }
