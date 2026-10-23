@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3.mtp-v2" />
+  </ItemGroup>
+
+  <!--
+    The tests run the CLI as its own process, so they need its build, not its types. Referencing an
+    executable copies it here with its runtimeconfig.json and deps.json, ready for "dotnet exec".
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ModShelf.Cli\ModShelf.Cli.csproj" />
+  </ItemGroup>
+
+</Project>

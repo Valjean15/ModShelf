@@ -14,6 +14,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/ModShelf.Application.Tests/ModShelf.Application.Tests.csproj" />
     <Project Path="tests/ModShelf.Architecture.Tests/ModShelf.Architecture.Tests.csproj" />
+    <Project Path="tests/ModShelf.Cli.Tests/ModShelf.Cli.Tests.csproj" />
     <Project Path="tests/ModShelf.Domain.Tests/ModShelf.Domain.Tests.csproj" />
     <Project Path="tests/ModShelf.Infrastructure.Tests/ModShelf.Infrastructure.Tests.csproj" />
     <Project Path="tests/ModShelf.Platform.Tests/ModShelf.Platform.Tests.csproj" />

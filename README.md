@@ -56,6 +56,7 @@ src/
 tests/
   ModShelf.<Library>.Tests        one test project per library
   ModShelf.Architecture.Tests     enforces the dependency rules
+  ModShelf.Cli.Tests              runs the built CLI end to end: stop, kill and resume a download
   Shared/SourceContractTests.cs   checks every source's test project compiles in
 ```
 
