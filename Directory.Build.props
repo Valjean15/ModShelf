@@ -8,5 +8,12 @@
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <Deterministic>true</Deterministic>
+
+    <!--
+      NuGet audit: a package with a high (NU1903) or critical (NU1904) advisory still fails the build.
+      Low (NU1901) and moderate (NU1902) ones stay visible as warnings, so a new advisory against an
+      indirect dependency doesn't stop every build until its fix ships. Update the package anyway.
+    -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);NU1901;NU1902</WarningsNotAsErrors>
   </PropertyGroup>
 </Project>
