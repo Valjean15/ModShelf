@@ -1,0 +1,14 @@
+<Project>
+
+  <!-- The repository-wide settings come first. -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..'))" />
+
+  <!--
+    Implementations are internal (docs/code-organization.md), so each project lets its own test project,
+    tests/<Project>.Tests, see its internal types. No other project gets that access.
+  -->
+  <ItemGroup Condition="Exists('$(MSBuildThisFileDirectory)..\tests\$(MSBuildProjectName).Tests')">
+    <InternalsVisibleTo Include="$(MSBuildProjectName).Tests" />
+  </ItemGroup>
+
+</Project>
