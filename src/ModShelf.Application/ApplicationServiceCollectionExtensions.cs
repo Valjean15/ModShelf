@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
+using ModShelf.Application.Accounts;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Sources;
 
@@ -22,10 +23,29 @@ public static class ApplicationServiceCollectionExtensions
 
         services.TryAddSingleton(TimeProvider.System);
         services.AddSingleton(options ?? new DownloadSchedulerOptions());
-        services.AddSingleton<ISourceRegistry, SourceRegistry>();
+        services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
         services.AddSingleton<DownloadScheduler>();
         services.AddSingleton<IDownloadService>(provider => provider.GetRequiredService<DownloadScheduler>());
         services.AddSingleton<ILinkDownloads, LinkDownloads>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers account linking: one <see cref="AccountService"/> as both the <see cref="IAccountService"/> and the
+    /// <see cref="ICredentialProvider"/>. Needs the ports from Platform (<see cref="ISecretStore"/>,
+    /// <see cref="IOAuthRedirectListener"/>, <see cref="IBrowserLauncher"/>) and Infrastructure
+    /// (<see cref="ILinkedAccountRepository"/>).
+    /// </summary>
+    public static IServiceCollection AddAccounts(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton(TimeProvider.System);
+        services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
+        services.AddSingleton<AccountService>();
+        services.AddSingleton<IAccountService>(provider => provider.GetRequiredService<AccountService>());
+        services.AddSingleton<ICredentialProvider>(provider => provider.GetRequiredService<AccountService>());
 
         return services;
     }

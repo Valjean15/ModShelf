@@ -2,8 +2,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Abstractions;
 
+using ModShelf.Application.Accounts;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Sources;
+using ModShelf.Application.Tests.Accounts;
 using ModShelf.Application.Tests.Fakes;
 
 namespace ModShelf.Application.Tests;
@@ -53,6 +55,22 @@ public sealed class ApplicationServiceCollectionExtensionsTests
         Assert.Same(scheduler, hosted);
     }
 
+    [Fact]
+    public void OneAccountServiceIsBothTheAccountServiceAndTheCredentialProvider()
+    {
+        ServiceCollection services = new();
+        services.AddDownloadEngine();
+        services.AddAccounts();
+        AccountService accounts = new AccountHarness().Service;
+        StubServiceProvider provider = new(NewScheduler(), accounts);
+
+        Assert.Same(accounts, Single<IAccountService>(services).ImplementationFactory!(provider));
+        Assert.Same(accounts, Single<ICredentialProvider>(services).ImplementationFactory!(provider));
+        Assert.Equal(typeof(AccountService), Single<AccountService>(services).ImplementationType);
+        Assert.Equal(typeof(SourceRegistry), Single<ISourceRegistry>(services).ImplementationType);
+        Assert.Single(services, descriptor => descriptor.ServiceType == typeof(TimeProvider));
+    }
+
     private static ServiceDescriptor Single<TService>(ServiceCollection services)
         => Assert.Single(services, descriptor => descriptor.ServiceType == typeof(TService));
 
@@ -65,8 +83,11 @@ public sealed class ApplicationServiceCollectionExtensionsTests
             new DownloadSchedulerOptions(),
             NullLogger<DownloadScheduler>.Instance);
 
-    private sealed class StubServiceProvider(DownloadScheduler scheduler) : IServiceProvider
+    private sealed class StubServiceProvider(DownloadScheduler scheduler, AccountService? accounts = null) : IServiceProvider
     {
-        public object? GetService(Type serviceType) => serviceType == typeof(DownloadScheduler) ? scheduler : null;
+        public object? GetService(Type serviceType)
+            => serviceType == typeof(DownloadScheduler) ? scheduler
+                : serviceType == typeof(AccountService) ? accounts
+                : null;
     }
 }
