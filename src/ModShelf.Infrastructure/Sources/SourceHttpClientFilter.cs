@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 
 using ModShelf.Application.Accounts;
@@ -12,9 +13,11 @@ namespace ModShelf.Infrastructure.Sources;
 /// </summary>
 /// <remarks>
 /// A filter rather than one registration per client, because sources are registered without Infrastructure knowing
-/// them: any client a source asks for under its name is covered.
+/// them: any client a source asks for under its name is covered. The client factory creates every filter when it
+/// starts, for any client, so the credential provider (and with it the secret store) is fetched only when a source's
+/// client is set up.
 /// </remarks>
-internal sealed class SourceHttpClientFilter(ICredentialProvider credentials) : IHttpMessageHandlerBuilderFilter
+internal sealed class SourceHttpClientFilter : IHttpMessageHandlerBuilderFilter
 {
     public Action<HttpMessageHandlerBuilder> Configure(Action<HttpMessageHandlerBuilder> next)
     {
@@ -27,6 +30,7 @@ internal sealed class SourceHttpClientFilter(ICredentialProvider credentials) : 
             {
                 // First in line, so handlers further in (such as retries) send the credentials already added, and a
                 // 401 is handled once for the whole request.
+                ICredentialProvider credentials = builder.Services.GetRequiredService<ICredentialProvider>();
                 builder.AdditionalHandlers.Insert(0, new LinkedAccountHandler(source, credentials));
             }
         };

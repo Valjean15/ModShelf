@@ -21,12 +21,17 @@ public sealed class SourceHttpClientFilterTests : IDisposable
     private readonly ScriptedHttpHandler _site = new();
     private readonly ScriptedCredentialProvider _credentials = new();
     private readonly ServiceProvider _services;
+    private int _providersCreated;
 
     public SourceHttpClientFilterTests()
     {
         ServiceCollection services = new();
         services.AddLogging();
-        services.AddSingleton<ICredentialProvider>(_credentials);
+        services.AddSingleton<ICredentialProvider>(_ =>
+        {
+            Interlocked.Increment(ref _providersCreated);
+            return _credentials;
+        });
         services.AddSourceHttpClients();
         services.AddSourceHttpClients();
 
@@ -76,6 +81,17 @@ public sealed class SourceHttpClientFilterTests : IDisposable
         using HttpResponseMessage response = await ClientNamed("ModShelf.Other").GetAsync(Endpoint, Cancellation);
 
         Assert.Null(Assert.Single(_site.Requests).Authorization);
+    }
+
+    [Fact]
+    public async Task OtherClientsDontNeedTheCredentialProvider()
+    {
+        // Creating it would open the secret store, which a plain download has no use for.
+        _site.Respond(() => new HttpResponseMessage(HttpStatusCode.OK));
+
+        using HttpResponseMessage response = await ClientNamed("ModShelf.Other").GetAsync(Endpoint, Cancellation);
+
+        Assert.Equal(0, Volatile.Read(ref _providersCreated));
     }
 
     private HttpClient ClientNamed(string name) => _services.GetRequiredService<IHttpClientFactory>().CreateClient(name);
