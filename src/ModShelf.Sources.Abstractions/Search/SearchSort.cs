@@ -1,7 +1,8 @@
 namespace ModShelf.Sources.Abstractions.Search;
 
 /// <summary>
-/// The order of the mods a search finds.
+/// The order of the mods a search finds. Each is described here most first; <see cref="SearchDirection.Ascending"/>
+/// turns it around.
 /// </summary>
 public enum SearchSort
 {

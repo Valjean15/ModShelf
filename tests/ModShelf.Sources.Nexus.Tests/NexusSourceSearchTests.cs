@@ -105,6 +105,17 @@ public sealed class NexusSourceSearchTests : IDisposable
     }
 
     [Fact]
+    public async Task TurnsTheSortAroundWhenAsked()
+    {
+        _api.AnswerPost(GraphQlPath, Page(total: 0));
+
+        await Source.SearchAsync(StardewValley, new SearchQuery(sort: SearchSort.Newest, direction: SearchDirection.Ascending), Cancellation);
+
+        JsonObject order = Assert.Single(SentBody()["variables"]!["sort"]!.AsArray())!.AsObject();
+        Assert.Equal("ASC", order["createdAt"]!["direction"]!.GetValue<string>());
+    }
+
+    [Fact]
     public async Task ReadsTheModsOnThePage()
     {
         _api.AnswerPost(GraphQlPath, Page(total: 45, """

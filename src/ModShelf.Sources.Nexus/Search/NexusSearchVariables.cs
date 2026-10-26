@@ -39,7 +39,10 @@ internal static class NexusSearchVariables
         return new JsonObject
         {
             ["filter"] = filter,
-            ["sort"] = new JsonArray(new JsonObject { [SortField(query)] = new JsonObject { ["direction"] = "DESC" } }),
+            ["sort"] = new JsonArray(new JsonObject
+            {
+                [SortField(query)] = new JsonObject { ["direction"] = query.Direction == SearchDirection.Ascending ? "ASC" : "DESC" },
+            }),
             ["offset"] = query.Offset,
             ["count"] = query.Count,
         };

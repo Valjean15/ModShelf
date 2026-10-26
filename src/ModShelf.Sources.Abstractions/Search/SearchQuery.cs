@@ -11,7 +11,7 @@ public sealed record SearchQuery
     public const int MaxCount = 100;
 
     /// <exception cref="ArgumentOutOfRangeException">
-    /// The sort is unknown, the offset negative, or the count not between 1 and <see cref="MaxCount"/>.
+    /// The sort or direction is unknown, the offset negative, or the count not between 1 and <see cref="MaxCount"/>.
     /// </exception>
     public SearchQuery(
         string? text = null,
@@ -19,11 +19,17 @@ public sealed record SearchQuery
         int offset = 0,
         int count = 20,
         string? author = null,
-        bool includeAdultContent = false)
+        bool includeAdultContent = false,
+        SearchDirection direction = SearchDirection.Descending)
     {
         if (!Enum.IsDefined(sort))
         {
             throw new ArgumentOutOfRangeException(nameof(sort), sort, "Unknown sort.");
+        }
+
+        if (!Enum.IsDefined(direction))
+        {
+            throw new ArgumentOutOfRangeException(nameof(direction), direction, "Unknown direction.");
         }
 
         ArgumentOutOfRangeException.ThrowIfNegative(offset);
@@ -36,6 +42,7 @@ public sealed record SearchQuery
         Count = count;
         Author = Blank(author);
         IncludeAdultContent = includeAdultContent;
+        Direction = direction;
     }
 
     /// <summary>
@@ -44,6 +51,11 @@ public sealed record SearchQuery
     public string? Text { get; }
 
     public SearchSort Sort { get; }
+
+    /// <summary>
+    /// Which end of the sort comes first: the most, unless asked otherwise.
+    /// </summary>
+    public SearchDirection Direction { get; }
 
     /// <summary>
     /// How many results to skip: the page's start.

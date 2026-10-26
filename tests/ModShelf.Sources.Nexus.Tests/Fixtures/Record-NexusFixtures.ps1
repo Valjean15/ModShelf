@@ -240,7 +240,7 @@ function Invoke-NexusGraphQl {
 
 # The variables the Nexus source sends for a search: the same as NexusSearchVariables builds.
 function New-SearchVariables {
-    param([string] $Text, [string] $Sort = 'Relevance', [int] $Offset = 0, [int] $Count = 5, [string] $Author, [switch] $IncludeAdult)
+    param([string] $Text, [string] $Sort = 'Relevance', [int] $Offset = 0, [int] $Count = 5, [string] $Author, [switch] $IncludeAdult, [switch] $Ascending)
 
     function Condition([string] $Value, [string] $Operator) {
         $condition = [System.Text.Json.Nodes.JsonObject]::new()
@@ -274,7 +274,7 @@ function New-SearchVariables {
     }
 
     $direction = [System.Text.Json.Nodes.JsonObject]::new()
-    $direction['direction'] = [System.Text.Json.Nodes.JsonValue]::Create('DESC')
+    $direction['direction'] = [System.Text.Json.Nodes.JsonValue]::Create($(if ($Ascending) { 'ASC' } else { 'DESC' }))
     $order = [System.Text.Json.Nodes.JsonObject]::new()
     $order[$field] = $direction
     $sorts = [System.Text.Json.Nodes.JsonArray]::new()
@@ -301,6 +301,7 @@ function Save-Searches {
     Save-Fixture 'search-author-updated' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Author $SearchAuthor -Sort Updated))
     Save-Fixture 'search-downloads' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Text $SearchWords -Sort Downloads))
     Save-Fixture 'search-newest-with-adult' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort Newest -IncludeAdult))
+    Save-Fixture 'search-oldest-first' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort Newest -Ascending))
     Save-Fixture 'search-no-results' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Text 'zqxj no such mod zqxj'))
 }
 
