@@ -33,13 +33,8 @@ public sealed partial class NexusSource
         HttpRequestMessage request = new(HttpMethod.Get, new Uri(ValidatePath, UriKind.Relative));
         strategy.Authorize(request, credentials);
         NexusUser user = await _api.SendAsync<NexusUser>(request, cancellationToken).ConfigureAwait(false);
-        return new AccountProfile(user.Name, Avatar(user.ProfileUrl), Tier(user));
+        return new AccountProfile(user.Name, WebLink(user.ProfileUrl), Tier(user));
     }
-
-    private static Uri? Avatar(string? profileUrl)
-        => Uri.TryCreate(profileUrl, UriKind.Absolute, out Uri? avatar) && (avatar.Scheme == Uri.UriSchemeHttps || avatar.Scheme == Uri.UriSchemeHttp)
-            ? avatar
-            : null;
 
     private static string Tier(NexusUser user) => user switch
     {

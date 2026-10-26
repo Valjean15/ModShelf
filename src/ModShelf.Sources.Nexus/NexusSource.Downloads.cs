@@ -20,8 +20,6 @@ namespace ModShelf.Sources.Nexus;
 /// </remarks>
 public sealed partial class NexusSource : IDownloadResolver
 {
-    private static readonly Uri Website = new("https://www.nexusmods.com/");
-
     /// <param name="file">One of this source's files.</param>
     /// <param name="handoff">
     /// An <c>nxm://</c> link to <paramref name="file"/>. Its key and expiry are sent with the request, and never

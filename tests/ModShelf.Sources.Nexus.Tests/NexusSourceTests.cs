@@ -20,6 +20,9 @@ public sealed class NexusSourceTests : SourceContractTests<NexusSource>, IDispos
         _api.Serve(RecordedNexusApi.Premium, "file");
         _api.Serve(RecordedNexusApi.Premium, "files");
         _api.Serve(RecordedNexusApi.Premium, "download-link");
+        _api.Serve(RecordedNexusApi.Premium, "game");
+        _api.Serve(RecordedNexusApi.Premium, "mod");
+        _api.Serve(RecordedNexusApi.Premium, "changelogs");
         _services = _api.BuildServices();
     }
 

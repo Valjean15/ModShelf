@@ -16,6 +16,11 @@ public sealed partial class NexusSource : IAccountLinker
     /// </summary>
     internal static readonly SourceId NexusId = new("nexus");
 
+    /// <summary>
+    /// The website, where mods and files have their pages.
+    /// </summary>
+    private static readonly Uri Website = new("https://www.nexusmods.com/");
+
     private readonly NexusApiClient _api;
 
     /// <param name="strategies">The ways to link an account, in the order to offer them.</param>
@@ -31,4 +36,12 @@ public sealed partial class NexusSource : IAccountLinker
     public SourceId Id => NexusId;
 
     public string DisplayName => Strings.DisplayName;
+
+    /// <summary>
+    /// An absolute HTTP or HTTPS link, or null for anything else, which the app must never open.
+    /// </summary>
+    private static Uri? WebLink(string? text)
+        => Uri.TryCreate(text, UriKind.Absolute, out Uri? link) && (link.Scheme == Uri.UriSchemeHttps || link.Scheme == Uri.UriSchemeHttp)
+            ? link
+            : null;
 }

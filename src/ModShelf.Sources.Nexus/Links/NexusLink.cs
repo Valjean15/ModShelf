@@ -55,21 +55,43 @@ internal sealed record NexusLink(string Game, string ModId, string? FileId, bool
     }
 
     /// <summary>
-    /// The link to a file of this source, such as one a saved download job names, checked as a link the user gives is.
+    /// The link to one of this source's games, such as one a caller asks about, checked as a link the user gives is.
+    /// </summary>
+    /// <exception cref="ArgumentException">The game isn't Nexus Mods', or its name isn't one Nexus Mods gives.</exception>
+    public static string ForGame(GameRef game)
+    {
+        ArgumentNullException.ThrowIfNull(game);
+        if (game.Source != NexusSource.NexusId)
+        {
+            throw new ArgumentException($"The game belongs to source '{game.Source}', not '{NexusSource.NexusId}'.", nameof(game));
+        }
+
+        return GameDomain(game.Key) ?? throw new ArgumentException("The game isn't one Nexus Mods names.", nameof(game));
+    }
+
+    /// <summary>
+    /// The link to one of this source's mods, checked as a link the user gives is.
+    /// </summary>
+    /// <exception cref="ArgumentException">The mod isn't Nexus Mods', or its game or ID aren't ones Nexus Mods gives.</exception>
+    public static NexusLink ForMod(ModRef mod)
+    {
+        ArgumentNullException.ThrowIfNull(mod);
+        string game = ForGame(mod.Game);
+        string id = Id(mod.Id) ?? throw new ArgumentException("The mod's ID isn't one Nexus Mods gives.", nameof(mod));
+        return new NexusLink(game, id, FileId: null, IsHandoff: false);
+    }
+
+    /// <summary>
+    /// The link to one of this source's files, such as one a saved download job names, checked as a link the user
+    /// gives is.
     /// </summary>
     /// <exception cref="ArgumentException">The file isn't Nexus Mods', or its game or IDs aren't ones Nexus Mods gives.</exception>
     public static NexusLink ForFile(ModFileRef file)
     {
         ArgumentNullException.ThrowIfNull(file);
-        if (file.Mod.Game.Source != NexusSource.NexusId)
-        {
-            throw new ArgumentException($"The file belongs to source '{file.Mod.Game.Source}', not '{NexusSource.NexusId}'.", nameof(file));
-        }
-
-        string game = GameDomain(file.Mod.Game.Key) ?? throw new ArgumentException("The file's game isn't one Nexus Mods names.", nameof(file));
-        string mod = Id(file.Mod.Id) ?? throw new ArgumentException("The file's mod ID isn't one Nexus Mods gives.", nameof(file));
+        NexusLink mod = ForMod(file.Mod);
         string fileId = Id(file.Id) ?? throw new ArgumentException("The file's ID isn't one Nexus Mods gives.", nameof(file));
-        return new NexusLink(game, mod, fileId, IsHandoff: false);
+        return mod with { FileId = fileId };
     }
 
     /// <summary>
