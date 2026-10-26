@@ -20,6 +20,7 @@ Nexus Mods hasn't documented that API. Its staff call it a work in progress, and
   - an author;
   - whether to include adult content, which is left out unless asked for;
   - a sort: relevance, endorsements, downloads, last update or newest;
+  - a direction: the most first, unless asked for the least first, such as the oldest;
   - the page's offset and size, from 1 to 100.
 - **Relevance needs words to match.** Without them, a source puts the most endorsed first.
 - **`SearchPage`** holds the mods as `ModInfo`, so a search result and `GetModAsync` describe a mod the same way. It also has the total the site counts, and whether more pages follow.
@@ -34,7 +35,7 @@ Nexus Mods hasn't documented that API. Its staff call it a work in progress, and
   - `nameStemmed` MATCHES the words, so "texture" finds "Textures";
   - `author` MATCHES the author;
   - `adultContent` EQUALS false, unless adult content is asked for.
-- **The sort** is one of `relevance`, `endorsements`, `downloads`, `updatedAt` or `createdAt`, highest or newest first.
+- **The sort** is one of `relevance`, `endorsements`, `downloads`, `updatedAt` or `createdAt`, `DESC` or, when asked, `ASC`.
 - **The results.** A node becomes `ModInfo` with the same page link and availability rules as the catalog. A node of another game is left out. A negative count is dropped.
 - **GraphQL errors.** GraphQL reports errors with HTTP 200, so the client checks for them in every answer and turns them into an `HttpRequestException` with their messages.
 - **An answer the client can't read**, from v1 or v2, is now an `HttpRequestException` rather than a `JsonException`, so an API change is a failure to report, not a crash.
@@ -44,14 +45,15 @@ Nexus Mods hasn't documented that API. Its staff call it a work in progress, and
 
 - **`-SearchOnly`** in the recording script records the searches with either account. A full Premium run records them too.
 - **The same query.** The script reads `SearchMods.graphql` itself, and builds the variables as `NexusSearchVariables` does. Each recording keeps the operation's name and variables, so a test can match its request to the recorded answer.
+- **What it records.** Words, a second page, an author, the download and newest sorts with adult content, the oldest first, and words that match nothing.
 - **The schema.** The script also records the parts of the schema the search relies on: the `mods` field's arguments, `ModsFilter`, `ModsSort`, `Mod` and the comparison operators. If the query is wrong, that shows how to fix it.
 - **Personal data.** Member IDs written in camelCase, as GraphQL writes them, are now replaced like the snake_case ones.
 
 ### Application and the CLI
 
 - **`IModLookup.SearchAsync`** passes a search to the game's source. **`IModLookup.SearchableSources`** lists the sources that can search.
-- **`mod search [words] --game <game>`** lists 20 mods a page, with author, endorsements, downloads, last update and link. Adult and hidden mods are labelled.
-- **Its options:** `--author`, `--adult`, `--sort` and `--page`. `--source` is needed only when more than one site can search.
+- **`mod search [words] --game <game>`** lists a page of mods, with author, endorsements, downloads, last update and link. Adult and hidden mods are labelled.
+- **Its options:** `--author`, `--adult`, `--sort`, `--ascending` to put the least first, `--page`, and `--page-size` from 1 to 100, 20 unless set. `--source` is needed only when more than one site can search.
 - **`mod show`** also prints the counts.
 
 ## Consequences

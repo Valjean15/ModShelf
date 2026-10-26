@@ -73,6 +73,44 @@ public sealed class ModCommandSearchTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task APageHoldsAsManyModsAsAsked()
+    {
+        CliResult found = await SearchAsync("--page-size", "5", "--page", "2");
+
+        Assert.Contains("44 mods match, most endorsed first. These are 6 to 10.", found.Output, StringComparison.Ordinal);
+        // Mod 103 has adult content, so the sixth to tenth mods are 107 to 111.
+        Assert.DoesNotContain(ModLink("106").AbsoluteUri, found.Output, StringComparison.Ordinal);
+        Assert.Contains(ModLink("107").AbsoluteUri, found.Output, StringComparison.Ordinal);
+        Assert.Contains(ModLink("111").AbsoluteUri, found.Output, StringComparison.Ordinal);
+        Assert.DoesNotContain(ModLink("112").AbsoluteUri, found.Output, StringComparison.Ordinal);
+        Assert.Contains("More on the next page: add --page 3.", found.Output, StringComparison.Ordinal);
+        Assert.Equal((5, 5), (_catalog.LastQuery!.Offset, _catalog.LastQuery.Count));
+    }
+
+    [Fact]
+    public async Task APageCanHoldAHundredMods()
+    {
+        CliResult found = await SearchAsync("--page-size", "100");
+
+        Assert.Contains("These are 1 to 44.", found.Output, StringComparison.Ordinal);
+        Assert.Equal(100, _catalog.LastQuery!.Count);
+    }
+
+    [Theory]
+    [InlineData("--sort", "newest", ", newest first.", SearchDirection.Descending)]
+    [InlineData("--sort", "newest", ", oldest first.", SearchDirection.Ascending)]
+    [InlineData("--sort", "downloads", ", least downloaded first.", SearchDirection.Ascending)]
+    [InlineData("--sort", "updated", ", longest since updated first.", SearchDirection.Ascending)]
+    [InlineData("--sort", "relevance", ", least endorsed first.", SearchDirection.Ascending)]
+    public async Task AscendingTurnsTheOrderAround(string option, string sort, string described, SearchDirection direction)
+    {
+        CliResult found = await SearchAsync(direction == SearchDirection.Ascending ? [option, sort, "--ascending"] : [option, sort]);
+
+        Assert.Contains(described, found.Output, StringComparison.Ordinal);
+        Assert.Equal(direction, _catalog.LastQuery!.Direction);
+    }
+
+    [Fact]
     public async Task AdultContentOnlyWhenAsked()
     {
         CliResult found = await SearchAsync("3", "--adult");
@@ -91,6 +129,8 @@ public sealed class ModCommandSearchTests : IAsyncDisposable
     [Theory]
     [InlineData(BadInput, "has no game 'elsewhere'", "--game", "elsewhere")]
     [InlineData(BadInput, "--page must be 1 or more", "--page", "0")]
+    [InlineData(BadInput, "--page-size must be from 1 to 100", "--page-size", "0")]
+    [InlineData(BadInput, "--page-size must be from 1 to 100", "--page-size", "101")]
     [InlineData(Failed, "couldn't search: Field 'nameStemmed' is not defined.", "broken")]
     [InlineData(Failed, "account link", "locked")]
     public async Task SaysWhyItCantSearch(int exitCode, string message, params string[] arguments)
