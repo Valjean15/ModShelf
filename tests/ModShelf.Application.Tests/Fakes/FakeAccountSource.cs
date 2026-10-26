@@ -23,8 +23,14 @@ internal sealed class FakeAccountSource(SourceId id, params FakeStrategy[] strat
     /// </summary>
     public Func<Task>? WhileLookingUpProfile { get; set; }
 
-    public async Task<AccountProfile> GetProfileAsync(AccountCredentials credentials, CancellationToken cancellationToken)
+    /// <summary>
+    /// The kind each profile lookup was told the credentials came from, oldest first.
+    /// </summary>
+    public List<AuthKind> ProfileKinds { get; } = [];
+
+    public async Task<AccountProfile> GetProfileAsync(AccountCredentials credentials, AuthKind kind, CancellationToken cancellationToken)
     {
+        ProfileKinds.Add(kind);
         if (WhileLookingUpProfile is not null)
         {
             await WhileLookingUpProfile();

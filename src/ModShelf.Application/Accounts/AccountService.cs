@@ -157,7 +157,7 @@ internal sealed partial class AccountService : IAccountService, ICredentialProvi
             AuthKind.OAuthPkce => await LinkInBrowserAsync(source, strategy, prompt, cancellationToken).ConfigureAwait(false),
             _ => throw new ArgumentOutOfRangeException(nameof(strategy), strategy.Kind, "Unknown kind of authentication."),
         };
-        AccountProfile profile = await linker.GetProfileAsync(credentials, cancellationToken).ConfigureAwait(false);
+        AccountProfile profile = await linker.GetProfileAsync(credentials, strategy.Kind, cancellationToken).ConfigureAwait(false);
         return (credentials, profile);
     }
 

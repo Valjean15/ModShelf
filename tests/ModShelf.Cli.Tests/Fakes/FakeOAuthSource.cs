@@ -28,8 +28,10 @@ internal sealed class FakeOAuthSource : IFakeAccountSource
 
     public IReadOnlyList<IAuthStrategy> Strategies { get; }
 
-    public Task<AccountProfile> GetProfileAsync(AccountCredentials credentials, CancellationToken cancellationToken)
-        => _api.GetProfileAsync(request => _strategy.Authorize(request, credentials), cancellationToken);
+    public Task<AccountProfile> GetProfileAsync(AccountCredentials credentials, AuthKind kind, CancellationToken cancellationToken)
+        => kind == _strategy.Kind
+            ? _api.GetProfileAsync(request => _strategy.Authorize(request, credentials), cancellationToken)
+            : throw new ArgumentException($"This source links only with {_strategy.Kind}.", nameof(kind));
 
     public Task<AccountProfile> WhoAmIAsync(CancellationToken cancellationToken) => _api.GetProfileAsync(authorize: null, cancellationToken);
 }

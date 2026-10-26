@@ -42,6 +42,17 @@ public sealed class AccountLinkingTests
         Assert.Equal("token-for-good-key", (await CredentialsAsync(TestData.Nexus))?.AccessToken);
     }
 
+    [Theory]
+    [InlineData(AuthKind.ApiKey)]
+    [InlineData(AuthKind.OAuthPkce)]
+    public async Task LooksUpTheProfileWithTheWayItWasLinked(AuthKind kind)
+    {
+        // Nexus offers both ways, and sends the credentials of each differently.
+        await _harness.LinkAsync(TestData.Nexus, kind);
+
+        Assert.Equal([kind], _harness.Nexus.ProfileKinds);
+    }
+
     [Fact]
     public async Task TrimsWhatTheUserPasted()
     {

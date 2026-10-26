@@ -18,6 +18,10 @@ public interface IAccountLinker : IModSource
     /// <summary>
     /// Looks up the account the credentials belong to.
     /// </summary>
+    /// <param name="kind">
+    /// The way the credentials were obtained, one of <see cref="Strategies"/>. It decides how they're sent, such as an
+    /// API key header or a bearer token.
+    /// </param>
     /// <exception cref="AuthenticationFailedException">The site refused the credentials.</exception>
-    Task<AccountProfile> GetProfileAsync(AccountCredentials credentials, CancellationToken cancellationToken);
+    Task<AccountProfile> GetProfileAsync(AccountCredentials credentials, AuthKind kind, CancellationToken cancellationToken);
 }
