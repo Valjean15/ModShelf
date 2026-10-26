@@ -1,25 +1,31 @@
 using System.CommandLine;
+using System.Net;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Downloads;
 using ModShelf.Cli.Hosting;
 using ModShelf.Domain.Downloads;
+using ModShelf.Sources.Abstractions.Accounts;
 
 namespace ModShelf.Cli.Commands;
 
 /// <summary>
 /// <c>download &lt;link&gt; --to &lt;folder&gt; [--name &lt;file&gt;]</c>: adds the file to the queue and runs the
-/// download engine until that file is done. Ctrl+C stops cleanly; running the same command again continues.
+/// download engine until that file is done. When the site wants the download started on its website, it shows the
+/// page and asks for the link the site hands over. Ctrl+C stops cleanly; running the same command again continues.
 /// </summary>
-internal static class DownloadCommand
+internal static partial class DownloadCommand
 {
     public static Command Create(CliEnvironment environment)
     {
         Argument<string> link = new("link")
         {
-            Description = "The file's web link. To check the file against a hash, end the link with #sha256=<hex> (or md5, sha1, sha512).",
+            Description = "What to download: a file's web link; a mod's or a file's page on a site ModShelf knows, such as Nexus Mods; "
+                + "or an nxm:// link from Nexus Mods. To check a plain web link's file against a hash, end the link with "
+                + "#sha256=<hex> (or md5, sha1, sha512).",
         };
         Option<DirectoryInfo> to = new("--to")
         {
@@ -29,7 +35,7 @@ internal static class DownloadCommand
         };
         Option<string?> name = new("--name")
         {
-            Description = "The name to save the file under. By default, the name at the end of the link.",
+            Description = "The name to save the file under. By default, the name the site gives the file, or the name at the end of the link.",
             HelpName = "file",
         };
 
@@ -87,24 +93,16 @@ internal static class DownloadCommand
         IDownloadService downloads = services.GetRequiredService<IDownloadService>();
         ILinkDownloads links = services.GetRequiredService<ILinkDownloads>();
 
-        // Watch before adding, so no change to the job is missed.
-        IAsyncEnumerable<DownloadJobSnapshot> updates = downloads.WatchAsync(cancellationToken);
-
         LinkDownload added;
         try
         {
             added = await links.AddAsync(link, targetDirectory, fileName, cancellationToken).ConfigureAwait(false);
         }
-        catch (UnsupportedLinkException)
+        catch (Exception exception) when (LinkProblem(exception) is { } problem)
         {
-            await environment.Error.WriteLineAsync("No source can download that link.").ConfigureAwait(false);
-            return ExitCodes.BadInput;
-        }
-        catch (ArgumentException exception)
-        {
-            string hint = exception.ParamName == "fileName" ? " Choose one with --name." : string.Empty;
-            await environment.Error.WriteLineAsync(exception.MessageForUser() + hint).ConfigureAwait(false);
-            return ExitCodes.BadInput;
+            string hint = exception is ArgumentException { ParamName: "fileName" } ? " Choose one with --name." : string.Empty;
+            await environment.Error.WriteLineAsync(problem.Message + hint).ConfigureAwait(false);
+            return problem.ExitCode;
         }
 
         DownloadJobSnapshot job = added.Job;
@@ -125,54 +123,49 @@ internal static class DownloadCommand
             environment.Output.WriteLine($"Downloading {job.FileName} to {job.TargetDirectory}");
         }
 
-        ProgressDisplay display = new(environment.Output, interactive: environment.OutputIsTerminal);
-        await foreach (DownloadJobSnapshot update in updates.ConfigureAwait(false))
-        {
-            if (update.Id != job.Id)
-            {
-                continue;
-            }
+        // Watch first and read the job after, so no change from here on is missed, and none from before (such as the page
+        // a job waited on before the link it got just now) is taken for news.
+        using CancellationTokenSource watching = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        IAsyncEnumerable<DownloadJobSnapshot> updates = downloads.WatchAsync(watching.Token);
+        DownloadJobSnapshot current = (await downloads.ListAsync(cancellationToken).ConfigureAwait(false))
+            .Single(listed => listed.Id == job.Id);
 
-            display.Show(update);
-            switch (update.Status)
-            {
-                case DownloadJobStatus.Completed:
-                    display.Finish();
-                    environment.Output.WriteLine($"Saved {Path.Combine(update.TargetDirectory, update.FileName)}");
-                    return ExitCodes.Done;
-
-                case DownloadJobStatus.Failed:
-                    display.Finish();
-                    await environment.Error.WriteLineAsync(FailureMessage(update.FailureReason)).ConfigureAwait(false);
-                    return ExitCodes.Failed;
-
-                case DownloadJobStatus.Cancelled:
-                    display.Finish();
-                    await environment.Error.WriteLineAsync("The download was cancelled.").ConfigureAwait(false);
-                    return ExitCodes.Failed;
-
-                default:
-                    break;
-            }
-        }
-
-        // The updates end when Ctrl+C cancels the token, or when the engine stops on its own.
-        display.Finish();
-        if (cancellationToken.IsCancellationRequested)
-        {
-            return await StoppedAsync(environment).ConfigureAwait(false);
-        }
-
-        await environment.Error.WriteLineAsync("The download engine stopped before the download finished.").ConfigureAwait(false);
-        return ExitCodes.Failed;
+        Follow follow = new(
+            environment,
+            downloads,
+            links,
+            new HandoffPrompt(environment, services.GetRequiredService<IBrowserLauncher>()),
+            current,
+            fileName);
+        return await follow.RunAsync(updates, watching, cancellationToken).ConfigureAwait(false);
     }
 
-    private static async Task<int> StoppedAsync(CliEnvironment environment)
+    private static async Task<int> StoppedAsync(CliEnvironment environment, bool waitingForHandoff = false)
     {
-        await environment.Error.WriteLineAsync("Stopped. The partly downloaded file is kept; run the same command again to continue.")
+        await environment.Error.WriteLineAsync(waitingForHandoff
+                ? "Stopped. The download is still waiting to be started on the site; run the same command again to continue."
+                : "Stopped. The partly downloaded file is kept; run the same command again to continue.")
             .ConfigureAwait(false);
         return ExitCodes.Interrupted;
     }
+
+    /// <summary>
+    /// What to tell the user when looking up a link went wrong, or null for an error that isn't the user's to act on.
+    /// </summary>
+    private static (string Message, int ExitCode)? LinkProblem(Exception exception) => exception switch
+    {
+        UnsupportedLinkException => ("No source can download that link.", ExitCodes.BadInput),
+        ArgumentException refused => (refused.MessageForUser(), ExitCodes.BadInput),
+        AuthenticationFailedException => (
+            "The site needs a linked account to look that link up, or refused the one linked. Link it with account link, "
+            + "then run the same command again.",
+            ExitCodes.Failed),
+        HttpRequestException { StatusCode: HttpStatusCode.NotFound or HttpStatusCode.Gone } => (
+            "The site has no such mod or file.",
+            ExitCodes.BadInput),
+        HttpRequestException failed => ($"The site couldn't look that link up: {failed.Message}", ExitCodes.Failed),
+        _ => null,
+    };
 
     private static string FailureMessage(DownloadFailureReason? reason) => reason switch
     {

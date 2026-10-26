@@ -27,12 +27,19 @@ internal sealed class InProcessCli : IAsyncDisposable
     private readonly FakeAccountSite _site;
     private readonly ScriptedBrowser _browser;
     private readonly Dictionary<string, string?> _settings;
+    private readonly IReadOnlyList<IModSource> _sources;
 
     /// <param name="settings">More configuration, as a user would set it, such as a Nexus Mods client ID.</param>
-    public InProcessCli(FakeAccountSite site, ScriptedBrowser browser, IReadOnlyDictionary<string, string?>? settings = null)
+    /// <param name="sources">More sources, such as a site that asks for handoffs.</param>
+    public InProcessCli(
+        FakeAccountSite site,
+        ScriptedBrowser browser,
+        IReadOnlyDictionary<string, string?>? settings = null,
+        IReadOnlyList<IModSource>? sources = null)
     {
         _site = site;
         _browser = browser;
+        _sources = sources ?? [];
         _settings = new Dictionary<string, string?>
         {
             [CliHost.DatabasePathKey] = Path.Combine(_folder.Path, "library.db"),
@@ -116,5 +123,9 @@ internal sealed class InProcessCli : IAsyncDisposable
             provider.GetRequiredService<IHttpClientFactory>(),
             provider.GetRequiredService<TimeProvider>()));
         services.AddSingleton<IModSource>(provider => new FakeApiKeySource(_site, provider.GetRequiredService<IHttpClientFactory>()));
+        foreach (IModSource source in _sources)
+        {
+            services.AddSingleton(source);
+        }
     });
 }

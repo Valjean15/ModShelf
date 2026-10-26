@@ -13,6 +13,9 @@ internal static class ExitCodes
     /// <summary>The arguments were wrong, such as a link no source can download.</summary>
     public const int BadInput = 2;
 
+    /// <summary>The download waits to be started on the site, and the input ended without the link that does it.</summary>
+    public const int Waiting = 3;
+
     /// <summary>Stopped by Ctrl+C, by the usual convention of 128 plus SIGINT.</summary>
     public const int Interrupted = 130;
 }
