@@ -1,6 +1,7 @@
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Accounts;
+using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Downloads;
 using ModShelf.Sources.Abstractions.Links;
 
@@ -109,6 +110,56 @@ public abstract class SourceContractTests<TSource>
             await Assert.ThrowsAsync<ArgumentException>(
                 () => linker.GetProfileAsync(new AccountCredentials("some-token"), kind, TestContext.Current.CancellationToken));
         }
+    }
+
+    [Fact]
+    public async Task RefusesToDescribeAnotherSourcesGameOrMod()
+    {
+        IModCatalog catalog = Capability<IModCatalog>();
+        GameRef game = new(new SourceId("someone-else"), "game");
+        ModRef mod = new(game, "mod");
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+
+        await Assert.ThrowsAsync<ArgumentException>(() => catalog.GetGameAsync(game, cancellationToken));
+        await Assert.ThrowsAsync<ArgumentException>(() => catalog.GetModAsync(mod, cancellationToken));
+        await Assert.ThrowsAsync<ArgumentException>(() => catalog.GetFilesAsync(mod, cancellationToken));
+        await Assert.ThrowsAsync<ArgumentException>(() => catalog.GetChangelogsAsync(mod, cancellationToken));
+    }
+
+    [Fact]
+    public async Task DescribesTheModsItsOwnLinksPointTo()
+    {
+        ILinkRecognizer recognizer = Capability<ILinkRecognizer>();
+        IModCatalog catalog = Capability<IModCatalog>();
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+
+        foreach (Uri link in OwnLinks)
+        {
+            RecognizedLink match = (await recognizer.RecognizeAsync(link, cancellationToken))!;
+            ModRef mod = match.File.Mod;
+
+            Assert.Equal(mod.Game, (await catalog.GetGameAsync(mod.Game, cancellationToken)).Game);
+            Assert.Equal(mod, (await catalog.GetModAsync(mod, cancellationToken)).Mod);
+            IReadOnlyList<ModFile> files = await catalog.GetFilesAsync(mod, cancellationToken);
+            Assert.Contains(files, file => file.Reference == match.File);
+            Assert.All(files, file => Assert.Equal(mod, file.Reference.Mod));
+            Assert.NotNull(await catalog.GetChangelogsAsync(mod, cancellationToken));
+        }
+    }
+
+    [Fact]
+    public async Task AFilesPageIsALinkToThatFile()
+    {
+        ILinkRecognizer recognizer = Capability<ILinkRecognizer>();
+        IModCatalog catalog = Capability<IModCatalog>();
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        RecognizedLink linked = (await recognizer.RecognizeAsync(OwnLinks[0], cancellationToken))!;
+        ModFile file = Assert.Single(await catalog.GetFilesAsync(linked.File.Mod, cancellationToken), listed => listed.Reference == linked.File);
+        Assert.SkipWhen(file.PageUrl is null, $"{typeof(TSource).Name} gives its files no page.");
+
+        RecognizedLink? fromPage = await recognizer.RecognizeAsync(file.PageUrl, cancellationToken);
+
+        Assert.Equal(file.Reference, fromPage?.File);
     }
 
     /// <summary>

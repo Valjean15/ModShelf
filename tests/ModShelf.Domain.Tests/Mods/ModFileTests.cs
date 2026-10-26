@@ -19,6 +19,30 @@ public sealed class ModFileTests
         Assert.Equal(2_500_000, file.SizeInBytes);
         Assert.Equal(TestData.CreatedAt, file.UploadedAt);
         Assert.Equal(Md5, Assert.Single(file.Hashes));
+        Assert.Null(file.PageUrl);
+    }
+
+    [Fact]
+    public void KeepsItsPage()
+    {
+        Uri page = new("https://www.nexusmods.com/skyrimspecialedition/mods/12604?tab=files&file_id=35407");
+
+        Assert.Same(page, Create(pageUrl: page).PageUrl);
+    }
+
+    [Theory]
+    [InlineData("nxm://skyrimspecialedition/mods/12604/files/35407")]
+    [InlineData("javascript:alert(1)")]
+    [InlineData("file:///C:/Windows/System32/calc.exe")]
+    public void RejectsAPageThatIsntAWebLink(string page)
+    {
+        Assert.Throws<ArgumentException>(() => Create(pageUrl: new Uri(page)));
+    }
+
+    [Fact]
+    public void RejectsARelativePage()
+    {
+        Assert.Throws<ArgumentException>(() => Create(pageUrl: new Uri("mods/12604", UriKind.Relative)));
     }
 
     [Fact]
@@ -81,7 +105,8 @@ public sealed class ModFileTests
         string? versionLabel = "5.2SE",
         ModFileCategory category = ModFileCategory.Main,
         long? sizeInBytes = 2_500_000,
-        IEnumerable<FileHash>? hashes = null)
+        IEnumerable<FileHash>? hashes = null,
+        Uri? pageUrl = null)
         => new(
             TestData.SkyUiMainFile,
             "Main File",
@@ -90,5 +115,6 @@ public sealed class ModFileTests
             category,
             sizeInBytes,
             TestData.CreatedAt,
-            hashes ?? [Md5]);
+            hashes ?? [Md5],
+            pageUrl);
 }

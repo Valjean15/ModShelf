@@ -15,7 +15,8 @@ public sealed class ModFile
         ModFileCategory category,
         long? sizeInBytes,
         DateTimeOffset uploadedAt,
-        IEnumerable<FileHash> hashes)
+        IEnumerable<FileHash> hashes,
+        Uri? pageUrl = null)
     {
         ArgumentNullException.ThrowIfNull(reference);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -28,6 +29,12 @@ public sealed class ModFile
         if (sizeInBytes is { } size)
         {
             ArgumentOutOfRangeException.ThrowIfNegative(size, nameof(sizeInBytes));
+        }
+
+        if (pageUrl is not null
+            && !(pageUrl.IsAbsoluteUri && (pageUrl.Scheme == Uri.UriSchemeHttps || pageUrl.Scheme == Uri.UriSchemeHttp)))
+        {
+            throw new ArgumentException("A file's page must be an absolute HTTP or HTTPS URL.", nameof(pageUrl));
         }
 
         ArgumentNullException.ThrowIfNull(hashes);
@@ -45,6 +52,7 @@ public sealed class ModFile
         SizeInBytes = sizeInBytes;
         UploadedAt = uploadedAt;
         Hashes = Array.AsReadOnly(hashList);
+        PageUrl = pageUrl;
     }
 
     public ModFileRef Reference { get; }
@@ -77,4 +85,10 @@ public sealed class ModFile
     /// The checksums the source publishes for the file. Empty when it publishes none.
     /// </summary>
     public IReadOnlyList<FileHash> Hashes { get; }
+
+    /// <summary>
+    /// The file's page on the source's site, when it has one: a link the source recognizes as this file, so the file
+    /// can be downloaded from it.
+    /// </summary>
+    public Uri? PageUrl { get; }
 }
