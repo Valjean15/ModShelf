@@ -1,7 +1,10 @@
+using System.Net;
+
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Tests.Fakes;
 using ModShelf.Domain.Downloads;
+using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Downloads;
 
 using static ModShelf.Domain.Downloads.DownloadJobStatus;
@@ -110,17 +113,29 @@ public sealed class DownloadSchedulerTests
         Assert.DoesNotContain(harness.Logger.Entries, entry => entry.Contains(ScriptedResolver.UrlSecret, StringComparison.Ordinal));
     }
 
-    [Fact]
-    public async Task FailsWhenTheSourceThrows()
+    public static TheoryData<Exception, DownloadFailureReason> SourceFailures() => new()
+    {
+        { new AuthenticationFailedException("The site refused the account."), DownloadFailureReason.AccountNeeded },
+        { new HttpRequestException("Service unavailable.", null, HttpStatusCode.ServiceUnavailable), DownloadFailureReason.Network },
+        { new HttpRequestException("No route to host."), DownloadFailureReason.Network },
+        { new HttpRequestException("No Mod Found", null, HttpStatusCode.NotFound), DownloadFailureReason.LinkUnavailable },
+        { new HttpRequestException("File removed", null, HttpStatusCode.Gone), DownloadFailureReason.LinkUnavailable },
+        { new InvalidOperationException("The source broke."), DownloadFailureReason.Unexpected },
+    };
+
+    [Theory]
+    [MemberData(nameof(SourceFailures))]
+    public async Task FailsWhenTheSourceThrows(Exception thrown, DownloadFailureReason reason)
     {
         await using SchedulerHarness harness = await SchedulerHarness.StartAsync();
-        harness.Nexus.ThenThrow(new HttpRequestException("Service unavailable."));
+        harness.Nexus.ThenThrow(thrown);
 
         DownloadJobSnapshot job = await harness.EnqueueAsync(TestData.Nexus, "35407");
 
         DownloadJobSnapshot failed = await harness.WaitForStatusAsync(job.Id, Failed);
-        Assert.Equal(DownloadFailureReason.Unexpected, failed.FailureReason);
+        Assert.Equal(reason, failed.FailureReason);
         Assert.Equal(0, harness.Transfer.CallCount);
+        Assert.Contains(harness.Logger.Entries, entry => entry.Contains(thrown.Message, StringComparison.Ordinal));
     }
 
     [Fact]

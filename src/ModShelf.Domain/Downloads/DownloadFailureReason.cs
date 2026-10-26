@@ -24,4 +24,9 @@ public enum DownloadFailureReason
 
     /// <summary>Something else went wrong.</summary>
     Unexpected = 6,
+
+    /// <summary>
+    /// The source needs a linked account to download the file, or refused the one linked: the user has to link it.
+    /// </summary>
+    AccountNeeded = 7,
 }

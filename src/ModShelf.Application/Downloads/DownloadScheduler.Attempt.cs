@@ -1,6 +1,9 @@
+using System.Net;
+
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Mods;
+using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Downloads;
 
 namespace ModShelf.Application.Downloads;
@@ -60,7 +63,17 @@ internal sealed partial class DownloadScheduler
         TransferProgress progress = new(this, id);
         for (int refreshes = 0; ; refreshes++)
         {
-            ResolveResult resolved = await resolver.ResolveAsync(file, cancellationToken).ConfigureAwait(false);
+            ResolveResult resolved;
+            try
+            {
+                resolved = await resolver.ResolveAsync(file, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception exception) when (ResolveFailure(exception) is { } reason)
+            {
+                LogResolveFailed(_logger, exception, id, resolver.Id);
+                return AttemptResult.Failed(reason);
+            }
+
             if (resolved is HandoffRequired)
             {
                 return AttemptResult.HandoffRequired;
@@ -95,6 +108,18 @@ internal sealed partial class DownloadScheduler
             }
         }
     }
+
+    /// <summary>
+    /// Why resolving failed, for the failures a source reports in the shared way: a refused account, the file
+    /// gone, or the site out of reach. Null for anything else, which fails the job as unexpected.
+    /// </summary>
+    private static DownloadFailureReason? ResolveFailure(Exception exception) => exception switch
+    {
+        AuthenticationFailedException => DownloadFailureReason.AccountNeeded,
+        HttpRequestException { StatusCode: HttpStatusCode.NotFound or HttpStatusCode.Gone } => DownloadFailureReason.LinkUnavailable,
+        HttpRequestException => DownloadFailureReason.Network,
+        _ => null,
+    };
 
     /// <summary>
     /// Hands a report to the loop. After the scheduler has stopped there is nobody left to tell.

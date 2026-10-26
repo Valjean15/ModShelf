@@ -181,6 +181,7 @@ internal static class DownloadCommand
         DownloadFailureReason.Network => "The download failed: the connection kept failing. Run the same command again to retry.",
         DownloadFailureReason.Storage => "The download failed: the file couldn't be saved. The folder may not be writable, the disk may be full, or a file with that name may exist already.",
         DownloadFailureReason.HashMismatch => "The download failed: the file doesn't match the expected hash, so it was deleted.",
+        DownloadFailureReason.AccountNeeded => "The download failed: the site needs a linked account, or refused the one linked. Link it with account link, then run the same command again.",
         _ => "The download failed unexpectedly. Set the environment variable Logging__LogLevel__Default=Debug and run it again for details.",
     };
 }

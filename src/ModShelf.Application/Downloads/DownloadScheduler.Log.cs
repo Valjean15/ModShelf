@@ -24,4 +24,7 @@ internal sealed partial class DownloadScheduler
 
     [LoggerMessage(EventId = 5, Level = LogLevel.Error, Message = "Couldn't apply an update to download job {JobId}")]
     private static partial void LogUpdateRejected(ILogger logger, Exception exception, DownloadJobId jobId);
+
+    [LoggerMessage(EventId = 6, Level = LogLevel.Warning, Message = "Source {SourceId} couldn't resolve download job {JobId}")]
+    private static partial void LogResolveFailed(ILogger logger, Exception exception, DownloadJobId jobId, SourceId sourceId);
 }
