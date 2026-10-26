@@ -6,6 +6,7 @@ namespace ModShelf.Application.Downloads;
 
 /// <summary>
 /// Asks every <see cref="ILinkRecognizer"/> about a link and queues the file through <see cref="IDownloadService"/>.
+/// A link that completes a handoff is handed to the queue too.
 /// </summary>
 /// <remarks>
 /// The check for an existing job and the enqueue are two steps, so two callers adding the same link at the
@@ -38,6 +39,12 @@ internal sealed class LinkDownloads : ILinkDownloads
         string name = fileName
             ?? recognized.SuggestedFileName
             ?? throw new ArgumentException("The link doesn't say what the file is called, so a file name is needed.", nameof(fileName));
+
+        // Before the job is found or added, so that the job resolves with the link from its first attempt.
+        if (recognized.IsHandoff)
+        {
+            await _downloads.HandOffAsync(recognized.File, link, cancellationToken).ConfigureAwait(false);
+        }
 
         IReadOnlyList<DownloadJobSnapshot> jobs = await _downloads.ListAsync(cancellationToken).ConfigureAwait(false);
         DownloadJobSnapshot? existing = jobs.FirstOrDefault(job =>

@@ -24,6 +24,18 @@ public interface IDownloadService
         CancellationToken cancellationToken);
 
     /// <summary>
+    /// Gives the queue the link that completes a handoff for <paramref name="file"/>: the link the source's
+    /// website handed over after the user started the download there (see <see cref="DownloadJobSnapshot.HandoffPage"/>).
+    /// A job for the file that is waiting for it resolves again with the link, and so does a job for the file
+    /// added or resumed later.
+    /// </summary>
+    /// <remarks>
+    /// The link can carry a key, so it's kept in memory only and never logged. It's dropped once the source
+    /// refuses it, or once no unfinished job for the file is left.
+    /// </remarks>
+    Task HandOffAsync(ModFileRef file, Uri handoff, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Every job, oldest first.
     /// </summary>
     Task<IReadOnlyList<DownloadJobSnapshot>> ListAsync(CancellationToken cancellationToken);

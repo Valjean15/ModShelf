@@ -34,15 +34,16 @@ internal sealed partial class DownloadScheduler
         Stopped,
     }
 
-    private readonly record struct AttemptResult(AttemptEnd End, DownloadFailureReason? FailureReason = null)
+    /// <param name="HandoffPage">For <see cref="AttemptEnd.HandoffRequired"/>: the page where the user starts the download.</param>
+    private readonly record struct AttemptResult(AttemptEnd End, DownloadFailureReason? FailureReason = null, Uri? HandoffPage = null)
     {
         public static AttemptResult Completed => new(AttemptEnd.Completed);
-
-        public static AttemptResult HandoffRequired => new(AttemptEnd.HandoffRequired);
 
         public static AttemptResult Stopped => new(AttemptEnd.Stopped);
 
         public static AttemptResult Failed(DownloadFailureReason reason) => new(AttemptEnd.Failed, reason);
+
+        public static AttemptResult HandoffRequired(Uri page) => new(AttemptEnd.HandoffRequired, HandoffPage: page);
     }
 
     private abstract record Message;
@@ -70,6 +71,14 @@ internal sealed partial class DownloadScheduler
         public override void Reject(Exception exception) => Reply.TrySetException(exception);
     }
 
+    /// <param name="Link">Secret: it can carry a key, so it's left out of <see cref="ToString"/>.</param>
+    private sealed record HandOffCommand(ModFileRef File, Uri Link, TaskCompletionSource Reply) : Command
+    {
+        public override void Reject(Exception exception) => Reply.TrySetException(exception);
+
+        public override string ToString() => $"{nameof(HandOffCommand)} {{ File = {File} }}";
+    }
+
     /// <summary>
     /// News from a running download about its job.
     /// </summary>
@@ -85,11 +94,14 @@ internal sealed partial class DownloadScheduler
 
     private sealed record AttemptFinished(DownloadJobId Id, AttemptResult Result) : Report(Id);
 
-    private sealed class RunningJob(SourceId source) : IDisposable
+    /// <param name="handoff">The handoff link the attempt resolves with, if any.</param>
+    private sealed class RunningJob(SourceId source, Uri? handoff) : IDisposable
     {
         private readonly List<TaskCompletionSource> _waiters = [];
 
         public SourceId Source { get; } = source;
+
+        public Uri? Handoff { get; } = handoff;
 
         public CancellationTokenSource Cancellation { get; } = new();
 

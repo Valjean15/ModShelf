@@ -44,7 +44,7 @@ public abstract class SourceContractTests<TSource>
         ModFileRef foreign = new(new ModRef(new GameRef(new SourceId("someone-else"), "game"), "mod"), "file");
 
         await Assert.ThrowsAsync<ArgumentException>(
-            () => resolver.ResolveAsync(foreign, TestContext.Current.CancellationToken));
+            () => resolver.ResolveAsync(foreign, handoff: null, TestContext.Current.CancellationToken));
     }
 
     [Theory]
@@ -83,7 +83,8 @@ public abstract class SourceContractTests<TSource>
         {
             RecognizedLink match = (await recognizer.RecognizeAsync(link, TestContext.Current.CancellationToken))!;
 
-            Assert.NotNull(await resolver.ResolveAsync(match.File, TestContext.Current.CancellationToken));
+            Uri? handoff = match.IsHandoff ? link : null;
+            Assert.NotNull(await resolver.ResolveAsync(match.File, handoff, TestContext.Current.CancellationToken));
         }
     }
 

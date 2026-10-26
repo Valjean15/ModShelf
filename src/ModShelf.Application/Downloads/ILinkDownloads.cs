@@ -6,7 +6,9 @@ namespace ModShelf.Application.Downloads;
 public interface ILinkDownloads
 {
     /// <summary>
-    /// Queues the file <paramref name="link"/> points to, saved in <paramref name="targetDirectory"/>.
+    /// Queues the file <paramref name="link"/> points to, saved in <paramref name="targetDirectory"/>. When the
+    /// link completes a handoff, such as an <c>nxm://</c> link, it's also handed to
+    /// <see cref="IDownloadService.HandOffAsync"/>, which wakes a job for the file that is waiting for it.
     /// </summary>
     /// <param name="link">An absolute link.</param>
     /// <param name="targetDirectory">An absolute path. Jobs count as the same folder only when this text matches exactly.</param>

@@ -4,8 +4,9 @@ namespace ModShelf.Sources.Abstractions.Downloads;
 
 /// <summary>
 /// The source needs the user to start the download on its website, such as the "Mod Manager Download"
-/// button that Nexus Mods shows free accounts. The job waits in AwaitingHandoff until the source's
-/// handoff link arrives.
+/// button that Nexus Mods shows free accounts. The job waits in AwaitingHandoff, showing the page, until the
+/// website hands the app the link that completes the download (a link the source recognizes with
+/// <see cref="Links.RecognizedLink.IsHandoff"/>); the engine then resolves the file again with that link.
 /// </summary>
 public sealed record HandoffRequired : ResolveResult
 {

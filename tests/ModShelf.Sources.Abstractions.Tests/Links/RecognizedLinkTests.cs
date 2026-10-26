@@ -16,6 +16,7 @@ public sealed class RecognizedLinkTests
         Assert.Same(SkyUiMainFile, link.File);
         Assert.Equal("SkyUI_5_2_SE.7z", link.SuggestedFileName);
         Assert.False(link.IsCatchAll);
+        Assert.False(link.IsHandoff);
     }
 
     [Theory]
@@ -31,6 +32,18 @@ public sealed class RecognizedLinkTests
     public void CanBeACatchAllMatch()
     {
         Assert.True(new RecognizedLink(SkyUiMainFile, isCatchAll: true).IsCatchAll);
+    }
+
+    [Fact]
+    public void CanCompleteAHandoff()
+    {
+        Assert.True(new RecognizedLink(SkyUiMainFile, isHandoff: true).IsHandoff);
+    }
+
+    [Fact]
+    public void RefusesACatchAllMatchThatCompletesAHandoff()
+    {
+        Assert.Throws<ArgumentException>(() => new RecognizedLink(SkyUiMainFile, isCatchAll: true, isHandoff: true));
     }
 
     [Fact]

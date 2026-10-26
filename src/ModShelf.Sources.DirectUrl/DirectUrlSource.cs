@@ -51,7 +51,8 @@ public sealed class DirectUrlSource : IDownloadResolver, ILinkRecognizer
         return Task.FromResult<RecognizedLink?>(new RecognizedLink(file, SuggestFileName(link), isCatchAll: true));
     }
 
-    public Task<ResolveResult> ResolveAsync(ModFileRef file, CancellationToken cancellationToken)
+    /// <param name="handoff">Ignored: a direct link never asks the user to start the download on a website.</param>
+    public Task<ResolveResult> ResolveAsync(ModFileRef file, Uri? handoff, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(file);
         if (file.Mod.Game.Source != DirectId)

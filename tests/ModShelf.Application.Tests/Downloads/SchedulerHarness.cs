@@ -59,12 +59,15 @@ internal sealed class SchedulerHarness : IAsyncDisposable
 
     public DownloadScheduler Scheduler { get; }
 
+    /// <param name="beforeStart">Runs before the scheduler starts, for scripting the sources that stored jobs meet first.</param>
     public static async Task<SchedulerHarness> StartAsync(
         DownloadSchedulerOptions? options = null,
         IEnumerable<DownloadJob>? storedJobs = null,
-        bool registerModIo = true)
+        bool registerModIo = true,
+        Action<SchedulerHarness>? beforeStart = null)
     {
         SchedulerHarness harness = new(options ?? new DownloadSchedulerOptions(), storedJobs ?? [], registerModIo);
+        beforeStart?.Invoke(harness);
         await harness.Scheduler.StartAsync(CancellationToken.None);
         return harness;
     }
@@ -106,6 +109,17 @@ internal sealed class SchedulerHarness : IAsyncDisposable
 
     public Task<DownloadJobSnapshot> WaitForStatusAsync(DownloadJobId id, DownloadJobStatus status)
         => WaitForAsync(id, snapshot => snapshot.Status == status);
+
+    /// <summary>
+    /// Every snapshot of the job published so far, oldest first.
+    /// </summary>
+    public IReadOnlyList<DownloadJobSnapshot> Snapshots(DownloadJobId id)
+    {
+        lock (_gate)
+        {
+            return [.. _snapshots.Where(snapshot => snapshot.Id == id)];
+        }
+    }
 
     /// <summary>
     /// Every status the job was published with, without repeats in a row.

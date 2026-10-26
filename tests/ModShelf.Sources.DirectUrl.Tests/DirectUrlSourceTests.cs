@@ -119,7 +119,7 @@ public sealed class DirectUrlSourceTests : SourceContractTests<DirectUrlSource>
         ModFileRef file = new(new ModRef(new GameRef(ExpectedId, "web"), "example.com"), fileId);
 
         await Assert.ThrowsAsync<ArgumentException>(
-            () => CreateSource().ResolveAsync(file, TestContext.Current.CancellationToken));
+            () => CreateSource().ResolveAsync(file, handoff: null, TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -128,7 +128,7 @@ public sealed class DirectUrlSourceTests : SourceContractTests<DirectUrlSource>
         ModFileRef file = new(new ModRef(new GameRef(new SourceId("nexus"), "web"), "example.com"), "https://example.com/abc.txt");
 
         await Assert.ThrowsAsync<ArgumentException>(
-            () => CreateSource().ResolveAsync(file, TestContext.Current.CancellationToken));
+            () => CreateSource().ResolveAsync(file, handoff: null, TestContext.Current.CancellationToken));
     }
 
     protected override DirectUrlSource CreateSource() => new();
@@ -143,7 +143,7 @@ public sealed class DirectUrlSourceTests : SourceContractTests<DirectUrlSource>
     private async Task<DownloadTicket> ResolveAsync(string link)
     {
         RecognizedLink match = await RecognizeAsync(link);
-        ResolveResult result = await CreateSource().ResolveAsync(match.File, TestContext.Current.CancellationToken);
+        ResolveResult result = await CreateSource().ResolveAsync(match.File, handoff: null, TestContext.Current.CancellationToken);
         return Assert.IsType<DownloadTicket>(result);
     }
 }

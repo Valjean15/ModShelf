@@ -19,8 +19,12 @@ internal sealed class ScriptedLinkRecognizer(SourceId id, Func<Uri, RecognizedLi
     /// <summary>
     /// A source that recognizes every link as <paramref name="file"/>.
     /// </summary>
-    public static ScriptedLinkRecognizer Always(ModFileRef file, string? suggestedFileName = "SkyUI_5_2_SE.7z", bool isCatchAll = false)
-        => new(file.Mod.Game.Source, _ => new RecognizedLink(file, suggestedFileName, isCatchAll));
+    public static ScriptedLinkRecognizer Always(
+        ModFileRef file,
+        string? suggestedFileName = "SkyUI_5_2_SE.7z",
+        bool isCatchAll = false,
+        bool isHandoff = false)
+        => new(file.Mod.Game.Source, _ => new RecognizedLink(file, suggestedFileName, isCatchAll, isHandoff));
 
     /// <summary>
     /// A source that recognizes no link.

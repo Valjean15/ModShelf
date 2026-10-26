@@ -23,8 +23,13 @@ namespace ModShelf.Application.Downloads;
 /// report back through it.
 /// </para>
 /// <para>
+/// A job waiting for a handoff resolves again as soon as the user hands over a link for its file. Handoff links
+/// and the pages to start them on live in memory only: links can carry a key, and pages come from the source.
+/// </para>
+/// <para>
 /// Register one instance as both <see cref="IDownloadService"/> and a hosted service. On start it requeues
-/// jobs that were interrupted mid-download; on stop it requeues the running ones, so they continue next time.
+/// jobs that were interrupted mid-download, and asks the sources again about jobs that were waiting for a
+/// handoff, since their pages are gone; on stop it requeues the running ones, so they continue next time.
 /// </para>
 /// </remarks>
 internal sealed partial class DownloadScheduler : BackgroundService, IDownloadService
@@ -45,6 +50,8 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
     private readonly List<DownloadJob> _jobs = [];
     private readonly Dictionary<DownloadJobId, RunningJob> _running = [];
     private readonly Dictionary<DownloadJobId, long> _lastProgressSnapshot = [];
+    private readonly Dictionary<ModFileRef, Uri> _handoffs = [];
+    private readonly Dictionary<DownloadJobId, Uri> _handoffPages = [];
     private bool _stopping;
 
     public DownloadScheduler(
@@ -86,6 +93,20 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
         TaskCompletionSource<DownloadJobSnapshot> reply = NewReply<DownloadJobSnapshot>();
         Post(new EnqueueCommand(job, reply));
         return await reply.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task HandOffAsync(ModFileRef file, Uri handoff, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+        ArgumentNullException.ThrowIfNull(handoff);
+        if (!handoff.IsAbsoluteUri)
+        {
+            throw new ArgumentException("The handoff link must be absolute.", nameof(handoff));
+        }
+
+        TaskCompletionSource reply = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        Post(new HandOffCommand(file, handoff, reply));
+        await reply.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyList<DownloadJobSnapshot>> ListAsync(CancellationToken cancellationToken)
@@ -215,7 +236,13 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
             return;
         }
 
-        foreach (DownloadJob job in _jobs.Where(job => job.Status == DownloadJobStatus.Queued).ToList())
+        // Waiting jobs go first: a handoff link the user just gave may expire soon.
+        List<DownloadJob> ready =
+        [
+            .. _jobs.Where(IsReadyToResolveAgain),
+            .. _jobs.Where(job => job.Status == DownloadJobStatus.Queued),
+        ];
+        foreach (DownloadJob job in ready)
         {
             if (_running.Count >= _options.MaxConcurrentDownloads)
             {
@@ -243,6 +270,14 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
         }
     }
 
+    /// <summary>
+    /// Whether a job waiting for a handoff should ask its source again: the user has handed over a link for its
+    /// file, or the scheduler doesn't know the page to show, because the app restarted since the source named it.
+    /// </summary>
+    private bool IsReadyToResolveAgain(DownloadJob job)
+        => job.Status == DownloadJobStatus.AwaitingHandoff
+            && (_handoffs.ContainsKey(job.File) || !_handoffPages.ContainsKey(job.Id));
+
     private async Task StopRunningJobsAsync()
     {
         _stopping = true;
@@ -268,8 +303,12 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
                 case EnqueueCommand command:
                     await EnqueueAsync(command).ConfigureAwait(false);
                     break;
+                case HandOffCommand command:
+                    _handoffs[command.File] = command.Link;
+                    command.Reply.TrySetResult();
+                    break;
                 case ListCommand command:
-                    command.Reply.TrySetResult([.. _jobs.Select(DownloadJobSnapshot.Of)]);
+                    command.Reply.TrySetResult([.. _jobs.Select(Snapshot)]);
                     break;
                 case ControlCommand command:
                     await ControlAsync(command).ConfigureAwait(false);
@@ -308,7 +347,7 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
         await _repository.AddAsync(command.Job, CancellationToken.None).ConfigureAwait(false);
         _jobs.Add(command.Job);
 
-        DownloadJobSnapshot snapshot = DownloadJobSnapshot.Of(command.Job);
+        DownloadJobSnapshot snapshot = Snapshot(command.Job);
         _watchers.Publish(snapshot);
         command.Reply.TrySetResult(snapshot);
     }
@@ -382,7 +421,7 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
             || _timeProvider.GetElapsedTime(last, now) >= _options.ProgressInterval)
         {
             _lastProgressSnapshot[job.Id] = now;
-            _watchers.Publish(DownloadJobSnapshot.Of(job));
+            _watchers.Publish(Snapshot(job));
         }
     }
 
@@ -417,11 +456,14 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
             DownloadJob job = _jobs.Find(job => job.Id == report.Id)!;
             _lastProgressSnapshot.Remove(job.Id);
 
-            bool stopped = report.Result.End == AttemptEnd.Stopped;
+            // A job left waiting for a handoff can still be paused or cancelled, so a request that came in while the
+            // source was asked applies, as it does to a stopped download.
+            bool stopped = report.Result.End == AttemptEnd.Stopped
+                || (report.Result.End == AttemptEnd.HandoffRequired && running.StopReason is StopReason.Pause or StopReason.Cancel);
             bool deletePartialFile = stopped && running.StopReason == StopReason.Cancel;
             try
             {
-                Finish(job, report.Result, running.StopReason);
+                Finish(job, report.Result, running);
             }
             catch (Exception exception) when (exception is InvalidOperationException or ArgumentException)
             {
@@ -442,8 +484,9 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
         }
     }
 
-    private void Finish(DownloadJob job, AttemptResult result, StopReason? stopReason)
+    private void Finish(DownloadJob job, AttemptResult result, RunningJob running)
     {
+        StopReason? stopReason = running.StopReason;
         switch (result.End)
         {
             case AttemptEnd.Completed:
@@ -456,7 +499,26 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
                 break;
 
             case AttemptEnd.HandoffRequired:
+                Uri page = result.HandoffPage ?? throw new InvalidOperationException("The attempt asked for a handoff without a page.");
                 job.AwaitHandoff();
+                if (stopReason == StopReason.Cancel)
+                {
+                    job.Cancel();
+                }
+                else if (stopReason == StopReason.Pause)
+                {
+                    job.Pause();
+                }
+                else if (!_handoffs.TryGetValue(job.File, out Uri? latest) || ReferenceEquals(latest, running.Handoff))
+                {
+                    // The source refused the link the attempt had, if it had one, so the job waits for the user to
+                    // start the download again.
+                    _handoffs.Remove(job.File);
+                    _handoffPages[job.Id] = page;
+                }
+
+                // Otherwise a newer link came in while the source was asked: the job asks again with it straight
+                // away, without showing the page.
                 break;
 
             case AttemptEnd.Failed:
@@ -491,9 +553,36 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
     private DownloadJob? RunningJobFor(Report report)
         => _running.ContainsKey(report.Id) ? _jobs.Find(job => job.Id == report.Id) : null;
 
+    private DownloadJobSnapshot Snapshot(DownloadJob job)
+        => DownloadJobSnapshot.Of(job, _handoffPages.GetValueOrDefault(job.Id));
+
+    /// <summary>
+    /// Saves and publishes a job that changed, and lets go of the handoff state it no longer needs.
+    /// </summary>
     private async Task SaveAsync(DownloadJob job)
     {
+        ForgetHandoffsNoLongerNeeded(job);
         await _repository.UpdateAsync(job, CancellationToken.None).ConfigureAwait(false);
-        _watchers.Publish(DownloadJobSnapshot.Of(job));
+        _watchers.Publish(Snapshot(job));
+    }
+
+    /// <summary>
+    /// Drops the job's page once it stops waiting, and the handoff link for its file once no unfinished job for
+    /// the file is left. A failed job keeps the link, so a retry can use it.
+    /// </summary>
+    private void ForgetHandoffsNoLongerNeeded(DownloadJob job)
+    {
+        if (job.Status != DownloadJobStatus.AwaitingHandoff)
+        {
+            _handoffPages.Remove(job.Id);
+        }
+
+        if (!_jobs.Any(other => other.File == job.File && !IsFinished(other)))
+        {
+            _handoffs.Remove(job.File);
+        }
+
+        static bool IsFinished(DownloadJob job)
+            => job.Status is DownloadJobStatus.Completed or DownloadJobStatus.Cancelled;
     }
 }

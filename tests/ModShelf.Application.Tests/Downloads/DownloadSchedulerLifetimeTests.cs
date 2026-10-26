@@ -4,6 +4,7 @@ using ModShelf.Application.Downloads;
 using ModShelf.Application.Sources;
 using ModShelf.Application.Tests.Fakes;
 using ModShelf.Domain.Downloads;
+using ModShelf.Sources.Abstractions.Downloads;
 
 using static ModShelf.Domain.Downloads.DownloadJobStatus;
 
@@ -31,16 +32,25 @@ public sealed class DownloadSchedulerLifetimeTests
     }
 
     [Fact]
-    public async Task LeavesJobsWaitingForAHandoffAlone()
+    public async Task AsksTheSourceAgainAboutJobsThatWereWaitingForAHandoff()
     {
+        // The page to start the download on is only kept in memory, so it's gone after a restart.
+        Uri page = new("https://www.nexusmods.com/skyrimspecialedition/mods/12604?tab=files&file_id=35407");
         DownloadJob waiting = StoredJob();
         waiting.StartResolving();
         waiting.AwaitHandoff();
 
-        await using SchedulerHarness harness = await SchedulerHarness.StartAsync(storedJobs: [waiting]);
+        await using SchedulerHarness harness = await SchedulerHarness.StartAsync(
+            storedJobs: [waiting],
+            beforeStart: harness => harness.Nexus.ThenReturn(new HandoffRequired(page)));
 
-        Assert.Equal(AwaitingHandoff, (await harness.CurrentAsync(waiting.Id)).Status);
-        Assert.Equal(0, harness.Nexus.Calls);
+        DownloadJobSnapshot asked = await harness.WaitForAsync(waiting.Id, snapshot => snapshot.HandoffPage is not null);
+        Assert.Equal(AwaitingHandoff, asked.Status);
+        Assert.Equal(page, asked.HandoffPage);
+        Assert.Equal([new ResolveCall(waiting.File, Handoff: null)], harness.Nexus.Resolved);
+        DownloadJobStatus[] saved = [Resolving, AwaitingHandoff];
+        Assert.Equal(saved, harness.Repository.SavedStatuses(waiting.Id));
+        Assert.Equal(0, harness.Transfer.CallCount);
     }
 
     [Fact]

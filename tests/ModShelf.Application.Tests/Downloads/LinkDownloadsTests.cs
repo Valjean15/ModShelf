@@ -36,6 +36,55 @@ public sealed class LinkDownloadsTests
     }
 
     [Fact]
+    public async Task KeepsAnOrdinaryLinkFromTheQueuesHandoffs()
+    {
+        RecordingDownloadService downloads = new();
+
+        await AddAsync(downloads, [ScriptedLinkRecognizer.Always(NexusFile)]);
+
+        Assert.Empty(downloads.HandedOff);
+    }
+
+    [Fact]
+    public async Task HandsALinkThatCompletesAHandoffToTheQueueBeforeAddingTheJob()
+    {
+        RecordingDownloadService downloads = new();
+
+        LinkDownload result = await AddAsync(downloads, [ScriptedLinkRecognizer.Always(NexusFile, isHandoff: true)]);
+
+        Assert.Equal((NexusFile, Link), Assert.Single(downloads.HandedOff));
+        string[] changes = [nameof(IDownloadService.HandOffAsync), nameof(IDownloadService.EnqueueAsync)];
+        Assert.Equal(changes, downloads.Changes);
+        Assert.False(result.AlreadyQueued);
+    }
+
+    [Fact]
+    public async Task HandsALinkThatCompletesAHandoffToTheQueueWhenTheJobIsWaitingForIt()
+    {
+        DownloadJobSnapshot waiting = RecordingDownloadService.Job(NexusFile, TestData.TargetDirectory, FileName, AwaitingHandoff);
+        RecordingDownloadService downloads = new(waiting);
+
+        LinkDownload result = await AddAsync(downloads, [ScriptedLinkRecognizer.Always(NexusFile, isHandoff: true)]);
+
+        Assert.Equal((NexusFile, Link), Assert.Single(downloads.HandedOff));
+        Assert.True(result.AlreadyQueued);
+        Assert.Same(waiting, result.Job);
+        Assert.Empty(downloads.Enqueued);
+    }
+
+    [Fact]
+    public async Task HandsNothingOverWhenTheHandoffLinkCantBeQueued()
+    {
+        RecordingDownloadService downloads = new();
+
+        await Assert.ThrowsAsync<ArgumentException>(() => AddAsync(
+            downloads,
+            [ScriptedLinkRecognizer.Always(NexusFile, suggestedFileName: null, isHandoff: true)]));
+
+        Assert.Empty(downloads.Changes);
+    }
+
+    [Fact]
     public async Task TheGivenFileNameWinsOverTheSuggestion()
     {
         RecordingDownloadService downloads = new();
