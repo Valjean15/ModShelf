@@ -31,6 +31,16 @@
     expire, so use one you just got. Records the download link Nexus Mods gives for its key, and how it
     refuses a key it never handed over. The script says when the link expires.
 
+.PARAMETER SearchOnly
+    Records only the search answers from the v2 GraphQL API, and the parts of its schema they rely on, leaving the
+    other recordings as they are. Works with either account. A full Premium run records them too.
+
+.PARAMETER SearchWords
+    Words to search the game's mods for. Their best match should be the mod given to -ModId.
+
+.PARAMETER SearchAuthor
+    An author with a few mods for the game, to search by author.
+
 .PARAMETER ExpiredNxmLink
     Free only, optional: an nxm:// link that has expired, such as the one given to -NxmLink earlier, once the
     time the script gave has passed. Records how Nexus Mods refuses an expired key.
@@ -43,6 +53,9 @@
 
 .EXAMPLE
     ./Record-NexusFixtures.ps1 -Account Free -ExpiredNxmLink 'nxm://stardewvalley/mods/2400/files/...'
+
+.EXAMPLE
+    ./Record-NexusFixtures.ps1 -Account Premium -SearchOnly
 #>
 
 #Requires -Version 7.2
@@ -63,6 +76,12 @@ param(
 
     [string] $ExpiredNxmLink,
 
+    [switch] $SearchOnly,
+
+    [string] $SearchWords = 'SMAPI',
+
+    [string] $SearchAuthor = 'Pathoschild',
+
     # Only for testing this script against a local fake of the API.
     [uri] $ApiBase = 'https://api.nexusmods.com/'
 )
@@ -73,6 +92,27 @@ $ErrorActionPreference = 'Stop'
 if ($Account -eq 'Premium' -and ($NxmLink -or $ExpiredNxmLink)) {
     throw 'nxm:// links are only recorded for a free account. Run with -Account Free.'
 }
+
+if ($SearchOnly -and ($NxmLink -or $ExpiredNxmLink)) {
+    throw '-SearchOnly records only searches; run the nxm:// links separately.'
+}
+
+# The search query the Nexus source sends, so the recorded answers are to exactly that query.
+$SearchQueryFile = Join-Path $PSScriptRoot '..' '..' '..' 'src' 'ModShelf.Sources.Nexus' 'Search' 'SearchMods.graphql'
+
+# The parts of the v2 schema the search relies on. A type that doesn't exist comes back as null.
+$SchemaQuery = @'
+query Schema {
+  query: __type(name: "Query") { fields { name args { name type { ...TypeRef } } type { ...TypeRef } } }
+  modsFilter: __type(name: "ModsFilter") { inputFields { name type { ...TypeRef } } }
+  modsSort: __type(name: "ModsSort") { inputFields { name type { ...TypeRef } } }
+  mod: __type(name: "Mod") { fields { name type { ...TypeRef } } }
+  baseFilterValue: __type(name: "BaseFilterValue") { inputFields { name type { ...TypeRef } } }
+  booleanFilterValue: __type(name: "BooleanFilterValue") { inputFields { name type { ...TypeRef } } }
+  comparison: __type(name: "FilterComparisonOperator") { enumValues { name } }
+}
+fragment TypeRef on __Type { kind name ofType { kind name ofType { kind name ofType { kind name } } } }
+'@
 
 $ApplicationName = 'ModShelf'
 $ApplicationVersion = '0.1.0-dev'
@@ -143,6 +183,141 @@ function Invoke-Nexus {
     finally {
         $response.Dispose()
         $request.Dispose()
+    }
+}
+
+# Posts a GraphQL query to v2/graphql. The recording keeps the operation's name and variables, not the query text.
+function Invoke-NexusGraphQl {
+    param([string] $Query, [string] $Operation, [System.Text.Json.Nodes.JsonObject] $Variables)
+
+    $body = [System.Text.Json.Nodes.JsonObject]::new()
+    $body['query'] = [System.Text.Json.Nodes.JsonValue]::Create($Query)
+    if ($Variables) {
+        $body['variables'] = $Variables.DeepClone()
+    }
+
+    $request = [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::Post, 'v2/graphql')
+    $request.Headers.Add('apikey', $script:ApiKey)
+    $request.Headers.Add('Application-Name', $ApplicationName)
+    $request.Headers.Add('Application-Version', $ApplicationVersion)
+    $request.Headers.Add('Accept', 'application/json')
+    $request.Content = [System.Net.Http.StringContent]::new($body.ToJsonString(), [System.Text.Encoding]::UTF8, 'application/json')
+
+    $response = $script:Http.Send($request)
+    try {
+        $headers = [ordered]@{}
+        if ($response.Content.Headers.ContentType) {
+            $headers['Content-Type'] = $response.Content.Headers.ContentType.ToString()
+        }
+
+        foreach ($header in $response.Headers) {
+            if ($header.Key -like 'X-RL-*') {
+                $headers[$header.Key] = $header.Value -join ', '
+            }
+        }
+
+        $sent = [System.Text.Json.Nodes.JsonObject]::new()
+        $sent['operationName'] = [System.Text.Json.Nodes.JsonValue]::Create($Operation)
+        if ($Variables) {
+            $sent['variables'] = $Variables.DeepClone()
+        }
+
+        return [pscustomobject]@{
+            Method  = 'POST'
+            Path    = 'v2/graphql'
+            Query   = ''
+            Body    = $sent
+            Status  = [int]$response.StatusCode
+            Headers = $headers
+            Text    = $response.Content.ReadAsStringAsync().GetAwaiter().GetResult()
+        }
+    }
+    finally {
+        $response.Dispose()
+        $request.Dispose()
+    }
+}
+
+# The variables the Nexus source sends for a search: the same as NexusSearchVariables builds.
+function New-SearchVariables {
+    param([string] $Text, [string] $Sort = 'Relevance', [int] $Offset = 0, [int] $Count = 5, [string] $Author, [switch] $IncludeAdult)
+
+    function Condition([string] $Value, [string] $Operator) {
+        $condition = [System.Text.Json.Nodes.JsonObject]::new()
+        $condition['value'] = [System.Text.Json.Nodes.JsonValue]::Create($Value)
+        $condition['op'] = [System.Text.Json.Nodes.JsonValue]::Create($Operator)
+        $list = [System.Text.Json.Nodes.JsonArray]::new()
+        $list.Add($condition)
+        return , $list
+    }
+
+    $filter = [System.Text.Json.Nodes.JsonObject]::new()
+    $filter['gameDomainName'] = Condition $Game 'EQUALS'
+    if ($Text) { $filter['nameStemmed'] = Condition $Text 'MATCHES' }
+    if ($Author) { $filter['author'] = Condition $Author 'MATCHES' }
+    if (-not $IncludeAdult) {
+        $adult = [System.Text.Json.Nodes.JsonObject]::new()
+        $adult['value'] = [System.Text.Json.Nodes.JsonValue]::Create($false)
+        $adult['op'] = [System.Text.Json.Nodes.JsonValue]::Create('EQUALS')
+        $adultList = [System.Text.Json.Nodes.JsonArray]::new()
+        $adultList.Add($adult)
+        $filter['adultContent'] = $adultList
+    }
+
+    $field = switch ($Sort) {
+        'Relevance' { if ($Text) { 'relevance' } else { 'endorsements' } }
+        'Endorsements' { 'endorsements' }
+        'Downloads' { 'downloads' }
+        'Updated' { 'updatedAt' }
+        'Newest' { 'createdAt' }
+        default { throw "Unknown sort $Sort." }
+    }
+
+    $direction = [System.Text.Json.Nodes.JsonObject]::new()
+    $direction['direction'] = [System.Text.Json.Nodes.JsonValue]::Create('DESC')
+    $order = [System.Text.Json.Nodes.JsonObject]::new()
+    $order[$field] = $direction
+    $sorts = [System.Text.Json.Nodes.JsonArray]::new()
+    $sorts.Add($order)
+
+    $variables = [System.Text.Json.Nodes.JsonObject]::new()
+    $variables['filter'] = $filter
+    $variables['sort'] = $sorts
+    $variables['offset'] = [System.Text.Json.Nodes.JsonValue]::Create($Offset)
+    $variables['count'] = [System.Text.Json.Nodes.JsonValue]::Create($Count)
+    return , $variables
+}
+
+# The searches the source's tests replay, and the schema they rely on.
+function Save-Searches {
+    if (-not (Test-Path $SearchQueryFile)) {
+        throw "The search query isn't at $SearchQueryFile. Run the script from its place in the repository."
+    }
+
+    $query = Get-Content -Raw $SearchQueryFile
+    Save-Fixture 'graphql-schema' (Invoke-NexusGraphQl $SchemaQuery 'Schema') { param($body) Limit-Schema $body }
+    Save-Fixture 'search-words' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Text $SearchWords))
+    Save-Fixture 'search-endorsed-page-2' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort Endorsements -Offset 5))
+    Save-Fixture 'search-author-updated' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Author $SearchAuthor -Sort Updated))
+    Save-Fixture 'search-downloads' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Text $SearchWords -Sort Downloads))
+    Save-Fixture 'search-newest-with-adult' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort Newest -IncludeAdult))
+    Save-Fixture 'search-no-results' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Text 'zqxj no such mod zqxj'))
+}
+
+# Of the Query type's fields, keeps only "mods": the rest is the whole API, which the tests don't need.
+# Plain assignments only: an if statement's output would unroll the JSON array into a copy.
+function Limit-Schema($Body) {
+    if ($Body -isnot [System.Text.Json.Nodes.JsonObject]) { return }
+    $data = $Body['data']
+    if ($data -isnot [System.Text.Json.Nodes.JsonObject]) { return }
+    $type = $data['query']
+    if ($type -isnot [System.Text.Json.Nodes.JsonObject]) { return }
+    $fields = $type['fields']
+    if ($fields -isnot [System.Text.Json.Nodes.JsonArray]) { return }
+    for ($index = $fields.Count - 1; $index -ge 0; $index--) {
+        if ((Get-Text $fields[$index]['name']) -ne 'mods') {
+            $fields.RemoveAt($index)
+        }
     }
 }
 
@@ -217,7 +392,7 @@ function Hide-Personal([string] $Text) {
     }
 
     $id = [regex]::Escape($script:Me.UserId)
-    $Text = [regex]::Replace($Text, "(?<=""(user_id|member_id|uid)"":\s*""?)$id(?!\d)", $Stand.UserId)
+    $Text = [regex]::Replace($Text, "(?<=""(user_id|member_id|uid|userId|memberId)"":\s*""?)$id(?!\d)", $Stand.UserId)
     $Text = [regex]::Replace($Text, "(?<=[=/])$id(?=[/&""?\s]|$)", $Stand.UserId)
     $Text = [regex]::Replace($Text, "(?<![\w.-])$([regex]::Escape($script:Me.Name))(?![\w.-])", $Stand.Name)
     return $Text
@@ -266,9 +441,13 @@ function Save-Fixture([string] $Name, $Exchange, [scriptblock] $Shape) {
     }
 
     $request = [System.Text.Json.Nodes.JsonObject]::new()
-    $request['method'] = [System.Text.Json.Nodes.JsonValue]::Create('GET')
+    $method = if ($Exchange.PSObject.Properties['Method']) { $Exchange.Method } else { 'GET' }
+    $request['method'] = [System.Text.Json.Nodes.JsonValue]::Create($method)
     $request['path'] = [System.Text.Json.Nodes.JsonValue]::Create('/' + $Exchange.Path.TrimStart('/'))
     $request['query'] = [System.Text.Json.Nodes.JsonValue]::Create($Exchange.Query)
+    if ($Exchange.PSObject.Properties['Body']) {
+        $request['body'] = $Exchange.Body.DeepClone()
+    }
 
     $response = [System.Text.Json.Nodes.JsonObject]::new()
     $response['status'] = [System.Text.Json.Nodes.JsonValue]::Create($Exchange.Status)
@@ -321,6 +500,12 @@ try {
     }
 
     Write-Host "Recording as a $Account account into $OutFolder"
+    if ($SearchOnly) {
+        Save-Searches
+        Write-Host 'Done. Review the files, then tell Claude they are there.'
+        return
+    }
+
     Save-Fixture 'validate' $validate
 
     $modPath = "v1/games/$Game/mods/$ModId"
@@ -348,6 +533,7 @@ try {
         Save-Fixture 'mod-not-found' (Invoke-Nexus "v1/games/$Game/mods/999999999.json")
         Save-Fixture 'game-not-found' (Invoke-Nexus 'v1/games/notagame.json')
         Save-Fixture 'validate-invalid-key' (Invoke-Nexus 'v1/users/validate.json' -Key 'not-a-real-key')
+        Save-Searches
     }
     else {
         $files = Invoke-Nexus "$modPath/files.json"
