@@ -35,7 +35,7 @@ internal sealed class LinkDownloads : ILinkDownloads
             throw new ArgumentException("The link must be absolute.", nameof(link));
         }
 
-        RecognizedLink recognized = await RecognizeAsync(link, cancellationToken).ConfigureAwait(false);
+        RecognizedLink recognized = await _sources.RecognizeAsync(link, cancellationToken).ConfigureAwait(false);
         string name = fileName
             ?? recognized.SuggestedFileName
             ?? throw new ArgumentException("The link doesn't say what the file is called, so a file name is needed.", nameof(fileName));
@@ -60,28 +60,5 @@ internal sealed class LinkDownloads : ILinkDownloads
         DownloadJobSnapshot added = await _downloads.EnqueueAsync(recognized.File, targetDirectory, name, cancellationToken)
             .ConfigureAwait(false);
         return new LinkDownload(added, AlreadyQueued: false);
-    }
-
-    private async Task<RecognizedLink> RecognizeAsync(Uri link, CancellationToken cancellationToken)
-    {
-        List<(ILinkRecognizer Source, RecognizedLink Match)> matches = [];
-        foreach (ILinkRecognizer source in _sources.All<ILinkRecognizer>())
-        {
-            RecognizedLink? match = await source.RecognizeAsync(link, cancellationToken).ConfigureAwait(false);
-            if (match is not null)
-            {
-                matches.Add((source, match));
-            }
-        }
-
-        string[] specific = [.. matches.Where(found => !found.Match.IsCatchAll).Select(found => found.Source.Id.Value)];
-        if (specific.Length > 1)
-        {
-            throw new InvalidOperationException(
-                $"More than one source claims this link ({string.Join(", ", specific)}), so it's ambiguous.");
-        }
-
-        return matches.Select(found => found.Match).OrderBy(match => match.IsCatchAll).FirstOrDefault()
-            ?? throw new UnsupportedLinkException();
     }
 }

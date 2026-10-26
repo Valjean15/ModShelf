@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 using ModShelf.Application.Accounts;
+using ModShelf.Application.Catalog;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Sources;
 
@@ -46,6 +47,19 @@ public static class ApplicationServiceCollectionExtensions
         services.AddSingleton<AccountService>();
         services.AddSingleton<IAccountService>(provider => provider.GetRequiredService<AccountService>());
         services.AddSingleton<ICredentialProvider>(provider => provider.GetRequiredService<AccountService>());
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers <see cref="IModLookup"/>, which looks mods up through the sources' catalogs.
+    /// </summary>
+    public static IServiceCollection AddModLookup(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
+        services.TryAddSingleton<IModLookup, ModLookup>();
 
         return services;
     }
