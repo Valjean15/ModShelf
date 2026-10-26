@@ -9,6 +9,7 @@ using ModShelf.Application.Sources;
 using ModShelf.Application.Tests.Accounts;
 using ModShelf.Application.Tests.Fakes;
 using ModShelf.Application.Updates;
+using ModShelf.Application.Watchlist;
 
 namespace ModShelf.Application.Tests;
 
@@ -95,6 +96,19 @@ public sealed class ApplicationServiceCollectionExtensionsTests
         services.AddModUpdates();
 
         Assert.Equal(typeof(ModUpdates), Single<IModUpdates>(services).ImplementationType);
+        Assert.Equal(typeof(SourceRegistry), Single<ISourceRegistry>(services).ImplementationType);
+        Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
+    }
+
+    [Fact]
+    public void TheWatchlistsShareTheSourceRegistry()
+    {
+        ServiceCollection services = new();
+        services.AddModLookup();
+        services.AddWatchlists();
+        services.AddWatchlists();
+
+        Assert.Equal(typeof(Watchlists), Single<IWatchlists>(services).ImplementationType);
         Assert.Equal(typeof(SourceRegistry), Single<ISourceRegistry>(services).ImplementationType);
         Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
     }

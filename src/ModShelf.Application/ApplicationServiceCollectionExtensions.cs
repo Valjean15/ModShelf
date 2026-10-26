@@ -6,6 +6,7 @@ using ModShelf.Application.Catalog;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Sources;
 using ModShelf.Application.Updates;
+using ModShelf.Application.Watchlist;
 
 namespace ModShelf.Application;
 
@@ -74,6 +75,19 @@ public static class ApplicationServiceCollectionExtensions
 
         services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
         services.TryAddSingleton<IModUpdates, ModUpdates>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers <see cref="IWatchlists"/>, which reads and changes the mods the linked accounts follow on their sites.
+    /// </summary>
+    public static IServiceCollection AddWatchlists(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
+        services.TryAddSingleton<IWatchlists, Watchlists>();
 
         return services;
     }
