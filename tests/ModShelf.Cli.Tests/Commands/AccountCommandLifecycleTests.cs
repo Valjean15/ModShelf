@@ -112,15 +112,14 @@ public sealed class AccountCommandLifecycleTests : IAsyncDisposable
         string shown = string.Concat(_runs.Select(run => run.Output + run.Errors));
         string logged = string.Join(Environment.NewLine, _cli.Logs.Entries);
         Assert.NotEmpty(_cli.Logs.Entries);
-        string[] files = Directory.GetFiles(_cli.Folder, "*", SearchOption.AllDirectories);
-        Assert.Contains(files, file => Path.GetFileName(file) == "library.db");
+        IReadOnlyDictionary<string, byte[]> files = await ReadFilesAsync(_cli.Folder);
+        Assert.Contains(files.Keys, file => Path.GetFileName(file) == "library.db");
         foreach (string secret in secrets)
         {
             Assert.DoesNotContain(secret, shown, StringComparison.Ordinal);
             Assert.DoesNotContain(secret, logged, StringComparison.Ordinal);
-            foreach (string file in files)
+            foreach ((string file, byte[] content) in files)
             {
-                byte[] content = await ReadSharedAsync(file);
                 Assert.True(
                     content.AsSpan().IndexOf(Encoding.UTF8.GetBytes(secret)) < 0,
                     $"{Path.GetRelativePath(_cli.Folder, file)} holds a credential in plain text.");
@@ -129,6 +128,38 @@ public sealed class AccountCommandLifecycleTests : IAsyncDisposable
     }
 
     private static string[] Cells(string row) => row.Split("  ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+    /// <summary>
+    /// Reads every file under <paramref name="folder"/> once, SQLite's side files first.
+    /// </summary>
+    /// <remarks>
+    /// When the last connection to the database closes, SQLite writes its <c>-wal</c> file into the database and
+    /// deletes it and the <c>-shm</c> file. That can happen at any moment here, because tests running alongside this
+    /// one clear SQLite's connection pools when they finish. A side file gone by the time it's read had its content
+    /// written into the database, which is read after it, so nothing escapes the check.
+    /// </remarks>
+    private static async Task<IReadOnlyDictionary<string, byte[]>> ReadFilesAsync(string folder)
+    {
+        Dictionary<string, byte[]> contents = new(StringComparer.Ordinal);
+        foreach (string file in Directory.GetFiles(folder, "*", SearchOption.AllDirectories).OrderBy(file => IsSqliteSideFile(file) ? 0 : 1))
+        {
+            try
+            {
+                contents[file] = await ReadSharedAsync(file);
+            }
+            catch (FileNotFoundException) when (IsSqliteSideFile(file))
+            {
+                // Written into the database and deleted since the folder was listed.
+            }
+        }
+
+        return contents;
+    }
+
+    private static bool IsSqliteSideFile(string file)
+        => file.EndsWith("-wal", StringComparison.Ordinal)
+            || file.EndsWith("-shm", StringComparison.Ordinal)
+            || file.EndsWith("-journal", StringComparison.Ordinal);
 
     /// <summary>
     /// Reads a file another handle may still have open for writing, such as the database in SQLite's connection pool,
