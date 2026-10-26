@@ -15,7 +15,7 @@ namespace ModShelf.Cli.Tests.Fakes;
 /// Links to mod <c>404</c> are to a mod it doesn't have, and to mod <c>401</c> need an account it doesn't have.
 /// </summary>
 /// <remarks>
-/// Its update feed is in <c>FakeCatalogSite.Updates.cs</c>.
+/// Its update feed and its watchlist are described in their own files.
 /// <para/>
 /// Its one game, <c>game</c>, has 45 mods to search, "Example Mod 1" to "Example Mod 45" with IDs 101 to 145, by
 /// "Someone" when even and "Another" when odd. Mod 103 has adult content and mod 104 is hidden. A search matches names
