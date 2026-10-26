@@ -28,6 +28,23 @@ public sealed class ModInfoTests
 
         Assert.True(mod.IsAvailable);
         Assert.False(mod.HasAdultContent);
+        Assert.Null(mod.Downloads);
+        Assert.Null(mod.Endorsements);
+    }
+
+    [Fact]
+    public void KeepsHowPopularTheModIs()
+    {
+        ModInfo mod = new(Smapi, "SMAPI", downloads: 30286114, endorsements: 387171);
+
+        Assert.Equal((30286114L, 387171L), (mod.Downloads!.Value, mod.Endorsements!.Value));
+    }
+
+    [Fact]
+    public void RefusesNegativeCounts()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new ModInfo(Smapi, "SMAPI", downloads: -1));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new ModInfo(Smapi, "SMAPI", endorsements: -1));
     }
 
     [Fact]

@@ -4,6 +4,7 @@ using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Downloads;
 using ModShelf.Sources.Abstractions.Links;
+using ModShelf.Sources.Abstractions.Search;
 
 namespace ModShelf.Testing;
 
@@ -160,6 +161,15 @@ public abstract class SourceContractTests<TSource>
         RecognizedLink? fromPage = await recognizer.RecognizeAsync(file.PageUrl, cancellationToken);
 
         Assert.Equal(file.Reference, fromPage?.File);
+    }
+
+    [Fact]
+    public async Task RefusesToSearchAnotherSourcesGame()
+    {
+        IModSearch search = Capability<IModSearch>();
+
+        await Assert.ThrowsAsync<ArgumentException>(() => search.SearchAsync(
+            new GameRef(new SourceId("someone-else"), "game"), new SearchQuery("anything"), TestContext.Current.CancellationToken));
     }
 
     /// <summary>

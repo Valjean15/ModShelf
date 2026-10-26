@@ -8,6 +8,7 @@ namespace ModShelf.Sources.Abstractions.Catalog;
 public sealed record ModInfo
 {
     /// <exception cref="ArgumentException">The name is blank, or a link isn't an absolute HTTP or HTTPS URL.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">A count is negative.</exception>
     public ModInfo(
         ModRef mod,
         string name,
@@ -18,12 +19,23 @@ public sealed record ModInfo
         Uri? pictureUrl = null,
         DateTimeOffset? updatedAt = null,
         bool isAvailable = true,
-        bool hasAdultContent = false)
+        bool hasAdultContent = false,
+        long? downloads = null,
+        long? endorsements = null)
     {
         ArgumentNullException.ThrowIfNull(mod);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         CatalogUrls.EnsureWebUrl(pageUrl);
         CatalogUrls.EnsureWebUrl(pictureUrl);
+        if (downloads < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(downloads), downloads, "A count can't be negative.");
+        }
+
+        if (endorsements < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(endorsements), endorsements, "A count can't be negative.");
+        }
 
         Mod = mod;
         Name = name;
@@ -35,6 +47,8 @@ public sealed record ModInfo
         UpdatedAt = updatedAt;
         IsAvailable = isAvailable;
         HasAdultContent = hasAdultContent;
+        Downloads = downloads;
+        Endorsements = endorsements;
     }
 
     public ModRef Mod { get; }
@@ -75,6 +89,16 @@ public sealed record ModInfo
     public bool IsAvailable { get; }
 
     public bool HasAdultContent { get; }
+
+    /// <summary>
+    /// How many times the mod has been downloaded, as the site counts it, or null when it doesn't say.
+    /// </summary>
+    public long? Downloads { get; }
+
+    /// <summary>
+    /// How many users endorsed, liked or followed the mod, whatever the site counts as approval, or null when it doesn't say.
+    /// </summary>
+    public long? Endorsements { get; }
 
     private static string? Blank(string? text) => string.IsNullOrWhiteSpace(text) ? null : text.Trim();
 }
