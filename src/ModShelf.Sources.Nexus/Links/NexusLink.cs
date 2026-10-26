@@ -23,6 +23,10 @@ internal sealed record NexusLink(string Game, string ModId, string? FileId, bool
 
     private const int MaxGameLength = 100;
 
+    private const string NotCollections = "ModShelf downloads single files, not collections.";
+
+    // Mod pages are on www. The next. site redirects its game pages there and hosts collections, so its links are
+    // read too: a collection gets a clear refusal instead of being fetched as a web page by the direct-link source.
     private static readonly string[] WebsiteHosts = ["nexusmods.com", "www.nexusmods.com", "next.nexusmods.com"];
 
     /// <summary>
@@ -74,6 +78,11 @@ internal sealed record NexusLink(string Game, string ModId, string? FileId, bool
     private static NexusLink ReadPage(Uri link)
     {
         string[] path = Segments(link);
+        if (path.Contains("collections", StringComparer.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException(NotCollections, nameof(link));
+        }
+
         if (path is not [string game, string mods, string mod] || !string.Equals(mods, "mods", StringComparison.OrdinalIgnoreCase))
         {
             throw new ArgumentException(
@@ -94,7 +103,7 @@ internal sealed record NexusLink(string Game, string ModId, string? FileId, bool
         string[] path = Segments(link);
         if (path is ["collections", ..])
         {
-            throw new ArgumentException("ModShelf downloads single files, not collections.", nameof(link));
+            throw new ArgumentException(NotCollections, nameof(link));
         }
 
         if (path is not ["mods", string mod, "files", string file])

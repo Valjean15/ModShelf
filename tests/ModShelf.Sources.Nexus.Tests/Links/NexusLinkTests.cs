@@ -93,12 +93,14 @@ public sealed class NexusLinkTests
         Assert.Throws<ArgumentException>(() => NexusLink.ForFile(file));
     }
 
-    [Fact]
-    public void SaysWhenALinkIsToACollection()
+    [Theory]
+    [InlineData("nxm://skyrimspecialedition/collections/qdurkx/revisions/12")]
+    [InlineData("https://next.nexusmods.com/skyrimspecialedition/collections/qdurkx")]
+    [InlineData("https://www.nexusmods.com/games/skyrimspecialedition/collections/qdurkx/mods")]
+    public void SaysWhenALinkIsToACollection(string link)
     {
-        ArgumentException refused = Assert.Throws<ArgumentException>(
-            () => NexusLink.Read(new Uri("nxm://skyrimspecialedition/collections/qdurkx/revisions/12")));
+        ArgumentException refused = Assert.Throws<ArgumentException>(() => NexusLink.Read(new Uri(link)));
 
-        Assert.Contains("collections", refused.Message, StringComparison.Ordinal);
+        Assert.Contains("not collections", refused.Message, StringComparison.Ordinal);
     }
 }

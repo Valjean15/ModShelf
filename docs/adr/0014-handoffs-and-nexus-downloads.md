@@ -33,11 +33,13 @@ Phase 1 already had the AwaitingHandoff status (ADR 0002) and `HandoffRequired` 
 
 **Links it recognizes:**
 
-- a mod's page on `nexusmods.com`, `www.nexusmods.com` or `next.nexusmods.com`: `/{game}/mods/{mod}`;
+- a mod's page on `www.nexusmods.com` or `nexusmods.com`: `/{game}/mods/{mod}`;
 - a file on its Files tab: the same page with `file_id`;
 - `nxm://{game}/mods/{mod}/files/{file}`, which completes a handoff.
 
-The game is lower-cased and limited to letters, digits, `-` and `_`. IDs are positive whole numbers without leading zeros. Its own links to anything else, such as news pages or collections, are refused with what to copy instead. Other sites' links, including Nexus Mods' CDN, are left to other sources without asking the API.
+The game is lower-cased and limited to letters, digits, `-` and `_`. IDs are positive whole numbers without leading zeros. Its own links to anything else, such as news pages, are refused with what to copy instead; collections, on the website or as `nxm://` links, are refused as collections. Other sites' links, including Nexus Mods' CDN, are left to other sources without asking the API.
+
+`next.nexusmods.com` doesn't serve mod pages: checked on 2026-10-26, `/stardewvalley/mods/2400` there fails, and `/games/stardewvalley` redirects to `www`. It hosts collections, though, so its links are read too. Its links to a mod or file get the same IDs as on `www`, and its collections get the refusal instead of being fetched as a web page by the direct-link source.
 
 **What it asks the API when recognizing:**
 
@@ -78,4 +80,3 @@ The game is lower-cased and limited to letters, digits, `-` and `_`. IDs are pos
 ## Open
 
 - **Which status Nexus Mods gives an expired or foreign key.** The recording script's `-NxmLink` option records a free account's download link for a fresh key. Trying a link again after it expires would show the refusal, and the refused statuses here can then narrow.
-- **Whether `next.nexusmods.com` serves mod pages at the same paths.** It's accepted on the assumption that it mirrors `www`.
