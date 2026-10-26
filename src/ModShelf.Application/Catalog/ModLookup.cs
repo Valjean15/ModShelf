@@ -3,12 +3,13 @@ using ModShelf.Application.Sources;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Links;
+using ModShelf.Sources.Abstractions.Search;
 
 namespace ModShelf.Application.Catalog;
 
 /// <summary>
 /// Finds the source a link belongs to, as <see cref="ILinkDownloads"/> does, and asks its <see cref="IModCatalog"/>
-/// about the mod, all four questions at once.
+/// about the mod, all four questions at once. Searches go to the game's source's <see cref="IModSearch"/>.
 /// </summary>
 internal sealed class ModLookup : IModLookup
 {
@@ -20,6 +21,8 @@ internal sealed class ModLookup : IModLookup
 
         _sources = sources;
     }
+
+    public IReadOnlyList<SourceId> SearchableSources => [.. _sources.All<IModSearch>().Select(source => source.Id)];
 
     public async Task<ModPage> LookUpAsync(Uri link, CancellationToken cancellationToken)
     {
@@ -55,5 +58,15 @@ internal sealed class ModLookup : IModLookup
             await files.ConfigureAwait(false),
             await changelogs.ConfigureAwait(false),
             recognized.File);
+    }
+
+    public Task<SearchPage> SearchAsync(GameRef game, SearchQuery query, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(game);
+        ArgumentNullException.ThrowIfNull(query);
+
+        IModSearch search = _sources.Find<IModSearch>(game.Source)
+            ?? throw new ArgumentException($"Source '{game.Source}' isn't registered, or can't search.", nameof(game));
+        return search.SearchAsync(game, query, cancellationToken);
     }
 }

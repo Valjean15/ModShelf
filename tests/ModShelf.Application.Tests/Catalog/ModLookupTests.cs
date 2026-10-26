@@ -7,6 +7,7 @@ using ModShelf.Application.Tests.Fakes;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Accounts;
+using ModShelf.Sources.Abstractions.Search;
 
 namespace ModShelf.Application.Tests.Catalog;
 
@@ -80,6 +81,58 @@ public sealed class ModLookupTests
         Exception thrown = await Assert.ThrowsAnyAsync<Exception>(() => LookUpAsync(site));
 
         Assert.Same(failure, thrown);
+    }
+
+    [Fact]
+    public async Task SearchesThroughTheGamesSource()
+    {
+        FakeCatalogSource site = new(TestData.Nexus);
+        GameRef game = TestData.File(TestData.Nexus, "1").Mod.Game;
+        SearchQuery query = new("SkyUI", SearchSort.Downloads, offset: 20);
+
+        SearchPage page = await new ModLookup(new SourceRegistry([site, new FakeCatalogSource(TestData.ModIo)]))
+            .SearchAsync(game, query, TestContext.Current.CancellationToken);
+
+        Assert.Equal(site.Mod, Assert.Single(page.Mods));
+        Assert.Equal((game, query), site.LastSearch);
+    }
+
+    [Fact]
+    public async Task RefusesToSearchWithASourceThatCant()
+    {
+        ModLookup lookup = new(new SourceRegistry([ScriptedLinkRecognizer.Never(TestData.Nexus)]));
+
+        await Assert.ThrowsAsync<ArgumentException>(() => lookup.SearchAsync(
+            TestData.File(TestData.Nexus, "1").Mod.Game, new SearchQuery(), TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ArgumentException>(() => lookup.SearchAsync(
+            TestData.File(TestData.ModIo, "1").Mod.Game, new SearchQuery(), TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task PassesOnWhatTheSearchRefuses()
+    {
+        FakeCatalogSource site = new(TestData.Nexus);
+        HttpRequestException failure = new("Field 'nameStemmed' is not defined.");
+        site.Failures["SearchAsync"] = failure;
+
+        Exception thrown = await Assert.ThrowsAnyAsync<Exception>(() => new ModLookup(new SourceRegistry([site]))
+            .SearchAsync(TestData.File(TestData.Nexus, "1").Mod.Game, new SearchQuery(), TestContext.Current.CancellationToken));
+
+        Assert.Same(failure, thrown);
+    }
+
+    [Fact]
+    public void ListsTheSourcesThatCanSearch()
+    {
+        ModLookup lookup = new(new SourceRegistry(
+            [
+                new FakeCatalogSource(TestData.Nexus),
+                ScriptedLinkRecognizer.Never(new SourceId("direct")),
+                new CatalogOnlySource(new SourceId("catalog-only")),
+                new FakeCatalogSource(TestData.ModIo),
+            ]));
+
+        Assert.Equal([TestData.Nexus, TestData.ModIo], lookup.SearchableSources);
     }
 
     [Fact]

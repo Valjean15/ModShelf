@@ -3,14 +3,15 @@ using System.Collections.Concurrent;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Links;
+using ModShelf.Sources.Abstractions.Search;
 
 namespace ModShelf.Application.Tests.Fakes;
 
 /// <summary>
-/// A site with a catalog. It recognizes every link as its <see cref="LinkedFile"/>, and describes that file's mod.
-/// The test can make any of its answers fail. It records what it was asked.
+/// A site with a catalog and a search. It recognizes every link as its <see cref="LinkedFile"/>, describes that file's
+/// mod, and finds it in every search. The test can make any of its answers fail. It records what it was asked.
 /// </summary>
-internal sealed class FakeCatalogSource(SourceId id) : ILinkRecognizer, IModCatalog
+internal sealed class FakeCatalogSource(SourceId id) : ILinkRecognizer, IModCatalog, IModSearch
 {
     private readonly ConcurrentQueue<string> _asked = new();
 
@@ -55,6 +56,17 @@ internal sealed class FakeCatalogSource(SourceId id) : ILinkRecognizer, IModCata
 
     public Task<IReadOnlyList<ModChangelog>> GetChangelogsAsync(ModRef modRef, CancellationToken cancellationToken)
         => Answer(nameof(GetChangelogsAsync), () => Changelogs);
+
+    /// <summary>
+    /// The game and query of the last search.
+    /// </summary>
+    public (GameRef Game, SearchQuery Query)? LastSearch { get; private set; }
+
+    public Task<SearchPage> SearchAsync(GameRef game, SearchQuery query, CancellationToken cancellationToken)
+    {
+        LastSearch = (game, query);
+        return Answer(nameof(SearchAsync), () => new SearchPage([Mod], 1, query.Offset));
+    }
 
     private Task<T> Answer<T>(string method, Func<T> answer)
     {
