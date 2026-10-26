@@ -5,6 +5,8 @@ using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Downloads;
 using ModShelf.Sources.Abstractions.Links;
 using ModShelf.Sources.Abstractions.Search;
+using ModShelf.Sources.Abstractions.Updates;
+using ModShelf.Sources.Abstractions.Watchlist;
 
 namespace ModShelf.Testing;
 
@@ -26,6 +28,11 @@ public abstract class SourceContractTests<TSource>
     /// Links the source recognizes, when it implements <see cref="ILinkRecognizer"/>.
     /// </summary>
     protected abstract IReadOnlyList<Uri> OwnLinks { get; }
+
+    /// <summary>
+    /// The clock the source reads, for the checks of how far back its update feed reaches.
+    /// </summary>
+    protected virtual TimeProvider Clock => TimeProvider.System;
 
     [Fact]
     public void KeepsItsDocumentedId()
@@ -172,10 +179,90 @@ public abstract class SourceContractTests<TSource>
             new GameRef(new SourceId("someone-else"), "game"), new SearchQuery("anything"), TestContext.Current.CancellationToken));
     }
 
+    [Fact]
+    public async Task RefusesUpdatesOfAnotherSourcesGame()
+    {
+        IUpdateFeed feed = Capability<IUpdateFeed>();
+
+        await Assert.ThrowsAsync<ArgumentException>(() => feed.GetUpdatesAsync(
+            new GameRef(new SourceId("someone-else"), "game"), Clock.GetUtcNow().AddHours(-1), TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task RefusesToReachFurtherBackThanItSays()
+    {
+        IUpdateFeed feed = Capability<IUpdateFeed>();
+        GameRef game = (await OwnLinkAsync()).File.Mod.Game;
+        Assert.True(feed.Reach > TimeSpan.Zero);
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => feed.GetUpdatesAsync(
+            game, Clock.GetUtcNow() - feed.Reach - TimeSpan.FromHours(1), TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task ReportsOnlyTheGamesModsActiveSinceAsked()
+    {
+        IUpdateFeed feed = Capability<IUpdateFeed>();
+        GameRef game = (await OwnLinkAsync()).File.Mod.Game;
+        DateTimeOffset since = Clock.GetUtcNow().AddHours(-12);
+
+        IReadOnlyList<ModUpdate> updates = await feed.GetUpdatesAsync(game, since, TestContext.Current.CancellationToken);
+
+        Assert.All(updates, update =>
+        {
+            Assert.Equal(game, update.Mod.Game);
+            Assert.True(update.LastActivityAt >= since, $"Mod {update.Mod.Id} was last active at {update.LastActivityAt:O}, before {since:O}.");
+        });
+    }
+
+    [Fact]
+    public async Task RefusesToWatchAnotherSourcesMod()
+    {
+        IWatchlistSync watchlist = Capability<IWatchlistSync>();
+        ModRef mod = new(new GameRef(new SourceId("someone-else"), "game"), "mod");
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+
+        await Assert.ThrowsAsync<ArgumentException>(() => watchlist.WatchAsync(mod, cancellationToken));
+        await Assert.ThrowsAsync<ArgumentException>(() => watchlist.UnwatchAsync(mod, cancellationToken));
+    }
+
+    /// <summary>
+    /// Watches the mod of the source's first own link and stops again, twice each, as the site must let a caller do.
+    /// The source's test sets the site up to keep the list.
+    /// </summary>
+    [Fact]
+    public async Task ListsAWatchedModUntilItIsUnwatched()
+    {
+        IWatchlistSync watchlist = Capability<IWatchlistSync>();
+        ModRef mod = (await OwnLinkAsync()).File.Mod;
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+
+        await watchlist.WatchAsync(mod, cancellationToken);
+        await watchlist.WatchAsync(mod, cancellationToken);
+        IReadOnlyList<ModRef> watching = await watchlist.GetWatchedAsync(cancellationToken);
+        await watchlist.UnwatchAsync(mod, cancellationToken);
+        await watchlist.UnwatchAsync(mod, cancellationToken);
+        IReadOnlyList<ModRef> watchingNoMore = await watchlist.GetWatchedAsync(cancellationToken);
+
+        Assert.Single(watching, watched => watched == mod);
+        Assert.DoesNotContain(mod, watchingNoMore);
+        Assert.All([.. watching, .. watchingNoMore], watched => Assert.Equal(ExpectedId, watched.Game.Source));
+    }
+
     /// <summary>
     /// A new instance of the source, set up as the test needs, for example against recorded HTTP fixtures.
     /// </summary>
     protected abstract TSource CreateSource();
+
+    /// <summary>
+    /// What the source recognizes its first own link as.
+    /// </summary>
+    private async Task<RecognizedLink> OwnLinkAsync()
+    {
+        ILinkRecognizer recognizer = Capability<ILinkRecognizer>();
+        return await recognizer.RecognizeAsync(OwnLinks[0], TestContext.Current.CancellationToken)
+            ?? throw new InvalidOperationException($"{typeof(TSource).Name} doesn't recognize its own link {OwnLinks[0]}.");
+    }
 
     private TCapability Capability<TCapability>()
         where TCapability : class, IModSource
