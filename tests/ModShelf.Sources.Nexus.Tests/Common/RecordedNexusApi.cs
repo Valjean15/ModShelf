@@ -84,6 +84,12 @@ internal sealed class RecordedNexusApi : IDisposable
         => _server.Given(Request.Create().UsingGet().WithPath(path)).RespondWith(response(Response.Create()));
 
     /// <summary>
+    /// From now on, POST requests to <paramref name="path"/> are answered as the test sets up.
+    /// </summary>
+    public void AnswerPost(string path, Func<IResponseBuilder, IResponseBuilder> response)
+        => _server.Given(Request.Create().UsingPost().WithPath(path)).RespondWith(response(Response.Create()));
+
+    /// <summary>
     /// Answers GET requests for <paramref name="path"/> with each response in turn, then the last one for good.
     /// </summary>
     public void AnswerInTurn(string path, params Func<IResponseBuilder, IResponseBuilder>[] responses)
@@ -112,9 +118,11 @@ internal sealed class RecordedNexusApi : IDisposable
     /// </param>
     public ServiceProvider BuildServices(Func<NexusOptions, NexusOptions>? configure = null, bool realClock = false)
     {
+        // The sign-in server answers here too, under /oauth/.
         NexusOptions options = new()
         {
             ApiBaseAddress = BaseAddress,
+            UsersBaseAddress = BaseAddress,
             RetryDelay = TimeSpan.Zero,
             AttemptTimeout = TimeSpan.FromSeconds(10),
         };

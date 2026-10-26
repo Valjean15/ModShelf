@@ -52,6 +52,8 @@ public sealed class NexusServiceCollectionExtensionsTests : IDisposable
         new NexusOptions { ApiBaseAddress = new Uri("api/", UriKind.Relative) },
         new NexusOptions { ApiBaseAddress = new Uri("https://api.nexusmods.com/v1") },
         new NexusOptions { ApiBaseAddress = new Uri("ftp://api.nexusmods.com/") },
+        new NexusOptions { UsersBaseAddress = new Uri("https://users.nexusmods.com/oauth") },
+        new NexusOptions { OAuthClientId = " " },
         new NexusOptions { MaxRetryAttempts = -1 },
         new NexusOptions { RetryDelay = TimeSpan.FromSeconds(-1) },
         new NexusOptions { AttemptTimeout = TimeSpan.Zero },

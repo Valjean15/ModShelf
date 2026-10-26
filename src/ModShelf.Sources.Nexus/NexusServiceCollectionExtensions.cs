@@ -7,6 +7,7 @@ using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Logging;
 
 using ModShelf.Sources.Abstractions;
+using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Nexus.Accounts;
 using ModShelf.Sources.Nexus.Api;
 
@@ -25,10 +26,10 @@ public static class NexusServiceCollectionExtensions
     private static readonly string ApplicationVersion = typeof(NexusSource).Assembly.GetName().Version?.ToString(3) ?? "0.0.0";
 
     /// <summary>
-    /// Adds <see cref="NexusSource"/> as an <see cref="IModSource"/> that links accounts with a personal API key, with its
-    /// API client: every request names the app and its version, as Nexus Mods asks; requests that fail for a passing
-    /// reason are retried with backoff; and requests are held back while the account's rate limit is used up. Calling
-    /// this again changes nothing.
+    /// Adds <see cref="NexusSource"/> as an <see cref="IModSource"/>. It links accounts with a personal API key, and
+    /// through the browser too when <see cref="NexusOptions.OAuthClientId"/> is set. Its API client names the app and
+    /// its version on every request, as Nexus Mods asks; retries requests that fail for a passing reason, with backoff;
+    /// and holds requests back while the account's rate limit is used up. Calling this again changes nothing.
     /// </summary>
     /// <remarks>
     /// The client is the one named for the source in <c>SourceHttpClients</c>, so the host's <c>AddSourceHttpClients()</c>
@@ -50,7 +51,7 @@ public static class NexusServiceCollectionExtensions
         services.AddSingleton<NexusApiClient>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IModSource, NexusSource>(provider => new NexusSource(
             provider.GetRequiredService<NexusApiClient>(),
-            [new NexusApiKeyStrategy()])));
+            Strategies(settings, provider))));
 
         IHttpClientBuilder client = services.AddHttpClient(NexusApiClient.ClientName, http =>
         {
@@ -93,17 +94,43 @@ public static class NexusServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>
+    /// Signing in through the browser first, once Nexus Mods has issued a client ID; the personal API key always.
+    /// </summary>
+    private static IAuthStrategy[] Strategies(NexusOptions settings, IServiceProvider provider)
+    {
+        NexusApiKeyStrategy apiKey = new();
+        return settings.OAuthClientId is { } clientId
+            ? [
+                new NexusOAuthStrategy(
+                    provider.GetRequiredService<NexusApiClient>(),
+                    provider.GetRequiredService<TimeProvider>(),
+                    clientId,
+                    settings.UsersBaseAddress),
+                apiKey,
+            ]
+            : [apiKey];
+    }
+
     private static void Validate(NexusOptions settings)
     {
-        if (settings.ApiBaseAddress is not { IsAbsoluteUri: true } address
-            || (address.Scheme != Uri.UriSchemeHttps && address.Scheme != Uri.UriSchemeHttp)
-            || !address.AbsolutePath.EndsWith('/'))
+        if (!IsBaseAddress(settings.ApiBaseAddress) || !IsBaseAddress(settings.UsersBaseAddress))
         {
-            throw new ArgumentException("The API's address must be an absolute HTTP or HTTPS URL ending in a slash.", nameof(settings));
+            throw new ArgumentException("The API's and the sign-in server's addresses must be absolute HTTP or HTTPS URLs ending in a slash.", nameof(settings));
+        }
+
+        if (settings.OAuthClientId is { } clientId && string.IsNullOrWhiteSpace(clientId))
+        {
+            throw new ArgumentException("The OAuth client ID can't be blank; leave it out to offer only the API key.", nameof(settings));
         }
 
         ArgumentOutOfRangeException.ThrowIfNegative(settings.MaxRetryAttempts, nameof(settings));
         ArgumentOutOfRangeException.ThrowIfLessThan(settings.RetryDelay, TimeSpan.Zero, nameof(settings));
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(settings.AttemptTimeout, TimeSpan.Zero, nameof(settings));
     }
+
+    private static bool IsBaseAddress(Uri address)
+        => address is { IsAbsoluteUri: true }
+            && (address.Scheme == Uri.UriSchemeHttps || address.Scheme == Uri.UriSchemeHttp)
+            && address.AbsolutePath.EndsWith('/');
 }
