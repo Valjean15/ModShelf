@@ -8,6 +8,7 @@ using ModShelf.Application.Downloads;
 using ModShelf.Application.Sources;
 using ModShelf.Application.Tests.Accounts;
 using ModShelf.Application.Tests.Fakes;
+using ModShelf.Application.Updates;
 
 namespace ModShelf.Application.Tests;
 
@@ -81,6 +82,19 @@ public sealed class ApplicationServiceCollectionExtensionsTests
         services.AddModLookup();
 
         Assert.Equal(typeof(ModLookup), Single<IModLookup>(services).ImplementationType);
+        Assert.Equal(typeof(SourceRegistry), Single<ISourceRegistry>(services).ImplementationType);
+        Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
+    }
+
+    [Fact]
+    public void TheModUpdatesShareTheSourceRegistry()
+    {
+        ServiceCollection services = new();
+        services.AddModLookup();
+        services.AddModUpdates();
+        services.AddModUpdates();
+
+        Assert.Equal(typeof(ModUpdates), Single<IModUpdates>(services).ImplementationType);
         Assert.Equal(typeof(SourceRegistry), Single<ISourceRegistry>(services).ImplementationType);
         Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
     }

@@ -5,6 +5,7 @@ using ModShelf.Application.Accounts;
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Sources;
+using ModShelf.Application.Updates;
 
 namespace ModShelf.Application;
 
@@ -60,6 +61,19 @@ public static class ApplicationServiceCollectionExtensions
 
         services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
         services.TryAddSingleton<IModLookup, ModLookup>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers <see cref="IModUpdates"/>, which asks the sources' update feeds which mods changed lately.
+    /// </summary>
+    public static IServiceCollection AddModUpdates(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
+        services.TryAddSingleton<IModUpdates, ModUpdates>();
 
         return services;
     }
