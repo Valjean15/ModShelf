@@ -48,6 +48,8 @@ public sealed class ModCommandTests : IAsyncDisposable
             ModLink("1").AbsoluteUri,
             "Makes the example better.",
             "Adult content.",
+            "Endorsements:",
+            "Downloads:",
             "Main files",
             "Optional files",
             FileLink("1", "20").AbsoluteUri,

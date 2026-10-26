@@ -13,9 +13,10 @@ namespace ModShelf.Cli.Commands;
 
 /// <summary>
 /// <c>mod show &lt;link&gt; [--all] [--changelog]</c>: shows a mod's details and files as its site lists them, with
-/// the link to download each file. Nothing is downloaded or saved.
+/// the link to download each file. <c>mod search [words] --game &lt;game&gt;</c>: lists a game's mods that match, a page
+/// at a time, each with the link <c>mod show</c> and <c>download</c> take. Nothing is downloaded or saved.
 /// </summary>
-internal static class ModCommand
+internal static partial class ModCommand
 {
     // The sections listed without --all, in the order the sites show them.
     private static readonly ModFileCategory[] CurrentSections =
@@ -48,7 +49,7 @@ internal static class ModCommand
         show.SetAction((parsed, cancellationToken)
             => ShowAsync(environment, parsed.GetValue(link)!, parsed.GetValue(all), parsed.GetValue(changelog), cancellationToken));
 
-        return new Command("mod", "Looks mods up on the sites ModShelf knows.") { show };
+        return new Command("mod", "Looks mods up on the sites ModShelf knows.") { show, CreateSearch(environment) };
     }
 
     private static async Task<int> ShowAsync(
@@ -115,6 +116,8 @@ internal static class ModCommand
             .. mod.Author is { } author ? new[] { new[] { "Author:", author } } : [],
             .. mod.Version is { } version ? new[] { new[] { "Version:", version } } : [],
             .. mod.UpdatedAt is { } updated ? new[] { new[] { "Updated:", Date(updated) } } : [],
+            .. mod.Endorsements is { } endorsements ? new[] { new[] { "Endorsements:", Count(endorsements) } } : [],
+            .. mod.Downloads is { } downloads ? new[] { new[] { "Downloads:", Count(downloads) } } : [],
             .. mod.PageUrl is { } pageUrl ? new[] { new[] { "Page:", pageUrl.AbsoluteUri } } : [],
         ];
         TextTable.Write(output, details);
@@ -237,4 +240,6 @@ internal static class ModCommand
 
     private static string Date(DateTimeOffset moment)
         => moment.ToLocalTime().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+    private static string Count(long count) => count.ToString("N0", CultureInfo.CurrentCulture);
 }
