@@ -29,6 +29,7 @@ The headless host in `src/ModShelf.Cli` builds the same dependency-injection con
 
 ```powershell
 dotnet run --project src/ModShelf.Cli -- download <link> --to <folder> [--name <file>]
+dotnet run --project src/ModShelf.Cli -- mod show <link> [--all] [--changelog]
 dotnet run --project src/ModShelf.Cli -- queue list
 dotnet run --project src/ModShelf.Cli -- account list
 dotnet run --project src/ModShelf.Cli -- account link <source> [--with api-key|browser|email]
@@ -39,6 +40,7 @@ dotnet run --project src/ModShelf.Cli -- account unlink <source>
 - Ctrl+C stops the download and keeps the partial file. Running the same command again continues where it stopped, including after a crash.
 - When a site wants a download started on its website, `download` opens the page in your browser, shows it, and asks for the link the site then hands over. Paste it and press Enter, and the download carries on. Ctrl+C leaves the download waiting; running the same command again shows the page again.
 - **Nexus Mods downloads:** `download` takes a mod's page (its newest main file), a file's link from the mod's Files tab, or an `nxm://` link, and needs a linked account. Premium accounts download straight away. Free accounts start each download on the website with "Slow download"; the website then hands your browser an `nxm://` link to paste. Until ModShelf registers itself for these links, the browser can't open them, and usually shows the link it couldn't open: Chrome and Edge in the developer tools' console, Firefox in its address bar. If Vortex or Mod Organizer 2 handles `nxm://` links on your computer, they get the link instead. `download "nxm://…" --to <folder>` on its own also finishes a download waiting in that folder.
+- `mod show` looks a mod up from a link to it or to one of its files, and prints its details and its files by section, newest first, each with the link to download it. The file the link points to is marked. `--all` adds old versions, archived files and files in no section; `--changelog` adds the changelog. Nothing is downloaded.
 - `queue list` shows every saved job without starting any download.
 - `account list` shows the sources that support accounts, the account linked on each, and the ways to link one.
 - `account link` asks for what the source needs. An API key isn't shown as you type it. For `browser`, it opens the site's sign-in page and waits until you approve ModShelf there; if no browser opens, it shows the page to open by hand. Linking again replaces the account.
@@ -66,7 +68,7 @@ src/
 tests/
   ModShelf.<Library>.Tests        one test project per library
   ModShelf.Architecture.Tests     enforces the dependency rules
-  ModShelf.Cli.Tests              runs the CLI end to end: stop, kill and resume a download; finish one through a handoff; link, refresh and unlink fake accounts
+  ModShelf.Cli.Tests              runs the CLI end to end: stop, kill and resume a download; finish one through a handoff; look up a mod; link, refresh and unlink fake accounts
   Shared                          code several test projects compile in: SourceContractTests, TempFolder, the log recorders
 ```
 
