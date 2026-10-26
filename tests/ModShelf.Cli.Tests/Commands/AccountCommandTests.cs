@@ -57,6 +57,7 @@ public sealed partial class AccountCommandTests : IAsyncDisposable
         Assert.Equal(["Source", "Account", "Level", "Linked on", "Link with"], Cells(listed.Output.ReplaceLineEndings("\n").Split('\n')[0]));
         Assert.Equal([KeySource, "- (optional)", "-", "-", "api-key"], Cells(listed.AccountRowFor(KeySource)));
         Assert.Equal([OAuthSource, "-", "-", "-", "browser"], Cells(listed.AccountRowFor(OAuthSource)));
+        Assert.Equal(["nexus", "-", "-", "-", "api-key"], Cells(listed.AccountRowFor("nexus")));
         Assert.DoesNotContain("direct", listed.Output, StringComparison.Ordinal);
     }
 
@@ -208,14 +209,14 @@ public sealed partial class AccountCommandTests : IAsyncDisposable
     [Fact]
     public async Task UnlinkingASourceThatIsntHereStillCleansUp()
     {
-        CliResult unlinked = await RunAsync(["account", "unlink", "nexus"]);
+        CliResult unlinked = await RunAsync(["account", "unlink", "no-such-site"]);
 
         Assert.Equal(Done, unlinked.ExitCode);
-        Assert.Contains("nexus isn't a source here. Any account stored for it is removed.", unlinked.Output, StringComparison.Ordinal);
+        Assert.Contains("no-such-site isn't a source here. Any account stored for it is removed.", unlinked.Output, StringComparison.Ordinal);
     }
 
     [Theory]
-    [InlineData("link", "nexus", "No source called nexus supports accounts. Run account list to see the ones that do.")]
+    [InlineData("link", "no-such-site", "No source called no-such-site supports accounts. Run account list to see the ones that do.")]
     [InlineData("link", "Nexus!", "Nexus! isn't a source ID.")]
     [InlineData("unlink", "Nexus!", "Nexus! isn't a source ID.")]
     public async Task SourcesThatDontExistAreBadInput(string command, string source, string message)

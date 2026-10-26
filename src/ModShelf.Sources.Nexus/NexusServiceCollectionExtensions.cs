@@ -7,6 +7,7 @@ using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Logging;
 
 using ModShelf.Sources.Abstractions;
+using ModShelf.Sources.Nexus.Accounts;
 using ModShelf.Sources.Nexus.Api;
 
 using Polly;
@@ -24,9 +25,10 @@ public static class NexusServiceCollectionExtensions
     private static readonly string ApplicationVersion = typeof(NexusSource).Assembly.GetName().Version?.ToString(3) ?? "0.0.0";
 
     /// <summary>
-    /// Adds <see cref="NexusSource"/> as an <see cref="IModSource"/>, with its API client: every request names the app
-    /// and its version, as Nexus Mods asks; requests that fail for a passing reason are retried with backoff; and
-    /// requests are held back while the account's rate limit is used up. Calling this again changes nothing.
+    /// Adds <see cref="NexusSource"/> as an <see cref="IModSource"/> that links accounts with a personal API key, with its
+    /// API client: every request names the app and its version, as Nexus Mods asks; requests that fail for a passing
+    /// reason are retried with backoff; and requests are held back while the account's rate limit is used up. Calling
+    /// this again changes nothing.
     /// </summary>
     /// <remarks>
     /// The client is the one named for the source in <c>SourceHttpClients</c>, so the host's <c>AddSourceHttpClients()</c>
@@ -46,7 +48,9 @@ public static class NexusServiceCollectionExtensions
         services.TryAddSingleton(TimeProvider.System);
         services.AddSingleton<NexusQuota>();
         services.AddSingleton<NexusApiClient>();
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IModSource, NexusSource>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IModSource, NexusSource>(provider => new NexusSource(
+            provider.GetRequiredService<NexusApiClient>(),
+            [new NexusApiKeyStrategy()])));
 
         IHttpClientBuilder client = services.AddHttpClient(NexusApiClient.ClientName, http =>
         {

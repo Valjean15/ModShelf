@@ -61,4 +61,14 @@
   <data name="DisplayName" xml:space="preserve">
     <value>Nexus Mods</value>
   </data>
+  <data name="TierFree" xml:space="preserve">
+    <value>Free</value>
+    <comment>An ordinary Nexus Mods account, without Premium or Supporter.</comment>
+  </data>
+  <data name="TierPremium" xml:space="preserve">
+    <value>Premium</value>
+  </data>
+  <data name="TierSupporter" xml:space="preserve">
+    <value>Supporter</value>
+  </data>
 </root>

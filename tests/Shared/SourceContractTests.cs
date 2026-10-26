@@ -1,5 +1,6 @@
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions;
+using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Downloads;
 using ModShelf.Sources.Abstractions.Links;
 
@@ -83,6 +84,29 @@ public abstract class SourceContractTests<TSource>
             RecognizedLink match = (await recognizer.RecognizeAsync(link, TestContext.Current.CancellationToken))!;
 
             Assert.NotNull(await resolver.ResolveAsync(match.File, TestContext.Current.CancellationToken));
+        }
+    }
+
+    [Fact]
+    public void OffersEachWayToLinkAnAccountOnce()
+    {
+        IAccountLinker linker = Capability<IAccountLinker>();
+
+        Assert.NotEmpty(linker.Strategies);
+        Assert.Equal(linker.Strategies.Count, linker.Strategies.Select(strategy => strategy.Kind).Distinct().Count());
+    }
+
+    [Fact]
+    public async Task NeverSendsCredentialsAWayItDoesntOffer()
+    {
+        IAccountLinker linker = Capability<IAccountLinker>();
+        AuthKind[] unoffered = [.. Enum.GetValues<AuthKind>().Where(kind => linker.Strategies.All(strategy => strategy.Kind != kind))];
+        Assert.SkipWhen(unoffered.Length == 0, $"{typeof(TSource).Name} offers every way to link an account.");
+
+        foreach (AuthKind kind in unoffered)
+        {
+            await Assert.ThrowsAsync<ArgumentException>(
+                () => linker.GetProfileAsync(new AccountCredentials("some-token"), kind, TestContext.Current.CancellationToken));
         }
     }
 
