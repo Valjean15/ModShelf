@@ -1,5 +1,6 @@
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Downloads.Ports;
+using ModShelf.Application.Tests.Common;
 using ModShelf.Application.Tests.Fakes;
 using ModShelf.Domain.Downloads;
 
@@ -64,6 +65,20 @@ public sealed class DownloadSchedulerControlTests
 
         Assert.Equal(Cancelled, (await harness.CurrentAsync(job.Id)).Status);
         Assert.Equal(call.DestinationPath, Assert.Single(harness.Transfer.DeletedPartialFiles));
+    }
+
+    [Fact]
+    public async Task CancellingARunningDownloadSaysWhenThePartialFileCantBeDeleted()
+    {
+        await using SchedulerHarness harness = await SchedulerHarness.StartAsync();
+        (DownloadJobSnapshot job, _) = await StartDownloadAsync(harness, bytesDownloaded: 40);
+        harness.Transfer.DeleteFailure = new IOException("Another program has the file open.");
+
+        IOException failed = await Assert.ThrowsAsync<IOException>(
+            () => harness.Scheduler.CancelAsync(job.Id, TestContext.Current.CancellationToken).WaitAsync(SchedulerTimeouts.Wait, TestContext.Current.CancellationToken));
+
+        Assert.Same(harness.Transfer.DeleteFailure, failed);
+        Assert.Equal(Cancelled, (await harness.CurrentAsync(job.Id)).Status);
     }
 
     [Fact]

@@ -309,6 +309,16 @@ public sealed class HttpFileTransferTests : IDisposable
     }
 
     [Fact]
+    public async Task DeletePartialFileIgnoresAFolderThatDoesntExist()
+    {
+        HttpFileTransfer transfer = CreateTransfer();
+
+        await transfer.DeletePartialFileAsync(
+            Path.Combine(Path.GetDirectoryName(Destination)!, "never-created", "SkyUI.7z"),
+            TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
     public async Task ReportsProgressAtMostOncePerInterval()
     {
         _server.Respond(Responses.Whole(File1000, chunkSize: 100));

@@ -121,7 +121,15 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
 
-        File.Delete(PartialFiles.PathFor(destinationPath));
+        try
+        {
+            File.Delete(PartialFiles.PathFor(destinationPath));
+        }
+        catch (DirectoryNotFoundException)
+        {
+            // The download never got as far as creating its folder, so there's no partial file.
+        }
+
         return Task.CompletedTask;
     }
 

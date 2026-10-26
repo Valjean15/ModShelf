@@ -19,6 +19,11 @@ internal sealed class ControlledFileTransfer : IFileTransfer
 
     public int CallCount => Volatile.Read(ref _callCount);
 
+    /// <summary>
+    /// What deleting a partial file throws, if anything, such as a file another program holds open.
+    /// </summary>
+    public Exception? DeleteFailure { get; set; }
+
     public Task<TransferOutcome> DownloadAsync(
         DownloadTicket ticket,
         string destinationPath,
@@ -33,6 +38,11 @@ internal sealed class ControlledFileTransfer : IFileTransfer
 
     public Task DeletePartialFileAsync(string destinationPath, CancellationToken cancellationToken)
     {
+        if (DeleteFailure is { } failure)
+        {
+            return Task.FromException(failure);
+        }
+
         DeletedPartialFiles.Enqueue(destinationPath);
         return Task.CompletedTask;
     }

@@ -472,10 +472,19 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
                 job.Fail(DownloadFailureReason.Unexpected);
             }
 
-            await SaveAsync(job).ConfigureAwait(false);
-            if (deletePartialFile)
+            try
             {
-                await _transfer.DeletePartialFileAsync(DestinationOf(job), CancellationToken.None).ConfigureAwait(false);
+                await SaveAsync(job).ConfigureAwait(false);
+                if (deletePartialFile)
+                {
+                    await _transfer.DeletePartialFileAsync(DestinationOf(job), CancellationToken.None).ConfigureAwait(false);
+                }
+            }
+            catch (Exception exception)
+            {
+                // Whoever asked for the stop hears what went wrong, rather than waiting for good.
+                running.CompleteWaiters(exception);
+                throw;
             }
 
             running.CompleteWaiters(stopped
