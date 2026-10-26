@@ -1,3 +1,4 @@
+using ModShelf.Domain.Mods;
 using ModShelf.Sources.Nexus.Links;
 
 namespace ModShelf.Sources.Nexus.Tests.Links;
@@ -70,6 +71,26 @@ public sealed class NexusLinkTests
     public void RefusesItsOwnLinksToSomethingElse(string link)
     {
         Assert.Throws<ArgumentException>(() => NexusLink.Read(new Uri(link)));
+    }
+
+    [Fact]
+    public void LinksToAFileOfTheSource()
+    {
+        ModFileRef file = new(new ModRef(new GameRef(new SourceId("nexus"), "skyrimspecialedition"), "12604"), "35407");
+
+        Assert.Equal(new NexusLink("skyrimspecialedition", "12604", "35407", IsHandoff: false), NexusLink.ForFile(file));
+    }
+
+    [Theory]
+    [InlineData("mod-io", "skyrimspecialedition", "12604", "35407")]
+    [InlineData("nexus", "skyrim/../se", "12604", "35407")]
+    [InlineData("nexus", "skyrimspecialedition", "12604?x=1", "35407")]
+    [InlineData("nexus", "skyrimspecialedition", "12604", "0")]
+    public void RefusesAFileThatIsntOneOfTheSources(string source, string game, string mod, string fileId)
+    {
+        ModFileRef file = new(new ModRef(new GameRef(new SourceId(source), game), mod), fileId);
+
+        Assert.Throws<ArgumentException>(() => NexusLink.ForFile(file));
     }
 
     [Fact]

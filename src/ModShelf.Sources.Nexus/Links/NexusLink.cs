@@ -2,6 +2,8 @@ using System.Collections.Specialized;
 using System.Globalization;
 using System.Web;
 
+using ModShelf.Domain.Mods;
+
 namespace ModShelf.Sources.Nexus.Links;
 
 /// <summary>
@@ -49,6 +51,24 @@ internal sealed record NexusLink(string Game, string ModId, string? FileId, bool
     }
 
     /// <summary>
+    /// The link to a file of this source, such as one a saved download job names, checked as a link the user gives is.
+    /// </summary>
+    /// <exception cref="ArgumentException">The file isn't Nexus Mods', or its game or IDs aren't ones Nexus Mods gives.</exception>
+    public static NexusLink ForFile(ModFileRef file)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+        if (file.Mod.Game.Source != NexusSource.NexusId)
+        {
+            throw new ArgumentException($"The file belongs to source '{file.Mod.Game.Source}', not '{NexusSource.NexusId}'.", nameof(file));
+        }
+
+        string game = GameDomain(file.Mod.Game.Key) ?? throw new ArgumentException("The file's game isn't one Nexus Mods names.", nameof(file));
+        string mod = Id(file.Mod.Id) ?? throw new ArgumentException("The file's mod ID isn't one Nexus Mods gives.", nameof(file));
+        string fileId = Id(file.Id) ?? throw new ArgumentException("The file's ID isn't one Nexus Mods gives.", nameof(file));
+        return new NexusLink(game, mod, fileId, IsHandoff: false);
+    }
+
+    /// <summary>
     /// <c>/{game}/mods/{mod}</c>, with the file in the <c>file_id</c> parameter when there is one.
     /// </summary>
     private static NexusLink ReadPage(Uri link)
@@ -63,7 +83,7 @@ internal sealed record NexusLink(string Game, string ModId, string? FileId, bool
 
         NameValueCollection query = HttpUtility.ParseQueryString(link.Query);
         string? file = query["file_id"];
-        return new NexusLink(GameDomain(game, link), Id(mod, link), file is null ? null : Id(file, link), IsHandoff: false);
+        return new NexusLink(GameIn(game, link), IdIn(mod, link), file is null ? null : IdIn(file, link), IsHandoff: false);
     }
 
     /// <summary>
@@ -82,32 +102,37 @@ internal sealed record NexusLink(string Game, string ModId, string? FileId, bool
             throw new ArgumentException("That nxm:// link isn't to a file.", nameof(link));
         }
 
-        return new NexusLink(GameDomain(link.Host, link), Id(mod, link), Id(file, link), IsHandoff: true);
+        return new NexusLink(GameIn(link.Host, link), IdIn(mod, link), IdIn(file, link), IsHandoff: true);
     }
 
     private static string[] Segments(Uri link)
         => link.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
+    private static string GameIn(string text, Uri link)
+        => GameDomain(text) ?? throw new ArgumentException("That Nexus Mods link names no game ModShelf can look up.", nameof(link));
+
+    private static string IdIn(string text, Uri link)
+        => Id(text) ?? throw new ArgumentException("That Nexus Mods link has a mod or file ID that isn't a number.", nameof(link));
+
     /// <summary>
-    /// Letters, digits, '-' and '_' only, since the name goes into the API's paths.
+    /// The game's domain name in lower case, or null unless it has only letters, digits, '-' and '_', since it goes
+    /// into the API's paths.
     /// </summary>
-    private static string GameDomain(string text, Uri link)
+    private static string? GameDomain(string text)
     {
         string game = text.ToLowerInvariant();
-        if (game.Length is 0 or > MaxGameLength
-            || !game.All(character => char.IsAsciiLetterLower(character) || char.IsAsciiDigit(character) || character is '-' or '_'))
-        {
-            throw new ArgumentException("That Nexus Mods link names no game ModShelf can look up.", nameof(link));
-        }
-
-        return game;
+        return game.Length is > 0 and <= MaxGameLength
+            && game.All(character => char.IsAsciiLetterLower(character) || char.IsAsciiDigit(character) || character is '-' or '_')
+                ? game
+                : null;
     }
 
     /// <summary>
     /// A positive whole number, written without leading zeros, so that the same mod or file always has the same ID.
+    /// Null for anything else.
     /// </summary>
-    private static string Id(string text, Uri link)
+    private static string? Id(string text)
         => text.All(char.IsAsciiDigit) && long.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out long id) && id > 0
             ? id.ToString(CultureInfo.InvariantCulture)
-            : throw new ArgumentException("That Nexus Mods link has a mod or file ID that isn't a number.", nameof(link));
+            : null;
 }
