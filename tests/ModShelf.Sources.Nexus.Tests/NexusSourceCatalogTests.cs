@@ -93,6 +93,8 @@ public sealed class NexusSourceCatalogTests : IDisposable
         Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(recorded["updated_timestamp"]!.GetValue<long>()), mod.UpdatedAt);
         Assert.True(mod.IsAvailable);
         Assert.False(mod.HasAdultContent);
+        Assert.Equal(recorded["mod_downloads"]!.GetValue<long>(), mod.Downloads);
+        Assert.Equal(recorded["endorsement_count"]!.GetValue<long>(), mod.Endorsements);
     }
 
     [Theory]
@@ -123,6 +125,8 @@ public sealed class NexusSourceCatalogTests : IDisposable
         Assert.Null(mod.UpdatedAt);
         Assert.True(mod.HasAdultContent);
         Assert.True(mod.IsAvailable);
+        Assert.Null(mod.Downloads);
+        Assert.Null(mod.Endorsements);
     }
 
     [Fact]

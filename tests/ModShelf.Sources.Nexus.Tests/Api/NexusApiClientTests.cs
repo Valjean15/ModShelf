@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Net;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +20,7 @@ public sealed partial class NexusApiClientTests : IDisposable
 {
     private const string ModPath = "/v1/games/stardewvalley/mods/2400.json";
     private const string FlakyPath = "/v1/flaky.json";
+    private const string GraphQlPath = "/v2/graphql";
 
     private readonly RecordedNexusApi _api = new();
 
@@ -161,6 +163,58 @@ public sealed partial class NexusApiClientTests : IDisposable
         Assert.DoesNotContain("nxm-key-123", refused.ToString(), StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task AnAnswerItCantReadIsAFailureNotACrash()
+    {
+        _api.Answer(ModPath, response => response.WithStatusCode(200).WithBody("<html>Down for maintenance</html>"));
+
+        HttpRequestException failed = await Assert.ThrowsAsync<HttpRequestException>(() => GetAsync<ModSummary>(ModPath));
+
+        Assert.IsType<System.Text.Json.JsonException>(failed.InnerException, exactMatch: false);
+    }
+
+    [Fact]
+    public async Task AGraphQlQueryIsPostedWithItsVariablesAndReadInCamelCase()
+    {
+        _api.AnswerPost(GraphQlPath, response => response.WithStatusCode(200).WithBody(
+            """{"data": {"mod": {"modId": 2400, "name": "SMAPI"}}}"""));
+
+        GraphQlData data = await QueryAsync<GraphQlData>("query Q($id: Int) { mod(id: $id) { modId name } }", new JsonObject { ["id"] = 2400 });
+
+        Assert.Equal(new ModSummary(2400, "SMAPI"), data.Mod);
+        JsonNode body = JsonNode.Parse(Assert.Single(_api.Requests).RequestMessage!.Body!)!;
+        Assert.Equal("query Q($id: Int) { mod(id: $id) { modId name } }", body["query"]!.GetValue<string>());
+        Assert.Equal(2400, body["variables"]!["id"]!.GetValue<int>());
+        Assert.Equal("ModShelf", Assert.Single(Assert.Single(_api.Requests).RequestMessage!.Headers!["Application-Name"]));
+    }
+
+    [Fact]
+    public async Task GraphQlErrorsAreAFailureWithTheirMessages()
+    {
+        _api.AnswerPost(GraphQlPath, response => response.WithStatusCode(200).WithBody(
+            """{"data": null, "errors": [{"message": "Field 'nope' doesn't exist"}, {"message": "Second\n   problem"}]}"""));
+
+        HttpRequestException refused = await Assert.ThrowsAsync<HttpRequestException>(() => QueryAsync<GraphQlData>("{ nope }", []));
+
+        Assert.Contains("Field 'nope' doesn't exist Second problem", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task AGraphQlAnswerWithoutDataIsAFailure()
+    {
+        _api.AnswerPost(GraphQlPath, response => response.WithStatusCode(200).WithBody("""{"data": null}"""));
+
+        await Assert.ThrowsAsync<HttpRequestException>(() => QueryAsync<GraphQlData>("{ mod { modId } }", []));
+    }
+
+    [Fact]
+    public async Task AGraphQlQueryWithARefusedKeyIsAnAuthenticationFailure()
+    {
+        _api.AnswerPost(GraphQlPath, response => response.WithStatusCode(401).WithBody("""{"message": "Please provide a valid API Key"}"""));
+
+        await Assert.ThrowsAsync<AuthenticationFailedException>(() => QueryAsync<GraphQlData>("{ mod { modId } }", []));
+    }
+
     [GeneratedRegex(@"^\d+\.\d+\.\d+$")]
     private static partial Regex Version();
 
@@ -186,5 +240,13 @@ public sealed partial class NexusApiClientTests : IDisposable
         return await services.GetRequiredService<NexusApiClient>().GetAsync<T>(path.TrimStart('/'), Cancellation);
     }
 
+    private async Task<T> QueryAsync<T>(string query, JsonObject variables)
+    {
+        await using ServiceProvider services = _api.BuildServices();
+        return await services.GetRequiredService<NexusApiClient>().QueryAsync<T>(query, variables, Cancellation);
+    }
+
     private sealed record ModSummary(int ModId, string Name);
+
+    private sealed record GraphQlData(ModSummary? Mod);
 }

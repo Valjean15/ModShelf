@@ -5,6 +5,7 @@ namespace ModShelf.Sources.Nexus.Api;
 /// </summary>
 /// <param name="Status">Such as <c>published</c>, <c>hidden</c> or <c>under_moderation</c>.</param>
 /// <param name="UpdatedTimestamp">When the mod last changed, in seconds since 1970.</param>
+/// <param name="ModDownloads">How many times the mod's files were downloaded.</param>
 internal sealed record NexusMod(
     long ModId,
     string? Name,
@@ -15,4 +16,6 @@ internal sealed record NexusMod(
     long? UpdatedTimestamp,
     bool? Available,
     string? Status,
-    bool? ContainsAdultContent);
+    bool? ContainsAdultContent,
+    long? ModDownloads = null,
+    long? EndorsementCount = null);

@@ -41,7 +41,9 @@ public sealed partial class NexusSource : IModCatalog
             pictureUrl: WebLink(found.PictureUrl),
             updatedAt: found.UpdatedTimestamp is { } updated ? FromUnixSeconds(updated) : null,
             isAvailable: found.Available != false && (found.Status is null || found.Status == "published"),
-            hasAdultContent: found.ContainsAdultContent == true);
+            hasAdultContent: found.ContainsAdultContent == true,
+            downloads: Count(found.ModDownloads),
+            endorsements: Count(found.EndorsementCount));
     }
 
     /// <exception cref="ArgumentException">The mod isn't Nexus Mods'.</exception>

@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
 using ModShelf.Sources.Abstractions.Accounts;
@@ -32,6 +33,11 @@ internal sealed partial class NexusApiClient(IHttpClientFactory clients)
     };
 
     /// <summary>
+    /// The v2 GraphQL API's JSON: camelCase names, such as <c>modId</c>.
+    /// </summary>
+    internal static readonly JsonSerializerOptions GraphQlJson = new(JsonSerializerDefaults.Web);
+
+    /// <summary>
     /// The name of the source's client, which the app sets up to add the linked account.
     /// </summary>
     internal static string ClientName { get; } = SourceHttpClients.NameFor(NexusSource.NexusId);
@@ -56,29 +62,35 @@ internal sealed partial class NexusApiClient(IHttpClientFactory clients)
     /// Sends <paramref name="request"/>, disposing it afterwards, and reads the answer.
     /// </summary>
     /// <inheritdoc cref="GetAsync" path="/exception"/>
-    public async Task<T> SendAsync<T>(HttpRequestMessage request, CancellationToken cancellationToken)
+    public Task<T> SendAsync<T>(HttpRequestMessage request, CancellationToken cancellationToken)
+        => SendAsync<T>(request, Json, cancellationToken);
+
+    /// <summary>
+    /// Runs a query against the v2 GraphQL API, <c>v2/graphql</c>, and reads the data it answers.
+    /// </summary>
+    /// <param name="query">The GraphQL document, such as one of the source's <c>.graphql</c> files.</param>
+    /// <param name="variables">The query's variables, with the API's camelCase names.</param>
+    /// <exception cref="AuthenticationFailedException">The API refused the account's key or token (401).</exception>
+    /// <exception cref="HttpRequestException">
+    /// Any other refusal or failure, including an answer that lists GraphQL errors instead of data.
+    /// </exception>
+    public async Task<T> QueryAsync<T>(string query, JsonObject variables, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentException.ThrowIfNullOrWhiteSpace(query);
+        ArgumentNullException.ThrowIfNull(variables);
 
-        using (request)
+        HttpRequestMessage request = new(HttpMethod.Post, new Uri("v2/graphql", UriKind.Relative))
         {
-            HttpResponseMessage response;
-            try
-            {
-                response = await clients.CreateClient(ClientName).SendAsync(request, cancellationToken).ConfigureAwait(false);
-            }
-            catch (TimeoutRejectedException exception)
-            {
-                throw new HttpRequestException("Nexus Mods didn't answer in time.", exception);
-            }
-
-            using (response)
-            {
-                await ThrowIfRefusedAsync(response, cancellationToken).ConfigureAwait(false);
-                return await response.Content.ReadFromJsonAsync<T>(Json, cancellationToken).ConfigureAwait(false)
-                    ?? throw new HttpRequestException("Nexus Mods answered with nothing.", null, response.StatusCode);
-            }
+            Content = JsonContent.Create(new JsonObject { ["query"] = query, ["variables"] = variables.DeepClone() }, options: GraphQlJson),
+        };
+        NexusGraphQlAnswer<T> answer = await SendAsync<NexusGraphQlAnswer<T>>(request, GraphQlJson, cancellationToken).ConfigureAwait(false);
+        if (answer.Errors is { Count: > 0 } errors)
+        {
+            string messages = string.Join(" ", errors.Select(error => error.Message).Where(message => !string.IsNullOrWhiteSpace(message)));
+            throw new HttpRequestException($"Nexus Mods refused the query. {Shorten(messages)}");
         }
+
+        return answer.Data ?? throw new HttpRequestException("Nexus Mods answered the query with no data.");
     }
 
     private static async Task ThrowIfRefusedAsync(HttpResponseMessage response, CancellationToken cancellationToken)
@@ -118,8 +130,16 @@ internal sealed partial class NexusApiClient(IHttpClientFactory clients)
             // Not a JSON error body.
         }
 
-        message = Whitespace().Replace(string.IsNullOrWhiteSpace(message) ? response.ReasonPhrase ?? string.Empty : message, " ").Trim();
-        return message.Length > MaxMessageLength ? message[..MaxMessageLength] + "…" : message;
+        return Shorten(string.IsNullOrWhiteSpace(message) ? response.ReasonPhrase ?? string.Empty : message);
+    }
+
+    /// <summary>
+    /// The message on one line, with runs of whitespace as one space, cut at <see cref="MaxMessageLength"/> characters.
+    /// </summary>
+    private static string Shorten(string message)
+    {
+        string line = Whitespace().Replace(message, " ").Trim();
+        return line.Length > MaxMessageLength ? line[..MaxMessageLength] + "…" : line;
     }
 
     private static string Until(DateTimeOffset? date)
@@ -127,6 +147,39 @@ internal sealed partial class NexusApiClient(IHttpClientFactory clients)
 
     [GeneratedRegex(@"\s+")]
     private static partial Regex Whitespace();
+
+    private async Task<T> SendAsync<T>(HttpRequestMessage request, JsonSerializerOptions json, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        using (request)
+        {
+            HttpResponseMessage response;
+            try
+            {
+                response = await clients.CreateClient(ClientName).SendAsync(request, cancellationToken).ConfigureAwait(false);
+            }
+            catch (TimeoutRejectedException exception)
+            {
+                throw new HttpRequestException("Nexus Mods didn't answer in time.", exception);
+            }
+
+            using (response)
+            {
+                await ThrowIfRefusedAsync(response, cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    return await response.Content.ReadFromJsonAsync<T>(json, cancellationToken).ConfigureAwait(false)
+                        ?? throw new HttpRequestException("Nexus Mods answered with nothing.", null, response.StatusCode);
+                }
+                catch (JsonException exception)
+                {
+                    // The API changed, or answered with something other than JSON: a failure to report, not a crash.
+                    throw new HttpRequestException("Nexus Mods answered in a way ModShelf doesn't understand.", exception, response.StatusCode);
+                }
+            }
+        }
+    }
 
     private sealed record NexusError(string? Message, string? Error);
 }

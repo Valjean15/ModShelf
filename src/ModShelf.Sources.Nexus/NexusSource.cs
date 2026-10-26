@@ -38,6 +38,11 @@ public sealed partial class NexusSource : IAccountLinker
     public string DisplayName => Strings.DisplayName;
 
     /// <summary>
+    /// A count the API gives, or null when it gives none or a negative one.
+    /// </summary>
+    private static long? Count(long? count) => count is >= 0 ? count : null;
+
+    /// <summary>
     /// An absolute HTTP or HTTPS link, or null for anything else, which the app must never open.
     /// </summary>
     private static Uri? WebLink(string? text)
