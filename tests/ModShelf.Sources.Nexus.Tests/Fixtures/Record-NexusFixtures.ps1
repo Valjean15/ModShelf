@@ -45,6 +45,15 @@
     Free only, optional: an nxm:// link that has expired, such as the one given to -NxmLink earlier, once the
     time the script gave has passed. Records how Nexus Mods refuses an expired key.
 
+.PARAMETER Tracking
+    Records how Nexus Mods answers tracking and untracking the mod given to -ModId: tracking it, tracking it again,
+    untracking it, untracking it again, and tracking a mod that doesn't exist. Records only those, leaving the other
+    recordings as they are; with -SearchOnly, the searches too. Works with either account.
+
+    It's the only option that changes your account. It tracks the mod and then untracks it, or the other way round
+    if you already track it, so your tracked mods end as they started, even if the script stops part-way. Of your
+    tracked mods, only the recorded one is written to a file.
+
 .EXAMPLE
     ./Record-NexusFixtures.ps1 -Account Premium
 
@@ -56,6 +65,9 @@
 
 .EXAMPLE
     ./Record-NexusFixtures.ps1 -Account Premium -SearchOnly
+
+.EXAMPLE
+    ./Record-NexusFixtures.ps1 -Account Premium -Tracking
 #>
 
 #Requires -Version 7.2
@@ -82,6 +94,8 @@ param(
 
     [string] $SearchAuthor = 'Pathoschild',
 
+    [switch] $Tracking,
+
     # Only for testing this script against a local fake of the API.
     [uri] $ApiBase = 'https://api.nexusmods.com/'
 )
@@ -95,6 +109,10 @@ if ($Account -eq 'Premium' -and ($NxmLink -or $ExpiredNxmLink)) {
 
 if ($SearchOnly -and ($NxmLink -or $ExpiredNxmLink)) {
     throw '-SearchOnly records only searches; run the nxm:// links separately.'
+}
+
+if ($Tracking -and ($NxmLink -or $ExpiredNxmLink)) {
+    throw '-Tracking records only tracking; run the nxm:// links separately.'
 }
 
 # The search query the Nexus source sends, so the recorded answers are to exactly that query.
@@ -113,6 +131,8 @@ query Schema {
 }
 fragment TypeRef on __Type { kind name ofType { kind name ofType { kind name ofType { kind name } } } }
 '@
+
+$TrackedModsPath = 'v1/user/tracked_mods.json'
 
 $ApplicationName = 'ModShelf'
 $ApplicationVersion = '0.1.0-dev'
@@ -149,15 +169,26 @@ function Get-ApiKey {
     return $key
 }
 
+# A GET request, or with -Form a form sent with -Method, as the source tracks and untracks mods.
 function Invoke-Nexus {
-    param([string] $Path, [string] $Query = '', [string] $Key = $script:ApiKey)
+    param([string] $Path, [string] $Query = '', [string] $Key = $script:ApiKey, [string] $Method = 'GET', [System.Collections.Specialized.OrderedDictionary] $Form)
 
     $target = if ($Query) { "${Path}?$Query" } else { $Path }
-    $request = [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::Get, $target.TrimStart('/'))
+    $request = [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::new($Method), $target.TrimStart('/'))
     $request.Headers.Add('apikey', $Key)
     $request.Headers.Add('Application-Name', $ApplicationName)
     $request.Headers.Add('Application-Version', $ApplicationVersion)
     $request.Headers.Add('Accept', 'application/json')
+    $sent = $null
+    if ($Form) {
+        $fields = [System.Collections.Generic.Dictionary[string, string]]::new()
+        foreach ($field in $Form.GetEnumerator()) {
+            $fields[[string]$field.Key] = [string]$field.Value
+        }
+
+        $request.Content = [System.Net.Http.FormUrlEncodedContent]::new($fields)
+        $sent = $request.Content.ReadAsStringAsync().GetAwaiter().GetResult()
+    }
 
     $response = $script:Http.Send($request)
     try {
@@ -172,13 +203,21 @@ function Invoke-Nexus {
             }
         }
 
-        return [pscustomobject]@{
+        $exchange = [ordered]@{
+            Method  = $Method
             Path    = $Path
             Query   = $Query
             Status  = [int]$response.StatusCode
             Headers = $headers
             Text    = $response.Content.ReadAsStringAsync().GetAwaiter().GetResult()
         }
+
+        # The form as sent, such as mod_id=2400, so a test can match its request to the answer.
+        if ($null -ne $sent) {
+            $exchange['Body'] = [System.Text.Json.Nodes.JsonValue]::Create($sent)
+        }
+
+        return [pscustomobject]$exchange
     }
     finally {
         $response.Dispose()
@@ -305,6 +344,86 @@ function Save-Searches {
     Save-Fixture 'search-no-results' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Text 'zqxj no such mod zqxj'))
 }
 
+# How Nexus Mods answers each way of tracking and untracking. The account's tracked mods end as they started, even
+# when something fails part-way.
+function Save-Tracking {
+    $mod = [pscustomobject]@{ Game = $Game; Id = [string]$ModId }
+    $unknown = [pscustomobject]@{ Game = $Game; Id = '999999999' }
+    $wasTracked = Test-Tracked $mod
+    try {
+        if ($wasTracked) {
+            Save-Fixture 'untrack' (Invoke-Tracking 'DELETE' $mod)
+            Save-Fixture 'untrack-not-tracked' (Invoke-Tracking 'DELETE' $mod)
+        }
+
+        Save-Fixture 'track' (Invoke-Tracking 'POST' $mod)
+        Save-Fixture 'track-tracked' (Invoke-Tracking 'POST' $mod)
+        Save-Fixture 'tracked-mods-with-mod' (Invoke-Nexus $TrackedModsPath) { param($body) Limit-Tracked $body $mod }
+        if (-not $wasTracked) {
+            Save-Fixture 'untrack' (Invoke-Tracking 'DELETE' $mod)
+            Save-Fixture 'untrack-not-tracked' (Invoke-Tracking 'DELETE' $mod)
+        }
+
+        Save-Fixture 'track-unknown-mod' (Invoke-Tracking 'POST' $unknown)
+    }
+    finally {
+        Set-Tracked $mod $wasTracked
+        Set-Tracked $unknown $false
+    }
+}
+
+function Invoke-Tracking([string] $Method, $Mod) {
+    return Invoke-Nexus $TrackedModsPath "domain_name=$($Mod.Game)" -Method $Method -Form ([ordered]@{ mod_id = $Mod.Id })
+}
+
+function Test-Tracked($Mod) {
+    $list = Invoke-Nexus $TrackedModsPath
+    if ($list.Status -ne 200) {
+        throw "Nexus Mods didn't list your tracked mods (HTTP $($list.Status)), so nothing was changed."
+    }
+
+    foreach ($entry in (ConvertTo-Node $list.Text)) {
+        if (Test-IsMod $entry $Mod) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+function Test-IsMod($Entry, $Mod) {
+    return $Entry -is [System.Text.Json.Nodes.JsonObject] -and (Get-Text $Entry['domain_name']) -eq $Mod.Game -and (Get-Text $Entry['mod_id']) -eq $Mod.Id
+}
+
+# Tracks or untracks the mod unless it already is as asked. Only warns when it can't, so the error that stopped the
+# script, if one did, is the one shown.
+function Set-Tracked($Mod, [bool] $Track) {
+    try {
+        if ((Test-Tracked $Mod) -eq $Track) {
+            return
+        }
+
+        $answer = Invoke-Tracking $(if ($Track) { 'POST' } else { 'DELETE' }) $Mod
+        if ((Test-Tracked $Mod) -ne $Track) {
+            throw "Nexus Mods answered HTTP $($answer.Status)."
+        }
+    }
+    catch {
+        $state = if ($Track) { 'tracked' } else { 'not tracked' }
+        Write-Warning "$Game mod $($Mod.Id) should be $state again, but the script couldn't make it so: $_ Check your tracked mods on Nexus Mods."
+    }
+}
+
+# Of your tracked mods, keeps only the recorded one: which others you track is yours.
+function Limit-Tracked($Body, $Mod) {
+    if ($Body -isnot [System.Text.Json.Nodes.JsonArray]) { return }
+    for ($index = $Body.Count - 1; $index -ge 0; $index--) {
+        if (-not (Test-IsMod $Body[$index] $Mod)) {
+            $Body.RemoveAt($index)
+        }
+    }
+}
+
 # Of the Query type's fields, keeps only "mods": the rest is the whole API, which the tests don't need.
 # Plain assignments only: an if statement's output would unroll the JSON array into a copy.
 function Limit-Schema($Body) {
@@ -395,6 +514,9 @@ function Hide-Personal([string] $Text) {
     $id = [regex]::Escape($script:Me.UserId)
     $Text = [regex]::Replace($Text, "(?<=""(user_id|member_id|uid|userId|memberId)"":\s*""?)$id(?!\d)", $Stand.UserId)
     $Text = [regex]::Replace($Text, "(?<=[=/])$id(?=[/&""?\s]|$)", $Stand.UserId)
+
+    # Inside any text, such as "User 1234567 is now Tracking Mod: 2400".
+    $Text = [regex]::Replace($Text, "(?<=:\s*""[^""]*)(?<!\d)$id(?!\d)", $Stand.UserId)
     $Text = [regex]::Replace($Text, "(?<![\w.-])$([regex]::Escape($script:Me.Name))(?![\w.-])", $Stand.Name)
     return $Text
 }
@@ -501,8 +623,15 @@ try {
     }
 
     Write-Host "Recording as a $Account account into $OutFolder"
-    if ($SearchOnly) {
-        Save-Searches
+    if ($SearchOnly -or $Tracking) {
+        if ($SearchOnly) {
+            Save-Searches
+        }
+
+        if ($Tracking) {
+            Save-Tracking
+        }
+
         Write-Host 'Done. Review the files, then tell Claude they are there.'
         return
     }
@@ -530,7 +659,7 @@ try {
         Save-Fixture 'changelogs' (Invoke-Nexus "$modPath/changelogs.json")
         Save-Fixture 'download-link' (Invoke-Nexus "$modPath/files/$fileId/download_link.json") { param($body) Hide-LinkTokens $body }
         Save-Fixture 'updated-1d' (Invoke-Nexus "v1/games/$Game/mods/updated.json" 'period=1d') { param($body) Limit-Array $body 25 }
-        Save-Fixture 'tracked-mods' (Invoke-Nexus 'v1/user/tracked_mods.json') { param($body) Limit-Array $body 5 }
+        Save-Fixture 'tracked-mods' (Invoke-Nexus $TrackedModsPath) { param($body) Limit-Array $body 5 }
         Save-Fixture 'mod-not-found' (Invoke-Nexus "v1/games/$Game/mods/999999999.json")
         Save-Fixture 'game-not-found' (Invoke-Nexus 'v1/games/notagame.json')
         Save-Fixture 'validate-invalid-key' (Invoke-Nexus 'v1/users/validate.json' -Key 'not-a-real-key')
