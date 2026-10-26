@@ -66,6 +66,22 @@ internal sealed partial class NexusApiClient(IHttpClientFactory clients)
         => SendAsync<T>(request, Json, cancellationToken);
 
     /// <summary>
+    /// Sends <paramref name="request"/>, disposing it afterwards, when only whether it worked matters, such as tracking
+    /// a mod. Whatever the API answers besides is ignored.
+    /// </summary>
+    /// <inheritdoc cref="GetAsync" path="/exception"/>
+    public async Task SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        using (request)
+        {
+            using HttpResponseMessage response = await GetResponseAsync(request, cancellationToken).ConfigureAwait(false);
+            await ThrowIfRefusedAsync(response, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
     /// Runs a query against the v2 GraphQL API, <c>v2/graphql</c>, and reads the data it answers.
     /// </summary>
     /// <param name="query">The GraphQL document, such as one of the source's <c>.graphql</c> files.</param>
@@ -154,17 +170,7 @@ internal sealed partial class NexusApiClient(IHttpClientFactory clients)
 
         using (request)
         {
-            HttpResponseMessage response;
-            try
-            {
-                response = await clients.CreateClient(ClientName).SendAsync(request, cancellationToken).ConfigureAwait(false);
-            }
-            catch (TimeoutRejectedException exception)
-            {
-                throw new HttpRequestException("Nexus Mods didn't answer in time.", exception);
-            }
-
-            using (response)
+            using (HttpResponseMessage response = await GetResponseAsync(request, cancellationToken).ConfigureAwait(false))
             {
                 await ThrowIfRefusedAsync(response, cancellationToken).ConfigureAwait(false);
                 try
@@ -178,6 +184,19 @@ internal sealed partial class NexusApiClient(IHttpClientFactory clients)
                     throw new HttpRequestException("Nexus Mods answered in a way ModShelf doesn't understand.", exception, response.StatusCode);
                 }
             }
+        }
+    }
+
+    /// <exception cref="HttpRequestException">Nexus Mods couldn't be reached, or didn't answer in time.</exception>
+    private async Task<HttpResponseMessage> GetResponseAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await clients.CreateClient(ClientName).SendAsync(request, cancellationToken).ConfigureAwait(false);
+        }
+        catch (TimeoutRejectedException exception)
+        {
+            throw new HttpRequestException("Nexus Mods didn't answer in time.", exception);
         }
     }
 

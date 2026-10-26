@@ -90,6 +90,18 @@ internal sealed class RecordedNexusApi : IDisposable
         => _server.Given(Request.Create().UsingPost().WithPath(path)).RespondWith(response(Response.Create()));
 
     /// <summary>
+    /// From now on, DELETE requests to <paramref name="path"/> are answered as the test sets up.
+    /// </summary>
+    public void AnswerDelete(string path, Func<IResponseBuilder, IResponseBuilder> response)
+        => _server.Given(Request.Create().UsingDelete().WithPath(path)).RespondWith(response(Response.Create()));
+
+    /// <summary>
+    /// Requests that match <paramref name="request"/> are answered as the test goes on to set up, such as only in a
+    /// scenario's state.
+    /// </summary>
+    public IRespondWithAProvider Given(IRequestBuilder request) => _server.Given(request);
+
+    /// <summary>
     /// Answers GET requests for <paramref name="path"/> with each response in turn, then the last one for good.
     /// </summary>
     public void AnswerInTurn(string path, params Func<IResponseBuilder, IResponseBuilder>[] responses)

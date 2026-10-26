@@ -21,6 +21,7 @@ public sealed partial class NexusApiClientTests : IDisposable
     private const string ModPath = "/v1/games/stardewvalley/mods/2400.json";
     private const string FlakyPath = "/v1/flaky.json";
     private const string GraphQlPath = "/v2/graphql";
+    private const string TrackedPath = "/v1/user/tracked_mods.json";
 
     private readonly RecordedNexusApi _api = new();
 
@@ -215,6 +216,37 @@ public sealed partial class NexusApiClientTests : IDisposable
         await Assert.ThrowsAsync<AuthenticationFailedException>(() => QueryAsync<GraphQlData>("{ mod { modId } }", []));
     }
 
+    [Theory]
+    [InlineData(204, "")]
+    [InlineData(200, "not JSON at all")]
+    public async Task ARequestWhoseAnswerDoesntMatterSucceedsWhateverItSays(int status, string body)
+    {
+        _api.AnswerPost(TrackedPath, response => response.WithStatusCode(status).WithBody(body));
+
+        await SendAsync(HttpMethod.Post, TrackedPath);
+
+        Assert.Single(_api.Requests);
+    }
+
+    [Fact]
+    public async Task ARequestWhoseAnswerDoesntMatterIsStillRefused()
+    {
+        _api.AnswerDelete(TrackedPath, response => response.WithStatusCode(403).WithBody("""{"message": "Not  your\n mod"}"""));
+
+        HttpRequestException refused = await Assert.ThrowsAsync<HttpRequestException>(() => SendAsync(HttpMethod.Delete, TrackedPath));
+
+        Assert.Equal(HttpStatusCode.Forbidden, refused.StatusCode);
+        Assert.Equal("Nexus Mods answered 403. Not your mod", refused.Message);
+    }
+
+    [Fact]
+    public async Task ARequestWhoseAnswerDoesntMatterWithARefusedKeyIsAnAuthenticationFailure()
+    {
+        _api.AnswerPost(TrackedPath, response => response.WithStatusCode(401).WithBody("""{"message": "Please provide a valid API Key"}"""));
+
+        await Assert.ThrowsAsync<AuthenticationFailedException>(() => SendAsync(HttpMethod.Post, TrackedPath));
+    }
+
     [GeneratedRegex(@"^\d+\.\d+\.\d+$")]
     private static partial Regex Version();
 
@@ -244,6 +276,12 @@ public sealed partial class NexusApiClientTests : IDisposable
     {
         await using ServiceProvider services = _api.BuildServices();
         return await services.GetRequiredService<NexusApiClient>().QueryAsync<T>(query, variables, Cancellation);
+    }
+
+    private async Task SendAsync(HttpMethod method, string path)
+    {
+        await using ServiceProvider services = _api.BuildServices();
+        await services.GetRequiredService<NexusApiClient>().SendAsync(new HttpRequestMessage(method, new Uri(path.TrimStart('/'), UriKind.Relative)), Cancellation);
     }
 
     private sealed record ModSummary(int ModId, string Name);

@@ -95,6 +95,15 @@ internal sealed record NexusLink(string Game, string ModId, string? FileId, bool
     }
 
     /// <summary>
+    /// The link to a mod as the API names it, such as in the account's tracked mods.
+    /// </summary>
+    /// <returns>The link, or null when the game or ID aren't ones Nexus Mods gives.</returns>
+    public static NexusLink? FromApi(string? game, long modId)
+        => game is not null && GameDomain(game) is { } domain && modId > 0
+            ? new NexusLink(domain, modId.ToString(CultureInfo.InvariantCulture), FileId: null, IsHandoff: false)
+            : null;
+
+    /// <summary>
     /// <c>/{game}/mods/{mod}</c>, with the file in the <c>file_id</c> parameter when there is one.
     /// </summary>
     private static NexusLink ReadPage(Uri link)

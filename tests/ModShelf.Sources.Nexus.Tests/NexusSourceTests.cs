@@ -1,9 +1,14 @@
+using System.Net;
+
 using Microsoft.Extensions.DependencyInjection;
 
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Nexus.Tests.Common;
 using ModShelf.Testing;
+
+using WireMock.RequestBuilders;
+using WireMock.ResponseBuilders;
 
 namespace ModShelf.Sources.Nexus.Tests;
 
@@ -12,6 +17,8 @@ namespace ModShelf.Sources.Nexus.Tests;
 /// </summary>
 public sealed class NexusSourceTests : SourceContractTests<NexusSource>, IDisposable
 {
+    private const string TrackedPath = "/v1/user/tracked_mods.json";
+
     private readonly RecordedNexusApi _api = new();
     private readonly ServiceProvider _services;
 
@@ -27,6 +34,7 @@ public sealed class NexusSourceTests : SourceContractTests<NexusSource>, IDispos
 
         // When the updates were recorded, so the last day's are recent.
         _api.Time.SetUtcNow(new DateTimeOffset(2026, 10, 23, 22, 59, 0, TimeSpan.Zero));
+        KeepTrackedMods();
         _services = _api.BuildServices();
     }
 
@@ -48,4 +56,35 @@ public sealed class NexusSourceTests : SourceContractTests<NexusSource>, IDispos
     }
 
     protected override NexusSource CreateSource() => _services.GetServices<IModSource>().OfType<NexusSource>().Single();
+
+    /// <summary>
+    /// Tracked mods as the site keeps them: SMAPI, once tracked, until untracked. Tracking it again, or untracking it
+    /// when it isn't tracked, gets a made-up refusal, since how Nexus Mods answers isn't recorded yet.
+    /// </summary>
+    private void KeepTrackedMods()
+    {
+        const string Scenario = "tracked-mods";
+        const string Tracked = "tracked";
+        const string Untracked = "untracked";
+        IRequestBuilder list = Request.Create().UsingGet().WithPath(TrackedPath);
+        IRequestBuilder track = Request.Create().UsingPost().WithPath(TrackedPath).WithParam("domain_name", "stardewvalley");
+        IRequestBuilder untrack = Request.Create().UsingDelete().WithPath(TrackedPath).WithParam("domain_name", "stardewvalley");
+        IResponseBuilder none = Response.Create().WithStatusCode(HttpStatusCode.OK).WithBody("[]");
+        IResponseBuilder smapi = Response.Create().WithStatusCode(HttpStatusCode.OK).WithBody("""[{"mod_id": 2400, "domain_name": "stardewvalley"}]""");
+        IResponseBuilder refused = Response.Create().WithStatusCode(HttpStatusCode.UnprocessableEntity).WithBody("""{"message": "Not changed"}""");
+        IResponseBuilder done = Response.Create().WithStatusCode(HttpStatusCode.OK).WithBody("""{"message": "Done"}""");
+
+        // Nothing is tracked at first. Every answer names the state after it, since WireMock forgets the state otherwise.
+        _api.Given(list).InScenario(Scenario).WillSetStateTo(Untracked).RespondWith(none);
+        _api.Given(track).InScenario(Scenario).WillSetStateTo(Tracked).RespondWith(done);
+        _api.Given(untrack).InScenario(Scenario).WillSetStateTo(Untracked).RespondWith(refused);
+
+        foreach (string state in new[] { Tracked, Untracked })
+        {
+            bool isTracked = state == Tracked;
+            _api.Given(list).InScenario(Scenario).WhenStateIs(state).WillSetStateTo(state).RespondWith(isTracked ? smapi : none);
+            _api.Given(track).InScenario(Scenario).WhenStateIs(state).WillSetStateTo(Tracked).RespondWith(isTracked ? refused : done);
+            _api.Given(untrack).InScenario(Scenario).WhenStateIs(state).WillSetStateTo(Untracked).RespondWith(isTracked ? done : refused);
+        }
+    }
 }
