@@ -132,7 +132,7 @@ internal static partial class ModCommand
 
             if (ChooseSource(lookup.SearchableSources, sourceText) is not { } source)
             {
-                await environment.Error.WriteLineAsync(SourceProblem(lookup.SearchableSources, sourceText)).ConfigureAwait(false);
+                await environment.Error.WriteLineAsync(SourceProblem(lookup.SearchableSources, sourceText, "search")).ConfigureAwait(false);
                 return ExitCodes.BadInput;
             }
 
@@ -163,23 +163,24 @@ internal static partial class ModCommand
     }
 
     /// <summary>
-    /// The source asked for, or the only one that can search; null when that's not one of them, or there's no choice.
+    /// The source asked for, or the only one that can; null when that's not one of them, or there's no choice.
     /// </summary>
-    private static SourceId? ChooseSource(IReadOnlyList<SourceId> searchable, string? asked)
+    private static SourceId? ChooseSource(IReadOnlyList<SourceId> able, string? asked)
     {
         if (asked is null)
         {
-            return searchable.Count == 1 ? searchable[0] : null;
+            return able.Count == 1 ? able[0] : null;
         }
 
-        return searchable.FirstOrDefault(source => string.Equals(source.Value, asked.Trim(), StringComparison.OrdinalIgnoreCase));
+        return able.FirstOrDefault(source => string.Equals(source.Value, asked.Trim(), StringComparison.OrdinalIgnoreCase));
     }
 
-    private static string SourceProblem(IReadOnlyList<SourceId> searchable, string? asked) => searchable.Count switch
+    /// <param name="what">What the sources can do, such as "search".</param>
+    private static string SourceProblem(IReadOnlyList<SourceId> able, string? asked, string what) => able.Count switch
     {
-        0 => "No site ModShelf knows can search.",
-        _ when asked is not null => $"'{asked}' can't search. Sites that can: {string.Join(", ", searchable)}.",
-        _ => $"More than one site can search; choose one with --source: {string.Join(", ", searchable)}.",
+        0 => $"No site ModShelf knows can {what}.",
+        _ when asked is not null => $"'{asked}' can't {what}. Sites that can: {string.Join(", ", able)}.",
+        _ => $"More than one site can {what}; choose one with --source: {string.Join(", ", able)}.",
     };
 
     private static (string Message, int ExitCode)? SearchProblem(Exception exception) => exception switch

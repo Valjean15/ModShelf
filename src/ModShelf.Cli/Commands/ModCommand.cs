@@ -14,7 +14,8 @@ namespace ModShelf.Cli.Commands;
 /// <summary>
 /// <c>mod show &lt;link&gt; [--all] [--changelog]</c>: shows a mod's details and files as its site lists them, with
 /// the link to download each file. <c>mod search [words] --game &lt;game&gt;</c>: lists a game's mods that match, a page
-/// at a time, each with the link <c>mod show</c> and <c>download</c> take. Nothing is downloaded or saved.
+/// at a time, each with the link <c>mod show</c> and <c>download</c> take. <c>mod updates --game &lt;game&gt;</c>: lists
+/// the game's mods that changed lately, with their links. Nothing is downloaded or saved.
 /// </summary>
 internal static partial class ModCommand
 {
@@ -49,7 +50,7 @@ internal static partial class ModCommand
         show.SetAction((parsed, cancellationToken)
             => ShowAsync(environment, parsed.GetValue(link)!, parsed.GetValue(all), parsed.GetValue(changelog), cancellationToken));
 
-        return new Command("mod", "Looks mods up on the sites ModShelf knows.") { show, CreateSearch(environment) };
+        return new Command("mod", "Looks mods up on the sites ModShelf knows.") { show, CreateSearch(environment), CreateUpdates(environment) };
     }
 
     private static async Task<int> ShowAsync(
