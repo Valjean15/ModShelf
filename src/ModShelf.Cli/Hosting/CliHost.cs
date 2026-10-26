@@ -36,6 +36,13 @@ internal static class CliHost
     /// </summary>
     public const string SecretScopeKey = "ModShelf:SecretScope";
 
+    /// <summary>
+    /// The configuration key, or <c>ModShelf__Nexus__ClientId</c>, for the OAuth client ID Nexus Mods issues to ModShelf.
+    /// With one, Nexus accounts can sign in through the browser. Keep it in user secrets or the environment, never in a
+    /// committed file.
+    /// </summary>
+    public const string NexusClientIdKey = "ModShelf:Nexus:ClientId";
+
     /// <param name="runDownloads">
     /// Whether queued jobs download while the host runs. A command that only reads the queue leaves this off.
     /// </param>
@@ -79,7 +86,7 @@ internal static class CliHost
         builder.Services.AddDownloadEngine();
         builder.Services.AddAccounts();
         builder.Services.AddDirectUrlSource();
-        builder.Services.AddNexusSource();
+        builder.Services.AddNexusSource(NexusOptionsFrom(builder.Configuration));
         if (runDownloads)
         {
             builder.Services.AddBackgroundDownloads();
@@ -87,6 +94,12 @@ internal static class CliHost
 
         configureServices?.Invoke(builder.Services);
         return builder.Build();
+    }
+
+    private static NexusOptions NexusOptionsFrom(ConfigurationManager configuration)
+    {
+        string? clientId = configuration[NexusClientIdKey];
+        return new NexusOptions { OAuthClientId = string.IsNullOrWhiteSpace(clientId) ? null : clientId.Trim() };
     }
 
     private static SecretStoreOptions SecretStoreOptionsFrom(ConfigurationManager configuration)

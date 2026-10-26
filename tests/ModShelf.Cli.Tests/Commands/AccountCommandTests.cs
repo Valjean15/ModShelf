@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Extensions.DependencyInjection;
 
 using ModShelf.Application.Accounts.Ports;
+using ModShelf.Cli.Hosting;
 using ModShelf.Cli.Tests.Common;
 using ModShelf.Cli.Tests.Fakes;
 using ModShelf.Platform;
@@ -59,6 +60,19 @@ public sealed partial class AccountCommandTests : IAsyncDisposable
         Assert.Equal([OAuthSource, "-", "-", "-", "browser"], Cells(listed.AccountRowFor(OAuthSource)));
         Assert.Equal(["nexus", "-", "-", "-", "api-key"], Cells(listed.AccountRowFor("nexus")));
         Assert.DoesNotContain("direct", listed.Output, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(null, "api-key")]
+    [InlineData(" ", "api-key")]
+    [InlineData("client-from-nexus", "browser, api-key")]
+    public async Task NexusOffersTheBrowserOnceItsClientIdIsSet(string? clientId, string linkWith)
+    {
+        await using InProcessCli cli = new(_site, _browser, new Dictionary<string, string?> { [CliHost.NexusClientIdKey] = clientId });
+
+        CliResult listed = Log(await cli.RunAsync(["account", "list"], Cancellation));
+
+        Assert.Equal(["nexus", "-", "-", "-", linkWith], Cells(listed.AccountRowFor("nexus")));
     }
 
     [Fact]

@@ -28,7 +28,8 @@ internal sealed class InProcessCli : IAsyncDisposable
     private readonly ScriptedBrowser _browser;
     private readonly Dictionary<string, string?> _settings;
 
-    public InProcessCli(FakeAccountSite site, ScriptedBrowser browser)
+    /// <param name="settings">More configuration, as a user would set it, such as a Nexus Mods client ID.</param>
+    public InProcessCli(FakeAccountSite site, ScriptedBrowser browser, IReadOnlyDictionary<string, string?>? settings = null)
     {
         _site = site;
         _browser = browser;
@@ -41,6 +42,10 @@ internal sealed class InProcessCli : IAsyncDisposable
             // Everything is logged, so the tests can check that no credential is.
             ["Logging:LogLevel:Default"] = "Trace",
         };
+        foreach ((string key, string? value) in settings ?? new Dictionary<string, string?>())
+        {
+            _settings[key] = value;
+        }
     }
 
     public RecordingLoggerProvider Logs { get; } = new();
