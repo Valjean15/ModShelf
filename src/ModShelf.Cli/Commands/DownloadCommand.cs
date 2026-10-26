@@ -1,5 +1,4 @@
 using System.CommandLine;
-using System.Net;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -8,7 +7,6 @@ using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Downloads;
 using ModShelf.Cli.Hosting;
 using ModShelf.Domain.Downloads;
-using ModShelf.Sources.Abstractions.Accounts;
 
 namespace ModShelf.Cli.Commands;
 
@@ -150,22 +148,10 @@ internal static partial class DownloadCommand
     }
 
     /// <summary>
-    /// What to tell the user when looking up a link went wrong, or null for an error that isn't the user's to act on.
+    /// What to tell the user when looking the link up went wrong, or null for an error that isn't the user's to act on.
     /// </summary>
-    private static (string Message, int ExitCode)? LinkProblem(Exception exception) => exception switch
-    {
-        UnsupportedLinkException => ("No source can download that link.", ExitCodes.BadInput),
-        ArgumentException refused => (refused.MessageForUser(), ExitCodes.BadInput),
-        AuthenticationFailedException => (
-            "The site needs a linked account to look that link up, or refused the one linked. Link it with account link, "
-            + "then run the same command again.",
-            ExitCodes.Failed),
-        HttpRequestException { StatusCode: HttpStatusCode.NotFound or HttpStatusCode.Gone } => (
-            "The site has no such mod or file.",
-            ExitCodes.BadInput),
-        HttpRequestException failed => ($"The site couldn't look that link up: {failed.Message}", ExitCodes.Failed),
-        _ => null,
-    };
+    private static (string Message, int ExitCode)? LinkProblem(Exception exception)
+        => LinkProblems.Describe(exception, unsupported: "No source can download that link.");
 
     private static string FailureMessage(DownloadFailureReason? reason) => reason switch
     {
