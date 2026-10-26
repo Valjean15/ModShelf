@@ -79,4 +79,4 @@ The game is lower-cased and limited to letters, digits, `-` and `_`. IDs are pos
 
 ## Open
 
-- **Which status Nexus Mods gives an expired or foreign key.** The recording script's `-NxmLink` option records a free account's download link for a fresh key. Trying a link again after it expires would show the refusal, and the refused statuses here can then narrow.
+- **Which status Nexus Mods gives an expired or foreign key.** The recording script now records both for a free account: `-NxmLink` with a fresh link records its download link and the answer to a made-up key, and says when the link expires; `-ExpiredNxmLink` with the same link after then records the answer to an expired key. Once those recordings exist, tests replay them and the refused statuses narrow to what Nexus Mods answers.

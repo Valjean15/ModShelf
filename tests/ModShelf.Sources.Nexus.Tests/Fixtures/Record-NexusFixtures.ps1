@@ -28,13 +28,21 @@
 
 .PARAMETER NxmLink
     Free only, optional: a fresh nxm:// link from the "Mod Manager Download" button of a file. These links
-    expire within minutes, so use one you just got.
+    expire, so use one you just got. Records the download link Nexus Mods gives for its key, and how it
+    refuses a key it never handed over. The script says when the link expires.
+
+.PARAMETER ExpiredNxmLink
+    Free only, optional: an nxm:// link that has expired, such as the one given to -NxmLink earlier, once the
+    time the script gave has passed. Records how Nexus Mods refuses an expired key.
 
 .EXAMPLE
     ./Record-NexusFixtures.ps1 -Account Premium
 
 .EXAMPLE
     ./Record-NexusFixtures.ps1 -Account Free -NxmLink 'nxm://stardewvalley/mods/2400/files/...'
+
+.EXAMPLE
+    ./Record-NexusFixtures.ps1 -Account Free -ExpiredNxmLink 'nxm://stardewvalley/mods/2400/files/...'
 #>
 
 #Requires -Version 7.2
@@ -53,12 +61,18 @@ param(
 
     [string] $NxmLink,
 
+    [string] $ExpiredNxmLink,
+
     # Only for testing this script against a local fake of the API.
     [uri] $ApiBase = 'https://api.nexusmods.com/'
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+
+if ($Account -eq 'Premium' -and ($NxmLink -or $ExpiredNxmLink)) {
+    throw 'nxm:// links are only recorded for a free account. Run with -Account Free.'
+}
 
 $ApplicationName = 'ModShelf'
 $ApplicationVersion = '0.1.0-dev'
@@ -74,6 +88,7 @@ else {
 $Redacted = 'REDACTED'
 $RedactedKey = 'REDACTED-API-KEY'
 $RedactedNxmKey = 'REDACTED-NXM-KEY'
+$MadeUpNxmKey = 'not-a-real-nxm-key'
 
 $JsonOptions = [System.Text.Json.JsonSerializerOptions]::new()
 $JsonOptions.WriteIndented = $true
@@ -171,6 +186,31 @@ function Hide-LinkTokens($Body) {
     }
 }
 
+# An nxm:// file link's parts. Its key joins the secrets, so it's replaced wherever it shows up.
+function Read-NxmLink([string] $Text, [string] $Parameter) {
+    $nxm = [uri]$Text.Trim()
+    $segments = $nxm.AbsolutePath.Trim('/').Split('/')
+    if ($nxm.Scheme -ne 'nxm' -or $segments.Count -ne 4 -or $segments[0] -ne 'mods' -or $segments[2] -ne 'files') {
+        throw "-$Parameter is not an nxm:// file link. It should look like nxm://<game>/mods/<mod>/files/<file>?key=...&expires=...&user_id=..."
+    }
+
+    $query = [System.Web.HttpUtility]::ParseQueryString($nxm.Query)
+    if (-not $query['key'] -or $query['expires'] -notmatch '^\d+$') {
+        throw "The -$Parameter link has no key or expiry."
+    }
+
+    $script:Secrets.Add([pscustomobject]@{ Kind = 'key'; Label = "the -$Parameter key"; Value = $query['key']; Stand = $RedactedNxmKey })
+    return [pscustomobject]@{
+        Game         = $nxm.Host
+        ModId        = $segments[1]
+        FileId       = $segments[3]
+        Key          = $query['key']
+        Expires      = $query['expires']
+        ExpiresAt    = [DateTimeOffset]::FromUnixTimeSeconds([long]$query['expires']).ToLocalTime()
+        DownloadPath = "v1/games/$($nxm.Host)/mods/$($segments[1])/files/$($segments[3])/download_link.json"
+    }
+}
+
 function Hide-Personal([string] $Text) {
     foreach ($secret in $script:Secrets) {
         $Text = $Text.Replace($secret.Value, $secret.Stand)
@@ -243,7 +283,7 @@ function Save-Fixture([string] $Name, $Exchange, [scriptblock] $Shape) {
     $json = Hide-Personal ($record.ToJsonString($JsonOptions))
     Assert-Clean $json $file
     [System.IO.File]::WriteAllText($file, $json.ReplaceLineEndings("`n") + "`n", [System.Text.UTF8Encoding]::new($false))
-    Write-Host ("  {0,-36} {1}" -f "$Name.json", $Exchange.Status)
+    Write-Host ("  {0,-44} {1}" -f "$Name.json", $Exchange.Status)
 }
 
 $ApiKey = Get-ApiKey
@@ -320,28 +360,31 @@ try {
         Save-Fixture 'download-link-without-key' (Invoke-Nexus "$modPath/files/$fileId/download_link.json")
 
         if ($NxmLink) {
-            $nxm = [uri]$NxmLink.Trim()
-            $segments = $nxm.AbsolutePath.Trim('/').Split('/')
-            if ($nxm.Scheme -ne 'nxm' -or $segments.Count -ne 4 -or $segments[0] -ne 'mods' -or $segments[2] -ne 'files') {
-                throw 'That is not an nxm:// file link. It should look like nxm://<game>/mods/<mod>/files/<file>?key=...&expires=...&user_id=...'
-            }
-
-            $query = [System.Web.HttpUtility]::ParseQueryString($nxm.Query)
-            if (-not $query['key'] -or -not $query['expires']) {
-                throw 'That nxm:// link has no key or expiry.'
-            }
-
-            $Secrets.Add([pscustomobject]@{ Kind = 'key'; Label = 'the nxm:// key'; Value = $query['key']; Stand = $RedactedNxmKey })
-            $exchange = Invoke-Nexus "v1/games/$($nxm.Host)/mods/$($segments[1])/files/$($segments[3])/download_link.json" `
-                "key=$([uri]::EscapeDataString($query['key']))&expires=$($query['expires'])"
-            $exchange.Query = "key=$RedactedNxmKey&expires=$($query['expires'])"
+            $nxm = Read-NxmLink $NxmLink 'NxmLink'
+            $exchange = Invoke-Nexus $nxm.DownloadPath "key=$([uri]::EscapeDataString($nxm.Key))&expires=$($nxm.Expires)"
+            $exchange.Query = "key=$RedactedNxmKey&expires=$($nxm.Expires)"
             Save-Fixture 'download-link-with-nxm-key' $exchange { param($body) Hide-LinkTokens $body }
 
+            # How Nexus Mods refuses a key it never handed over, with the link's own expiry.
+            Save-Fixture 'download-link-with-wrong-nxm-key' (Invoke-Nexus $nxm.DownloadPath "key=$MadeUpNxmKey&expires=$($nxm.Expires)")
+
             # The link itself, as a browser hands it over, for the link parser's tests.
-            $link = "nxm://$($nxm.Host)/mods/$($segments[1])/files/$($segments[3])?key=$RedactedNxmKey&expires=$($query['expires'])&user_id=$($Stand.UserId)"
+            $link = "nxm://$($nxm.Game)/mods/$($nxm.ModId)/files/$($nxm.FileId)?key=$RedactedNxmKey&expires=$($nxm.Expires)&user_id=$($Stand.UserId)"
             Assert-Clean $link 'nxm-link.txt'
             [System.IO.File]::WriteAllText((Join-Path $OutFolder 'nxm-link.txt'), "$link`n", [System.Text.UTF8Encoding]::new($false))
-            Write-Host ("  {0,-36} {1}" -f 'nxm-link.txt', 'saved')
+            Write-Host ("  {0,-44} {1}" -f 'nxm-link.txt', 'saved')
+            Write-Host ("The link expires at {0:yyyy-MM-dd HH:mm:ss}. After then, run this again with -ExpiredNxmLink and the same link." -f $nxm.ExpiresAt)
+        }
+
+        if ($ExpiredNxmLink) {
+            $old = Read-NxmLink $ExpiredNxmLink 'ExpiredNxmLink'
+            if ($old.ExpiresAt -gt [DateTimeOffset]::Now) {
+                throw ("The -ExpiredNxmLink link works until {0:yyyy-MM-dd HH:mm:ss}. Run this again after then." -f $old.ExpiresAt)
+            }
+
+            $exchange = Invoke-Nexus $old.DownloadPath "key=$([uri]::EscapeDataString($old.Key))&expires=$($old.Expires)"
+            $exchange.Query = "key=$RedactedNxmKey&expires=$($old.Expires)"
+            Save-Fixture 'download-link-with-expired-nxm-key' $exchange { param($body) Hide-LinkTokens $body }
         }
     }
 
