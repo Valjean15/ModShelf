@@ -1,6 +1,6 @@
 # 3. Download scheduler on a single message loop
 
-- Status: Accepted
+- Status: Accepted; on start, jobs waiting for a handoff ask their source again, as [ADR 0014](0014-handoffs-and-nexus-downloads.md) records
 - Date: 2026-10-21
 
 ## Context
