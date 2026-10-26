@@ -22,15 +22,18 @@ public sealed partial class NexusSource : IAccountLinker
     private static readonly Uri Website = new("https://www.nexusmods.com/");
 
     private readonly NexusApiClient _api;
+    private readonly TimeProvider _timeProvider;
 
     /// <param name="strategies">The ways to link an account, in the order to offer them.</param>
-    internal NexusSource(NexusApiClient api, IReadOnlyList<IAuthStrategy> strategies)
+    internal NexusSource(NexusApiClient api, IReadOnlyList<IAuthStrategy> strategies, TimeProvider timeProvider)
     {
         ArgumentNullException.ThrowIfNull(api);
         ArgumentNullException.ThrowIfNull(strategies);
+        ArgumentNullException.ThrowIfNull(timeProvider);
 
         _api = api;
         Strategies = strategies;
+        _timeProvider = timeProvider;
     }
 
     public SourceId Id => NexusId;

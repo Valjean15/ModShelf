@@ -23,6 +23,10 @@ public sealed class NexusSourceTests : SourceContractTests<NexusSource>, IDispos
         _api.Serve(RecordedNexusApi.Premium, "game");
         _api.Serve(RecordedNexusApi.Premium, "mod");
         _api.Serve(RecordedNexusApi.Premium, "changelogs");
+        _api.Serve(RecordedNexusApi.Premium, "updated-1d");
+
+        // When the updates were recorded, so the last day's are recent.
+        _api.Time.SetUtcNow(new DateTimeOffset(2026, 10, 23, 22, 59, 0, TimeSpan.Zero));
         _services = _api.BuildServices();
     }
 
@@ -34,6 +38,8 @@ public sealed class NexusSourceTests : SourceContractTests<NexusSource>, IDispos
         new("https://www.nexusmods.com/stardewvalley/mods/2400"),
         new("nxm://stardewvalley/mods/2400/files/160380?key=nxm-key&expires=1893456000&user_id=1000001"),
     ];
+
+    protected override TimeProvider Clock => _api.Time;
 
     public void Dispose()
     {

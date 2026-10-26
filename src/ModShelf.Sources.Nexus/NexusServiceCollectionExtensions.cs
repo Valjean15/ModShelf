@@ -51,7 +51,8 @@ public static class NexusServiceCollectionExtensions
         services.AddSingleton<NexusApiClient>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IModSource, NexusSource>(provider => new NexusSource(
             provider.GetRequiredService<NexusApiClient>(),
-            Strategies(settings, provider))));
+            Strategies(settings, provider),
+            provider.GetRequiredService<TimeProvider>())));
 
         IHttpClientBuilder client = services.AddHttpClient(NexusApiClient.ClientName, http =>
         {
