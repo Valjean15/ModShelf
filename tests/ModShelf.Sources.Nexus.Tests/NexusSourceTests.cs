@@ -8,7 +8,7 @@ using ModShelf.Testing;
 namespace ModShelf.Sources.Nexus.Tests;
 
 /// <summary>
-/// The checks every source passes, for the capabilities the Nexus source has so far.
+/// The checks every source passes, for the capabilities the Nexus source has so far, against the recorded API.
 /// </summary>
 public sealed class NexusSourceTests : SourceContractTests<NexusSource>, IDisposable
 {
@@ -17,12 +17,19 @@ public sealed class NexusSourceTests : SourceContractTests<NexusSource>, IDispos
 
     public NexusSourceTests()
     {
+        _api.Serve(RecordedNexusApi.Premium, "file");
+        _api.Serve(RecordedNexusApi.Premium, "files");
         _services = _api.BuildServices();
     }
 
     protected override SourceId ExpectedId { get; } = new("nexus");
 
-    protected override IReadOnlyList<Uri> OwnLinks { get; } = [];
+    protected override IReadOnlyList<Uri> OwnLinks { get; } =
+    [
+        new("https://www.nexusmods.com/stardewvalley/mods/2400?tab=files&file_id=160380"),
+        new("https://www.nexusmods.com/stardewvalley/mods/2400"),
+        new("nxm://stardewvalley/mods/2400/files/160380?key=nxm-key&expires=1893456000&user_id=1000001"),
+    ];
 
     public void Dispose()
     {
