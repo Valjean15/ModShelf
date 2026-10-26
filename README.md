@@ -31,6 +31,10 @@ The headless host in `src/ModShelf.Cli` builds the same dependency-injection con
 dotnet run --project src/ModShelf.Cli -- download <link> --to <folder> [--name <file>]
 dotnet run --project src/ModShelf.Cli -- mod show <link> [--all] [--changelog]
 dotnet run --project src/ModShelf.Cli -- mod search [words] --game <game> [--author <name>] [--adult] [--sort <order>] [--ascending] [--page <n>] [--page-size <count>]
+dotnet run --project src/ModShelf.Cli -- mod updates --game <game> [--since 1d|7d|28d|<date>]
+dotnet run --project src/ModShelf.Cli -- mod tracked
+dotnet run --project src/ModShelf.Cli -- mod track <link>
+dotnet run --project src/ModShelf.Cli -- mod untrack <link>
 dotnet run --project src/ModShelf.Cli -- queue list
 dotnet run --project src/ModShelf.Cli -- account list
 dotnet run --project src/ModShelf.Cli -- account link <source> [--with api-key|browser|email]
@@ -43,6 +47,9 @@ dotnet run --project src/ModShelf.Cli -- account unlink <source>
 - **Nexus Mods downloads:** `download` takes a mod's page (its newest main file), a file's link from the mod's Files tab, or an `nxm://` link, and needs a linked account. Premium accounts download straight away. Free accounts start each download on the website with "Slow download"; the website then hands your browser an `nxm://` link to paste. Until ModShelf registers itself for these links, the browser can't open them, and usually shows the link it couldn't open: Chrome and Edge in the developer tools' console, Firefox in its address bar. If Vortex or Mod Organizer 2 handles `nxm://` links on your computer, they get the link instead. `download "nxm://…" --to <folder>` on its own also finishes a download waiting in that folder.
 - `mod show` looks a mod up from a link to it or to one of its files, and prints its details and its files by section, newest first, each with the link to download it. The file the link points to is marked. `--all` adds old versions, archived files and files in no section; `--changelog` adds the changelog. Nothing is downloaded.
 - `mod search` lists a game's mods whose names hold the words, a page at a time, with author, endorsements, downloads, last update and the link `mod show` and `download` take. The game is named as in the site's links, such as `stardewvalley` for Nexus Mods. `--author` keeps one author's mods, and `--adult` includes mods with adult content. `--sort` orders by `Relevance` (the default), `Endorsements`, `Downloads`, `Updated` or `Newest`, the most first; `--ascending` puts the least first, such as the oldest. `--page` picks the page, and `--page-size` how many mods it lists, from 1 to 100 (20 unless set).
+- `mod updates` lists a game's mods that changed since a time, in one request: each with when its files last changed, when it was last active, and its link. Mods with new or changed files since then are marked; the others only changed their pages, such as their descriptions or comments. `--since` takes `1d` (the default), `7d` or `28d`, or a date or time such as `2026-10-20` or `2026-10-20T18:00`, in local time unless it gives an offset. Nexus Mods lists the last 28 days only.
+- `mod tracked` lists the mods your linked account tracks on the site. `mod track` and `mod untrack` track the mod a link is to, or stop tracking it, as the site's Track button does; doing either twice changes nothing.
+- When more than one site can search, list updates or track mods, `--source` picks one, such as `--source nexus`.
 - `queue list` shows every saved job without starting any download.
 - `account list` shows the sources that support accounts, the account linked on each, and the ways to link one.
 - `account link` asks for what the source needs. An API key isn't shown as you type it. For `browser`, it opens the site's sign-in page and waits until you approve ModShelf there; if no browser opens, it shows the page to open by hand. Linking again replaces the account.
