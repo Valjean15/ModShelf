@@ -4,7 +4,7 @@ Where files, types and members go. The rules apply to every project under `src` 
 
 ## 1. Folders follow features
 
-- Each project is split into **feature folders named after the domain concept**: `Accounts`, `Catalog`, `Downloads`, `Mods`, `Search`, `Sources`, `Links`, `Updates`, `Watchlist`, and later `Library`. Use the same names in every layer, so one feature can be followed from Domain to Desktop.
+- Each project is split into **feature folders named after the domain concept**: `Accounts`, `Catalog`, `Downloads`, `Library`, `Mods`, `Search`, `Sources`, `Links`, `Updates` and `Watchlist`. Use the same names in every layer, so one feature can be followed from Domain to Desktop.
 - Group by concept, not by kind. `DownloadJob`, its `DownloadJobId`, `DownloadJobStatus` and `DownloadFailureReason` sit together in `Downloads/`, not in `Entities/`, `ValueObjects/` and `Enums/`.
 - **The namespace always matches the folder.** The build fails otherwise (IDE0130).
 
