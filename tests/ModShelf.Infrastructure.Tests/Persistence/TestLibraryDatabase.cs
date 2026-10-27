@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Downloads.Ports;
+using ModShelf.Application.Library.Ports;
 using ModShelf.Infrastructure.Persistence;
 using ModShelf.Testing;
 
@@ -31,6 +32,8 @@ internal sealed class TestLibraryDatabase : IAsyncDisposable
     public IDownloadJobRepository Repository => _services.GetRequiredService<IDownloadJobRepository>();
 
     public ILinkedAccountRepository LinkedAccounts => _services.GetRequiredService<ILinkedAccountRepository>();
+
+    public ILibraryRepository Library => _services.GetRequiredService<ILibraryRepository>();
 
     public IServiceProvider Services => _services;
 

@@ -6,7 +6,9 @@ using Microsoft.Extensions.Hosting;
 
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Downloads.Ports;
+using ModShelf.Application.Library.Ports;
 using ModShelf.Domain.Downloads;
+using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Infrastructure.Persistence;
 using ModShelf.Infrastructure.Persistence.Repositories;
@@ -19,6 +21,7 @@ namespace ModShelf.Infrastructure.Tests.Persistence;
 public sealed class LibraryDatabaseTests
 {
     private const string InitialCreate = "20261023144452_InitialCreate";
+    private const string AddLinkedAccounts = "20261023202312_AddLinkedAccounts";
 
     [Fact]
     public async Task StartingCreatesTheFolderAndTheSchema()
@@ -85,6 +88,33 @@ public sealed class LibraryDatabaseTests
     }
 
     [Fact]
+    public async Task ADatabaseFromBeforeTheLibraryIsUpgradedWithItsJobs()
+    {
+        await using TestLibraryDatabase database = new();
+        await using (ModShelfDbContext context = await database.CreateContextAsync())
+        {
+            // The schema Phase 3 shipped with.
+            await context.GetService<IMigrator>().MigrateAsync(AddLinkedAccounts, TestContext.Current.CancellationToken);
+        }
+
+        DownloadJob job = DownloadJob.Create(
+            new ModFileRef(new ModRef(new GameRef(new SourceId("nexus"), "skyrimspecialedition"), "12604"), "35407"),
+            Path.GetDirectoryName(database.DatabasePath)!,
+            "SkyUI_5_2_SE.7z",
+            DateTimeOffset.UnixEpoch);
+        await database.Repository.AddAsync(job, TestContext.Current.CancellationToken);
+        Assert.Equal(0L, await database.QueryAsync("SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name LIKE 'Library%'"));
+
+        await database.StartAsync();
+
+        Assert.Equal(2L, await database.QueryAsync("SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name IN ('LibraryMods', 'LibraryFiles')"));
+        Assert.Equal(job.Id, Assert.Single(await database.Repository.ListAsync(TestContext.Current.CancellationToken)).Id);
+        ModRef mod = new(new GameRef(new SourceId("nexus"), "stardewvalley"), "2400");
+        await database.Library.UpdateAsync(mod, _ => LibraryMod.Watch(mod, "SMAPI", null, null, DateTimeOffset.UnixEpoch), TestContext.Current.CancellationToken);
+        Assert.Single(await database.Library.ListAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task TheModelMatchesTheLatestMigration()
     {
         // Fails when the model changes without a new migration: run `dotnet ef migrations add <Name>`.
@@ -127,6 +157,14 @@ public sealed class LibraryDatabaseTests
 
         ServiceDescriptor options = Assert.Single(services, descriptor => descriptor.ServiceType == typeof(LibraryDatabaseOptions));
         Assert.Equal(LibraryDatabaseLocation.GetDefaultPath(), Assert.IsType<LibraryDatabaseOptions>(options.ImplementationInstance).DatabasePath);
+    }
+
+    [Fact]
+    public async Task RegistersTheLibraryRepository()
+    {
+        await using TestLibraryDatabase database = new();
+
+        Assert.IsType<LibraryRepository>(database.Services.GetRequiredService<ILibraryRepository>());
     }
 
     [Fact]

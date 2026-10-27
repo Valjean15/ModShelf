@@ -10,6 +10,7 @@ using Microsoft.Extensions.Http.Resilience;
 using ModShelf.Application.Accounts;
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Downloads.Ports;
+using ModShelf.Application.Library.Ports;
 using ModShelf.Infrastructure.Downloads;
 using ModShelf.Infrastructure.Persistence;
 using ModShelf.Infrastructure.Persistence.Repositories;
@@ -95,7 +96,8 @@ public static class InfrastructureServiceCollectionExtensions
 
     /// <summary>
     /// Registers the library database at <paramref name="databasePath"/>: the <see cref="ModShelfDbContext"/>
-    /// factory, the repositories (<see cref="IDownloadJobRepository"/>, <see cref="ILinkedAccountRepository"/>), and
+    /// factory, the repositories (<see cref="IDownloadJobRepository"/>, <see cref="ILinkedAccountRepository"/>,
+    /// <see cref="ILibraryRepository"/>), and
     /// a hosted service that creates or migrates the database before any other hosted service starts.
     /// </summary>
     /// <param name="databasePath">The absolute path of the database file. Its folder is created if missing.</param>
@@ -119,6 +121,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddDbContextFactory<ModShelfDbContext>(options => options.UseSqlite(connectionString));
         services.AddSingleton<IDownloadJobRepository, DownloadJobRepository>();
         services.AddSingleton<ILinkedAccountRepository, LinkedAccountRepository>();
+        services.AddSingleton<ILibraryRepository, LibraryRepository>();
         services.AddHostedService<LibraryDatabaseMigrator>();
 
         return services;
