@@ -11,6 +11,7 @@ using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Cli.Hosting;
 using ModShelf.Cli.Tests.Fakes;
+using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Testing;
 
@@ -29,18 +30,22 @@ internal sealed class InProcessCli : IAsyncDisposable
     private readonly ScriptedBrowser _browser;
     private readonly Dictionary<string, string?> _settings;
     private readonly IReadOnlyList<IModSource> _sources;
+    private readonly Action<IServiceCollection>? _configureServices;
 
     /// <param name="settings">More configuration, as a user would set it, such as a Nexus Mods client ID.</param>
     /// <param name="sources">More sources, such as a site that asks for handoffs.</param>
+    /// <param name="configureServices">Changes the app's services last, such as where the Nexus Mods API answers.</param>
     public InProcessCli(
         FakeAccountSite site,
         ScriptedBrowser browser,
         IReadOnlyDictionary<string, string?>? settings = null,
-        IReadOnlyList<IModSource>? sources = null)
+        IReadOnlyList<IModSource>? sources = null,
+        Action<IServiceCollection>? configureServices = null)
     {
         _site = site;
         _browser = browser;
         _sources = sources ?? [];
+        _configureServices = configureServices;
         _settings = new Dictionary<string, string?>
         {
             [CliHost.DatabasePathKey] = Path.Combine(_folder.Path, "library.db"),
@@ -96,7 +101,8 @@ internal sealed class InProcessCli : IAsyncDisposable
     }
 
     /// <summary>
-    /// Unlinks the fake sources, which removes what the tests stored in the system's keyring, then deletes the folder.
+    /// Unlinks the fake sources and Nexus Mods, which removes what the tests stored in the system's keyring, then
+    /// deletes the folder.
     /// </summary>
     public async ValueTask DisposeAsync()
     {
@@ -106,6 +112,7 @@ internal sealed class InProcessCli : IAsyncDisposable
                     IAccountService accounts = services.GetRequiredService<IAccountService>();
                     await accounts.UnlinkAsync(FakeOAuthSource.SourceId, CancellationToken.None).ConfigureAwait(false);
                     await accounts.UnlinkAsync(FakeApiKeySource.SourceId, CancellationToken.None).ConfigureAwait(false);
+                    await accounts.UnlinkAsync(new SourceId("nexus"), CancellationToken.None).ConfigureAwait(false);
                     return true;
                 },
                 CancellationToken.None)
@@ -134,5 +141,7 @@ internal sealed class InProcessCli : IAsyncDisposable
         {
             services.AddSingleton(source);
         }
+
+        _configureServices?.Invoke(services);
     });
 }
