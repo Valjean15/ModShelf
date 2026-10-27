@@ -93,12 +93,15 @@ internal static class CliHost
         builder.Services.AddModUpdates();
         builder.Services.AddWatchlists();
         builder.Services.AddLibrary();
+        builder.Services.AddLibraryStorage();
+        builder.Services.AddLibraryDownloads();
         builder.Services.AddSettings();
         builder.Services.AddDirectUrlSource();
         builder.Services.AddNexusSource(NexusOptionsFrom(builder.Configuration));
         if (runDownloads)
         {
             builder.Services.AddBackgroundDownloads();
+            builder.Services.AddLibraryRecording();
         }
 
         configureServices?.Invoke(builder.Services);

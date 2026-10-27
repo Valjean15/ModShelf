@@ -5,15 +5,17 @@ using Microsoft.Extensions.Hosting;
 
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Downloads;
+using ModShelf.Application.Library;
 using ModShelf.Cli.Hosting;
 using ModShelf.Domain.Downloads;
 
 namespace ModShelf.Cli.Commands;
 
 /// <summary>
-/// <c>download &lt;link&gt; --to &lt;folder&gt; [--name &lt;file&gt;]</c>: adds the file to the queue and runs the
-/// download engine until that file is done. When the site wants the download started on its website, it shows the
-/// page and asks for the link the site hands over. Ctrl+C stops cleanly; running the same command again continues.
+/// <c>download &lt;link&gt; [--to &lt;folder&gt; [--name &lt;file&gt;]]</c>: adds the file to the queue and runs the
+/// download engine until that file is done. Without <c>--to</c>, the file goes into the library and is recorded there.
+/// When the site wants the download started on its website, it shows the page and asks for the link the site hands
+/// over. Ctrl+C stops cleanly; running the same command again continues.
 /// </summary>
 internal static partial class DownloadCommand
 {
@@ -25,33 +27,37 @@ internal static partial class DownloadCommand
                 + "or an nxm:// link from Nexus Mods. To check a plain web link's file against a hash, end the link with "
                 + "#sha256=<hex> (or md5, sha1, sha512).",
         };
-        Option<DirectoryInfo> to = new("--to")
+        Option<DirectoryInfo?> to = new("--to")
         {
-            Description = "The folder to save the file in. It's created if it doesn't exist.",
+            Description = "The folder to save the file in, outside the library. It's created if it doesn't exist. Without --to, "
+                + "the file goes into the library: under its root, in the folder its game's pattern gives (see settings show).",
             HelpName = "folder",
-            Required = true,
         };
         Option<string?> name = new("--name")
         {
-            Description = "The name to save the file under. By default, the name the site gives the file, or the name at the end of the link.",
+            Description = "With --to, the name to save the file under. By default, the name the site gives the file, or the "
+                + "name at the end of the link.",
             HelpName = "file",
         };
 
-        Command command = new("download", "Downloads a file and waits until it's done. Ctrl+C stops the download; run the same command again to continue it.")
+        Command command = new(
+            "download",
+            "Downloads a file into the library, or into a folder with --to, and waits until it's done. Ctrl+C stops the "
+                + "download; run the same command again to continue it.")
         {
             link,
             to,
             name,
         };
         command.SetAction((parsed, cancellationToken)
-            => RunAsync(environment, parsed.GetValue(link)!, parsed.GetValue(to)!, parsed.GetValue(name), cancellationToken));
+            => RunAsync(environment, parsed.GetValue(link)!, parsed.GetValue(to), parsed.GetValue(name), cancellationToken));
         return command;
     }
 
     private static async Task<int> RunAsync(
         CliEnvironment environment,
         string linkText,
-        DirectoryInfo folder,
+        DirectoryInfo? folder,
         string? fileName,
         CancellationToken cancellationToken)
     {
@@ -61,7 +67,15 @@ internal static partial class DownloadCommand
             return ExitCodes.BadInput;
         }
 
-        string targetDirectory = Path.TrimEndingDirectorySeparator(folder.FullName);
+        if (folder is null && fileName is not null)
+        {
+            await environment.Error.WriteLineAsync(
+                    "--name works with --to only: files in the library keep the names their sites give them.")
+                .ConfigureAwait(false);
+            return ExitCodes.BadInput;
+        }
+
+        string? targetDirectory = folder is null ? null : Path.TrimEndingDirectorySeparator(folder.FullName);
 
         using IHost host = environment.BuildHost(true);
         try
@@ -80,23 +94,39 @@ internal static partial class DownloadCommand
         }
     }
 
+    /// <param name="targetDirectory">The folder given with --to; or null for the library.</param>
     private static async Task<int> DownloadAsync(
         CliEnvironment environment,
         IServiceProvider services,
         Uri link,
-        string targetDirectory,
+        string? targetDirectory,
         string? fileName,
         CancellationToken cancellationToken)
     {
         IDownloadService downloads = services.GetRequiredService<IDownloadService>();
         ILinkDownloads links = services.GetRequiredService<ILinkDownloads>();
+        ILibraryDownloads? library = targetDirectory is null ? services.GetRequiredService<ILibraryDownloads>() : null;
 
         LinkDownload added;
         try
         {
-            added = await links.AddAsync(link, targetDirectory, fileName, cancellationToken).ConfigureAwait(false);
+            if (library is null)
+            {
+                added = await links.AddAsync(link, targetDirectory!, fileName, cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                LibraryDownload placed = await library.AddAsync(link, cancellationToken).ConfigureAwait(false);
+                if (placed.Queued is null)
+                {
+                    environment.Output.WriteLine($"{placed.Path} is in the library already.");
+                    return ExitCodes.Done;
+                }
+
+                added = placed.Queued;
+            }
         }
-        catch (Exception exception) when (LinkProblem(exception) is { } problem)
+        catch (Exception exception) when (Problem(exception, library is not null) is { } problem)
         {
             string hint = exception is ArgumentException { ParamName: "fileName" } ? " Choose one with --name." : string.Empty;
             await environment.Error.WriteLineAsync(problem.Message + hint).ConfigureAwait(false);
@@ -132,6 +162,7 @@ internal static partial class DownloadCommand
             environment,
             downloads,
             links,
+            library,
             new HandoffPrompt(environment, services.GetRequiredService<IBrowserLauncher>()),
             current,
             fileName);
@@ -148,10 +179,20 @@ internal static partial class DownloadCommand
     }
 
     /// <summary>
-    /// What to tell the user when looking the link up went wrong, or null for an error that isn't the user's to act on.
+    /// What to tell the user when adding the link went wrong, or null for an error that isn't the user's to act on.
     /// </summary>
-    private static (string Message, int ExitCode)? LinkProblem(Exception exception)
-        => LinkProblems.Describe(exception, unsupported: "No source can download that link.");
+    /// <param name="library">Whether the file was to go into the library.</param>
+    private static (string Message, int ExitCode)? Problem(Exception exception, bool library) => exception switch
+    {
+        // The library wraps the refusal of every source; its own refusal is of a link to a site without a catalog.
+        UnsupportedLinkException { InnerException: not UnsupportedLinkException } when library => (
+            "Only the files of mods on sites such as Nexus Mods go into the library. To download this file into a folder of "
+            + "your own, add --to <folder>.",
+            ExitCodes.BadInput),
+        IOException when library => ($"{exception.Message} See where files go with settings show.", ExitCodes.Failed),
+        InvalidDataException => (exception.Message, ExitCodes.Failed),
+        _ => LinkProblems.Describe(exception, unsupported: "No source can download that link."),
+    };
 
     private static string FailureMessage(DownloadFailureReason? reason) => reason switch
     {

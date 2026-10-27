@@ -1,4 +1,5 @@
 using ModShelf.Application.Downloads;
+using ModShelf.Application.Library;
 using ModShelf.Cli.Hosting;
 using ModShelf.Domain.Downloads;
 
@@ -11,15 +12,18 @@ internal static partial class DownloadCommand
 {
     /// <summary>
     /// Shows the job's progress and how it ended, and asks for the link that completes its handoff whenever it waits
-    /// for one. A link the user pastes goes through <see cref="ILinkDownloads"/>, as the same command run with that
-    /// link would, so the source checks it.
+    /// for one. A link the user pastes goes through <see cref="ILinkDownloads"/>, or <see cref="ILibraryDownloads"/>
+    /// for the library, as the same command run with that link would, so the source checks it. A download into the
+    /// library is recorded there once it's done.
     /// </summary>
+    /// <param name="library">The library the file goes into; or null for a download with --to.</param>
     /// <param name="job">The job as it was read once the watch began.</param>
     /// <param name="fileName">The name the user chose with --name, if any.</param>
     private sealed class Follow(
         CliEnvironment environment,
         IDownloadService downloads,
         ILinkDownloads links,
+        ILibraryDownloads? library,
         HandoffPrompt prompt,
         DownloadJobSnapshot job,
         string? fileName)
@@ -109,7 +113,7 @@ internal static partial class DownloadCommand
                 case DownloadJobStatus.Completed:
                     _display.Finish();
                     environment.Output.WriteLine($"Saved {Path.Combine(update.TargetDirectory, update.FileName)}");
-                    return ExitCodes.Done;
+                    return library is null ? ExitCodes.Done : await RecordAsync(library, update, cancellationToken).ConfigureAwait(false);
 
                 case DownloadJobStatus.Failed:
                     _display.Finish();
@@ -144,24 +148,36 @@ internal static partial class DownloadCommand
                 return;
             }
 
-            LinkDownload handed;
+            // The library keeps the place the job was queued for, so the link finds the job whatever name it was given.
+            LinkDownload? handed;
+            string handedName;
             try
             {
-                handed = await links.AddAsync(link, job.TargetDirectory, fileName, cancellationToken).ConfigureAwait(false);
+                if (library is null)
+                {
+                    handed = await links.AddAsync(link, job.TargetDirectory, fileName, cancellationToken).ConfigureAwait(false);
+                    handedName = handed.Job.FileName;
+                }
+                else
+                {
+                    LibraryDownload placed = await library.AddAsync(link, cancellationToken).ConfigureAwait(false);
+                    handed = placed.Queued;
+                    handedName = Path.GetFileName(placed.Path);
+                }
             }
-            catch (Exception exception) when (LinkProblem(exception) is { } problem)
+            catch (Exception exception) when (Problem(exception, library is not null) is { } problem)
             {
                 _typed = prompt.AskAgain($"{problem.Message} {PasteOrStop}");
                 return;
             }
 
-            if (handed.Job.Id == job.Id)
+            if (handed?.Job.Id == job.Id)
             {
                 return;
             }
 
             // The link was to another file. A job added just now for it isn't what the user asked for.
-            if (!handed.AlreadyQueued)
+            if (handed is { AlreadyQueued: false })
             {
                 try
                 {
@@ -173,7 +189,30 @@ internal static partial class DownloadCommand
                 }
             }
 
-            _typed = prompt.AskAgain($"That link is to another file, {handed.Job.FileName}. Paste the link for {job.FileName}, or press Ctrl+C to stop.");
+            _typed = prompt.AskAgain($"That link is to another file, {handedName}. Paste the link for {job.FileName}, or press Ctrl+C to stop.");
+        }
+
+        /// <summary>
+        /// Records the finished download in the library.
+        /// </summary>
+        private async Task<int> RecordAsync(ILibraryDownloads library, DownloadJobSnapshot done, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (await library.RecordAsync(done, cancellationToken).ConfigureAwait(false) is not null)
+                {
+                    environment.Output.WriteLine("Added to the library.");
+                }
+
+                return ExitCodes.Done;
+            }
+            catch (Exception exception) when (exception is ArgumentException or InvalidDataException or HttpRequestException)
+            {
+                string reason = exception is ArgumentException refused ? refused.MessageForUser() : exception.Message;
+                await environment.Error.WriteLineAsync($"The file is saved, but it couldn't be added to the library: {reason}")
+                    .ConfigureAwait(false);
+                return ExitCodes.Failed;
+            }
         }
 
         private async Task<int> NoLinkAsync()

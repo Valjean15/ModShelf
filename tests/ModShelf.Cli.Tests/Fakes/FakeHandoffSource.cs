@@ -4,6 +4,7 @@ using System.Web;
 
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Accounts;
+using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Downloads;
 using ModShelf.Sources.Abstractions.Links;
 
@@ -14,14 +15,19 @@ namespace ModShelf.Cli.Tests.Fakes;
 /// download on its website: until it gets a handoff link with the right key, it asks for one. Its files are at
 /// <c>https://handoff.example/files/{id}</c>, its handoff links are <c>fakehandoff://files/{id}?key=…</c>, and every
 /// file downloads from <paramref name="fileUrl"/>. Links under <c>/locked/</c> need an account it doesn't have, and
-/// links under <c>/missing/</c> are to files it doesn't have.
+/// links under <c>/missing/</c> are to files it doesn't have. Every file is of one mod, <see cref="ModName"/>, which its
+/// catalog describes, so its files can go into the library.
 /// </summary>
-internal sealed class FakeHandoffSource(Uri fileUrl) : ILinkRecognizer, IDownloadResolver
+internal sealed class FakeHandoffSource(Uri fileUrl) : ILinkRecognizer, IDownloadResolver, IModCatalog
 {
+    public const string ModName = "Handoff Mod";
+
     public const string GoodKey = "handoff-key-3f9a1c";
 
     private const string Host = "handoff.example";
     private const string Scheme = "fakehandoff";
+
+    private static readonly string[] FileIds = ["1", "2", "3"];
 
     private readonly ConcurrentQueue<Uri?> _handoffs = new();
 
@@ -73,6 +79,22 @@ internal sealed class FakeHandoffSource(Uri fileUrl) : ILinkRecognizer, IDownloa
         string? key = handoff is null ? null : HttpUtility.ParseQueryString(handoff.Query)["key"];
         return Task.FromResult<ResolveResult>(key == GoodKey ? new DownloadTicket(fileUrl) : new HandoffRequired(Page(file.Id)));
     }
+
+    public Task<GameInfo> GetGameAsync(GameRef game, CancellationToken cancellationToken)
+        => Task.FromResult(new GameInfo(game, "Handoff Game"));
+
+    public Task<ModInfo> GetModAsync(ModRef modRef, CancellationToken cancellationToken)
+        => Task.FromResult(new ModInfo(modRef, ModName, author: "Someone", pageUrl: new Uri($"https://{Host}/mod")));
+
+    /// <summary>
+    /// Files 1 to 3.
+    /// </summary>
+    public Task<IReadOnlyList<ModFile>> GetFilesAsync(ModRef modRef, CancellationToken cancellationToken)
+        => Task.FromResult<IReadOnlyList<ModFile>>(
+            [.. FileIds.Select(id => new ModFile(File(id), $"File {id}", FileNameOf(id), "1.0", ModFileCategory.Main, null, DateTimeOffset.UnixEpoch, []))]);
+
+    public Task<IReadOnlyList<ModChangelog>> GetChangelogsAsync(ModRef modRef, CancellationToken cancellationToken)
+        => Task.FromResult<IReadOnlyList<ModChangelog>>([]);
 
     private static ModFileRef File(string fileId) => new(new ModRef(new GameRef(SourceId, "game"), "mod"), fileId);
 }
