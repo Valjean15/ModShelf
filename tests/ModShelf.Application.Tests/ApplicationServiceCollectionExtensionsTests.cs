@@ -142,6 +142,15 @@ public sealed class ApplicationServiceCollectionExtensionsTests
     }
 
     [Fact]
+    public void BackgroundUpdateChecksRunTheService()
+    {
+        ServiceCollection services = new();
+        services.AddBackgroundUpdateChecks();
+
+        Assert.Equal(typeof(UpdateCheckService), Single<IHostedService>(services).ImplementationType);
+    }
+
+    [Fact]
     public void LibraryRecordingRunsTheRecorder()
     {
         ServiceCollection services = new();

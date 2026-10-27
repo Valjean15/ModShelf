@@ -157,6 +157,20 @@ public static class ApplicationServiceCollectionExtensions
     }
 
     /// <summary>
+    /// Checks the watched mods for updates in the background while the host runs, every
+    /// <see cref="AppSettings.UpdateInterval"/>, with a hosted <see cref="UpdateCheckService"/>. For the desktop app; the
+    /// CLI checks only when asked. Needs <see cref="AddUpdateChecks"/> and <see cref="AddSettings"/>.
+    /// </summary>
+    public static IServiceCollection AddBackgroundUpdateChecks(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddHostedService<UpdateCheckService>();
+
+        return services;
+    }
+
+    /// <summary>
     /// Registers <see cref="IModUpdates"/>, which asks the sources' update feeds which mods changed lately.
     /// </summary>
     public static IServiceCollection AddModUpdates(this IServiceCollection services)
