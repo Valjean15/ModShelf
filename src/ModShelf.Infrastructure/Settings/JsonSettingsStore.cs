@@ -7,6 +7,7 @@ using System.Text.Json.Nodes;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Domain.Library;
+using ModShelf.Domain.Updates;
 
 namespace ModShelf.Infrastructure.Settings;
 
@@ -19,7 +20,8 @@ namespace ModShelf.Infrastructure.Settings;
 ///     "folders": "{source}/{game}/{mod} ({modid})/{file}",
 ///     "gameFolders": { "skyrimspecialedition": "{source}/{game}/{mod}/{file}" },
 ///     "oldVersions": 2
-///   }
+///   },
+///   "updates": { "interval": "6h" }
 /// }
 /// </code>
 /// </summary>
@@ -34,6 +36,8 @@ internal sealed class JsonSettingsStore : ISettingsStore
     private const string Folders = "folders";
     private const string GameFolders = "gameFolders";
     private const string OldVersions = "oldVersions";
+    private const string Updates = "updates";
+    private const string Interval = "interval";
 
     private static readonly JsonDocumentOptions Reading = new() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
     private static readonly JsonSerializerOptions Writing = new() { WriteIndented = true };
@@ -58,11 +62,7 @@ internal sealed class JsonSettingsStore : ISettingsStore
     public async Task<AppSettings> LoadAsync(CancellationToken cancellationToken)
     {
         JsonObject? file = await ReadAsync(cancellationToken).ConfigureAwait(false);
-        if (file?[Library] is not JsonObject library)
-        {
-            return new AppSettings();
-        }
-
+        JsonObject library = file?[Library] as JsonObject ?? [];
         try
         {
             string? root = Text(library, Root);
@@ -87,6 +87,9 @@ internal sealed class JsonSettingsStore : ISettingsStore
                 LibraryFolders = folders is null ? null : FolderPattern.Parse(folders),
                 GameFolders = games.ToImmutable(),
                 OldVersions = ReadOldVersions(library),
+                UpdateInterval = file?[Updates] is JsonObject updates && Text(updates, Interval, Updates) is { } interval
+                    ? UpdateInterval.Parse(interval)
+                    : null,
             };
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or InvalidDataException or FormatException)
@@ -140,6 +143,17 @@ internal sealed class JsonSettingsStore : ISettingsStore
             file.Remove(Library);
         }
 
+        JsonObject updatesSection = file[Updates] as JsonObject ?? [];
+        Set(updatesSection, Interval, settings.UpdateInterval is { } every ? UpdateInterval.Format(every) : null);
+        if (updatesSection.Count == 0)
+        {
+            file.Remove(Updates);
+        }
+        else
+        {
+            file[Updates] = updatesSection;
+        }
+
         Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
         string temporary = _path + ".tmp";
         await File.WriteAllTextAsync(temporary, file.ToJsonString(Writing) + Environment.NewLine, new UTF8Encoding(false), cancellationToken)
@@ -147,11 +161,11 @@ internal sealed class JsonSettingsStore : ISettingsStore
         File.Move(temporary, _path, overwrite: true);
     }
 
-    private static string? Text(JsonObject section, string name) => section[name] switch
+    private static string? Text(JsonObject section, string name, string sectionName = Library) => section[name] switch
     {
         null => null,
         JsonValue value when value.TryGetValue(out string? text) => string.IsNullOrWhiteSpace(text) ? null : text,
-        _ => throw new InvalidDataException($"library.{name} must be text."),
+        _ => throw new InvalidDataException($"{sectionName}.{name} must be text."),
     };
 
     /// <summary>

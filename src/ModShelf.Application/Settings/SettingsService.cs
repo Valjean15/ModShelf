@@ -4,6 +4,7 @@ using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Domain.Library;
+using ModShelf.Domain.Updates;
 
 namespace ModShelf.Application.Settings;
 
@@ -93,6 +94,17 @@ internal sealed class SettingsService : ISettingsService, IDisposable
 
     public Task SetOldVersionsAsync(OldVersionRule? rule, CancellationToken cancellationToken)
         => ChangeAsync((settings, _) => Task.FromResult(settings with { OldVersions = rule }), cancellationToken);
+
+    public Task SetUpdateIntervalAsync(TimeSpan? interval, CancellationToken cancellationToken)
+    {
+        if (interval is { } value)
+        {
+            ArgumentOutOfRangeException.ThrowIfLessThan(value, UpdateInterval.Minimum, nameof(interval));
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(value, UpdateInterval.Maximum, nameof(interval));
+        }
+
+        return ChangeAsync((settings, _) => Task.FromResult(settings with { UpdateInterval = interval }), cancellationToken);
+    }
 
     public void Dispose() => _changing.Dispose();
 

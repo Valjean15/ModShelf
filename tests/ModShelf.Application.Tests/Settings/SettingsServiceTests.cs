@@ -150,6 +150,28 @@ public sealed class SettingsServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task SetsHowOftenToCheckForUpdatesAndBackToTheDefault()
+    {
+        await _settings.SetUpdateIntervalAsync(TimeSpan.FromMinutes(30), Cancellation);
+        TimeSpan? set = (await _settings.GetAsync(Cancellation)).UpdateInterval;
+
+        await _settings.SetUpdateIntervalAsync(null, Cancellation);
+
+        Assert.Equal(TimeSpan.FromMinutes(30), set);
+        Assert.Null((await _settings.GetAsync(Cancellation)).UpdateInterval);
+    }
+
+    [Theory]
+    [InlineData(14)]
+    [InlineData(10081)]
+    public async Task RefusesAnIntervalOutOfRange(int minutes)
+    {
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _settings.SetUpdateIntervalAsync(TimeSpan.FromMinutes(minutes), Cancellation));
+
+        Assert.Equal(0, _store.Saves);
+    }
+
+    [Fact]
     public async Task SetsThePatternForEveryGameAndForOne()
     {
         FolderPattern byId = FolderPattern.Parse("{source}/{game}/{modid}/{file}");

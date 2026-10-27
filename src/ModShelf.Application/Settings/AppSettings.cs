@@ -34,6 +34,11 @@ public sealed record AppSettings
     public OldVersionRule? OldVersions { get; init; }
 
     /// <summary>
+    /// How often the watched mods are checked for updates in the background; null for <see cref="Domain.Updates.UpdateInterval.Default"/>.
+    /// </summary>
+    public TimeSpan? UpdateInterval { get; init; }
+
+    /// <summary>
     /// The pattern files of <paramref name="game"/> go by.
     /// </summary>
     public FolderPattern FoldersFor(string game)

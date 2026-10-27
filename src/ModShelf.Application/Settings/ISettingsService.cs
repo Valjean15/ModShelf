@@ -1,4 +1,5 @@
 using ModShelf.Domain.Library;
+using ModShelf.Domain.Updates;
 
 namespace ModShelf.Application.Settings;
 
@@ -47,4 +48,14 @@ public interface ISettingsService
     /// <see cref="OldVersionRule.Default"/> with null. Files downloaded already stay as they are.
     /// </summary>
     Task SetOldVersionsAsync(OldVersionRule? rule, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets how often the watched mods are checked for updates in the background, or sets it back to
+    /// <see cref="UpdateInterval.Default"/> with null.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// The interval is shorter than <see cref="UpdateInterval.Minimum"/> or longer than
+    /// <see cref="UpdateInterval.Maximum"/>.
+    /// </exception>
+    Task SetUpdateIntervalAsync(TimeSpan? interval, CancellationToken cancellationToken);
 }

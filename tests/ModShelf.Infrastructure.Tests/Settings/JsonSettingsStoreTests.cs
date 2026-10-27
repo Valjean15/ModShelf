@@ -80,12 +80,12 @@ public sealed class JsonSettingsStoreTests : IDisposable
     [Fact]
     public async Task KeepsWhatElseTheFileHolds()
     {
-        await WriteAsync("""{ "updates": { "interval": "6h" }, "library": { "keep": 3, "root": "/old" } }""");
+        await WriteAsync("""{ "appearance": { "theme": "dark" }, "library": { "keep": 3, "root": "/old" } }""");
 
         await Store().SaveAsync(new AppSettings { LibraryFolders = FolderPattern.Default }, Cancellation);
 
         string file = await File.ReadAllTextAsync(FilePath, Cancellation);
-        Assert.Contains("\"interval\": \"6h\"", file, StringComparison.Ordinal);
+        Assert.Contains("\"theme\": \"dark\"", file, StringComparison.Ordinal);
         Assert.Contains("\"keep\": 3", file, StringComparison.Ordinal);
         Assert.DoesNotContain("/old", file, StringComparison.Ordinal);
         Assert.False(File.Exists(FilePath + ".tmp"));
@@ -175,6 +175,41 @@ public sealed class JsonSettingsStoreTests : IDisposable
         await Store().SaveAsync(new AppSettings(), Cancellation);
 
         Assert.Equal("{}", (await File.ReadAllTextAsync(FilePath, Cancellation)).Trim());
+    }
+
+    [Fact]
+    public async Task KeepsHowOftenToCheckForUpdates()
+    {
+        await Store().SaveAsync(new AppSettings { UpdateInterval = TimeSpan.FromMinutes(90) }, Cancellation);
+
+        AppSettings settings = await Store().LoadAsync(Cancellation);
+
+        Assert.Equal(TimeSpan.FromMinutes(90), settings.UpdateInterval);
+        Assert.Contains("\"updates\": {", await File.ReadAllTextAsync(FilePath, Cancellation), StringComparison.Ordinal);
+        Assert.Contains("\"interval\": \"90m\"", await File.ReadAllTextAsync(FilePath, Cancellation), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task TheDefaultIntervalLeavesTheFile()
+    {
+        await Store().SaveAsync(new AppSettings { UpdateInterval = TimeSpan.FromHours(1) }, Cancellation);
+
+        await Store().SaveAsync(new AppSettings(), Cancellation);
+
+        Assert.Equal("{}", (await File.ReadAllTextAsync(FilePath, Cancellation)).Trim());
+    }
+
+    [Theory]
+    [InlineData("""{ "updates": { "interval": "1w" } }""")]
+    [InlineData("""{ "updates": { "interval": "5m" } }""")]
+    [InlineData("""{ "updates": { "interval": 6 } }""")]
+    public async Task SaysWhenTheIntervalIsWrong(string content)
+    {
+        await WriteAsync(content);
+
+        InvalidDataException refused = await Assert.ThrowsAsync<InvalidDataException>(() => Store().LoadAsync(Cancellation));
+
+        Assert.StartsWith($"The settings in {FilePath} can't be read:", refused.Message, StringComparison.Ordinal);
     }
 
     [Fact]
