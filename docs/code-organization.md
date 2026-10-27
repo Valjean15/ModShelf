@@ -81,7 +81,8 @@ Other projects see a project only through what it makes public, so keep that to 
 | 600–699 | Application: library downloads and recording |
 | 700–799 | Application: update checks |
 | 800–899 | Platform: notices |
-| 900 onward | Next free block |
+| 900–999 | Presentation: the main window and the screens |
+| 1000 onward | Next free block |
 
 ## 7. Files
 

@@ -35,6 +35,8 @@ tests/ModShelf.Platform.Tests/bin/Debug/net10.0/ModShelf.Platform.Tests -method 
 
 `dotnet run --project src/ModShelf.Desktop` opens the main window: a sidebar of the screens, Library, Updates, Browse, Downloads, Accounts and Settings, and the one selected. The button at the top of the sidebar hides the screens' names. The screens fill in over Phase 5. While the app is open, queued downloads go on, finished ones go into the library, and the watched mods are checked for updates every `updates.interval`. It uses the same library database, settings, accounts and environment variables as the command line, so a library made with one shows in the other.
 
+The Downloads screen takes a link to a mod or a file: **Download** puts it into the library, and **Save to a folder…** into a folder you pick. It lists every download, newest first, with its progress, speed and time left, and the buttons to pause, resume, retry or cancel it. Cancelling a download with bytes saved asks first. **Clear finished** removes the done and cancelled downloads from the list; their files stay. A download Nexus Mods wants started on its website shows **Open on Nexus Mods** and **Paste link…**: start it there with the download for mod managers, copy the `nxm://` link its button holds, and paste it. The badge on Downloads counts the downloads waiting for you, to be started or because they failed.
+
 ### Command line
 
 The headless host in `src/ModShelf.Cli` builds the same dependency-injection container as the desktop app and drives the engine directly:
