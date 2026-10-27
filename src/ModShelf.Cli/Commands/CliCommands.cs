@@ -11,10 +11,11 @@ namespace ModShelf.Cli.Commands;
 internal static class CliCommands
 {
     public static RootCommand Create(CliEnvironment environment)
-        => new("ModShelf from the command line: download files, look mods up, look at the download queue and link accounts.")
+        => new("ModShelf from the command line: download files, look mods up, keep a library of mods, look at the download queue and link accounts.")
         {
             DownloadCommand.Create(environment),
             ModCommand.Create(environment),
+            LibraryCommand.Create(environment),
             QueueCommand.Create(environment),
             AccountCommand.Create(environment),
         };

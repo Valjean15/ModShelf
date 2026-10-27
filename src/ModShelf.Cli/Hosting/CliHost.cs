@@ -88,6 +88,7 @@ internal static class CliHost
         builder.Services.AddModLookup();
         builder.Services.AddModUpdates();
         builder.Services.AddWatchlists();
+        builder.Services.AddLibrary();
         builder.Services.AddDirectUrlSource();
         builder.Services.AddNexusSource(NexusOptionsFrom(builder.Configuration));
         if (runDownloads)
