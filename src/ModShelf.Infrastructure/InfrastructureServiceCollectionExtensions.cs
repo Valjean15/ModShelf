@@ -13,6 +13,7 @@ using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Infrastructure.Downloads;
+using ModShelf.Infrastructure.Library;
 using ModShelf.Infrastructure.Persistence;
 using ModShelf.Infrastructure.Persistence.Repositories;
 using ModShelf.Infrastructure.Settings;
@@ -109,6 +110,19 @@ public static class InfrastructureServiceCollectionExtensions
         }
 
         services.AddSingleton<ISettingsStore>(new JsonSettingsStore(path));
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the file system as the <see cref="ILibraryStorage"/>, which Application's library downloads check files
+    /// and paths with.
+    /// </summary>
+    public static IServiceCollection AddLibraryStorage(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton<ILibraryStorage>(new FileSystemLibraryStorage());
 
         return services;
     }
