@@ -118,6 +118,17 @@ public sealed class ApplicationServiceCollectionExtensionsTests
     }
 
     [Fact]
+    public void RegistersTheMoverOnce()
+    {
+        ServiceCollection services = new();
+        services.AddLibraryMover();
+        services.AddLibraryMover();
+
+        Assert.Equal(typeof(LibraryMover), Single<ILibraryMover>(services).ImplementationType);
+        Assert.Equal(ServiceLifetime.Singleton, Single<ILibraryMover>(services).Lifetime);
+    }
+
+    [Fact]
     public void LibraryRecordingRunsTheRecorder()
     {
         ServiceCollection services = new();

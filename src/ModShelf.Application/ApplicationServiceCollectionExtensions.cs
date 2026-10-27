@@ -100,6 +100,20 @@ public static class ApplicationServiceCollectionExtensions
     }
 
     /// <summary>
+    /// Registers <see cref="ILibraryMover"/>, which moves the library to another root. Needs the settings
+    /// (<see cref="AddSettings"/>) and Infrastructure's <see cref="Library.Ports.ILibraryRepository"/> and
+    /// <see cref="Library.Ports.ILibraryStorage"/>.
+    /// </summary>
+    public static IServiceCollection AddLibraryMover(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton<ILibraryMover, LibraryMover>();
+
+        return services;
+    }
+
+    /// <summary>
     /// Records finished downloads into the library while the host runs, with a hosted <see cref="LibraryRecorder"/>.
     /// A host that runs downloads (<see cref="AddBackgroundDownloads"/>) adds this too, with
     /// <see cref="AddLibraryDownloads"/>.

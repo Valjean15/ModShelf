@@ -21,6 +21,11 @@ internal sealed class FakeLibraryStorage : ILibraryStorage
     public ConcurrentDictionary<string, Exception> Failures { get; } = new(StringComparer.Ordinal);
 
     /// <summary>
+    /// Runs after each move, with where the file went.
+    /// </summary>
+    public Action<string>? AfterMove { get; set; }
+
+    /// <summary>
     /// Every move, in order.
     /// </summary>
     public ConcurrentQueue<(string Source, string Destination)> Moves { get; } = new();
@@ -65,6 +70,7 @@ internal sealed class FakeLibraryStorage : ILibraryStorage
 
         _files[destination] = size;
         Moves.Enqueue((source, destination));
+        AfterMove?.Invoke(destination);
     }
 
     public void DeleteFile(string path)

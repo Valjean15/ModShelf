@@ -12,8 +12,9 @@ using ModShelf.Domain.Mods;
 namespace ModShelf.Cli.Commands;
 
 /// <summary>
-/// <c>library list</c>, <c>library watch &lt;link&gt;</c> and <c>library unwatch &lt;link&gt;</c>: the mods ModShelf
-/// watches for updates or has downloaded files of.
+/// <c>library list</c>, <c>library watch &lt;link&gt;</c>, <c>library unwatch &lt;link&gt;</c> and
+/// <c>library move &lt;folder&gt;</c>: the mods ModShelf watches for updates or has downloaded files of, and where their
+/// files are.
 /// </summary>
 internal static class LibraryCommand
 {
@@ -22,11 +23,22 @@ internal static class LibraryCommand
         Command list = new("list", "Shows the mods in the library: the ones watched for updates, and the ones with downloaded files.");
         list.SetAction((_, cancellationToken) => ListAsync(environment, cancellationToken));
 
-        return new Command("library", "Shows the library of watched and downloaded mods, and watches mods for updates.")
+        Argument<DirectoryInfo> folder = new("folder")
+        {
+            Description = "The library's new root folder. The library's files go to the same places under it.",
+        };
+        Command move = new("move", "Moves the library's files to another folder, which becomes the library's root. Ctrl+C stops it; run the same command again to finish.")
+        {
+            folder,
+        };
+        move.SetAction((parsed, cancellationToken) => MoveAsync(environment, parsed.GetValue(folder)!, cancellationToken));
+
+        return new Command("library", "Shows the library of watched and downloaded mods, watches mods for updates, and moves the library.")
         {
             list,
             CreateWatch(environment, watch: true),
             CreateWatch(environment, watch: false),
+            move,
         };
     }
 
@@ -42,6 +54,64 @@ internal static class LibraryCommand
             : new("unwatch", "Stops watching a mod for updates. A mod with downloaded files stays in the library.") { link };
         command.SetAction((parsed, cancellationToken) => WatchAsync(environment, parsed.GetValue(link)!, watch, cancellationToken));
         return command;
+    }
+
+    private static async Task<int> MoveAsync(CliEnvironment environment, DirectoryInfo folder, CancellationToken cancellationToken)
+    {
+        using IHost host = environment.BuildHost(false);
+        await host.StartAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            LibraryMove move = await host.Services.GetRequiredService<ILibraryMover>()
+                .MoveAsync(folder.FullName, cancellationToken)
+                .ConfigureAwait(false);
+            if (string.Equals(move.From, move.To, StringComparison.Ordinal))
+            {
+                environment.Output.WriteLine($"The library is in {move.To} already.");
+                return ExitCodes.Done;
+            }
+
+            environment.Output.WriteLine(move.Moved == 1
+                ? $"Moved 1 file from {move.From} to {move.To}."
+                : string.Create(CultureInfo.CurrentCulture, $"Moved {move.Moved:N0} files from {move.From} to {move.To}."));
+            if (move.AlreadyThere > 0)
+            {
+                environment.Output.WriteLine(move.AlreadyThere == 1
+                    ? "1 file was there already, from a move that stopped part-way."
+                    : string.Create(CultureInfo.CurrentCulture, $"{move.AlreadyThere:N0} files were there already, from a move that stopped part-way."));
+            }
+
+            if (move.Missing > 0)
+            {
+                environment.Output.WriteLine(move.Missing == 1
+                    ? "1 file wasn't on disk. The library still has it, to download again."
+                    : string.Create(CultureInfo.CurrentCulture, $"{move.Missing:N0} files weren't on disk. The library still has them, to download again."));
+            }
+
+            environment.Output.WriteLine($"The library is in {move.To} now.");
+            return ExitCodes.Done;
+        }
+        catch (ArgumentException exception)
+        {
+            await environment.Error.WriteLineAsync(exception.MessageForUser()).ConfigureAwait(false);
+            return ExitCodes.BadInput;
+        }
+        catch (Exception exception) when (exception is InvalidOperationException or IOException or UnauthorizedAccessException or InvalidDataException)
+        {
+            await environment.Error.WriteLineAsync(exception.Message).ConfigureAwait(false);
+            return ExitCodes.Failed;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            await environment.Error.WriteLineAsync(
+                    "Stopped. The library stays where it was until every file is moved; run the same command again to finish.")
+                .ConfigureAwait(false);
+            return ExitCodes.Interrupted;
+        }
+        finally
+        {
+            await host.StopAsync(CancellationToken.None).ConfigureAwait(false);
+        }
     }
 
     private static async Task<int> ListAsync(CliEnvironment environment, CancellationToken cancellationToken)
