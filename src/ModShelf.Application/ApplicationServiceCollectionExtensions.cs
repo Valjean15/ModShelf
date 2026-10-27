@@ -142,6 +142,21 @@ public static class ApplicationServiceCollectionExtensions
     }
 
     /// <summary>
+    /// Registers <see cref="IUpdateChecker"/>, which checks the watched mods for updates. Needs Infrastructure's
+    /// <see cref="Library.Ports.ILibraryRepository"/>.
+    /// </summary>
+    public static IServiceCollection AddUpdateChecks(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton(TimeProvider.System);
+        services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
+        services.TryAddSingleton<IUpdateChecker, UpdateChecker>();
+
+        return services;
+    }
+
+    /// <summary>
     /// Registers <see cref="IModUpdates"/>, which asks the sources' update feeds which mods changed lately.
     /// </summary>
     public static IServiceCollection AddModUpdates(this IServiceCollection services)

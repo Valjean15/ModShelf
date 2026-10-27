@@ -129,6 +129,19 @@ public sealed class ApplicationServiceCollectionExtensionsTests
     }
 
     [Fact]
+    public void TheUpdateCheckerSharesTheSourceRegistry()
+    {
+        ServiceCollection services = new();
+        services.AddModLookup();
+        services.AddUpdateChecks();
+        services.AddUpdateChecks();
+
+        Assert.Equal(typeof(UpdateChecker), Single<IUpdateChecker>(services).ImplementationType);
+        Assert.Equal(typeof(SourceRegistry), Single<ISourceRegistry>(services).ImplementationType);
+        Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
+    }
+
+    [Fact]
     public void LibraryRecordingRunsTheRecorder()
     {
         ServiceCollection services = new();
