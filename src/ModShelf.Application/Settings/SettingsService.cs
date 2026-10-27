@@ -106,6 +106,9 @@ internal sealed class SettingsService : ISettingsService, IDisposable
         return ChangeAsync((settings, _) => Task.FromResult(settings with { UpdateInterval = interval }), cancellationToken);
     }
 
+    public Task SetNotifyOfUpdatesAsync(bool? notify, CancellationToken cancellationToken)
+        => ChangeAsync((settings, _) => Task.FromResult(settings with { NotifyOfUpdates = notify }), cancellationToken);
+
     public void Dispose() => _changing.Dispose();
 
     /// <summary>

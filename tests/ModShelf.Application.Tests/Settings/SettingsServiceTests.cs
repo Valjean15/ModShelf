@@ -172,6 +172,18 @@ public sealed class SettingsServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task SetsWhetherToNotifyOfUpdatesAndBackToTheDefault()
+    {
+        await _settings.SetNotifyOfUpdatesAsync(false, Cancellation);
+        bool? set = (await _settings.GetAsync(Cancellation)).NotifyOfUpdates;
+
+        await _settings.SetNotifyOfUpdatesAsync(null, Cancellation);
+
+        Assert.False(set);
+        Assert.Null((await _settings.GetAsync(Cancellation)).NotifyOfUpdates);
+    }
+
+    [Fact]
     public async Task SetsThePatternForEveryGameAndForOne()
     {
         FolderPattern byId = FolderPattern.Parse("{source}/{game}/{modid}/{file}");

@@ -38,6 +38,7 @@ internal sealed class JsonSettingsStore : ISettingsStore
     private const string OldVersions = "oldVersions";
     private const string Updates = "updates";
     private const string Interval = "interval";
+    private const string Notify = "notify";
 
     private static readonly JsonDocumentOptions Reading = new() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
     private static readonly JsonSerializerOptions Writing = new() { WriteIndented = true };
@@ -63,6 +64,7 @@ internal sealed class JsonSettingsStore : ISettingsStore
     {
         JsonObject? file = await ReadAsync(cancellationToken).ConfigureAwait(false);
         JsonObject library = file?[Library] as JsonObject ?? [];
+        JsonObject updates = file?[Updates] as JsonObject ?? [];
         try
         {
             string? root = Text(library, Root);
@@ -87,9 +89,13 @@ internal sealed class JsonSettingsStore : ISettingsStore
                 LibraryFolders = folders is null ? null : FolderPattern.Parse(folders),
                 GameFolders = games.ToImmutable(),
                 OldVersions = ReadOldVersions(library),
-                UpdateInterval = file?[Updates] is JsonObject updates && Text(updates, Interval, Updates) is { } interval
-                    ? UpdateInterval.Parse(interval)
-                    : null,
+                UpdateInterval = Text(updates, Interval, Updates) is { } interval ? UpdateInterval.Parse(interval) : null,
+                NotifyOfUpdates = updates[Notify] switch
+                {
+                    null => null,
+                    JsonValue value when value.TryGetValue(out bool notify) => notify,
+                    _ => throw new InvalidDataException($"{Updates}.{Notify} must be true or false."),
+                },
             };
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or InvalidDataException or FormatException)
@@ -145,6 +151,15 @@ internal sealed class JsonSettingsStore : ISettingsStore
 
         JsonObject updatesSection = file[Updates] as JsonObject ?? [];
         Set(updatesSection, Interval, settings.UpdateInterval is { } every ? UpdateInterval.Format(every) : null);
+        if (settings.NotifyOfUpdates is { } notify)
+        {
+            updatesSection[Notify] = notify;
+        }
+        else
+        {
+            updatesSection.Remove(Notify);
+        }
+
         if (updatesSection.Count == 0)
         {
             file.Remove(Updates);

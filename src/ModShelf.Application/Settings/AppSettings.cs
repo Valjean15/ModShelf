@@ -39,6 +39,11 @@ public sealed record AppSettings
     public TimeSpan? UpdateInterval { get; init; }
 
     /// <summary>
+    /// Whether a background check that finds new updates shows a notice; null for yes.
+    /// </summary>
+    public bool? NotifyOfUpdates { get; init; }
+
+    /// <summary>
     /// The pattern files of <paramref name="game"/> go by.
     /// </summary>
     public FolderPattern FoldersFor(string game)

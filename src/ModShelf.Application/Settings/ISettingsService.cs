@@ -58,4 +58,9 @@ public interface ISettingsService
     /// <see cref="UpdateInterval.Maximum"/>.
     /// </exception>
     Task SetUpdateIntervalAsync(TimeSpan? interval, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets whether a background check that finds new updates shows a notice, or sets it back to yes with null.
+    /// </summary>
+    Task SetNotifyOfUpdatesAsync(bool? notify, CancellationToken cancellationToken);
 }

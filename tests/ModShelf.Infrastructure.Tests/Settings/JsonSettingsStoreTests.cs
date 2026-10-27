@@ -212,6 +212,42 @@ public sealed class JsonSettingsStoreTests : IDisposable
         Assert.StartsWith($"The settings in {FilePath} can't be read:", refused.Message, StringComparison.Ordinal);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task KeepsWhetherToNotifyOfUpdates(bool notify)
+    {
+        await Store().SaveAsync(new AppSettings { UpdateInterval = TimeSpan.FromHours(1), NotifyOfUpdates = notify }, Cancellation);
+
+        AppSettings settings = await Store().LoadAsync(Cancellation);
+
+        Assert.Equal((notify, TimeSpan.FromHours(1)), (settings.NotifyOfUpdates, settings.UpdateInterval));
+        Assert.Contains($"\"notify\": {(notify ? "true" : "false")}", await File.ReadAllTextAsync(FilePath, Cancellation), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task NotifyingByDefaultLeavesTheFile()
+    {
+        await Store().SaveAsync(new AppSettings { NotifyOfUpdates = false }, Cancellation);
+
+        await Store().SaveAsync(new AppSettings(), Cancellation);
+
+        Assert.Null((await Store().LoadAsync(Cancellation)).NotifyOfUpdates);
+        Assert.Equal("{}", (await File.ReadAllTextAsync(FilePath, Cancellation)).Trim());
+    }
+
+    [Theory]
+    [InlineData("""{ "updates": { "notify": "no" } }""")]
+    [InlineData("""{ "updates": { "notify": 0 } }""")]
+    public async Task SaysWhenNotifyIsntTrueOrFalse(string content)
+    {
+        await WriteAsync(content);
+
+        InvalidDataException refused = await Assert.ThrowsAsync<InvalidDataException>(() => Store().LoadAsync(Cancellation));
+
+        Assert.Contains("updates.notify must be true or false.", refused.Message, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void RefusesARelativePath()
     {

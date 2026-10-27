@@ -22,7 +22,8 @@ internal static class SettingsCommand
     private const string GamePrefix = LibraryFolders + ".";
     private const string OldVersions = "library.oldVersions";
     private const string Interval = "updates.interval";
-    private const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<game>, {OldVersions}, {Interval}";
+    private const string Notify = "updates.notify";
+    private const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<game>, {OldVersions}, {Interval}, {Notify}";
 
     public static Command Create(CliEnvironment environment)
     {
@@ -33,7 +34,8 @@ internal static class SettingsCommand
         Argument<string> value = new("value")
         {
             Description = "Its new value: a full path for library.root; all, archive or how many versions to keep for "
-                + "library.oldVersions; minutes, hours or days, such as 30m, 6h or 1d, for updates.interval; a folder pattern, "
+                + "library.oldVersions; minutes, hours or days, such as 30m, 6h or 1d, for updates.interval; true or false for "
+                + "updates.notify; a folder pattern, "
                 + "such as \"{source}/{game}/{mod} ({modid})/{file}\", for the others.",
         };
         Command set = new("set", "Changes a setting.") { setName, value };
@@ -43,7 +45,7 @@ internal static class SettingsCommand
         Command reset = new("reset", "Sets a setting back to its default.") { resetName };
         reset.SetAction((parsed, cancellationToken) => ChangeAsync(environment, parsed.GetValue(resetName)!, null, cancellationToken));
 
-        return new Command("settings", "Shows and changes the settings: where the library is, how its folders are named, what happens to old versions, and how often to check for updates.")
+        return new Command("settings", "Shows and changes the settings: where the library is, how its folders are named, what happens to old versions, and how often to check for updates and whether to say so.")
         {
             show,
             set,
@@ -80,6 +82,7 @@ internal static class SettingsCommand
                     .Select(game => new[] { GamePrefix + game.Key, game.Value.Text }),
                 [OldVersions, stored.OldVersions?.ToString() ?? $"{OldVersionRule.Default} (default)"],
                 [Interval, stored.UpdateInterval is { } every ? UpdateInterval.Format(every) : $"{UpdateInterval.Format(UpdateInterval.Default)} (default)"],
+                [Notify, stored.NotifyOfUpdates is { } notify ? Text(notify) : $"{Text(true)} (default)"],
             ];
             TextTable.Write(environment.Output, rows);
             environment.Output.WriteLine(
@@ -89,7 +92,8 @@ internal static class SettingsCommand
                 $"When a newer version of a file is downloaded, {OldVersions} keeps the old ones (all), moves them to an "
                 + "_archive folder (archive), or keeps that many versions and deletes the older ones (a number).");
             environment.Output.WriteLine(
-                $"The desktop app checks the watched mods for updates every {Interval}; library check checks them now.");
+                $"The desktop app checks the watched mods for updates every {Interval}, and shows a notice of new ones unless "
+                + $"{Notify} is false; library check checks them now.");
             environment.Output.WriteLine("To change a setting: settings set <setting> <value>");
             return ExitCodes.Done;
         }
@@ -98,6 +102,8 @@ internal static class SettingsCommand
             await host.StopAsync(CancellationToken.None).ConfigureAwait(false);
         }
     }
+
+    private static string Text(bool value) => value ? "true" : "false";
 
     /// <summary>
     /// What a rule does with old versions, as a sentence.
@@ -110,13 +116,17 @@ internal static class SettingsCommand
         _ => $"when a newer version of a file is downloaded, the newest {rule.Count} stay and older ones are deleted.",
     };
 
+    /// <exception cref="ArgumentException"><paramref name="value"/> is neither true nor false.</exception>
+    private static bool ParseBool(string value)
+        => bool.TryParse(value.Trim(), out bool parsed) ? parsed : throw new ArgumentException($"'{value}' isn't true or false.", nameof(value));
+
     /// <param name="value">The setting's new value, or null to set it back to its default.</param>
     private static async Task<int> ChangeAsync(CliEnvironment environment, string name, string? value, CancellationToken cancellationToken)
     {
         string setting = name.Trim().ToLowerInvariant();
         string? game = setting.StartsWith(GamePrefix, StringComparison.Ordinal) ? name.Trim()[GamePrefix.Length..] : null;
         bool oldVersions = setting.Equals(OldVersions, StringComparison.OrdinalIgnoreCase);
-        if (setting is not (LibraryRoot or LibraryFolders or Interval) && !oldVersions && string.IsNullOrWhiteSpace(game))
+        if (setting is not (LibraryRoot or LibraryFolders or Interval or Notify) && !oldVersions && string.IsNullOrWhiteSpace(game))
         {
             await environment.Error.WriteLineAsync($"There's no setting called {name}. Settings: {Names}.").ConfigureAwait(false);
             return ExitCodes.BadInput;
@@ -152,6 +162,15 @@ internal static class SettingsCommand
                 environment.Output.WriteLine(interval is { } every
                     ? $"{Interval} is now {UpdateInterval.Format(every)}."
                     : $"{Interval} is back to its default, {UpdateInterval.Format(UpdateInterval.Default)}.");
+            }
+            else if (setting == Notify)
+            {
+                bool? notify = value is null ? null : ParseBool(value);
+                await settings.SetNotifyOfUpdatesAsync(notify, cancellationToken).ConfigureAwait(false);
+                string what = notify ?? true
+                    ? "the desktop app shows a notice when a background check finds new updates."
+                    : "the desktop app shows no notice when a background check finds new updates.";
+                environment.Output.WriteLine(notify is { } now ? $"{Notify} is now {Text(now)}: {what}" : $"{Notify} is back to its default, {Text(true)}: {what}");
             }
             else if (oldVersions)
             {

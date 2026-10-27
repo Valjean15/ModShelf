@@ -159,6 +159,23 @@ public sealed class LibraryUpdatesCommandTests : IAsyncDisposable
         Assert.StartsWith("'5m' isn't an interval.", refused.Errors.Trim(), StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task SetsWhetherToNotify()
+    {
+        CliResult set = await RunAsync("settings", "set", "updates.notify", "False");
+        CliResult shown = await RunAsync("settings", "show");
+        CliResult reset = await RunAsync("settings", "reset", "updates.notify");
+        CliResult shownAgain = await RunAsync("settings", "show");
+        CliResult refused = await RunAsync("settings", "set", "updates.notify", "no");
+
+        Assert.Equal("updates.notify is now false: the desktop app shows no notice when a background check finds new updates.", set.Output.Trim());
+        Assert.Contains(Lines(shown), line => Words(line) is ["updates.notify", "false"]);
+        Assert.Equal("updates.notify is back to its default, true: the desktop app shows a notice when a background check finds new updates.", reset.Output.Trim());
+        Assert.Contains(Lines(shownAgain), line => Words(line) is ["updates.notify", "true", "(default)"]);
+        Assert.Equal(BadInput, refused.ExitCode);
+        Assert.Equal("'no' isn't true or false.", refused.Errors.Trim());
+    }
+
     private static string[] Lines(CliResult result) => result.Output.TrimEnd().ReplaceLineEndings("\n").Split('\n');
 
     private static LibraryUpdate Update(ModRef mod, string id, int days) => new(
