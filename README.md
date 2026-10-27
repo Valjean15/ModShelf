@@ -4,7 +4,7 @@ ModShelf is a cross-platform desktop app for Windows, macOS and Linux that downl
 
 ModShelf downloads and manages files. **It never installs mods**: it doesn't extract into game folders, deploy, manage load order, detect conflicts, run FOMOD installers or install collections.
 
-> **Status:** Phase 4, the library, is done. The command line downloads files from Nexus Mods and from plain web links, keeps a library of the mods you download or watch, checks them for updates, and links a Nexus Mods account. The background checks that will show a notice of new updates are ready for the desktop app, which comes next and opens an empty window for now.
+> **Status:** Phase 5, the desktop app. The command line downloads files from Nexus Mods and from plain web links, keeps a library of the mods you download or watch, checks them for updates, and links a Nexus Mods account. The desktop app has its six screens in a sidebar, empty for now, and does the background work while it's open: queued downloads, recording them into the library, and update checks with a notice of new updates.
 
 ## Requirements
 
@@ -30,6 +30,10 @@ dotnet build
 $env:MODSHELF_TEST_NOTICES = "1"
 tests/ModShelf.Platform.Tests/bin/Debug/net10.0/ModShelf.Platform.Tests -method ModShelf.Platform.Tests.Notifications.NotificationServicesTests.ShowsARealNotice
 ```
+
+### Desktop app
+
+`dotnet run --project src/ModShelf.Desktop` opens the main window: a sidebar of the screens, Library, Updates, Browse, Downloads, Accounts and Settings, and the one selected. The button at the top of the sidebar hides the screens' names. The screens fill in over Phase 5. While the app is open, queued downloads go on, finished ones go into the library, and the watched mods are checked for updates every `updates.interval`. It uses the same library database, settings, accounts and environment variables as the command line, so a library made with one shows in the other.
 
 ### Command line
 

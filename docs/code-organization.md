@@ -36,7 +36,7 @@ Split a feature folder by role only where the roles below apply. Don't add role 
 | Presentation | `ViewModels/`, `Services/`, `Resources/` | ViewModels; navigation and dialog interfaces; `.resx` strings. |
 | Sources.\<Name\> | root, then `<Capability>/`, `Api/` | `<Name>Source`, `Add<Name>Source()` and the `<Name>Options` it takes at the root; capability folders (`Accounts`, `Catalog`, `Downloads`) as the site grows; HTTP clients and DTOs in `Api/`. |
 | Cli | `Commands/`, `Hosting/` | One `<Name>Command` per command with what only commands use (`ExitCodes`, output formatting); the host builder and lifetime. |
-| Desktop | `Views/`, `Hosting/` | Windows and views (`.axaml` with code-behind); the host builder and lifetime. Later `Styles/` and `Services/` (Avalonia implementations of Presentation's services). |
+| Desktop | `Views/`, `Hosting/`, `Styles/`, `Services/` | Windows and views (`.axaml` with code-behind), dialogs in `Views/Dialogs/`, and what only views use, such as converters; the host builder and lifetime; styles and icons; Avalonia implementations of Presentation's services (`AvaloniaDialogService`). |
 
 ## 4. Visibility
 
