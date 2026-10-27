@@ -78,7 +78,8 @@ Other projects see a project only through what it makes public, so keep that to 
 | 400–499 | Application: accounts and credentials |
 | 500–599 | Sources.Nexus |
 | 600–699 | Application: library downloads and recording |
-| 700 onward | Next free block |
+| 700–799 | Application: update checks |
+| 800 onward | Next free block |
 
 ## 7. Files
 

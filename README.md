@@ -4,7 +4,7 @@ ModShelf is a cross-platform desktop app for Windows, macOS and Linux that downl
 
 ModShelf downloads and manages files. **It never installs mods**: it doesn't extract into game folders, deploy, manage load order, detect conflicts, run FOMOD installers or install collections.
 
-> **Status:** Phase 4, the library. The command line downloads files from Nexus Mods and from plain web links, keeps a library of the mods you download or watch, and links a Nexus Mods account. Checking the library for updates comes next. The desktop app opens an empty window.
+> **Status:** Phase 4, the library. The command line downloads files from Nexus Mods and from plain web links, keeps a library of the mods you download or watch, checks them for updates, and links a Nexus Mods account. Notifications of new updates come next. The desktop app opens an empty window.
 
 ## Requirements
 
@@ -38,6 +38,8 @@ dotnet run --project src/ModShelf.Cli -- mod untrack <link>
 dotnet run --project src/ModShelf.Cli -- library list
 dotnet run --project src/ModShelf.Cli -- library watch <link>
 dotnet run --project src/ModShelf.Cli -- library unwatch <link>
+dotnet run --project src/ModShelf.Cli -- library check
+dotnet run --project src/ModShelf.Cli -- library updates [--changelog]
 dotnet run --project src/ModShelf.Cli -- library move <folder>
 dotnet run --project src/ModShelf.Cli -- settings show
 dotnet run --project src/ModShelf.Cli -- settings set <setting> <value>
@@ -61,12 +63,14 @@ dotnet run --project src/ModShelf.Cli -- account unlink <source>
 - `mod tracked` lists the mods your linked account tracks on the site. `mod track` and `mod untrack` track the mod a link is to, or stop tracking it, as the site's Track button does; doing either twice changes nothing.
 - When more than one site can search, list updates or track mods, `--source` picks one, such as `--source nexus`.
 - `library list` shows the library: the mods ModShelf watches for updates, and the ones with downloaded files, each with its link. `library watch` adds the mod a link is to and watches it; `library unwatch` stops watching it, and a mod without downloaded files leaves the library. Watching is ModShelf's own, apart from a site's tracked mods.
+- `library check` checks the watched mods for updates now, and lists the new ones with the link to download each. An update is the newest file of a downloaded file's update chain on the site, or, for a main file the author didn't link, a newer main file; for a mod that's only watched, a main file uploaded since the last check. Version labels are never compared. It asks the site as little as it can: once per game for the mods checked in the last 28 days, then only about mods whose files changed. `library updates` lists every update found; `--changelog` adds what changed in each. Downloading an update takes it off the list.
 - `library move` moves the library's files to the same places under another folder, which becomes the library's root. It waits until downloads into the library are finished, never moves a file over another, and puts every file back if one can't move. Ctrl+C stops it; running the same command again finishes it. Your own files under the old root stay, and the folders it emptied are removed.
 - `settings show` lists the settings, marking the defaults, and says where they're kept. `settings set` changes one, and `settings reset` puts it back to its default:
   - `library.root` is the library's folder: a ModShelf folder in your Downloads folder unless set. Once the library has files, `library move` changes it instead, taking them along.
   - `library.folders` is where files go under it, as folders separated by `/` and ending in `{file}`. The folders mix text with `{source}`, `{game}`, `{mod}` and `{modid}`, such as the default, `{source}/{game}/{mod} ({modid})/{file}`. A mod keeps its folder when its site renames it.
   - `library.folders.<game>` is a pattern for one game, named as in the site's links, such as `library.folders.skyrimspecialedition`.
   - `library.oldVersions` is what happens to a file's old versions when a newer one is downloaded: `all` keeps them, `archive` moves them to an `_archive` folder in their folder, and a number keeps that many versions, the newest first, and deletes the others. The default is `2`.
+  - `updates.interval` is how often the desktop app will check the watched mods for updates: minutes, hours or days, such as `30m`, `6h` or `1d`, from 15 minutes to 7 days. The default is `6h`. The command line checks only when asked.
 - `queue list` shows every saved job without starting any download.
 - `account list` shows the sources that support accounts, the account linked on each, and the ways to link one.
 - `account link` asks for what the source needs. An API key isn't shown as you type it. For `browser`, it opens the site's sign-in page and waits until you approve ModShelf there; if no browser opens, it shows the page to open by hand. Linking again replaces the account.
@@ -94,7 +98,7 @@ src/
 tests/
   ModShelf.<Library>.Tests        one test project per library
   ModShelf.Architecture.Tests     enforces the dependency rules
-  ModShelf.Cli.Tests              runs the CLI end to end: stop, kill and resume a download; finish one through a handoff; download into the library and move it; look up and search mods; link, refresh and unlink fake accounts
+  ModShelf.Cli.Tests              runs the CLI end to end: stop, kill and resume a download; finish one through a handoff; download into the library, move it and check it for updates; look up and search mods; link, refresh and unlink fake accounts
   Shared                          code several test projects compile in: SourceContractTests, TempFolder, the log recorders
 ```
 
