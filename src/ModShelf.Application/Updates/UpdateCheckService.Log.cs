@@ -12,4 +12,7 @@ internal sealed partial class UpdateCheckService
 
     [LoggerMessage(EventId = 704, Level = LogLevel.Warning, Message = "Couldn't read how often to check for updates, so it's every 6 hours")]
     private static partial void LogCantReadInterval(ILogger logger, Exception exception);
+
+    [LoggerMessage(EventId = 705, Level = LogLevel.Warning, Message = "Couldn't show the notice of new updates ({UpdateCount} found)")]
+    private static partial void LogCantNotify(ILogger logger, Exception exception, int updateCount);
 }
