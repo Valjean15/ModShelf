@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 using ModShelf.Application.Accounts.Ports;
+using ModShelf.Application.Settings.Ports;
 using ModShelf.Platform.Browser;
 using ModShelf.Platform.OAuth;
 using ModShelf.Platform.Secrets;
@@ -34,6 +35,17 @@ public sealed class PlatformServiceCollectionExtensionsTests : IDisposable
         Assert.IsType<SystemBrowserLauncher>(launcher);
         Assert.Equal(typeof(LoopbackRedirectListener), Single<IOAuthRedirectListener>(services).ImplementationType);
         Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
+    }
+
+    [Fact]
+    public void RegistersTheUsersFolders()
+    {
+        ServiceCollection services = new();
+        services.AddPlatformServices(new SecretStoreOptions { Folder = _folder.Path });
+
+        object folders = Single<IUserFolders>(services).ImplementationFactory!(new StubServiceProvider());
+
+        Assert.True(Path.IsPathFullyQualified(Assert.IsAssignableFrom<IUserFolders>(folders).Downloads));
     }
 
     [Fact]

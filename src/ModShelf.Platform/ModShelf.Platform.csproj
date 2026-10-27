@@ -5,8 +5,9 @@
     <NeutralLanguage>en</NeutralLanguage>
 
     <!--
-      The Keychain and libsecret stores call the OS through LibraryImport, which generates the native calls at
-      compile time and needs unsafe code for that. Only the interop classes in Secrets/ use it.
+      The Keychain and libsecret stores, and the Windows Known Folders lookup, call the OS through LibraryImport,
+      which generates the native calls at compile time and needs unsafe code for that. Only the interop classes in
+      Secrets/ and Folders/ use it.
     -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
