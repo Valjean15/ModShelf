@@ -1,7 +1,120 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:ModShelf.Presentation.ViewModels"
+             xmlns:res="using:ModShelf.Presentation.Resources"
              x:Class="ModShelf.Desktop.Views.DownloadsView"
              x:DataType="vm:DownloadsViewModel">
-    <TextBlock Classes="heading" Text="{Binding Title}" />
+
+    <DockPanel>
+        <TextBlock DockPanel.Dock="Top" Classes="heading" Text="{Binding Title}" />
+
+        <!-- A link goes into the library, or into a folder the user picks. Enter downloads it into the library. -->
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBox Name="LinkBox"
+                     Text="{Binding Link}"
+                     PlaceholderText="{x:Static res:Strings.DownloadsLinkHint}">
+                <TextBox.KeyBindings>
+                    <KeyBinding Gesture="Enter" Command="{Binding AddCommand}" />
+                </TextBox.KeyBindings>
+            </TextBox>
+            <Button Grid.Column="1"
+                    Classes="accent"
+                    Content="{x:Static res:Strings.DownloadsAdd}"
+                    Command="{Binding AddCommand}" />
+            <Button Grid.Column="2"
+                    Content="{x:Static res:Strings.DownloadsAddToFolder}"
+                    Command="{Binding AddToFolderCommand}" />
+        </Grid>
+
+        <TextBlock DockPanel.Dock="Top"
+                   Classes="note"
+                   Classes.problem="{Binding IsMessageAProblem}"
+                   Margin="0,8,0,0"
+                   TextWrapping="Wrap"
+                   Text="{Binding Message}"
+                   IsVisible="{Binding Message, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+        <Button DockPanel.Dock="Top"
+                HorizontalAlignment="Right"
+                Margin="0,16,0,8"
+                Content="{x:Static res:Strings.DownloadsClearFinished}"
+                Command="{Binding ClearFinishedCommand}" />
+
+        <Panel>
+            <TextBlock Classes="note"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Text="{x:Static res:Strings.DownloadsEmpty}"
+                       IsVisible="{Binding !HasJobs}" />
+
+            <!-- The rows share the width of their buttons, so their progress bars line up. -->
+            <ListBox Classes="rows"
+                     Grid.IsSharedSizeScope="True"
+                     ItemsSource="{Binding Jobs}"
+                     IsVisible="{Binding HasJobs}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:DownloadJobViewModel">
+                        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="16" RowSpacing="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="Actions" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Text="{Binding FileName}" />
+                            <TextBlock Grid.Row="1"
+                                       Classes="note"
+                                       TextTrimming="PathSegmentEllipsis"
+                                       Text="{Binding Folder}"
+                                       ToolTip.Tip="{Binding Folder}" />
+                            <ProgressBar Grid.Row="2"
+                                         Margin="0,4"
+                                         Maximum="100"
+                                         Value="{Binding Progress}"
+                                         IsIndeterminate="{Binding IsProgressIndeterminate}" />
+                            <Grid Grid.Row="3" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="16">
+                                <TextBlock Classes="note"
+                                           Classes.problem="{Binding IsFailed}"
+                                           TextWrapping="Wrap"
+                                           Text="{Binding StatusText}" />
+                                <TextBlock Grid.Column="1" Classes="note" Text="{Binding SizeText}" />
+                                <TextBlock Grid.Column="2" Classes="note" Text="{Binding SpeedText}" />
+                            </Grid>
+
+                            <!-- A download waiting for the user says what to do, and holds the buttons to do it. -->
+                            <StackPanel Grid.Row="4"
+                                        Orientation="Horizontal"
+                                        Spacing="8"
+                                        Margin="0,4,0,0"
+                                        IsVisible="{Binding IsAwaitingHandoff}">
+                                <Button Content="{Binding OpenPageLabel}" Command="{Binding OpenPageCommand}" />
+                                <Button Classes="accent"
+                                        Content="{x:Static res:Strings.JobPasteLink}"
+                                        Command="{Binding PasteLinkCommand}" />
+                            </StackPanel>
+
+                            <!-- Only what the download allows now shows. -->
+                            <StackPanel Grid.Column="1"
+                                        Grid.RowSpan="5"
+                                        Orientation="Horizontal"
+                                        Spacing="8"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center">
+                                <Button Content="{x:Static res:Strings.JobPause}"
+                                        Command="{Binding PauseCommand}"
+                                        IsVisible="{Binding CanPause}" />
+                                <Button Content="{x:Static res:Strings.JobResume}"
+                                        Command="{Binding ResumeCommand}"
+                                        IsVisible="{Binding CanResume}" />
+                                <Button Content="{x:Static res:Strings.JobRetry}"
+                                        Command="{Binding RetryCommand}"
+                                        IsVisible="{Binding CanRetry}" />
+                                <Button Content="{x:Static res:Strings.JobCancel}"
+                                        Command="{Binding CancelCommand}"
+                                        IsVisible="{Binding CanCancel}" />
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Panel>
+    </DockPanel>
 </UserControl>

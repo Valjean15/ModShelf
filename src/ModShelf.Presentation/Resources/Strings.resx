@@ -98,4 +98,268 @@
     <value>Cancel</value>
     <comment>The button that turns down what a dialog asks.</comment>
   </data>
+  <data name="DownloadsLinkHint" xml:space="preserve">
+    <value>Paste a link to a mod or a file, such as a mod's page on Nexus Mods</value>
+    <comment>The empty box at the top of the Downloads screen.</comment>
+  </data>
+  <data name="DownloadsAdd" xml:space="preserve">
+    <value>Download</value>
+    <comment>Button: download the pasted link into the library.</comment>
+  </data>
+  <data name="DownloadsAddToFolder" xml:space="preserve">
+    <value>Save to a folder…</value>
+    <comment>Button: download the pasted link into a folder the user picks, outside the library.</comment>
+  </data>
+  <data name="DownloadsClearFinished" xml:space="preserve">
+    <value>Clear finished</value>
+    <comment>Button: remove finished and cancelled downloads from the list; their files stay.</comment>
+  </data>
+  <data name="DownloadsEmpty" xml:space="preserve">
+    <value>Nothing to download. Paste a link above to start.</value>
+    <comment>Shown when the queue is empty.</comment>
+  </data>
+  <data name="DownloadsNotALink" xml:space="preserve">
+    <value>That isn't a complete web link, such as https://www.nexusmods.com/skyrimspecialedition/mods/12604.</value>
+    <comment>When the pasted text isn't a link.</comment>
+  </data>
+  <data name="DownloadsDownloadingInto" xml:space="preserve">
+    <value>Downloading {0} into {1}.</value>
+    <comment>{0} is the file's name, {1} the folder.</comment>
+  </data>
+  <data name="DownloadsContinuing" xml:space="preserve">
+    <value>Continuing the download of {0}, added earlier.</value>
+    <comment>{0} is the file's name.</comment>
+  </data>
+  <data name="DownloadsInLibraryAlready" xml:space="preserve">
+    <value>{0} is in the library already.</value>
+    <comment>{0} is the file's full path.</comment>
+  </data>
+  <data name="DownloadsOnlyModSites" xml:space="preserve">
+    <value>Only the files of mods on sites such as Nexus Mods go into the library. To download this file into a folder of your own, choose Save to a folder.</value>
+    <comment>When a plain web link is added to the library.</comment>
+  </data>
+  <data name="DownloadsNoSource" xml:space="preserve">
+    <value>No source can download that link.</value>
+    <comment>When no mod site recognizes the link.</comment>
+  </data>
+  <data name="DownloadsLibraryPlaceProblem" xml:space="preserve">
+    <value>{0} See where files go on the Settings screen.</value>
+    <comment>{0} is why the file couldn't be placed in the library, such as a path too long.</comment>
+  </data>
+  <data name="DownloadsUnexpected" xml:space="preserve">
+    <value>Something went wrong. The log has the details.</value>
+    <comment>When an action failed for a reason the user can't act on.</comment>
+  </data>
+  <data name="ChooseFolderTitle" xml:space="preserve">
+    <value>Choose where to save the file</value>
+    <comment>Title of the folder picker for a download outside the library.</comment>
+  </data>
+  <data name="NameTheFileTitle" xml:space="preserve">
+    <value>Name the file</value>
+    <comment>Title of the dialog asking what to save a file as.</comment>
+  </data>
+  <data name="NameTheFileMessage" xml:space="preserve">
+    <value>The link doesn't say what the file is called. What should it be saved as?</value>
+    <comment>The dialog asking for a file name.</comment>
+  </data>
+  <data name="NameTheFileHint" xml:space="preserve">
+    <value>file.zip</value>
+    <comment>Example file name in the empty box.</comment>
+  </data>
+  <data name="LinkNeedsAccount" xml:space="preserve">
+    <value>The site needs a linked account to look that link up, or refused the one linked. Link it on the Accounts screen, then try again.</value>
+    <comment>When a mod site refused the account while looking a link up.</comment>
+  </data>
+  <data name="LinkNotFound" xml:space="preserve">
+    <value>The site has no such mod or file.</value>
+    <comment>When the mod site says the mod or file doesn't exist.</comment>
+  </data>
+  <data name="LinkLookUpFailed" xml:space="preserve">
+    <value>The site couldn't look that link up: {0}</value>
+    <comment>{0} is the site's reason.</comment>
+  </data>
+  <data name="JobQueued" xml:space="preserve">
+    <value>Waiting to start</value>
+    <comment>A download's status.</comment>
+  </data>
+  <data name="JobResolving" xml:space="preserve">
+    <value>Getting the download link</value>
+    <comment>A download's status.</comment>
+  </data>
+  <data name="JobAwaitingHandoff" xml:space="preserve">
+    <value>Waiting for you: start the download on {0}, then paste the link it hands over</value>
+    <comment>A download's status while it waits for a handoff. {0} is the site's name, such as Nexus Mods.</comment>
+  </data>
+  <data name="JobDownloading" xml:space="preserve">
+    <value>Downloading</value>
+    <comment>A download's status.</comment>
+  </data>
+  <data name="JobVerifying" xml:space="preserve">
+    <value>Checking the file</value>
+    <comment>A download's status.</comment>
+  </data>
+  <data name="JobCompleted" xml:space="preserve">
+    <value>Done</value>
+    <comment>A download's status.</comment>
+  </data>
+  <data name="JobPaused" xml:space="preserve">
+    <value>Paused</value>
+    <comment>A download's status.</comment>
+  </data>
+  <data name="JobCancelled" xml:space="preserve">
+    <value>Cancelled</value>
+    <comment>A download's status.</comment>
+  </data>
+  <data name="JobFailedLinkUnavailable" xml:space="preserve">
+    <value>Failed: the link no longer works, or the server refused it.</value>
+    <comment>A failed download's status.</comment>
+  </data>
+  <data name="JobFailedHandoffExpired" xml:space="preserve">
+    <value>Failed: it wasn't started on the site in time.</value>
+    <comment>A failed download's status.</comment>
+  </data>
+  <data name="JobFailedNetwork" xml:space="preserve">
+    <value>Failed: the connection kept failing.</value>
+    <comment>A failed download's status.</comment>
+  </data>
+  <data name="JobFailedStorage" xml:space="preserve">
+    <value>Failed: the file couldn't be saved. The folder may not be writable, the disk may be full, or a file with that name may exist already.</value>
+    <comment>A failed download's status.</comment>
+  </data>
+  <data name="JobFailedHashMismatch" xml:space="preserve">
+    <value>Failed: the file doesn't match the expected hash, so it was deleted.</value>
+    <comment>A failed download's status.</comment>
+  </data>
+  <data name="JobFailedAccountNeeded" xml:space="preserve">
+    <value>Failed: the site needs a linked account, or refused the one linked. Link it on the Accounts screen, then retry.</value>
+    <comment>A failed download's status.</comment>
+  </data>
+  <data name="JobFailedUnexpected" xml:space="preserve">
+    <value>Failed unexpectedly. The log has the details.</value>
+    <comment>A failed download's status.</comment>
+  </data>
+  <data name="JobSize" xml:space="preserve">
+    <value>{0} of {1}</value>
+    <comment>How much of a file is downloaded. {0} and {1} are sizes, such as 12.3 MB.</comment>
+  </data>
+  <data name="JobSpeed" xml:space="preserve">
+    <value>{0}/s, {1}</value>
+    <comment>A download's speed and time left. {0} is a size, such as 2.1 MB; {1} the time left.</comment>
+  </data>
+  <data name="JobLeftUnderAMinute" xml:space="preserve">
+    <value>less than a minute left</value>
+    <comment>Time left of a download.</comment>
+  </data>
+  <data name="JobLeftMinutes" xml:space="preserve">
+    <value>about {0} min left</value>
+    <comment>Time left of a download, in minutes.</comment>
+  </data>
+  <data name="JobLeftHours" xml:space="preserve">
+    <value>about {0} h left</value>
+    <comment>Time left of a download, in hours, such as 2 or 1.5.</comment>
+  </data>
+  <data name="JobPause" xml:space="preserve">
+    <value>Pause</value>
+    <comment>Button on a download.</comment>
+  </data>
+  <data name="JobResume" xml:space="preserve">
+    <value>Resume</value>
+    <comment>Button on a download.</comment>
+  </data>
+  <data name="JobRetry" xml:space="preserve">
+    <value>Retry</value>
+    <comment>Button on a failed download.</comment>
+  </data>
+  <data name="JobCancel" xml:space="preserve">
+    <value>Cancel</value>
+    <comment>Button on a download: stop it for good.</comment>
+  </data>
+  <data name="JobOpenPage" xml:space="preserve">
+    <value>Open on {0}</value>
+    <comment>Button on a download waiting for a handoff. {0} is the site's name.</comment>
+  </data>
+  <data name="JobPasteLink" xml:space="preserve">
+    <value>Paste link…</value>
+    <comment>Button on a download waiting for a handoff: paste the link the site handed over.</comment>
+  </data>
+  <data name="CancelDownloadTitle" xml:space="preserve">
+    <value>Stop this download for good?</value>
+    <comment>Title of the dialog confirming a cancel.</comment>
+  </data>
+  <data name="CancelDownloadMessage" xml:space="preserve">
+    <value>{0} of {1} is downloaded already. Stopping the download for good deletes it. To go on later instead, pause it.</value>
+    <comment>{0} is a size, such as 12.3 MB; {1} the file's name.</comment>
+  </data>
+  <data name="CancelDownloadConfirm" xml:space="preserve">
+    <value>Stop and delete</value>
+    <comment>Button that cancels a download for good. The dialog's other button, Cancel, keeps the download.</comment>
+  </data>
+  <data name="OpenPageFailedTitle" xml:space="preserve">
+    <value>Couldn't open the browser</value>
+    <comment>Title of the message when no browser opened.</comment>
+  </data>
+  <data name="OpenPageFailed" xml:space="preserve">
+    <value>Open this page in your browser to start the download: {0}</value>
+    <comment>{0} is the page's address.</comment>
+  </data>
+  <data name="PasteLinkTitle" xml:space="preserve">
+    <value>Paste the link</value>
+    <comment>Title of the dialog asking for the link a site hands over.</comment>
+  </data>
+  <data name="PasteLinkMessage" xml:space="preserve">
+    <value>On {1}, start the download of {0} with the download for mod managers. Its button holds the link to paste here, such as one starting with nxm://. Right-click the button, copy the link, and paste it here.</value>
+    <comment>{0} is the file's name, {1} the site's name.</comment>
+  </data>
+  <data name="PasteLinkHint" xml:space="preserve">
+    <value>nxm://…</value>
+    <comment>Example of the link, in the empty box.</comment>
+  </data>
+  <data name="PasteLinkConfirm" xml:space="preserve">
+    <value>Continue</value>
+    <comment>Button that hands the pasted link over.</comment>
+  </data>
+  <data name="PasteLinkToAnotherFile" xml:space="preserve">
+    <value>That link is to another file, {0}. Paste the link for {1}.</value>
+    <comment>{0} and {1} are file names.</comment>
+  </data>
+  <data name="PasteLinkProblemTitle" xml:space="preserve">
+    <value>That link didn't work</value>
+    <comment>Title of the message when a pasted link didn't continue the download.</comment>
+  </data>
+  <data name="JobSpeedOnly" xml:space="preserve">
+    <value>{0}/s</value>
+    <comment>A download's speed when its size isn't known. {0} is a size, such as 2.1 MB.</comment>
+  </data>
+  <data name="NameTheFileConfirm" xml:space="preserve">
+    <value>Download</value>
+    <comment>Button that downloads the file under the name typed.</comment>
+  </data>
+  <data name="ActionFailedTitle" xml:space="preserve">
+    <value>That didn't work</value>
+    <comment>Title of the message when an action on a download failed for a reason the user can't act on.</comment>
+  </data>
+  <data name="SizeBytes" xml:space="preserve">
+    <value>{0} B</value>
+    <comment>A size in bytes, in powers of 1024 as file managers show them. {0} is the number.</comment>
+  </data>
+  <data name="SizeKilobytes" xml:space="preserve">
+    <value>{0} KB</value>
+    <comment>A size in kilobytes, in powers of 1024 as file managers show them. {0} is the number.</comment>
+  </data>
+  <data name="SizeMegabytes" xml:space="preserve">
+    <value>{0} MB</value>
+    <comment>A size in megabytes, in powers of 1024 as file managers show them. {0} is the number.</comment>
+  </data>
+  <data name="SizeGigabytes" xml:space="preserve">
+    <value>{0} GB</value>
+    <comment>A size in gigabytes, in powers of 1024 as file managers show them. {0} is the number.</comment>
+  </data>
+  <data name="SizeTerabytes" xml:space="preserve">
+    <value>{0} TB</value>
+    <comment>A size in terabytes, in powers of 1024 as file managers show them. {0} is the number.</comment>
+  </data>
+  <data name="PasteLinkNotALink" xml:space="preserve">
+    <value>That isn't a link. Copy the link the download button on {0} holds, and paste that.</value>
+    <comment>When the text pasted for a handoff isn't a link. {0} is the site's name.</comment>
+  </data>
 </root>

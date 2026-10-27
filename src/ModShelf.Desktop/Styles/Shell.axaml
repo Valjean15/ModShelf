@@ -1,4 +1,4 @@
-<!-- The look of the main window's sidebar and the screens' headings. -->
+<!-- The look of the main window's sidebar, and of what the screens share: headings, notes, problems and lists. -->
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
@@ -6,6 +6,31 @@
         <Setter Property="FontSize" Value="24" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Margin" Value="0,0,0,16" />
+    </Style>
+
+    <!-- Text that says more about what's above it, such as a folder or a status. -->
+    <Style Selector="TextBlock.note">
+        <Setter Property="Opacity" Value="0.75" />
+    </Style>
+
+    <!-- Text that says what went wrong. -->
+    <Style Selector="TextBlock.problem">
+        <Setter Property="Opacity" Value="1" />
+        <Setter Property="Foreground" Value="{DynamicResource SystemControlErrorTextForegroundBrush}" />
+    </Style>
+
+    <!-- A list of things to act on, rather than to pick from: rows stretch, and aren't highlighted when clicked. -->
+    <Style Selector="ListBox.rows">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <Style Selector="ListBox.rows ListBoxItem">
+        <Setter Property="Padding" Value="12" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+
+    <Style Selector="ListBox.rows ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter, ListBox.rows ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
     </Style>
 
     <Style Selector="Button.sidebarToggle">
