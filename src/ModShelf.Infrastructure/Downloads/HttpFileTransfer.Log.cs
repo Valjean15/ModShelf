@@ -38,4 +38,7 @@ internal sealed partial class HttpFileTransfer
 
     [LoggerMessage(EventId = 108, Level = LogLevel.Warning, Message = "{FileName} doesn't match its expected {Algorithm} hash; the download was discarded")]
     private static partial void LogHashMismatch(ILogger logger, string fileName, FileHashAlgorithm algorithm);
+
+    [LoggerMessage(EventId = 109, Level = LogLevel.Warning, Message = "There isn't room on the disk for {FileName}: it needs {NeededBytes} more bytes, and {FreeBytes} are free")]
+    private static partial void LogNotEnoughSpace(ILogger logger, string fileName, long neededBytes, long freeBytes);
 }

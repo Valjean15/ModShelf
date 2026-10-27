@@ -345,6 +345,90 @@ public sealed class HttpFileTransferTests : IDisposable
         Assert.Contains(_logger.Entries, entry => entry.Contains("cdn.example.com", StringComparison.Ordinal));
     }
 
+    [Fact]
+    public async Task RefusesAFileTheDiskHasNoRoomFor()
+    {
+        _server.Respond(Responses.Whole(File1000));
+        List<string> asked = [];
+
+        TransferOutcome outcome = await DownloadAsync(freeSpace: folder =>
+        {
+            asked.Add(folder);
+            return 999;
+        });
+
+        Assert.Equal(TransferOutcome.StorageError, outcome);
+        Assert.Equal([_folder.Path], asked);
+        Assert.False(File.Exists(PartialFile));
+        Assert.False(File.Exists(Destination));
+        Assert.Contains(
+            "Warning: There isn't room on the disk for SkyUI_5_2_SE.7z: it needs 1000 more bytes, and 999 are free",
+            _logger.Entries.Select(entry => entry.TrimEnd()));
+    }
+
+    [Fact]
+    public async Task KeepsThePartialFileWhenTheRestHasNoRoom()
+    {
+        File.WriteAllBytes(PartialFile, File1000[..400]);
+        _server.Respond(Responses.Rest(File1000, from: 400));
+
+        TransferOutcome outcome = await DownloadAsync(freeSpace: _ => 599);
+
+        Assert.Equal(TransferOutcome.StorageError, outcome);
+        Assert.Equal(File1000[..400], File.ReadAllBytes(PartialFile));
+    }
+
+    [Fact]
+    public async Task ResumingNeedsRoomForTheRestOnly()
+    {
+        File.WriteAllBytes(PartialFile, File1000[..400]);
+        _server.Respond(Responses.Rest(File1000, from: 400));
+
+        TransferOutcome outcome = await DownloadAsync(freeSpace: _ => 600);
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+    }
+
+    [Fact]
+    public async Task CountsThePartialFileTheWholeFileReplacesAsRoom()
+    {
+        File.WriteAllBytes(PartialFile, Enumerable.Repeat((byte)0xFF, 400).ToArray());
+        _server.Respond(Responses.Whole(File1000)).Respond(Responses.Whole(File1000));
+
+        TransferOutcome fits = await DownloadAsync(freeSpace: _ => 600);
+        File.Delete(Destination);
+        File.WriteAllBytes(PartialFile, Enumerable.Repeat((byte)0xFF, 400).ToArray());
+        TransferOutcome doesnt = await DownloadAsync(freeSpace: _ => 599);
+
+        Assert.Equal((TransferOutcome.Completed, TransferOutcome.StorageError), (fits, doesnt));
+    }
+
+    [Fact]
+    public async Task DownloadsWhenTheSystemCantTellTheRoom()
+    {
+        _server.Respond(Responses.Whole(File1000));
+
+        TransferOutcome outcome = await DownloadAsync(freeSpace: _ => null);
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+    }
+
+    [Fact]
+    public async Task DownloadsAFileOfUnknownSizeWithoutAskingForRoom()
+    {
+        _server.Respond(() =>
+        {
+            HttpResponseMessage response = Responses.Whole(File1000)();
+            response.Content.Headers.ContentLength = null;
+            return response;
+        });
+
+        TransferOutcome outcome = await DownloadAsync(freeSpace: _ => 0);
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+        Assert.Equal(File1000, File.ReadAllBytes(Destination));
+    }
+
     private static DownloadTicket Ticket(FileHash? expectedHash = null, IReadOnlyDictionary<string, string>? headers = null)
         => new(new Uri($"https://cdn.example.com/files/SkyUI_5_2_SE.7z?{UrlSecret}"), headers, expectedHash);
 
@@ -362,19 +446,22 @@ public sealed class HttpFileTransferTests : IDisposable
         }
     }
 
-    private HttpFileTransfer CreateTransfer(FileTransferOptions? options = null, TimeProvider? timeProvider = null)
-        => new(
-            new SingleHandlerHttpClientFactory(_server),
-            timeProvider ?? TimeProvider.System,
-            options ?? new FileTransferOptions(),
-            _logger);
+    /// <param name="freeSpace">The disk's room, for a folder; null for the system's own disk.</param>
+    private HttpFileTransfer CreateTransfer(
+        FileTransferOptions? options = null,
+        TimeProvider? timeProvider = null,
+        Func<string, long?>? freeSpace = null)
+        => freeSpace is null
+            ? new(new SingleHandlerHttpClientFactory(_server), timeProvider ?? TimeProvider.System, options ?? new FileTransferOptions(), _logger)
+            : new(new SingleHandlerHttpClientFactory(_server), timeProvider ?? TimeProvider.System, options ?? new FileTransferOptions(), _logger, freeSpace);
 
     private Task<TransferOutcome> DownloadAsync(
         FileTransferOptions? options = null,
         FileHash? expectedHash = null,
         IReadOnlyDictionary<string, string>? headers = null,
-        TimeProvider? timeProvider = null)
-        => CreateTransfer(options, timeProvider).DownloadAsync(
+        TimeProvider? timeProvider = null,
+        Func<string, long?>? freeSpace = null)
+        => CreateTransfer(options, timeProvider, freeSpace).DownloadAsync(
             Ticket(expectedHash, headers),
             Destination,
             _progress,

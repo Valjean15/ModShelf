@@ -33,12 +33,26 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
     private readonly TimeProvider _timeProvider;
     private readonly FileTransferOptions _options;
     private readonly ILogger<HttpFileTransfer> _logger;
+    private readonly Func<string, long?> _freeSpace;
 
     public HttpFileTransfer(
         IHttpClientFactory httpClientFactory,
         TimeProvider timeProvider,
         FileTransferOptions options,
         ILogger<HttpFileTransfer> logger)
+        : this(httpClientFactory, timeProvider, options, logger, FreeSpace.Available)
+    {
+    }
+
+    /// <param name="freeSpace">
+    /// The bytes free on the disk that holds a folder, or null when the system can't tell. Tests stand in for the disk.
+    /// </param>
+    internal HttpFileTransfer(
+        IHttpClientFactory httpClientFactory,
+        TimeProvider timeProvider,
+        FileTransferOptions options,
+        ILogger<HttpFileTransfer> logger,
+        Func<string, long?> freeSpace)
     {
         ArgumentNullException.ThrowIfNull(httpClientFactory);
         ArgumentNullException.ThrowIfNull(timeProvider);
@@ -46,11 +60,13 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
         ArgumentNullException.ThrowIfNull(logger);
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(options.ReadTimeout, TimeSpan.Zero);
         ArgumentOutOfRangeException.ThrowIfNegative(options.MaxResumeAttempts);
+        ArgumentNullException.ThrowIfNull(freeSpace);
 
         _httpClientFactory = httpClientFactory;
         _timeProvider = timeProvider;
         _options = options;
         _logger = logger;
+        _freeSpace = freeSpace;
     }
 
     private enum ResponseKind
@@ -279,6 +295,16 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
                 if (!append && offset > 0)
                 {
                     LogPartialFileDiscarded(_logger, fileName, "the server sent the whole file again");
+                }
+
+                // Checked before any byte is written, so a file that can't fit leaves the disk as it was. A partial file
+                // the body replaces frees its bytes first.
+                long? missing = totalBytes - position;
+                long? room = _freeSpace(Path.GetDirectoryName(partialPath)!) + (append ? 0 : offset);
+                if (missing > room)
+                {
+                    LogNotEnoughSpace(_logger, fileName, missing.Value, room.Value);
+                    return TransferOutcome.StorageError;
                 }
 
                 if (!started)
