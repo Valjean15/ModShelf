@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using ModShelf.Application.Accounts;
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Downloads;
+using ModShelf.Application.Library;
 using ModShelf.Application.Sources;
 using ModShelf.Application.Tests.Accounts;
 using ModShelf.Application.Tests.Fakes;
@@ -84,6 +85,20 @@ public sealed class ApplicationServiceCollectionExtensionsTests
 
         Assert.Equal(typeof(ModLookup), Single<IModLookup>(services).ImplementationType);
         Assert.Equal(typeof(SourceRegistry), Single<ISourceRegistry>(services).ImplementationType);
+        Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
+    }
+
+    [Fact]
+    public void TheLibrarySharesTheSourceRegistry()
+    {
+        ServiceCollection services = new();
+        services.AddModLookup();
+        services.AddLibrary();
+        services.AddLibrary();
+
+        Assert.Equal(typeof(ModLibrary), Single<IModLibrary>(services).ImplementationType);
+        Assert.Equal(typeof(SourceRegistry), Single<ISourceRegistry>(services).ImplementationType);
+        Assert.Single(services, descriptor => descriptor.ServiceType == typeof(TimeProvider));
         Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
     }
 

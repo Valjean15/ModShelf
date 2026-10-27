@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using ModShelf.Application.Accounts;
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Downloads;
+using ModShelf.Application.Library;
 using ModShelf.Application.Sources;
 using ModShelf.Application.Updates;
 using ModShelf.Application.Watchlist;
@@ -62,6 +63,21 @@ public static class ApplicationServiceCollectionExtensions
 
         services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
         services.TryAddSingleton<IModLookup, ModLookup>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers <see cref="IModLibrary"/>, the library of watched and downloaded mods. Needs Infrastructure's
+    /// <see cref="Library.Ports.ILibraryRepository"/>, which <c>AddLibraryDatabase()</c> registers.
+    /// </summary>
+    public static IServiceCollection AddLibrary(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton(TimeProvider.System);
+        services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
+        services.TryAddSingleton<IModLibrary, ModLibrary>();
 
         return services;
     }
