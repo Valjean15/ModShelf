@@ -104,6 +104,29 @@ public sealed class ApplicationServiceCollectionExtensionsTests
     }
 
     [Fact]
+    public void TheLibraryDownloadsShareTheSourceRegistry()
+    {
+        ServiceCollection services = new();
+        services.AddLibrary();
+        services.AddLibraryDownloads();
+        services.AddLibraryDownloads();
+
+        Assert.Equal(typeof(LibraryDownloads), Single<ILibraryDownloads>(services).ImplementationType);
+        Assert.Equal(typeof(SourceRegistry), Single<ISourceRegistry>(services).ImplementationType);
+        Assert.Single(services, descriptor => descriptor.ServiceType == typeof(TimeProvider));
+        Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
+    }
+
+    [Fact]
+    public void LibraryRecordingRunsTheRecorder()
+    {
+        ServiceCollection services = new();
+        services.AddLibraryRecording();
+
+        Assert.Equal(typeof(LibraryRecorder), Single<IHostedService>(services).ImplementationType);
+    }
+
+    [Fact]
     public void RegistersTheSettingsOnce()
     {
         ServiceCollection services = new();

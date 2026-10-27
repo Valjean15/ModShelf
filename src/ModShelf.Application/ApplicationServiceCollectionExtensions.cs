@@ -84,6 +84,36 @@ public static class ApplicationServiceCollectionExtensions
     }
 
     /// <summary>
+    /// Registers <see cref="ILibraryDownloads"/>, which downloads files into the library and records them there. Needs
+    /// the download engine (<see cref="AddDownloadEngine"/>) and the settings (<see cref="AddSettings"/>), and
+    /// Infrastructure's <see cref="Library.Ports.ILibraryRepository"/> and <see cref="Library.Ports.ILibraryStorage"/>.
+    /// </summary>
+    public static IServiceCollection AddLibraryDownloads(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton(TimeProvider.System);
+        services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
+        services.TryAddSingleton<ILibraryDownloads, LibraryDownloads>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Records finished downloads into the library while the host runs, with a hosted <see cref="LibraryRecorder"/>.
+    /// A host that runs downloads (<see cref="AddBackgroundDownloads"/>) adds this too, with
+    /// <see cref="AddLibraryDownloads"/>.
+    /// </summary>
+    public static IServiceCollection AddLibraryRecording(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddHostedService<LibraryRecorder>();
+
+        return services;
+    }
+
+    /// <summary>
     /// Registers <see cref="ISettingsService"/>. Needs Infrastructure's <see cref="Settings.Ports.ISettingsStore"/> and
     /// <see cref="Library.Ports.ILibraryRepository"/>, and Platform's <see cref="Settings.Ports.IUserFolders"/>.
     /// </summary>
