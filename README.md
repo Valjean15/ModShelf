@@ -38,6 +38,7 @@ dotnet run --project src/ModShelf.Cli -- mod untrack <link>
 dotnet run --project src/ModShelf.Cli -- library list
 dotnet run --project src/ModShelf.Cli -- library watch <link>
 dotnet run --project src/ModShelf.Cli -- library unwatch <link>
+dotnet run --project src/ModShelf.Cli -- library move <folder>
 dotnet run --project src/ModShelf.Cli -- settings show
 dotnet run --project src/ModShelf.Cli -- settings set <setting> <value>
 dotnet run --project src/ModShelf.Cli -- settings reset <setting>
@@ -49,6 +50,7 @@ dotnet run --project src/ModShelf.Cli -- account unlink <source>
 
 - `download` queues the file and shows its progress until it's done. Put the link in quotes, since shells treat characters such as `&` specially. A file that won't fit on the disk fails before anything is written.
 - **Into the library:** without `--to`, the file goes under the library root, in its mod's folder, and the library records it, with its mod watched for updates. The file keeps the name its site gives it, made safe on every system; when another file has that name, the file's ID is added to it. A file the library has, still on disk, isn't downloaded again. Only files of mods on sites such as Nexus Mods go into the library.
+- **Old versions:** the files a download replaced, as its site says (Nexus Mods' update chains), are its old versions. By default, the two newest versions stay and older ones are **deleted for good**; `library.oldVersions` can keep them all, or move them to an `_archive` folder instead. `download` says what it moved or deleted.
 - **Into a folder of your own:** `--to` saves any file there, such as one from a plain web link, and `--name` picks its name. To check the file against a hash, end the link with `#sha256=<hex>` (or `md5`, `sha1`, `sha512`); the fragment is never sent to the server.
 - Ctrl+C stops the download and keeps the partial file. Running the same command again continues where it stopped, including after a crash.
 - When a site wants a download started on its website, `download` opens the page in your browser, shows it, and asks for the link the site then hands over. Paste it and press Enter, and the download carries on. Ctrl+C leaves the download waiting; running the same command again shows the page again.
@@ -59,10 +61,12 @@ dotnet run --project src/ModShelf.Cli -- account unlink <source>
 - `mod tracked` lists the mods your linked account tracks on the site. `mod track` and `mod untrack` track the mod a link is to, or stop tracking it, as the site's Track button does; doing either twice changes nothing.
 - When more than one site can search, list updates or track mods, `--source` picks one, such as `--source nexus`.
 - `library list` shows the library: the mods ModShelf watches for updates, and the ones with downloaded files, each with its link. `library watch` adds the mod a link is to and watches it; `library unwatch` stops watching it, and a mod without downloaded files leaves the library. Watching is ModShelf's own, apart from a site's tracked mods.
+- `library move` moves the library's files to the same places under another folder, which becomes the library's root. It waits until downloads into the library are finished, never moves a file over another, and puts every file back if one can't move. Ctrl+C stops it; running the same command again finishes it. Your own files under the old root stay, and the folders it emptied are removed.
 - `settings show` lists the settings, marking the defaults, and says where they're kept. `settings set` changes one, and `settings reset` puts it back to its default:
-  - `library.root` is the library's folder: a ModShelf folder in your Downloads folder unless set. For now it can change only while the library has no files.
+  - `library.root` is the library's folder: a ModShelf folder in your Downloads folder unless set. Once the library has files, `library move` changes it instead, taking them along.
   - `library.folders` is where files go under it, as folders separated by `/` and ending in `{file}`. The folders mix text with `{source}`, `{game}`, `{mod}` and `{modid}`, such as the default, `{source}/{game}/{mod} ({modid})/{file}`. A mod keeps its folder when its site renames it.
   - `library.folders.<game>` is a pattern for one game, named as in the site's links, such as `library.folders.skyrimspecialedition`.
+  - `library.oldVersions` is what happens to a file's old versions when a newer one is downloaded: `all` keeps them, `archive` moves them to an `_archive` folder in their folder, and a number keeps that many versions, the newest first, and deletes the others. The default is `2`.
 - `queue list` shows every saved job without starting any download.
 - `account list` shows the sources that support accounts, the account linked on each, and the ways to link one.
 - `account link` asks for what the source needs. An API key isn't shown as you type it. For `browser`, it opens the site's sign-in page and waits until you approve ModShelf there; if no browser opens, it shows the page to open by hand. Linking again replaces the account.
@@ -90,7 +94,7 @@ src/
 tests/
   ModShelf.<Library>.Tests        one test project per library
   ModShelf.Architecture.Tests     enforces the dependency rules
-  ModShelf.Cli.Tests              runs the CLI end to end: stop, kill and resume a download; finish one through a handoff; download into the library; look up and search mods; link, refresh and unlink fake accounts
+  ModShelf.Cli.Tests              runs the CLI end to end: stop, kill and resume a download; finish one through a handoff; download into the library and move it; look up and search mods; link, refresh and unlink fake accounts
   Shared                          code several test projects compile in: SourceContractTests, TempFolder, the log recorders
 ```
 
