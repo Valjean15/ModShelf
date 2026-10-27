@@ -168,6 +168,32 @@ public sealed class DownloadCommandLibraryTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task SaysWhatHappenedToTheOldVersions()
+    {
+        await RunAsync("download", HandoffLink("1").AbsoluteUri);
+        CliResult second = await RunAsync("download", HandoffLink("2").AbsoluteUri);
+
+        CliResult third = await RunAsync("download", HandoffLink("3").AbsoluteUri);
+
+        Assert.DoesNotContain("old version", second.Output, StringComparison.Ordinal);
+        Assert.EndsWith($"Added to the library.{Environment.NewLine}Deleted the old version {FileNameOf("1")}.", third.Output.TrimEnd(), StringComparison.Ordinal);
+        Assert.False(File.Exists(Path.Combine(ModFolder, FileNameOf("1"))));
+        Assert.Equal("2", Assert.Single(Rows(await RunAsync("library", "list")))[5]);
+    }
+
+    [Fact]
+    public async Task ArchivesTheOldVersionsWhenTheSettingsSay()
+    {
+        await RunAsync("settings", "set", "library.oldVersions", "archive");
+        await RunAsync("download", HandoffLink("1").AbsoluteUri);
+
+        CliResult second = await RunAsync("download", HandoffLink("2").AbsoluteUri);
+
+        Assert.EndsWith($"Moved the old version {FileNameOf("1")} to the _archive folder in its folder.", second.Output.TrimEnd(), StringComparison.Ordinal);
+        Assert.True(File.Exists(Path.Combine(ModFolder, "_archive", FileNameOf("1"))));
+    }
+
+    [Fact]
     public async Task ANameNeedsAFolder()
     {
         CliResult refused = await RunAsync("download", HandoffLink("3").AbsoluteUri, "--name", "mine.zip");

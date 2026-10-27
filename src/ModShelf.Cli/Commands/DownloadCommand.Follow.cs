@@ -2,6 +2,7 @@ using ModShelf.Application.Downloads;
 using ModShelf.Application.Library;
 using ModShelf.Cli.Hosting;
 using ModShelf.Domain.Downloads;
+using ModShelf.Domain.Library;
 
 namespace ModShelf.Cli.Commands;
 
@@ -193,15 +194,24 @@ internal static partial class DownloadCommand
         }
 
         /// <summary>
-        /// Records the finished download in the library.
+        /// Records the finished download in the library, and says what happened to the old versions it replaced.
         /// </summary>
         private async Task<int> RecordAsync(ILibraryDownloads library, DownloadJobSnapshot done, CancellationToken cancellationToken)
         {
             try
             {
-                if (await library.RecordAsync(done, cancellationToken).ConfigureAwait(false) is not null)
+                if (await library.RecordAsync(done, cancellationToken).ConfigureAwait(false) is { } recorded)
                 {
                     environment.Output.WriteLine("Added to the library.");
+                    foreach (LibraryFile archived in recorded.Archived)
+                    {
+                        environment.Output.WriteLine($"Moved the old version {archived.FileName} to the _archive folder in its folder.");
+                    }
+
+                    foreach (LibraryFile deleted in recorded.Deleted)
+                    {
+                        environment.Output.WriteLine($"Deleted the old version {deleted.FileName}.");
+                    }
                 }
 
                 return ExitCodes.Done;

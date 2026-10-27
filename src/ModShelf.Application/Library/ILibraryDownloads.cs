@@ -38,16 +38,25 @@ public interface ILibraryDownloads
 
     /// <summary>
     /// Records a finished download saved under the library root as one of its mod's files. A mod new to the library is
-    /// watched; one in it keeps its choice. Recording the same download again changes nothing.
+    /// watched; one in it keeps its choice. Recording the same download again changes nothing, and while the app runs,
+    /// says again what the first time did.
     /// </summary>
-    /// <returns>The file as the library has it; or null when the job isn't a finished download under the library root.</returns>
+    /// <remarks>
+    /// The files this one replaced, as its site says, are old versions: the rule in the settings keeps them, moves them to
+    /// an <c>_archive</c> folder, or deletes all but the newest few. One that can't be moved or deleted is logged, and
+    /// stays as it was.
+    /// </remarks>
+    /// <returns>
+    /// The file as the library has it, and what happened to its old versions; or null when the job isn't a finished
+    /// download under the library root.
+    /// </returns>
     /// <exception cref="ArgumentException">
     /// The site doesn't list the file among the mod's, or the file can't be in the library, such as one whose path holds
     /// a ':'.
     /// </exception>
     /// <exception cref="InvalidDataException">The settings can't be read.</exception>
     /// <exception cref="HttpRequestException">The mod's details were needed from its site, which couldn't be reached.</exception>
-    Task<LibraryFile?> RecordAsync(DownloadJobSnapshot job, CancellationToken cancellationToken);
+    Task<LibraryRecord?> RecordAsync(DownloadJobSnapshot job, CancellationToken cancellationToken);
 
     /// <summary>
     /// Records the finished downloads under the library root that the library lacks and that are still on disk, such as

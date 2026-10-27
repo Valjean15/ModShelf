@@ -52,9 +52,18 @@ internal sealed class FakeModSite : ILinkRecognizer, IModCatalog
 
     public void AddMod(string modId, string name) => _mods[modId] = name;
 
-    public void AddFile(string modId, string fileId, string fileName, string name = "Main file", string? version = "1.0")
-        => _files.GetOrAdd(modId, _ => []).Add(
-            new ModFile(File(modId, fileId), name, fileName, version, ModFileCategory.Main, 100, TestData.Now.AddDays(-1), []));
+    /// <param name="replacedBy">The ID of the newer file of the mod that replaced this one, if any.</param>
+    public void AddFile(string modId, string fileId, string fileName, string name = "Main file", string? version = "1.0", string? replacedBy = null)
+        => _files.GetOrAdd(modId, _ => []).Add(new ModFile(
+            File(modId, fileId),
+            name,
+            fileName,
+            version,
+            ModFileCategory.Main,
+            100,
+            TestData.Now.AddDays(-1),
+            [],
+            replacedBy: replacedBy is null ? null : File(modId, replacedBy)));
 
     public Task<RecognizedLink?> RecognizeAsync(Uri link, CancellationToken cancellationToken)
     {

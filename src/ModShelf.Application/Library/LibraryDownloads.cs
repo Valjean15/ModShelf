@@ -30,6 +30,11 @@ namespace ModShelf.Application.Library;
 /// </remarks>
 internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
 {
+    /// <summary>
+    /// How many recent records are kept for a second caller, such as the CLI after the recorder.
+    /// </summary>
+    private const int RecentRecords = 64;
+
     private readonly ISourceRegistry _sources;
     private readonly IDownloadService _downloads;
     private readonly ILibraryRepository _library;
@@ -39,6 +44,10 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
     private readonly ILogger<LibraryDownloads> _logger;
     private readonly ConcurrentDictionary<DownloadJobId, SiteDetails> _details = new();
     private readonly SemaphoreSlim _recording = new(1, 1);
+
+    // Used only under _recording.
+    private readonly Dictionary<DownloadJobId, LibraryRecord> _recent = [];
+    private readonly Queue<DownloadJobId> _recentOrder = new();
 
     public LibraryDownloads(
         ISourceRegistry sources,
@@ -112,7 +121,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
         if (jobs.LastOrDefault(job => job.File == file && IsMissing(root, job, kept)) is { } missed
             && await RecordAsync(missed, cancellationToken).ConfigureAwait(false) is { } recorded)
         {
-            return new LibraryDownload(LibraryPaths.Resolve(root, recorded.RelativePath), null);
+            return new LibraryDownload(LibraryPaths.Resolve(root, recorded.File.RelativePath), null);
         }
 
         // A file the library has, but that's gone from disk, is downloaded again to the same place.
@@ -127,7 +136,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
             details = await ReadDetailsAsync(catalog, file, cancellationToken).ConfigureAwait(false);
             string pathByPattern = settings.FoldersFor(file.Mod.Game.Key).Render(
                 file.Mod.Game.Source.Value, file.Mod.Game.Key, details.Mod.Name, file.Mod.Id, details.File.FileName);
-            string folder = stored is { Files.Count: > 0 } ? FolderOf(stored.Files[^1].RelativePath) : FolderOf(pathByPattern);
+            string folder = stored is { Files.Count: > 0 } ? ModFolderOf(stored.Files[^1].RelativePath) : FolderOf(pathByPattern);
             relativePath = FreePath(root, library, jobs, folder, NameOf(pathByPattern), file);
         }
 
@@ -136,7 +145,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
         return new LibraryDownload(target, await QueueAsync(recognized, link, target, details, cancellationToken).ConfigureAwait(false));
     }
 
-    public async Task<LibraryFile?> RecordAsync(DownloadJobSnapshot job, CancellationToken cancellationToken)
+    public async Task<LibraryRecord?> RecordAsync(DownloadJobSnapshot job, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(job);
         if (job.Status != DownloadJobStatus.Completed)
@@ -202,12 +211,17 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
         ModFile listed = (await files.ConfigureAwait(false)).FirstOrDefault(candidate => candidate.Reference == file)
             ?? throw new ArgumentException(
                 $"The site doesn't list file {file.Id} among the mod's files, so it can't go into the library.", nameof(file));
-        return new SiteDetails(await mod.ConfigureAwait(false), listed);
+        return new SiteDetails(await mod.ConfigureAwait(false), listed, await files.ConfigureAwait(false));
     }
 
     private static bool IsDone(DownloadJobSnapshot job) => job.Status is DownloadJobStatus.Completed or DownloadJobStatus.Cancelled;
 
     private static string TargetOf(DownloadJobSnapshot job) => Path.Combine(job.TargetDirectory, job.FileName);
+
+    /// <summary>
+    /// Whether the library's record of a file is of this download, or of one made after it, wherever that was saved.
+    /// </summary>
+    private static bool IsRecorded(LibraryFile kept, DownloadJobSnapshot job) => kept.DownloadedAt >= job.CreatedAt;
 
     /// <summary>
     /// The folder part of a library path, with no ending separator; empty for a file at the root.
@@ -217,6 +231,13 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
         int separator = relativePath.LastIndexOf(LibraryPaths.Separator);
         return separator < 0 ? string.Empty : relativePath[..separator];
     }
+
+    /// <summary>
+    /// The folder of a mod with a file at <paramref name="relativePath"/>: the file's folder, or the one holding its
+    /// <c>_archive</c> folder.
+    /// </summary>
+    private static string ModFolderOf(string relativePath)
+        => OldVersions.IsArchived(relativePath) ? FolderOf(FolderOf(relativePath)) : FolderOf(relativePath);
 
     /// <summary>
     /// The last part of a library path: the file's name.
@@ -268,11 +289,6 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
             && !(kept is not null && IsRecorded(kept, job))
             && _storage.FileExists(TargetOf(job));
 
-    /// <summary>
-    /// Whether the library's record of a file is of this download, or of one made after it, wherever that was saved.
-    /// </summary>
-    private static bool IsRecorded(LibraryFile kept, DownloadJobSnapshot job) => kept.DownloadedAt >= job.CreatedAt;
-
     private async Task<LinkDownload> QueueAsync(
         RecognizedLink recognized,
         Uri link,
@@ -291,9 +307,10 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
         return queued;
     }
 
-    private async Task<LibraryFile?> RecordCompletedAsync(DownloadJobSnapshot job, CancellationToken cancellationToken)
+    private async Task<LibraryRecord?> RecordCompletedAsync(DownloadJobSnapshot job, CancellationToken cancellationToken)
     {
-        string root = await _settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+        AppSettings settings = await _settings.GetAsync(cancellationToken).ConfigureAwait(false);
+        string root = settings.LibraryRoot ?? _settings.DefaultLibraryRoot;
         if (LibraryPaths.RelativeTo(root, TargetOf(job)) is not { } relativePath)
         {
             _details.TryRemove(job.Id, out _);
@@ -306,8 +323,11 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
         LibraryFile? kept = stored?.Files.FirstOrDefault(file => file.File == job.File);
         if (kept is not null && IsRecorded(kept, job))
         {
+            // Recorded already, perhaps just now by another caller, which then also did what the rule says.
             _details.TryRemove(job.Id, out _);
-            return kept;
+            return _recent.TryGetValue(job.Id, out LibraryRecord? recent) && recent.File.RelativePath == kept.RelativePath
+                ? recent with { File = kept }
+                : new LibraryRecord(kept, [], []);
         }
 
         // The site is asked first: the transaction mustn't wait on it. It's needed for a file the library doesn't have.
@@ -327,25 +347,171 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
             ? new LibraryFile(job.File, kept!.Name, kept.VersionLabel, kept.Category, kept.UploadedAt, relativePath, size, now)
             : new LibraryFile(
                 job.File, details.File.Name, details.File.VersionLabel, details.File.Category, details.File.UploadedAt, relativePath, size, now);
-        await _library.UpdateAsync(
-                mod,
-                current => (current, details) switch
-                {
-                    (null, null) => throw new InvalidOperationException("The mod left the library while its file was being added."),
-                    (null, _) => LibraryMod.Watch(mod, details.Mod.Name, details.Mod.Author, details.Mod.PageUrl, now).WithFile(recorded),
-                    (_, null) => current.WithFile(recorded),
-                    _ => current.WithDetails(details.Mod.Name, details.Mod.Author, details.Mod.PageUrl).WithFile(recorded),
-                },
-                cancellationToken)
-            .ConfigureAwait(false);
+
+        // Old versions are known from the site's list of files, which is read for a file new to the library. They're moved
+        // or deleted before the library changes, so it never lists a file where it isn't.
+        OldVersionPlan plan = details is null || stored is null
+            ? OldVersionPlan.None
+            : OldVersions.Plan(stored, job.File, details.Files, settings.OldVersions ?? OldVersionRule.Default);
+        IReadOnlyList<(LibraryFile Before, LibraryFile After)> archived = plan.Archive.Count == 0
+            ? []
+            : Archive(root, await _library.ListAsync(cancellationToken).ConfigureAwait(false), plan.Archive);
+        IReadOnlyList<LibraryFile> deleted = Delete(root, plan.Delete);
+        try
+        {
+            await _library.UpdateAsync(
+                    mod,
+                    current =>
+                    {
+                        LibraryMod changed = (current, details) switch
+                        {
+                            (null, null) => throw new InvalidOperationException("The mod left the library while its file was being added."),
+                            (null, _) => LibraryMod.Watch(mod, details.Mod.Name, details.Mod.Author, details.Mod.PageUrl, now).WithFile(recorded),
+                            (_, null) => current.WithFile(recorded),
+                            _ => current.WithDetails(details.Mod.Name, details.Mod.Author, details.Mod.PageUrl).WithFile(recorded),
+                        };
+                        foreach (LibraryFile gone in deleted)
+                        {
+                            changed = changed.WithoutFile(gone.File)!;
+                        }
+
+                        foreach ((LibraryFile before, LibraryFile after) in archived.Where(moved => changed.Files.Any(file => file.File == moved.Before.File)))
+                        {
+                            changed = changed.WithFile(after);
+                        }
+
+                        return changed;
+                    },
+                    cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch
+        {
+            PutBack(root, archived);
+            throw;
+        }
 
         _details.TryRemove(job.Id, out _);
         LogRecorded(_logger, recorded.FileName, mod.Id, mod.Game.Key);
-        return recorded;
+        LibraryRecord record = new(recorded, [.. archived.Select(moved => moved.After)], deleted);
+        Remember(job.Id, record);
+        return record;
     }
 
     /// <summary>
-    /// A mod's details and one of its files, as its site gave them.
+    /// Keeps a record for whoever asks to record the same job next, forgetting the oldest beyond
+    /// <see cref="RecentRecords"/>.
     /// </summary>
-    private sealed record SiteDetails(ModInfo Mod, ModFile File);
+    private void Remember(DownloadJobId job, LibraryRecord record)
+    {
+        if (_recent.TryAdd(job, record))
+        {
+            _recentOrder.Enqueue(job);
+        }
+        else
+        {
+            _recent[job] = record;
+        }
+
+        while (_recentOrder.Count > RecentRecords)
+        {
+            _recent.Remove(_recentOrder.Dequeue());
+        }
+    }
+
+    /// <summary>
+    /// Moves old versions into the <c>_archive</c> folder in their folder. One that isn't on disk, or that can't be moved,
+    /// stays as it is; a name another library file or a file on disk has there gets the file's ID added.
+    /// </summary>
+    /// <returns>Each file moved, as it was and as it is now.</returns>
+    private List<(LibraryFile Before, LibraryFile After)> Archive(string root, IReadOnlyList<LibraryMod> library, IReadOnlyList<LibraryFile> files)
+    {
+        List<(LibraryFile Before, LibraryFile After)> moved = [];
+        HashSet<string> taken = new(library.SelectMany(mod => mod.Files).Select(file => file.RelativePath), StringComparer.OrdinalIgnoreCase);
+        foreach (LibraryFile file in files)
+        {
+            string from = LibraryPaths.Resolve(root, file.RelativePath);
+            if (!_storage.FileExists(from))
+            {
+                continue;
+            }
+
+            string withId = LibraryNames.File($"{Path.GetFileNameWithoutExtension(file.FileName)} ({file.File.Id}){Path.GetExtension(file.FileName)}");
+            string? archivePath = new[] { file.FileName, withId }
+                .Select(name => OldVersions.ArchivePath(file.RelativePath, name))
+                .FirstOrDefault(candidate => !taken.Contains(candidate) && !_storage.FileExists(LibraryPaths.Resolve(root, candidate)));
+            if (archivePath is null)
+            {
+                LogNoArchiveName(_logger, file.FileName);
+                continue;
+            }
+
+            try
+            {
+                _storage.MoveFile(from, LibraryPaths.Resolve(root, archivePath));
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                LogCantArchive(_logger, exception, file.FileName);
+                continue;
+            }
+
+            taken.Add(archivePath);
+            moved.Add((file, new LibraryFile(
+                file.File, file.Name, file.VersionLabel, file.Category, file.UploadedAt, archivePath, file.SizeInBytes, file.DownloadedAt)));
+            LogArchived(_logger, file.FileName);
+        }
+
+        return moved;
+    }
+
+    /// <summary>
+    /// Deletes old versions from the disk. One that can't be deleted, such as one another program has open, stays in the
+    /// library, so the next newer version tries again.
+    /// </summary>
+    /// <returns>The files deleted, or gone already.</returns>
+    private List<LibraryFile> Delete(string root, IReadOnlyList<LibraryFile> files)
+    {
+        List<LibraryFile> deleted = [];
+        foreach (LibraryFile file in files)
+        {
+            try
+            {
+                _storage.DeleteFile(LibraryPaths.Resolve(root, file.RelativePath));
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                LogCantDelete(_logger, exception, file.FileName);
+                continue;
+            }
+
+            deleted.Add(file);
+            LogDeleted(_logger, file.FileName);
+        }
+
+        return deleted;
+    }
+
+    /// <summary>
+    /// Moves archived files back where they were, when the library couldn't take the change.
+    /// </summary>
+    private void PutBack(string root, IReadOnlyList<(LibraryFile Before, LibraryFile After)> archived)
+    {
+        foreach ((LibraryFile before, LibraryFile after) in archived)
+        {
+            try
+            {
+                _storage.MoveFile(LibraryPaths.Resolve(root, after.RelativePath), LibraryPaths.Resolve(root, before.RelativePath));
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                LogCantPutBack(_logger, exception, before.FileName, after.RelativePath);
+            }
+        }
+    }
+
+    /// <summary>
+    /// A mod's details, one of its files, and all its files, as its site gave them.
+    /// </summary>
+    private sealed record SiteDetails(ModInfo Mod, ModFile File, IReadOnlyList<ModFile> Files);
 }

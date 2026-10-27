@@ -110,6 +110,18 @@ public sealed class LibraryDownloadsTests : IDisposable
         Assert.Equal(InRoot("fake-mods", "skyrimspecialedition", "SkyUI old (12604)", "SkyUI_5_3_SE.7z"), added.Path);
     }
 
+    [Fact]
+    public async Task PutsANextFileBesideTheArchiveNotInIt()
+    {
+        string folder = "fake-mods/skyrimspecialedition/SkyUI old (12604)";
+        _library.Add(ModWith(StoredFile(SkyUi52, $"{folder}/_archive/SkyUI_5_2_SE.7z")));
+        using LibraryDownloads library = Create();
+
+        LibraryDownload added = await library.AddAsync(Link(SkyUi, SkyUi53), Cancellation);
+
+        Assert.Equal(InRoot("fake-mods", "skyrimspecialedition", "SkyUI old (12604)", "SkyUI_5_3_SE.7z"), added.Path);
+    }
+
     public static TheoryData<string> Takers() => ["the library", "the queue", "the disk"];
 
     [Theory]
@@ -302,7 +314,7 @@ public sealed class LibraryDownloadsTests : IDisposable
         LibraryDownload added = await library.AddAsync(Link(SkyUi, SkyUi52), Cancellation);
         _time.Advance(TimeSpan.FromMinutes(5));
 
-        LibraryFile? recorded = await library.RecordAsync(RecordingDownloadService.Completed(added.Queued!.Job, 4321), Cancellation);
+        LibraryFile? recorded = (await library.RecordAsync(RecordingDownloadService.Completed(added.Queued!.Job, 4321), Cancellation))?.File;
 
         LibraryMod mod = Assert.Single(_library.Mods);
         Assert.Same(recorded, Assert.Single(mod.Files));
@@ -327,7 +339,7 @@ public sealed class LibraryDownloadsTests : IDisposable
         }
 
         using LibraryDownloads library = Create();
-        LibraryFile? recorded = await library.RecordAsync(RecordingDownloadService.Completed(added.Queued!.Job), Cancellation);
+        LibraryFile? recorded = (await library.RecordAsync(RecordingDownloadService.Completed(added.Queued!.Job), Cancellation))?.File;
 
         Assert.Equal("SkyUI 5.2", recorded!.Name);
         Assert.Equal(["GetFilesAsync", "GetFilesAsync", "GetModAsync", "GetModAsync", "RecognizeAsync"], _site.Asked.Order());
@@ -352,11 +364,11 @@ public sealed class LibraryDownloadsTests : IDisposable
     {
         DownloadJobSnapshot done = Done(SkyUi52, SkyUiFolder, "SkyUI_5_2_SE.7z");
         using LibraryDownloads library = Create();
-        LibraryFile? first = await library.RecordAsync(done, Cancellation);
+        LibraryFile? first = (await library.RecordAsync(done, Cancellation))?.File;
         LibraryMod before = Assert.Single(_library.Mods);
         _time.Advance(TimeSpan.FromHours(1));
 
-        LibraryFile? again = await library.RecordAsync(done, Cancellation);
+        LibraryFile? again = (await library.RecordAsync(done, Cancellation))?.File;
 
         Assert.Same(first, again);
         Assert.Same(before, Assert.Single(_library.Mods));
@@ -371,7 +383,7 @@ public sealed class LibraryDownloadsTests : IDisposable
         DownloadJobSnapshot again = Done(SkyUi52, InRoot("kept"), "SkyUI.7z", size: 999) with { CreatedAt = _time.GetUtcNow() };
         using LibraryDownloads library = Create();
 
-        LibraryFile? recorded = await library.RecordAsync(again, Cancellation);
+        LibraryFile? recorded = (await library.RecordAsync(again, Cancellation))?.File;
 
         Assert.Equal(("SkyUI 5.2", 999L, TestData.Now.AddDays(1)), (recorded!.Name, recorded.SizeInBytes, recorded.DownloadedAt));
         Assert.Empty(_site.Asked);
@@ -395,7 +407,7 @@ public sealed class LibraryDownloadsTests : IDisposable
     {
         using LibraryDownloads library = Create();
 
-        LibraryFile? recorded = await library.RecordAsync(Done(SkyUi52, Root, "SkyUI.7z"), Cancellation);
+        LibraryFile? recorded = (await library.RecordAsync(Done(SkyUi52, Root, "SkyUI.7z"), Cancellation))?.File;
 
         Assert.Equal("SkyUI.7z", recorded!.RelativePath);
     }
@@ -419,12 +431,12 @@ public sealed class LibraryDownloadsTests : IDisposable
         using LibraryDownloads library = Create();
         _site.Hold = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        Task<LibraryFile?> first = library.RecordAsync(done, Cancellation);
-        Task<LibraryFile?> second = library.RecordAsync(done, Cancellation);
+        Task<LibraryRecord?> first = library.RecordAsync(done, Cancellation);
+        Task<LibraryRecord?> second = library.RecordAsync(done, Cancellation);
         await WaitUntilAsync(() => _site.Asked.Count == 2);
         _site.Hold.SetResult();
 
-        Assert.Same(await first, await second);
+        Assert.Same((await first)?.File, (await second)?.File);
         Assert.Equal(2, _site.Asked.Count);
     }
 
@@ -491,7 +503,7 @@ public sealed class LibraryDownloadsTests : IDisposable
         using LibraryDownloads library = Create();
 
         await library.RecordMissedAsync(Cancellation);
-        LibraryFile? recorded = await library.RecordAsync(older, Cancellation);
+        LibraryFile? recorded = (await library.RecordAsync(older, Cancellation))?.File;
 
         Assert.Same(kept, Assert.Single(_library.Mods));
         Assert.Equal("kept/SkyUI.7z", recorded!.RelativePath);

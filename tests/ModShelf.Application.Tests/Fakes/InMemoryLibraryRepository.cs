@@ -38,10 +38,22 @@ internal sealed class InMemoryLibraryRepository : ILibraryRepository
     public Task<LibraryMod?> FindAsync(ModRef modRef, CancellationToken cancellationToken)
         => Task.FromResult(Mods.FirstOrDefault(mod => mod.Mod == modRef));
 
+    /// <summary>
+    /// What the next update throws instead, after running its change, as a database that can't commit would.
+    /// </summary>
+    public Exception? UpdateFailure { get; set; }
+
     public Task<LibraryChange> UpdateAsync(ModRef modRef, Func<LibraryMod?, LibraryMod?> change, CancellationToken cancellationToken)
     {
         lock (_lock)
         {
+            if (UpdateFailure is { } failure)
+            {
+                UpdateFailure = null;
+                change(_mods.FirstOrDefault(mod => mod.Mod == modRef));
+                return Task.FromException<LibraryChange>(failure);
+            }
+
             int index = _mods.FindIndex(mod => mod.Mod == modRef);
             LibraryMod? before = index < 0 ? null : _mods[index];
             LibraryMod? after = change(before);

@@ -87,11 +87,22 @@ internal sealed class FakeHandoffSource(Uri fileUrl) : ILinkRecognizer, IDownloa
         => Task.FromResult(new ModInfo(modRef, ModName, author: "Someone", pageUrl: new Uri($"https://{Host}/mod")));
 
     /// <summary>
-    /// Files 1 to 3.
+    /// Files 1 to 3, each the update of the one before.
     /// </summary>
     public Task<IReadOnlyList<ModFile>> GetFilesAsync(ModRef modRef, CancellationToken cancellationToken)
         => Task.FromResult<IReadOnlyList<ModFile>>(
-            [.. FileIds.Select(id => new ModFile(File(id), $"File {id}", FileNameOf(id), "1.0", ModFileCategory.Main, null, DateTimeOffset.UnixEpoch, []))]);
+        [
+            .. FileIds.Select((id, index) => new ModFile(
+                File(id),
+                $"File {id}",
+                FileNameOf(id),
+                "1.0",
+                ModFileCategory.Main,
+                null,
+                DateTimeOffset.UnixEpoch,
+                [],
+                replacedBy: index + 1 < FileIds.Length ? File(FileIds[index + 1]) : null)),
+        ]);
 
     public Task<IReadOnlyList<ModChangelog>> GetChangelogsAsync(ModRef modRef, CancellationToken cancellationToken)
         => Task.FromResult<IReadOnlyList<ModChangelog>>([]);
