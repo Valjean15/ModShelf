@@ -8,6 +8,18 @@
         <Setter Property="Margin" Value="0,0,0,16" />
     </Style>
 
+    <!-- A heading inside a screen, such as a game's above its mods. -->
+    <Style Selector="TextBlock.subheading">
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <!-- Text that wants the user's attention without being a problem, such as updates found. -->
+    <Style Selector="TextBlock.attention">
+        <Setter Property="Foreground" Value="{DynamicResource SystemAccentColor}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
     <!-- Text that says more about what's above it, such as a folder or a status. -->
     <Style Selector="TextBlock.note">
         <Setter Property="Opacity" Value="0.75" />

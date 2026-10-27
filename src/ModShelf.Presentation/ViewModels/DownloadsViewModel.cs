@@ -217,7 +217,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         catch (Exception exception)
         {
             LogClearFailed(_logger, exception);
-            SayProblem(Strings.DownloadsUnexpected);
+            SayProblem(Strings.SomethingWentWrong);
         }
     }
 
@@ -259,7 +259,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         catch (Exception exception)
         {
             LogAddFailed(_logger, exception);
-            SayProblem(Strings.DownloadsUnexpected);
+            SayProblem(Strings.SomethingWentWrong);
         }
         finally
         {

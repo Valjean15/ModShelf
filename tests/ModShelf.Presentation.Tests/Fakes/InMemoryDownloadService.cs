@@ -12,8 +12,7 @@ internal sealed class InMemoryDownloadService : IDownloadService
 {
     private readonly Lock _gate = new();
     private readonly List<DownloadJobSnapshot> _jobs = [];
-    private readonly List<Watch> _watches = [];
-    private readonly TaskCompletionSource _waitedOn = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly ControlledWatchers<DownloadJobSnapshot> _watchers = new();
 
     /// <summary>
     /// What was asked of the queue, in order, such as "Pause" with the job's ID.
@@ -36,7 +35,7 @@ internal sealed class InMemoryDownloadService : IDownloadService
     /// <summary>
     /// Done once a watcher has read everything published and waits for more.
     /// </summary>
-    public Task WaitedOn => _waitedOn.Task;
+    public Task WaitedOn => _watchers.WaitedOn;
 
     public IReadOnlyList<DownloadJobSnapshot> Jobs
     {
@@ -65,7 +64,6 @@ internal sealed class InMemoryDownloadService : IDownloadService
     /// </summary>
     public void Publish(DownloadJobSnapshot job)
     {
-        Watch[] watches;
         lock (_gate)
         {
             int index = _jobs.FindIndex(listed => listed.Id == job.Id);
@@ -77,14 +75,9 @@ internal sealed class InMemoryDownloadService : IDownloadService
             {
                 _jobs[index] = job;
             }
-
-            watches = [.. _watches];
         }
 
-        foreach (Watch watch in watches)
-        {
-            watch.Publish(job);
-        }
+        _watchers.Publish(job);
     }
 
     public Task<DownloadJobSnapshot> EnqueueAsync(ModFileRef file, string targetDirectory, string fileName, CancellationToken cancellationToken)
@@ -132,16 +125,7 @@ internal sealed class InMemoryDownloadService : IDownloadService
         }
     }
 
-    public IAsyncEnumerable<DownloadJobSnapshot> WatchAsync(CancellationToken cancellationToken)
-    {
-        Watch watch = new(_waitedOn, cancellationToken);
-        lock (_gate)
-        {
-            _watches.Add(watch);
-        }
-
-        return watch;
-    }
+    public IAsyncEnumerable<DownloadJobSnapshot> WatchAsync(CancellationToken cancellationToken) => _watchers.Watch(cancellationToken);
 
     private Task ControlAsync(string action, DownloadJobId id, Func<DownloadJobSnapshot, DownloadJobSnapshot> change)
     {
@@ -154,120 +138,5 @@ internal sealed class InMemoryDownloadService : IDownloadService
         DownloadJobSnapshot job = Jobs.SingleOrDefault(listed => listed.Id == id) ?? throw new KeyNotFoundException($"There is no download job {id}.");
         Publish(change(job));
         return Task.CompletedTask;
-    }
-
-    /// <summary>
-    /// One watcher's stream. Publishing waits until the watcher has handled the change, which it has once it asks for the
-    /// next one; cancelling ends the stream.
-    /// </summary>
-    private sealed class Watch : IAsyncEnumerable<DownloadJobSnapshot>, IAsyncEnumerator<DownloadJobSnapshot>
-    {
-        private static readonly TimeSpan LongestWait = TimeSpan.FromSeconds(10);
-
-        private readonly Lock _gate = new();
-        private readonly Queue<DownloadJobSnapshot> _queued = new();
-        private readonly TaskCompletionSource _waitedOn;
-        private readonly CancellationTokenRegistration _cancelling;
-        private TaskCompletionSource<bool>? _waiting;
-        private bool _ended;
-        private int _published;
-        private int _asked;
-
-        public Watch(TaskCompletionSource waitedOn, CancellationToken cancellationToken)
-        {
-            _waitedOn = waitedOn;
-            _cancelling = cancellationToken.Register(End);
-        }
-
-        public DownloadJobSnapshot Current { get; private set; } = null!;
-
-        private int Asked
-        {
-            get
-            {
-                lock (_gate)
-                {
-                    return _asked;
-                }
-            }
-        }
-
-        private bool Ended
-        {
-            get
-            {
-                lock (_gate)
-                {
-                    return _ended;
-                }
-            }
-        }
-
-        public IAsyncEnumerator<DownloadJobSnapshot> GetAsyncEnumerator(CancellationToken cancellationToken = default) => this;
-
-        public ValueTask<bool> MoveNextAsync()
-        {
-            lock (_gate)
-            {
-                _asked++;
-                if (_queued.TryDequeue(out DownloadJobSnapshot? next))
-                {
-                    Current = next;
-                    return ValueTask.FromResult(true);
-                }
-
-                if (_ended)
-                {
-                    return ValueTask.FromResult(false);
-                }
-
-                _waiting = new TaskCompletionSource<bool>();
-            }
-
-            _waitedOn.TrySetResult();
-            return new ValueTask<bool>(_waiting.Task);
-        }
-
-        public void Publish(DownloadJobSnapshot job)
-        {
-            TaskCompletionSource<bool>? waiting;
-            int handledOnceAsked;
-            lock (_gate)
-            {
-                // The watcher asked once for each change before this one, and once for this one; it asks again when done.
-                handledOnceAsked = ++_published + 1;
-                waiting = _waiting;
-                _waiting = null;
-                if (waiting is null)
-                {
-                    _queued.Enqueue(job);
-                }
-                else
-                {
-                    Current = job;
-                }
-            }
-
-            waiting?.SetResult(true);
-            if (!SpinWait.SpinUntil(() => Asked >= handledOnceAsked || Ended, LongestWait))
-            {
-                throw new TimeoutException("The watcher didn't handle the change.");
-            }
-        }
-
-        public async ValueTask DisposeAsync() => await _cancelling.DisposeAsync();
-
-        private void End()
-        {
-            TaskCompletionSource<bool>? waiting;
-            lock (_gate)
-            {
-                _ended = true;
-                waiting = _waiting;
-                _waiting = null;
-            }
-
-            waiting?.SetResult(false);
-        }
     }
 }

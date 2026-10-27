@@ -14,9 +14,15 @@ internal sealed class FakeSettingsService : ISettingsService
 
     public string LibraryRoot { get; set; } = TestData.LibraryRoot;
 
+    /// <summary>
+    /// What reading the settings throws, such as an <see cref="InvalidDataException"/>; null for nothing.
+    /// </summary>
+    public Exception? Refusal { get; set; }
+
     public Task<AppSettings> GetAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
 
-    public Task<string> GetLibraryRootAsync(CancellationToken cancellationToken) => Task.FromResult(LibraryRoot);
+    public Task<string> GetLibraryRootAsync(CancellationToken cancellationToken)
+        => Refusal is null ? Task.FromResult(LibraryRoot) : Task.FromException<string>(Refusal);
 
     public Task SetLibraryRootAsync(string? root, CancellationToken cancellationToken) => throw new NotSupportedException();
 

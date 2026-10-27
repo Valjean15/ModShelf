@@ -1,7 +1,110 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:ModShelf.Presentation.ViewModels"
+             xmlns:res="using:ModShelf.Presentation.Resources"
              x:Class="ModShelf.Desktop.Views.LibraryView"
              x:DataType="vm:LibraryViewModel">
-    <TextBlock Classes="heading" Text="{Binding Title}" />
+
+    <DockPanel>
+        <TextBlock DockPanel.Dock="Top" Classes="heading" Text="{Binding Title}" />
+
+        <TextBox DockPanel.Dock="Top"
+                 Margin="0,0,0,16"
+                 Text="{Binding Filter}"
+                 PlaceholderText="{x:Static res:Strings.LibraryFilterHint}"
+                 IsVisible="{Binding !IsEmpty}" />
+
+        <Panel>
+            <TextBlock Classes="note"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       TextWrapping="Wrap"
+                       Text="{x:Static res:Strings.LibraryEmpty}"
+                       IsVisible="{Binding IsEmpty}" />
+            <TextBlock Classes="note"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Text="{Binding NothingMatchesText}"
+                       IsVisible="{Binding NothingMatches}" />
+
+            <!-- One list of games' headings and their mods, so it's virtualized. -->
+            <!-- The mods share the width of Watch and Unwatch, so their buttons line up. -->
+            <ListBox Classes="rows"
+                     Grid.IsSharedSizeScope="True"
+                     ItemsSource="{Binding Rows}"
+                     IsVisible="{Binding !IsEmpty}">
+                <ListBox.DataTemplates>
+                    <DataTemplate DataType="vm:LibraryGameViewModel">
+                        <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,12,0,0">
+                            <TextBlock Classes="subheading" Text="{Binding Name}" />
+                            <TextBlock Classes="note" VerticalAlignment="Bottom" Text="{Binding ModsText}" />
+                        </StackPanel>
+                    </DataTemplate>
+
+                    <DataTemplate DataType="vm:LibraryModViewModel">
+                        <Expander HorizontalAlignment="Stretch" IsExpanded="{Binding IsExpanded}">
+                            <Expander.Header>
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                    <StackPanel Spacing="2">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
+                                            <TextBlock Classes="note" Text="{Binding AuthorText}" />
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Spacing="16">
+                                            <TextBlock Classes="note" Text="{Binding WatchedText}" />
+                                            <TextBlock Classes="note" Text="{Binding FilesText}" />
+                                            <TextBlock Classes="attention" Text="{Binding UpdatesText}" IsVisible="{Binding HasUpdates}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <Grid Grid.Column="1" ColumnSpacing="8" VerticalAlignment="Center">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="WatchButton" />
+                                        </Grid.ColumnDefinitions>
+                                        <Button Content="{x:Static res:Strings.LibraryOpenPage}" Command="{Binding OpenPageCommand}" />
+                                        <Button Grid.Column="1" Content="{x:Static res:Strings.LibraryOpenFolder}" Command="{Binding OpenFolderCommand}" />
+                                        <Button Grid.Column="2"
+                                                HorizontalAlignment="Stretch"
+                                                HorizontalContentAlignment="Center"
+                                                Content="{x:Static res:Strings.LibraryWatch}"
+                                                Command="{Binding WatchCommand}"
+                                                IsVisible="{Binding !IsWatched}" />
+                                        <Button Grid.Column="2"
+                                                HorizontalAlignment="Stretch"
+                                                HorizontalContentAlignment="Center"
+                                                Content="{x:Static res:Strings.LibraryUnwatch}"
+                                                Command="{Binding UnwatchCommand}"
+                                                IsVisible="{Binding IsWatched}" />
+                                    </Grid>
+                                </Grid>
+                            </Expander.Header>
+
+                            <ItemsControl ItemsSource="{Binding Files}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:LibraryFileViewModel">
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16" Margin="0,4">
+                                            <StackPanel Spacing="2">
+                                                <TextBlock TextTrimming="CharacterEllipsis" Text="{Binding FileName}" />
+                                                <StackPanel Orientation="Horizontal" Spacing="16">
+                                                    <TextBlock Classes="note" Text="{Binding Name}" />
+                                                    <TextBlock Classes="note" Text="{Binding VersionText}" />
+                                                    <TextBlock Classes="note" Text="{Binding SizeText}" />
+                                                    <TextBlock Classes="note" Text="{Binding DownloadedText}" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <Button Grid.Column="1"
+                                                    VerticalAlignment="Center"
+                                                    Content="{x:Static res:Strings.LibraryDeleteFile}"
+                                                    Command="{Binding DeleteCommand}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Expander>
+                    </DataTemplate>
+                </ListBox.DataTemplates>
+            </ListBox>
+        </Panel>
+    </DockPanel>
 </UserControl>

@@ -437,7 +437,7 @@ public sealed partial class DownloadJobViewModel : ObservableObject
             LogActionFailed(_services.Logger, exception, action, Id);
             try
             {
-                await _services.Dialogs.ShowMessageAsync(Strings.ActionFailedTitle, Strings.DownloadsUnexpected, CancellationToken.None);
+                await _services.Dialogs.ShowMessageAsync(Strings.ActionFailedTitle, Strings.SomethingWentWrong, CancellationToken.None);
             }
             catch (Exception shown)
             {

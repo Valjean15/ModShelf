@@ -10,7 +10,7 @@ public sealed class ScreenTitlesTests
 {
     public static TheoryData<ScreenViewModel, Screen, string> Screens => new()
     {
-        { new LibraryViewModel(), Screen.Library, "Library" },
+        { new LibraryHarness().Screen, Screen.Library, "Library" },
         { new UpdatesViewModel(), Screen.Updates, "Updates" },
         { new BrowseViewModel(), Screen.Browse, "Browse" },
         { new DownloadsHarness().Screen, Screen.Downloads, "Downloads" },

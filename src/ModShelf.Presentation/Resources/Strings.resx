@@ -146,9 +146,9 @@
     <value>{0} See where files go on the Settings screen.</value>
     <comment>{0} is why the file couldn't be placed in the library, such as a path too long.</comment>
   </data>
-  <data name="DownloadsUnexpected" xml:space="preserve">
+  <data name="SomethingWentWrong" xml:space="preserve">
     <value>Something went wrong. The log has the details.</value>
-    <comment>When an action failed for a reason the user can't act on.</comment>
+    <comment>When an action failed for a reason the user can't act on, on any screen.</comment>
   </data>
   <data name="ChooseFolderTitle" xml:space="preserve">
     <value>Choose where to save the file</value>
@@ -361,5 +361,117 @@
   <data name="PasteLinkNotALink" xml:space="preserve">
     <value>That isn't a link. Copy the link the download button on {0} holds, and paste that.</value>
     <comment>When the text pasted for a handoff isn't a link. {0} is the site's name.</comment>
+  </data>
+  <data name="LibraryFilterHint" xml:space="preserve">
+    <value>Filter by mod name</value>
+    <comment>The empty box at the top of the Library screen.</comment>
+  </data>
+  <data name="LibraryEmpty" xml:space="preserve">
+    <value>The library is empty. Mods you download into it show here, watched for updates.</value>
+    <comment>Shown when the library has no mods.</comment>
+  </data>
+  <data name="LibraryNothingMatches" xml:space="preserve">
+    <value>No mod's name has “{0}”.</value>
+    <comment>Shown when the filter hides every mod. {0} is what the user typed.</comment>
+  </data>
+  <data name="LibraryOneMod" xml:space="preserve">
+    <value>1 mod</value>
+    <comment>How many of a game's mods the library has.</comment>
+  </data>
+  <data name="LibraryMods" xml:space="preserve">
+    <value>{0:N0} mods</value>
+    <comment>How many of a game's mods the library has, more than one.</comment>
+  </data>
+  <data name="LibraryByAuthor" xml:space="preserve">
+    <value>by {0}</value>
+    <comment>A mod's author, under its name.</comment>
+  </data>
+  <data name="LibraryWatched" xml:space="preserve">
+    <value>Watched for updates</value>
+    <comment>A mod's state.</comment>
+  </data>
+  <data name="LibraryNotWatched" xml:space="preserve">
+    <value>Not watched</value>
+    <comment>A mod's state.</comment>
+  </data>
+  <data name="LibraryNoFiles" xml:space="preserve">
+    <value>No files</value>
+    <comment>How many files of a mod the library has: none.</comment>
+  </data>
+  <data name="LibraryOneFile" xml:space="preserve">
+    <value>1 file</value>
+    <comment>How many files of a mod the library has.</comment>
+  </data>
+  <data name="LibraryFiles" xml:space="preserve">
+    <value>{0:N0} files</value>
+    <comment>How many files of a mod the library has, more than one.</comment>
+  </data>
+  <data name="LibraryOneUpdate" xml:space="preserve">
+    <value>1 update</value>
+    <comment>How many updates were found for a mod.</comment>
+  </data>
+  <data name="LibraryUpdates" xml:space="preserve">
+    <value>{0:N0} updates</value>
+    <comment>How many updates were found for a mod, more than one.</comment>
+  </data>
+  <data name="LibraryOpenPage" xml:space="preserve">
+    <value>Open page</value>
+    <comment>Button: open the mod's page on its site.</comment>
+  </data>
+  <data name="LibraryOpenFolder" xml:space="preserve">
+    <value>Open folder</value>
+    <comment>Button: open the folder of the mod's files.</comment>
+  </data>
+  <data name="LibraryWatch" xml:space="preserve">
+    <value>Watch</value>
+    <comment>Button: watch the mod for updates.</comment>
+  </data>
+  <data name="LibraryUnwatch" xml:space="preserve">
+    <value>Unwatch</value>
+    <comment>Button: stop watching the mod for updates.</comment>
+  </data>
+  <data name="LibraryFileVersion" xml:space="preserve">
+    <value>Version {0}</value>
+    <comment>A file's version, such as 5.2.</comment>
+  </data>
+  <data name="LibraryFileDownloaded" xml:space="preserve">
+    <value>Downloaded {0}</value>
+    <comment>When a file was downloaded. {0} is a date.</comment>
+  </data>
+  <data name="LibraryDeleteFile" xml:space="preserve">
+    <value>Delete…</value>
+    <comment>Button on a file: delete it, after asking.</comment>
+  </data>
+  <data name="DeleteFileTitle" xml:space="preserve">
+    <value>Delete this file?</value>
+    <comment>Title of the dialog confirming a delete.</comment>
+  </data>
+  <data name="DeleteFileMessage" xml:space="preserve">
+    <value>{0} ({1}) is deleted from disk for good, and the library forgets it.</value>
+    <comment>{0} is the file's name, {1} its size.</comment>
+  </data>
+  <data name="DeleteFileConfirm" xml:space="preserve">
+    <value>Delete</value>
+    <comment>Button that deletes a file for good.</comment>
+  </data>
+  <data name="DeleteFileFailedTitle" xml:space="preserve">
+    <value>The file wasn't deleted</value>
+    <comment>Title of the message when a file couldn't be deleted.</comment>
+  </data>
+  <data name="DeleteFileFailed" xml:space="preserve">
+    <value>{0} couldn't be deleted: {1} It stays in the library.</value>
+    <comment>{0} is the file's name, {1} the system's reason.</comment>
+  </data>
+  <data name="OpenFolderFailedTitle" xml:space="preserve">
+    <value>Couldn't open the folder</value>
+    <comment>Title of the message when a folder didn't open.</comment>
+  </data>
+  <data name="OpenFolderFailed" xml:space="preserve">
+    <value>{0} couldn't be opened. It may have been moved or deleted.</value>
+    <comment>{0} is the folder's path.</comment>
+  </data>
+  <data name="PageOpenFailed" xml:space="preserve">
+    <value>Open this page in your browser: {0}</value>
+    <comment>{0} is the page's address.</comment>
   </data>
 </root>

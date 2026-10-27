@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 
@@ -46,7 +45,7 @@ internal sealed class AvaloniaDialogService : IDialogService
         return Dispatcher.UIThread.InvokeAsync(async () =>
         {
             // The system's folder picker needs a window to belong to.
-            if (Owner() is not { } owner)
+            if (AppWindows.Main is not { } owner)
             {
                 return null;
             }
@@ -56,14 +55,6 @@ internal sealed class AvaloniaDialogService : IDialogService
             return folders.Count > 0 ? folders[0].TryGetLocalPath() : null;
         });
     }
-
-    /// <summary>
-    /// The main window, when the app has one open.
-    /// </summary>
-    private static Window? Owner()
-        => (Avalonia.Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow is { IsVisible: true } window
-            ? window
-            : null;
 
     private static Task<bool> ShowAsync(MessageDialogContent content, CancellationToken cancellationToken)
     {
@@ -87,7 +78,7 @@ internal sealed class AvaloniaDialogService : IDialogService
     private static async Task<bool> ShowAsync(Window dialog, Func<bool> confirmed, CancellationToken cancellationToken)
     {
         await using CancellationTokenRegistration closing = cancellationToken.Register(() => Dispatcher.UIThread.Post(() => dialog.Close(false)));
-        if (Owner() is { } owner)
+        if (AppWindows.Main is { } owner)
         {
             await dialog.ShowDialog<bool>(owner);
             return confirmed();

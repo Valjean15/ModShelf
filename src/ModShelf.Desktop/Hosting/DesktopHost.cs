@@ -107,6 +107,7 @@ internal static class DesktopHost
         builder.Services.AddPresentation();
         builder.Services.AddSingleton<IUiThread, AvaloniaUiThread>();
         builder.Services.AddSingleton<IDialogService, AvaloniaDialogService>();
+        builder.Services.AddSingleton<IFolderOpener, AvaloniaFolderOpener>();
 
         return builder.Build();
     }

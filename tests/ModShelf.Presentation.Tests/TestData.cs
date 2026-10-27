@@ -1,5 +1,6 @@
 using ModShelf.Application.Downloads;
 using ModShelf.Domain.Downloads;
+using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 
 namespace ModShelf.Presentation.Tests;
@@ -32,6 +33,39 @@ internal static class TestData
     public static string Folder { get; } = Path.Combine(Path.GetTempPath(), "My Downloads");
 
     public static ModFileRef File(string id = "35407") => new(new ModRef(new GameRef(Nexus, "skyrimspecialedition"), "12604"), id);
+
+    /// <summary>
+    /// A mod of a Nexus Mods game, Skyrim Special Edition unless told otherwise.
+    /// </summary>
+    public static ModRef Mod(string id, string game = "skyrimspecialedition") => new(new GameRef(Nexus, game), id);
+
+    /// <summary>
+    /// A mod as the library has it, with its page on Nexus Mods, watched unless told otherwise.
+    /// </summary>
+    public static LibraryMod LibraryMod(ModRef mod, string name, bool watched = true, params LibraryFile[] files)
+        => Domain.Library.LibraryMod.Restore(
+            mod,
+            name,
+            "An Author",
+            new Uri($"https://www.nexusmods.com/{mod.Game.Key}/mods/{mod.Id}"),
+            watched,
+            Now.AddDays(-30),
+            null,
+            files);
+
+    /// <summary>
+    /// One of a mod's files in the library, in the mod's folder, downloaded <paramref name="daysAgo"/> days ago.
+    /// </summary>
+    public static LibraryFile LibraryFile(ModRef mod, string id, string fileName, string? version = "1.0", long size = 1024, int daysAgo = 1)
+        => new(
+            new ModFileRef(mod, id),
+            $"{fileName} file",
+            version,
+            ModFileCategory.Main,
+            Now.AddDays(-daysAgo - 1),
+            $"nexus/{mod.Game.Key}/Mod ({mod.Id})/{fileName}",
+            size,
+            Now.AddDays(-daysAgo));
 
     /// <summary>
     /// A job as the queue lists it: in a folder outside the library unless told otherwise, failed for the network, and
