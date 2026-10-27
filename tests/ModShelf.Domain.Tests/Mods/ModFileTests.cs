@@ -20,6 +20,22 @@ public sealed class ModFileTests
         Assert.Equal(TestData.CreatedAt, file.UploadedAt);
         Assert.Equal(Md5, Assert.Single(file.Hashes));
         Assert.Null(file.PageUrl);
+        Assert.Null(file.ReplacedBy);
+    }
+
+    [Fact]
+    public void KeepsTheFileThatReplacedIt()
+    {
+        ModFileRef newer = new(TestData.SkyUi, "35408");
+
+        Assert.Equal(newer, Create(replacedBy: newer).ReplacedBy);
+    }
+
+    [Fact]
+    public void IsReplacedOnlyByAnotherFileOfItsMod()
+    {
+        Assert.Throws<ArgumentException>(() => Create(replacedBy: TestData.SkyUiMainFile));
+        Assert.Throws<ArgumentException>(() => Create(replacedBy: new ModFileRef(new ModRef(TestData.Skyrim, "3863"), "35408")));
     }
 
     [Fact]
@@ -106,7 +122,8 @@ public sealed class ModFileTests
         ModFileCategory category = ModFileCategory.Main,
         long? sizeInBytes = 2_500_000,
         IEnumerable<FileHash>? hashes = null,
-        Uri? pageUrl = null)
+        Uri? pageUrl = null,
+        ModFileRef? replacedBy = null)
         => new(
             TestData.SkyUiMainFile,
             "Main File",
@@ -116,5 +133,6 @@ public sealed class ModFileTests
             sizeInBytes,
             TestData.CreatedAt,
             hashes ?? [Md5],
-            pageUrl);
+            pageUrl,
+            replacedBy);
 }

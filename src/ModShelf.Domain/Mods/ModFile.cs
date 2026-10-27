@@ -7,6 +7,11 @@ namespace ModShelf.Domain.Mods;
 /// </summary>
 public sealed class ModFile
 {
+    /// <param name="replacedBy">The newer file of the same mod its site says replaced this one, if any.</param>
+    /// <exception cref="ArgumentException">
+    /// The name or file name isn't valid, the page isn't a web link, a hash is null, or the file that replaced it is of
+    /// another mod, or is this file.
+    /// </exception>
     public ModFile(
         ModFileRef reference,
         string name,
@@ -16,7 +21,8 @@ public sealed class ModFile
         long? sizeInBytes,
         DateTimeOffset uploadedAt,
         IEnumerable<FileHash> hashes,
-        Uri? pageUrl = null)
+        Uri? pageUrl = null,
+        ModFileRef? replacedBy = null)
     {
         ArgumentNullException.ThrowIfNull(reference);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -44,6 +50,11 @@ public sealed class ModFile
             throw new ArgumentException("The hashes can't include null.", nameof(hashes));
         }
 
+        if (replacedBy is not null && (replacedBy.Mod != reference.Mod || replacedBy == reference))
+        {
+            throw new ArgumentException("A file can only be replaced by another file of its mod.", nameof(replacedBy));
+        }
+
         Reference = reference;
         Name = name;
         FileName = fileName;
@@ -53,6 +64,7 @@ public sealed class ModFile
         UploadedAt = uploadedAt;
         Hashes = Array.AsReadOnly(hashList);
         PageUrl = pageUrl;
+        ReplacedBy = replacedBy;
     }
 
     public ModFileRef Reference { get; }
@@ -91,4 +103,10 @@ public sealed class ModFile
     /// can be downloaded from it.
     /// </summary>
     public Uri? PageUrl { get; }
+
+    /// <summary>
+    /// The newer file of the same mod its site says replaced this one, such as the next version in Nexus Mods' update
+    /// chains; or null when the site says none did. Following it from file to file leads to the newest version.
+    /// </summary>
+    public ModFileRef? ReplacedBy { get; }
 }
