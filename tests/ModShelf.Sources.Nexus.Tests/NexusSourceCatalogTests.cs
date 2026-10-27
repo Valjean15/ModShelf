@@ -203,6 +203,53 @@ public sealed class NexusSourceCatalogTests : IDisposable
     }
 
     [Fact]
+    public async Task FollowsTheUpdateChainsToTheNewestVersion()
+    {
+        _api.Serve(RecordedNexusApi.Premium, "files");
+
+        IReadOnlyList<ModFile> files = await Source.GetFilesAsync(Smapi, Cancellation);
+
+        Dictionary<string, ModFile> byId = files.ToDictionary(file => file.Reference.Id);
+        Assert.Equal(new ModFileRef(Smapi, "11997"), byId["11397"].ReplacedBy);
+        Assert.Null(byId["160380"].ReplacedBy);
+        Assert.Equal(294, files.Count(file => file.ReplacedBy is not null));
+        Assert.Equal(82, files.Count(file => NewestOf(file, byId) == "160380"));
+    }
+
+    [Fact]
+    public async Task KeepsOnlyLinksBetweenTwoFiles()
+    {
+        _api.Answer(FilesPath, response => response.WithStatusCode(200).WithBody("""
+            {"files": [
+              {"file_id": 1, "category_id": 4, "uploaded_timestamp": 1},
+              {"file_id": 2, "category_id": 4, "uploaded_timestamp": 2},
+              {"file_id": 3, "category_id": 1, "uploaded_timestamp": 3},
+              {"file_id": 4, "category_id": 3, "uploaded_timestamp": 4}
+            ],
+            "file_updates": [
+              {"old_file_id": 1, "new_file_id": 2, "uploaded_timestamp": 2},
+              {"old_file_id": 2, "new_file_id": 3, "uploaded_timestamp": 3},
+              {"old_file_id": 4, "new_file_id": 4, "uploaded_timestamp": 4},
+              {"old_file_id": 0, "new_file_id": 3, "uploaded_timestamp": 3}
+            ]}
+            """));
+
+        IReadOnlyList<ModFile> files = await Source.GetFilesAsync(Smapi, Cancellation);
+
+        Assert.Equal(["2", "3", null, null], files.Select(file => file.ReplacedBy?.Id));
+    }
+
+    [Fact]
+    public async Task AnAnswerWithoutUpdateChainsReplacesNothing()
+    {
+        _api.Answer(FilesPath, response => response.WithStatusCode(200).WithBody("""
+            {"files": [{"file_id": 1, "category_id": 1, "uploaded_timestamp": 1}]}
+            """));
+
+        Assert.Null(Assert.Single(await Source.GetFilesAsync(Smapi, Cancellation)).ReplacedBy);
+    }
+
+    [Fact]
     public async Task AModWithoutAChangelogHasNone()
     {
         _api.Serve(RecordedNexusApi.Premium, "changelogs");
@@ -247,5 +294,20 @@ public sealed class NexusSourceCatalogTests : IDisposable
         await Assert.ThrowsAsync<ArgumentException>(() => Source.GetFilesAsync(odd, Cancellation));
         await Assert.ThrowsAsync<ArgumentException>(() => Source.GetChangelogsAsync(odd, Cancellation));
         Assert.Empty(_api.Requests);
+    }
+
+    /// <summary>
+    /// The ID of the file at the end of <paramref name="file"/>'s update chain.
+    /// </summary>
+    private static string NewestOf(ModFile file, Dictionary<string, ModFile> byId)
+    {
+        ModFile newest = file;
+        HashSet<string> seen = [];
+        while (newest.ReplacedBy is { } newer && seen.Add(newest.Reference.Id) && byId.TryGetValue(newer.Id, out ModFile? next))
+        {
+            newest = next;
+        }
+
+        return newest.Reference.Id;
     }
 }

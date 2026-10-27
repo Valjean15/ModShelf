@@ -52,7 +52,18 @@ public sealed partial class NexusSource : IModCatalog
     {
         NexusLink mod = NexusLink.ForMod(modRef);
         NexusModFiles found = await _api.GetAsync<NexusModFiles>($"{ModPath(mod)}/files.json", cancellationToken).ConfigureAwait(false);
-        return [.. found.Files.Select(file => ToModFile(modRef, mod, file))];
+
+        // A later link for the same file wins, though Nexus Mods lists each file once.
+        Dictionary<long, long> replacedBy = [];
+        foreach (NexusFileUpdate update in found.FileUpdates ?? [])
+        {
+            if (update.OldFileId > 0 && update.NewFileId > 0 && update.OldFileId != update.NewFileId)
+            {
+                replacedBy[update.OldFileId] = update.NewFileId;
+            }
+        }
+
+        return [.. found.Files.Select(file => ToModFile(modRef, mod, file, replacedBy.TryGetValue(file.FileId, out long newer) ? newer : null))];
     }
 
     /// <returns>Each version's changes, in the order Nexus Mods lists them; empty when the mod has no changelog.</returns>
@@ -82,7 +93,8 @@ public sealed partial class NexusSource : IModCatalog
 
     private static string ModPath(NexusLink mod) => $"v1/games/{mod.Game}/mods/{mod.ModId}";
 
-    private static ModFile ToModFile(ModRef modRef, NexusLink mod, NexusFile file)
+    /// <param name="replacedBy">The ID of the file Nexus Mods says replaced this one, if any.</param>
+    private static ModFile ToModFile(ModRef modRef, NexusLink mod, NexusFile file, long? replacedBy)
     {
         string fileId = file.FileId.ToString(CultureInfo.InvariantCulture);
         long? size = file.SizeInBytes ?? file.SizeKb * 1024;
@@ -95,7 +107,8 @@ public sealed partial class NexusSource : IModCatalog
             size is >= 0 ? size : null,
             FromUnixSeconds(file.UploadedTimestamp),
             hashes: [],
-            pageUrl: new Uri(Website, $"{mod.Game}/mods/{mod.ModId}?tab=files&file_id={fileId}"));
+            pageUrl: new Uri(Website, $"{mod.Game}/mods/{mod.ModId}?tab=files&file_id={fileId}"),
+            replacedBy: replacedBy is { } newer ? new ModFileRef(modRef, newer.ToString(CultureInfo.InvariantCulture)) : null);
     }
 
     /// <summary>
