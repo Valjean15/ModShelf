@@ -1,7 +1,98 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sys="using:System"
              xmlns:vm="using:ModShelf.Presentation.ViewModels"
+             xmlns:res="using:ModShelf.Presentation.Resources"
              x:Class="ModShelf.Desktop.Views.UpdatesView"
              x:DataType="vm:UpdatesViewModel">
-    <TextBlock Classes="heading" Text="{Binding Title}" />
+
+    <DockPanel>
+        <TextBlock DockPanel.Dock="Top" Classes="heading" Text="{Binding Title}" />
+
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,*" ColumnSpacing="16">
+            <Button Classes="accent" Content="{x:Static res:Strings.UpdatesCheckNow}" Command="{Binding CheckNowCommand}" />
+            <TextBlock Grid.Column="1"
+                       Classes="note"
+                       VerticalAlignment="Center"
+                       TextWrapping="Wrap"
+                       Text="{Binding CheckedText}" />
+        </Grid>
+
+        <ProgressBar DockPanel.Dock="Top" Margin="0,12,0,0" IsIndeterminate="True" IsVisible="{Binding IsChecking}" />
+
+        <TextBlock DockPanel.Dock="Top"
+                   Margin="0,8,0,0"
+                   Classes="note"
+                   Classes.problem="{Binding IsCheckResultAProblem}"
+                   TextWrapping="Wrap"
+                   Text="{Binding CheckResult}"
+                   IsVisible="{Binding CheckResult, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+        <!-- What the last check couldn't check, and why. -->
+        <ItemsControl DockPanel.Dock="Top" Margin="0,4,0,0" ItemsSource="{Binding CheckFailures}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="sys:String">
+                    <TextBlock Classes="problem" TextWrapping="Wrap" Text="{Binding}" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Panel Margin="0,16,0,0">
+            <TextBlock Classes="note"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       TextWrapping="Wrap"
+                       Text="{Binding NoUpdatesText}"
+                       IsVisible="{Binding !HasUpdates}" />
+
+            <ListBox Classes="rows" ItemsSource="{Binding Updates}" IsVisible="{Binding HasUpdates}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:UpdateViewModel">
+                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="4">
+                            <StackPanel Spacing="2">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock FontWeight="SemiBold" Text="{Binding ModName}" />
+                                    <TextBlock TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="16">
+                                    <TextBlock Classes="note" Text="{Binding FileName}" />
+                                    <TextBlock Classes="note" Text="{Binding VersionText}" />
+                                    <TextBlock Classes="note" Text="{Binding UploadedText}" />
+                                    <TextBlock Classes="note" Text="{Binding ReplacesText}" />
+                                </StackPanel>
+                                <TextBlock Classes="note"
+                                           Classes.problem="{Binding IsNoteAProblem}"
+                                           TextWrapping="Wrap"
+                                           Text="{Binding Note}"
+                                           IsVisible="{Binding Note, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <Button Content="{x:Static res:Strings.UpdateChanges}" Command="{Binding ToggleChangesCommand}" />
+                                <Button Classes="accent" Content="{x:Static res:Strings.UpdateDownload}" Command="{Binding DownloadCommand}" />
+                            </StackPanel>
+
+                            <!-- The update's version in its mod's changelog. -->
+                            <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="12,4,0,0" Spacing="2" IsVisible="{Binding AreChangesShown}">
+                                <TextBlock Classes="note"
+                                           TextWrapping="Wrap"
+                                           Text="{Binding ChangesNote}"
+                                           IsVisible="{Binding ChangesNote, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                <ItemsControl ItemsSource="{Binding Changes}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="sys:String">
+                                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                                <TextBlock Text="•" />
+                                                <TextBlock Grid.Column="1" TextWrapping="Wrap" Text="{Binding}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Panel>
+    </DockPanel>
 </UserControl>

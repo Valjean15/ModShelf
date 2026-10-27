@@ -474,4 +474,120 @@
     <value>Open this page in your browser: {0}</value>
     <comment>{0} is the page's address.</comment>
   </data>
+  <data name="UpdatesCheckNow" xml:space="preserve">
+    <value>Check now</value>
+    <comment>Button: check the watched mods for updates now.</comment>
+  </data>
+  <data name="UpdatesChecking" xml:space="preserve">
+    <value>Checking the watched mods…</value>
+    <comment>Shown while a check runs.</comment>
+  </data>
+  <data name="UpdatesNoneWatched" xml:space="preserve">
+    <value>No mods are watched. Mods you download into the library are watched for updates.</value>
+    <comment>Shown when no mod is watched.</comment>
+  </data>
+  <data name="UpdatesNone" xml:space="preserve">
+    <value>No updates found.</value>
+    <comment>Shown when the watched mods have no updates.</comment>
+  </data>
+  <data name="UpdatesNotAllChecked" xml:space="preserve">
+    <value>Some watched mods haven't been checked yet.</value>
+    <comment>When a watched mod was never checked.</comment>
+  </data>
+  <data name="UpdatesCheckedSince" xml:space="preserve">
+    <value>Every watched mod was checked on {0} or later.</value>
+    <comment>{0} is a date and time.</comment>
+  </data>
+  <data name="CheckOneMod" xml:space="preserve">
+    <value>1 mod</value>
+    <comment>In a check's summary: how many mods it checked.</comment>
+  </data>
+  <data name="CheckMods" xml:space="preserve">
+    <value>{0:N0} mods</value>
+    <comment>In a check's summary: how many mods it checked, other than one.</comment>
+  </data>
+  <data name="CheckOneRequest" xml:space="preserve">
+    <value>1 request</value>
+    <comment>In a check's summary: how many questions it asked the sites.</comment>
+  </data>
+  <data name="CheckRequests" xml:space="preserve">
+    <value>{0:N0} requests</value>
+    <comment>In a check's summary: how many questions it asked the sites, other than one.</comment>
+  </data>
+  <data name="CheckSummary" xml:space="preserve">
+    <value>Checked {0} with {1}.</value>
+    <comment>What a check did. {0} is such as 12 mods, {1} such as 3 requests.</comment>
+  </data>
+  <data name="CheckNoNewUpdates" xml:space="preserve">
+    <value>No new updates.</value>
+    <comment>What a check found.</comment>
+  </data>
+  <data name="CheckOneNewUpdate" xml:space="preserve">
+    <value>1 new update.</value>
+    <comment>What a check found.</comment>
+  </data>
+  <data name="CheckNewUpdates" xml:space="preserve">
+    <value>{0:N0} new updates.</value>
+    <comment>What a check found, more than one.</comment>
+  </data>
+  <data name="CheckModFailed" xml:space="preserve">
+    <value>Couldn't check {0}: {1}</value>
+    <comment>{0} is a mod's name, {1} why.</comment>
+  </data>
+  <data name="CheckGameFailed" xml:space="preserve">
+    <value>Couldn't check the mods of {0} on {1}: {2}</value>
+    <comment>{0} is a game, {1} a site's name, {2} why.</comment>
+  </data>
+  <data name="UpdateUploaded" xml:space="preserve">
+    <value>Uploaded {0}</value>
+    <comment>When an update was uploaded. {0} is a date.</comment>
+  </data>
+  <data name="UpdateReplaces" xml:space="preserve">
+    <value>Replaces {0}</value>
+    <comment>The library's file an update replaces. {0} is its file name.</comment>
+  </data>
+  <data name="UpdateDownload" xml:space="preserve">
+    <value>Download</value>
+    <comment>Button: download the update into the library.</comment>
+  </data>
+  <data name="UpdateChanges" xml:space="preserve">
+    <value>Changes</value>
+    <comment>Button: show or hide the update's changes, from its mod's changelog.</comment>
+  </data>
+  <data name="UpdateDownloading" xml:space="preserve">
+    <value>Downloading into {0}. It shows on the Downloads screen.</value>
+    <comment>{0} is the folder.</comment>
+  </data>
+  <data name="UpdateDownloadingAlready" xml:space="preserve">
+    <value>It's on the Downloads screen already.</value>
+    <comment>When the update's download was added before.</comment>
+  </data>
+  <data name="UpdateInLibraryAlready" xml:space="preserve">
+    <value>{0} is in the library already.</value>
+    <comment>{0} is the file's path.</comment>
+  </data>
+  <data name="ChangelogReading" xml:space="preserve">
+    <value>Reading the changelog…</value>
+    <comment>Shown while the site is asked for the changelog.</comment>
+  </data>
+  <data name="ChangelogNothing" xml:space="preserve">
+    <value>The changelog says nothing about this version.</value>
+    <comment>When the changelog has no entry for the update's version.</comment>
+  </data>
+  <data name="ChangelogNoVersion" xml:space="preserve">
+    <value>The file has no version, so its changes can't be found in the changelog.</value>
+    <comment>When the update has no version label.</comment>
+  </data>
+  <data name="ChangelogNone" xml:space="preserve">
+    <value>{0} doesn't give changelogs.</value>
+    <comment>{0} is the site's name.</comment>
+  </data>
+  <data name="ChangelogNeedsAccount" xml:space="preserve">
+    <value>The site needs a linked account to give the changelog, or refused the one linked. Link it on the Accounts screen.</value>
+    <comment>When the site refused the account.</comment>
+  </data>
+  <data name="ChangelogFailed" xml:space="preserve">
+    <value>The site couldn't give the changelog: {0}</value>
+    <comment>{0} is the site's reason.</comment>
+  </data>
 </root>
