@@ -2,9 +2,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Accounts.Ports;
+using ModShelf.Application.Notifications.Ports;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Platform.Browser;
 using ModShelf.Platform.Folders;
+using ModShelf.Platform.Notifications;
 using ModShelf.Platform.OAuth;
 using ModShelf.Platform.Secrets;
 
@@ -16,8 +18,8 @@ namespace ModShelf.Platform;
 public static class PlatformServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers the secret store for this system, the OAuth loopback redirect listener, the browser launcher, and the
-    /// user's folders as this system keeps them.
+    /// Registers the secret store for this system, the OAuth loopback redirect listener, the browser launcher, the
+    /// user's folders as this system keeps them, and the way this system shows notices.
     /// </summary>
     /// <param name="secrets">Where the secret store keeps its secrets; by default the user's own ModShelf secrets.</param>
     public static IServiceCollection AddPlatformServices(this IServiceCollection services, SecretStoreOptions? secrets = null)
@@ -33,6 +35,8 @@ public static class PlatformServiceCollectionExtensions
         services.AddSingleton<IOAuthRedirectListener, LoopbackRedirectListener>();
         services.AddSingleton<IBrowserLauncher>(_ => new SystemBrowserLauncher());
         services.AddSingleton(_ => UserFolders.ForThisSystem());
+        services.AddSingleton(provider => NotificationServices.ForThisSystem(
+            provider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(NotificationServices).FullName!)));
 
         return services;
     }

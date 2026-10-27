@@ -5,9 +5,10 @@
     <NeutralLanguage>en</NeutralLanguage>
 
     <!--
-      The Keychain and libsecret stores, and the Windows Known Folders lookup, call the OS through LibraryImport,
-      which generates the native calls at compile time and needs unsafe code for that. Only the interop classes in
-      Secrets/ and Folders/ use it.
+      The Keychain and libsecret stores, the Windows Known Folders lookup, and the notices call the OS through
+      LibraryImport, which generates the native calls at compile time and needs unsafe code for that. Windows toasts
+      also call the Windows Runtime through function pointers. Only the interop classes in Secrets/, Folders/ and
+      Notifications/ use it.
     -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>

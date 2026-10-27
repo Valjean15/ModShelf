@@ -42,9 +42,10 @@ jobs:
         run: dotnet build --no-restore
 
       # The Linux secret store talks to a Secret Service, which GitHub's runners don't run, so install GNOME Keyring.
-      - name: Install a keyring
+      # Linux notices go through libnotify.
+      - name: Install a keyring and libnotify
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y gnome-keyring dbus
+        run: sudo apt-get update && sudo apt-get install -y gnome-keyring dbus libnotify4
 
       # global.json selects Microsoft.Testing.Platform, so this runs every test project in the solution.
       - name: Test
