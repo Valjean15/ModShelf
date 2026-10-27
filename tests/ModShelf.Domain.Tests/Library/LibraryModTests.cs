@@ -192,12 +192,112 @@ public sealed class LibraryModTests
         Assert.Throws<ArgumentException>(() => Restore(isWatched: true, File("1"), null!));
     }
 
+    [Fact]
+    public void AWatchedModHasNoUpdatesUntilACheckFindsThem()
+    {
+        LibraryMod mod = Watched().WithFile(File("35407"));
+
+        LibraryMod found = mod.Checked(Later).WithUpdates([Update("35408", replaces: "35407")]);
+
+        Assert.Empty(mod.Updates);
+        Assert.Equal(["35408"], found.Updates.Select(update => update.File.Id));
+        Assert.Equal(Later, found.CheckedAt);
+    }
+
+    [Fact]
+    public void AnUpdateFoundAgainKeepsWhenItWasFirstFound()
+    {
+        LibraryMod mod = Watched().WithUpdates([Update("35408", foundAt: TestData.CreatedAt)]);
+
+        LibraryMod again = mod.WithUpdates([Update("35408", foundAt: Later), Update("35409", foundAt: Later)]);
+
+        Assert.Equal([TestData.CreatedAt, Later], again.Updates.Select(update => update.FoundAt));
+    }
+
+    [Fact]
+    public void ACheckReplacesTheUpdatesItHad()
+    {
+        LibraryMod mod = Watched().WithUpdates([Update("35408"), Update("35409")]);
+
+        Assert.Equal(["35409"], mod.WithUpdates([Update("35409")]).Updates.Select(update => update.File.Id));
+        Assert.Empty(mod.WithUpdates([]).Updates);
+    }
+
+    [Fact]
+    public void DownloadingAnUpdateTakesItOff()
+    {
+        LibraryMod mod = Watched().WithFile(File("35407")).WithUpdates([Update("35408", replaces: "35407"), Update("35409")]);
+
+        LibraryMod downloaded = mod.WithFile(File("35408", "SkyUI_5_3_SE.7z"));
+
+        Assert.Equal(["35409"], downloaded.Updates.Select(update => update.File.Id));
+    }
+
+    [Fact]
+    public void AnUpdateGoesWithTheFileItReplaces()
+    {
+        LibraryMod mod = Watched().WithFile(File("35407")).WithUpdates([Update("35408", replaces: "35407"), Update("35409")]);
+
+        LibraryMod without = mod.WithoutFile(Ref("35407"))!;
+
+        Assert.Equal(["35409"], without.Updates.Select(update => update.File.Id));
+    }
+
+    [Fact]
+    public void UnwatchingDropsTheUpdates()
+    {
+        LibraryMod mod = Watched().WithFile(File("35407")).WithUpdates([Update("35408", replaces: "35407")]);
+
+        LibraryMod unwatched = mod.Unwatched()!;
+
+        Assert.Empty(unwatched.Updates);
+        Assert.Throws<ArgumentException>(() => unwatched.WithUpdates([Update("35408")]));
+    }
+
+    [Fact]
+    public void ChangesKeepTheUpdates()
+    {
+        LibraryMod mod = Watched().WithUpdates([Update("35408")]);
+
+        Assert.Single(mod.WithDetails("SkyUI SE", null, null).Updates);
+        Assert.Single(mod.Checked(Later).Updates);
+        Assert.Single(mod.Watched().Updates);
+    }
+
+    [Fact]
+    public void RefusesUpdatesItCantHave()
+    {
+        LibraryMod mod = Watched().WithFile(File("35407"));
+        LibraryUpdate otherMod = new(
+            new ModFileRef(new ModRef(TestData.Skyrim, "3863"), "1"), "SKSE", "skse.7z", null, ModFileCategory.Main, TestData.CreatedAt, null, Later);
+
+        Assert.Throws<ArgumentException>(() => mod.WithUpdates([otherMod]));
+        Assert.Throws<ArgumentException>(() => mod.WithUpdates([Update("35407")]));
+        Assert.Throws<ArgumentException>(() => mod.WithUpdates([Update("35409", replaces: "35406")]));
+        Assert.Throws<ArgumentException>(() => mod.WithUpdates([Update("35408"), Update("35408")]));
+        Assert.Throws<ArgumentException>(() => mod.WithUpdates([null!]));
+    }
+
+    [Fact]
+    public void RestoresTheUpdatesItHad()
+    {
+        LibraryMod mod = LibraryMod.Restore(
+            TestData.SkyUi, "SkyUI", null, null, true, TestData.CreatedAt, Later, [File("35407")], [Update("35408", replaces: "35407")]);
+
+        Assert.Equal(TestData.SkyUiMainFile, Assert.Single(mod.Updates).Replaces);
+        Assert.Throws<ArgumentException>(() => LibraryMod.Restore(
+            TestData.SkyUi, "SkyUI", null, null, false, TestData.CreatedAt, Later, [File("35407")], [Update("35408")]));
+    }
+
     private static LibraryMod Watched() => LibraryMod.Watch(TestData.SkyUi, "SkyUI", "schlangster", Page, TestData.CreatedAt);
 
     private static ModFileRef Ref(string id) => new(TestData.SkyUi, id);
 
     private static LibraryFile File(string id, string path = "SkyUI_5_2_SE.7z")
         => new(Ref(id), "SkyUI 5.2", "5.2", ModFileCategory.Main, TestData.CreatedAt, path, 2_500_000, Later);
+
+    private static LibraryUpdate Update(string id, string? replaces = null, DateTimeOffset? foundAt = null)
+        => new(Ref(id), $"SkyUI {id}", $"SkyUI_{id}.7z", null, ModFileCategory.Main, TestData.CreatedAt, replaces is null ? null : Ref(replaces), foundAt ?? Later);
 
     private static LibraryMod Restore(bool isWatched, params LibraryFile[] files)
         => LibraryMod.Restore(TestData.SkyUi, "SkyUI", null, null, isWatched, TestData.CreatedAt, null, files);

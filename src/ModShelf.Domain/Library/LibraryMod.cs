@@ -8,6 +8,9 @@ namespace ModShelf.Domain.Library;
 /// <remarks>
 /// Immutable: every change returns a new instance, so whoever holds one sees it as it was read. A change that leaves
 /// the mod neither watched nor with files returns null, since nothing keeps it in the library any more.
+/// <para/>
+/// A watched mod also has the updates its last check found: newer files of the mod that the library doesn't have. One
+/// leaves when its file comes into the library, and they all leave when the mod is unwatched.
 /// </remarks>
 public sealed class LibraryMod
 {
@@ -19,7 +22,8 @@ public sealed class LibraryMod
         bool isWatched,
         DateTimeOffset addedAt,
         DateTimeOffset? checkedAt,
-        LibraryFile[] files)
+        LibraryFile[] files,
+        LibraryUpdate[] updates)
     {
         Mod = mod;
         Name = name;
@@ -29,6 +33,7 @@ public sealed class LibraryMod
         AddedAt = addedAt;
         CheckedAt = checkedAt;
         Files = Array.AsReadOnly(files);
+        Updates = Array.AsReadOnly(updates);
     }
 
     public ModRef Mod { get; }
@@ -63,6 +68,11 @@ public sealed class LibraryMod
     public IReadOnlyList<LibraryFile> Files { get; }
 
     /// <summary>
+    /// The updates checks found, the newest first, as they were given. Empty for a mod that isn't watched.
+    /// </summary>
+    public IReadOnlyList<LibraryUpdate> Updates { get; }
+
+    /// <summary>
     /// A mod the user starts watching, without any files yet.
     /// </summary>
     /// <exception cref="ArgumentException">The name is blank, or the page isn't an absolute HTTP or HTTPS URL.</exception>
@@ -71,15 +81,15 @@ public sealed class LibraryMod
         ArgumentNullException.ThrowIfNull(mod);
         EnsureDetails(name, pageUrl);
 
-        return new LibraryMod(mod, name, Blank(author), pageUrl, isWatched: true, addedAt, checkedAt: null, []);
+        return new LibraryMod(mod, name, Blank(author), pageUrl, isWatched: true, addedAt, checkedAt: null, [], []);
     }
 
     /// <summary>
     /// Rebuilds a mod that was stored earlier, such as one loaded from the library database.
     /// </summary>
     /// <exception cref="ArgumentException">
-    /// The details are invalid; a file isn't the mod's, or two files are the same file or at the same path; or the mod
-    /// is neither watched nor has files.
+    /// The details are invalid; a file isn't the mod's, or two files are the same file or at the same path; the mod is
+    /// neither watched nor has files; or an update isn't one the mod can have.
     /// </exception>
     public static LibraryMod Restore(
         ModRef mod,
@@ -89,7 +99,8 @@ public sealed class LibraryMod
         bool isWatched,
         DateTimeOffset addedAt,
         DateTimeOffset? checkedAt,
-        IEnumerable<LibraryFile> files)
+        IEnumerable<LibraryFile> files,
+        IEnumerable<LibraryUpdate>? updates = null)
     {
         ArgumentNullException.ThrowIfNull(mod);
         EnsureDetails(name, pageUrl);
@@ -106,7 +117,9 @@ public sealed class LibraryMod
             throw new ArgumentException("A library mod is watched, has files, or both.", nameof(files));
         }
 
-        return new LibraryMod(mod, name, Blank(author), pageUrl, isWatched, addedAt, checkedAt, fileList);
+        LibraryUpdate[] updateList = [.. updates ?? []];
+        EnsureUpdates(mod, isWatched, fileList, updateList, nameof(updates));
+        return new LibraryMod(mod, name, Blank(author), pageUrl, isWatched, addedAt, checkedAt, fileList, updateList);
     }
 
     /// <summary>
@@ -115,9 +128,10 @@ public sealed class LibraryMod
     public LibraryMod Watched() => IsWatched ? this : With(isWatched: true);
 
     /// <summary>
-    /// The mod, no longer watched; or null when it has no files, so nothing keeps it in the library.
+    /// The mod, no longer watched and without updates; or null when it has no files, so nothing keeps it in the library.
     /// </summary>
-    public LibraryMod? Unwatched() => Files.Count == 0 ? null : With(isWatched: false);
+    public LibraryMod? Unwatched()
+        => Files.Count == 0 ? null : new LibraryMod(Mod, Name, Author, PageUrl, isWatched: false, AddedAt, CheckedAt, [.. Files], []);
 
     /// <summary>
     /// The mod with its details as its site gives them now.
@@ -127,16 +141,42 @@ public sealed class LibraryMod
     {
         EnsureDetails(name, pageUrl);
 
-        return new LibraryMod(Mod, name, Blank(author), pageUrl, IsWatched, AddedAt, CheckedAt, [.. Files]);
+        return new LibraryMod(Mod, name, Blank(author), pageUrl, IsWatched, AddedAt, CheckedAt, [.. Files], [.. Updates]);
     }
 
     /// <summary>
     /// The mod, last checked for updates at <paramref name="at"/>.
     /// </summary>
-    public LibraryMod Checked(DateTimeOffset at) => new(Mod, Name, Author, PageUrl, IsWatched, AddedAt, at, [.. Files]);
+    public LibraryMod Checked(DateTimeOffset at) => new(Mod, Name, Author, PageUrl, IsWatched, AddedAt, at, [.. Files], [.. Updates]);
 
     /// <summary>
-    /// The mod with <paramref name="file"/> in the library, in place of the same file if it was there already.
+    /// The mod with the updates a check found, in place of the ones it had. An update of a file it had already keeps
+    /// when it was first found.
+    /// </summary>
+    /// <exception cref="ArgumentException">
+    /// The mod isn't watched; or an update is of another mod, of a file the library has, of a file it doesn't have, or
+    /// listed twice.
+    /// </exception>
+    public LibraryMod WithUpdates(IEnumerable<LibraryUpdate> updates)
+    {
+        ArgumentNullException.ThrowIfNull(updates);
+
+        LibraryUpdate[] updateList = [.. updates];
+        for (int index = 0; index < updateList.Length; index++)
+        {
+            if (updateList[index] is { } update && Updates.FirstOrDefault(found => found.File == update.File) is { } earlier)
+            {
+                updateList[index] = update.FoundSince(earlier.FoundAt);
+            }
+        }
+
+        EnsureUpdates(Mod, IsWatched, [.. Files], updateList, nameof(updates));
+        return new LibraryMod(Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt, [.. Files], updateList);
+    }
+
+    /// <summary>
+    /// The mod with <paramref name="file"/> in the library, in place of the same file if it was there already. An update
+    /// to that file is no longer one.
     /// </summary>
     /// <exception cref="ArgumentException">The file isn't the mod's, or another of its files is at the same path.</exception>
     public LibraryMod WithFile(LibraryFile file)
@@ -146,7 +186,7 @@ public sealed class LibraryMod
 
         int index = Files.ToList().FindIndex(other => other.File == file.File);
         LibraryFile[] files = index < 0 ? [.. Files, file] : [.. Files.Take(index), file, .. Files.Skip(index + 1)];
-        return new LibraryMod(Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt, files);
+        return new LibraryMod(Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt, files, [.. Updates.Where(update => update.File != file.File)]);
     }
 
     /// <summary>
@@ -159,7 +199,7 @@ public sealed class LibraryMod
         LibraryFile[] files = [.. Files.Where(other => other.File != file)];
         return !IsWatched && files.Length == 0
             ? null
-            : new LibraryMod(Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt, files);
+            : new LibraryMod(Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt, files, [.. Updates.Where(update => update.Replaces != file)]);
     }
 
     private static void EnsureDetails(string name, Uri? pageUrl)
@@ -202,7 +242,48 @@ public sealed class LibraryMod
         }
     }
 
+    /// <summary>
+    /// Throws unless every update is of a watched mod, of the mod, of a file the library doesn't have, listed once, and
+    /// replaces a file the library has, if any.
+    /// </summary>
+    private static void EnsureUpdates(ModRef mod, bool isWatched, LibraryFile[] files, LibraryUpdate[] updates, string paramName)
+    {
+        if (updates.Length > 0 && !isWatched)
+        {
+            throw new ArgumentException("Only a watched mod has updates.", paramName);
+        }
+
+        HashSet<ModFileRef> seen = [];
+        foreach (LibraryUpdate update in updates)
+        {
+            if (update is null)
+            {
+                throw new ArgumentException("The updates can't include null.", paramName);
+            }
+
+            if (update.File.Mod != mod)
+            {
+                throw new ArgumentException($"Update {update.File.Id} is of mod {update.File.Mod.Id}, not {mod.Id}.", paramName);
+            }
+
+            if (Array.Exists(files, file => file.File == update.File))
+            {
+                throw new ArgumentException($"File {update.File.Id} is in the library already, so it isn't an update.", paramName);
+            }
+
+            if (update.Replaces is { } replaced && !Array.Exists(files, file => file.File == replaced))
+            {
+                throw new ArgumentException($"Update {update.File.Id} replaces file {replaced.Id}, which isn't in the library.", paramName);
+            }
+
+            if (!seen.Add(update.File))
+            {
+                throw new ArgumentException($"Update {update.File.Id} is listed twice.", paramName);
+            }
+        }
+    }
+
     private static string? Blank(string? text) => string.IsNullOrWhiteSpace(text) ? null : text;
 
-    private LibraryMod With(bool isWatched) => new(Mod, Name, Author, PageUrl, isWatched, AddedAt, CheckedAt, [.. Files]);
+    private LibraryMod With(bool isWatched) => new(Mod, Name, Author, PageUrl, isWatched, AddedAt, CheckedAt, [.. Files], [.. Updates]);
 }
