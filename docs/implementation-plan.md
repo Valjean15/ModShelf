@@ -364,6 +364,7 @@ Phase 6 ships an installable beta (v0.9) on all three operating systems, updatin
 - **Versioning:** the version comes from git tags (MinVer), so tagging `v0.9.0` is the whole release step
 - **Release workflow:** a GitHub Actions job on tag push builds, tests, packs for Windows, macOS and Linux, and attaches the artifacts to the release
 - **`nxm://` registration:** done through Velopack install and uninstall hooks, and only when the user opts in, because Vortex and Mod Organizer 2 claim the same scheme; ModHub remembers the previous handler and restores it when disabled or uninstalled
+- **Notice clicks:** clicking an update notice brings ModShelf forward on the Updates screen. Moved here from Phase 5, since it needs the installer's Start-menu shortcut on Windows and the signed bundle on macOS (ADR 0025)
 - **First-run wizard:** choose the library root, link accounts, opt in to being the `nxm://` handler
 - **Code signing:** Windows Authenticode certificate and macOS notarization (Apple Developer Program); unsigned builds work but show OS warnings
 - **Diagnostics:** "Open log folder" and "Copy diagnostics" in Settings for bug reports

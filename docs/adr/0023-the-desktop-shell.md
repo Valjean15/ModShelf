@@ -29,7 +29,7 @@ The human chose to build Phase 5 in six steps, each delivered and tested like Ph
    - mods by game, opening their folder, and removing files after asking;
    - watching and unwatching, and checking now;
    - updates with their changelogs, and downloading one;
-   - clicking a notice opens Updates.
+   - clicking a notice opens Updates; this moved to Phase 6 (ADR 0025).
 4. **Browse:** searching a game, a mod's files and changelog, and downloading or watching.
 5. **Accounts and Settings:**
    - linking with an API key or the browser, unlinking, and showing the tier and the API quota;
