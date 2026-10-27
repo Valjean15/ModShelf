@@ -7,6 +7,7 @@ using ModShelf.Application.Downloads;
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
+using ModShelf.Application.Tests.Common;
 using ModShelf.Application.Tests.Fakes;
 using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Library;
@@ -31,6 +32,7 @@ public sealed class LibraryDownloadsTests : IDisposable
     private readonly InMemorySettingsStore _store = new();
     private readonly FakeUserFolders _folders = new();
     private readonly FakeLibraryStorage _storage = new();
+    private readonly LibraryChanges _changes = new();
     private readonly RecordingLogger<LibraryDownloads> _logger = new();
     private readonly SettingsService _settings;
 
@@ -360,6 +362,20 @@ public sealed class LibraryDownloadsTests : IDisposable
     }
 
     [Fact]
+    public async Task RecordingADownloadTellsWhoWatchesTheLibrary()
+    {
+        using WatchedChanges watched = new(_changes);
+        using LibraryDownloads library = Create();
+
+        await library.RecordAsync(Done(SkyUi52, SkyUiFolder, "SkyUI_5_2_SE.7z"), Cancellation);
+        await library.RecordAsync(Done(SkyUi52, SkyUiFolder, "SkyUI_5_2_SE.7z"), Cancellation);
+
+        LibraryChange change = Assert.Single(await watched.StopAsync());
+        Assert.Null(change.Before);
+        Assert.Same(Assert.Single(_library.Mods), change.After);
+    }
+
+    [Fact]
     public async Task RecordingTheSameDownloadAgainChangesNothing()
     {
         DownloadJobSnapshot done = Done(SkyUi52, SkyUiFolder, "SkyUI_5_2_SE.7z");
@@ -582,5 +598,5 @@ public sealed class LibraryDownloadsTests : IDisposable
     }
 
     private LibraryDownloads Create(FakeLibraryStorage? storage = null, IModSource[]? sources = null)
-        => new(new SourceRegistry([_site, .. sources ?? []]), _downloads, _library, _settings, storage ?? _storage, _time, _logger);
+        => new(new SourceRegistry([_site, .. sources ?? []]), _downloads, _library, _settings, storage ?? _storage, _changes, _time, _logger);
 }

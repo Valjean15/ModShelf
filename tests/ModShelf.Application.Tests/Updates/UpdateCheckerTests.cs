@@ -2,7 +2,9 @@ using System.Net;
 
 using Microsoft.Extensions.Time.Testing;
 
+using ModShelf.Application.Library;
 using ModShelf.Application.Sources;
+using ModShelf.Application.Tests.Common;
 using ModShelf.Application.Tests.Fakes;
 using ModShelf.Application.Updates;
 using ModShelf.Domain.Library;
@@ -28,6 +30,7 @@ public sealed class UpdateCheckerTests : IDisposable
     private readonly FakeModSite _site = new();
     private readonly FakeModSiteWithFeed _feed;
     private readonly InMemoryLibraryRepository _library = new();
+    private readonly LibraryChanges _changes = new();
     private readonly RecordingLogger<UpdateChecker> _logger = new();
 
     public UpdateCheckerTests()
@@ -62,6 +65,34 @@ public sealed class UpdateCheckerTests : IDisposable
         Assert.Equal("10", Assert.Single(Mod("1").Updates).Replaces?.Id);
         Assert.All(_library.Mods, mod => Assert.Equal(TestData.Now, mod.CheckedAt));
         Assert.Contains(_logger.Entries, entry => entry.StartsWith("Information: Checked 3 watched mods for updates with 3 requests: 2 new updates, 0 failures", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task EachModCheckedTellsWhoWatchesTheLibrary()
+    {
+        using WatchedChanges watched = new(_changes);
+
+        await CheckAsync(_feed);
+
+        IReadOnlyList<LibraryChange> changes = await watched.StopAsync();
+        Assert.Equal(["1", "2", "3"], changes.Select(change => change.Mod.Id));
+        Assert.All(changes, change => Assert.Equal((null, TestData.Now), (change.Before!.CheckedAt, change.After!.CheckedAt)));
+        Assert.Equal([1, 1, 0], changes.Select(change => change.After!.Updates.Count));
+    }
+
+    [Fact]
+    public async Task ModsTheFeedSaysAreUnchangedAreToldCheckedToo()
+    {
+        await CheckedAtAsync(TestData.Now.AddHours(-2));
+        _time.Advance(TimeSpan.FromHours(1));
+        _feed.Changes.Add(Changed("1", TestData.Now.AddMinutes(-30), TestData.Now.AddMinutes(-30)));
+        using WatchedChanges watched = new(_changes);
+
+        await CheckAsync(_feed);
+
+        IReadOnlyList<LibraryChange> changes = await watched.StopAsync();
+        Assert.Equal(["1", "2", "3"], changes.Select(change => change.Mod.Id).Order());
+        Assert.All(changes, change => Assert.Equal(TestData.Now.AddHours(1), change.After!.CheckedAt));
     }
 
     [Fact]
@@ -354,5 +385,5 @@ public sealed class UpdateCheckerTests : IDisposable
         return await checker.CheckAsync(Cancellation);
     }
 
-    private UpdateChecker Checker(IModSource source) => new(new SourceRegistry([source]), _library, _time, _logger);
+    private UpdateChecker Checker(IModSource source) => new(new SourceRegistry([source]), _library, _changes, _time, _logger);
 }

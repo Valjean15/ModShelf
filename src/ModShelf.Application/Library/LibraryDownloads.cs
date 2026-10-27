@@ -40,6 +40,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
     private readonly ILibraryRepository _library;
     private readonly ISettingsService _settings;
     private readonly ILibraryStorage _storage;
+    private readonly LibraryChanges _changes;
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<LibraryDownloads> _logger;
     private readonly ConcurrentDictionary<DownloadJobId, SiteDetails> _details = new();
@@ -55,6 +56,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
         ILibraryRepository library,
         ISettingsService settings,
         ILibraryStorage storage,
+        LibraryChanges changes,
         TimeProvider timeProvider,
         ILogger<LibraryDownloads> logger)
     {
@@ -63,6 +65,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
         ArgumentNullException.ThrowIfNull(library);
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(storage);
+        ArgumentNullException.ThrowIfNull(changes);
         ArgumentNullException.ThrowIfNull(timeProvider);
         ArgumentNullException.ThrowIfNull(logger);
 
@@ -71,6 +74,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
         _library = library;
         _settings = settings;
         _storage = storage;
+        _changes = changes;
         _timeProvider = timeProvider;
         _logger = logger;
     }
@@ -357,9 +361,10 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
             ? []
             : Archive(root, await _library.ListAsync(cancellationToken).ConfigureAwait(false), plan.Archive);
         IReadOnlyList<LibraryFile> deleted = Delete(root, plan.Delete);
+        LibraryChange change;
         try
         {
-            await _library.UpdateAsync(
+            change = await _library.UpdateAsync(
                     mod,
                     current =>
                     {
@@ -391,6 +396,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
             throw;
         }
 
+        _changes.Publish(change);
         _details.TryRemove(job.Id, out _);
         LogRecorded(_logger, recorded.FileName, mod.Id, mod.Game.Key);
         LibraryRecord record = new(recorded, [.. archived.Select(moved => moved.After)], deleted);

@@ -31,19 +31,27 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
 
     private readonly ISourceRegistry _sources;
     private readonly ILibraryRepository _library;
+    private readonly LibraryChanges _changes;
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<UpdateChecker> _logger;
     private readonly SemaphoreSlim _checking = new(1, 1);
 
-    public UpdateChecker(ISourceRegistry sources, ILibraryRepository library, TimeProvider timeProvider, ILogger<UpdateChecker> logger)
+    public UpdateChecker(
+        ISourceRegistry sources,
+        ILibraryRepository library,
+        LibraryChanges changes,
+        TimeProvider timeProvider,
+        ILogger<UpdateChecker> logger)
     {
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(library);
+        ArgumentNullException.ThrowIfNull(changes);
         ArgumentNullException.ThrowIfNull(timeProvider);
         ArgumentNullException.ThrowIfNull(logger);
 
         _sources = sources;
         _library = library;
+        _changes = changes;
         _timeProvider = timeProvider;
         _logger = logger;
     }
@@ -133,8 +141,11 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
                 }
                 else
                 {
-                    await _library.UpdateAsync(mod.Mod, stored => stored is { IsWatched: true } ? stored.Checked(check.StartedAt) : stored, cancellationToken)
-                        .ConfigureAwait(false);
+                    _changes.Publish(await _library.UpdateAsync(
+                            mod.Mod,
+                            stored => stored is { IsWatched: true } ? stored.Checked(check.StartedAt) : stored,
+                            cancellationToken)
+                        .ConfigureAwait(false));
                     check.Checked++;
                 }
             }
@@ -169,6 +180,7 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
                         : stored,
                     cancellationToken)
                 .ConfigureAwait(false);
+            _changes.Publish(change);
             if (change.After is { IsWatched: true } after)
             {
                 check.Checked++;

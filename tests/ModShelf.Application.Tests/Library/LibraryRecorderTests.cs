@@ -32,6 +32,7 @@ public sealed class LibraryRecorderTests : IDisposable
             _library,
             _settings,
             _storage,
+            new LibraryChanges(),
             TimeProvider.System,
             new RecordingLogger<LibraryDownloads>());
         _site.AddMod("1", "First");

@@ -257,5 +257,5 @@ public sealed class LibraryOldVersionsTests : IDisposable
     private string InRoot(string relativePath) => Domain.Library.LibraryPaths.Resolve(Root, relativePath);
 
     private LibraryDownloads Create()
-        => new(new SourceRegistry([_site]), _downloads, _library, _settings, _storage, _time, _logger);
+        => new(new SourceRegistry([_site]), _downloads, _library, _settings, _storage, new LibraryChanges(), _time, _logger);
 }
