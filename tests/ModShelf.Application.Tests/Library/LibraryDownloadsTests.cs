@@ -36,7 +36,7 @@ public sealed class LibraryDownloadsTests : IDisposable
 
     public LibraryDownloadsTests()
     {
-        _settings = new SettingsService(_store, _folders, _library);
+        _settings = new SettingsService(_store, _folders, _library, new InMemoryDownloadJobRepository([]));
         _site.AddMod(SkyUi, "SkyUI");
         _site.AddFile(SkyUi, SkyUi52, "SkyUI_5_2_SE.7z", "SkyUI 5.2", "5.2");
         _site.AddFile(SkyUi, SkyUi53, "SkyUI_5_3_SE.7z", "SkyUI 5.3", "5.3");

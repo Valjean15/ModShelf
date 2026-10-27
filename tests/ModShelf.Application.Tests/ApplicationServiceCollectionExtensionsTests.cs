@@ -133,8 +133,11 @@ public sealed class ApplicationServiceCollectionExtensionsTests
         services.AddSettings();
         services.AddSettings();
 
-        Assert.Equal(typeof(SettingsService), Single<ISettingsService>(services).ImplementationType);
-        Assert.Equal(ServiceLifetime.Singleton, Single<ISettingsService>(services).Lifetime);
+        SettingsService settings = new(new InMemorySettingsStore(), new FakeUserFolders(), new InMemoryLibraryRepository(), new InMemoryDownloadJobRepository([]));
+        Assert.Equal(typeof(SettingsService), Single<SettingsService>(services).ImplementationType);
+        Assert.Same(settings, Single<ISettingsService>(services).ImplementationFactory!(new SettingsProvider(settings)));
+        Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
+        settings.Dispose();
     }
 
     [Fact]
@@ -174,6 +177,11 @@ public sealed class ApplicationServiceCollectionExtensionsTests
             TimeProvider.System,
             new DownloadSchedulerOptions(),
             NullLogger<DownloadScheduler>.Instance);
+
+    private sealed class SettingsProvider(SettingsService settings) : IServiceProvider
+    {
+        public object? GetService(Type serviceType) => serviceType == typeof(SettingsService) ? settings : null;
+    }
 
     private sealed class StubServiceProvider(DownloadScheduler scheduler, AccountService? accounts = null) : IServiceProvider
     {

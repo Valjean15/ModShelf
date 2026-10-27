@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -16,7 +17,8 @@ namespace ModShelf.Infrastructure.Settings;
 ///   "library": {
 ///     "root": "D:\\Mods",
 ///     "folders": "{source}/{game}/{mod} ({modid})/{file}",
-///     "gameFolders": { "skyrimspecialedition": "{source}/{game}/{mod}/{file}" }
+///     "gameFolders": { "skyrimspecialedition": "{source}/{game}/{mod}/{file}" },
+///     "oldVersions": 2
 ///   }
 /// }
 /// </code>
@@ -31,6 +33,7 @@ internal sealed class JsonSettingsStore : ISettingsStore
     private const string Root = "root";
     private const string Folders = "folders";
     private const string GameFolders = "gameFolders";
+    private const string OldVersions = "oldVersions";
 
     private static readonly JsonDocumentOptions Reading = new() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
     private static readonly JsonSerializerOptions Writing = new() { WriteIndented = true };
@@ -83,6 +86,7 @@ internal sealed class JsonSettingsStore : ISettingsStore
                 LibraryRoot = root,
                 LibraryFolders = folders is null ? null : FolderPattern.Parse(folders),
                 GameFolders = games.ToImmutable(),
+                OldVersions = ReadOldVersions(library),
             };
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or InvalidDataException or FormatException)
@@ -117,6 +121,20 @@ internal sealed class JsonSettingsStore : ISettingsStore
             library[GameFolders] = games;
         }
 
+        // A count as a number, the others as text: "oldVersions": 2, or "oldVersions": "archive".
+        switch (settings.OldVersions)
+        {
+            case null:
+                library.Remove(OldVersions);
+                break;
+            case { Action: OldVersionAction.KeepLatest } rule:
+                library[OldVersions] = rule.Count;
+                break;
+            case { } rule:
+                library[OldVersions] = rule.ToString();
+                break;
+        }
+
         if (library.Count == 0)
         {
             file.Remove(Library);
@@ -134,6 +152,17 @@ internal sealed class JsonSettingsStore : ISettingsStore
         null => null,
         JsonValue value when value.TryGetValue(out string? text) => string.IsNullOrWhiteSpace(text) ? null : text,
         _ => throw new InvalidDataException($"library.{name} must be text."),
+    };
+
+    /// <summary>
+    /// The rule for old versions: a count, or text as <see cref="OldVersionRule.Parse"/> reads it.
+    /// </summary>
+    private static OldVersionRule? ReadOldVersions(JsonObject library) => library[OldVersions] switch
+    {
+        null => null,
+        JsonValue value when value.TryGetValue(out int count) => OldVersionRule.Parse(count.ToString(CultureInfo.InvariantCulture)),
+        JsonValue value when value.TryGetValue(out string? text) => OldVersionRule.Parse(text),
+        _ => throw new InvalidDataException($"library.{OldVersions} must be all, archive, or a number of versions to keep."),
     };
 
     private static void Set(JsonObject section, string name, string? value)

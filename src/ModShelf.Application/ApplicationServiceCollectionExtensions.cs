@@ -121,7 +121,8 @@ public static class ApplicationServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.TryAddSingleton<ISettingsService, SettingsService>();
+        services.TryAddSingleton<SettingsService>();
+        services.TryAddSingleton<ISettingsService>(provider => provider.GetRequiredService<SettingsService>());
 
         return services;
     }

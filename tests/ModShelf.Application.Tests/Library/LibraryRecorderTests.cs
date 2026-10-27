@@ -25,7 +25,7 @@ public sealed class LibraryRecorderTests : IDisposable
 
     public LibraryRecorderTests()
     {
-        _settings = new SettingsService(new InMemorySettingsStore(), new FakeUserFolders(), _library);
+        _settings = new SettingsService(new InMemorySettingsStore(), new FakeUserFolders(), _library, new InMemoryDownloadJobRepository([]));
         _libraryDownloads = new LibraryDownloads(
             new SourceRegistry([_site]),
             _downloads,

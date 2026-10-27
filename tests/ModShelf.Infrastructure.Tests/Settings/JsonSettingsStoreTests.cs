@@ -28,6 +28,7 @@ public sealed class JsonSettingsStoreTests : IDisposable
         Assert.Null(settings.LibraryRoot);
         Assert.Null(settings.LibraryFolders);
         Assert.Empty(settings.GameFolders);
+        Assert.Null(settings.OldVersions);
         Assert.Equal(FilePath, Store().Location);
     }
 
@@ -125,6 +126,55 @@ public sealed class JsonSettingsStoreTests : IDisposable
         InvalidDataException refused = await Assert.ThrowsAsync<InvalidDataException>(() => Store().LoadAsync(Cancellation));
 
         Assert.StartsWith($"The settings in {FilePath} can't be read:", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("all", "\"all\"")]
+    [InlineData("archive", "\"archive\"")]
+    [InlineData("3", "3")]
+    public async Task KeepsTheRuleForOldVersions(string rule, string json)
+    {
+        await Store().SaveAsync(new AppSettings { OldVersions = OldVersionRule.Parse(rule) }, Cancellation);
+
+        AppSettings settings = await Store().LoadAsync(Cancellation);
+
+        Assert.Equal(OldVersionRule.Parse(rule), settings.OldVersions);
+        Assert.Contains($"\"oldVersions\": {json}", await File.ReadAllTextAsync(FilePath, Cancellation), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ReadsARuleForOldVersionsWrittenByHand()
+    {
+        await WriteAsync("""{ "library": { "oldVersions": " Archive " } }""");
+        OldVersionRule? archive = (await Store().LoadAsync(Cancellation)).OldVersions;
+        await WriteAsync("""{ "library": { "oldVersions": "4" } }""");
+        OldVersionRule? four = (await Store().LoadAsync(Cancellation)).OldVersions;
+
+        Assert.Equal((OldVersionRule.Archive, OldVersionRule.KeepLatest(4)), (archive, four));
+    }
+
+    [Theory]
+    [InlineData("""{ "library": { "oldVersions": 0 } }""")]
+    [InlineData("""{ "library": { "oldVersions": 2.5 } }""")]
+    [InlineData("""{ "library": { "oldVersions": "some" } }""")]
+    [InlineData("""{ "library": { "oldVersions": true } }""")]
+    public async Task SaysWhenTheRuleForOldVersionsIsWrong(string content)
+    {
+        await WriteAsync(content);
+
+        InvalidDataException refused = await Assert.ThrowsAsync<InvalidDataException>(() => Store().LoadAsync(Cancellation));
+
+        Assert.StartsWith($"The settings in {FilePath} can't be read:", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task TheDefaultRuleLeavesTheFile()
+    {
+        await Store().SaveAsync(new AppSettings { OldVersions = OldVersionRule.Archive }, Cancellation);
+
+        await Store().SaveAsync(new AppSettings(), Cancellation);
+
+        Assert.Equal("{}", (await File.ReadAllTextAsync(FilePath, Cancellation)).Trim());
     }
 
     [Fact]

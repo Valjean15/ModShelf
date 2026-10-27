@@ -3,6 +3,7 @@ using System.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
 using ModShelf.Cli.Hosting;
 using ModShelf.Domain.Library;
@@ -18,7 +19,8 @@ internal static class SettingsCommand
     private const string LibraryRoot = "library.root";
     private const string LibraryFolders = "library.folders";
     private const string GamePrefix = LibraryFolders + ".";
-    private const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<game>";
+    private const string OldVersions = "library.oldVersions";
+    private const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<game>, {OldVersions}";
 
     public static Command Create(CliEnvironment environment)
     {
@@ -28,7 +30,8 @@ internal static class SettingsCommand
         Argument<string> setName = new("setting") { Description = $"The setting: {Names}." };
         Argument<string> value = new("value")
         {
-            Description = "Its new value: a full path for library.root; a folder pattern, such as \"{source}/{game}/{mod} ({modid})/{file}\", for the others.",
+            Description = "Its new value: a full path for library.root; all, archive or how many versions to keep for "
+                + "library.oldVersions; a folder pattern, such as \"{source}/{game}/{mod} ({modid})/{file}\", for the others.",
         };
         Command set = new("set", "Changes a setting.") { setName, value };
         set.SetAction((parsed, cancellationToken) => ChangeAsync(environment, parsed.GetValue(setName)!, parsed.GetValue(value), cancellationToken));
@@ -37,7 +40,7 @@ internal static class SettingsCommand
         Command reset = new("reset", "Sets a setting back to its default.") { resetName };
         reset.SetAction((parsed, cancellationToken) => ChangeAsync(environment, parsed.GetValue(resetName)!, null, cancellationToken));
 
-        return new Command("settings", "Shows and changes the settings: where the library is, and how its folders are named.")
+        return new Command("settings", "Shows and changes the settings: where the library is, how its folders are named, and what happens to old versions.")
         {
             show,
             set,
@@ -72,11 +75,16 @@ internal static class SettingsCommand
                 .. stored.GameFolders
                     .OrderBy(game => game.Key, StringComparer.OrdinalIgnoreCase)
                     .Select(game => new[] { GamePrefix + game.Key, game.Value.Text }),
+                [OldVersions, stored.OldVersions?.ToString() ?? $"{OldVersionRule.Default} (default)"],
             ];
             TextTable.Write(environment.Output, rows);
             environment.Output.WriteLine(
                 $"Folder patterns use {FolderPattern.SourceToken}, {FolderPattern.GameToken}, {FolderPattern.ModToken} and "
-                + $"{FolderPattern.ModIdToken}, and end with /{FolderPattern.FileToken}. To change a setting: settings set <setting> <value>");
+                + $"{FolderPattern.ModIdToken}, and end with /{FolderPattern.FileToken}.");
+            environment.Output.WriteLine(
+                $"When a newer version of a file is downloaded, {OldVersions} keeps the old ones (all), moves them to an "
+                + "_archive folder (archive), or keeps that many versions and deletes the older ones (a number).");
+            environment.Output.WriteLine("To change a setting: settings set <setting> <value>");
             return ExitCodes.Done;
         }
         finally
@@ -85,12 +93,24 @@ internal static class SettingsCommand
         }
     }
 
+    /// <summary>
+    /// What a rule does with old versions, as a sentence.
+    /// </summary>
+    private static string Describe(OldVersionRule rule) => rule switch
+    {
+        { Action: OldVersionAction.KeepAll } => "every version of a file stays.",
+        { Action: OldVersionAction.Archive } => "when a newer version of a file is downloaded, the old ones move to an _archive folder.",
+        { Count: 1 } => "when a newer version of a file is downloaded, the old ones are deleted.",
+        _ => $"when a newer version of a file is downloaded, the newest {rule.Count} stay and older ones are deleted.",
+    };
+
     /// <param name="value">The setting's new value, or null to set it back to its default.</param>
     private static async Task<int> ChangeAsync(CliEnvironment environment, string name, string? value, CancellationToken cancellationToken)
     {
         string setting = name.Trim().ToLowerInvariant();
         string? game = setting.StartsWith(GamePrefix, StringComparison.Ordinal) ? name.Trim()[GamePrefix.Length..] : null;
-        if (setting is not (LibraryRoot or LibraryFolders) && string.IsNullOrWhiteSpace(game))
+        bool oldVersions = setting.Equals(OldVersions, StringComparison.OrdinalIgnoreCase);
+        if (setting is not (LibraryRoot or LibraryFolders) && !oldVersions && string.IsNullOrWhiteSpace(game))
         {
             await environment.Error.WriteLineAsync($"There's no setting called {name}. Settings: {Names}.").ConfigureAwait(false);
             return ExitCodes.BadInput;
@@ -103,9 +123,29 @@ internal static class SettingsCommand
             ISettingsService settings = host.Services.GetRequiredService<ISettingsService>();
             if (setting == LibraryRoot)
             {
-                await settings.SetLibraryRootAsync(value, cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    await settings.SetLibraryRootAsync(value, cancellationToken).ConfigureAwait(false);
+                }
+                catch (InvalidOperationException exception) when (value is not null)
+                {
+                    // A library with files moves with library move; one with downloads under way has to wait for them.
+                    IReadOnlyList<LibraryMod> library = await host.Services.GetRequiredService<IModLibrary>().ListAsync(cancellationToken).ConfigureAwait(false);
+                    string hint = library.Any(mod => mod.Files.Count > 0) ? $" To move it there: library move \"{value}\"" : string.Empty;
+                    await environment.Error.WriteLineAsync(exception.Message + hint).ConfigureAwait(false);
+                    return ExitCodes.Failed;
+                }
+
                 string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
                 environment.Output.WriteLine(value is null ? $"{LibraryRoot} is back to its default, {root}." : $"{LibraryRoot} is now {root}.");
+            }
+            else if (oldVersions)
+            {
+                OldVersionRule? rule = value is null ? null : OldVersionRule.Parse(value);
+                await settings.SetOldVersionsAsync(rule, cancellationToken).ConfigureAwait(false);
+                environment.Output.WriteLine(rule is null
+                    ? $"{OldVersions} is back to its default, {OldVersionRule.Default}: {Describe(OldVersionRule.Default)}"
+                    : $"{OldVersions} is now {rule}: {Describe(rule)}");
             }
             else
             {

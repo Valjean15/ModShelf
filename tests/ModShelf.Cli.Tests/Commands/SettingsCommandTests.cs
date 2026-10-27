@@ -50,6 +50,7 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         Assert.Contains($"Settings are kept in {SettingsFile}.", shown.Output, StringComparison.Ordinal);
         Assert.Equal(Path.Combine(_cli.Downloads, "ModShelf") + " (default)", Value(shown, "library.root"));
         Assert.Equal("{source}/{game}/{mod} ({modid})/{file} (default)", Value(shown, "library.folders"));
+        Assert.Equal("2 (default)", Value(shown, "library.oldVersions"));
         Assert.Contains("To change a setting: settings set <setting> <value>", shown.Output, StringComparison.Ordinal);
     }
 
@@ -97,11 +98,39 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     }
 
     [Theory]
+    [InlineData("all", "library.oldVersions is now all: every version of a file stays.")]
+    [InlineData("Archive", "library.oldVersions is now archive: when a newer version of a file is downloaded, the old ones move to an _archive folder.")]
+    [InlineData("1", "library.oldVersions is now 1: when a newer version of a file is downloaded, the old ones are deleted.")]
+    [InlineData("3", "library.oldVersions is now 3: when a newer version of a file is downloaded, the newest 3 stay and older ones are deleted.")]
+    public async Task SetsWhatHappensToOldVersions(string value, string said)
+    {
+        CliResult set = await RunAsync("set", "Library.OldVersions", value);
+
+        Assert.Equal(Done, set.ExitCode);
+        Assert.Equal(said, set.Output.Trim());
+        Assert.Equal(value.ToLowerInvariant(), Value(await RunAsync("show"), "library.oldVersions"));
+    }
+
+    [Fact]
+    public async Task ResetsWhatHappensToOldVersions()
+    {
+        await RunAsync("set", "library.oldVersions", "archive");
+
+        CliResult reset = await RunAsync("reset", "library.oldVersions");
+
+        Assert.Equal(
+            "library.oldVersions is back to its default, 2: when a newer version of a file is downloaded, the newest 2 stay and older ones are deleted.",
+            reset.Output.Trim());
+        Assert.Equal("2 (default)", Value(await RunAsync("show"), "library.oldVersions"));
+    }
+
+    [Theory]
     [InlineData("set", "library.root", "Mods", "isn't a full path")]
     [InlineData("set", "library.folders", "{mod}", "The last part must be exactly {file}.")]
     [InlineData("set", "library.folders.skyrimspecialedition", "{name}/{file}", "{name} isn't a folder's part.")]
-    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<game>.")]
+    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<game>, library.oldVersions.")]
     [InlineData("reset", "library.folders.", null, "There's no setting called library.folders.")]
+    [InlineData("set", "library.oldVersions", "0", "'0' isn't a rule for old versions. Use all, archive, or how many versions to keep, from 1 to 99, such as 2.")]
     public async Task SaysWhatsWrongWithASetting(string command, string name, string? value, string message)
     {
         CliResult refused = await RunAsync([command, name, .. value is null ? Array.Empty<string>() : [value]]);
@@ -130,6 +159,7 @@ public sealed class SettingsCommandTests : IAsyncDisposable
 
         Assert.Equal(Failed, refused.ExitCode);
         Assert.Contains($"The library has files in {Path.Combine(_cli.Downloads, "ModShelf")}.", refused.Errors, StringComparison.Ordinal);
+        Assert.EndsWith($"To move it there: library move \"{Mods}\"", refused.Errors.Trim(), StringComparison.Ordinal);
     }
 
     [Fact]

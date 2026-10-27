@@ -1,5 +1,6 @@
 using ModShelf.Application.Settings;
 using ModShelf.Application.Tests.Fakes;
+using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 
@@ -12,11 +13,12 @@ public sealed class SettingsServiceTests : IDisposable
     private readonly InMemorySettingsStore _store = new();
     private readonly FakeUserFolders _folders = new();
     private readonly InMemoryLibraryRepository _library = new();
+    private readonly InMemoryDownloadJobRepository _jobs = new([]);
     private readonly SettingsService _settings;
 
     public SettingsServiceTests()
     {
-        _settings = new SettingsService(_store, _folders, _library);
+        _settings = new SettingsService(_store, _folders, _library, _jobs);
     }
 
     private static CancellationToken Cancellation => TestContext.Current.CancellationToken;
@@ -99,6 +101,55 @@ public sealed class SettingsServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task KeepsTheRootWhileDownloadsIntoItAreUnfinished()
+    {
+        string root = _settings.DefaultLibraryRoot;
+        await _jobs.AddAsync(Job(Path.Combine(root, "nexus"), DownloadJobStatus.Queued), Cancellation);
+        await _jobs.AddAsync(Job(Path.Combine(root, "nexus"), DownloadJobStatus.Paused), Cancellation);
+
+        InvalidOperationException refused = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _settings.SetLibraryRootAsync(Mods, Cancellation));
+
+        Assert.Equal($"2 downloads into {root} aren't finished. Let them finish, or cancel them, first.", refused.Message);
+        Assert.Equal(0, _store.Saves);
+    }
+
+    [Fact]
+    public async Task FinishedDownloadsAndDownloadsElsewhereDontKeepTheRoot()
+    {
+        DownloadJob cancelled = Job(_settings.DefaultLibraryRoot, DownloadJobStatus.Queued);
+        cancelled.Cancel();
+        await _jobs.AddAsync(cancelled, Cancellation);
+        await _jobs.AddAsync(Job(Path.Combine(Path.GetTempPath(), "ModShelf.Tests", "Elsewhere"), DownloadJobStatus.Queued), Cancellation);
+
+        await _settings.SetLibraryRootAsync(Mods, Cancellation);
+
+        Assert.Equal(Mods, await _settings.GetLibraryRootAsync(Cancellation));
+    }
+
+    [Fact]
+    public async Task MovingTheLibrarySetsTheRootWhateverItHolds()
+    {
+        _library.Add(ModWithFile());
+
+        await _settings.MoveLibraryRootAsync(Mods + Path.DirectorySeparatorChar, Cancellation);
+
+        Assert.Equal(Mods, (await _settings.GetAsync(Cancellation)).LibraryRoot);
+    }
+
+    [Fact]
+    public async Task SetsTheRuleForOldVersionsAndBackToTheDefault()
+    {
+        await _settings.SetOldVersionsAsync(OldVersionRule.Archive, Cancellation);
+        OldVersionRule? set = (await _settings.GetAsync(Cancellation)).OldVersions;
+
+        await _settings.SetOldVersionsAsync(null, Cancellation);
+
+        Assert.Same(OldVersionRule.Archive, set);
+        Assert.Null((await _settings.GetAsync(Cancellation)).OldVersions);
+    }
+
+    [Fact]
     public async Task SetsThePatternForEveryGameAndForOne()
     {
         FolderPattern byId = FolderPattern.Parse("{source}/{game}/{modid}/{file}");
@@ -144,6 +195,17 @@ public sealed class SettingsServiceTests : IDisposable
     }
 
     private static ModRef Smapi() => new(new GameRef(new SourceId("nexus"), "stardewvalley"), "2400");
+
+    private static DownloadJob Job(string folder, DownloadJobStatus status)
+    {
+        DownloadJob job = DownloadJob.Create(new ModFileRef(Smapi(), "160380"), folder, "SMAPI.zip", DateTimeOffset.UnixEpoch);
+        if (status == DownloadJobStatus.Paused)
+        {
+            job.Pause();
+        }
+
+        return job;
+    }
 
     private static LibraryMod ModWithFile()
         => LibraryMod.Watch(Smapi(), "SMAPI", null, null, DateTimeOffset.UnixEpoch).WithFile(new LibraryFile(

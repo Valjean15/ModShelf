@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 
+using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Domain.Library;
@@ -17,17 +18,20 @@ internal sealed class SettingsService : ISettingsService, IDisposable
     private readonly ISettingsStore _store;
     private readonly IUserFolders _folders;
     private readonly ILibraryRepository _library;
+    private readonly IDownloadJobRepository _jobs;
     private readonly SemaphoreSlim _changing = new(1, 1);
 
-    public SettingsService(ISettingsStore store, IUserFolders folders, ILibraryRepository library)
+    public SettingsService(ISettingsStore store, IUserFolders folders, ILibraryRepository library, IDownloadJobRepository jobs)
     {
         ArgumentNullException.ThrowIfNull(store);
         ArgumentNullException.ThrowIfNull(folders);
         ArgumentNullException.ThrowIfNull(library);
+        ArgumentNullException.ThrowIfNull(jobs);
 
         _store = store;
         _folders = folders;
         _library = library;
+        _jobs = jobs;
     }
 
     public string Location => _store.Location;
@@ -41,26 +45,20 @@ internal sealed class SettingsService : ISettingsService, IDisposable
 
     public async Task SetLibraryRootAsync(string? root, CancellationToken cancellationToken)
     {
-        string? normalized = null;
-        if (root is not null)
-        {
-            if (!Path.IsPathFullyQualified(root.Trim()))
-            {
-                throw new ArgumentException($"'{root}' isn't a full path, such as {Path.Combine(_folders.Downloads, LibraryFolderName)}.", nameof(root));
-            }
-
-            normalized = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root.Trim()));
-        }
-
+        string? normalized = root is null ? null : FullRoot(root, nameof(root));
         await ChangeAsync(
                 async (settings, token) =>
                 {
                     string current = settings.LibraryRoot ?? DefaultLibraryRoot;
-                    if (!SamePath(current, normalized ?? DefaultLibraryRoot)
-                        && (await _library.ListAsync(token).ConfigureAwait(false)).Any(mod => mod.Files.Count > 0))
+                    if (!SamePath(current, normalized ?? DefaultLibraryRoot))
                     {
-                        throw new InvalidOperationException(
-                            $"The library has files in {current}. Until ModShelf can move them, its root can only change while it has none.");
+                        if ((await _library.ListAsync(token).ConfigureAwait(false)).Any(mod => mod.Files.Count > 0))
+                        {
+                            throw new InvalidOperationException(
+                                $"The library has files in {current}. Moving the library changes its root and takes them along.");
+                        }
+
+                        await EnsureNoDownloadsIntoAsync(current, token).ConfigureAwait(false);
                     }
 
                     return settings with { LibraryRoot = normalized };
@@ -93,7 +91,37 @@ internal sealed class SettingsService : ISettingsService, IDisposable
             .ConfigureAwait(false);
     }
 
+    public Task SetOldVersionsAsync(OldVersionRule? rule, CancellationToken cancellationToken)
+        => ChangeAsync((settings, _) => Task.FromResult(settings with { OldVersions = rule }), cancellationToken);
+
     public void Dispose() => _changing.Dispose();
+
+    /// <summary>
+    /// Sets the root of a library whose files are there already, as moving the library does once they're all moved.
+    /// </summary>
+    internal Task MoveLibraryRootAsync(string root, CancellationToken cancellationToken)
+    {
+        string normalized = FullRoot(root, nameof(root));
+        return ChangeAsync(
+            (settings, _) => Task.FromResult(settings with { LibraryRoot = normalized }),
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// Throws unless every download into <paramref name="root"/> has finished or been cancelled.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">A download into the root is unfinished.</exception>
+    internal async Task EnsureNoDownloadsIntoAsync(string root, CancellationToken cancellationToken)
+    {
+        int unfinished = (await _jobs.ListAsync(cancellationToken).ConfigureAwait(false))
+            .Count(job => !job.IsFinished && LibraryPaths.RelativeTo(root, Path.Combine(job.TargetDirectory, job.FileName)) is not null);
+        if (unfinished > 0)
+        {
+            throw new InvalidOperationException(unfinished == 1
+                ? $"A download into {root} isn't finished. Let it finish, or cancel it, first."
+                : $"{unfinished} downloads into {root} aren't finished. Let them finish, or cancel them, first.");
+        }
+    }
 
     /// <summary>
     /// Whether two paths name the same folder: ignoring case on Windows and macOS, whose usual file systems do.
@@ -103,6 +131,20 @@ internal sealed class SettingsService : ISettingsService, IDisposable
             first,
             second,
             OperatingSystem.IsWindows() || OperatingSystem.IsMacOS() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+
+    /// <summary>
+    /// A root as it's stored: a full path, without an ending separator.
+    /// </summary>
+    /// <exception cref="ArgumentException">It isn't a full path.</exception>
+    private string FullRoot(string root, string paramName)
+    {
+        if (!Path.IsPathFullyQualified(root.Trim()))
+        {
+            throw new ArgumentException($"'{root}' isn't a full path, such as {Path.Combine(_folders.Downloads, LibraryFolderName)}.", paramName);
+        }
+
+        return Path.TrimEndingDirectorySeparator(Path.GetFullPath(root.Trim()));
+    }
 
     private async Task ChangeAsync(Func<AppSettings, CancellationToken, Task<AppSettings>> change, CancellationToken cancellationToken)
     {

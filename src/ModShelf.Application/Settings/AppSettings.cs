@@ -28,6 +28,12 @@ public sealed record AppSettings
         = ImmutableDictionary.Create<string, FolderPattern>(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
+    /// What happens to a library file's old versions when a newer one is downloaded; null for
+    /// <see cref="OldVersionRule.Default"/>.
+    /// </summary>
+    public OldVersionRule? OldVersions { get; init; }
+
+    /// <summary>
     /// The pattern files of <paramref name="game"/> go by.
     /// </summary>
     public FolderPattern FoldersFor(string game)

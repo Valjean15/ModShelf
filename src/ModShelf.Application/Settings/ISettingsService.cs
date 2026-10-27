@@ -26,11 +26,12 @@ public interface ISettingsService
     Task<string> GetLibraryRootAsync(CancellationToken cancellationToken);
 
     /// <summary>
-    /// Sets the library's root folder, or sets it back to the default with null.
+    /// Sets the library's root folder, or sets it back to the default with null. Only an empty library's root changes this
+    /// way; <see cref="Library.ILibraryMover"/> moves a library with files.
     /// </summary>
     /// <exception cref="ArgumentException"><paramref name="root"/> isn't an absolute path.</exception>
     /// <exception cref="InvalidOperationException">
-    /// The library has files under its current root. Until ModShelf can move them, the root only changes while it has none.
+    /// The library has files under its current root, or downloads into it aren't finished.
     /// </exception>
     Task SetLibraryRootAsync(string? root, CancellationToken cancellationToken);
 
@@ -40,4 +41,10 @@ public interface ISettingsService
     /// </summary>
     /// <exception cref="ArgumentException"><paramref name="game"/> is blank.</exception>
     Task SetLibraryFoldersAsync(string? game, FolderPattern? pattern, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets what happens to a library file's old versions when a newer one is downloaded, or sets it back to
+    /// <see cref="OldVersionRule.Default"/> with null. Files downloaded already stay as they are.
+    /// </summary>
+    Task SetOldVersionsAsync(OldVersionRule? rule, CancellationToken cancellationToken);
 }
