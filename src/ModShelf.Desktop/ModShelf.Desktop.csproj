@@ -2,6 +2,9 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <!-- Every binding is compiled against its view's x:DataType, so a binding that doesn't fit fails the build. -->
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +19,10 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <!-- Composition root: references every library, for DI registration only. -->
   <ItemGroup>
     <ProjectReference Include="..\ModShelf.Application\ModShelf.Application.csproj" />
@@ -24,6 +31,7 @@
     <ProjectReference Include="..\ModShelf.Platform\ModShelf.Platform.csproj" />
     <ProjectReference Include="..\ModShelf.Presentation\ModShelf.Presentation.csproj" />
     <ProjectReference Include="..\ModShelf.Sources.Abstractions\ModShelf.Sources.Abstractions.csproj" />
+    <ProjectReference Include="..\ModShelf.Sources.DirectUrl\ModShelf.Sources.DirectUrl.csproj" />
     <ProjectReference Include="..\ModShelf.Sources.Nexus\ModShelf.Sources.Nexus.csproj" />
   </ItemGroup>
 </Project>
