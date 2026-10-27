@@ -4,7 +4,7 @@ ModShelf is a cross-platform desktop app for Windows, macOS and Linux that downl
 
 ModShelf downloads and manages files. **It never installs mods**: it doesn't extract into game folders, deploy, manage load order, detect conflicts, run FOMOD installers or install collections.
 
-> **Status:** Phase 4, the library. The command line downloads files from Nexus Mods and from plain web links, keeps a library of the mods you download or watch, checks them for updates, and links a Nexus Mods account. Notifications of new updates come next. The desktop app opens an empty window.
+> **Status:** Phase 4, the library, is done. The command line downloads files from Nexus Mods and from plain web links, keeps a library of the mods you download or watch, checks them for updates, and links a Nexus Mods account. The background checks that will show a notice of new updates are ready for the desktop app, which comes next and opens an empty window for now.
 
 ## Requirements
 
@@ -22,6 +22,14 @@ dotnet run --project src/ModShelf.Desktop    # opens the desktop app
 ```
 
 `dotnet test` runs on Microsoft.Testing.Platform, which `global.json` selects for the whole repository.
+
+To see a real notice on this computer, as the desktop app will show for new updates, run this one test with `MODSHELF_TEST_NOTICES` set to 1. It fails if the notice couldn't be shown, and says why.
+
+```powershell
+dotnet build
+$env:MODSHELF_TEST_NOTICES = "1"
+tests/ModShelf.Platform.Tests/bin/Debug/net10.0/ModShelf.Platform.Tests -method ModShelf.Platform.Tests.Notifications.NotificationServicesTests.ShowsARealNotice
+```
 
 ### Command line
 
@@ -71,6 +79,7 @@ dotnet run --project src/ModShelf.Cli -- account unlink <source>
   - `library.folders.<game>` is a pattern for one game, named as in the site's links, such as `library.folders.skyrimspecialedition`.
   - `library.oldVersions` is what happens to a file's old versions when a newer one is downloaded: `all` keeps them, `archive` moves them to an `_archive` folder in their folder, and a number keeps that many versions, the newest first, and deletes the others. The default is `2`.
   - `updates.interval` is how often the desktop app will check the watched mods for updates: minutes, hours or days, such as `30m`, `6h` or `1d`, from 15 minutes to 7 days. The default is `6h`. The command line checks only when asked.
+  - `updates.notify` is whether a background check that finds new updates shows a notice: `true`, the default, or `false`. Windows shows it as a toast from ModShelf, macOS through Script Editor for now, and Linux through libnotify, which most desktops have. The command line only prints what `library check` finds.
 - `queue list` shows every saved job without starting any download.
 - `account list` shows the sources that support accounts, the account linked on each, and the ways to link one.
 - `account link` asks for what the source needs. An API key isn't shown as you type it. For `browser`, it opens the site's sign-in page and waits until you approve ModShelf there; if no browser opens, it shows the page to open by hand. Linking again replaces the account.
