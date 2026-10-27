@@ -1,0 +1,34 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:dialogs="using:ModShelf.Desktop.Views.Dialogs"
+        x:Class="ModShelf.Desktop.Views.Dialogs.TextDialog"
+        x:DataType="dialogs:TextDialogContent"
+        Title="{Binding Title}"
+        Width="480"
+        SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+    <DockPanel Margin="24">
+        <StackPanel DockPanel.Dock="Bottom"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="8"
+                    Margin="0,24,0,0">
+            <Button Classes="accent"
+                    IsDefault="True"
+                    Content="{Binding ConfirmLabel}"
+                    Click="OnConfirm" />
+            <Button IsCancel="True"
+                    Content="{Binding CancelLabel}"
+                    Click="OnCancel" />
+        </StackPanel>
+        <StackPanel Spacing="12">
+            <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+            <TextBox Name="Answer"
+                     Text="{Binding Text}"
+                     PlaceholderText="{Binding Hint}" />
+        </StackPanel>
+    </DockPanel>
+</Window>

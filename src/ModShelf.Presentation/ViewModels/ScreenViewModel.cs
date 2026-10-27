@@ -31,4 +31,11 @@ public abstract partial class ScreenViewModel : ObservableObject
     /// Whether the sidebar shows <see cref="Badge"/>.
     /// </summary>
     public bool HasBadge => Badge > 0;
+
+    /// <summary>
+    /// The screen's work for the app's lifetime, whether it's shown or not, such as watching the download queue so its
+    /// badge stays right. The main window starts it once, on the UI thread, and cancels
+    /// <paramref name="cancellationToken"/> when the app closes. A screen without such work has nothing to do.
+    /// </summary>
+    public virtual Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }

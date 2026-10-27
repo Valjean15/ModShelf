@@ -3,6 +3,7 @@ using System.ComponentModel;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.ViewModels;
+using ModShelf.Testing;
 
 namespace ModShelf.Presentation.Tests.ViewModels;
 
@@ -10,11 +11,12 @@ public sealed class MainWindowViewModelTests : IDisposable
 {
     private readonly NavigationService _navigation = new();
     private readonly QueuedUiThread _uiThread = new();
+    private readonly RecordingLogger<MainWindowViewModel> _logger = new();
     private readonly MainWindowViewModel _window;
 
     public MainWindowViewModelTests()
     {
-        _window = new MainWindowViewModel(_navigation, _uiThread, AllScreens().Reverse());
+        _window = Window(TestScreen.OneOfEach().Reverse());
     }
 
     public void Dispose() => _window.Dispose();
@@ -89,8 +91,8 @@ public sealed class MainWindowViewModelTests : IDisposable
     [Fact]
     public void NeedsOneOfEachScreen()
     {
-        Assert.Throws<ArgumentException>(() => new MainWindowViewModel(_navigation, _uiThread, AllScreens().Skip(1)));
-        Assert.Throws<ArgumentException>(() => new MainWindowViewModel(_navigation, _uiThread, [.. AllScreens(), new LibraryViewModel()]));
+        Assert.Throws<ArgumentException>(() => Window(TestScreen.OneOfEach().Skip(1)));
+        Assert.Throws<ArgumentException>(() => Window([.. TestScreen.OneOfEach(), new TestScreen(Screen.Library)]));
     }
 
     [Fact]
@@ -106,7 +108,7 @@ public sealed class MainWindowViewModelTests : IDisposable
     [Fact]
     public void AScreensBadgeShowsWhenThereIsSomethingToCount()
     {
-        CountingScreen screen = new();
+        TestScreen screen = new(Screen.Downloads);
         List<string?> changed = [];
         ((INotifyPropertyChanged)screen).PropertyChanged += (_, e) => changed.Add(e.PropertyName);
 
@@ -119,22 +121,45 @@ public sealed class MainWindowViewModelTests : IDisposable
         Assert.Equal(["Badge", "HasBadge", "Badge", "HasBadge"], changed);
     }
 
-    private static IEnumerable<ScreenViewModel> AllScreens() =>
-    [
-        new LibraryViewModel(),
-        new UpdatesViewModel(),
-        new BrowseViewModel(),
-        new DownloadsViewModel(),
-        new AccountsViewModel(),
-        new SettingsViewModel(),
-    ];
-
-    private sealed class CountingScreen : ScreenViewModel
+    [Fact]
+    public void StartsEveryScreensWorkOnce()
     {
-        public override Screen Screen => Screen.Downloads;
+        _window.Start();
 
-        public override string Title => "Counting";
-
-        public void Count(int count) => Badge = count;
+        Assert.All(_window.Screens, screen => Assert.Equal(1, ((TestScreen)screen).Starts));
+        Assert.Throws<InvalidOperationException>(_window.Start);
+        Assert.False(_window.ScreensWork.IsCompleted);
     }
+
+    [Fact]
+    public async Task DisposingStopsTheScreensWork()
+    {
+        _window.Start();
+
+        _window.Dispose();
+        await _window.ScreensWork.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+
+        Assert.Empty(_logger.Entries);
+        Assert.Throws<ObjectDisposedException>(_window.Start);
+    }
+
+    [Fact]
+    public async Task WorkThatFailsIsLoggedAndTheOtherScreensGoOn()
+    {
+        using MainWindowViewModel window = Window(
+            [.. TestScreen.OneOfEach().Where(screen => screen.Screen != Screen.Browse),
+                new TestScreen(Screen.Browse, _ => Task.FromException(new InvalidOperationException("The site is down.")))]);
+
+        window.Start();
+        bool othersGoOn = !window.ScreensWork.IsCompleted;
+        window.Dispose();
+        await window.ScreensWork.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+
+        Assert.True(othersGoOn);
+        string entry = Assert.Single(_logger.Entries);
+        Assert.StartsWith("Error: The Browse screen's work stopped", entry, StringComparison.Ordinal);
+        Assert.Contains("The site is down.", entry, StringComparison.Ordinal);
+    }
+
+    private MainWindowViewModel Window(IEnumerable<ScreenViewModel> screens) => new(_navigation, _uiThread, screens, _logger);
 }

@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 
 using ModShelf.Desktop.Views.Dialogs;
@@ -20,6 +21,42 @@ internal sealed class AvaloniaDialogService : IDialogService
     public Task<bool> ConfirmAsync(string title, string message, string confirmLabel, CancellationToken cancellationToken)
         => ShowAsync(new MessageDialogContent(title, message, confirmLabel, Strings.DialogCancel), cancellationToken);
 
+    public async Task<string?> AskTextAsync(TextQuestion question, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(question);
+        ArgumentException.ThrowIfNullOrWhiteSpace(question.Title);
+        ArgumentException.ThrowIfNullOrWhiteSpace(question.Message);
+        ArgumentException.ThrowIfNullOrWhiteSpace(question.ConfirmLabel);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        TextDialogContent content = new(question.Title, question.Message, question.Hint, question.ConfirmLabel, Strings.DialogCancel);
+        bool confirmed = await Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            TextDialog dialog = new() { DataContext = content };
+            return await ShowAsync(dialog, () => dialog.Confirmed, cancellationToken);
+        });
+        return confirmed ? content.Text : null;
+    }
+
+    public Task<string?> PickFolderAsync(string title, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(title);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            // The system's folder picker needs a window to belong to.
+            if (Owner() is not { } owner)
+            {
+                return null;
+            }
+
+            IReadOnlyList<IStorageFolder> folders = await owner.StorageProvider.OpenFolderPickerAsync(
+                new FolderPickerOpenOptions { Title = title, AllowMultiple = false });
+            return folders.Count > 0 ? folders[0].TryGetLocalPath() : null;
+        });
+    }
+
     /// <summary>
     /// The main window, when the app has one open.
     /// </summary>
@@ -38,17 +75,29 @@ internal sealed class AvaloniaDialogService : IDialogService
         return Dispatcher.UIThread.InvokeAsync(async () =>
         {
             MessageDialog dialog = new() { DataContext = content };
-            await using CancellationTokenRegistration closing = cancellationToken.Register(() => Dispatcher.UIThread.Post(() => dialog.Close(false)));
-            if (Owner() is { } owner)
-            {
-                return await dialog.ShowDialog<bool>(owner);
-            }
-
-            // Without a window to sit over, such as while ModShelf is only in the tray.
-            TaskCompletionSource<bool> closed = new();
-            dialog.Closed += (_, _) => closed.TrySetResult(dialog.Confirmed);
-            dialog.Show();
-            return await closed.Task;
+            return await ShowAsync(dialog, () => dialog.Confirmed, cancellationToken);
         });
+    }
+
+    /// <summary>
+    /// Shows <paramref name="dialog"/> over the main window until it closes, or until
+    /// <paramref name="cancellationToken"/> closes it. Runs on the UI thread.
+    /// </summary>
+    /// <param name="confirmed">Whether the user confirmed, once the dialog has closed.</param>
+    private static async Task<bool> ShowAsync(Window dialog, Func<bool> confirmed, CancellationToken cancellationToken)
+    {
+        await using CancellationTokenRegistration closing = cancellationToken.Register(() => Dispatcher.UIThread.Post(() => dialog.Close(false)));
+        if (Owner() is { } owner)
+        {
+            await dialog.ShowDialog<bool>(owner);
+            return confirmed();
+        }
+
+        // Without a window to sit over, such as while ModShelf is only in the tray.
+        TaskCompletionSource closed = new();
+        dialog.Closed += (_, _) => closed.TrySetResult();
+        dialog.Show();
+        await closed.Task;
+        return confirmed();
     }
 }

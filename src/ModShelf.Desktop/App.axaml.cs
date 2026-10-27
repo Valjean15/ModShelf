@@ -32,10 +32,14 @@ public sealed partial class App : Avalonia.Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
             && _createMainWindowViewModel is not null)
         {
+            MainWindowViewModel viewModel = _createMainWindowViewModel();
             desktop.MainWindow = new MainWindow
             {
-                DataContext = _createMainWindowViewModel(),
+                DataContext = viewModel,
             };
+
+            // The screens' own work, such as watching the download queue, runs while the app does.
+            viewModel.Start();
         }
 
         base.OnFrameworkInitializationCompleted();
