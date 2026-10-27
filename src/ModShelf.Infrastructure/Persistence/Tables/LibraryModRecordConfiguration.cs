@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace ModShelf.Infrastructure.Persistence.Tables;
 
 /// <summary>
-/// Maps <see cref="LibraryModRecord"/> to the <c>LibraryMods</c> table, one row per mod, and its files to
-/// <c>LibraryFiles</c>, which go with their mod when it's deleted.
+/// Maps <see cref="LibraryModRecord"/> to the <c>LibraryMods</c> table, one row per mod, its files to
+/// <c>LibraryFiles</c> and its updates to <c>LibraryUpdates</c>, which go with their mod when it's deleted.
 /// </summary>
 /// <remarks>
 /// Text columns compare case-sensitively, SQLite's default, like the download jobs' references.
@@ -24,6 +24,11 @@ internal sealed class LibraryModRecordConfiguration : IEntityTypeConfiguration<L
         builder.HasMany(record => record.Files)
             .WithOne()
             .HasForeignKey(file => file.ModSequence)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(record => record.Updates)
+            .WithOne()
+            .HasForeignKey(update => update.ModSequence)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -32,6 +32,8 @@ internal sealed class LibraryRepository : ILibraryRepository
             List<LibraryModRecord> records = await context.LibraryMods
                 .AsNoTracking()
                 .Include(record => record.Files)
+                .Include(record => record.Updates)
+                .AsSplitQuery()
                 .OrderBy(record => record.Sequence)
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
@@ -111,6 +113,8 @@ internal sealed class LibraryRepository : ILibraryRepository
         string mod = modRef.Id;
         return context.LibraryMods
             .Include(record => record.Files)
+            .Include(record => record.Updates)
+            .AsSplitQuery()
             .Where(record => record.SourceId == source && record.GameKey == game && record.ModId == mod);
     }
 }

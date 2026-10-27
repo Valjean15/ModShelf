@@ -169,6 +169,83 @@ public sealed class LibraryRepositoryTests : IAsyncLifetime
         await Assert.ThrowsAsync<InvalidDataException>(() => _database.Library.FindAsync(Smapi, Cancellation));
     }
 
+    [Fact]
+    public async Task UpdatesSurviveARestartInTheirOrder()
+    {
+        LibraryMod mod = Watched(Smapi)
+            .WithFile(File(Smapi, "153075", "a.zip"))
+            .Checked(Added.AddHours(1))
+            .WithUpdates([Update(Smapi, "160380", replaces: "153075"), Update(Smapi, "160381")]);
+        await StoreAsync(mod);
+
+        await _database.RestartAsync();
+
+        LibraryMod stored = (await _database.Library.FindAsync(Smapi, Cancellation))!;
+        Assert.Equal(["160380", "160381"], stored.Updates.Select(update => update.File.Id));
+        AssertSameUpdate(mod.Updates[0], stored.Updates[0]);
+        AssertSameUpdate(mod.Updates[1], stored.Updates[1]);
+        Assert.Equal(Added.AddHours(1), stored.CheckedAt);
+    }
+
+    [Fact]
+    public async Task TheListHasEachModsUpdates()
+    {
+        await StoreAsync(Watched(Smapi).WithUpdates([Update(Smapi, "1")]));
+
+        LibraryMod listed = Assert.Single(await _database.Library.ListAsync(Cancellation));
+
+        Assert.Equal("1", Assert.Single(listed.Updates).File.Id);
+    }
+
+    [Fact]
+    public async Task UpdatesAreChangedInPlaceAddedRemovedAndReordered()
+    {
+        await StoreAsync(Watched(Smapi).WithUpdates([Update(Smapi, "1"), Update(Smapi, "2")]));
+
+        await _database.Library.UpdateAsync(
+            Smapi,
+            mod => mod!.WithUpdates([Update(Smapi, "3"), Update(Smapi, "2", name: "Renamed")]),
+            Cancellation);
+
+        LibraryMod stored = (await _database.Library.FindAsync(Smapi, Cancellation))!;
+        Assert.Equal(["3", "2"], stored.Updates.Select(update => update.File.Id));
+        Assert.Equal("Renamed", stored.Updates[1].Name);
+        Assert.Equal(Added, stored.Updates[1].FoundAt);
+        Assert.Equal(2L, await _database.QueryAsync("SELECT COUNT(*) FROM LibraryUpdates"));
+    }
+
+    [Fact]
+    public async Task DownloadingAnUpdateTakesItsRowOff()
+    {
+        await StoreAsync(Watched(Smapi).WithFile(File(Smapi, "1", "a.zip")).WithUpdates([Update(Smapi, "2", replaces: "1")]));
+
+        await _database.Library.UpdateAsync(Smapi, mod => mod!.WithFile(File(Smapi, "2", "b.zip")), Cancellation);
+
+        Assert.Empty((await _database.Library.FindAsync(Smapi, Cancellation))!.Updates);
+        Assert.Equal(0L, await _database.QueryAsync("SELECT COUNT(*) FROM LibraryUpdates"));
+    }
+
+    [Fact]
+    public async Task AModsUpdatesGoWithIt()
+    {
+        await StoreAsync(Watched(Smapi).WithUpdates([Update(Smapi, "1")]));
+
+        await _database.Library.UpdateAsync(Smapi, mod => mod!.Unwatched(), Cancellation);
+
+        Assert.Equal(0L, await _database.QueryAsync("SELECT COUNT(*) FROM LibraryUpdates"));
+    }
+
+    [Fact]
+    public async Task AStoredUpdateNoLibraryCanHaveStopsTheLoad()
+    {
+        await StoreAsync(Watched(Smapi).WithUpdates([Update(Smapi, "1")]));
+        await _database.QueryAsync("UPDATE LibraryUpdates SET ReplacesFileId = '99'");
+
+        InvalidDataException exception = await Assert.ThrowsAsync<InvalidDataException>(() => _database.Library.FindAsync(Smapi, Cancellation));
+
+        Assert.Contains("Mod 2400 of stardewvalley on nexus", exception.Message, StringComparison.Ordinal);
+    }
+
     private static string Count(string name, int add = 0)
         => (int.Parse(name, System.Globalization.CultureInfo.InvariantCulture) + add).ToString(System.Globalization.CultureInfo.InvariantCulture);
 
@@ -181,6 +258,23 @@ public sealed class LibraryRepositoryTests : IAsyncLifetime
         => Assert.Equal(
             (expected.File, expected.Name, expected.VersionLabel, expected.Category, expected.UploadedAt, expected.RelativePath, expected.SizeInBytes, expected.DownloadedAt),
             (actual.File, actual.Name, actual.VersionLabel, actual.Category, actual.UploadedAt, actual.RelativePath, actual.SizeInBytes, actual.DownloadedAt));
+
+    private static LibraryUpdate Update(ModRef mod, string id, string? replaces = null, string? name = null)
+        => new(
+            new ModFileRef(mod, id),
+            name ?? "SMAPI " + id,
+            $"SMAPI {id}.zip",
+            "4.5." + id,
+            ModFileCategory.Main,
+            Added.AddDays(-1),
+            replaces is null ? null : new ModFileRef(mod, replaces),
+            Added,
+            new Uri($"https://www.nexusmods.com/stardewvalley/mods/2400?tab=files&file_id={id}"));
+
+    private static void AssertSameUpdate(LibraryUpdate expected, LibraryUpdate actual)
+        => Assert.Equal(
+            (expected.File, expected.Name, expected.FileName, expected.VersionLabel, expected.Category, expected.UploadedAt, expected.Replaces, expected.FoundAt, expected.PageUrl),
+            (actual.File, actual.Name, actual.FileName, actual.VersionLabel, actual.Category, actual.UploadedAt, actual.Replaces, actual.FoundAt, actual.PageUrl));
 
     private Task<LibraryChange> StoreAsync(LibraryMod mod) => _database.Library.UpdateAsync(mod.Mod, _ => mod, Cancellation);
 }

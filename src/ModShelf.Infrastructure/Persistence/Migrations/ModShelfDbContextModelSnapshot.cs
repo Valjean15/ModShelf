@@ -162,6 +162,56 @@ namespace ModShelf.Infrastructure.Persistence.Migrations
                     b.ToTable("LibraryMods", (string)null);
                 });
 
+            modelBuilder.Entity("ModShelf.Infrastructure.Persistence.Tables.LibraryUpdateRecord", b =>
+                {
+                    b.Property<long>("Sequence")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("FileId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("FoundAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("ModSequence")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PageUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ReplacesFileId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("UploadedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("VersionLabel")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Sequence");
+
+                    b.HasIndex("ModSequence", "FileId")
+                        .IsUnique();
+
+                    b.ToTable("LibraryUpdates", (string)null);
+                });
+
             modelBuilder.Entity("ModShelf.Infrastructure.Persistence.Tables.LinkedAccountRecord", b =>
                 {
                     b.Property<string>("SourceId")
@@ -197,9 +247,20 @@ namespace ModShelf.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ModShelf.Infrastructure.Persistence.Tables.LibraryUpdateRecord", b =>
+                {
+                    b.HasOne("ModShelf.Infrastructure.Persistence.Tables.LibraryModRecord", null)
+                        .WithMany("Updates")
+                        .HasForeignKey("ModSequence")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("ModShelf.Infrastructure.Persistence.Tables.LibraryModRecord", b =>
                 {
                     b.Navigation("Files");
+
+                    b.Navigation("Updates");
                 });
 #pragma warning restore 612, 618
         }

@@ -27,5 +27,6 @@ internal sealed class ModShelfDbContext(DbContextOptions<ModShelfDbContext> opti
         modelBuilder.ApplyConfiguration(new LinkedAccountRecordConfiguration());
         modelBuilder.ApplyConfiguration(new LibraryModRecordConfiguration());
         modelBuilder.ApplyConfiguration(new LibraryFileRecordConfiguration());
+        modelBuilder.ApplyConfiguration(new LibraryUpdateRecordConfiguration());
     }
 }

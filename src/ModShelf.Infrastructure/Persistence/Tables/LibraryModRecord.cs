@@ -4,7 +4,8 @@ using ModShelf.Domain.Mods;
 namespace ModShelf.Infrastructure.Persistence.Tables;
 
 /// <summary>
-/// A row of the <c>LibraryMods</c> table, with its files. The repository maps it to and from <see cref="LibraryMod"/>.
+/// A row of the <c>LibraryMods</c> table, with its files and updates. The repository maps it to and from
+/// <see cref="LibraryMod"/>.
 /// </summary>
 /// <remarks>A mutable class rather than a record, because EF Core tracks entities by reference.</remarks>
 internal sealed class LibraryModRecord
@@ -34,6 +35,8 @@ internal sealed class LibraryModRecord
 
     public List<LibraryFileRecord> Files { get; set; } = [];
 
+    public List<LibraryUpdateRecord> Updates { get; set; } = [];
+
     public static LibraryModRecord From(LibraryMod mod)
     {
         LibraryModRecord record = new()
@@ -48,8 +51,8 @@ internal sealed class LibraryModRecord
     }
 
     /// <summary>
-    /// Takes over everything but the key from <paramref name="mod"/>. Files are matched by their ID, so a file that
-    /// stays keeps its row and its place.
+    /// Takes over everything but the key from <paramref name="mod"/>. Files and updates are matched by their file's ID,
+    /// so one that stays keeps its row; files also keep their place.
     /// </summary>
     public void CopyFrom(LibraryMod mod)
     {
@@ -72,6 +75,20 @@ internal sealed class LibraryModRecord
                 Files.Add(LibraryFileRecord.From(file));
             }
         }
+
+        Updates.RemoveAll(record => mod.Updates.All(update => update.File.Id != record.FileId));
+        for (int position = 0; position < mod.Updates.Count; position++)
+        {
+            LibraryUpdate update = mod.Updates[position];
+            if (Updates.Find(record => record.FileId == update.File.Id) is { } stored)
+            {
+                stored.CopyFrom(update, position);
+            }
+            else
+            {
+                Updates.Add(LibraryUpdateRecord.From(update, position));
+            }
+        }
     }
 
     /// <summary>
@@ -91,7 +108,8 @@ internal sealed class LibraryModRecord
                 IsWatched,
                 AddedAt,
                 CheckedAt,
-                Files.OrderBy(file => file.Sequence).Select(file => file.ToFile(mod)));
+                Files.OrderBy(file => file.Sequence).Select(file => file.ToFile(mod)),
+                Updates.OrderBy(update => update.Position).Select(update => update.ToUpdate(mod)));
         }
         catch (Exception exception) when (exception is ArgumentException or UriFormatException)
         {
