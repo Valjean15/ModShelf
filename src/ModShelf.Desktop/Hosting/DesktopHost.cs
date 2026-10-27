@@ -4,10 +4,12 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using ModShelf.Application;
+using ModShelf.Desktop.Services;
 using ModShelf.Infrastructure;
 using ModShelf.Platform;
 using ModShelf.Platform.Secrets;
-using ModShelf.Presentation.ViewModels;
+using ModShelf.Presentation;
+using ModShelf.Presentation.Services;
 using ModShelf.Sources.DirectUrl;
 using ModShelf.Sources.Nexus;
 
@@ -15,7 +17,8 @@ namespace ModShelf.Desktop.Hosting;
 
 /// <summary>
 /// The desktop app's composition root: the generic host with every service the CLI has, plus the ones that run in
-/// the background while the app is open: downloads, recording them into the library, and update checks.
+/// the background while the app is open (downloads, recording them into the library, and update checks), and the
+/// screens.
 /// </summary>
 internal static class DesktopHost
 {
@@ -101,7 +104,9 @@ internal static class DesktopHost
         builder.Services.AddLibraryRecording();
         builder.Services.AddBackgroundUpdateChecks();
 
-        builder.Services.AddTransient<MainWindowViewModel>();
+        builder.Services.AddPresentation();
+        builder.Services.AddSingleton<IUiThread, AvaloniaUiThread>();
+        builder.Services.AddSingleton<IDialogService, AvaloniaDialogService>();
 
         return builder.Build();
     }

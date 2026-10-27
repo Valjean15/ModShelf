@@ -1,0 +1,7 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ModShelf.Presentation.ViewModels"
+             x:Class="ModShelf.Desktop.Views.BrowseView"
+             x:DataType="vm:BrowseViewModel">
+    <TextBlock Classes="heading" Text="{Binding Title}" />
+</UserControl>

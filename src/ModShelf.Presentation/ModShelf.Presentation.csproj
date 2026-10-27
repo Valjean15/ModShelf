@@ -29,6 +29,8 @@
       <StronglyTypedNamespace>ModShelf.Presentation.Resources</StronglyTypedNamespace>
       <StronglyTypedClassName>Strings</StronglyTypedClassName>
       <StronglyTypedFileName>$(IntermediateOutputPath)Strings.Designer.cs</StronglyTypedFileName>
+      <!-- Public, so Desktop's views can show these strings too, through x:Static. -->
+      <PublicClass>true</PublicClass>
     </EmbeddedResource>
   </ItemGroup>
 

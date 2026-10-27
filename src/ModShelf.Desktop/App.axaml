@@ -1,10 +1,31 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ModShelf.Presentation.ViewModels"
+             xmlns:views="using:ModShelf.Desktop.Views"
              x:Class="ModShelf.Desktop.App"
              RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+    <!-- "Default" follows the system's light or dark theme. -->
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="/Styles/Icons.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+
+    <!-- Each screen's view, by its ViewModel: listed, not found by name, so the bindings stay compiled. -->
+    <Application.DataTemplates>
+        <DataTemplate DataType="vm:LibraryViewModel"><views:LibraryView /></DataTemplate>
+        <DataTemplate DataType="vm:UpdatesViewModel"><views:UpdatesView /></DataTemplate>
+        <DataTemplate DataType="vm:BrowseViewModel"><views:BrowseView /></DataTemplate>
+        <DataTemplate DataType="vm:DownloadsViewModel"><views:DownloadsView /></DataTemplate>
+        <DataTemplate DataType="vm:AccountsViewModel"><views:AccountsView /></DataTemplate>
+        <DataTemplate DataType="vm:SettingsViewModel"><views:SettingsView /></DataTemplate>
+    </Application.DataTemplates>
 
     <Application.Styles>
         <FluentTheme />
+        <StyleInclude Source="/Styles/Shell.axaml" />
     </Application.Styles>
 </Application>

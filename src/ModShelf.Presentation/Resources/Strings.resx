@@ -62,4 +62,40 @@
     <value>ModShelf</value>
     <comment>Product name, shown as the main window title.</comment>
   </data>
+  <data name="LibraryTitle" xml:space="preserve">
+    <value>Library</value>
+    <comment>The screen of the mods ModShelf has files of or watches; in the sidebar and as its heading.</comment>
+  </data>
+  <data name="UpdatesTitle" xml:space="preserve">
+    <value>Updates</value>
+    <comment>The screen of the updates the checks found.</comment>
+  </data>
+  <data name="BrowseTitle" xml:space="preserve">
+    <value>Browse</value>
+    <comment>The screen for searching a mod site's mods.</comment>
+  </data>
+  <data name="DownloadsTitle" xml:space="preserve">
+    <value>Downloads</value>
+    <comment>The screen of the download queue.</comment>
+  </data>
+  <data name="AccountsTitle" xml:space="preserve">
+    <value>Accounts</value>
+    <comment>The screen of the accounts linked on each mod site.</comment>
+  </data>
+  <data name="SettingsTitle" xml:space="preserve">
+    <value>Settings</value>
+    <comment>The settings screen.</comment>
+  </data>
+  <data name="ToggleSidebar" xml:space="preserve">
+    <value>Show or hide the screens' names</value>
+    <comment>Tooltip of the button at the top of the sidebar.</comment>
+  </data>
+  <data name="DialogOk" xml:space="preserve">
+    <value>OK</value>
+    <comment>The button that closes a message.</comment>
+  </data>
+  <data name="DialogCancel" xml:space="preserve">
+    <value>Cancel</value>
+    <comment>The button that turns down what a dialog asks.</comment>
+  </data>
 </root>
