@@ -82,4 +82,23 @@ internal sealed class DownloadJobRepository : IDownloadJobRepository
             return [.. records.Select(record => record.ToJob())];
         }
     }
+
+    public async Task DeleteAsync(IReadOnlyCollection<DownloadJobId> ids, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(ids);
+        if (ids.Count == 0)
+        {
+            return;
+        }
+
+        Guid[] keys = [.. ids.Select(id => id.Value)];
+        ModShelfDbContext context = await _contextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
+        await using (context.ConfigureAwait(false))
+        {
+            await context.DownloadJobs
+                .Where(record => keys.Contains(record.Id))
+                .ExecuteDeleteAsync(cancellationToken)
+                .ConfigureAwait(false);
+        }
+    }
 }

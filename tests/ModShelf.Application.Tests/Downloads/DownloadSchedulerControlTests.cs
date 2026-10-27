@@ -127,6 +127,33 @@ public sealed class DownloadSchedulerControlTests
     }
 
     [Fact]
+    public async Task ClearingFinishedJobsRemovesTheCompletedAndCancelledOnes()
+    {
+        DownloadJob completed = Stored("completed");
+        completed.StartResolving();
+        completed.StartDownloading(0, 100);
+        completed.StartVerifying();
+        completed.Complete();
+        DownloadJob cancelled = Stored("cancelled");
+        cancelled.Cancel();
+        DownloadJob failed = Stored("failed");
+        failed.StartResolving();
+        failed.Fail(DownloadFailureReason.Network);
+        DownloadJob paused = Stored("paused");
+        paused.Pause();
+        await using SchedulerHarness harness = await SchedulerHarness.StartAsync(storedJobs: [completed, cancelled, failed, paused]);
+
+        int cleared = await harness.Scheduler.ClearFinishedAsync(TestContext.Current.CancellationToken);
+        int clearedAgain = await harness.Scheduler.ClearFinishedAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal((2, 0), (cleared, clearedAgain));
+        Assert.Equal([failed.Id, paused.Id], (await harness.SettleAsync()).Select(job => job.Id));
+        Assert.Equal([completed.Id, cancelled.Id], harness.Repository.Deleted);
+        Assert.Empty(harness.Transfer.DeletedPartialFiles);
+        Assert.Contains(harness.Logger.Entries, entry => entry.StartsWith("Information: Cleared 2 finished download jobs from the queue", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public async Task RequestsForAnUnknownJobThrow()
     {
         await using SchedulerHarness harness = await SchedulerHarness.StartAsync();
@@ -152,6 +179,9 @@ public sealed class DownloadSchedulerControlTests
         await Assert.ThrowsAsync<InvalidOperationException>(
             () => harness.Scheduler.ResumeAsync(running.Id, TestContext.Current.CancellationToken));
     }
+
+    private static DownloadJob Stored(string fileId)
+        => DownloadJob.Create(TestData.File(TestData.Nexus, fileId), TestData.TargetDirectory, $"{fileId}.7z", TestData.Now);
 
     /// <summary>
     /// Queues a Nexus job and lets its transfer start and report <paramref name="bytesDownloaded"/> of 100 bytes.

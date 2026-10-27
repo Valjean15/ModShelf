@@ -18,4 +18,9 @@ public interface IDownloadJobRepository
     /// Every stored job, oldest first.
     /// </summary>
     Task<IReadOnlyList<DownloadJob>> ListAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Deletes the jobs with these IDs. An ID of no stored job is skipped.
+    /// </summary>
+    Task DeleteAsync(IReadOnlyCollection<DownloadJobId> ids, CancellationToken cancellationToken);
 }

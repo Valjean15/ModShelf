@@ -125,6 +125,8 @@ internal sealed class RecordingDownloadService(params DownloadJobSnapshot[] exis
 
     public Task CancelAsync(DownloadJobId id, CancellationToken cancellationToken) => throw new NotSupportedException();
 
+    public Task<int> ClearFinishedAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
+
     /// <summary>
     /// The jobs <see cref="Update"/> changes from now on, until <see cref="Stop"/>. One watcher at a time.
     /// </summary>

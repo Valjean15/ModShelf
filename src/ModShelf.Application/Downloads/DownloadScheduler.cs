@@ -128,6 +128,13 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
     public Task CancelAsync(DownloadJobId id, CancellationToken cancellationToken)
         => ControlAsync(id, JobControl.Cancel, cancellationToken);
 
+    public async Task<int> ClearFinishedAsync(CancellationToken cancellationToken)
+    {
+        TaskCompletionSource<int> reply = NewReply<int>();
+        Post(new ClearFinishedCommand(reply));
+        return await reply.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
+    }
+
     public IAsyncEnumerable<DownloadJobSnapshot> WatchAsync(CancellationToken cancellationToken)
         => _watchers.Watch(cancellationToken);
 
@@ -313,6 +320,9 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
                 case ControlCommand command:
                     await ControlAsync(command).ConfigureAwait(false);
                     break;
+                case ClearFinishedCommand command:
+                    await ClearFinishedAsync(command).ConfigureAwait(false);
+                    break;
                 case TransferStarted report:
                     await OnTransferStartedAsync(report).ConfigureAwait(false);
                     break;
@@ -394,6 +404,27 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
         }
 
         command.Reply.TrySetResult();
+    }
+
+    private async Task ClearFinishedAsync(ClearFinishedCommand command)
+    {
+        // A finished job never runs, so nothing else holds it.
+        DownloadJob[] finished = [.. _jobs.Where(job => job.Status is DownloadJobStatus.Completed or DownloadJobStatus.Cancelled)];
+        if (finished.Length > 0)
+        {
+            HashSet<DownloadJobId> ids = [.. finished.Select(job => job.Id)];
+            await _repository.DeleteAsync(ids, CancellationToken.None).ConfigureAwait(false);
+            _jobs.RemoveAll(job => ids.Contains(job.Id));
+            foreach (DownloadJobId id in ids)
+            {
+                _lastProgressSnapshot.Remove(id);
+                _handoffPages.Remove(id);
+            }
+
+            LogClearedFinished(_logger, finished.Length);
+        }
+
+        command.Reply.TrySetResult(finished.Length);
     }
 
     private async Task OnTransferStartedAsync(TransferStarted report)

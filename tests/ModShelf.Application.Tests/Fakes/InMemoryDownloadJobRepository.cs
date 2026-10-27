@@ -17,6 +17,11 @@ internal sealed class InMemoryDownloadJobRepository : IDownloadJobRepository
         _jobs = [.. storedJobs];
     }
 
+    /// <summary>
+    /// The IDs of the jobs deleted, in order.
+    /// </summary>
+    public List<DownloadJobId> Deleted { get; } = [];
+
     public Task AddAsync(DownloadJob job, CancellationToken cancellationToken)
     {
         lock (_gate)
@@ -44,6 +49,17 @@ internal sealed class InMemoryDownloadJobRepository : IDownloadJobRepository
         {
             return Task.FromResult<IReadOnlyList<DownloadJob>>([.. _jobs]);
         }
+    }
+
+    public Task DeleteAsync(IReadOnlyCollection<DownloadJobId> ids, CancellationToken cancellationToken)
+    {
+        lock (_gate)
+        {
+            _jobs.RemoveAll(job => ids.Contains(job.Id));
+            Deleted.AddRange(ids);
+        }
+
+        return Task.CompletedTask;
     }
 
     /// <summary>

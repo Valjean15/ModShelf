@@ -65,6 +65,22 @@ public sealed class DownloadJobRepositoryTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task DeletesTheJobsAskedFor()
+    {
+        DownloadJob[] jobs = [NewJob("A.7z"), NewJob("B.7z"), NewJob("C.7z")];
+        foreach (DownloadJob job in jobs)
+        {
+            await _database.Repository.AddAsync(job, TestContext.Current.CancellationToken);
+        }
+
+        await _database.Repository.DeleteAsync([jobs[0].Id, jobs[2].Id, DownloadJobId.New()], TestContext.Current.CancellationToken);
+        await _database.Repository.DeleteAsync([], TestContext.Current.CancellationToken);
+
+        await _database.RestartAsync();
+        Assert.Equal(jobs[1].Id, Assert.Single(await _database.Repository.ListAsync(TestContext.Current.CancellationToken)).Id);
+    }
+
+    [Fact]
     public async Task UpdateSavesTheStatusProgressAndReason()
     {
         DownloadJob job = NewJob();

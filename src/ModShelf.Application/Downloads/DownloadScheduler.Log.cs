@@ -27,4 +27,7 @@ internal sealed partial class DownloadScheduler
 
     [LoggerMessage(EventId = 6, Level = LogLevel.Warning, Message = "Source {SourceId} couldn't resolve download job {JobId}")]
     private static partial void LogResolveFailed(ILogger logger, Exception exception, DownloadJobId jobId, SourceId sourceId);
+
+    [LoggerMessage(EventId = 7, Level = LogLevel.Information, Message = "Cleared {Count} finished download jobs from the queue")]
+    private static partial void LogClearedFinished(ILogger logger, int count);
 }

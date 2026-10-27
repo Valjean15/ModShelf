@@ -52,6 +52,13 @@ public interface IDownloadService
     Task CancelAsync(DownloadJobId id, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Removes the completed and cancelled jobs from the queue, and from the database. Their files stay, and the
+    /// library keeps its own records of the ones it has. The jobs aren't listed or watched any more.
+    /// </summary>
+    /// <returns>How many jobs it removed.</returns>
+    Task<int> ClearFinishedAsync(CancellationToken cancellationToken);
+
+    /// <summary>
     /// A snapshot every time a job changes: its status, or its progress (at most a few times per second).
     /// The stream ends when <paramref name="cancellationToken"/> is cancelled.
     /// </summary>
