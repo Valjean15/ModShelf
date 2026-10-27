@@ -87,7 +87,7 @@ internal sealed class FakeHandoffSource(Uri fileUrl) : ILinkRecognizer, IDownloa
         => Task.FromResult(new ModInfo(modRef, ModName, author: "Someone", pageUrl: new Uri($"https://{Host}/mod")));
 
     /// <summary>
-    /// Files 1 to 3, each the update of the one before.
+    /// Files 1 to 3, each the update of the one before, at versions 1.1 to 1.3, with their pages.
     /// </summary>
     public Task<IReadOnlyList<ModFile>> GetFilesAsync(ModRef modRef, CancellationToken cancellationToken)
         => Task.FromResult<IReadOnlyList<ModFile>>(
@@ -96,16 +96,21 @@ internal sealed class FakeHandoffSource(Uri fileUrl) : ILinkRecognizer, IDownloa
                 File(id),
                 $"File {id}",
                 FileNameOf(id),
-                "1.0",
+                $"1.{id}",
                 ModFileCategory.Main,
                 null,
-                DateTimeOffset.UnixEpoch,
+                DateTimeOffset.UnixEpoch.AddDays(index),
                 [],
-                replacedBy: index + 1 < FileIds.Length ? File(FileIds[index + 1]) : null)),
+                FileLink(id),
+                index + 1 < FileIds.Length ? File(FileIds[index + 1]) : null)),
         ]);
 
+    /// <summary>
+    /// Says what changed in 1.2 and 1.3.
+    /// </summary>
     public Task<IReadOnlyList<ModChangelog>> GetChangelogsAsync(ModRef modRef, CancellationToken cancellationToken)
-        => Task.FromResult<IReadOnlyList<ModChangelog>>([]);
+        => Task.FromResult<IReadOnlyList<ModChangelog>>(
+            [new ModChangelog("1.2", ["Smaller."]), new ModChangelog("1.3", ["Faster.", "Fixed the crash."])]);
 
     private static ModFileRef File(string fileId) => new(new ModRef(new GameRef(SourceId, "game"), "mod"), fileId);
 }

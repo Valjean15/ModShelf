@@ -14,9 +14,9 @@ namespace ModShelf.Cli.Commands;
 /// <summary>
 /// <c>library list</c>, <c>library watch &lt;link&gt;</c>, <c>library unwatch &lt;link&gt;</c> and
 /// <c>library move &lt;folder&gt;</c>: the mods ModShelf watches for updates or has downloaded files of, and where their
-/// files are.
+/// files are. Checking for updates is in its own file.
 /// </summary>
-internal static class LibraryCommand
+internal static partial class LibraryCommand
 {
     public static Command Create(CliEnvironment environment)
     {
@@ -33,11 +33,13 @@ internal static class LibraryCommand
         };
         move.SetAction((parsed, cancellationToken) => MoveAsync(environment, parsed.GetValue(folder)!, cancellationToken));
 
-        return new Command("library", "Shows the library of watched and downloaded mods, watches mods for updates, and moves the library.")
+        return new Command("library", "Shows the library of watched and downloaded mods, watches mods and checks them for updates, and moves the library.")
         {
             list,
             CreateWatch(environment, watch: true),
             CreateWatch(environment, watch: false),
+            CreateCheck(environment),
+            CreateUpdates(environment),
             move,
         };
     }

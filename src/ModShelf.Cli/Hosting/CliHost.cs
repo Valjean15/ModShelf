@@ -96,6 +96,7 @@ internal static class CliHost
         builder.Services.AddLibraryStorage();
         builder.Services.AddLibraryDownloads();
         builder.Services.AddLibraryMover();
+        builder.Services.AddUpdateChecks();
         builder.Services.AddSettings();
         builder.Services.AddDirectUrlSource();
         builder.Services.AddNexusSource(NexusOptionsFrom(builder.Configuration));

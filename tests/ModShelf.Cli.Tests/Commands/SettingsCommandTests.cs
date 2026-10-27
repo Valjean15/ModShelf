@@ -51,6 +51,7 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         Assert.Equal(Path.Combine(_cli.Downloads, "ModShelf") + " (default)", Value(shown, "library.root"));
         Assert.Equal("{source}/{game}/{mod} ({modid})/{file} (default)", Value(shown, "library.folders"));
         Assert.Equal("2 (default)", Value(shown, "library.oldVersions"));
+        Assert.Equal("6h (default)", Value(shown, "updates.interval"));
         Assert.Contains("To change a setting: settings set <setting> <value>", shown.Output, StringComparison.Ordinal);
     }
 
@@ -128,7 +129,7 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     [InlineData("set", "library.root", "Mods", "isn't a full path")]
     [InlineData("set", "library.folders", "{mod}", "The last part must be exactly {file}.")]
     [InlineData("set", "library.folders.skyrimspecialedition", "{name}/{file}", "{name} isn't a folder's part.")]
-    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<game>, library.oldVersions.")]
+    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<game>, library.oldVersions, updates.interval.")]
     [InlineData("reset", "library.folders.", null, "There's no setting called library.folders.")]
     [InlineData("set", "library.oldVersions", "0", "'0' isn't a rule for old versions. Use all, archive, or how many versions to keep, from 1 to 99, such as 2.")]
     public async Task SaysWhatsWrongWithASetting(string command, string name, string? value, string message)

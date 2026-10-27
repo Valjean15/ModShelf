@@ -7,6 +7,7 @@ using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
 using ModShelf.Cli.Hosting;
 using ModShelf.Domain.Library;
+using ModShelf.Domain.Updates;
 
 namespace ModShelf.Cli.Commands;
 
@@ -20,7 +21,8 @@ internal static class SettingsCommand
     private const string LibraryFolders = "library.folders";
     private const string GamePrefix = LibraryFolders + ".";
     private const string OldVersions = "library.oldVersions";
-    private const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<game>, {OldVersions}";
+    private const string Interval = "updates.interval";
+    private const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<game>, {OldVersions}, {Interval}";
 
     public static Command Create(CliEnvironment environment)
     {
@@ -31,7 +33,8 @@ internal static class SettingsCommand
         Argument<string> value = new("value")
         {
             Description = "Its new value: a full path for library.root; all, archive or how many versions to keep for "
-                + "library.oldVersions; a folder pattern, such as \"{source}/{game}/{mod} ({modid})/{file}\", for the others.",
+                + "library.oldVersions; minutes, hours or days, such as 30m, 6h or 1d, for updates.interval; a folder pattern, "
+                + "such as \"{source}/{game}/{mod} ({modid})/{file}\", for the others.",
         };
         Command set = new("set", "Changes a setting.") { setName, value };
         set.SetAction((parsed, cancellationToken) => ChangeAsync(environment, parsed.GetValue(setName)!, parsed.GetValue(value), cancellationToken));
@@ -40,7 +43,7 @@ internal static class SettingsCommand
         Command reset = new("reset", "Sets a setting back to its default.") { resetName };
         reset.SetAction((parsed, cancellationToken) => ChangeAsync(environment, parsed.GetValue(resetName)!, null, cancellationToken));
 
-        return new Command("settings", "Shows and changes the settings: where the library is, how its folders are named, and what happens to old versions.")
+        return new Command("settings", "Shows and changes the settings: where the library is, how its folders are named, what happens to old versions, and how often to check for updates.")
         {
             show,
             set,
@@ -76,6 +79,7 @@ internal static class SettingsCommand
                     .OrderBy(game => game.Key, StringComparer.OrdinalIgnoreCase)
                     .Select(game => new[] { GamePrefix + game.Key, game.Value.Text }),
                 [OldVersions, stored.OldVersions?.ToString() ?? $"{OldVersionRule.Default} (default)"],
+                [Interval, stored.UpdateInterval is { } every ? UpdateInterval.Format(every) : $"{UpdateInterval.Format(UpdateInterval.Default)} (default)"],
             ];
             TextTable.Write(environment.Output, rows);
             environment.Output.WriteLine(
@@ -84,6 +88,8 @@ internal static class SettingsCommand
             environment.Output.WriteLine(
                 $"When a newer version of a file is downloaded, {OldVersions} keeps the old ones (all), moves them to an "
                 + "_archive folder (archive), or keeps that many versions and deletes the older ones (a number).");
+            environment.Output.WriteLine(
+                $"The desktop app checks the watched mods for updates every {Interval}; library check checks them now.");
             environment.Output.WriteLine("To change a setting: settings set <setting> <value>");
             return ExitCodes.Done;
         }
@@ -110,7 +116,7 @@ internal static class SettingsCommand
         string setting = name.Trim().ToLowerInvariant();
         string? game = setting.StartsWith(GamePrefix, StringComparison.Ordinal) ? name.Trim()[GamePrefix.Length..] : null;
         bool oldVersions = setting.Equals(OldVersions, StringComparison.OrdinalIgnoreCase);
-        if (setting is not (LibraryRoot or LibraryFolders) && !oldVersions && string.IsNullOrWhiteSpace(game))
+        if (setting is not (LibraryRoot or LibraryFolders or Interval) && !oldVersions && string.IsNullOrWhiteSpace(game))
         {
             await environment.Error.WriteLineAsync($"There's no setting called {name}. Settings: {Names}.").ConfigureAwait(false);
             return ExitCodes.BadInput;
@@ -138,6 +144,14 @@ internal static class SettingsCommand
 
                 string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
                 environment.Output.WriteLine(value is null ? $"{LibraryRoot} is back to its default, {root}." : $"{LibraryRoot} is now {root}.");
+            }
+            else if (setting == Interval)
+            {
+                TimeSpan? interval = value is null ? null : UpdateInterval.Parse(value);
+                await settings.SetUpdateIntervalAsync(interval, cancellationToken).ConfigureAwait(false);
+                environment.Output.WriteLine(interval is { } every
+                    ? $"{Interval} is now {UpdateInterval.Format(every)}."
+                    : $"{Interval} is back to its default, {UpdateInterval.Format(UpdateInterval.Default)}.");
             }
             else if (oldVersions)
             {
