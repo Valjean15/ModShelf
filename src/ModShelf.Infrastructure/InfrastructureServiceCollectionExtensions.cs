@@ -11,9 +11,11 @@ using ModShelf.Application.Accounts;
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Library.Ports;
+using ModShelf.Application.Settings.Ports;
 using ModShelf.Infrastructure.Downloads;
 using ModShelf.Infrastructure.Persistence;
 using ModShelf.Infrastructure.Persistence.Repositories;
+using ModShelf.Infrastructure.Settings;
 using ModShelf.Infrastructure.Sources;
 using ModShelf.Sources.Abstractions.Http;
 
@@ -78,6 +80,36 @@ public static class InfrastructureServiceCollectionExtensions
 
         services.AddHttpClient();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, SourceHttpClientFilter>());
+        return services;
+    }
+
+    /// <summary>
+    /// Keeps the settings in <c>settings.json</c> next to the library database's default location, such as
+    /// <c>%LOCALAPPDATA%\ModShelf\settings.json</c> on Windows.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The system has no local application data folder for this user.</exception>
+    public static IServiceCollection AddSettingsFile(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        return services.AddSettingsFile(Path.Combine(Path.GetDirectoryName(LibraryDatabaseLocation.GetDefaultPath())!, "settings.json"));
+    }
+
+    /// <summary>
+    /// Keeps the settings in the JSON file at <paramref name="path"/>, an absolute path, as the
+    /// <see cref="ISettingsStore"/>. The file and its folder are created when settings are first saved.
+    /// </summary>
+    public static IServiceCollection AddSettingsFile(this IServiceCollection services, string path)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        if (!Path.IsPathFullyQualified(path))
+        {
+            throw new ArgumentException($"'{path}' is not an absolute path.", nameof(path));
+        }
+
+        services.AddSingleton<ISettingsStore>(new JsonSettingsStore(path));
+
         return services;
     }
 

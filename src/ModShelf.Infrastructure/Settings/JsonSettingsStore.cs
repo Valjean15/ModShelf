@@ -1,0 +1,176 @@
+using System.Collections.Immutable;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+
+using ModShelf.Application.Settings;
+using ModShelf.Application.Settings.Ports;
+using ModShelf.Domain.Library;
+
+namespace ModShelf.Infrastructure.Settings;
+
+/// <summary>
+/// Keeps the settings in a JSON file the user can read and edit, such as:
+/// <code>
+/// {
+///   "library": {
+///     "root": "D:\\Mods",
+///     "folders": "{source}/{game}/{mod} ({modid})/{file}",
+///     "gameFolders": { "skyrimspecialedition": "{source}/{game}/{mod}/{file}" }
+///   }
+/// }
+/// </code>
+/// </summary>
+/// <remarks>
+/// Settings left out take their defaults. Saving keeps whatever else the file holds, such as a newer version's settings,
+/// and replaces the file in one step, so it's never left half-written.
+/// </remarks>
+internal sealed class JsonSettingsStore : ISettingsStore
+{
+    private const string Library = "library";
+    private const string Root = "root";
+    private const string Folders = "folders";
+    private const string GameFolders = "gameFolders";
+
+    private static readonly JsonDocumentOptions Reading = new() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
+    private static readonly JsonSerializerOptions Writing = new() { WriteIndented = true };
+
+    private readonly string _path;
+
+    /// <param name="path">The file's absolute path. It's created when settings are first saved.</param>
+    public JsonSettingsStore(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        if (!Path.IsPathFullyQualified(path))
+        {
+            throw new ArgumentException($"'{path}' is not an absolute path.", nameof(path));
+        }
+
+        _path = path;
+    }
+
+    public string Location => _path;
+
+    /// <exception cref="InvalidDataException">The file isn't JSON, or holds a setting no value can have.</exception>
+    public async Task<AppSettings> LoadAsync(CancellationToken cancellationToken)
+    {
+        JsonObject? file = await ReadAsync(cancellationToken).ConfigureAwait(false);
+        if (file?[Library] is not JsonObject library)
+        {
+            return new AppSettings();
+        }
+
+        try
+        {
+            string? root = Text(library, Root);
+            if (root is not null && !Path.IsPathFullyQualified(root))
+            {
+                throw new InvalidDataException($"library.root must be a full path, not '{root}'.");
+            }
+
+            ImmutableDictionary<string, FolderPattern>.Builder games = ImmutableDictionary.CreateBuilder<string, FolderPattern>(StringComparer.OrdinalIgnoreCase);
+            if (library[GameFolders] is JsonObject gameFolders)
+            {
+                foreach ((string game, JsonNode? pattern) in gameFolders)
+                {
+                    games[game] = FolderPattern.Parse(pattern?.GetValue<string>() ?? throw new InvalidDataException($"library.gameFolders.{game} is empty."));
+                }
+            }
+
+            string? folders = Text(library, Folders);
+            return new AppSettings
+            {
+                LibraryRoot = root,
+                LibraryFolders = folders is null ? null : FolderPattern.Parse(folders),
+                GameFolders = games.ToImmutable(),
+            };
+        }
+        catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or InvalidDataException or FormatException)
+        {
+            throw new InvalidDataException($"The settings in {_path} can't be read: {exception.Message} Fix the file, or delete it to start again.", exception);
+        }
+    }
+
+    public async Task SaveAsync(AppSettings settings, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        // What the file holds besides these settings stays.
+        JsonObject file = await ReadAsync(cancellationToken).ConfigureAwait(false) ?? [];
+        JsonObject library = file[Library] as JsonObject ?? [];
+        file[Library] = library;
+
+        Set(library, Root, settings.LibraryRoot);
+        Set(library, Folders, settings.LibraryFolders?.Text);
+        if (settings.GameFolders.Count == 0)
+        {
+            library.Remove(GameFolders);
+        }
+        else
+        {
+            JsonObject games = [];
+            foreach ((string game, FolderPattern pattern) in settings.GameFolders.OrderBy(entry => entry.Key, StringComparer.OrdinalIgnoreCase))
+            {
+                games[game] = pattern.Text;
+            }
+
+            library[GameFolders] = games;
+        }
+
+        if (library.Count == 0)
+        {
+            file.Remove(Library);
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
+        string temporary = _path + ".tmp";
+        await File.WriteAllTextAsync(temporary, file.ToJsonString(Writing) + Environment.NewLine, new UTF8Encoding(false), cancellationToken)
+            .ConfigureAwait(false);
+        File.Move(temporary, _path, overwrite: true);
+    }
+
+    private static string? Text(JsonObject section, string name) => section[name] switch
+    {
+        null => null,
+        JsonValue value when value.TryGetValue(out string? text) => string.IsNullOrWhiteSpace(text) ? null : text,
+        _ => throw new InvalidDataException($"library.{name} must be text."),
+    };
+
+    private static void Set(JsonObject section, string name, string? value)
+    {
+        if (value is null)
+        {
+            section.Remove(name);
+        }
+        else
+        {
+            section[name] = value;
+        }
+    }
+
+    /// <returns>The file's object, or null when there's no file yet.</returns>
+    /// <exception cref="InvalidDataException">The file isn't a JSON object.</exception>
+    private async Task<JsonObject?> ReadAsync(CancellationToken cancellationToken)
+    {
+        string text;
+        try
+        {
+            text = await File.ReadAllTextAsync(_path, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception exception) when (exception is FileNotFoundException or DirectoryNotFoundException)
+        {
+            return null;
+        }
+
+        try
+        {
+            return JsonNode.Parse(text, documentOptions: Reading) as JsonObject
+                ?? throw new InvalidDataException($"The settings in {_path} can't be read: the file must hold a JSON object.");
+        }
+        catch (JsonException exception)
+        {
+            throw new InvalidDataException(
+                $"The settings in {_path} can't be read: {exception.Message} Fix the file, or delete it to start again.", exception);
+        }
+    }
+}

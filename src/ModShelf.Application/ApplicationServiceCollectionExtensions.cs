@@ -5,6 +5,7 @@ using ModShelf.Application.Accounts;
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Library;
+using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
 using ModShelf.Application.Updates;
 using ModShelf.Application.Watchlist;
@@ -78,6 +79,19 @@ public static class ApplicationServiceCollectionExtensions
         services.TryAddSingleton(TimeProvider.System);
         services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
         services.TryAddSingleton<IModLibrary, ModLibrary>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers <see cref="ISettingsService"/>. Needs Infrastructure's <see cref="Settings.Ports.ISettingsStore"/> and
+    /// <see cref="Library.Ports.ILibraryRepository"/>, and Platform's <see cref="Settings.Ports.IUserFolders"/>.
+    /// </summary>
+    public static IServiceCollection AddSettings(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton<ISettingsService, SettingsService>();
 
         return services;
     }

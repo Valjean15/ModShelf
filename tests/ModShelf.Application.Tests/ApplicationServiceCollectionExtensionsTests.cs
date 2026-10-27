@@ -6,6 +6,7 @@ using ModShelf.Application.Accounts;
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Library;
+using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
 using ModShelf.Application.Tests.Accounts;
 using ModShelf.Application.Tests.Fakes;
@@ -100,6 +101,17 @@ public sealed class ApplicationServiceCollectionExtensionsTests
         Assert.Equal(typeof(SourceRegistry), Single<ISourceRegistry>(services).ImplementationType);
         Assert.Single(services, descriptor => descriptor.ServiceType == typeof(TimeProvider));
         Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
+    }
+
+    [Fact]
+    public void RegistersTheSettingsOnce()
+    {
+        ServiceCollection services = new();
+        services.AddSettings();
+        services.AddSettings();
+
+        Assert.Equal(typeof(SettingsService), Single<ISettingsService>(services).ImplementationType);
+        Assert.Equal(ServiceLifetime.Singleton, Single<ISettingsService>(services).Lifetime);
     }
 
     [Fact]
