@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Accounts;
 using ModShelf.Application.Accounts.Ports;
+using ModShelf.Application.Settings.Ports;
 using ModShelf.Cli.Hosting;
 using ModShelf.Cli.Tests.Fakes;
 using ModShelf.Sources.Abstractions;
@@ -16,10 +17,10 @@ using ModShelf.Testing;
 namespace ModShelf.Cli.Tests.Common;
 
 /// <summary>
-/// The CLI with the fake sources plugged in, run in this process. Its library database and secret files sit in a
-/// folder of its own, and secrets in the system's keyring under a scope of its own, so the user's own ModShelf data is
-/// never touched. Each command builds its own host, as each run of the real CLI does, so the app restarts between
-/// commands.
+/// The CLI with the fake sources plugged in, run in this process. Its library database, settings, library and secret
+/// files sit in a folder of its own, and secrets in the system's keyring under a scope of its own, so the user's own
+/// ModShelf data is never touched. Each command builds its own host, as each run of the real CLI does, so the app
+/// restarts between commands.
 /// </summary>
 internal sealed class InProcessCli : IAsyncDisposable
 {
@@ -61,6 +62,11 @@ internal sealed class InProcessCli : IAsyncDisposable
     /// The folder holding everything the app keeps on disk here.
     /// </summary>
     public string Folder => _folder.Path;
+
+    /// <summary>
+    /// The user's Downloads folder as the app sees it here, so the library's default root is in the test's folder too.
+    /// </summary>
+    public string Downloads => Path.Combine(_folder.Path, "Downloads");
 
     public async Task<CliResult> RunAsync(string[] arguments, CancellationToken cancellationToken, string input = "")
     {
@@ -118,6 +124,7 @@ internal sealed class InProcessCli : IAsyncDisposable
         services.AddSingleton<ILoggerProvider>(Logs);
 
         services.AddSingleton<IBrowserLauncher>(_browser);
+        services.AddSingleton<IUserFolders>(new TestUserFolders(Downloads));
         services.AddSingleton<IModSource>(provider => new FakeOAuthSource(
             _site,
             provider.GetRequiredService<IHttpClientFactory>(),

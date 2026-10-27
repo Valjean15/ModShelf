@@ -20,7 +20,7 @@ internal static class CliHost
 {
     /// <summary>
     /// The configuration key, or <c>ModShelf__DatabasePath</c> as an environment variable, that moves the
-    /// library database away from its default location.
+    /// library database away from its default location. The settings file, <c>settings.json</c>, moves with it.
     /// </summary>
     public const string DatabasePathKey = "ModShelf:DatabasePath";
 
@@ -70,14 +70,18 @@ internal static class CliHost
         builder.Services.Configure<ConsoleLoggerOptions>(options => options.LogToStandardErrorThreshold = LogLevel.Trace);
         builder.Services.AddSingleton<IHostLifetime, CliHostLifetime>();
 
+        // The settings sit next to the database, so a database moved elsewhere, such as for tests, takes its settings along.
         string? configuredPath = builder.Configuration[DatabasePathKey];
         if (string.IsNullOrWhiteSpace(configuredPath))
         {
             builder.Services.AddLibraryDatabase();
+            builder.Services.AddSettingsFile();
         }
         else
         {
-            builder.Services.AddLibraryDatabase(Path.GetFullPath(configuredPath));
+            string databasePath = Path.GetFullPath(configuredPath);
+            builder.Services.AddLibraryDatabase(databasePath);
+            builder.Services.AddSettingsFile(Path.Combine(Path.GetDirectoryName(databasePath)!, "settings.json"));
         }
 
         builder.Services.AddPlatformServices(SecretStoreOptionsFrom(builder.Configuration));
@@ -89,6 +93,7 @@ internal static class CliHost
         builder.Services.AddModUpdates();
         builder.Services.AddWatchlists();
         builder.Services.AddLibrary();
+        builder.Services.AddSettings();
         builder.Services.AddDirectUrlSource();
         builder.Services.AddNexusSource(NexusOptionsFrom(builder.Configuration));
         if (runDownloads)

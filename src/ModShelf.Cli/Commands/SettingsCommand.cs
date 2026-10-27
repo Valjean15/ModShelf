@@ -1,0 +1,140 @@
+using System.CommandLine;
+
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
+using ModShelf.Application.Settings;
+using ModShelf.Cli.Hosting;
+using ModShelf.Domain.Library;
+
+namespace ModShelf.Cli.Commands;
+
+/// <summary>
+/// <c>settings show</c>, <c>settings set &lt;setting&gt; &lt;value&gt;</c> and <c>settings reset &lt;setting&gt;</c>: the
+/// settings in <c>settings.json</c>, by name.
+/// </summary>
+internal static class SettingsCommand
+{
+    private const string LibraryRoot = "library.root";
+    private const string LibraryFolders = "library.folders";
+    private const string GamePrefix = LibraryFolders + ".";
+    private const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<game>";
+
+    public static Command Create(CliEnvironment environment)
+    {
+        Command show = new("show", "Shows every setting, the ones left at their defaults too, and where they're kept.");
+        show.SetAction((_, cancellationToken) => ShowAsync(environment, cancellationToken));
+
+        Argument<string> setName = new("setting") { Description = $"The setting: {Names}." };
+        Argument<string> value = new("value")
+        {
+            Description = "Its new value: a full path for library.root; a folder pattern, such as \"{source}/{game}/{mod} ({modid})/{file}\", for the others.",
+        };
+        Command set = new("set", "Changes a setting.") { setName, value };
+        set.SetAction((parsed, cancellationToken) => ChangeAsync(environment, parsed.GetValue(setName)!, parsed.GetValue(value), cancellationToken));
+
+        Argument<string> resetName = new("setting") { Description = $"The setting: {Names}." };
+        Command reset = new("reset", "Sets a setting back to its default.") { resetName };
+        reset.SetAction((parsed, cancellationToken) => ChangeAsync(environment, parsed.GetValue(resetName)!, null, cancellationToken));
+
+        return new Command("settings", "Shows and changes the settings: where the library is, and how its folders are named.")
+        {
+            show,
+            set,
+            reset,
+        };
+    }
+
+    private static async Task<int> ShowAsync(CliEnvironment environment, CancellationToken cancellationToken)
+    {
+        using IHost host = environment.BuildHost(false);
+        await host.StartAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            ISettingsService settings = host.Services.GetRequiredService<ISettingsService>();
+            AppSettings stored;
+            try
+            {
+                stored = await settings.GetAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (InvalidDataException exception)
+            {
+                await environment.Error.WriteLineAsync(exception.Message).ConfigureAwait(false);
+                return ExitCodes.Failed;
+            }
+
+            environment.Output.WriteLine($"Settings are kept in {settings.Location}.");
+            string[][] rows =
+            [
+                ["Setting", "Value"],
+                [LibraryRoot, stored.LibraryRoot ?? $"{settings.DefaultLibraryRoot} (default)"],
+                [LibraryFolders, stored.LibraryFolders?.Text ?? $"{FolderPattern.Default.Text} (default)"],
+                .. stored.GameFolders
+                    .OrderBy(game => game.Key, StringComparer.OrdinalIgnoreCase)
+                    .Select(game => new[] { GamePrefix + game.Key, game.Value.Text }),
+            ];
+            TextTable.Write(environment.Output, rows);
+            environment.Output.WriteLine(
+                $"Folder patterns use {FolderPattern.SourceToken}, {FolderPattern.GameToken}, {FolderPattern.ModToken} and "
+                + $"{FolderPattern.ModIdToken}, and end with /{FolderPattern.FileToken}. To change a setting: settings set <setting> <value>");
+            return ExitCodes.Done;
+        }
+        finally
+        {
+            await host.StopAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+    }
+
+    /// <param name="value">The setting's new value, or null to set it back to its default.</param>
+    private static async Task<int> ChangeAsync(CliEnvironment environment, string name, string? value, CancellationToken cancellationToken)
+    {
+        string setting = name.Trim().ToLowerInvariant();
+        string? game = setting.StartsWith(GamePrefix, StringComparison.Ordinal) ? name.Trim()[GamePrefix.Length..] : null;
+        if (setting is not (LibraryRoot or LibraryFolders) && string.IsNullOrWhiteSpace(game))
+        {
+            await environment.Error.WriteLineAsync($"There's no setting called {name}. Settings: {Names}.").ConfigureAwait(false);
+            return ExitCodes.BadInput;
+        }
+
+        using IHost host = environment.BuildHost(false);
+        await host.StartAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            ISettingsService settings = host.Services.GetRequiredService<ISettingsService>();
+            if (setting == LibraryRoot)
+            {
+                await settings.SetLibraryRootAsync(value, cancellationToken).ConfigureAwait(false);
+                string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+                environment.Output.WriteLine(value is null ? $"{LibraryRoot} is back to its default, {root}." : $"{LibraryRoot} is now {root}.");
+            }
+            else
+            {
+                FolderPattern? pattern = value is null ? null : FolderPattern.Parse(value);
+                await settings.SetLibraryFoldersAsync(game, pattern, cancellationToken).ConfigureAwait(false);
+                string named = game is null ? LibraryFolders : GamePrefix + game;
+                environment.Output.WriteLine((pattern, game) switch
+                {
+                    (not null, _) => $"{named} is now {pattern.Text}.",
+                    (null, null) => $"{LibraryFolders} is back to its default, {FolderPattern.Default.Text}.",
+                    (null, _) => $"{named} is gone, so {game}'s files go by {LibraryFolders} again.",
+                });
+            }
+
+            return ExitCodes.Done;
+        }
+        catch (ArgumentException exception)
+        {
+            await environment.Error.WriteLineAsync(exception.MessageForUser()).ConfigureAwait(false);
+            return ExitCodes.BadInput;
+        }
+        catch (Exception exception) when (exception is InvalidOperationException or InvalidDataException)
+        {
+            await environment.Error.WriteLineAsync(exception.Message).ConfigureAwait(false);
+            return ExitCodes.Failed;
+        }
+        finally
+        {
+            await host.StopAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+    }
+}
