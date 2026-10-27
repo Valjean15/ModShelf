@@ -5,19 +5,90 @@ using ModShelf.Application.Library.Ports;
 namespace ModShelf.Application.Tests.Fakes;
 
 /// <summary>
-/// A disk the test says what's on, holding paths up to <see cref="MaxPath"/> characters long.
+/// A disk the test says what's on, holding paths up to <see cref="MaxPath"/> characters long. Moves and deletes can
+/// fail the way the test says.
 /// </summary>
 internal sealed class FakeLibraryStorage : ILibraryStorage
 {
-    private readonly ConcurrentDictionary<string, bool> _files = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, long> _files = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _folders = new(StringComparer.Ordinal);
 
     public int MaxPath { get; init; } = int.MaxValue;
 
-    public void Add(string path) => _files[path] = true;
+    /// <summary>
+    /// What moving or deleting the file at a path throws instead.
+    /// </summary>
+    public ConcurrentDictionary<string, Exception> Failures { get; } = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// Every move, in order.
+    /// </summary>
+    public ConcurrentQueue<(string Source, string Destination)> Moves { get; } = new();
+
+    /// <summary>
+    /// Every folder removed, in order.
+    /// </summary>
+    public ConcurrentQueue<string> RemovedFolders { get; } = new();
+
+    public IReadOnlyCollection<string> Files => [.. _files.Keys];
+
+    /// <summary>
+    /// Puts a file at <paramref name="path"/>, and notes its folders up to the system's root as folders that can be
+    /// removed once empty.
+    /// </summary>
+    public void Add(string path, long size = 100)
+    {
+        _files[path] = size;
+        for (string? folder = Path.GetDirectoryName(path); !string.IsNullOrEmpty(folder); folder = Path.GetDirectoryName(folder))
+        {
+            _folders.Add(folder);
+        }
+    }
 
     public void Remove(string path) => _files.TryRemove(path, out _);
 
     public bool FileExists(string path) => _files.ContainsKey(path);
+
+    public long? FileSize(string path) => _files.TryGetValue(path, out long size) ? size : null;
+
+    public void MoveFile(string source, string destination)
+    {
+        if (Failures.TryGetValue(source, out Exception? failure))
+        {
+            throw failure;
+        }
+
+        if (_files.ContainsKey(destination) || !_files.TryRemove(source, out long size))
+        {
+            throw new IOException($"Can't move {source} to {destination}.");
+        }
+
+        _files[destination] = size;
+        Moves.Enqueue((source, destination));
+    }
+
+    public void DeleteFile(string path)
+    {
+        if (Failures.TryGetValue(path, out Exception? failure))
+        {
+            throw failure;
+        }
+
+        _files.TryRemove(path, out _);
+    }
+
+    public bool RemoveFolderIfEmpty(string path)
+    {
+        string folder = path.EndsWith(Path.DirectorySeparatorChar) ? path : path + Path.DirectorySeparatorChar;
+        if (!_folders.Contains(path) || _files.Keys.Any(file => file.StartsWith(folder, StringComparison.Ordinal)))
+        {
+            return false;
+        }
+
+        _folders.Remove(path);
+        RemovedFolders.Enqueue(path);
+        return true;
+    }
 
     public void EnsurePathFits(string path)
     {
