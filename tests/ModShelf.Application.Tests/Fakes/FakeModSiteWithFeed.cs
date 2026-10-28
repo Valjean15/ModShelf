@@ -55,6 +55,8 @@ internal sealed class FakeModSiteWithFeed(FakeModSite site, TimeProvider timePro
         return Task.FromResult<IReadOnlyList<ModUpdate>>([.. Changes.Where(change => change.Mod.Game == game && change.LastActivityAt >= since)]);
     }
 
+    public Task<IReadOnlyList<GameInfo>> GetGamesAsync(CancellationToken cancellationToken) => site.GetGamesAsync(cancellationToken);
+
     public Task<GameInfo> GetGameAsync(GameRef game, CancellationToken cancellationToken) => site.GetGameAsync(game, cancellationToken);
 
     public Task<ModInfo> GetModAsync(ModRef modRef, CancellationToken cancellationToken) => site.GetModAsync(modRef, cancellationToken);

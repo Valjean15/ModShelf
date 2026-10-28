@@ -13,16 +13,37 @@ namespace ModShelf.Sources.Nexus;
 /// </summary>
 public sealed partial class NexusSource : IModCatalog
 {
+    /// <summary>
+    /// The approved games, from <c>v1/games.json</c>: one request for them all.
+    /// </summary>
+    /// <returns>
+    /// Each game once, in the order the API lists them. One whose domain name isn't one Nexus Mods gives in links is
+    /// left out, since it couldn't be searched.
+    /// </returns>
+    /// <exception cref="HttpRequestException">The API couldn't be reached or refused.</exception>
+    public async Task<IReadOnlyList<GameInfo>> GetGamesAsync(CancellationToken cancellationToken)
+    {
+        NexusGame?[] found = await _api.GetAsync<NexusGame?[]>("v1/games.json", cancellationToken).ConfigureAwait(false);
+        HashSet<string> listed = new(StringComparer.Ordinal);
+        List<GameInfo> games = [];
+        foreach (NexusGame? game in found)
+        {
+            if (NexusLink.GameFromApi(game?.DomainName) is { } domain && listed.Add(domain))
+            {
+                games.Add(ToGameInfo(new GameRef(NexusId, domain), domain, game!));
+            }
+        }
+
+        return games;
+    }
+
     /// <exception cref="ArgumentException">The game isn't Nexus Mods'.</exception>
     /// <exception cref="HttpRequestException">The API couldn't be reached or refused; with 404 when there's no such game.</exception>
     public async Task<GameInfo> GetGameAsync(GameRef game, CancellationToken cancellationToken)
     {
         string domain = NexusLink.ForGame(game);
         NexusGame found = await _api.GetAsync<NexusGame>($"v1/games/{domain}.json", cancellationToken).ConfigureAwait(false);
-        return new GameInfo(
-            game,
-            string.IsNullOrWhiteSpace(found.Name) ? domain : found.Name,
-            WebLink(found.NexusmodsUrl) ?? new Uri(Website, domain));
+        return ToGameInfo(game, domain, found);
     }
 
     /// <exception cref="ArgumentException">The mod isn't Nexus Mods'.</exception>
@@ -92,6 +113,15 @@ public sealed partial class NexusSource : IModCatalog
     }
 
     private static string ModPath(NexusLink mod) => $"v1/games/{mod.Game}/mods/{mod.ModId}";
+
+    /// <summary>
+    /// The game by its name, or its domain name if it has none, with its page, or the page its domain name gives.
+    /// </summary>
+    private static GameInfo ToGameInfo(GameRef game, string domain, NexusGame found)
+        => new(
+            game,
+            string.IsNullOrWhiteSpace(found.Name) ? domain : found.Name,
+            WebLink(found.NexusmodsUrl) ?? new Uri(Website, domain));
 
     /// <param name="replacedBy">The ID of the file Nexus Mods says replaced this one, if any.</param>
     private static ModFile ToModFile(ModRef modRef, NexusLink mod, NexusFile file, long? replacedBy)

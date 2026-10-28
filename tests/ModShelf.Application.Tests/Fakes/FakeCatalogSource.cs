@@ -45,6 +45,9 @@ internal sealed class FakeCatalogSource(SourceId id) : ILinkRecognizer, IModCata
     public Task<RecognizedLink?> RecognizeAsync(Uri link, CancellationToken cancellationToken)
         => Answer(nameof(RecognizeAsync), () => (RecognizedLink?)new RecognizedLink(LinkedFile, "SkyUI_5_2_SE.7z"));
 
+    public Task<IReadOnlyList<GameInfo>> GetGamesAsync(CancellationToken cancellationToken)
+        => Answer(nameof(GetGamesAsync), () => (IReadOnlyList<GameInfo>)[Game]);
+
     public Task<GameInfo> GetGameAsync(GameRef game, CancellationToken cancellationToken)
         => Answer(nameof(GetGameAsync), () => Game);
 

@@ -135,6 +135,34 @@ public abstract class SourceContractTests<TSource>
     }
 
     [Fact]
+    public async Task ListsItsOwnGamesEachOnce()
+    {
+        IModCatalog catalog = Capability<IModCatalog>();
+
+        IReadOnlyList<GameInfo> games = await catalog.GetGamesAsync(TestContext.Current.CancellationToken);
+
+        Assert.NotEmpty(games);
+        Assert.All(games, game => Assert.Equal(ExpectedId, game.Game.Source));
+        Assert.Equal(games.Count, games.Select(game => game.Game).Distinct().Count());
+    }
+
+    [Fact]
+    public async Task ListsTheGamesItsOwnLinksAreTo()
+    {
+        ILinkRecognizer recognizer = Capability<ILinkRecognizer>();
+        IModCatalog catalog = Capability<IModCatalog>();
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+
+        IReadOnlyList<GameInfo> games = await catalog.GetGamesAsync(cancellationToken);
+
+        foreach (Uri link in OwnLinks)
+        {
+            GameRef game = (await recognizer.RecognizeAsync(link, cancellationToken))!.File.Mod.Game;
+            Assert.Contains(games, listed => listed.Game == game);
+        }
+    }
+
+    [Fact]
     public async Task DescribesTheModsItsOwnLinksPointTo()
     {
         ILinkRecognizer recognizer = Capability<ILinkRecognizer>();

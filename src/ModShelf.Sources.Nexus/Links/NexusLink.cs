@@ -95,6 +95,12 @@ internal sealed record NexusLink(string Game, string ModId, string? FileId, bool
     }
 
     /// <summary>
+    /// A game's domain name as the API gives it, such as in the list of games, checked as a link the user gives is.
+    /// </summary>
+    /// <returns>The domain name in lower case, or null when it isn't one Nexus Mods gives.</returns>
+    public static string? GameFromApi(string? game) => game is null ? null : GameDomain(game);
+
+    /// <summary>
     /// The link to a mod as the API names it, such as in the account's tracked mods.
     /// </summary>
     /// <returns>The link, or null when the game or ID aren't ones Nexus Mods gives.</returns>

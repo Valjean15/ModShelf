@@ -76,6 +76,70 @@ public sealed class NexusSourceCatalogTests : IDisposable
     }
 
     [Fact]
+    public async Task ListsEachGameWithItsNameAndPageInOneRequest()
+    {
+        JsonNode stardew = RecordedGame();
+        JsonNode skyrim = RecordedGame();
+        skyrim["name"] = "Skyrim Special Edition";
+        skyrim["domain_name"] = "skyrimspecialedition";
+        skyrim["nexusmods_url"] = "https://www.nexusmods.com/skyrimspecialedition";
+        AnswerGames(stardew, skyrim);
+
+        IReadOnlyList<GameInfo> games = await Source.GetGamesAsync(Cancellation);
+
+        Assert.Equal(
+            [
+                new GameInfo(StardewValley, "Stardew Valley", new Uri("https://www.nexusmods.com/stardewvalley")),
+                new GameInfo(new GameRef(new SourceId("nexus"), "skyrimspecialedition"), "Skyrim Special Edition", new Uri("https://www.nexusmods.com/skyrimspecialedition")),
+            ],
+            games);
+        Assert.Equal("/v1/games.json", Assert.Single(_api.Requests).RequestMessage!.Path);
+    }
+
+    [Fact]
+    public async Task ListsEachGameOnceAndLeavesOutThoseWithoutADomainNameForLinks()
+    {
+        JsonNode again = RecordedGame();
+        again["name"] = "Stardew Valley again";
+        JsonNode shouting = RecordedGame();
+        shouting["domain_name"] = "STARDEWVALLEY";
+        AnswerGames(
+            RecordedGame(),
+            null,
+            JsonNode.Parse("""{"name": "No domain"}"""),
+            JsonNode.Parse("""{"name": "Spaces", "domain_name": "not a domain"}"""),
+            JsonNode.Parse("""{"name": "Blank", "domain_name": ""}"""),
+            again,
+            shouting);
+
+        IReadOnlyList<GameInfo> games = await Source.GetGamesAsync(Cancellation);
+
+        Assert.Equal("Stardew Valley", Assert.Single(games).Name);
+    }
+
+    [Fact]
+    public async Task AListedGameWithoutANameOrPageGoesByItsDomainName()
+    {
+        AnswerGames(JsonNode.Parse("""{"domain_name": "NewGame", "nexusmods_url": "ftp://www.nexusmods.com/newgame"}"""));
+
+        GameInfo game = Assert.Single(await Source.GetGamesAsync(Cancellation));
+
+        Assert.Equal(new GameRef(new SourceId("nexus"), "newgame"), game.Game);
+        Assert.Equal("newgame", game.Name);
+        Assert.Equal(new Uri("https://www.nexusmods.com/newgame"), game.PageUrl);
+    }
+
+    [Fact]
+    public async Task AGameListTheApiRefusesIsAnError()
+    {
+        _api.Answer("/v1/games.json", response => response.WithStatusCode(HttpStatusCode.ServiceUnavailable).WithBody("Down"));
+
+        HttpRequestException refused = await Assert.ThrowsAsync<HttpRequestException>(() => Source.GetGamesAsync(Cancellation));
+
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, refused.StatusCode);
+    }
+
+    [Fact]
     public async Task AModHasItsDetails()
     {
         _api.Serve(RecordedNexusApi.Premium, "mod");
@@ -309,5 +373,17 @@ public sealed class NexusSourceCatalogTests : IDisposable
         }
 
         return newest.Reference.Id;
+    }
+
+    /// <summary>
+    /// The recorded game, as one entry of the list of games. Until the list is recorded, its entries are taken to have
+    /// the same shape as the game answer, as the API documents.
+    /// </summary>
+    private static JsonNode RecordedGame() => RecordedNexusApi.Recording(RecordedNexusApi.Premium, "game")["response"]!["body"]!.DeepClone();
+
+    private void AnswerGames(params JsonNode?[] games)
+    {
+        string body = new JsonArray([.. games.Select(game => game?.DeepClone())]).ToJsonString();
+        _api.Answer("/v1/games.json", response => response.WithStatusCode(HttpStatusCode.OK).WithBody(body));
     }
 }

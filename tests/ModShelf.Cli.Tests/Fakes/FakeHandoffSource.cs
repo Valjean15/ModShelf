@@ -80,6 +80,9 @@ internal sealed class FakeHandoffSource(Uri fileUrl) : ILinkRecognizer, IDownloa
         return Task.FromResult<ResolveResult>(key == GoodKey ? new DownloadTicket(fileUrl) : new HandoffRequired(Page(file.Id)));
     }
 
+    public Task<IReadOnlyList<GameInfo>> GetGamesAsync(CancellationToken cancellationToken)
+        => Task.FromResult<IReadOnlyList<GameInfo>>([new GameInfo(new GameRef(Id, "game"), "Handoff Game")]);
+
     public Task<GameInfo> GetGameAsync(GameRef game, CancellationToken cancellationToken)
         => Task.FromResult(new GameInfo(game, "Handoff Game"));
 

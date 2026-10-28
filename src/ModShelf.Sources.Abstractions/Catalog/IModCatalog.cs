@@ -3,7 +3,8 @@ using ModShelf.Domain.Mods;
 namespace ModShelf.Sources.Abstractions.Catalog;
 
 /// <summary>
-/// Describes the source's games and mods: what a game is called, a mod's details, its files and its changelog.
+/// Describes the source's games and mods: which games it has and what each is called, a mod's details, its files and
+/// its changelog.
 /// </summary>
 /// <remarks>
 /// Each method asks the site afresh, so callers ask only for what they show. Every method refuses a game or mod of
@@ -13,6 +14,11 @@ namespace ModShelf.Sources.Abstractions.Catalog;
 /// </remarks>
 public interface IModCatalog : IModSource
 {
+    /// <returns>
+    /// Every game the site has mods for, each once, in no particular order: a list for the user to pick a game from.
+    /// </returns>
+    Task<IReadOnlyList<GameInfo>> GetGamesAsync(CancellationToken cancellationToken);
+
     Task<GameInfo> GetGameAsync(GameRef game, CancellationToken cancellationToken);
 
     Task<ModInfo> GetModAsync(ModRef modRef, CancellationToken cancellationToken);

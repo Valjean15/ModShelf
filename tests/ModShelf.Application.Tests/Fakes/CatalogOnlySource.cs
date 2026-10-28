@@ -12,6 +12,8 @@ internal sealed class CatalogOnlySource(SourceId id) : IModCatalog
 
     public string DisplayName => Id.Value;
 
+    public Task<IReadOnlyList<GameInfo>> GetGamesAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
+
     public Task<GameInfo> GetGameAsync(GameRef game, CancellationToken cancellationToken) => throw new NotSupportedException();
 
     public Task<ModInfo> GetModAsync(ModRef modRef, CancellationToken cancellationToken) => throw new NotSupportedException();

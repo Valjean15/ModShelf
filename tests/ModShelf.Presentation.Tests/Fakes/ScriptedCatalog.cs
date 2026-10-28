@@ -39,6 +39,8 @@ internal sealed class ScriptedCatalog(SourceId id, string displayName) : IModCat
     /// </summary>
     public ConcurrentQueue<string> Asked { get; } = new();
 
+    public Task<IReadOnlyList<GameInfo>> GetGamesAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
+
     public Task<GameInfo> GetGameAsync(GameRef game, CancellationToken cancellationToken)
     {
         Asked.Enqueue($"GetGameAsync {game.Key}");

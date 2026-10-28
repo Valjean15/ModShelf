@@ -17,8 +17,8 @@
     never written to a file or the screen.
 
 .PARAMETER Account
-    Premium or Free: the kind of account the key belongs to. Premium records the game, mod, file, changelog,
-    update and tracked-mod responses too; Free records only what differs for a free account.
+    Premium or Free: the kind of account the key belongs to. Premium records the game, game list, mod, file,
+    changelog, update and tracked-mod responses too; Free records only what differs for a free account.
 
 .PARAMETER Game
     The game's domain name on Nexus Mods, as in nexusmods.com/<game>/mods/<id>.
@@ -424,6 +424,21 @@ function Limit-Tracked($Body, $Mod) {
     }
 }
 
+# Of the thousands of games, keeps the first three and the recorded one, without their categories, which the tests
+# don't read.
+function Limit-Games($Body, [string] $Game) {
+    if ($Body -isnot [System.Text.Json.Nodes.JsonArray]) { return }
+    for ($index = $Body.Count - 1; $index -ge 0; $index--) {
+        $entry = $Body[$index]
+        if ($index -ge 3 -and -not ($entry -is [System.Text.Json.Nodes.JsonObject] -and (Get-Text $entry['domain_name']) -eq $Game)) {
+            $Body.RemoveAt($index)
+        }
+        elseif ($entry -is [System.Text.Json.Nodes.JsonObject]) {
+            $null = $entry.Remove('categories')
+        }
+    }
+}
+
 # Of the Query type's fields, keeps only "mods": the rest is the whole API, which the tests don't need.
 # Plain assignments only: an if statement's output would unroll the JSON array into a copy.
 function Limit-Schema($Body) {
@@ -641,6 +656,7 @@ try {
     $modPath = "v1/games/$Game/mods/$ModId"
     if ($Account -eq 'Premium') {
         Save-Fixture 'game' (Invoke-Nexus "v1/games/$Game.json")
+        Save-Fixture 'games' (Invoke-Nexus 'v1/games.json') { param($body) Limit-Games $body $Game }
         Save-Fixture 'mod' (Invoke-Nexus "$modPath.json")
 
         $files = Invoke-Nexus "$modPath/files.json"

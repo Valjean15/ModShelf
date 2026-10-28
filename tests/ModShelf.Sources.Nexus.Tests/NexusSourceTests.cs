@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json.Nodes;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -31,6 +32,7 @@ public sealed class NexusSourceTests : SourceContractTests<NexusSource>, IDispos
         _api.Serve(RecordedNexusApi.Premium, "mod");
         _api.Serve(RecordedNexusApi.Premium, "changelogs");
         _api.Serve(RecordedNexusApi.Premium, "updated-1d");
+        ServeGames();
 
         // When the updates were recorded, so the last day's are recent.
         _api.Time.SetUtcNow(new DateTimeOffset(2026, 10, 23, 22, 59, 0, TimeSpan.Zero));
@@ -56,6 +58,15 @@ public sealed class NexusSourceTests : SourceContractTests<NexusSource>, IDispos
     }
 
     protected override NexusSource CreateSource() => _services.GetServices<IModSource>().OfType<NexusSource>().Single();
+
+    /// <summary>
+    /// The list of games, as the recorded game in a list, until the list itself is recorded.
+    /// </summary>
+    private void ServeGames()
+    {
+        JsonNode game = RecordedNexusApi.Recording(RecordedNexusApi.Premium, "game")["response"]!["body"]!;
+        _api.Answer("/v1/games.json", response => response.WithStatusCode(HttpStatusCode.OK).WithBody(new JsonArray(game.DeepClone()).ToJsonString()));
+    }
 
     /// <summary>
     /// Tracked mods as the site keeps them: SMAPI, once tracked, until untracked. Tracking it again, or untracking it

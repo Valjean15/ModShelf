@@ -53,6 +53,9 @@ internal sealed partial class FakeCatalogSite : ILinkRecognizer, IModCatalog, IM
         return Task.FromResult<RecognizedLink?>(new RecognizedLink(File(mod, file), $"file-{file}.zip"));
     }
 
+    public Task<IReadOnlyList<GameInfo>> GetGamesAsync(CancellationToken cancellationToken)
+        => Task.FromResult<IReadOnlyList<GameInfo>>([new GameInfo(new GameRef(Id, "game"), "Example Game", new Uri($"https://{Host}/game"))]);
+
     public Task<GameInfo> GetGameAsync(GameRef game, CancellationToken cancellationToken)
         => Task.FromResult(new GameInfo(game, "Example Game", new Uri($"https://{Host}/game")));
 

@@ -105,6 +105,9 @@ internal sealed class FakeModSite : ILinkRecognizer, IModCatalog
         return Task.FromResult<RecognizedLink?>(new RecognizedLink(File(parts[0], parts[1]), suggestedFileName: null, isHandoff: isHandoff));
     }
 
+    public Task<IReadOnlyList<GameInfo>> GetGamesAsync(CancellationToken cancellationToken)
+        => AnswerAsync(nameof(GetGamesAsync), null, () => (IReadOnlyList<GameInfo>)[new GameInfo(Game, "Skyrim Special Edition")]);
+
     public Task<GameInfo> GetGameAsync(GameRef game, CancellationToken cancellationToken)
         => AnswerAsync(nameof(GetGameAsync), null, () => new GameInfo(game, "Skyrim Special Edition"));
 
