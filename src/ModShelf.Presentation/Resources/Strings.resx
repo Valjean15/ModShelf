@@ -590,4 +590,284 @@
     <value>The site couldn't give the changelog: {0}</value>
     <comment>{0} is the site's reason.</comment>
   </data>
+  <data name="BrowseGameHint" xml:space="preserve">
+    <value>Choose a game</value>
+    <comment>The game box's hint.</comment>
+  </data>
+  <data name="BrowseSearchHint" xml:space="preserve">
+    <value>Words in the mods' names, or a link to a mod</value>
+    <comment>The search box's hint.</comment>
+  </data>
+  <data name="BrowseSearch" xml:space="preserve">
+    <value>Search</value>
+    <comment>Searches the chosen game's mods, or opens the mod a link is to.</comment>
+  </data>
+  <data name="BrowseAuthorHint" xml:space="preserve">
+    <value>Author</value>
+    <comment>The box for searching by author.</comment>
+  </data>
+  <data name="BrowseAdultContent" xml:space="preserve">
+    <value>Include adult content</value>
+    <comment>Whether a search includes mods with adult content.</comment>
+  </data>
+  <data name="BrowseShowTracked" xml:space="preserve">
+    <value>Tracked mods</value>
+    <comment>Lists the mods the linked account tracks on the site, of the chosen game.</comment>
+  </data>
+  <data name="BrowseLoadMore" xml:space="preserve">
+    <value>Load more</value>
+    <comment>Lists the next page of mods.</comment>
+  </data>
+  <data name="BrowseRetry" xml:space="preserve">
+    <value>Try again</value>
+    <comment>Reads the games again after it failed.</comment>
+  </data>
+  <data name="BrowseGoToAccounts" xml:space="preserve">
+    <value>Go to Accounts</value>
+    <comment>Shows the Accounts screen, to link an account.</comment>
+  </data>
+  <data name="BrowseBack" xml:space="preserve">
+    <value>Back to the list</value>
+    <comment>Closes the mod, back to the search's results or the tracked mods.</comment>
+  </data>
+  <data name="BrowseSortBestMatch" xml:space="preserve">
+    <value>Best match</value>
+    <comment>A sort: the best matches for the words first; the most endorsed without words.</comment>
+  </data>
+  <data name="BrowseSortMostEndorsed" xml:space="preserve">
+    <value>Most endorsed</value>
+    <comment>A sort.</comment>
+  </data>
+  <data name="BrowseSortLeastEndorsed" xml:space="preserve">
+    <value>Least endorsed</value>
+    <comment>A sort.</comment>
+  </data>
+  <data name="BrowseSortMostDownloaded" xml:space="preserve">
+    <value>Most downloaded</value>
+    <comment>A sort.</comment>
+  </data>
+  <data name="BrowseSortLeastDownloaded" xml:space="preserve">
+    <value>Least downloaded</value>
+    <comment>A sort.</comment>
+  </data>
+  <data name="BrowseSortRecentlyUpdated" xml:space="preserve">
+    <value>Recently updated</value>
+    <comment>A sort.</comment>
+  </data>
+  <data name="BrowseSortLongestSinceUpdated" xml:space="preserve">
+    <value>Longest since updated</value>
+    <comment>A sort.</comment>
+  </data>
+  <data name="BrowseSortNewest" xml:space="preserve">
+    <value>Newest</value>
+    <comment>A sort: the most recently published first.</comment>
+  </data>
+  <data name="BrowseSortOldest" xml:space="preserve">
+    <value>Oldest</value>
+    <comment>A sort: the first published first.</comment>
+  </data>
+  <data name="BrowseGameOnSite" xml:space="preserve">
+    <value>{0} ({1})</value>
+    <comment>A game when several sites can search: {0} is the game's name, {1} the site's.</comment>
+  </data>
+  <data name="BrowseNoSites" xml:space="preserve">
+    <value>No site ModShelf knows can search its mods.</value>
+    <comment>When no source can search.</comment>
+  </data>
+  <data name="BrowseAccountNeeded" xml:space="preserve">
+    <value>{0} needs your account linked, or refused the one linked. Link it on the Accounts screen, then try again.</value>
+    <comment>{0} is the site's name.</comment>
+  </data>
+  <data name="BrowseGamesFailed" xml:space="preserve">
+    <value>Couldn't read the games from {0}: {1}</value>
+    <comment>{0} is the site's name, {1} its reason.</comment>
+  </data>
+  <data name="BrowseSearchFailed" xml:space="preserve">
+    <value>{0} couldn't search: {1}</value>
+    <comment>{0} is the site's name, {1} its reason.</comment>
+  </data>
+  <data name="BrowseTrackedFailed" xml:space="preserve">
+    <value>{0} couldn't list your tracked mods: {1}</value>
+    <comment>{0} is the site's name, {1} its reason.</comment>
+  </data>
+  <data name="BrowseOpenFailed" xml:space="preserve">
+    <value>{0} couldn't give the mod: {1}</value>
+    <comment>{0} is the site's name, {1} its reason.</comment>
+  </data>
+  <data name="BrowseUnknownLink" xml:space="preserve">
+    <value>No site ModShelf knows has mods at that link.</value>
+    <comment>When no source recognizes a pasted link, or its site can't describe its mods.</comment>
+  </data>
+  <data name="BrowseNoSuchMod" xml:space="preserve">
+    <value>The site has no such mod.</value>
+    <comment>When the site answers 404 for a mod.</comment>
+  </data>
+  <data name="BrowseChooseGame" xml:space="preserve">
+    <value>Choose a game to search its mods.</value>
+    <comment>When searching without a game.</comment>
+  </data>
+  <data name="BrowseNoMatches" xml:space="preserve">
+    <value>No mods match.</value>
+    <comment>A search that found nothing.</comment>
+  </data>
+  <data name="BrowseOneMatch" xml:space="preserve">
+    <value>1 mod matches.</value>
+    <comment>A search that found one mod.</comment>
+  </data>
+  <data name="BrowseMatches" xml:space="preserve">
+    <value>{0:N0} mods match.</value>
+    <comment>{0} is how many mods the search found.</comment>
+  </data>
+  <data name="BrowseTrackedNone" xml:space="preserve">
+    <value>You track no mods of {0} on {1}.</value>
+    <comment>{0} is the game's name, {1} the site's.</comment>
+  </data>
+  <data name="BrowseTrackedOne" xml:space="preserve">
+    <value>You track 1 mod of {0} on {1}.</value>
+    <comment>{0} is the game's name, {1} the site's.</comment>
+  </data>
+  <data name="BrowseTracked" xml:space="preserve">
+    <value>You track {0:N0} mods of {1} on {2}.</value>
+    <comment>{0} is how many, {1} the game's name, {2} the site's.</comment>
+  </data>
+  <data name="BrowseModNumbered" xml:space="preserve">
+    <value>Mod {0}</value>
+    <comment>A mod whose name couldn't be read; {0} is its ID.</comment>
+  </data>
+  <data name="BrowseModUnreadable" xml:space="preserve">
+    <value>Couldn't read its details: {0}</value>
+    <comment>{0} is the site's reason.</comment>
+  </data>
+  <data name="BrowseDownloadedTag" xml:space="preserve">
+    <value>Downloaded</value>
+    <comment>The library has files of the mod.</comment>
+  </data>
+  <data name="BrowseWatchedTag" xml:space="preserve">
+    <value>Watched</value>
+    <comment>The library watches the mod for updates.</comment>
+  </data>
+  <data name="BrowseAdultTag" xml:space="preserve">
+    <value>Adult content</value>
+    <comment>The mod has adult content.</comment>
+  </data>
+  <data name="BrowseHiddenTag" xml:space="preserve">
+    <value>Hidden or removed</value>
+    <comment>The mod is hidden or removed on its site.</comment>
+  </data>
+  <data name="BrowseUpdated" xml:space="preserve">
+    <value>Updated {0}</value>
+    <comment>{0} is the date the mod last changed.</comment>
+  </data>
+  <data name="BrowseOneDownload" xml:space="preserve">
+    <value>1 download</value>
+    <comment>A mod's downloads.</comment>
+  </data>
+  <data name="BrowseDownloads" xml:space="preserve">
+    <value>{0:N0} downloads</value>
+    <comment>{0} is how many times the mod was downloaded.</comment>
+  </data>
+  <data name="BrowseOneEndorsement" xml:space="preserve">
+    <value>1 endorsement</value>
+    <comment>A mod's endorsements.</comment>
+  </data>
+  <data name="BrowseEndorsements" xml:space="preserve">
+    <value>{0:N0} endorsements</value>
+    <comment>{0} is how many users endorsed the mod.</comment>
+  </data>
+  <data name="BrowseUnavailable" xml:space="preserve">
+    <value>The mod is hidden or removed on its site, so its files can't be downloaded.</value>
+    <comment>On a mod that isn't available.</comment>
+  </data>
+  <data name="BrowseTrack" xml:space="preserve">
+    <value>Track on {0}</value>
+    <comment>Tracks the mod on its site; {0} is the site's name.</comment>
+  </data>
+  <data name="BrowseUntrack" xml:space="preserve">
+    <value>Untrack on {0}</value>
+    <comment>Stops tracking the mod on its site; {0} is the site's name.</comment>
+  </data>
+  <data name="BrowseTrackedNote" xml:space="preserve">
+    <value>Tracked on {0}.</value>
+    <comment>{0} is the site's name.</comment>
+  </data>
+  <data name="BrowseUntrackedNote" xml:space="preserve">
+    <value>No longer tracked on {0}.</value>
+    <comment>{0} is the site's name.</comment>
+  </data>
+  <data name="BrowseTrackFailed" xml:space="preserve">
+    <value>{0} couldn't change your tracked mods: {1}</value>
+    <comment>{0} is the site's name, {1} its reason.</comment>
+  </data>
+  <data name="BrowseWatchedNote" xml:space="preserve">
+    <value>Watched for updates, in the library.</value>
+    <comment>After watching a mod.</comment>
+  </data>
+  <data name="BrowseUnwatchedNote" xml:space="preserve">
+    <value>No longer watched for updates.</value>
+    <comment>After unwatching a mod.</comment>
+  </data>
+  <data name="BrowseWatchFailed" xml:space="preserve">
+    <value>{0} couldn't give the mod's details to watch it: {1}</value>
+    <comment>{0} is the site's name, {1} its reason.</comment>
+  </data>
+  <data name="BrowseChangelog" xml:space="preserve">
+    <value>Changelog</value>
+    <comment>The heading of a mod's changelog.</comment>
+  </data>
+  <data name="BrowseNoChangelog" xml:space="preserve">
+    <value>The mod has no changelog.</value>
+    <comment>A mod without a changelog.</comment>
+  </data>
+  <data name="BrowseNoFiles" xml:space="preserve">
+    <value>The site lists no files for this mod.</value>
+    <comment>A mod without files.</comment>
+  </data>
+  <data name="BrowseShowOneMoreFile" xml:space="preserve">
+    <value>Show 1 more file: an old version, archived, or in no section</value>
+    <comment>Shows the files not shown.</comment>
+  </data>
+  <data name="BrowseShowMoreFiles" xml:space="preserve">
+    <value>Show {0:N0} more files: old versions, archived, or in no section</value>
+    <comment>{0} is how many files aren't shown.</comment>
+  </data>
+  <data name="BrowseHideMoreFiles" xml:space="preserve">
+    <value>Hide old versions, archived files and files in no section</value>
+    <comment>Hides those files again.</comment>
+  </data>
+  <data name="BrowseFileInLibrary" xml:space="preserve">
+    <value>In the library</value>
+    <comment>The library has the file.</comment>
+  </data>
+  <data name="BrowseFileLinked" xml:space="preserve">
+    <value>The link's file</value>
+    <comment>The file the pasted link is to.</comment>
+  </data>
+  <data name="FilesMain" xml:space="preserve">
+    <value>Main files</value>
+    <comment>A section of a mod's files.</comment>
+  </data>
+  <data name="FilesUpdate" xml:space="preserve">
+    <value>Updates</value>
+    <comment>A section of a mod's files.</comment>
+  </data>
+  <data name="FilesOptional" xml:space="preserve">
+    <value>Optional files</value>
+    <comment>A section of a mod's files.</comment>
+  </data>
+  <data name="FilesMiscellaneous" xml:space="preserve">
+    <value>Miscellaneous files</value>
+    <comment>A section of a mod's files.</comment>
+  </data>
+  <data name="FilesOldVersion" xml:space="preserve">
+    <value>Old versions</value>
+    <comment>A section of a mod's files.</comment>
+  </data>
+  <data name="FilesArchived" xml:space="preserve">
+    <value>Archived files</value>
+    <comment>A section of a mod's files.</comment>
+  </data>
+  <data name="FilesUnknown" xml:space="preserve">
+    <value>Files in no section</value>
+    <comment>A section of a mod's files.</comment>
+  </data>
 </root>

@@ -6,7 +6,8 @@ using ModShelf.Sources.Abstractions.Catalog;
 namespace ModShelf.Presentation.Tests.Fakes;
 
 /// <summary>
-/// A mod site that names its games and gives its mods' changelogs as the test says, recording what it was asked.
+/// A mod site that names its games, and gives its mods' details and changelogs, as the test says, recording what it was
+/// asked.
 /// </summary>
 internal sealed class ScriptedCatalog(SourceId id, string displayName) : IModCatalog
 {
@@ -23,6 +24,11 @@ internal sealed class ScriptedCatalog(SourceId id, string displayName) : IModCat
     /// Each mod's changelog by its ID; a mod not here has an empty one.
     /// </summary>
     public ConcurrentDictionary<string, IReadOnlyList<ModChangelog>> Changelogs { get; } = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// Each mod's details by its ID; a mod not here doesn't exist.
+    /// </summary>
+    public ConcurrentDictionary<string, ModInfo> Mods { get; } = new(StringComparer.Ordinal);
 
     /// <summary>
     /// What asking the site throws, such as a refused account; null for nothing.
@@ -52,7 +58,18 @@ internal sealed class ScriptedCatalog(SourceId id, string displayName) : IModCat
         return HoldGames is { } hold ? NameAfterAsync(hold.Task, game) : Name(game);
     }
 
-    public Task<ModInfo> GetModAsync(ModRef modRef, CancellationToken cancellationToken) => throw new NotSupportedException();
+    public Task<ModInfo> GetModAsync(ModRef modRef, CancellationToken cancellationToken)
+    {
+        Asked.Enqueue($"GetModAsync {modRef.Id}");
+        if (Refusal is not null)
+        {
+            return Task.FromException<ModInfo>(Refusal);
+        }
+
+        return Mods.TryGetValue(modRef.Id, out ModInfo? mod)
+            ? Task.FromResult(mod)
+            : Task.FromException<ModInfo>(new HttpRequestException("No Mod Found", null, System.Net.HttpStatusCode.NotFound));
+    }
 
     public Task<IReadOnlyList<ModFile>> GetFilesAsync(ModRef modRef, CancellationToken cancellationToken) => throw new NotSupportedException();
 

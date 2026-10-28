@@ -1,7 +1,276 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sys="using:System"
              xmlns:vm="using:ModShelf.Presentation.ViewModels"
+             xmlns:res="using:ModShelf.Presentation.Resources"
+             xmlns:catalog="using:ModShelf.Sources.Abstractions.Catalog"
              x:Class="ModShelf.Desktop.Views.BrowseView"
              x:DataType="vm:BrowseViewModel">
-    <TextBlock Classes="heading" Text="{Binding Title}" />
+
+    <DockPanel>
+        <TextBlock DockPanel.Dock="Top" Classes="heading" Text="{Binding Title}" />
+
+        <!-- The game, and what to look for in it: words, or a link to a mod. -->
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="260,*,Auto" ColumnSpacing="8">
+            <AutoCompleteBox ItemsSource="{Binding Games}"
+                             SelectedItem="{Binding Game}"
+                             FilterMode="Contains"
+                             PlaceholderText="{x:Static res:Strings.BrowseGameHint}"
+                             IsEnabled="{Binding !IsReadingGames}" />
+            <TextBox Grid.Column="1"
+                     Text="{Binding SearchText}"
+                     PlaceholderText="{x:Static res:Strings.BrowseSearchHint}">
+                <TextBox.KeyBindings>
+                    <KeyBinding Gesture="Enter" Command="{Binding SearchCommand}" />
+                </TextBox.KeyBindings>
+            </TextBox>
+            <Button Grid.Column="2"
+                    Classes="accent"
+                    Content="{x:Static res:Strings.BrowseSearch}"
+                    Command="{Binding SearchCommand}" />
+        </Grid>
+
+        <!-- How to search, and the tracked mods instead. -->
+        <WrapPanel DockPanel.Dock="Top" Margin="0,8,0,0" ItemSpacing="8" LineSpacing="8">
+            <ComboBox MinWidth="200" ItemsSource="{Binding Sorts}" SelectedItem="{Binding SelectedSort}" />
+            <TextBox Width="200" Text="{Binding Author}" PlaceholderText="{x:Static res:Strings.BrowseAuthorHint}">
+                <TextBox.KeyBindings>
+                    <KeyBinding Gesture="Enter" Command="{Binding SearchCommand}" />
+                </TextBox.KeyBindings>
+            </TextBox>
+            <CheckBox Content="{x:Static res:Strings.BrowseAdultContent}" IsChecked="{Binding IncludeAdultContent}" />
+            <Button Content="{x:Static res:Strings.BrowseShowTracked}" Command="{Binding ShowTrackedCommand}" />
+        </WrapPanel>
+
+        <Panel DockPanel.Dock="Top" Margin="0,12,0,0">
+            <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsReadingGames}" />
+            <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+        </Panel>
+
+        <!-- What went wrong, with what the user can do about it. -->
+        <Grid DockPanel.Dock="Top"
+              Margin="0,8,0,0"
+              ColumnDefinitions="*,Auto,Auto"
+              ColumnSpacing="8"
+              IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <TextBlock Classes="problem" VerticalAlignment="Center" TextWrapping="Wrap" Text="{Binding Problem}" />
+            <Button Grid.Column="1"
+                    Content="{x:Static res:Strings.BrowseGoToAccounts}"
+                    Command="{Binding GoToAccountsCommand}"
+                    IsVisible="{Binding NeedsAccount}" />
+            <Button Grid.Column="2"
+                    Content="{x:Static res:Strings.BrowseRetry}"
+                    Command="{Binding ReadGamesCommand}"
+                    IsVisible="{Binding IsGamesProblem}" />
+        </Grid>
+
+        <Panel Margin="0,12,0,0">
+            <!-- The search's results, or the tracked mods. Clicking a mod opens it. -->
+            <DockPanel IsVisible="{Binding !IsModOpen}">
+                <TextBlock DockPanel.Dock="Top" Classes="note" Text="{Binding ResultsText}" />
+                <Button DockPanel.Dock="Bottom"
+                        Margin="0,8,0,0"
+                        HorizontalAlignment="Center"
+                        Content="{x:Static res:Strings.BrowseLoadMore}"
+                        Command="{Binding LoadMoreCommand}"
+                        IsVisible="{Binding HasMore}" />
+
+                <ListBox Classes="rows browse" ItemsSource="{Binding Results}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:BrowseModViewModel">
+                            <Button Classes="row" Command="{Binding OpenCommand}">
+                                <StackPanel Spacing="2">
+                                    <WrapPanel ItemSpacing="8">
+                                        <TextBlock FontWeight="SemiBold" Text="{Binding Name}" />
+                                        <TextBlock Classes="note" Text="{Binding AuthorText}" />
+                                        <Border Classes="tag" IsVisible="{Binding IsDownloaded}">
+                                            <TextBlock Text="{x:Static res:Strings.BrowseDownloadedTag}" />
+                                        </Border>
+                                        <Border Classes="tag" IsVisible="{Binding IsWatched}">
+                                            <TextBlock Text="{x:Static res:Strings.BrowseWatchedTag}" />
+                                        </Border>
+                                        <Border Classes="tag" IsVisible="{Binding HasAdultContent}">
+                                            <TextBlock Text="{x:Static res:Strings.BrowseAdultTag}" />
+                                        </Border>
+                                        <Border Classes="tag" IsVisible="{Binding IsHidden}">
+                                            <TextBlock Text="{x:Static res:Strings.BrowseHiddenTag}" />
+                                        </Border>
+                                    </WrapPanel>
+                                    <TextBlock TextWrapping="Wrap"
+                                               MaxLines="2"
+                                               TextTrimming="CharacterEllipsis"
+                                               Text="{Binding Summary}"
+                                               IsVisible="{Binding Summary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                    <WrapPanel ItemSpacing="16">
+                                        <TextBlock Classes="note" Text="{Binding VersionText}" />
+                                        <TextBlock Classes="note" Text="{Binding UpdatedText}" />
+                                        <TextBlock Classes="note" Text="{Binding DownloadsText}" />
+                                        <TextBlock Classes="note" Text="{Binding EndorsementsText}" />
+                                    </WrapPanel>
+                                    <TextBlock Classes="problem"
+                                               TextWrapping="Wrap"
+                                               Text="{Binding Problem}"
+                                               IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                </StackPanel>
+                            </Button>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+
+            <!-- The mod opened, in place of the list. -->
+            <DockPanel IsVisible="{Binding IsModOpen}">
+                <Button DockPanel.Dock="Top"
+                        HorizontalAlignment="Left"
+                        Content="{x:Static res:Strings.BrowseBack}"
+                        Command="{Binding BackCommand}" />
+
+                <ScrollViewer Margin="0,12,0,0">
+                    <ContentControl Content="{Binding Mod}">
+                        <ContentControl.ContentTemplate>
+                            <DataTemplate x:DataType="vm:ModPageViewModel">
+                                <StackPanel Spacing="12" Margin="0,0,16,0">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                        <StackPanel Spacing="4">
+                                            <WrapPanel ItemSpacing="8">
+                                                <TextBlock Classes="subheading" TextWrapping="Wrap" Text="{Binding Name}" />
+                                                <Border Classes="tag" VerticalAlignment="Center" IsVisible="{Binding IsDownloaded}">
+                                                    <TextBlock Text="{x:Static res:Strings.BrowseDownloadedTag}" />
+                                                </Border>
+                                                <Border Classes="tag" VerticalAlignment="Center" IsVisible="{Binding IsWatched}">
+                                                    <TextBlock Text="{x:Static res:Strings.BrowseWatchedTag}" />
+                                                </Border>
+                                                <Border Classes="tag" VerticalAlignment="Center" IsVisible="{Binding HasAdultContent}">
+                                                    <TextBlock Text="{x:Static res:Strings.BrowseAdultTag}" />
+                                                </Border>
+                                            </WrapPanel>
+                                            <WrapPanel ItemSpacing="16">
+                                                <TextBlock Classes="note" Text="{Binding AuthorText}" />
+                                                <TextBlock Classes="note" Text="{Binding GameName}" />
+                                                <TextBlock Classes="note" Text="{Binding VersionText}" />
+                                                <TextBlock Classes="note" Text="{Binding UpdatedText}" />
+                                                <TextBlock Classes="note" Text="{Binding DownloadsText}" />
+                                                <TextBlock Classes="note" Text="{Binding EndorsementsText}" />
+                                            </WrapPanel>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
+                                            <Button Content="{x:Static res:Strings.LibraryOpenPage}" Command="{Binding OpenPageCommand}" />
+                                            <Button Command="{Binding ToggleWatchCommand}">
+                                                <Panel>
+                                                    <TextBlock Text="{x:Static res:Strings.LibraryWatch}" IsVisible="{Binding !IsWatched}" />
+                                                    <TextBlock Text="{x:Static res:Strings.LibraryUnwatch}" IsVisible="{Binding IsWatched}" />
+                                                </Panel>
+                                            </Button>
+                                            <Button Command="{Binding ToggleTrackCommand}" IsVisible="{Binding CanTrack}">
+                                                <Panel>
+                                                    <TextBlock Text="{Binding TrackText}" IsVisible="{Binding !IsTracked}" />
+                                                    <TextBlock Text="{Binding UntrackText}" IsVisible="{Binding IsTracked}" />
+                                                </Panel>
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <TextBlock TextWrapping="Wrap"
+                                               Text="{Binding Summary}"
+                                               IsVisible="{Binding Summary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                    <TextBlock Classes="problem"
+                                               TextWrapping="Wrap"
+                                               Text="{x:Static res:Strings.BrowseUnavailable}"
+                                               IsVisible="{Binding IsUnavailable}" />
+                                    <TextBlock Classes="note"
+                                               Classes.problem="{Binding IsNoteAProblem}"
+                                               TextWrapping="Wrap"
+                                               Text="{Binding Note}"
+                                               IsVisible="{Binding Note, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+                                    <!-- The files, by section. Their buttons line up through shared widths. -->
+                                    <TextBlock Classes="note" Text="{x:Static res:Strings.BrowseNoFiles}" IsVisible="{Binding !HasFiles}" />
+                                    <ItemsControl Grid.IsSharedSizeScope="True" ItemsSource="{Binding Sections}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:ModFileSectionViewModel">
+                                                <StackPanel Spacing="4" Margin="0,4,0,8">
+                                                    <TextBlock FontWeight="SemiBold" Text="{Binding Title}" />
+                                                    <ItemsControl ItemsSource="{Binding Files}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate x:DataType="vm:ModFileViewModel">
+                                                                <Border Classes="file">
+                                                                    <Grid ColumnSpacing="16">
+                                                                        <Grid.ColumnDefinitions>
+                                                                            <ColumnDefinition Width="*" />
+                                                                            <ColumnDefinition Width="Auto" SharedSizeGroup="FileButtons" />
+                                                                        </Grid.ColumnDefinitions>
+                                                                        <StackPanel Spacing="2">
+                                                                            <WrapPanel ItemSpacing="8">
+                                                                                <TextBlock Text="{Binding Name}" />
+                                                                                <Border Classes="tag" IsVisible="{Binding IsInLibrary}">
+                                                                                    <TextBlock Text="{x:Static res:Strings.BrowseFileInLibrary}" />
+                                                                                </Border>
+                                                                                <Border Classes="tag" IsVisible="{Binding IsLinked}">
+                                                                                    <TextBlock Text="{x:Static res:Strings.BrowseFileLinked}" />
+                                                                                </Border>
+                                                                            </WrapPanel>
+                                                                            <WrapPanel ItemSpacing="16">
+                                                                                <TextBlock Classes="note" Text="{Binding FileName}" />
+                                                                                <TextBlock Classes="note" Text="{Binding VersionText}" />
+                                                                                <TextBlock Classes="note" Text="{Binding SizeText}" />
+                                                                                <TextBlock Classes="note" Text="{Binding UploadedText}" />
+                                                                            </WrapPanel>
+                                                                            <TextBlock Classes="note"
+                                                                                       Classes.problem="{Binding IsNoteAProblem}"
+                                                                                       TextWrapping="Wrap"
+                                                                                       Text="{Binding Note}"
+                                                                                       IsVisible="{Binding Note, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                                                        </StackPanel>
+                                                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                                                            <Button Content="{x:Static res:Strings.DownloadsAddToFolder}" Command="{Binding SaveToFolderCommand}" />
+                                                                            <Button Classes="accent" Content="{x:Static res:Strings.UpdateDownload}" Command="{Binding DownloadCommand}" />
+                                                                        </StackPanel>
+                                                                    </Grid>
+                                                                </Border>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <Button HorizontalAlignment="Left"
+                                            Content="{Binding MoreFilesText}"
+                                            Command="{Binding ToggleMoreFilesCommand}"
+                                            IsVisible="{Binding HasMoreFiles}" />
+
+                                    <!-- Each version's changes. -->
+                                    <Expander HorizontalAlignment="Stretch"
+                                              Header="{x:Static res:Strings.BrowseChangelog}"
+                                              IsVisible="{Binding HasChangelog}">
+                                        <ItemsControl ItemsSource="{Binding Changelog}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="catalog:ModChangelog">
+                                                    <StackPanel Spacing="2" Margin="0,0,0,8">
+                                                        <TextBlock FontWeight="SemiBold" Text="{Binding Version}" />
+                                                        <ItemsControl ItemsSource="{Binding Changes}">
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate x:DataType="sys:String">
+                                                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                                                        <TextBlock Text="•" />
+                                                                        <TextBlock Grid.Column="1" TextWrapping="Wrap" Text="{Binding}" />
+                                                                    </Grid>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Expander>
+                                    <TextBlock Classes="note" Text="{x:Static res:Strings.BrowseNoChangelog}" IsVisible="{Binding !HasChangelog}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ContentControl.ContentTemplate>
+                    </ContentControl>
+                </ScrollViewer>
+            </DockPanel>
+        </Panel>
+    </DockPanel>
 </UserControl>

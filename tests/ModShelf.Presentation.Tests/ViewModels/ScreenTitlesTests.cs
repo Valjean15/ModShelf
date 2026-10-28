@@ -12,7 +12,7 @@ public sealed class ScreenTitlesTests
     {
         { new LibraryHarness().Screen, Screen.Library, "Library" },
         { new UpdatesHarness().Screen, Screen.Updates, "Updates" },
-        { new BrowseViewModel(), Screen.Browse, "Browse" },
+        { new BrowseHarness().Screen, Screen.Browse, "Browse" },
         { new DownloadsHarness().Screen, Screen.Downloads, "Downloads" },
         { new AccountsViewModel(), Screen.Accounts, "Accounts" },
         { new SettingsViewModel(), Screen.Settings, "Settings" },

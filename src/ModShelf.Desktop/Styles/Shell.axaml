@@ -1,4 +1,4 @@
-<!-- The look of the main window's sidebar, and of what the screens share: headings, notes, problems and lists. -->
+<!-- The look of the main window's sidebar, and of what the screens share: headings, notes, problems, lists and tags. -->
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
@@ -43,6 +43,39 @@
 
     <Style Selector="ListBox.rows ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter, ListBox.rows ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <!-- A list whose rows are buttons, such as the mods a search found: the button pads the row instead. -->
+    <Style Selector="ListBox.browse ListBoxItem">
+        <Setter Property="Padding" Value="0,2" />
+    </Style>
+
+    <!-- A row the user clicks to open, such as a mod a search found. -->
+    <Style Selector="Button.row">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Padding" Value="12,10" />
+    </Style>
+
+    <!-- A short label beside a name, such as "Watched". -->
+    <Style Selector="Border.tag">
+        <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColor}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Padding" Value="6,0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Border.tag TextBlock">
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <!-- One of a mod's files, in its section. -->
+    <Style Selector="Border.file">
+        <Setter Property="Padding" Value="12,8" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseLowBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
     </Style>
 
     <Style Selector="Button.sidebarToggle">

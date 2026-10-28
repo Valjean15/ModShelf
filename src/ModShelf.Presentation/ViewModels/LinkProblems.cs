@@ -31,7 +31,7 @@ internal static class LinkProblems
     /// <summary>
     /// The exception's message without the "(Parameter 'name')" .NET appends, which means nothing to the user.
     /// </summary>
-    private static string MessageForUser(ArgumentException exception)
+    internal static string MessageForUser(ArgumentException exception)
         => exception.ParamName is null
             ? exception.Message
             : exception.Message.Replace($" (Parameter '{exception.ParamName}')", string.Empty, StringComparison.Ordinal);
