@@ -26,8 +26,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
 {
     private readonly IDownloadService _downloads;
     private readonly ILibraryDownloads _library;
-    private readonly ILinkDownloads _links;
-    private readonly IDialogService _dialogs;
+    private readonly FolderDownloads _folders;
     private readonly ISourceRegistry _sources;
     private readonly IUiThread _uiThread;
     private readonly ILogger<DownloadsViewModel> _logger;
@@ -56,8 +55,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
 
         _downloads = downloads;
         _library = library;
-        _links = links;
-        _dialogs = dialogs;
+        _folders = new FolderDownloads(links, dialogs);
         _sources = sources;
         _uiThread = uiThread;
         _logger = logger;
@@ -165,26 +163,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
     private Task AddToFolderAsync(CancellationToken cancellationToken)
         => AddingAsync(
             library: false,
-            async link =>
-            {
-                if (await _dialogs.PickFolderAsync(Strings.ChooseFolderTitle, cancellationToken) is not { } picked)
-                {
-                    return null;
-                }
-
-                string folder = Path.TrimEndingDirectorySeparator(picked);
-                try
-                {
-                    return await _links.AddAsync(link, folder, null, cancellationToken);
-                }
-                catch (ArgumentException exception) when (exception.ParamName == "fileName")
-                {
-                    TextQuestion question = new(Strings.NameTheFileTitle, Strings.NameTheFileMessage, Strings.NameTheFileHint, Strings.NameTheFileConfirm);
-                    return await _dialogs.AskTextAsync(question, cancellationToken) is { } name && !string.IsNullOrWhiteSpace(name)
-                        ? await _links.AddAsync(link, folder, name.Trim(), cancellationToken)
-                        : null;
-                }
-            },
+            link => _folders.AddAsync(link, cancellationToken),
             cancellationToken);
 
     /// <summary>
