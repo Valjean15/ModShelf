@@ -33,6 +33,22 @@ public interface IWatchlists
     /// Stops following the mod the link is to. Unfollowing one not followed changes nothing.
     /// </summary>
     /// <returns>The mod no longer followed.</returns>
-    /// <inheritdoc cref="WatchAsync" path="/exception"/>
+    /// <inheritdoc cref="WatchAsync(Uri, CancellationToken)" path="/exception"/>
     Task<ModRef> UnwatchAsync(Uri link, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Follows a mod by reference, such as one a search found. Following one already followed changes nothing.
+    /// </summary>
+    /// <exception cref="ArgumentException">
+    /// The mod's source isn't registered or has no watchlist, or the source doesn't know the mod's game or ID.
+    /// </exception>
+    /// <exception cref="Sources.Abstractions.Accounts.AuthenticationFailedException">No account is linked, or the site refused it.</exception>
+    /// <exception cref="HttpRequestException">The site couldn't be reached, or refused; with 404 when there's no such mod.</exception>
+    Task WatchAsync(ModRef modRef, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Stops following a mod by reference. Unfollowing one not followed changes nothing.
+    /// </summary>
+    /// <inheritdoc cref="WatchAsync(ModRef, CancellationToken)" path="/exception"/>
+    Task UnwatchAsync(ModRef modRef, CancellationToken cancellationToken);
 }

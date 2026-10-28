@@ -38,6 +38,21 @@ internal sealed class Watchlists : IWatchlists
     public Task<ModRef> UnwatchAsync(Uri link, CancellationToken cancellationToken)
         => ChangeAsync(link, (watchlist, mod) => watchlist.UnwatchAsync(mod, cancellationToken), cancellationToken);
 
+    public Task WatchAsync(ModRef modRef, CancellationToken cancellationToken)
+        => Watchlist(modRef).WatchAsync(modRef, cancellationToken);
+
+    public Task UnwatchAsync(ModRef modRef, CancellationToken cancellationToken)
+        => Watchlist(modRef).UnwatchAsync(modRef, cancellationToken);
+
+    /// <exception cref="ArgumentException">The mod's source isn't registered, or has no watchlist.</exception>
+    private IWatchlistSync Watchlist(ModRef modRef)
+    {
+        ArgumentNullException.ThrowIfNull(modRef);
+
+        return _sources.Find<IWatchlistSync>(modRef.Game.Source)
+            ?? throw new ArgumentException($"Source '{modRef.Game.Source}' isn't registered, or has no watchlist.", nameof(modRef));
+    }
+
     private async Task<ModRef> ChangeAsync(Uri link, Func<IWatchlistSync, ModRef, Task> change, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(link);

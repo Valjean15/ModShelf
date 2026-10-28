@@ -25,6 +25,11 @@ internal sealed class InMemoryModLibrary : IModLibrary
     public Exception? Refusal { get; set; }
 
     /// <summary>
+    /// The names mods' sites give them, by mod ID, for watching a mod from its site.
+    /// </summary>
+    public Dictionary<string, string> SiteNames { get; } = new(StringComparer.Ordinal);
+
+    /// <summary>
     /// Done once a watcher has read everything published and waits for more.
     /// </summary>
     public Task WaitedOn => _watchers.WaitedOn;
@@ -84,6 +89,23 @@ internal sealed class InMemoryModLibrary : IModLibrary
         => Task.FromResult(Mods.FirstOrDefault(mod => mod.Mod == modRef));
 
     public Task<LibraryMod> WatchAsync(Uri link, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    /// <summary>
+    /// Watches the mod, adding it under the name <see cref="SiteNames"/> gives it, as its site would.
+    /// </summary>
+    public Task<LibraryMod> WatchAsync(ModRef modRef, CancellationToken cancellationToken)
+    {
+        Asked.Add($"Watch from the site {modRef.Id}");
+        if (Refusal is not null)
+        {
+            throw Refusal;
+        }
+
+        LibraryMod? listed = Mods.FirstOrDefault(mod => mod.Mod == modRef);
+        string name = SiteNames.GetValueOrDefault(modRef.Id, $"Mod {modRef.Id}");
+        LibraryMod watched = listed?.Watched() ?? LibraryMod.Watch(modRef, name, author: null, pageUrl: null, TestData.Now);
+        return Task.FromResult(Change(modRef, watched).After!);
+    }
 
     public Task<LibraryChange> UnwatchAsync(Uri link, CancellationToken cancellationToken) => throw new NotSupportedException();
 

@@ -1,10 +1,12 @@
 using ModShelf.Domain.Mods;
+using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Search;
 
 namespace ModShelf.Application.Catalog;
 
 /// <summary>
-/// Looks mods up on their sites: one from a link to it, with its game, files and changelog; or a game's mods by search.
+/// Looks mods up on their sites: one from a link to it or by reference, with its game, files and changelog; a game's
+/// mods by search; or the games a site has.
 /// </summary>
 public interface IModLookup
 {
@@ -23,6 +25,27 @@ public interface IModLookup
     /// The site couldn't be reached or refused; with 404 when there's no such mod or file.
     /// </exception>
     Task<ModPage> LookUpAsync(Uri link, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// A mod by reference, such as one a search found, as <see cref="LookUpAsync(Uri, CancellationToken)"/> describes
+    /// it, without a linked file.
+    /// </summary>
+    /// <exception cref="ArgumentException">
+    /// The mod's source isn't registered or can't describe its mods, or the source doesn't know the mod's game or ID.
+    /// </exception>
+    /// <exception cref="Sources.Abstractions.Accounts.AuthenticationFailedException">The site needs a linked account, or refused it.</exception>
+    /// <exception cref="HttpRequestException">The site couldn't be reached or refused; with 404 when there's no such mod.</exception>
+    Task<ModPage> LookUpAsync(ModRef modRef, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Every game the source has mods for, each once, in no particular order: a list for the user to pick a game from.
+    /// It's read from the site the first time, then kept while the app runs. A read that failed is tried again the next
+    /// time.
+    /// </summary>
+    /// <exception cref="ArgumentException">The source isn't registered, or can't describe its games.</exception>
+    /// <exception cref="Sources.Abstractions.Accounts.AuthenticationFailedException">The site needs a linked account, or refused it.</exception>
+    /// <exception cref="HttpRequestException">The site couldn't be reached, or refused.</exception>
+    Task<IReadOnlyList<GameInfo>> GetGamesAsync(SourceId source, CancellationToken cancellationToken);
 
     /// <summary>
     /// One page of a game's mods that match <paramref name="query"/>, from the game's source.

@@ -67,18 +67,16 @@ internal sealed partial class ModLibrary : IModLibrary
         ModRef mod = await ModOfAsync(link, cancellationToken).ConfigureAwait(false);
         IModCatalog catalog = _sources.Find<IModCatalog>(mod.Game.Source)
             ?? throw new UnsupportedLinkException("This link isn't to a mod on a site where ModShelf can watch mods.");
+        return await WatchingAsync(catalog, mod, cancellationToken).ConfigureAwait(false);
+    }
 
-        // The site is asked first: the transaction mustn't wait on it.
-        ModInfo info = await catalog.GetModAsync(mod, cancellationToken).ConfigureAwait(false);
-        DateTimeOffset now = _timeProvider.GetUtcNow();
-        LibraryChange change = await UpdateAsync(
-                mod,
-                stored => stored is null
-                    ? LibraryMod.Watch(mod, info.Name, info.Author, info.PageUrl, now)
-                    : stored.WithDetails(info.Name, info.Author, info.PageUrl).Watched(),
-                cancellationToken)
-            .ConfigureAwait(false);
-        return change.After!;
+    public Task<LibraryMod> WatchAsync(ModRef modRef, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(modRef);
+
+        IModCatalog catalog = _sources.Find<IModCatalog>(modRef.Game.Source)
+            ?? throw new ArgumentException($"Source '{modRef.Game.Source}' isn't registered, or can't describe its mods.", nameof(modRef));
+        return WatchingAsync(catalog, modRef, cancellationToken);
     }
 
     public async Task<LibraryChange> UnwatchAsync(Uri link, CancellationToken cancellationToken)
@@ -118,6 +116,24 @@ internal sealed partial class ModLibrary : IModLibrary
     }
 
     public IAsyncEnumerable<LibraryChange> ChangesAsync(CancellationToken cancellationToken) => _changes.Watch(cancellationToken);
+
+    /// <summary>
+    /// Adds the mod to the library, watched, or watches it again, with its details as its site gives them now.
+    /// </summary>
+    private async Task<LibraryMod> WatchingAsync(IModCatalog catalog, ModRef mod, CancellationToken cancellationToken)
+    {
+        // The site is asked first: the transaction mustn't wait on it.
+        ModInfo info = await catalog.GetModAsync(mod, cancellationToken).ConfigureAwait(false);
+        DateTimeOffset now = _timeProvider.GetUtcNow();
+        LibraryChange change = await UpdateAsync(
+                mod,
+                stored => stored is null
+                    ? LibraryMod.Watch(mod, info.Name, info.Author, info.PageUrl, now)
+                    : stored.WithDetails(info.Name, info.Author, info.PageUrl).Watched(),
+                cancellationToken)
+            .ConfigureAwait(false);
+        return change.After!;
+    }
 
     /// <summary>
     /// The mod no longer watched; the same mod when it wasn't, so nothing is told of a change that changed nothing.

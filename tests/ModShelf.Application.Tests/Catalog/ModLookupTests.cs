@@ -7,6 +7,7 @@ using ModShelf.Application.Tests.Fakes;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Accounts;
+using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Search;
 
 namespace ModShelf.Application.Tests.Catalog;
@@ -119,6 +120,86 @@ public sealed class ModLookupTests
             .SearchAsync(TestData.File(TestData.Nexus, "1").Mod.Game, new SearchQuery(), TestContext.Current.CancellationToken));
 
         Assert.Same(failure, thrown);
+    }
+
+    [Fact]
+    public async Task LooksAModUpByItsReferenceWithoutALinkedFile()
+    {
+        FakeCatalogSource site = new(TestData.Nexus);
+
+        ModPage page = await new ModLookup(new SourceRegistry([site])).LookUpAsync(site.Mod.Mod, TestContext.Current.CancellationToken);
+
+        Assert.Equal((site.Game, site.Mod, site.Changelogs), (page.Game, page.Mod, page.Changelogs));
+        Assert.Equal(site.Files.Select(file => file.Reference), page.Files.Select(file => file.Reference));
+        Assert.Null(page.LinkedFile);
+        Assert.Equal(["GetChangelogsAsync", "GetFilesAsync", "GetGameAsync", "GetModAsync"], site.Asked.Order(StringComparer.Ordinal));
+    }
+
+    [Fact]
+    public async Task RefusesToLookUpAModByReferenceWhoseSourceCantDescribeIt()
+    {
+        ModLookup lookup = new(new SourceRegistry([ScriptedLinkRecognizer.Never(TestData.Nexus)]));
+
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => lookup.LookUpAsync(TestData.File(TestData.Nexus, "1").Mod, TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => lookup.LookUpAsync(TestData.File(TestData.ModIo, "1").Mod, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task LookingUpByReferencePassesOnWhatTheSourceRefuses()
+    {
+        FakeCatalogSource site = new(TestData.Nexus);
+        HttpRequestException failure = new("No Mod Found", null, HttpStatusCode.NotFound);
+        site.Failures["GetModAsync"] = failure;
+
+        Exception thrown = await Assert.ThrowsAnyAsync<Exception>(
+            () => new ModLookup(new SourceRegistry([site])).LookUpAsync(site.Mod.Mod, TestContext.Current.CancellationToken));
+
+        Assert.Same(failure, thrown);
+    }
+
+    [Fact]
+    public async Task ReadsEachSourcesGamesOnceAndKeepsThem()
+    {
+        FakeCatalogSource nexus = new(TestData.Nexus);
+        FakeCatalogSource modIo = new(TestData.ModIo);
+        ModLookup lookup = new(new SourceRegistry([nexus, modIo]));
+
+        IReadOnlyList<GameInfo> first = await lookup.GetGamesAsync(TestData.Nexus, TestContext.Current.CancellationToken);
+        IReadOnlyList<GameInfo> again = await lookup.GetGamesAsync(TestData.Nexus, TestContext.Current.CancellationToken);
+        IReadOnlyList<GameInfo> other = await lookup.GetGamesAsync(TestData.ModIo, TestContext.Current.CancellationToken);
+
+        Assert.Equal([nexus.Game], first);
+        Assert.Same(first, again);
+        Assert.Equal([modIo.Game], other);
+        Assert.Equal(["GetGamesAsync"], nexus.Asked);
+        Assert.Equal(["GetGamesAsync"], modIo.Asked);
+    }
+
+    [Fact]
+    public async Task ReadsTheGamesAgainAfterAFailedRead()
+    {
+        FakeCatalogSource site = new(TestData.Nexus);
+        HttpRequestException failure = new("Service unavailable.", null, HttpStatusCode.ServiceUnavailable);
+        site.Failures["GetGamesAsync"] = failure;
+        ModLookup lookup = new(new SourceRegistry([site]));
+
+        Exception thrown = await Assert.ThrowsAnyAsync<Exception>(() => lookup.GetGamesAsync(TestData.Nexus, TestContext.Current.CancellationToken));
+        IReadOnlyList<GameInfo> games = await lookup.GetGamesAsync(TestData.Nexus, TestContext.Current.CancellationToken);
+
+        Assert.Same(failure, thrown);
+        Assert.Equal([site.Game], games);
+        Assert.Equal(["GetGamesAsync", "GetGamesAsync"], site.Asked);
+    }
+
+    [Fact]
+    public async Task RefusesTheGamesOfASourceThatCantDescribeThem()
+    {
+        ModLookup lookup = new(new SourceRegistry([ScriptedLinkRecognizer.Never(TestData.Nexus)]));
+
+        await Assert.ThrowsAsync<ArgumentException>(() => lookup.GetGamesAsync(TestData.Nexus, TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ArgumentException>(() => lookup.GetGamesAsync(TestData.ModIo, TestContext.Current.CancellationToken));
     }
 
     [Fact]

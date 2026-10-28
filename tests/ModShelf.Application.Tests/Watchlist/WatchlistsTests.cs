@@ -124,6 +124,47 @@ public sealed class WatchlistsTests
     }
 
     [Fact]
+    public async Task FollowsAndStopsFollowingAModByItsReferenceWithoutReadingALink()
+    {
+        FakeWatchlistSource site = new(TestData.Nexus);
+        Watchlists watchlists = new(new SourceRegistry([site]));
+
+        await watchlists.WatchAsync(site.LinkedMod, Cancellation);
+        IReadOnlyList<ModRef> followed = await watchlists.GetWatchedAsync(TestData.Nexus, Cancellation);
+        await watchlists.UnwatchAsync(site.LinkedMod, Cancellation);
+
+        Assert.Equal([site.LinkedMod], followed);
+        Assert.Empty(await watchlists.GetWatchedAsync(TestData.Nexus, Cancellation));
+        Assert.Equal(["WatchAsync", "GetWatchedAsync", "UnwatchAsync", "GetWatchedAsync"], site.Asked);
+    }
+
+    [Fact]
+    public async Task RefusesToFollowAModByReferenceOnASiteWithoutAWatchlist()
+    {
+        Watchlists watchlists = new(new SourceRegistry([new CatalogOnlySource(TestData.Nexus)]));
+        ModRef mod = TestData.File(TestData.Nexus, "1").Mod;
+
+        await Assert.ThrowsAsync<ArgumentException>(() => watchlists.WatchAsync(mod, Cancellation));
+        await Assert.ThrowsAsync<ArgumentException>(() => watchlists.UnwatchAsync(TestData.File(TestData.ModIo, "1").Mod, Cancellation));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task FollowingByReferencePassesOnWhatTheSiteRefuses(bool follow)
+    {
+        FakeWatchlistSource site = new(TestData.Nexus);
+        AuthenticationFailedException failure = new("No account is linked.");
+        site.Failures[follow ? "WatchAsync" : "UnwatchAsync"] = failure;
+        Watchlists watchlists = new(new SourceRegistry([site]));
+
+        Exception thrown = await Assert.ThrowsAnyAsync<Exception>(
+            () => follow ? watchlists.WatchAsync(site.LinkedMod, Cancellation) : watchlists.UnwatchAsync(site.LinkedMod, Cancellation));
+
+        Assert.Same(failure, thrown);
+    }
+
+    [Fact]
     public async Task RefusesToListASiteWithoutAWatchlist()
     {
         Watchlists watchlists = new(new SourceRegistry([new CatalogOnlySource(TestData.Nexus)]));

@@ -26,10 +26,23 @@ public interface IModLibrary
     Task<LibraryMod> WatchAsync(Uri link, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Watches a mod for updates by reference, such as one a search found, as
+    /// <see cref="WatchAsync(Uri, CancellationToken)"/> does with a link: adds it to the library, or watches it again,
+    /// with its name, author and page read from its site.
+    /// </summary>
+    /// <returns>The mod as the library has it now.</returns>
+    /// <exception cref="ArgumentException">
+    /// The mod's source isn't registered or can't describe its mods, or the source doesn't know the mod's game or ID.
+    /// </exception>
+    /// <exception cref="Sources.Abstractions.Accounts.AuthenticationFailedException">The site needs a linked account, or refused it.</exception>
+    /// <exception cref="HttpRequestException">The site couldn't be reached, or refused; with 404 when there's no such mod.</exception>
+    Task<LibraryMod> WatchAsync(ModRef modRef, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Stops watching the mod a link is to. A mod with downloaded files stays in the library; one without leaves it.
     /// Unwatching a mod that isn't watched changes nothing.
     /// </summary>
-    /// <inheritdoc cref="WatchAsync" path="/exception"/>
+    /// <inheritdoc cref="WatchAsync(Uri, CancellationToken)" path="/exception"/>
     Task<LibraryChange> UnwatchAsync(Uri link, CancellationToken cancellationToken);
 
     /// <summary>

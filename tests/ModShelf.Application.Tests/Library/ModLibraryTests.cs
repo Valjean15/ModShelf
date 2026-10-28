@@ -154,6 +154,53 @@ public sealed class ModLibraryTests : IDisposable
     }
 
     [Fact]
+    public async Task WatchesAModByItsReferenceWithItsDetailsFromItsSite()
+    {
+        LibraryMod watched = await Library(_site).WatchAsync(SkyUi, Cancellation);
+
+        Assert.Equal((SkyUi, "SkyUI", true, TestData.Now), (watched.Mod, watched.Name, watched.IsWatched, watched.AddedAt));
+        Assert.Same(watched, Assert.Single(_repository.Mods));
+        Assert.Equal(["GetModAsync"], _site.Asked);
+    }
+
+    [Fact]
+    public async Task WatchingAModInTheLibraryByItsReferenceKeepsItsFilesAndUpdatesItsDetails()
+    {
+        LibraryFile file = File("35407");
+        _repository.Add(LibraryMod.Restore(SkyUi, "SkyUI (old name)", "someone", null, isWatched: false, TestData.Now.AddDays(-9), null, [file]));
+        ModLibrary library = Library(_site);
+        using WatchedChanges seen = new(library);
+
+        LibraryMod watched = await library.WatchAsync(SkyUi, Cancellation);
+
+        Assert.Equal(("SkyUI", (string?)null, true, TestData.Now.AddDays(-9)), (watched.Name, watched.Author, watched.IsWatched, watched.AddedAt));
+        Assert.Same(file, Assert.Single(watched.Files));
+        Assert.Equal(watched, Assert.Single(await seen.StopAsync()).After);
+    }
+
+    [Fact]
+    public async Task OnlyWatchesModsByReferenceOnSitesThatDescribeThem()
+    {
+        ModLibrary library = Library(ScriptedLinkRecognizer.Never(TestData.Nexus));
+
+        await Assert.ThrowsAsync<ArgumentException>(() => library.WatchAsync(SkyUi, Cancellation));
+        await Assert.ThrowsAsync<ArgumentException>(() => library.WatchAsync(TestData.File(TestData.ModIo, "1").Mod, Cancellation));
+        Assert.Empty(_repository.Mods);
+    }
+
+    [Fact]
+    public async Task WatchingByReferencePassesOnWhatTheSiteRefusesAndStoresNothing()
+    {
+        HttpRequestException failure = new("No Mod Found", null, HttpStatusCode.NotFound);
+        _site.Failures["GetModAsync"] = failure;
+
+        Exception thrown = await Assert.ThrowsAnyAsync<Exception>(() => Library(_site).WatchAsync(SkyUi, Cancellation));
+
+        Assert.Same(failure, thrown);
+        Assert.Empty(_repository.Mods);
+    }
+
+    [Fact]
     public async Task RejectsARelativeLink()
     {
         Uri relative = new("skyrimspecialedition/mods/12604", UriKind.Relative);
