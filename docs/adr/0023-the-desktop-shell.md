@@ -30,7 +30,7 @@ The human chose to build Phase 5 in six steps, each delivered and tested like Ph
    - watching and unwatching, and checking now;
    - updates with their changelogs, and downloading one;
    - clicking a notice opens Updates; this moved to Phase 6 (ADR 0025).
-4. **Browse:** searching a game, a mod's files and changelog, and downloading or watching.
+4. **Browse:** searching a game, a mod's files and changelog, and downloading or watching; tracking on the site came with it (ADR 0026).
 5. **Accounts and Settings:**
    - linking with an API key or the browser, unlinking, and showing the tier and the API quota;
    - every setting, including moving the library and the theme.
