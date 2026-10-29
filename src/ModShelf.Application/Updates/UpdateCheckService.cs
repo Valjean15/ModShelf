@@ -16,10 +16,14 @@ namespace ModShelf.Application.Updates;
 /// </summary>
 /// <remarks>
 /// Nothing but stopping ends the checks: whatever fails is logged, and checked again an interval later. No check is due
-/// later than an interval from now, since a later time means the clock has moved back.
+/// later than an interval from now, since a later time means the clock has moved back. A changed interval counts within
+/// <see cref="UpdateInterval.Minimum"/>.
 /// </remarks>
 internal sealed partial class UpdateCheckService : BackgroundService
 {
+    // The longest the service waits before reading the interval again: the shortest interval there is.
+    private static readonly TimeSpan WaitSlice = UpdateInterval.Minimum;
+
     private readonly IUpdateChecker _checker;
     private readonly ISettingsService _settings;
     private readonly ILibraryRepository _library;
@@ -57,17 +61,13 @@ internal sealed partial class UpdateCheckService : BackgroundService
             DateTimeOffset? lastCheck = null;
             while (true)
             {
-                TimeSpan interval = await IntervalAsync(stoppingToken).ConfigureAwait(false);
-                DateTimeOffset due = lastCheck is { } last ? last + interval : await FirstDueAsync(interval, stoppingToken).ConfigureAwait(false);
-                TimeSpan wait = due - _timeProvider.GetUtcNow();
-                if (wait > interval)
+                // The interval counts from the last check; before the first, from the library's oldest. A time later
+                // than now means the clock has moved back, so it counts from now instead.
+                DateTimeOffset now = _timeProvider.GetUtcNow();
+                DateTimeOffset? from = lastCheck ?? await FirstFromAsync(stoppingToken).ConfigureAwait(false);
+                if (from is { } since)
                 {
-                    wait = interval;
-                }
-
-                if (wait > TimeSpan.Zero)
-                {
-                    await Task.Delay(wait, _timeProvider, stoppingToken).ConfigureAwait(false);
+                    await WaitAsync(since < now ? since : now, stoppingToken).ConfigureAwait(false);
                 }
 
                 lastCheck = _timeProvider.GetUtcNow();
@@ -89,6 +89,25 @@ internal sealed partial class UpdateCheckService : BackgroundService
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
         {
             // The host is stopping.
+        }
+    }
+
+    /// <summary>
+    /// Waits until an interval after <paramref name="since"/>, a slice at a time, reading the interval again after each:
+    /// so a shorter one chosen meanwhile counts within minutes, rather than after the wait the longer one set.
+    /// </summary>
+    private async Task WaitAsync(DateTimeOffset since, CancellationToken stoppingToken)
+    {
+        while (true)
+        {
+            TimeSpan interval = await IntervalAsync(stoppingToken).ConfigureAwait(false);
+            TimeSpan wait = since + interval - _timeProvider.GetUtcNow();
+            if (wait <= TimeSpan.Zero)
+            {
+                return;
+            }
+
+            await Task.Delay(wait < WaitSlice ? wait : WaitSlice, _timeProvider, stoppingToken).ConfigureAwait(false);
         }
     }
 
@@ -146,23 +165,22 @@ internal sealed partial class UpdateCheckService : BackgroundService
     }
 
     /// <summary>
-    /// When the first check is due: now, when a watched mod was never checked; otherwise an interval after the oldest
-    /// check. When the library can't be read, which is logged, it's an interval from now.
+    /// When the interval before the first check counts from: the oldest check, or none, for a check at once, when a
+    /// watched mod was never checked. When the library can't be read, which is logged, it counts from now.
     /// </summary>
-    private async Task<DateTimeOffset> FirstDueAsync(TimeSpan interval, CancellationToken cancellationToken)
+    private async Task<DateTimeOffset?> FirstFromAsync(CancellationToken cancellationToken)
     {
-        DateTimeOffset now = _timeProvider.GetUtcNow();
         try
         {
             LibraryMod[] watched = [.. (await _library.ListAsync(cancellationToken).ConfigureAwait(false)).Where(mod => mod.IsWatched)];
             return watched.Length == 0 || watched.Any(mod => mod.CheckedAt is null)
-                ? now
-                : watched.Min(mod => mod.CheckedAt!.Value) + interval;
+                ? null
+                : watched.Min(mod => mod.CheckedAt!.Value);
         }
         catch (Exception exception) when (!cancellationToken.IsCancellationRequested)
         {
             LogCheckFailed(_logger, exception);
-            return now + interval;
+            return _timeProvider.GetUtcNow();
         }
     }
 }

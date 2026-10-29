@@ -79,6 +79,41 @@ public sealed class UpdateCheckServiceTests : IDisposable
         });
     }
 
+    [Fact]
+    public async Task ALongerIntervalChosenWhileWaitingPutsTheNextCheckOff()
+    {
+        await RunAsync(async () =>
+        {
+            await WaitForChecksAsync(1);
+            await AdvanceAsync(TimeSpan.FromHours(1));
+            await _settings.SetUpdateIntervalAsync(TimeSpan.FromHours(12), Cancellation);
+            await AdvanceAsync(UpdateInterval.Default);
+            await SettleAsync();
+            Assert.Equal(1, _checker.Checks);
+            await AdvanceAsync(TimeSpan.FromHours(5));
+            await WaitForChecksAsync(2);
+        });
+    }
+
+    [Fact]
+    public async Task AShorterIntervalChosenWhileWaitingCountsWithinMinutes()
+    {
+        // Changed from a week to 30 minutes in Settings: the next check comes 30 minutes after the last, not a week on.
+        _store.Settings = new AppSettings { UpdateInterval = UpdateInterval.Maximum };
+
+        await RunAsync(async () =>
+        {
+            await WaitForChecksAsync(1);
+            await _settings.SetUpdateIntervalAsync(TimeSpan.FromMinutes(30), Cancellation);
+            await AdvanceAsync(UpdateInterval.Minimum);
+            await SettleAsync();
+            Assert.Equal(1, _checker.Checks);
+
+            await AdvanceAsync(TimeSpan.FromMinutes(15));
+            await WaitForChecksAsync(2);
+        });
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
