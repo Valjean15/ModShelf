@@ -1,7 +1,150 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:ModShelf.Presentation.ViewModels"
+             xmlns:res="using:ModShelf.Presentation.Resources"
              x:Class="ModShelf.Desktop.Views.SettingsView"
              x:DataType="vm:SettingsViewModel">
-    <TextBlock Classes="heading" Text="{Binding Title}" />
+
+    <UserControl.Resources>
+        <!-- A folder pattern: its text, saved when the user says, with where a sample file goes or what's wrong. -->
+        <DataTemplate x:Key="FolderPattern" x:DataType="vm:FolderPatternViewModel">
+            <Grid ColumnDefinitions="160,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="4">
+                <TextBlock VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
+                <TextBox Grid.Column="1" Text="{Binding Text}" />
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                    <Button Classes="accent" Content="{x:Static res:Strings.SettingsSave}" Command="{Binding SaveCommand}" />
+                    <Button Content="{x:Static res:Strings.SettingsUseDefault}" Command="{Binding UseDefaultCommand}" IsVisible="{Binding !IsGame}" />
+                    <Button Content="{x:Static res:Strings.SettingsRemoveGame}" Command="{Binding RemoveCommand}" IsVisible="{Binding IsGame}" />
+                </StackPanel>
+                <TextBlock Grid.Row="1"
+                           Grid.Column="1"
+                           Grid.ColumnSpan="2"
+                           Classes="note"
+                           TextWrapping="Wrap"
+                           Text="{Binding Preview}"
+                           IsVisible="{Binding Preview, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <TextBlock Grid.Row="1"
+                           Grid.Column="1"
+                           Grid.ColumnSpan="2"
+                           Classes="problem"
+                           TextWrapping="Wrap"
+                           Text="{Binding Problem}"
+                           IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <DockPanel>
+        <TextBlock DockPanel.Dock="Top" Classes="heading" Text="{Binding Title}" />
+
+        <TextBlock DockPanel.Dock="Top"
+                   Margin="0,0,0,12"
+                   Classes="problem"
+                   TextWrapping="Wrap"
+                   Text="{Binding Problem}"
+                   IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+        <ScrollViewer>
+            <StackPanel Spacing="12" Margin="0,0,16,16" IsEnabled="{Binding IsLoaded}">
+
+                <Border Classes="card">
+                    <StackPanel Spacing="8">
+                        <TextBlock Classes="subheading" Text="{x:Static res:Strings.SettingsLibraryHeading}" />
+                        <SelectableTextBlock FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding LibraryRoot}" />
+                        <TextBlock Classes="note" Text="{x:Static res:Strings.SettingsDefaultFolder}" IsVisible="{Binding IsDefaultRoot}" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="{x:Static res:Strings.SettingsChooseFolder}" Command="{Binding ChooseRootCommand}" />
+                            <Button Content="{x:Static res:Strings.SettingsUseDefaultFolder}" Command="{Binding UseDefaultRootCommand}" />
+                        </StackPanel>
+                        <StackPanel Spacing="4" IsVisible="{Binding IsMoving}">
+                            <TextBlock Classes="note" Text="{x:Static res:Strings.SettingsMoving}" />
+                            <ProgressBar IsIndeterminate="True" />
+                        </StackPanel>
+                        <TextBlock Classes="note"
+                                   Classes.problem="{Binding IsRootNoteAProblem}"
+                                   TextWrapping="Wrap"
+                                   Text="{Binding RootNote}"
+                                   IsVisible="{Binding RootNote, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="card">
+                    <StackPanel Spacing="8">
+                        <TextBlock Classes="subheading" Text="{x:Static res:Strings.SettingsFoldersHeading}" />
+                        <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.SettingsFoldersNote}" />
+                        <ContentControl Content="{Binding Folders}" ContentTemplate="{StaticResource FolderPattern}" />
+                        <ItemsControl ItemsSource="{Binding GameFolders}" ItemTemplate="{StaticResource FolderPattern}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Spacing="8" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                        <Button Content="{x:Static res:Strings.SettingsAddGame}" Command="{Binding AddGameCommand}" />
+                        <TextBlock Classes="problem"
+                                   TextWrapping="Wrap"
+                                   Text="{Binding GameFoldersNote}"
+                                   IsVisible="{Binding GameFoldersNote, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="card">
+                    <StackPanel Spacing="8">
+                        <TextBlock Classes="subheading" Text="{x:Static res:Strings.SettingsOldVersionsHeading}" />
+                        <TextBlock TextWrapping="Wrap" Text="{x:Static res:Strings.SettingsOldVersionsNote}" />
+                        <RadioButton GroupName="OldVersions" Content="{x:Static res:Strings.SettingsKeepAll}" IsChecked="{Binding IsKeepAll}" />
+                        <!-- In a TextBlock, so the _ of _archive shows rather than marking an access key. -->
+                        <RadioButton GroupName="OldVersions" IsChecked="{Binding IsArchive}">
+                            <TextBlock Text="{x:Static res:Strings.SettingsArchive}" />
+                        </RadioButton>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <RadioButton GroupName="OldVersions" Content="{x:Static res:Strings.SettingsKeepLatest}" IsChecked="{Binding IsKeepLatest}" />
+                            <!-- From 1 to OldVersionRule.MaxCount. -->
+                            <NumericUpDown Minimum="1"
+                                           Maximum="99"
+                                           Increment="1"
+                                           FormatString="0"
+                                           Width="120"
+                                           Value="{Binding KeepCount}"
+                                           IsEnabled="{Binding IsKeepLatest}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="card">
+                    <StackPanel Spacing="8">
+                        <TextBlock Classes="subheading" Text="{x:Static res:Strings.SettingsUpdatesHeading}" />
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <TextBlock VerticalAlignment="Center" Text="{x:Static res:Strings.SettingsInterval}" />
+                            <ComboBox MinWidth="220" ItemsSource="{Binding IntervalChoices}" SelectedItem="{Binding SelectedInterval}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:IntervalChoice">
+                                        <TextBlock Text="{Binding Label}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        <CheckBox Content="{x:Static res:Strings.SettingsNotify}" IsChecked="{Binding NotifyOfUpdates}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="card">
+                    <StackPanel Spacing="8">
+                        <TextBlock Classes="subheading" Text="{x:Static res:Strings.SettingsAppearanceHeading}" />
+                        <RadioButton GroupName="Theme" Content="{x:Static res:Strings.SettingsThemeSystem}" IsChecked="{Binding IsSystemTheme}" />
+                        <RadioButton GroupName="Theme" Content="{x:Static res:Strings.SettingsThemeLight}" IsChecked="{Binding IsLightTheme}" />
+                        <RadioButton GroupName="Theme" Content="{x:Static res:Strings.SettingsThemeDark}" IsChecked="{Binding IsDarkTheme}" />
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Spacing="4">
+                    <SelectableTextBlock Classes="note" TextWrapping="Wrap" Text="{Binding KeptInText}" />
+                    <TextBlock Classes="problem"
+                               TextWrapping="Wrap"
+                               Text="{x:Static res:Strings.AccountsNotProtected}"
+                               IsVisible="{Binding IsStoreUnprotected}" />
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
 </UserControl>

@@ -1086,4 +1086,184 @@
     <value>Your browser didn't open. Open this page by hand:</value>
     <comment>In a dialog, when a page that helps answer didn't open. The page's address follows.</comment>
   </data>
+  <data name="SettingsLibraryHeading" xml:space="preserve">
+    <value>Library folder</value>
+    <comment>Settings: the library's root folder.</comment>
+  </data>
+  <data name="SettingsDefaultFolder" xml:space="preserve">
+    <value>The default folder.</value>
+    <comment>Settings: below the library's folder, when it's the default.</comment>
+  </data>
+  <data name="SettingsChooseFolder" xml:space="preserve">
+    <value>Choose another folder…</value>
+    <comment>Settings: picks another folder for the library, moving its files there.</comment>
+  </data>
+  <data name="SettingsUseDefaultFolder" xml:space="preserve">
+    <value>Use the default folder</value>
+    <comment>Settings: puts the library back in the default folder, moving its files there.</comment>
+  </data>
+  <data name="SettingsChooseFolderTitle" xml:space="preserve">
+    <value>Choose the library's folder</value>
+    <comment>The title of the folder picker for the library.</comment>
+  </data>
+  <data name="SettingsMoveTitle" xml:space="preserve">
+    <value>Move the library?</value>
+    <comment>Asked before moving the library's files.</comment>
+  </data>
+  <data name="SettingsMoveMessageOne" xml:space="preserve">
+    <value>ModShelf moves the library's file from {0} to {1}, into the same folders there. Other files in {0} stay where they are.</value>
+    <comment>{0} is the old folder, {1} the new one.</comment>
+  </data>
+  <data name="SettingsMoveMessage" xml:space="preserve">
+    <value>ModShelf moves the library's {0} files from {1} to {2}, into the same folders there. Other files in {1} stay where they are.</value>
+    <comment>{0} is how many files, {1} the old folder, {2} the new one.</comment>
+  </data>
+  <data name="SettingsMoveConfirm" xml:space="preserve">
+    <value>Move</value>
+    <comment>Moves the library's files.</comment>
+  </data>
+  <data name="SettingsMoving" xml:space="preserve">
+    <value>Moving the library's files…</value>
+    <comment>While the library's files move.</comment>
+  </data>
+  <data name="SettingsLibraryIsIn" xml:space="preserve">
+    <value>The library is in {0} now.</value>
+    <comment>{0} is the library's folder, after it changed.</comment>
+  </data>
+  <data name="SettingsMissingOne" xml:space="preserve">
+    <value>One of its files wasn't on disk; it stays in the library, to download again.</value>
+    <comment>After moving the library.</comment>
+  </data>
+  <data name="SettingsMissing" xml:space="preserve">
+    <value>{0} of its files weren't on disk; they stay in the library, to download again.</value>
+    <comment>{0} is how many, after moving the library.</comment>
+  </data>
+  <data name="SettingsFoldersHeading" xml:space="preserve">
+    <value>Folders in the library</value>
+    <comment>Settings: where downloaded files go in the library.</comment>
+  </data>
+  <data name="SettingsFoldersNote" xml:space="preserve">
+    <value>Where downloaded files go in the library. Use {source}, {game}, {mod} and {modid} in folders' names, separate folders with /, and end with /{file}. Files downloaded already stay where they are.</value>
+    <comment>The names in braces are typed as they are, untranslated.</comment>
+  </data>
+  <data name="SettingsFoldersEveryGame" xml:space="preserve">
+    <value>Every game</value>
+    <comment>Settings: the folder pattern for games without one of their own.</comment>
+  </data>
+  <data name="SettingsFoldersPreview" xml:space="preserve">
+    <value>For example: {0}</value>
+    <comment>{0} is where a sample file would go.</comment>
+  </data>
+  <data name="SettingsSave" xml:space="preserve">
+    <value>Save</value>
+    <comment>Saves a folder pattern.</comment>
+  </data>
+  <data name="SettingsUseDefault" xml:space="preserve">
+    <value>Use the default</value>
+    <comment>Sets a folder pattern back to the default.</comment>
+  </data>
+  <data name="SettingsAddGame" xml:space="preserve">
+    <value>Add a game…</value>
+    <comment>Gives a game a folder pattern of its own.</comment>
+  </data>
+  <data name="SettingsRemoveGame" xml:space="preserve">
+    <value>Remove</value>
+    <comment>Removes a game's own folder pattern; its files go by the pattern for every game again.</comment>
+  </data>
+  <data name="SettingsAddGameTitle" xml:space="preserve">
+    <value>Add a game's folders</value>
+    <comment>The title of the dialog that asks for a game.</comment>
+  </data>
+  <data name="SettingsAddGameMessage" xml:space="preserve">
+    <value>Enter the game as its site names it in links, such as skyrimspecialedition for Skyrim Special Edition on Nexus Mods. Its files then go by a pattern of their own.</value>
+    <comment>Asks for a game to give its own folder pattern.</comment>
+  </data>
+  <data name="SettingsAddGameHint" xml:space="preserve">
+    <value>skyrimspecialedition</value>
+    <comment>An example of a game's name in links.</comment>
+  </data>
+  <data name="SettingsAddGameConfirm" xml:space="preserve">
+    <value>Add</value>
+    <comment>Adds the game's folder pattern.</comment>
+  </data>
+  <data name="SettingsGameHasFolders" xml:space="preserve">
+    <value>{0} has a pattern of its own already.</value>
+    <comment>{0} is the game.</comment>
+  </data>
+  <data name="SettingsOldVersionsHeading" xml:space="preserve">
+    <value>Old versions</value>
+    <comment>Settings: what happens to a file's old versions.</comment>
+  </data>
+  <data name="SettingsOldVersionsNote" xml:space="preserve">
+    <value>When a newer version of a file is downloaded into the library:</value>
+    <comment>Above the choices for old versions.</comment>
+  </data>
+  <data name="SettingsKeepAll" xml:space="preserve">
+    <value>Keep every version</value>
+    <comment>Old versions: keep them all.</comment>
+  </data>
+  <data name="SettingsArchive" xml:space="preserve">
+    <value>Move the old versions to an _archive folder beside it</value>
+    <comment>Old versions: move them to an _archive folder.</comment>
+  </data>
+  <data name="SettingsKeepLatest" xml:space="preserve">
+    <value>Keep the newest versions, and delete older ones. Versions to keep:</value>
+    <comment>Old versions: keep this many versions, the new one included, and delete older ones.</comment>
+  </data>
+  <data name="SettingsUpdatesHeading" xml:space="preserve">
+    <value>Updates</value>
+    <comment>Settings: background update checks.</comment>
+  </data>
+  <data name="SettingsInterval" xml:space="preserve">
+    <value>Check the watched mods for updates</value>
+    <comment>Before the choice of how often.</comment>
+  </data>
+  <data name="SettingsNotify" xml:space="preserve">
+    <value>Show a notice when a check finds new updates</value>
+    <comment>Settings: whether background checks show a notice.</comment>
+  </data>
+  <data name="IntervalEveryMinutes" xml:space="preserve">
+    <value>Every {0} minutes</value>
+    <comment>{0} is a number of minutes.</comment>
+  </data>
+  <data name="IntervalEveryHour" xml:space="preserve">
+    <value>Every hour</value>
+    <comment>An update interval.</comment>
+  </data>
+  <data name="IntervalEveryHours" xml:space="preserve">
+    <value>Every {0} hours</value>
+    <comment>{0} is a number of hours.</comment>
+  </data>
+  <data name="IntervalEveryDay" xml:space="preserve">
+    <value>Every day</value>
+    <comment>An update interval.</comment>
+  </data>
+  <data name="IntervalEveryDays" xml:space="preserve">
+    <value>Every {0} days</value>
+    <comment>{0} is a number of days.</comment>
+  </data>
+  <data name="IntervalDefault" xml:space="preserve">
+    <value>{0} (the default)</value>
+    <comment>{0} is an interval, such as Every 6 hours.</comment>
+  </data>
+  <data name="SettingsAppearanceHeading" xml:space="preserve">
+    <value>Appearance</value>
+    <comment>Settings: how the app looks.</comment>
+  </data>
+  <data name="SettingsThemeSystem" xml:space="preserve">
+    <value>As the system is</value>
+    <comment>The theme that follows the system's light or dark mode.</comment>
+  </data>
+  <data name="SettingsThemeLight" xml:space="preserve">
+    <value>Light</value>
+    <comment>The light theme.</comment>
+  </data>
+  <data name="SettingsThemeDark" xml:space="preserve">
+    <value>Dark</value>
+    <comment>The dark theme.</comment>
+  </data>
+  <data name="SettingsKeptIn" xml:space="preserve">
+    <value>Settings are kept in {0}.</value>
+    <comment>{0} is the settings file's path.</comment>
+  </data>
 </root>

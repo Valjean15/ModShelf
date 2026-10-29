@@ -13,8 +13,9 @@ public static class PresentationServiceCollectionExtensions
 {
     /// <summary>
     /// Registers navigation, every screen's ViewModel and the main window's, each once for the app's lifetime, so a
-    /// screen keeps what it shows while another is shown. Needs an <see cref="IUiThread"/> and an
-    /// <see cref="IDialogService"/>, which Desktop registers.
+    /// screen keeps what it shows while another is shown. Needs an <see cref="IUiThread"/>, an
+    /// <see cref="IDialogService"/>, an <see cref="IFolderOpener"/> and an <see cref="IThemeSwitcher"/>, which Desktop
+    /// registers.
     /// </summary>
     public static IServiceCollection AddPresentation(this IServiceCollection services)
     {

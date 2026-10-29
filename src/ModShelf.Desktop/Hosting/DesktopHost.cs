@@ -115,6 +115,7 @@ internal static class DesktopHost
         builder.Services.AddSingleton<IUiThread, AvaloniaUiThread>();
         builder.Services.AddSingleton<IDialogService, AvaloniaDialogService>();
         builder.Services.AddSingleton<IFolderOpener, AvaloniaFolderOpener>();
+        builder.Services.AddSingleton<IThemeSwitcher, AvaloniaThemeSwitcher>();
 
         return builder.Build();
     }
