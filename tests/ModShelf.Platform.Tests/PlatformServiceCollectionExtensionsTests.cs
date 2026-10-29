@@ -10,6 +10,7 @@ using ModShelf.Platform.Browser;
 using ModShelf.Platform.Instances;
 using ModShelf.Platform.OAuth;
 using ModShelf.Platform.Secrets;
+using ModShelf.Platform.Tray;
 using ModShelf.Testing;
 
 namespace ModShelf.Platform.Tests;
@@ -73,6 +74,18 @@ public sealed class PlatformServiceCollectionExtensionsTests : IDisposable
         Assert.True(instance.TryClaim([]));
         Assert.True(File.Exists(Path.Combine(_folder.Path, "desktop.lock")));
         Assert.Equal(ServiceLifetime.Singleton, Single<ISingleInstance>(services).Lifetime);
+    }
+
+    [Fact]
+    public void RegistersTheTrayHost()
+    {
+        ServiceCollection services = new();
+        services.AddTrayHost();
+
+        object tray = Single<ITrayHost>(services).ImplementationFactory!(new StubServiceProvider());
+
+        Assert.IsType<SystemTrayHost>(tray);
+        Assert.Equal(ServiceLifetime.Singleton, Single<ITrayHost>(services).Lifetime);
     }
 
     [Fact]

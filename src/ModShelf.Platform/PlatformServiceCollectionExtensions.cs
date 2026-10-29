@@ -11,6 +11,7 @@ using ModShelf.Platform.Instances;
 using ModShelf.Platform.Notifications;
 using ModShelf.Platform.OAuth;
 using ModShelf.Platform.Secrets;
+using ModShelf.Platform.Tray;
 
 namespace ModShelf.Platform;
 
@@ -59,6 +60,19 @@ public static class PlatformServiceCollectionExtensions
             libraryFolder,
             TimeSpan.FromSeconds(5),
             provider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(PipeSingleInstance).FullName!)));
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the desktop app's <see cref="ITrayHost"/>, which says whether this system shows tray icons now.
+    /// </summary>
+    public static IServiceCollection AddTrayHost(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddSingleton<ITrayHost>(provider => new SystemTrayHost(
+            provider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(SystemTrayHost).FullName!)));
 
         return services;
     }
