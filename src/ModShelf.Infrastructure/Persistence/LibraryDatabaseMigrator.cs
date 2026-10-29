@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
@@ -13,6 +15,12 @@ namespace ModShelf.Infrastructure.Persistence;
 /// <c>StartAsync</c>. Services that read the database at startup, such as the download scheduler,
 /// therefore always find the schema ready, whatever order they were registered in. A database that can't be opened
 /// stops the host with a <see cref="LibraryDatabaseUnavailableException"/>, before anything else runs.
+/// <para>
+/// An update holds a lock of its own: a file next to the database, held open with no sharing, as the download queue's
+/// lock is, which the operating system lets go of however the process ends. Another ModShelf starting meanwhile waits
+/// for it. While it's held, no other ModShelf is updating the database, so a lock that EF Core's own update left in the
+/// database when it stopped part-way, which would make every later update wait for good, is cleared.
+/// </para>
 /// </remarks>
 internal sealed partial class LibraryDatabaseMigrator(
     LibraryDatabaseOptions options,
@@ -30,6 +38,16 @@ internal sealed partial class LibraryDatabaseMigrator(
     private const int SqliteAuthorization = 23;
     private const int SqliteNotADatabase = 26;
 
+    // EF Core's lock on updating a SQLite database: a row in this table while an update runs.
+    private const string UpdateLockTable = "__EFMigrationsLock";
+
+    private static readonly TimeSpan UpdateLockRetry = TimeSpan.FromMilliseconds(100);
+
+    /// <summary>
+    /// How long a start waits for another ModShelf updating the database.
+    /// </summary>
+    internal TimeSpan UpdatePatience { get; init; } = TimeSpan.FromSeconds(30);
+
     /// <exception cref="LibraryDatabaseUnavailableException">The database can't be opened or brought up to date.</exception>
     public async Task StartingAsync(CancellationToken cancellationToken)
     {
@@ -45,15 +63,17 @@ internal sealed partial class LibraryDatabaseMigrator(
             ModShelfDbContext context = await contextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
             await using (context.ConfigureAwait(false))
             {
-                List<string> pending = [.. await context.Database.GetPendingMigrationsAsync(cancellationToken).ConfigureAwait(false)];
-                if (pending.Count == 0)
+                if ((await context.Database.GetPendingMigrationsAsync(cancellationToken).ConfigureAwait(false)).Any())
                 {
-                    LogUpToDate(logger);
-                    return;
+                    FileStream updating = await TakeUpdateLockAsync(cancellationToken).ConfigureAwait(false);
+                    await using (updating.ConfigureAwait(false))
+                    {
+                        await UpdateAsync(context, cancellationToken).ConfigureAwait(false);
+                        return;
+                    }
                 }
 
-                LogApplyingMigrations(logger, pending.Count, pending[^1]);
-                await context.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
+                LogUpToDate(logger);
             }
         }
         catch (SqliteException exception)
@@ -91,6 +111,58 @@ internal sealed partial class LibraryDatabaseMigrator(
         SqliteFull => "the disk is full. Make room, then try again.",
         _ => exception.Message,
     };
+
+    /// <summary>
+    /// Applies the migrations still pending, with the update lock held: none, when another ModShelf applied them while
+    /// this one waited for it.
+    /// </summary>
+    private async Task UpdateAsync(ModShelfDbContext context, CancellationToken cancellationToken)
+    {
+        List<string> pending = [.. await context.Database.GetPendingMigrationsAsync(cancellationToken).ConfigureAwait(false)];
+        if (pending.Count == 0)
+        {
+            LogUpToDate(logger);
+            return;
+        }
+
+        bool locked = await context.Database
+            .SqlQuery<long>($"SELECT COUNT(*) AS \"Value\" FROM sqlite_master WHERE type = 'table' AND name = {UpdateLockTable}")
+            .SingleAsync(cancellationToken)
+            .ConfigureAwait(false) > 0;
+        if (locked && await context.Database.ExecuteSqlRawAsync($"DELETE FROM \"{UpdateLockTable}\"", cancellationToken).ConfigureAwait(false) > 0)
+        {
+            LogClearedStoppedUpdate(logger);
+        }
+
+        LogApplyingMigrations(logger, pending.Count, pending[^1]);
+        await context.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Takes the update lock, waiting up to <see cref="UpdatePatience"/> while another ModShelf holds it.
+    /// </summary>
+    /// <exception cref="LibraryDatabaseUnavailableException">Another ModShelf held it all that time.</exception>
+    private async Task<FileStream> TakeUpdateLockAsync(CancellationToken cancellationToken)
+    {
+        string path = options.DatabasePath + ".update.lock";
+        long started = Stopwatch.GetTimestamp();
+        while (true)
+        {
+            try
+            {
+                return new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+            }
+            catch (IOException exception)
+            {
+                if (Stopwatch.GetElapsedTime(started) >= UpdatePatience)
+                {
+                    throw Unavailable("another ModShelf is updating it, and hasn't finished. Wait for it, then try again.", exception);
+                }
+            }
+
+            await Task.Delay(UpdateLockRetry, cancellationToken).ConfigureAwait(false);
+        }
+    }
 
     private LibraryDatabaseUnavailableException Unavailable(string problem, Exception exception)
     {

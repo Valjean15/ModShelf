@@ -161,6 +161,63 @@ public sealed class LibraryDatabaseTests
     }
 
     [Fact]
+    public async Task AnUpdateThatStoppedPartWayDoesntHoldTheNextOneUp()
+    {
+        await using TestLibraryDatabase database = new();
+        await using (ModShelfDbContext context = await database.CreateContextAsync())
+        {
+            // The update before the latest one, and the lock the latest one left when the app stopped part-way.
+            List<string> migrations = [.. context.Database.GetMigrations()];
+            await context.GetService<IMigrator>().MigrateAsync(migrations[^2], TestContext.Current.CancellationToken);
+            await context.Database.ExecuteSqlRawAsync(
+                "INSERT INTO \"__EFMigrationsLock\" (\"Id\", \"Timestamp\") VALUES (1, '2026-10-29 21:00:00+00:00')",
+                TestContext.Current.CancellationToken);
+        }
+
+        await database.StartAsync().WaitAsync(TimeSpan.FromSeconds(30), TestContext.Current.CancellationToken);
+
+        await using (ModShelfDbContext context = await database.CreateContextAsync())
+        {
+            Assert.Empty(await context.Database.GetPendingMigrationsAsync(TestContext.Current.CancellationToken));
+        }
+
+        Assert.Equal(0L, await database.QueryAsync("SELECT COUNT(*) FROM \"__EFMigrationsLock\""));
+        Assert.Contains(database.Logs.Entries, entry => entry.Contains("Cleared the lock an update of the library database left", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task AStartWaitsForAnotherModShelfUpdatingTheDatabase()
+    {
+        await using TestLibraryDatabase database = new();
+        LibraryDatabaseMigrator migrator = Migrator(database, TimeSpan.FromSeconds(30));
+        Task starting;
+        await using (new FileStream(database.DatabasePath + ".update.lock", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
+        {
+            starting = migrator.StartingAsync(TestContext.Current.CancellationToken);
+            await Task.Delay(TimeSpan.FromMilliseconds(300), TestContext.Current.CancellationToken);
+            Assert.False(starting.IsCompleted);
+        }
+
+        await starting.WaitAsync(TimeSpan.FromSeconds(30), TestContext.Current.CancellationToken);
+        Assert.Equal(1L, await database.QueryAsync("SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'LibraryMods'"));
+    }
+
+    [Fact]
+    public async Task AStartStopsWhenAnotherModShelfKeepsUpdatingTheDatabase()
+    {
+        await using TestLibraryDatabase database = new();
+        Directory.CreateDirectory(Path.GetDirectoryName(database.DatabasePath)!);
+        await using FileStream held = new(database.DatabasePath + ".update.lock", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+
+        LibraryDatabaseUnavailableException refused = await Assert.ThrowsAsync<LibraryDatabaseUnavailableException>(
+            () => Migrator(database, TimeSpan.FromMilliseconds(300)).StartingAsync(TestContext.Current.CancellationToken));
+
+        Assert.Equal(
+            $"The library database {database.DatabasePath} can't be opened: another ModShelf is updating it, and hasn't finished. Wait for it, then try again.",
+            refused.Message);
+    }
+
+    [Fact]
     public async Task TheModelMatchesTheLatestMigration()
     {
         // Fails when the model changes without a new migration: run `dotnet ef migrations add <Name>`.
@@ -228,4 +285,13 @@ public sealed class LibraryDatabaseTests
     {
         Assert.Throws<ArgumentException>(() => new ServiceCollection().AddLibraryDatabase(databasePath));
     }
+
+    private static LibraryDatabaseMigrator Migrator(TestLibraryDatabase database, TimeSpan patience)
+        => new(
+            database.Services.GetRequiredService<LibraryDatabaseOptions>(),
+            database.Services.GetRequiredService<IDbContextFactory<ModShelfDbContext>>(),
+            database.Services.GetRequiredService<Microsoft.Extensions.Logging.ILogger<LibraryDatabaseMigrator>>())
+        {
+            UpdatePatience = patience,
+        };
 }
