@@ -41,4 +41,7 @@ internal sealed partial class HttpFileTransfer
 
     [LoggerMessage(EventId = 109, Level = LogLevel.Warning, Message = "There isn't room on the disk for {FileName}: it needs {NeededBytes} more bytes, and {FreeBytes} are free")]
     private static partial void LogNotEnoughSpace(ILogger logger, string fileName, long neededBytes, long freeBytes);
+
+    [LoggerMessage(EventId = 110, Level = LogLevel.Warning, Message = "{Host} answered with a web page instead of {FileName}; the link needs refreshing")]
+    private static partial void LogWebPage(ILogger logger, string host, string fileName);
 }

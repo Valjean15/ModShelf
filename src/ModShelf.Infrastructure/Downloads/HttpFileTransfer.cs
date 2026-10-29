@@ -16,6 +16,12 @@ namespace ModShelf.Infrastructure.Downloads;
 /// continues with a Range request. Once complete and verified, the file is renamed into place in one step.
 /// </summary>
 /// <remarks>
+/// Beside the partial file, a <c>.part.info</c> file keeps what the server said of the file: its length, and its entity
+/// tag or the date it last changed. A later attempt asks for the rest only if the file is still that one
+/// (<c>If-Range</c>), and starts over when the server's answer is for a file of another length. An answer that's a web
+/// page, such as a sign-in page or a captive portal, is never saved as the file.
+/// </remarks>
+/// <remarks>
 /// Transient request failures are retried by the HTTP client's resilience pipeline (see
 /// <see cref="InfrastructureServiceCollectionExtensions.AddHttpFileTransfer"/>). A connection that drops or
 /// stalls mid-file is resumed here, from the bytes already on disk.
@@ -29,11 +35,16 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
 
     private const int BufferSize = 81920;
 
+    // How many times the finished file is moved into place while another program holds it for a moment.
+    private const int MoveAttempts = 5;
+
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly TimeProvider _timeProvider;
     private readonly FileTransferOptions _options;
     private readonly ILogger<HttpFileTransfer> _logger;
     private readonly Func<string, long?> _freeSpace;
+    private readonly Action<string, string> _move;
+    private readonly Action<string> _delete;
 
     public HttpFileTransfer(
         IHttpClientFactory httpClientFactory,
@@ -47,12 +58,16 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
     /// <param name="freeSpace">
     /// The bytes free on the disk that holds a folder, or null when the system can't tell. Tests stand in for the disk.
     /// </param>
+    /// <param name="move">Moves the finished file into place without overwriting; null for the system's own move.</param>
+    /// <param name="delete">Deletes a partial file; null for the system's own delete.</param>
     internal HttpFileTransfer(
         IHttpClientFactory httpClientFactory,
         TimeProvider timeProvider,
         FileTransferOptions options,
         ILogger<HttpFileTransfer> logger,
-        Func<string, long?> freeSpace)
+        Func<string, long?> freeSpace,
+        Action<string, string>? move = null,
+        Action<string>? delete = null)
     {
         ArgumentNullException.ThrowIfNull(httpClientFactory);
         ArgumentNullException.ThrowIfNull(timeProvider);
@@ -67,6 +82,8 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
         _options = options;
         _logger = logger;
         _freeSpace = freeSpace;
+        _move = move ?? ((from, to) => File.Move(from, to, overwrite: false));
+        _delete = delete ?? File.Delete;
     }
 
     private enum ResponseKind
@@ -137,19 +154,22 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
 
+        string partialPath = PartialFiles.PathFor(destinationPath);
         try
         {
-            File.Delete(PartialFiles.PathFor(destinationPath));
+            _delete(partialPath);
         }
         catch (DirectoryNotFoundException)
         {
             // The download never got as far as creating its folder, so there's no partial file.
         }
 
+        PartialFiles.DeleteRecord(partialPath);
         return Task.CompletedTask;
     }
 
-    private static HttpRequestMessage CreateRequest(DownloadTicket ticket, long offset)
+    /// <param name="record">What the server said of the file the partial file holds the start of, when that was kept.</param>
+    private static HttpRequestMessage CreateRequest(DownloadTicket ticket, long offset, PartialFileRecord? record)
     {
         HttpRequestMessage request = new(HttpMethod.Get, ticket.Url);
         foreach (KeyValuePair<string, string> header in ticket.Headers)
@@ -160,12 +180,22 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
         if (offset > 0)
         {
             request.Headers.Range = new RangeHeaderValue(offset, null);
+
+            // The rest only if the file is still the one started; otherwise the server sends the whole of the new one.
+            if (record?.ETag is { } tag)
+            {
+                request.Headers.IfRange = new RangeConditionHeaderValue(EntityTagHeaderValue.Parse(tag));
+            }
+            else if (record?.LastModified is { } changed)
+            {
+                request.Headers.IfRange = new RangeConditionHeaderValue(changed);
+            }
         }
 
         return request;
     }
 
-    private static ResponseKind Classify(HttpResponseMessage response, long offset)
+    private static ResponseKind Classify(HttpResponseMessage response, long offset, PartialFileRecord? record)
     {
         switch (response.StatusCode)
         {
@@ -173,13 +203,19 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
                 return ResponseKind.LinkRejected;
 
             case HttpStatusCode.RequestedRangeNotSatisfiable:
-                // "bytes */1000": a partial file of exactly that length is complete; any other is unusable.
-                return offset > 0 && response.Content.Headers.ContentRange?.Length == offset
+                // "bytes */1000": a partial file of exactly that length is complete, if the file started was that long
+                // too; any other is unusable.
+                return offset > 0
+                    && response.Content.Headers.ContentRange?.Length == offset
+                    && (record?.Length is null || record.Length == offset)
                     ? ResponseKind.AlreadyComplete
                     : ResponseKind.CannotResume;
 
             case HttpStatusCode.PartialContent:
-                return response.Content.Headers.ContentRange is { HasRange: true } range && range.From == offset
+                // The rest of a file of another length is the rest of another file.
+                return response.Content.Headers.ContentRange is { HasRange: true } range
+                    && range.From == offset
+                    && (record?.Length is null || range.Length is null || range.Length == record.Length)
                     ? ResponseKind.Content
                     : ResponseKind.CannotResume;
 
@@ -197,6 +233,21 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
 
     private static bool IsStorageFailure(Exception exception)
         => exception is IOException or UnauthorizedAccessException;
+
+    /// <summary>
+    /// Whether the answer is a web page, such as a sign-in page, a captive portal, or a file host's page about the file,
+    /// when the file isn't one.
+    /// </summary>
+    private static bool IsWebPage(HttpResponseMessage response, string fileName)
+        => string.Equals(response.Content.Headers.ContentType?.MediaType, "text/html", StringComparison.OrdinalIgnoreCase)
+            && !fileName.EndsWith(".html", StringComparison.OrdinalIgnoreCase)
+            && !fileName.EndsWith(".htm", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// The answer's entity tag, when it's a strong one: a weak one doesn't stand for the bytes.
+    /// </summary>
+    private static string? StrongTag(HttpResponseMessage response)
+        => response.Headers.ETag is { IsWeak: false } tag ? tag.ToString() : null;
 
     private static async Task<FileHash> ComputeHashAsync(string path, FileHashAlgorithm algorithm, CancellationToken cancellationToken)
     {
@@ -239,7 +290,8 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
         while (true)
         {
             long offset = PartialFiles.LengthOf(partialPath);
-            using HttpRequestMessage request = CreateRequest(ticket, offset);
+            PartialFileRecord? record = offset > 0 ? PartialFiles.ReadRecord(partialPath) : null;
+            using HttpRequestMessage request = CreateRequest(ticket, offset, record);
 
             HttpResponseMessage response;
             try
@@ -257,7 +309,7 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
 
             using (response)
             {
-                switch (Classify(response, offset))
+                switch (Classify(response, offset, record))
                 {
                     case ResponseKind.LinkRejected:
                         LogLinkRejected(_logger, host, response.StatusCode);
@@ -279,7 +331,17 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
 
                     case ResponseKind.CannotResume:
                         LogPartialFileDiscarded(_logger, fileName, "the server can't continue it");
-                        File.Delete(partialPath);
+                        try
+                        {
+                            DiscardPartialFile(partialPath);
+                        }
+                        catch (Exception exception) when (IsStorageFailure(exception))
+                        {
+                            // Such as a partial file another program holds.
+                            LogStorageFailed(_logger, exception, fileName);
+                            return TransferOutcome.StorageError;
+                        }
+
                         if (++interruptions > _options.MaxResumeAttempts)
                         {
                             LogTooManyInterruptions(_logger, host, interruptions);
@@ -287,6 +349,13 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
                         }
 
                         continue;
+                }
+
+                // Checked before the partial file is touched, so a captive portal's page doesn't replace it.
+                if (IsWebPage(response, fileName))
+                {
+                    LogWebPage(_logger, host, fileName);
+                    return TransferOutcome.LinkExpired;
                 }
 
                 bool append = response.StatusCode == HttpStatusCode.PartialContent;
@@ -304,6 +373,19 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
                 if (missing > room)
                 {
                     LogNotEnoughSpace(_logger, fileName, missing.Value, room.Value);
+                    return TransferOutcome.StorageError;
+                }
+
+                // Before the first byte, so that a later attempt can tell whether the server's file is still this one.
+                try
+                {
+                    PartialFiles.WriteRecord(
+                        partialPath,
+                        new PartialFileRecord(totalBytes, StrongTag(response), response.Content.Headers.LastModified));
+                }
+                catch (Exception exception) when (IsStorageFailure(exception))
+                {
+                    LogStorageFailed(_logger, exception, fileName);
                     return TransferOutcome.StorageError;
                 }
 
@@ -444,13 +526,14 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
                 if (actual != expectedHash)
                 {
                     LogHashMismatch(_logger, fileName, expectedHash.Algorithm);
-                    File.Delete(partialPath);
+                    DiscardPartialFile(partialPath);
                     return TransferOutcome.HashMismatch;
                 }
             }
 
             // Never overwrite: if a file appeared at the destination meanwhile, this throws and nothing is lost.
-            File.Move(partialPath, destinationPath, overwrite: false);
+            await MoveIntoPlaceAsync(partialPath, destinationPath, cancellationToken).ConfigureAwait(false);
+            PartialFiles.DeleteRecord(partialPath);
             return TransferOutcome.Completed;
         }
         catch (Exception exception) when (IsStorageFailure(exception))
@@ -458,5 +541,33 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
             LogStorageFailed(_logger, exception, fileName);
             return TransferOutcome.StorageError;
         }
+    }
+
+    /// <summary>
+    /// Moves the finished file into place, trying again a few times, a moment apart, while another program holds it,
+    /// such as a virus scanner looking at it.
+    /// </summary>
+    private async Task MoveIntoPlaceAsync(string partialPath, string destinationPath, CancellationToken cancellationToken)
+    {
+        TimeSpan wait = TimeSpan.FromMilliseconds(100);
+        for (int attempt = 1; ; attempt++)
+        {
+            try
+            {
+                _move(partialPath, destinationPath);
+                return;
+            }
+            catch (IOException) when (attempt < MoveAttempts && File.Exists(partialPath) && !File.Exists(destinationPath))
+            {
+                await Task.Delay(wait, _timeProvider, cancellationToken).ConfigureAwait(false);
+                wait *= 2;
+            }
+        }
+    }
+
+    private void DiscardPartialFile(string partialPath)
+    {
+        _delete(partialPath);
+        PartialFiles.DeleteRecord(partialPath);
     }
 }

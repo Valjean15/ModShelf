@@ -115,6 +115,164 @@ public sealed class HttpFileTransferTests : IDisposable
     }
 
     [Fact]
+    public async Task ResumingAsksForTheRestOnlyIfTheFileIsStillTheOneStarted()
+    {
+        _server.Respond(Responses.Whole(File1000, stopAfter: 400, etag: "\"v1\""));
+        Assert.Equal(TransferOutcome.NetworkError, await DownloadAsync(new FileTransferOptions { MaxResumeAttempts = 0 }));
+        _server.Respond(Responses.Rest(File1000, from: 400, etag: "\"v1\""));
+
+        TransferOutcome outcome = await DownloadAsync();
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+        Assert.Equal(File1000, File.ReadAllBytes(Destination));
+        Assert.Equal("bytes=400-", _server.Requests[^1].Range);
+        Assert.Equal("\"v1\"", _server.Requests[^1].Headers!["If-Range"]);
+    }
+
+    [Fact]
+    public async Task ResumingAsksWithTheFilesDateWithoutAStrongTag()
+    {
+        // A weak tag can't stand for the bytes, so the date when the file last changed does.
+        DateTimeOffset changed = new(2026, 10, 21, 7, 28, 0, TimeSpan.Zero);
+        _server.Respond(Responses.Whole(File1000, stopAfter: 400, etag: "W/\"v1\"", lastModified: changed));
+        await DownloadAsync(new FileTransferOptions { MaxResumeAttempts = 0 });
+        _server.Respond(Responses.Rest(File1000, from: 400));
+
+        await DownloadAsync();
+
+        Assert.Equal("Wed, 21 Oct 2026 07:28:00 GMT", _server.Requests[^1].Headers!["If-Range"]);
+    }
+
+    [Fact]
+    public async Task TheRestOfAFileOfAnotherLengthStartsOver()
+    {
+        // The link gives another file now, such as a "latest release" link, and the server takes the range anyway:
+        // its rest would follow the first file's bytes.
+        byte[] newer = [.. Responses.SampleFile(1200).Reverse()];
+        _server.Respond(Responses.Whole(File1000, stopAfter: 400));
+        await DownloadAsync(new FileTransferOptions { MaxResumeAttempts = 0 });
+        _server.Respond(Responses.Rest(newer, from: 400)).Respond(Responses.Whole(newer));
+
+        TransferOutcome outcome = await DownloadAsync();
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+        Assert.Equal(newer, File.ReadAllBytes(Destination));
+    }
+
+    [Fact]
+    public async Task AFileOfAnotherLengthIsntTakenAsComplete()
+    {
+        // "Range not satisfiable" for a file as long as the bytes kept, but the file started was longer.
+        byte[] shorter = [.. Responses.SampleFile(400).Reverse()];
+        _server.Respond(Responses.Whole(File1000, stopAfter: 400));
+        await DownloadAsync(new FileTransferOptions { MaxResumeAttempts = 0 });
+        _server.Respond(Responses.RangeNotSatisfiable(400)).Respond(Responses.Whole(shorter));
+
+        TransferOutcome outcome = await DownloadAsync();
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+        Assert.Equal(shorter, File.ReadAllBytes(Destination));
+    }
+
+    [Fact]
+    public async Task LeavesNothingButTheFileOnceItsSaved()
+    {
+        _server.Respond(Responses.Whole(File1000, stopAfter: 400, etag: "\"v1\""));
+        await DownloadAsync(new FileTransferOptions { MaxResumeAttempts = 0 });
+        _server.Respond(Responses.Rest(File1000, from: 400, etag: "\"v1\""));
+
+        await DownloadAsync();
+
+        Assert.Equal([Destination], Directory.GetFiles(_folder.Path));
+    }
+
+    [Fact]
+    public async Task AWebPageIsntSavedAsTheFile()
+    {
+        // Such as a sign-in page, or a file host's page about the file rather than the file.
+        _server.Respond(Responses.Page("<html>Sign in</html>"));
+
+        TransferOutcome outcome = await DownloadAsync();
+
+        Assert.Equal(TransferOutcome.LinkExpired, outcome);
+        Assert.Empty(Directory.GetFiles(_folder.Path));
+        Assert.Contains(_logger.Entries, entry => entry.Contains("answered with a web page", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task AWebPageInPlaceOfTheRestKeepsThePartialFile()
+    {
+        // A captive portal on a hotel's network, say.
+        File.WriteAllBytes(PartialFile, File1000[..400]);
+        _server.Respond(Responses.Page("<html>Accept the terms</html>"));
+
+        TransferOutcome outcome = await DownloadAsync();
+
+        Assert.Equal(TransferOutcome.LinkExpired, outcome);
+        Assert.Equal(File1000[..400], File.ReadAllBytes(PartialFile));
+    }
+
+    [Fact]
+    public async Task AWebPageIsSavedWhenThatsWhatTheFileIs()
+    {
+        _server.Respond(Responses.Page("<html>Read me</html>"));
+        string page = Path.Combine(_folder.Path, "ReadMe.html");
+
+        TransferOutcome outcome = await CreateTransfer().DownloadAsync(Ticket(), page, _progress, TestContext.Current.CancellationToken);
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+        Assert.Equal("<html>Read me</html>", File.ReadAllText(page));
+    }
+
+    [Fact]
+    public async Task AFileHeldForAMomentIsStillMovedIntoPlace()
+    {
+        // Such as by a virus scanner looking at the finished file.
+        int tries = 0;
+        _server.Respond(Responses.Whole(File1000));
+        HttpFileTransfer transfer = CreateTransfer(move: (from, to) =>
+        {
+            if (++tries < 3)
+            {
+                throw new IOException("The process cannot access the file because it is being used by another process.");
+            }
+
+            File.Move(from, to);
+        });
+
+        TransferOutcome outcome = await transfer.DownloadAsync(Ticket(), Destination, _progress, TestContext.Current.CancellationToken);
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+        Assert.Equal(3, tries);
+        Assert.Equal(File1000, File.ReadAllBytes(Destination));
+    }
+
+    [Fact]
+    public async Task AFileHeldForGoodIsAStorageErrorAndKeptWhole()
+    {
+        _server.Respond(Responses.Whole(File1000));
+        HttpFileTransfer transfer = CreateTransfer(move: (_, _) => throw new IOException("The file is in use."));
+
+        TransferOutcome outcome = await transfer.DownloadAsync(Ticket(), Destination, _progress, TestContext.Current.CancellationToken);
+
+        Assert.Equal(TransferOutcome.StorageError, outcome);
+        Assert.Equal(File1000, File.ReadAllBytes(PartialFile));
+    }
+
+    [Fact]
+    public async Task APartialFileThatCantBeDiscardedIsAStorageError()
+    {
+        File.WriteAllBytes(PartialFile, Responses.SampleFile(1200));
+        _server.Respond(Responses.RangeNotSatisfiable(1000));
+        HttpFileTransfer transfer = CreateTransfer(delete: _ => throw new IOException("The file is in use."));
+
+        TransferOutcome outcome = await transfer.DownloadAsync(Ticket(), Destination, _progress, TestContext.Current.CancellationToken);
+
+        Assert.Equal(TransferOutcome.StorageError, outcome);
+        Assert.Contains(_logger.Entries, entry => entry.StartsWith("Error: Couldn't write SkyUI_5_2_SE.7z", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public async Task ResumesAfterTheConnectionDrops()
     {
         _server
@@ -309,6 +467,17 @@ public sealed class HttpFileTransferTests : IDisposable
     }
 
     [Fact]
+    public async Task DeletePartialFileRemovesWhatWasKeptOfIt()
+    {
+        _server.Respond(Responses.Whole(File1000, stopAfter: 400, etag: "\"v1\""));
+        await DownloadAsync(new FileTransferOptions { MaxResumeAttempts = 0 });
+
+        await CreateTransfer().DeletePartialFileAsync(Destination, TestContext.Current.CancellationToken);
+
+        Assert.Empty(Directory.GetFiles(_folder.Path));
+    }
+
+    [Fact]
     public async Task DeletePartialFileIgnoresAFolderThatDoesntExist()
     {
         HttpFileTransfer transfer = CreateTransfer();
@@ -447,13 +616,24 @@ public sealed class HttpFileTransferTests : IDisposable
     }
 
     /// <param name="freeSpace">The disk's room, for a folder; null for the system's own disk.</param>
+    /// <param name="move">Moves the finished file into place, in place of the system; null for the system's.</param>
+    /// <param name="delete">Deletes a partial file, in place of the system; null for the system's.</param>
     private HttpFileTransfer CreateTransfer(
         FileTransferOptions? options = null,
         TimeProvider? timeProvider = null,
-        Func<string, long?>? freeSpace = null)
-        => freeSpace is null
+        Func<string, long?>? freeSpace = null,
+        Action<string, string>? move = null,
+        Action<string>? delete = null)
+        => freeSpace is null && move is null && delete is null
             ? new(new SingleHandlerHttpClientFactory(_server), timeProvider ?? TimeProvider.System, options ?? new FileTransferOptions(), _logger)
-            : new(new SingleHandlerHttpClientFactory(_server), timeProvider ?? TimeProvider.System, options ?? new FileTransferOptions(), _logger, freeSpace);
+            : new(
+                new SingleHandlerHttpClientFactory(_server),
+                timeProvider ?? TimeProvider.System,
+                options ?? new FileTransferOptions(),
+                _logger,
+                freeSpace ?? FreeSpace.Available,
+                move,
+                delete);
 
     private Task<TransferOutcome> DownloadAsync(
         FileTransferOptions? options = null,
