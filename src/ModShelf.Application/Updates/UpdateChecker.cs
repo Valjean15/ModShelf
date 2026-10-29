@@ -87,10 +87,13 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
     public void Dispose() => _checking.Dispose();
 
     /// <summary>
-    /// Whether a failure means the site wants nothing more for now: it refused the account, or asked to slow down.
+    /// Whether a failure means the site wants nothing more for now: it refused the account, or asked to slow down; or it
+    /// can't be reached at all, as when offline, where each question would wait out its retries and timeouts in turn.
     /// </summary>
     private static bool StopsTheSource(Exception exception)
-        => exception is AuthenticationFailedException or HttpRequestException { StatusCode: HttpStatusCode.TooManyRequests };
+        => exception is AuthenticationFailedException
+            or HttpRequestException { StatusCode: HttpStatusCode.TooManyRequests }
+            or HttpRequestException { StatusCode: null };
 
     /// <summary>
     /// When <paramref name="mod"/> was last checked, as far as can be told: a check later than <paramref name="now"/>,
@@ -130,7 +133,7 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
                 check.Fail(game, null, exception.Message);
                 if (StopsTheSource(exception))
                 {
-                    check.Stop(game.Source, exception.Message);
+                    check.Stop(game.Source, exception);
                 }
 
                 return;
@@ -175,7 +178,7 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
                 check.Fail(game, mod.Mod, exception.Message);
                 if (StopsTheSource(exception))
                 {
-                    check.Stop(game.Source, exception.Message);
+                    check.Stop(game.Source, exception);
                     return;
                 }
 
@@ -221,7 +224,9 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
 
         public void Fail(GameRef game, ModRef? mod, string reason) => Failures.Add(new UpdateCheckFailure(game, mod, reason));
 
-        public void Stop(SourceId source, string reason)
-            => Stopped[source] = $"Not checked: {source} refused an earlier question in this check. {reason}";
+        public void Stop(SourceId source, Exception exception)
+            => Stopped[source] = exception is HttpRequestException { StatusCode: null }
+                ? $"Not checked: {source} couldn't be reached earlier in this check. {exception.Message}"
+                : $"Not checked: {source} refused an earlier question in this check. {exception.Message}";
     }
 }

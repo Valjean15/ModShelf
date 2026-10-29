@@ -249,6 +249,33 @@ public sealed class UpdateCheckerTests : IDisposable
     }
 
     [Fact]
+    public async Task ASiteThatCantBeReachedStopsBeingAsked()
+    {
+        // Offline, say: each question would wait out its retries and timeouts in turn, minutes a mod.
+        _library.Add(LibraryMod.Watch(new ModRef(Fallout, "5"), "Mod 5", null, null, TestData.Now.AddDays(-9)));
+        _site.ModFailures["1"] = new HttpRequestException("No such host is known.");
+
+        UpdateCheck check = await CheckAsync(_feed);
+
+        Assert.Equal((0, 1), (check.Checked, check.Requests));
+        Assert.Equal(["GetFilesAsync 1"], _site.AskedFor);
+        Assert.Equal(
+            ["No such host is known.", "Not checked: fake-mods couldn't be reached earlier in this check. No such host is known."],
+            check.Failures.Select(failure => failure.Reason));
+    }
+
+    [Fact]
+    public async Task AnAnswerWithAStatusDoesntStopTheSite()
+    {
+        // The site answered: it's there, and the next mod may well check.
+        _site.ModFailures["1"] = new HttpRequestException("Server error.", null, HttpStatusCode.InternalServerError);
+
+        UpdateCheck check = await CheckAsync(_feed);
+
+        Assert.Equal((2, 3), (check.Checked, check.Requests));
+    }
+
+    [Fact]
     public async Task ASiteThatCantDescribeItsModsCantBeChecked()
     {
         UpdateCheck check = await CheckAsync(ScriptedLinkRecognizer.Never(FakeModSite.SourceId));
