@@ -8,6 +8,7 @@ using ModShelf.Application.Downloads;
 using ModShelf.Application.Library;
 using ModShelf.Cli.Hosting;
 using ModShelf.Domain.Downloads;
+using ModShelf.Infrastructure.Logging;
 
 namespace ModShelf.Cli.Commands;
 
@@ -184,7 +185,8 @@ internal static partial class DownloadCommand
             library,
             new HandoffPrompt(environment, services.GetRequiredService<IBrowserLauncher>()),
             current,
-            fileName);
+            fileName,
+            services.GetService<LogFolder>()?.Path);
         return await follow.RunAsync(updates, watching, cancellationToken).ConfigureAwait(false);
     }
 
@@ -213,7 +215,8 @@ internal static partial class DownloadCommand
         _ => LinkProblems.Describe(exception, unsupported: "No source can download that link."),
     };
 
-    private static string FailureMessage(DownloadFailureReason? reason) => reason switch
+    /// <param name="logFolder">Where the log files are, which hold the details of an unexpected failure.</param>
+    private static string FailureMessage(DownloadFailureReason? reason, string? logFolder) => reason switch
     {
         DownloadFailureReason.LinkUnavailable => "The download failed: the link no longer works, or the server refused it.",
         DownloadFailureReason.HandoffExpired => "The download failed: it wasn't started on the site in time.",
@@ -221,6 +224,7 @@ internal static partial class DownloadCommand
         DownloadFailureReason.Storage => "The download failed: the file couldn't be saved. The folder may not be writable, the disk may be full, or a file with that name may exist already.",
         DownloadFailureReason.HashMismatch => "The download failed: the file doesn't match the expected hash, so it was deleted.",
         DownloadFailureReason.AccountNeeded => "The download failed: the site needs a linked account, or refused the one linked. Link it with account link, then run the same command again.",
-        _ => "The download failed unexpectedly. Set the environment variable Logging__LogLevel__Default=Debug and run it again for details.",
+        _ when logFolder is not null => $"The download failed unexpectedly. The details are in the log in {logFolder}.",
+        _ => "The download failed unexpectedly.",
     };
 }

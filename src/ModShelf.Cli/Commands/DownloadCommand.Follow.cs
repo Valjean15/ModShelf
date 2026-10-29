@@ -20,6 +20,7 @@ internal static partial class DownloadCommand
     /// <param name="library">The library the file goes into; or null for a download with --to.</param>
     /// <param name="job">The job as it was read once the watch began.</param>
     /// <param name="fileName">The name the user chose with --name, if any.</param>
+    /// <param name="logFolder">Where the log files are, to point to when the job fails unexpectedly.</param>
     private sealed class Follow(
         CliEnvironment environment,
         IDownloadService downloads,
@@ -27,7 +28,8 @@ internal static partial class DownloadCommand
         ILibraryDownloads? library,
         HandoffPrompt prompt,
         DownloadJobSnapshot job,
-        string? fileName)
+        string? fileName,
+        string? logFolder)
     {
         private const string PasteOrStop = "Paste the link the site handed over, or press Ctrl+C to stop.";
 
@@ -129,7 +131,7 @@ internal static partial class DownloadCommand
 
                 case DownloadJobStatus.Failed:
                     _display.Finish();
-                    await environment.Error.WriteLineAsync(FailureMessage(update.FailureReason)).ConfigureAwait(false);
+                    await environment.Error.WriteLineAsync(FailureMessage(update.FailureReason, logFolder)).ConfigureAwait(false);
                     return ExitCodes.Failed;
 
                 case DownloadJobStatus.Cancelled:

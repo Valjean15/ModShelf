@@ -233,6 +233,18 @@ public sealed class DownloadCommandLibraryTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task ADownloadThatFailsUnexpectedlyPointsToTheLog()
+    {
+        string folder = Path.Combine(_folder.Path, "Elsewhere");
+
+        CliResult failed = await RunAsync("download", HandoffLink("crash").AbsoluteUri, "--to", folder);
+
+        Assert.Equal(Failed, failed.ExitCode);
+        Assert.Equal($"The download failed unexpectedly. The details are in the log in {Path.Combine(_cli.Folder, "logs")}.", failed.Errors.Trim());
+        Assert.Contains(_cli.Logs.Entries, entry => entry.Contains("The site's answer made no sense.", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public async Task AFolderThatsAFileIsRefusedBeforeAnythingIsQueued()
     {
         string file = Path.Combine(_folder.Path, "notes.txt");

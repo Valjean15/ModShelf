@@ -72,9 +72,18 @@ internal sealed class FakeHandoffSource(Uri fileUrl) : ILinkRecognizer, IDownloa
         };
     }
 
+    /// <summary>
+    /// Hands over a ticket for a handoff with the right key, and asks for one otherwise. File <c>crash</c> fails as a
+    /// source with a bug does.
+    /// </summary>
     public Task<ResolveResult> ResolveAsync(ModFileRef file, Uri? handoff, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(file);
+        if (file.Id == "crash")
+        {
+            throw new InvalidOperationException("The site's answer made no sense.");
+        }
+
         _handoffs.Enqueue(handoff);
         string? key = handoff is null ? null : HttpUtility.ParseQueryString(handoff.Query)["key"];
         return Task.FromResult<ResolveResult>(key == GoodKey ? new DownloadTicket(fileUrl) : new HandoffRequired(Page(file.Id)));
