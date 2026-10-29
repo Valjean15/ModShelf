@@ -245,6 +245,20 @@ public sealed class DownloadCommandLibraryTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task ALibraryDatabaseThatCantBeChangedSaysSoAndFails()
+    {
+        // Such as one another program holds past SQLite's wait: an error to say what to do about, not an unexpected one.
+        await using InProcessCli cli = WithLibraryChanges(_ => throw new SqliteException("SQLite Error 5: 'database is locked'.", 5));
+
+        CliResult result = await cli.RunAsync(["library", "watch", FileLink("1").AbsoluteUri], Cancellation);
+
+        Assert.Equal(Failed, result.ExitCode);
+        Assert.Equal(
+            "The library database couldn't be changed: another program is using it. Close that program, then try again.",
+            result.Errors.Trim());
+    }
+
+    [Fact]
     public async Task ADownloadTheSitesRateLimitStoppedSaysSo()
     {
         string folder = Path.Combine(_folder.Path, "Elsewhere");

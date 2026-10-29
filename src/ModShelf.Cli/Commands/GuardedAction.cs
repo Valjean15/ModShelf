@@ -13,7 +13,7 @@ namespace ModShelf.Cli.Commands;
 
 /// <summary>
 /// Runs a command's action, and ends what it leaves unhandled in a line rather than a stack trace: a library database
-/// that can't be opened exits <see cref="ExitCodes.Failed"/> with what's wrong; Ctrl+C,
+/// that can't be opened, or changed, exits <see cref="ExitCodes.Failed"/> with what's wrong; Ctrl+C,
 /// <see cref="ExitCodes.Interrupted"/> with "Stopped."; and anything else, <see cref="ExitCodes.Unexpected"/>, with the
 /// details in the log.
 /// </summary>
@@ -52,6 +52,13 @@ internal sealed partial class GuardedAction(AsynchronousCommandLineAction action
         {
             await environment.Error.WriteLineAsync("Stopped.").ConfigureAwait(false);
             return ExitCodes.Interrupted;
+        }
+        catch (Exception exception) when (LibraryDatabaseUnavailableException.FromFailedChange(exception) is { } database)
+        {
+            // Such as a database another program holds past SQLite's wait: the user can act on it, so it isn't unexpected.
+            Log(parseResult.CommandResult.Command, exception);
+            await environment.Error.WriteLineAsync(database.Message).ConfigureAwait(false);
+            return ExitCodes.Failed;
         }
         catch (Exception exception)
         {
