@@ -71,6 +71,14 @@
         <Setter Property="FontSize" Value="12" />
     </Style>
 
+    <!-- A thing of its own among others, such as a site's account on the Accounts screen. -->
+    <Style Selector="Border.card">
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseLowBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
     <!-- One of a mod's files, in its section. -->
     <Style Selector="Border.file">
         <Setter Property="Padding" Value="12,8" />

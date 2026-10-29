@@ -894,4 +894,196 @@
     <value>{0} is saved in {1} already.</value>
     <comment>{0} is the file, {1} its folder: a download asked for again once it finished.</comment>
   </data>
+  <data name="AccountsNone" xml:space="preserve">
+    <value>No site here supports accounts.</value>
+    <comment>On the Accounts screen, when no source can link an account.</comment>
+  </data>
+  <data name="AccountsNotProtected" xml:space="preserve">
+    <value>No keyring is running, so credentials are stored in a file encrypted for this computer. Install and unlock a keyring, such as GNOME Keyring or KWallet, to protect them better.</value>
+    <comment>On Linux without a keyring: other programs running as the user can read the encrypted file.</comment>
+  </data>
+  <data name="AccountNeeded" xml:space="preserve">
+    <value>{0} needs a linked account.</value>
+    <comment>{0} is the site's name: one that can't be used without an account.</comment>
+  </data>
+  <data name="AccountOptional" xml:space="preserve">
+    <value>Linking an account on {0} is optional.</value>
+    <comment>{0} is the site's name: one that can be used without an account.</comment>
+  </data>
+  <data name="AccountNotLinked" xml:space="preserve">
+    <value>No account is linked.</value>
+    <comment>On a site's card, without an account.</comment>
+  </data>
+  <data name="AccountLinkedOn" xml:space="preserve">
+    <value>Linked on {0}</value>
+    <comment>{0} is the date the account was linked, in the user's culture.</comment>
+  </data>
+  <data name="AccountLinkApiKey" xml:space="preserve">
+    <value>Link with an API key</value>
+    <comment>Links an account by pasting a personal API key.</comment>
+  </data>
+  <data name="AccountLinkBrowser" xml:space="preserve">
+    <value>Link in the browser</value>
+    <comment>Links an account by signing in on the site, in the browser, and approving ModShelf.</comment>
+  </data>
+  <data name="AccountLinkEmail" xml:space="preserve">
+    <value>Link with an emailed code</value>
+    <comment>Links an account with a code the site emails.</comment>
+  </data>
+  <data name="AccountCheck" xml:space="preserve">
+    <value>Check</value>
+    <comment>Asks the site who the linked account is now, and what's left of its API requests.</comment>
+  </data>
+  <data name="AccountUnlink" xml:space="preserve">
+    <value>Unlink</value>
+    <comment>Removes the linked account and its stored credentials.</comment>
+  </data>
+  <data name="AccountQuotaHeading" xml:space="preserve">
+    <value>API requests left, as {0} last said:</value>
+    <comment>{0} is the site's name. Above a line per allowance.</comment>
+  </data>
+  <data name="AccountQuotaLine" xml:space="preserve">
+    <value>{0}: {1:N0} of {2:N0} left, until {3}</value>
+    <comment>{0} is the period, such as Per day; {1} what's left; {2} the limit; {3} when it starts over, a local date and time.</comment>
+  </data>
+  <data name="AccountQuotaPerDay" xml:space="preserve">
+    <value>Per day</value>
+    <comment>An allowance of API requests that starts over every day.</comment>
+  </data>
+  <data name="AccountQuotaPerHour" xml:space="preserve">
+    <value>Per hour</value>
+    <comment>An allowance of API requests that starts over every hour.</comment>
+  </data>
+  <data name="AccountQuotaPer" xml:space="preserve">
+    <value>Per {0}</value>
+    <comment>{0} is how long the allowance lasts, such as 0:15:00, for allowances other than a day or an hour.</comment>
+  </data>
+  <data name="AccountWaitingForBrowser" xml:space="preserve">
+    <value>Sign in to {0} in the page that opened in your browser, and approve ModShelf. Linking finishes here once you have.</value>
+    <comment>{0} is the site's name.</comment>
+  </data>
+  <data name="AccountBrowserDidntOpen" xml:space="preserve">
+    <value>Your browser didn't open. Open this page, sign in to {0} and approve ModShelf:</value>
+    <comment>{0} is the site's name. The page's address follows.</comment>
+  </data>
+  <data name="AccountOpenPageAgain" xml:space="preserve">
+    <value>Open page again</value>
+    <comment>Opens the site's page to approve ModShelf again, while linking in the browser.</comment>
+  </data>
+  <data name="AccountStopLinking" xml:space="preserve">
+    <value>Cancel</value>
+    <comment>Stops linking in the browser.</comment>
+  </data>
+  <data name="AccountLinked" xml:space="preserve">
+    <value>Linked as {0}.</value>
+    <comment>{0} is the account's name on the site.</comment>
+  </data>
+  <data name="AccountChecked" xml:space="preserve">
+    <value>Checked at {0}.</value>
+    <comment>{0} is the local time of the check.</comment>
+  </data>
+  <data name="AccountUnlinked" xml:space="preserve">
+    <value>Unlinked. Its stored credentials are deleted.</value>
+    <comment>After unlinking an account.</comment>
+  </data>
+  <data name="AccountApiKeyRefused" xml:space="preserve">
+    <value>{0} refused the API key. Check it, then try again.</value>
+    <comment>{0} is the site's name.</comment>
+  </data>
+  <data name="AccountCodeRefused" xml:space="preserve">
+    <value>{0} refused the code. Check it, or ask for a new one, then try again.</value>
+    <comment>{0} is the site's name.</comment>
+  </data>
+  <data name="AccountBrowserRefused" xml:space="preserve">
+    <value>{0} didn't let ModShelf in. Try again, and approve ModShelf in the browser.</value>
+    <comment>{0} is the site's name.</comment>
+  </data>
+  <data name="AccountSlowDown" xml:space="preserve">
+    <value>{0} asked ModShelf to slow down. Try again in a while.</value>
+    <comment>{0} is the site's name: it answered 429 Too Many Requests.</comment>
+  </data>
+  <data name="AccountSiteError" xml:space="preserve">
+    <value>{0} answered with an error: {1} Try again later.</value>
+    <comment>{0} is the site's name; {1} the error.</comment>
+  </data>
+  <data name="AccountUnreachable" xml:space="preserve">
+    <value>Couldn't reach {0}. Check your connection, then try again.</value>
+    <comment>{0} is the site's name.</comment>
+  </data>
+  <data name="AccountNothingLinked" xml:space="preserve">
+    <value>{0} Nothing was linked.</value>
+    <comment>{0} says why linking failed, such as a keyring that's locked.</comment>
+  </data>
+  <data name="AccountCheckRefused" xml:space="preserve">
+    <value>{0} refused the account's credentials, or they can't be used any more. Link it again.</value>
+    <comment>{0} is the site's name.</comment>
+  </data>
+  <data name="AccountNoLongerLinked" xml:space="preserve">
+    <value>No account is linked on {0} any more.</value>
+    <comment>{0} is the site's name: it was unlinked elsewhere, such as from the command line.</comment>
+  </data>
+  <data name="AccountUnlinkProblem" xml:space="preserve">
+    <value>{0} The account stays linked; unlink it again once that's fixed.</value>
+    <comment>{0} says why unlinking failed, such as a keyring that's locked.</comment>
+  </data>
+  <data name="AccountUnlinkTitle" xml:space="preserve">
+    <value>Unlink {0}?</value>
+    <comment>{0} is the site's name.</comment>
+  </data>
+  <data name="AccountUnlinkMessage" xml:space="preserve">
+    <value>ModShelf forgets {1}, your account on {0}, and deletes its stored credentials. Whatever needs the account stops working on {0} until one is linked again.</value>
+    <comment>{0} is the site's name, {1} the account's name.</comment>
+  </data>
+  <data name="AccountLinkTitle" xml:space="preserve">
+    <value>Link {0}</value>
+    <comment>{0} is the site's name: the title of each dialog while linking.</comment>
+  </data>
+  <data name="AccountApiKeyMessage" xml:space="preserve">
+    <value>Paste your personal API key for {0}.</value>
+    <comment>{0} is the site's name, for a site without a page for the key.</comment>
+  </data>
+  <data name="AccountApiKeyMessageWithPage" xml:space="preserve">
+    <value>Paste your personal API key for {0}. You'll find it on your account's API key page.</value>
+    <comment>{0} is the site's name.</comment>
+  </data>
+  <data name="AccountApiKeyHint" xml:space="preserve">
+    <value>API key</value>
+    <comment>Shown in the empty box for the API key.</comment>
+  </data>
+  <data name="AccountApiKeyPage" xml:space="preserve">
+    <value>Open the API key page</value>
+    <comment>Opens the site's page where the user finds their API key.</comment>
+  </data>
+  <data name="AccountLinkConfirm" xml:space="preserve">
+    <value>Link</value>
+    <comment>Links the account with what the user entered.</comment>
+  </data>
+  <data name="AccountEmailMessage" xml:space="preserve">
+    <value>Enter the email address of your account on {0}. {0} sends a code to it.</value>
+    <comment>{0} is the site's name.</comment>
+  </data>
+  <data name="AccountEmailHint" xml:space="preserve">
+    <value>name@example.com</value>
+    <comment>Shown in the empty box for an email address.</comment>
+  </data>
+  <data name="AccountSendCode" xml:space="preserve">
+    <value>Send code</value>
+    <comment>Asks the site to email a code.</comment>
+  </data>
+  <data name="AccountCodeMessage" xml:space="preserve">
+    <value>Enter the code {0} emailed you.</value>
+    <comment>{0} is the site's name.</comment>
+  </data>
+  <data name="AccountCodeMessageSentTo" xml:space="preserve">
+    <value>Enter the code {0} sent to {1}.</value>
+    <comment>{0} is the site's name, {1} where the code went.</comment>
+  </data>
+  <data name="AccountCodeHint" xml:space="preserve">
+    <value>Code</value>
+    <comment>Shown in the empty box for an emailed code.</comment>
+  </data>
+  <data name="DialogPageDidntOpen" xml:space="preserve">
+    <value>Your browser didn't open. Open this page by hand:</value>
+    <comment>In a dialog, when a page that helps answer didn't open. The page's address follows.</comment>
+  </data>
 </root>

@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 
+using ModShelf.Application.Accounts.Ports;
 using ModShelf.Desktop.Views.Dialogs;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
@@ -14,6 +15,16 @@ namespace ModShelf.Desktop.Services;
 /// </summary>
 internal sealed class AvaloniaDialogService : IDialogService
 {
+    private readonly IBrowserLauncher _browser;
+
+    /// <param name="browser">Opens the pages that help answer a question, such as where to find an API key.</param>
+    public AvaloniaDialogService(IBrowserLauncher browser)
+    {
+        ArgumentNullException.ThrowIfNull(browser);
+
+        _browser = browser;
+    }
+
     public Task ShowMessageAsync(string title, string message, CancellationToken cancellationToken)
         => ShowAsync(new MessageDialogContent(title, message, Strings.DialogOk, null), cancellationToken);
 
@@ -28,7 +39,13 @@ internal sealed class AvaloniaDialogService : IDialogService
         ArgumentException.ThrowIfNullOrWhiteSpace(question.ConfirmLabel);
         cancellationToken.ThrowIfCancellationRequested();
 
-        TextDialogContent content = new(question.Title, question.Message, question.Hint, question.ConfirmLabel, Strings.DialogCancel);
+        TextDialogContent content = new(question.Title, question.Message, question.Hint, question.ConfirmLabel, Strings.DialogCancel)
+        {
+            PasswordChar = question.IsSecret ? '•' : '\0',
+            HelpPage = question.HelpPage,
+            HelpPageLabel = question.HelpPageLabel,
+            OpenPage = page => _browser.TryOpenAsync(page, cancellationToken),
+        };
         bool confirmed = await Dispatcher.UIThread.InvokeAsync(async () =>
         {
             TextDialog dialog = new() { DataContext = content };

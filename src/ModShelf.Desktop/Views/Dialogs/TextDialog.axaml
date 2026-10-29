@@ -26,8 +26,14 @@
         </StackPanel>
         <StackPanel Spacing="12">
             <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+
+            <!-- A page that helps answer, such as where to find an API key. -->
+            <Button Content="{Binding HelpPageLabel}" IsVisible="{Binding HasHelpPage}" Click="OnOpenHelpPage" />
+            <SelectableTextBlock Name="HelpPageProblem" TextWrapping="Wrap" IsVisible="False" />
+
             <TextBox Name="Answer"
                      Text="{Binding Text}"
+                     PasswordChar="{Binding PasswordChar}"
                      PlaceholderText="{Binding Hint}" />
         </StackPanel>
     </DockPanel>

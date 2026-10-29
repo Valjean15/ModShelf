@@ -1,7 +1,112 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sys="using:System"
              xmlns:vm="using:ModShelf.Presentation.ViewModels"
+             xmlns:res="using:ModShelf.Presentation.Resources"
              x:Class="ModShelf.Desktop.Views.AccountsView"
              x:DataType="vm:AccountsViewModel">
-    <TextBlock Classes="heading" Text="{Binding Title}" />
+
+    <DockPanel>
+        <TextBlock DockPanel.Dock="Top" Classes="heading" Text="{Binding Title}" />
+
+        <!-- Linux without a keyring: the credentials are in a file other programs running as the user can read. -->
+        <TextBlock DockPanel.Dock="Top"
+                   Margin="0,0,0,12"
+                   Classes="problem"
+                   TextWrapping="Wrap"
+                   Text="{x:Static res:Strings.AccountsNotProtected}"
+                   IsVisible="{Binding IsStoreUnprotected}" />
+
+        <ProgressBar DockPanel.Dock="Top" IsIndeterminate="True" IsVisible="{Binding IsLoading}" />
+
+        <TextBlock DockPanel.Dock="Top"
+                   Classes="note"
+                   Classes.problem="{Binding IsEmptyTextAProblem}"
+                   TextWrapping="Wrap"
+                   Text="{Binding EmptyText}"
+                   IsVisible="{Binding EmptyText, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+        <ScrollViewer>
+            <ItemsControl ItemsSource="{Binding Sources}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="12" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:AccountViewModel">
+                        <Border Classes="card">
+                            <StackPanel Spacing="8">
+                                <StackPanel Spacing="2">
+                                    <TextBlock Classes="subheading" Text="{Binding SiteName}" />
+                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding AboutText}" />
+                                </StackPanel>
+
+                                <!-- The account: its name, its membership and when it was linked. -->
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock FontWeight="SemiBold"
+                                               VerticalAlignment="Center"
+                                               Text="{Binding AccountName}"
+                                               IsVisible="{Binding IsLinked}" />
+                                    <Border Classes="tag" IsVisible="{Binding Tier, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                        <TextBlock Text="{Binding Tier}" />
+                                    </Border>
+                                    <TextBlock Classes="note" VerticalAlignment="Center" Text="{Binding LinkedText}" />
+                                </StackPanel>
+
+                                <!-- What's left of the site's API requests, as it last said. -->
+                                <StackPanel Spacing="2" IsVisible="{Binding HasQuota}">
+                                    <TextBlock Classes="note" Text="{Binding QuotaHeading}" />
+                                    <ItemsControl ItemsSource="{Binding Quota}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="sys:String">
+                                                <TextBlock TextWrapping="Wrap" Text="{Binding}" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+
+                                <WrapPanel ItemSpacing="8" LineSpacing="8">
+                                    <ItemsControl ItemsSource="{Binding LinkMethods}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="8" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:LinkMethodViewModel">
+                                                <Button Classes.accent="{Binding IsMain}" Content="{Binding Label}" Command="{Binding Command}" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <Button Content="{x:Static res:Strings.AccountCheck}" Command="{Binding CheckCommand}" IsVisible="{Binding IsLinked}" />
+                                    <Button Content="{x:Static res:Strings.AccountUnlink}" Command="{Binding UnlinkCommand}" IsVisible="{Binding IsLinked}" />
+                                </WrapPanel>
+
+                                <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+
+                                <!-- While linking waits for the user to approve ModShelf in the browser. -->
+                                <StackPanel Spacing="8" IsVisible="{Binding IsWaitingForBrowser}">
+                                    <TextBlock TextWrapping="Wrap" Text="{Binding BrowserNote}" />
+                                    <SelectableTextBlock TextWrapping="Wrap"
+                                                         Text="{Binding BrowserPageText}"
+                                                         IsVisible="{Binding BrowserPageText, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Button Content="{x:Static res:Strings.AccountOpenPageAgain}" Command="{Binding OpenBrowserPageAgainCommand}" />
+                                        <Button Content="{x:Static res:Strings.AccountStopLinking}" Command="{Binding StopLinkingCommand}" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <TextBlock Classes="note"
+                                           Classes.problem="{Binding IsNoteAProblem}"
+                                           TextWrapping="Wrap"
+                                           Text="{Binding Note}"
+                                           IsVisible="{Binding Note, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
 </UserControl>

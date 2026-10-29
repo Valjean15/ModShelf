@@ -14,7 +14,7 @@ public sealed class ScreenTitlesTests
         { new UpdatesHarness().Screen, Screen.Updates, "Updates" },
         { new BrowseHarness().Screen, Screen.Browse, "Browse" },
         { new DownloadsHarness().Screen, Screen.Downloads, "Downloads" },
-        { new AccountsViewModel(), Screen.Accounts, "Accounts" },
+        { new AccountsHarness().Screen, Screen.Accounts, "Accounts" },
         { new SettingsViewModel(), Screen.Settings, "Settings" },
     };
 
