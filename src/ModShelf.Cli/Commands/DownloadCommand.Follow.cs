@@ -60,6 +60,8 @@ internal static partial class DownloadCommand
                         _typed = null;
                         if (await typed.ConfigureAwait(false) is not { } line)
                         {
+                            // The input ended, or, on Windows, Ctrl+C ended the read before it stopped the command.
+                            await Task.Delay(CliEnvironment.InputEndGrace, cancellationToken).ConfigureAwait(false);
                             return await NoLinkAsync().ConfigureAwait(false);
                         }
 

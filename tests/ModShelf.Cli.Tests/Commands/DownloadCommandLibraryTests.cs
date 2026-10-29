@@ -272,6 +272,33 @@ public sealed class DownloadCommandLibraryTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task AFolderThatsAFileIsRefusedWithATrailingSeparatorToo()
+    {
+        string file = Path.Combine(_folder.Path, "notes.txt");
+        await File.WriteAllTextAsync(file, "not a folder", Cancellation);
+
+        CliResult refused = await RunAsync("download", _server.FileUrl.AbsoluteUri, "--to", file + Path.DirectorySeparatorChar);
+
+        Assert.Equal(BadInput, refused.ExitCode);
+        Assert.Equal($"{file} is a file. Give --to a folder; it's created if it doesn't exist.", refused.Errors.Trim());
+        Assert.Contains("The queue is empty.", (await RunAsync("queue", "list")).Output, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task AFolderWithAQuoteInItIsRefusedOnWindows()
+    {
+        // In cmd and Windows PowerShell, --to "D:\My Mods\" reaches the command as D:\My Mods".
+        Assert.SkipUnless(OperatingSystem.IsWindows(), "Only Windows forbids quotes in names, and passes a quote this way.");
+        string folder = Path.Combine(_folder.Path, "My Mods\"");
+
+        CliResult refused = await RunAsync("download", _server.FileUrl.AbsoluteUri, "--to", folder);
+
+        Assert.Equal(BadInput, refused.ExitCode);
+        Assert.Contains("a name can't hold a quote", refused.Errors, StringComparison.Ordinal);
+        Assert.Contains("The queue is empty.", (await RunAsync("queue", "list")).Output, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task AFolderThatsAFileIsRefusedBeforeAnythingIsQueued()
     {
         string file = Path.Combine(_folder.Path, "notes.txt");

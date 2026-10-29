@@ -14,9 +14,9 @@ namespace ModShelf.Cli.Tests.Fakes;
 /// A site that, as Nexus Mods does for free accounts, lets a file be downloaded only once the user has started the
 /// download on its website: until it gets a handoff link with the right key, it asks for one. Its files are at
 /// <c>https://handoff.example/files/{id}</c>, its handoff links are <c>fakehandoff://files/{id}?key=…</c>, and every
-/// file downloads from <paramref name="fileUrl"/>. Links under <c>/locked/</c> need an account it doesn't have, and
-/// links under <c>/missing/</c> are to files it doesn't have. Every file is of one mod, <see cref="ModName"/>, which its
-/// catalog describes, so its files can go into the library.
+/// file downloads from <paramref name="fileUrl"/>. Links under <c>/locked/</c> need an account it doesn't have, links
+/// under <c>/missing/</c> are to files it doesn't have, and links under <c>/slow/</c> are looked up until cancelled.
+/// Every file is of one mod, <see cref="ModName"/>, which its catalog describes, so its files can go into the library.
 /// </summary>
 internal sealed class FakeHandoffSource(Uri fileUrl) : ILinkRecognizer, IDownloadResolver, IModCatalog
 {
@@ -30,6 +30,7 @@ internal sealed class FakeHandoffSource(Uri fileUrl) : ILinkRecognizer, IDownloa
     private static readonly string[] FileIds = ["1", "2", "3"];
 
     private readonly ConcurrentQueue<Uri?> _handoffs = new();
+    private readonly TaskCompletionSource _slowLinkAsked = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     public static SourceId SourceId { get; } = new("fake-handoff");
 
@@ -66,11 +67,17 @@ internal sealed class FakeHandoffSource(Uri fileUrl) : ILinkRecognizer, IDownloa
         string fileId = isHandoff ? path[^1] : path[1];
         return (isHandoff ? "files" : path[0]) switch
         {
+            "slow" => AnswerNeverAsync(cancellationToken),
             "locked" => throw new AuthenticationFailedException("The site wants an account first."),
             "missing" => throw new HttpRequestException("The site has no such file.", null, HttpStatusCode.NotFound),
             _ => Task.FromResult<RecognizedLink?>(new RecognizedLink(File(fileId), FileNameOf(fileId), isHandoff: isHandoff)),
         };
     }
+
+    /// <summary>
+    /// Completes once a link under <c>/slow/</c> is being looked up, which goes on until it's cancelled.
+    /// </summary>
+    public Task SlowLinkAsked => _slowLinkAsked.Task;
 
     /// <summary>
     /// Hands over a ticket for a handoff with the right key, and asks for one otherwise. File <c>crash</c> fails as a
@@ -130,4 +137,11 @@ internal sealed class FakeHandoffSource(Uri fileUrl) : ILinkRecognizer, IDownloa
             [new ModChangelog("1.2", ["Smaller."]), new ModChangelog("1.3", ["Faster.", "Fixed the crash."])]);
 
     private static ModFileRef File(string fileId) => new(new ModRef(new GameRef(SourceId, "game"), "mod"), fileId);
+
+    private async Task<RecognizedLink?> AnswerNeverAsync(CancellationToken cancellationToken)
+    {
+        _slowLinkAsked.TrySetResult();
+        await Task.Delay(Timeout.Infinite, cancellationToken).ConfigureAwait(false);
+        return null;
+    }
 }

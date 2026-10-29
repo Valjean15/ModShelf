@@ -76,24 +76,38 @@ internal static partial class DownloadCommand
             return ExitCodes.BadInput;
         }
 
-        if (folder is not null && File.Exists(folder.FullName))
+        string? targetDirectory = folder is null ? null : Path.TrimEndingDirectorySeparator(folder.FullName);
+        if (targetDirectory is not null && File.Exists(targetDirectory))
         {
-            await environment.Error.WriteLineAsync($"{folder.FullName} is a file. Give --to a folder; it's created if it doesn't exist.")
+            await environment.Error.WriteLineAsync($"{targetDirectory} is a file. Give --to a folder; it's created if it doesn't exist.")
                 .ConfigureAwait(false);
             return ExitCodes.BadInput;
         }
 
-        string? targetDirectory = folder is null ? null : Path.TrimEndingDirectorySeparator(folder.FullName);
+        // In cmd and Windows PowerShell, a quoted folder that ends in a backslash, such as "D:\My Mods\", reaches the command
+        // with the closing quote in it; no Windows name holds one.
+        if (targetDirectory is not null && OperatingSystem.IsWindows() && targetDirectory.Contains('"', StringComparison.Ordinal))
+        {
+            await environment.Error.WriteLineAsync(
+                    $"{targetDirectory} isn't a folder Windows can have: a name can't hold a quote. If you quoted a folder that ends in "
+                    + "a backslash, leave the backslash out, such as \"D:\\My Mods\".")
+                .ConfigureAwait(false);
+            return ExitCodes.BadInput;
+        }
 
         using IHost host = environment.BuildHost(true);
+        bool started = false;
         try
         {
             await host.StartAsync(cancellationToken).ConfigureAwait(false);
+            started = true;
             return await DownloadAsync(environment, host.Services, link, targetDirectory, fileName, cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            return await StoppedAsync(environment).ConfigureAwait(false);
+            return started
+                ? await StoppedAsync(environment).ConfigureAwait(false)
+                : await NothingAddedAsync(environment).ConfigureAwait(false);
         }
         finally
         {
@@ -146,6 +160,11 @@ internal static partial class DownloadCommand
                 added = placed.Queued;
             }
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // Ctrl+C while the link was looked up: no download was added.
+            return await NothingAddedAsync(environment).ConfigureAwait(false);
+        }
         catch (Exception exception) when (Problem(exception, library is not null) is { } problem)
         {
             string hint = exception is ArgumentException { ParamName: "fileName" } ? " Choose one with --name." : string.Empty;
@@ -179,6 +198,12 @@ internal static partial class DownloadCommand
             current,
             services.GetService<LogFolder>()?.Path);
         return await follow.RunAsync(updates, watching, cancellationToken).ConfigureAwait(false);
+    }
+
+    private static async Task<int> NothingAddedAsync(CliEnvironment environment)
+    {
+        await environment.Error.WriteLineAsync("Stopped before anything was added.").ConfigureAwait(false);
+        return ExitCodes.Interrupted;
     }
 
     private static async Task<int> StoppedAsync(CliEnvironment environment, bool waitingForHandoff = false)

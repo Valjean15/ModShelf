@@ -83,7 +83,9 @@ public sealed partial class AccountCommandTests : IAsyncDisposable
 
         Assert.Equal(Done, linked.ExitCode);
         Assert.Contains($"Find your API key for {KeySource} at {_site.KeyPage}", linked.Output, StringComparison.Ordinal);
-        Assert.Contains("API key (not shown as you type): ", linked.Output, StringComparison.Ordinal);
+        // Typed into a pipe, as here, the key shows on a terminal, so the prompt doesn't say otherwise.
+        Assert.Contains("API key: ", linked.Output, StringComparison.Ordinal);
+        Assert.DoesNotContain("not shown", linked.Output, StringComparison.Ordinal);
         Assert.Contains($"Linked {KeySource} as {FakeAccountSite.KeyUser} ({FakeAccountSite.KeyTier}).", linked.Output, StringComparison.Ordinal);
         Assert.Empty(linked.Errors);
         Assert.DoesNotContain(_site.ApiKey, linked.Output, StringComparison.Ordinal);
@@ -208,7 +210,7 @@ public sealed partial class AccountCommandTests : IAsyncDisposable
         CliResult stopped;
         await using (CliRun run = _cli.Start(["account", "link", KeySource], keyboard))
         {
-            await run.WaitForOutputAsync("API key (not shown as you type): ", Cancellation);
+            await run.WaitForOutputAsync("API key: ", Cancellation);
             await run.PressCtrlCAsync();
             stopped = Log(await run.WaitForExitAsync(Cancellation));
         }

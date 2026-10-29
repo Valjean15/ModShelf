@@ -5,7 +5,8 @@ namespace ModShelf.Cli.Commands;
 
 /// <summary>
 /// Asks on the terminal for the link that completes a handoff: opens the page where the user starts the download,
-/// and reads the link the site hands over. Each read runs off the command's thread, so the command keeps following
+/// and reads the link the site hands over. It writes to <see cref="CliEnvironment.Prompts"/>, so the person typing sees
+/// it even when the output goes into a file. Each read runs off the command's thread, so the command keeps following
 /// the download, and Ctrl+C ends it, while the user is busy on the site.
 /// </summary>
 /// <remarks>
@@ -22,14 +23,14 @@ internal sealed class HandoffPrompt(CliEnvironment environment, IBrowserLauncher
     public async Task<Task<string?>> AskAsync(Uri page, CancellationToken cancellationToken)
     {
         bool opened = await browser.TryOpenAsync(page, cancellationToken).ConfigureAwait(false);
-        environment.Output.WriteLine(_askedBefore
+        environment.Prompts.WriteLine(_askedBefore
             ? "The site didn't take that link; it may have expired. Start the download on the site again."
             : "The site wants this download started on its website.");
-        environment.Output.WriteLine(opened
+        environment.Prompts.WriteLine(opened
             ? "Its page opened in your browser. If it didn't, open this one:"
             : "Open this page in your browser:");
-        environment.Output.WriteLine(page.AbsoluteUri);
-        environment.Output.WriteLine(
+        environment.Prompts.WriteLine(page.AbsoluteUri);
+        environment.Prompts.WriteLine(
             "Start the download there with the download for mod managers. The site then hands your browser a link (for "
             + "Nexus Mods, one starting with nxm://). Paste that link here and press Enter. Press Ctrl+C to stop; the "
             + "download keeps waiting.");
@@ -43,7 +44,7 @@ internal sealed class HandoffPrompt(CliEnvironment environment, IBrowserLauncher
     /// </summary>
     public Task<string?> AskAgain(string reason)
     {
-        environment.Output.WriteLine(reason);
+        environment.Prompts.WriteLine(reason);
         return Read();
     }
 
@@ -53,7 +54,7 @@ internal sealed class HandoffPrompt(CliEnvironment environment, IBrowserLauncher
     /// </summary>
     private Task<string?> Read()
     {
-        environment.Output.Write("Link: ");
+        environment.Prompts.Write("Link: ");
         return Task.Run(environment.Input.ReadLine, CancellationToken.None);
     }
 }

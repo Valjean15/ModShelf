@@ -17,6 +17,18 @@ internal sealed record CliEnvironment(
     bool OutputIsTerminal,
     Func<bool, IHost> BuildHost)
 {
+    /// <summary>
+    /// How long a read that ended at a prompt waits for Ctrl+C before it counts as the end of the input: on Windows,
+    /// Ctrl+C ends the read before it stops the command.
+    /// </summary>
+    public static TimeSpan InputEndGrace { get; } = TimeSpan.FromMilliseconds(250);
+
+    /// <summary>
+    /// Where to ask, and to say what to do before asking: the output, unless a person types while the output goes
+    /// elsewhere, such as into a file; then the error stream, which still shows on their terminal.
+    /// </summary>
+    public TextWriter Prompts => InputIsTerminal && !OutputIsTerminal ? Error : Output;
+
     public static CliEnvironment ForConsole() => new(
         Console.In,
         Console.Out,

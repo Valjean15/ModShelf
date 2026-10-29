@@ -201,6 +201,37 @@ public sealed class DownloadCommandHandoffTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task CtrlCThatEndsTheReadFirstStillStops()
+    {
+        // On Windows, Ctrl+C at the prompt ends the read before it stops the command.
+        ControlledTextReader input = new();
+        await using CliRun run = _cli.Start(Download(FileLink("1")), input);
+        await run.WaitForOutputAsync("Link: ", Cancellation);
+
+        input.Dispose();
+        await run.PressCtrlCAsync();
+        CliResult stopped = await run.WaitForExitAsync(Cancellation);
+
+        Assert.Equal(Interrupted, stopped.ExitCode);
+        Assert.Contains("still waiting to be started on the site", stopped.Errors, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task CtrlCWhileTheLinkIsLookedUpSaysNothingWasAdded()
+    {
+        using ControlledTextReader input = new();
+        await using CliRun run = _cli.Start(Download(new Uri("https://handoff.example/slow/1")), input);
+        await _source.SlowLinkAsked.WaitAsync(TimeSpan.FromSeconds(10), Cancellation);
+
+        await run.PressCtrlCAsync();
+        CliResult stopped = await run.WaitForExitAsync(Cancellation);
+
+        Assert.Equal(Interrupted, stopped.ExitCode);
+        Assert.Equal("Stopped before anything was added.", stopped.Errors.Trim());
+        Assert.Contains("The queue is empty.", (await RunAsync(["queue", "list"])).Output, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task StopsWaitingWhenTheInputEndsWithoutALink()
     {
         CliResult result = await RunAsync(Download(FileLink("1")));
