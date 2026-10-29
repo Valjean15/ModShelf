@@ -13,11 +13,18 @@ internal sealed class ScriptedDialogs : IDialogService
 
     public List<TextQuestion> Questions { get; } = [];
 
+    public List<(string Title, string Message, IReadOnlyList<string> Choices)> ChoiceQuestions { get; } = [];
+
     public List<string> FolderPickers { get; } = [];
 
     public Queue<bool> Confirm { get; } = new();
 
     public Queue<string?> Answers { get; } = new();
+
+    /// <summary>
+    /// The index of each choice the user makes in turn; null closes the dialog.
+    /// </summary>
+    public Queue<int?> Choices { get; } = new();
 
     public Queue<string?> Folders { get; } = new();
 
@@ -31,6 +38,12 @@ internal sealed class ScriptedDialogs : IDialogService
     {
         Confirmations.Add((title, message, confirmLabel));
         return Task.FromResult(Confirm.TryDequeue(out bool confirmed) && confirmed);
+    }
+
+    public Task<int?> ChooseAsync(string title, string message, IReadOnlyList<string> choices, CancellationToken cancellationToken)
+    {
+        ChoiceQuestions.Add((title, message, choices));
+        return Task.FromResult(Choices.TryDequeue(out int? choice) ? choice : null);
     }
 
     public Task<string?> AskTextAsync(TextQuestion question, CancellationToken cancellationToken)

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- ModShelf: books on a shelf, one leaning on the others. -->
+  <rect x="8" y="8" width="240" height="240" rx="56" fill="#1F6FEB"/>
+  <g fill="#FFFFFF">
+    <rect x="52" y="80" width="36" height="104" rx="6"/>
+    <rect x="96" y="58" width="36" height="126" rx="6"/>
+    <g transform="rotate(-14 190 184)">
+      <rect x="154" y="80" width="36" height="104" rx="6"/>
+    </g>
+    <rect x="40" y="184" width="176" height="18" rx="6"/>
+  </g>
+  <g fill="#1F6FEB">
+    <rect x="52" y="96" width="36" height="7"/>
+    <rect x="52" y="160" width="36" height="7"/>
+    <rect x="96" y="74" width="36" height="7"/>
+    <rect x="96" y="160" width="36" height="7"/>
+    <g transform="rotate(-14 190 184)">
+      <rect x="154" y="96" width="36" height="7"/>
+      <rect x="154" y="160" width="36" height="7"/>
+    </g>
+  </g>
+</svg>

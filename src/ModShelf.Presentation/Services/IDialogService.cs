@@ -18,6 +18,13 @@ public interface IDialogService
     Task<bool> ConfirmAsync(string title, string message, string confirmLabel, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Asks the user to choose one of a few ways on, each a button, the first the main one.
+    /// </summary>
+    /// <param name="choices">Each button's label, saying what it does, such as "Quit ModShelf".</param>
+    /// <returns>The index of the choice; null when they closed the dialog without choosing.</returns>
+    Task<int?> ChooseAsync(string title, string message, IReadOnlyList<string> choices, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Asks the user to type or paste text.
     /// </summary>
     /// <returns>What the user entered, as typed; null when they cancelled or closed the dialog.</returns>

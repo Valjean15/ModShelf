@@ -5,7 +5,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 
 using ModShelf.Application.Desktop.Ports;
-
+using ModShelf.Desktop.Services;
 using ModShelf.Desktop.Views;
 using ModShelf.Desktop.Views.Dialogs;
 using ModShelf.Presentation.ViewModels;
@@ -16,6 +16,7 @@ namespace ModShelf.Desktop;
 public sealed partial class App : Avalonia.Application
 {
     private readonly Func<MainWindowViewModel>? _createMainWindowViewModel;
+    private readonly Func<TrayViewModel>? _createTrayViewModel;
     private readonly ISingleInstance? _instance;
     private readonly MessageDialogContent? _startupProblem;
 
@@ -25,9 +26,10 @@ public sealed partial class App : Avalonia.Application
     }
 
     /// <param name="instance">The app's claim to the library, which tells it of each launch after it.</param>
-    internal App(Func<MainWindowViewModel> createMainWindowViewModel, ISingleInstance instance)
+    internal App(Func<MainWindowViewModel> createMainWindowViewModel, Func<TrayViewModel> createTrayViewModel, ISingleInstance instance)
     {
         _createMainWindowViewModel = createMainWindowViewModel;
+        _createTrayViewModel = createTrayViewModel;
         _instance = instance;
     }
 
@@ -56,43 +58,24 @@ public sealed partial class App : Avalonia.Application
             };
         }
         else if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
-            && _createMainWindowViewModel is not null)
+            && _createMainWindowViewModel is not null
+            && _createTrayViewModel is not null
+            && _instance is not null)
         {
             MainWindowViewModel viewModel = _createMainWindowViewModel();
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = viewModel,
-            };
+            MainWindow window = new() { DataContext = viewModel };
+            desktop.MainWindow = window;
 
-            // The screens' own work, such as watching the download queue, runs while the app does.
+            // The screens' own work, such as watching the download queue, runs while the app does, with or without
+            // its window.
             viewModel.Start();
+            AppTray tray = new(this, desktop, _createTrayViewModel());
+            tray.Attach(window);
 
             // Launching ModShelf again shows this app.
-            if (_instance is not null)
-            {
-                _instance.LaunchedAgain += (_, _) => Dispatcher.UIThread.Post(() => ShowMainWindow(desktop));
-            }
+            _instance.LaunchedAgain += (_, _) => Dispatcher.UIThread.Post(tray.ShowMainWindow);
         }
 
         base.OnFrameworkInitializationCompleted();
-    }
-
-    /// <summary>
-    /// Brings the main window to the front: shown, restored if minimized, and active.
-    /// </summary>
-    private static void ShowMainWindow(IClassicDesktopStyleApplicationLifetime desktop)
-    {
-        if (desktop.MainWindow is not { } window)
-        {
-            return;
-        }
-
-        window.Show();
-        if (window.WindowState == WindowState.Minimized)
-        {
-            window.WindowState = WindowState.Normal;
-        }
-
-        window.Activate();
     }
 }

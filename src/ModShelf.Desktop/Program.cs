@@ -88,7 +88,10 @@ internal static partial class Program
 
     private static AppBuilder CreateAppBuilder(IServiceProvider services, ISingleInstance instance)
         => Configure(AppBuilder.Configure(
-            () => new App(() => services.GetRequiredService<MainWindowViewModel>(), instance)));
+            () => new App(
+                () => services.GetRequiredService<MainWindowViewModel>(),
+                () => services.GetRequiredService<TrayViewModel>(),
+                instance)));
 
     /// <summary>
     /// Shows why ModShelf can't start, in a window of its own, until it's closed.

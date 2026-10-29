@@ -12,7 +12,7 @@ internal sealed class SettingsHarness
     public SettingsHarness(bool protectedByOs = true)
     {
         Mover = new ScriptedLibraryMover(Settings);
-        Screen = new SettingsViewModel(Settings, Library, Mover, new FixedSecretStore(protectedByOs), Themes, Dialogs, Logger);
+        Screen = new SettingsViewModel(Settings, Library, Mover, new FixedSecretStore(protectedByOs), Themes, Tray, Dialogs, Logger);
     }
 
     public InMemorySettingsService Settings { get; } = new();
@@ -22,6 +22,8 @@ internal sealed class SettingsHarness
     public ScriptedLibraryMover Mover { get; }
 
     public RecordingThemeSwitcher Themes { get; } = new();
+
+    public ScriptedTrayHost Tray { get; } = new();
 
     public ScriptedDialogs Dialogs { get; } = new();
 

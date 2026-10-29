@@ -31,6 +31,27 @@ internal sealed class AvaloniaDialogService : IDialogService
     public Task<bool> ConfirmAsync(string title, string message, string confirmLabel, CancellationToken cancellationToken)
         => ShowAsync(new MessageDialogContent(title, message, confirmLabel, Strings.DialogCancel), cancellationToken);
 
+    public Task<int?> ChooseAsync(string title, string message, IReadOnlyList<string> choices, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(title);
+        ArgumentException.ThrowIfNullOrWhiteSpace(message);
+        ArgumentNullException.ThrowIfNull(choices);
+        if (choices.Count == 0 || choices.Any(string.IsNullOrWhiteSpace))
+        {
+            throw new ArgumentException("Each choice needs a label, and there must be one at least.", nameof(choices));
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        ChoiceDialogContent content = new(title, message, choices);
+        return Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            ChoiceDialog dialog = new() { DataContext = content };
+            await ShowAsync(dialog, () => dialog.Chosen is not null, cancellationToken);
+            return dialog.Chosen;
+        });
+    }
+
     public async Task<string?> AskTextAsync(TextQuestion question, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(question);

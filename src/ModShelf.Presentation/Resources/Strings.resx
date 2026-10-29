@@ -1270,4 +1270,56 @@
     <value>ModShelf is running already, but didn't answer. Quit the ModShelf that's running, or end it if it won't quit, then start ModShelf again.</value>
     <comment>The window shown when another ModShelf holds the library but doesn't answer a second launch.</comment>
   </data>
+  <data name="CloseTitle" xml:space="preserve">
+    <value>Keep ModShelf running?</value>
+    <comment>Asked the first time the main window closes.</comment>
+  </data>
+  <data name="CloseMessage" xml:space="preserve">
+    <value>ModShelf can keep downloading and checking for updates with its window closed, from its icon in the tray. You can change this later in Settings.</value>
+    <comment>Asked the first time the main window closes.</comment>
+  </data>
+  <data name="CloseKeepRunning" xml:space="preserve">
+    <value>Keep running in the tray</value>
+    <comment>Closing the window keeps ModShelf running, with its icon in the tray.</comment>
+  </data>
+  <data name="QuitModShelf" xml:space="preserve">
+    <value>Quit ModShelf</value>
+    <comment>Ends ModShelf: its downloads stop, and go on the next time it starts.</comment>
+  </data>
+  <data name="TrayOpen" xml:space="preserve">
+    <value>Open ModShelf</value>
+    <comment>The tray menu's item that shows the main window.</comment>
+  </data>
+  <data name="TrayCheckNow" xml:space="preserve">
+    <value>Check for updates now</value>
+    <comment>The tray menu's item that checks the watched mods for updates.</comment>
+  </data>
+  <data name="TrayToolTipOneUpdate" xml:space="preserve">
+    <value>ModShelf: 1 update</value>
+    <comment>The tray icon's tooltip with one update found.</comment>
+  </data>
+  <data name="TrayToolTipUpdates" xml:space="preserve">
+    <value>ModShelf: {0} updates</value>
+    <comment>The tray icon's tooltip; {0} is how many updates were found.</comment>
+  </data>
+  <data name="SettingsWindowHeading" xml:space="preserve">
+    <value>Closing the window</value>
+    <comment>Settings: what closing the main window does.</comment>
+  </data>
+  <data name="SettingsCloseAsk" xml:space="preserve">
+    <value>Ask the next time</value>
+    <comment>Closing the window: ask whether to keep running in the tray.</comment>
+  </data>
+  <data name="SettingsCloseToTray" xml:space="preserve">
+    <value>Keep running in the tray</value>
+    <comment>Closing the window keeps ModShelf running in the tray.</comment>
+  </data>
+  <data name="SettingsCloseQuit" xml:space="preserve">
+    <value>Quit ModShelf</value>
+    <comment>Closing the window quits ModShelf.</comment>
+  </data>
+  <data name="SettingsNoTray" xml:space="preserve">
+    <value>This desktop shows no tray icons, so closing the window quits ModShelf. On GNOME, the AppIndicator extension adds them.</value>
+    <comment>Settings, when no tray host runs.</comment>
+  </data>
 </root>

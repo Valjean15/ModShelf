@@ -1,0 +1,31 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:dialogs="using:ModShelf.Desktop.Views.Dialogs"
+        x:Class="ModShelf.Desktop.Views.Dialogs.ChoiceDialog"
+        x:DataType="dialogs:ChoiceDialogContent"
+        Title="{Binding Title}"
+        Width="460"
+        SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+    <DockPanel Margin="24">
+        <ItemsControl DockPanel.Dock="Bottom" Margin="0,24,0,0" HorizontalAlignment="Right" ItemsSource="{Binding Choices}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" Spacing="8" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="dialogs:ChoiceDialogButton">
+                    <Button Classes.accent="{Binding IsMain}"
+                            IsDefault="{Binding IsMain}"
+                            Content="{Binding Label}"
+                            Click="OnChoose" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+    </DockPanel>
+</Window>

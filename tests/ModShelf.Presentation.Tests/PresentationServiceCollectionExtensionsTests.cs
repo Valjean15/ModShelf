@@ -8,7 +8,7 @@ namespace ModShelf.Presentation.Tests;
 public sealed class PresentationServiceCollectionExtensionsTests
 {
     [Fact]
-    public void RegistersNavigationTheScreensAndTheMainWindowOnce()
+    public void RegistersNavigationTheScreensTheMainWindowAndTheTrayOnce()
     {
         ServiceCollection services = new();
         services.AddPresentation();
@@ -19,6 +19,7 @@ public sealed class PresentationServiceCollectionExtensionsTests
             [typeof(LibraryViewModel), typeof(UpdatesViewModel), typeof(BrowseViewModel), typeof(DownloadsViewModel), typeof(AccountsViewModel), typeof(SettingsViewModel)],
             services.Where(descriptor => descriptor.ServiceType == typeof(ScreenViewModel)).Select(descriptor => descriptor.ImplementationType));
         Assert.Single(services, descriptor => descriptor.ServiceType == typeof(MainWindowViewModel));
+        Assert.Single(services, descriptor => descriptor.ServiceType == typeof(TrayViewModel));
         Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
     }
 }

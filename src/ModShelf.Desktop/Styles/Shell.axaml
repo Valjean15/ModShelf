@@ -2,6 +2,11 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!-- Every window has ModShelf's icon, in its title bar and the taskbar. -->
+    <Style Selector="Window">
+        <Setter Property="Icon" Value="/Assets/modshelf.png" />
+    </Style>
+
     <Style Selector="TextBlock.heading">
         <Setter Property="FontSize" Value="24" />
         <Setter Property="FontWeight" Value="SemiBold" />

@@ -12,10 +12,10 @@ namespace ModShelf.Presentation;
 public static class PresentationServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers navigation, every screen's ViewModel and the main window's, each once for the app's lifetime, so a
-    /// screen keeps what it shows while another is shown. Needs an <see cref="IUiThread"/>, an
+    /// Registers navigation, every screen's ViewModel, the main window's and the tray's, each once for the app's
+    /// lifetime, so a screen keeps what it shows while another is shown. Needs an <see cref="IUiThread"/>, an
     /// <see cref="IDialogService"/>, an <see cref="IFolderOpener"/> and an <see cref="IThemeSwitcher"/>, which Desktop
-    /// registers.
+    /// registers, and Platform's tray host and notices.
     /// </summary>
     public static IServiceCollection AddPresentation(this IServiceCollection services)
     {
@@ -32,6 +32,7 @@ public static class PresentationServiceCollectionExtensions
             ServiceDescriptor.Singleton<ScreenViewModel, SettingsViewModel>(),
         ]);
         services.TryAddSingleton<MainWindowViewModel>();
+        services.TryAddSingleton<TrayViewModel>();
 
         return services;
     }

@@ -275,6 +275,59 @@ public sealed class SettingsViewModelTests
         Assert.False(Screen.IsLoaded);
     }
 
+    [Fact]
+    public async Task WhatClosingTheWindowDoesIsSavedAsItsChosen()
+    {
+        await _harness.StartAsync();
+        bool askedAtFirst = Screen.IsAskOnClose;
+
+        Screen.IsCloseToTray = true;
+        await Screen.Saving.WaitAsync(Patience, Cancellation);
+        bool? kept = _harness.Settings.Stored.CloseToTray;
+        Screen.IsQuitOnClose = true;
+        await Screen.Saving.WaitAsync(Patience, Cancellation);
+        bool? quits = _harness.Settings.Stored.CloseToTray;
+        Screen.IsAskOnClose = true;
+        await Screen.Saving.WaitAsync(Patience, Cancellation);
+
+        Assert.True(askedAtFirst);
+        Assert.Equal((true, false), (kept, quits));
+        Assert.Null(_harness.Settings.Stored.CloseToTray);
+        Assert.Equal(["closeToTray True", "closeToTray False", "closeToTray null"], _harness.Settings.Changes);
+    }
+
+    [Theory]
+    [InlineData(true, false, true, false)]
+    [InlineData(false, false, false, true)]
+    public async Task ShowsWhatClosingTheWindowDoes(bool closeToTray, bool ask, bool tray, bool quit)
+    {
+        _harness.Settings.Stored = new AppSettings { CloseToTray = closeToTray };
+
+        await _harness.StartAsync();
+        Screen.IsAskOnClose = false;
+        Screen.IsCloseToTray = false;
+        Screen.IsQuitOnClose = false;
+        await Screen.Saving.WaitAsync(Patience, Cancellation);
+
+        Assert.Equal((ask, tray, quit), (Screen.IsAskOnClose, Screen.IsCloseToTray, Screen.IsQuitOnClose));
+        Assert.Empty(_harness.Settings.Changes);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task SaysWhetherTheSystemShowsTrayIcons(bool available)
+    {
+        _harness.Tray.IsAvailable = available;
+        bool before = Screen.IsTrayAvailable;
+
+        await _harness.StartAsync();
+
+        Assert.True(before);
+        Assert.Equal(available, Screen.IsTrayAvailable);
+        Assert.Equal(1, _harness.Tray.Asked);
+    }
+
     [Theory]
     [InlineData(true, false)]
     [InlineData(false, true)]

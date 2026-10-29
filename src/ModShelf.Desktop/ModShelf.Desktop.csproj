@@ -23,6 +23,12 @@
     <Content Include="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <!-- The app's icon, for its windows and the tray. modshelf.svg is its source, rendered at 256 and 64 pixels. -->
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\*.png" />
+    <None Include="Assets\modshelf.svg" />
+  </ItemGroup>
+
   <!-- Composition root: references every library, for DI registration only. -->
   <ItemGroup>
     <ProjectReference Include="..\ModShelf.Application\ModShelf.Application.csproj" />

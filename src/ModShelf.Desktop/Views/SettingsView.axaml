@@ -137,6 +137,21 @@
                     </StackPanel>
                 </Border>
 
+                <Border Classes="card">
+                    <StackPanel Spacing="8">
+                        <TextBlock Classes="subheading" Text="{x:Static res:Strings.SettingsWindowHeading}" />
+                        <StackPanel Spacing="8" IsEnabled="{Binding IsTrayAvailable}">
+                            <RadioButton GroupName="Close" Content="{x:Static res:Strings.SettingsCloseAsk}" IsChecked="{Binding IsAskOnClose}" />
+                            <RadioButton GroupName="Close" Content="{x:Static res:Strings.SettingsCloseToTray}" IsChecked="{Binding IsCloseToTray}" />
+                            <RadioButton GroupName="Close" Content="{x:Static res:Strings.SettingsCloseQuit}" IsChecked="{Binding IsQuitOnClose}" />
+                        </StackPanel>
+                        <TextBlock Classes="note"
+                                   TextWrapping="Wrap"
+                                   Text="{x:Static res:Strings.SettingsNoTray}"
+                                   IsVisible="{Binding !IsTrayAvailable}" />
+                    </StackPanel>
+                </Border>
+
                 <StackPanel Spacing="4">
                     <SelectableTextBlock Classes="note" TextWrapping="Wrap" Text="{Binding KeptInText}" />
                     <TextBlock Classes="problem"

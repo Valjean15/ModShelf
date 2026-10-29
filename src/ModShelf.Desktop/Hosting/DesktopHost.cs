@@ -91,6 +91,7 @@ internal static class DesktopHost
         }
 
         builder.Services.AddPlatformServices(SecretStoreOptionsFrom(builder.Configuration));
+        builder.Services.AddTrayHost();
         builder.Services.AddHttpFileTransfer();
         builder.Services.AddSourceHttpClients();
         builder.Services.AddDownloadEngine();

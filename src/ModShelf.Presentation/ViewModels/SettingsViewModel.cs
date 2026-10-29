@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Accounts.Ports;
+using ModShelf.Application.Desktop.Ports;
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
 using ModShelf.Domain.Library;
@@ -18,9 +19,10 @@ namespace ModShelf.Presentation.ViewModels;
 
 /// <summary>
 /// The settings: where the library is, moving its files when it has some; how its folders are named, for every game and
-/// for single games; what happens to old versions; how often to check for updates and whether to say so; and whether the
-/// app is light or dark. Choices are saved as they're made, folder patterns when the user saves them, and each change
-/// shows the settings as stored after it. The theme is applied at start and as it's chosen.
+/// for single games; what happens to old versions; how often to check for updates and whether to say so; whether the
+/// app is light or dark; and what closing its window does. Choices are saved as they're made, folder patterns when the
+/// user saves them, and each change shows the settings as stored after it. The theme is applied at start and as it's
+/// chosen.
 /// </summary>
 public sealed partial class SettingsViewModel : ScreenViewModel
 {
@@ -43,6 +45,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     private readonly IModLibrary _library;
     private readonly ILibraryMover _mover;
     private readonly IThemeSwitcher _themes;
+    private readonly ITrayHost _tray;
     private readonly IDialogService _dialogs;
     private readonly ILogger<SettingsViewModel> _logger;
     private AppSettings _shown = new();
@@ -55,6 +58,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         ILibraryMover mover,
         ISecretStore secrets,
         IThemeSwitcher themes,
+        ITrayHost tray,
         IDialogService dialogs,
         ILogger<SettingsViewModel> logger)
     {
@@ -63,6 +67,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(mover);
         ArgumentNullException.ThrowIfNull(secrets);
         ArgumentNullException.ThrowIfNull(themes);
+        ArgumentNullException.ThrowIfNull(tray);
         ArgumentNullException.ThrowIfNull(dialogs);
         ArgumentNullException.ThrowIfNull(logger);
 
@@ -70,6 +75,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         _library = library;
         _mover = mover;
         _themes = themes;
+        _tray = tray;
         _dialogs = dialogs;
         _logger = logger;
         KeptInText = Text.Format(Strings.SettingsKeptIn, settings.Location);
@@ -230,15 +236,53 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     }
 
     /// <summary>
+    /// Whether closing the main window keeps ModShelf running in the tray (true) or quits it (false); null to ask the
+    /// next time.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsAskOnClose))]
+    [NotifyPropertyChangedFor(nameof(IsCloseToTray))]
+    [NotifyPropertyChangedFor(nameof(IsQuitOnClose))]
+    public partial bool? CloseToTray { get; set; }
+
+    public bool IsAskOnClose
+    {
+        get => CloseToTray is null;
+        set => ChooseOnClose(value, null);
+    }
+
+    public bool IsCloseToTray
+    {
+        get => CloseToTray == true;
+        set => ChooseOnClose(value, true);
+    }
+
+    public bool IsQuitOnClose
+    {
+        get => CloseToTray == false;
+        set => ChooseOnClose(value, false);
+    }
+
+    /// <summary>
+    /// Whether the system shows tray icons, which keeping ModShelf running with its window closed needs. Without them,
+    /// closing the window quits.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsTrayAvailable { get; private set; } = true;
+
+    /// <summary>
     /// The changes saved so far, done once this is: each choice is saved in turn, and the settings shown after it.
     /// </summary>
     internal Task Saving => _saving;
 
     /// <summary>
-    /// Reads the settings, shows them, and applies the theme.
+    /// Reads the settings, shows them, and applies the theme; then asks whether the system shows tray icons.
     /// </summary>
     public override async Task StartAsync(CancellationToken cancellationToken)
-        => Problem = await ReloadAsync(cancellationToken);
+    {
+        Problem = await ReloadAsync(cancellationToken);
+        IsTrayAvailable = await _tray.IsAvailableAsync(cancellationToken);
+    }
 
     /// <summary>
     /// Whether two paths name the same folder: ignoring case on Windows and macOS, whose usual file systems do.
@@ -275,6 +319,8 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     }
 
     partial void OnNotifyOfUpdatesChanged(bool value) => Save(token => _settings.SetNotifyOfUpdatesAsync(value ? null : false, token));
+
+    partial void OnCloseToTrayChanged(bool? value) => Save(token => _settings.SetCloseToTrayAsync(value, token));
 
     partial void OnThemeChanged(AppTheme value)
     {
@@ -419,6 +465,14 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         }
     }
 
+    private void ChooseOnClose(bool chosen, bool? closeToTray)
+    {
+        if (chosen)
+        {
+            CloseToTray = closeToTray;
+        }
+    }
+
     private void SaveOldVersions()
     {
         OldVersionRule rule = OldVersionAction switch
@@ -552,6 +606,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
 
             NotifyOfUpdates = settings.NotifyOfUpdates ?? true;
             Theme = settings.Theme ?? AppTheme.System;
+            CloseToTray = settings.CloseToTray;
             IsLoaded = true;
         }
         finally
