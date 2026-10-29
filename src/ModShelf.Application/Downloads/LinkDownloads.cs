@@ -2,6 +2,7 @@ using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Sources;
 using ModShelf.Domain.Common;
 using ModShelf.Domain.Downloads;
+using ModShelf.Domain.Library;
 using ModShelf.Sources.Abstractions.Links;
 
 namespace ModShelf.Application.Downloads;
@@ -41,9 +42,13 @@ internal sealed class LinkDownloads : ILinkDownloads
         }
 
         RecognizedLink recognized = await _sources.RecognizeAsync(link, cancellationToken).ConfigureAwait(false);
-        string name = fileName
+
+        // Made to work on every system, as the library's names are: a name Windows keeps for a device would write to the
+        // device, and one too long for the partial file's name would fail part-way.
+        string name = LibraryNames.File(
+            fileName
             ?? recognized.SuggestedFileName
-            ?? throw new ArgumentException("The link doesn't say what the file is called, so a file name is needed.", nameof(fileName));
+            ?? throw new ArgumentException("The link doesn't say what the file is called, so a file name is needed.", nameof(fileName)));
 
         // A file saved there already isn't downloaded again: a new job would only fail on it.
         IReadOnlyList<DownloadJobSnapshot> jobs = await _downloads.ListAsync(cancellationToken).ConfigureAwait(false);

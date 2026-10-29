@@ -94,6 +94,33 @@ public sealed class LinkDownloadsTests
         Assert.Equal("SkyUI.7z", Assert.Single(downloads.Enqueued).FileName);
     }
 
+    [Theory]
+    [InlineData("nul.zip", "_nul.zip")]
+    [InlineData(" SkyUI.7z.", "SkyUI.7z")]
+    public async Task AFileNameIsMadeToWorkOnEverySystem(string given, string saved)
+    {
+        // As the library's are: a name Windows keeps for a device would write to the device, and one with a trailing
+        // dot wouldn't be found again.
+        RecordingDownloadService downloads = new();
+
+        await AddAsync(downloads, [ScriptedLinkRecognizer.Always(NexusFile)], fileName: given);
+
+        Assert.Equal(saved, Assert.Single(downloads.Enqueued).FileName);
+    }
+
+    [Fact]
+    public async Task AFileNameTooLongIsShortenedKeepingItsExtension()
+    {
+        // A name the system takes can still be too long once ".part" is added while it downloads.
+        RecordingDownloadService downloads = new();
+
+        await AddAsync(downloads, [ScriptedLinkRecognizer.Always(NexusFile)], fileName: new string('a', 252) + ".7z");
+
+        string saved = Assert.Single(downloads.Enqueued).FileName;
+        Assert.EndsWith(".7z", saved, StringComparison.Ordinal);
+        Assert.True(saved.Length <= ModShelf.Domain.Library.LibraryNames.MaxFileBytes);
+    }
+
     [Fact]
     public async Task ASiteSpecificMatchWinsOverACatchAll()
     {
