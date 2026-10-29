@@ -34,4 +34,7 @@ internal sealed partial class AccountService
 
     [LoggerMessage(EventId = 408, Level = LogLevel.Error, Message = "Couldn't save the refreshed credentials for {Source}; they're kept until ModShelf closes, and the account may have to be linked again after that")]
     private static partial void LogCantSaveRefreshed(ILogger logger, Exception exception, SourceId source);
+
+    [LoggerMessage(EventId = 409, Level = LogLevel.Information, Message = "Checked the account on {Source}")]
+    private static partial void LogChecked(ILogger logger, SourceId source);
 }

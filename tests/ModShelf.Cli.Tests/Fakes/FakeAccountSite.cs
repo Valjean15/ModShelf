@@ -62,6 +62,11 @@ internal sealed partial class FakeAccountSite : IAsyncDisposable
     public bool UserDeclines { get; set; }
 
     /// <summary>
+    /// The membership the site gives the API key's account from now on, such as after the user upgrades.
+    /// </summary>
+    public string KeyAccountTier { get; set; } = KeyTier;
+
+    /// <summary>
     /// What the site answers when asked whose account a request carries, instead of saying, while set: such as asking
     /// to slow down, or an error of its own.
     /// </summary>
@@ -266,7 +271,7 @@ internal sealed partial class FakeAccountSite : IAsyncDisposable
 
         if (request.Header(FakeApiKeyStrategy.HeaderName) == ApiKey)
         {
-            return Json(HttpStatusCode.OK, new() { ["name"] = KeyUser, ["membership"] = KeyTier });
+            return Json(HttpStatusCode.OK, new() { ["name"] = KeyUser, ["membership"] = KeyAccountTier });
         }
 
         return new Response(HttpStatusCode.Unauthorized);

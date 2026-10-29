@@ -13,7 +13,7 @@ using ModShelf.Platform;
 namespace ModShelf.Cli.Tests.Commands;
 
 /// <summary>
-/// <c>account list</c>, <c>link</c> and <c>unlink</c> as the user runs them, in-process, against the fake site through
+/// <c>account list</c>, <c>link</c>, <c>check</c> and <c>unlink</c> as the user runs them, in-process, against the fake site through
 /// the real secret store, database and OAuth loopback redirect.
 /// </summary>
 public sealed partial class AccountCommandTests : IAsyncDisposable
@@ -219,6 +219,54 @@ public sealed partial class AccountCommandTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task CheckSaysWhoTheAccountIsNowAndKeepsIt()
+    {
+        Assert.Equal(Done, (await RunAsync(["account", "link", KeySource], _site.ApiKey + "\n")).ExitCode);
+        _site.KeyAccountTier = "Premium";
+
+        CliResult checkedAccount = await RunAsync(["account", "check", KeySource]);
+
+        Assert.Equal(Done, checkedAccount.ExitCode);
+        Assert.Equal(
+            [$"Checked {KeySource}: {FakeAccountSite.KeyUser} (Premium).", $"{KeySource} doesn't say how much of its API is left."],
+            Lines(checkedAccount.Output.TrimEnd()));
+        Assert.Empty(checkedAccount.Errors);
+        Assert.Equal(2, _site.RequestsTo("/api/me").Count);
+        Assert.Equal([KeySource, FakeAccountSite.KeyUser, "Premium"], Cells((await RunAsync(["account", "list"])).AccountRowFor(KeySource))[..3]);
+    }
+
+    [Fact]
+    public async Task CheckNeedsALinkedAccount()
+    {
+        CliResult refused = await RunAsync(["account", "check", KeySource]);
+
+        Assert.Equal(Failed, refused.ExitCode);
+        Assert.Equal($"No account is linked on {KeySource}. Link one with account link {KeySource}.", refused.Errors.Trim());
+        Assert.Empty(refused.Output);
+        Assert.Empty(_site.Requests);
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.Unauthorized, "refused the account's credentials, or they can't be used any more. Link it again with account link fake-key.")]
+    [InlineData(HttpStatusCode.TooManyRequests, "asked ModShelf to slow down. Try again in a while.")]
+    [InlineData(HttpStatusCode.BadGateway, "answered with an error: Response status code does not indicate success: 502 (BadGateway). Try again later.")]
+    public async Task ACheckTheSiteRefusesKeepsTheAccountAsItWas(HttpStatusCode refusal, string message)
+    {
+        Assert.Equal(Done, (await RunAsync(["account", "link", KeySource], _site.ApiKey + "\n")).ExitCode);
+        _site.ProfileRefusal = refusal;
+        _site.KeyAccountTier = "Premium";
+
+        CliResult refused = await RunAsync(["account", "check", KeySource]);
+
+        Assert.Equal(Failed, refused.ExitCode);
+        Assert.Equal($"{KeySource} {message}", refused.Errors.Trim());
+        Assert.DoesNotContain("Checked", refused.Output, StringComparison.Ordinal);
+        Assert.Equal(
+            [KeySource, FakeAccountSite.KeyUser, FakeAccountSite.KeyTier],
+            Cells((await RunAsync(["account", "list"])).AccountRowFor(KeySource))[..3]);
+    }
+
+    [Fact]
     public async Task UnlinkRemovesTheAccount()
     {
         Assert.Equal(Done, (await RunAsync(["account", "link", KeySource], _site.ApiKey + "\n")).ExitCode);
@@ -246,6 +294,9 @@ public sealed partial class AccountCommandTests : IAsyncDisposable
     [InlineData("link", "no-such-site", "No source called no-such-site supports accounts. Run account list to see the ones that do.")]
     [InlineData("link", "Nexus!", "Nexus! isn't a source ID.")]
     [InlineData("unlink", "Nexus!", "Nexus! isn't a source ID.")]
+    [InlineData("check", "no-such-site", "No source called no-such-site supports accounts. Run account list to see the ones that do.")]
+    [InlineData("check", "direct", "No source called direct supports accounts. Run account list to see the ones that do.")]
+    [InlineData("check", "Nexus!", "Nexus! isn't a source ID.")]
     public async Task SourcesThatDontExistAreBadInput(string command, string source, string message)
     {
         CliResult refused = await RunAsync(["account", command, source]);

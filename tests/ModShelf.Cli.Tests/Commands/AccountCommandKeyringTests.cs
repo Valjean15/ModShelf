@@ -8,7 +8,7 @@ using ModShelf.Cli.Tests.Fakes;
 namespace ModShelf.Cli.Tests.Commands;
 
 /// <summary>
-/// <c>account link</c> and <c>unlink</c> with a keyring that's there but fails, such as one that's locked.
+/// <c>account link</c>, <c>check</c> and <c>unlink</c> with a keyring that's there but fails, such as one that's locked.
 /// </summary>
 public sealed class AccountCommandKeyringTests : IAsyncDisposable
 {
@@ -66,6 +66,20 @@ public sealed class AccountCommandKeyringTests : IAsyncDisposable
             unlinked.Errors.Trim(),
             StringComparison.Ordinal);
         Assert.Contains(FakeAccountSite.KeyUser, (await RunAsync(["account", "list"])).AccountRowFor(KeySource), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ACheckTheKeyringRefusesSaysWhy()
+    {
+        _keyring.Failing = false;
+        Assert.Equal(Done, (await RunAsync(["account", "link", KeySource], _site.ApiKey + "\n")).ExitCode);
+        _keyring.Failing = true;
+
+        CliResult refused = await RunAsync(["account", "check", KeySource]);
+
+        Assert.Equal(Failed, refused.ExitCode);
+        Assert.Equal(FailingSecretStore.Problem, refused.Errors.Trim());
+        Assert.Single(_site.RequestsTo("/api/me"));
     }
 
     private Task<CliResult> RunAsync(string[] arguments, string input = "") => _cli.RunAsync(arguments, Cancellation, input);

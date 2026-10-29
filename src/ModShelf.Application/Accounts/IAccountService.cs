@@ -28,6 +28,18 @@ public interface IAccountService
     Task<LinkedAccount> LinkAsync(SourceId source, AuthKind kind, IAuthPrompt prompt, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Asks the site who the linked account is now, with its stored credentials, and keeps what it says, such as a tier
+    /// the account has moved to. The site's answer also brings its quota up to date, where it has one.
+    /// </summary>
+    /// <returns>The account as it's linked now.</returns>
+    /// <exception cref="KeyNotFoundException">No registered source with that ID can link accounts, or no account is linked on it.</exception>
+    /// <exception cref="AuthenticationFailedException">
+    /// The site refused the account's credentials, or they can't be used any more; it has to be linked again.
+    /// </exception>
+    /// <exception cref="HttpRequestException">The site couldn't be reached, or answered with an error.</exception>
+    Task<LinkedAccount> CheckAsync(SourceId source, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Removes the source's account and its credentials. Does nothing when none is linked.
     /// </summary>
     Task UnlinkAsync(SourceId source, CancellationToken cancellationToken);

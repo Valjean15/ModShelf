@@ -4,6 +4,7 @@ using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Sources;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Accounts;
+using ModShelf.Sources.Abstractions.Quota;
 
 namespace ModShelf.Application.Accounts;
 
@@ -64,13 +65,41 @@ internal sealed partial class AccountService : IAccountService, ICredentialProvi
 
         return
         [
-            .. _sources.All<IAccountLinker>().Select(source => new SourceAccountStatus(
-                source.Id,
-                source.DisplayName,
-                source.WorksWithoutAccount,
-                [.. source.Strategies.Select(strategy => strategy.Kind)],
-                linked.FirstOrDefault(account => account.Source == source.Id))),
+            .. _sources.All<IAccountLinker>().Select(source =>
+            {
+                LinkedAccount? account = linked.FirstOrDefault(account => account.Source == source.Id);
+                return new SourceAccountStatus(
+                    source.Id,
+                    source.DisplayName,
+                    source.WorksWithoutAccount,
+                    [.. source.Strategies.Select(strategy => strategy.Kind)],
+                    account,
+                    account is null ? null : (source as IApiQuota)?.Quota);
+            }),
         ];
+    }
+
+    public async Task<LinkedAccount> CheckAsync(SourceId source, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        IAccountLinker linker = _sources.Find<IAccountLinker>(source)
+            ?? throw new KeyNotFoundException($"No registered source '{source}' can link accounts.");
+        LinkedAccount account = (await _accounts.ListAsync(cancellationToken).ConfigureAwait(false))
+                .FirstOrDefault(linked => linked.Source == source)
+            ?? throw new KeyNotFoundException($"No account is linked on {source}.");
+        VaultEntry entry = await GetUsableAsync(source, cancellationToken).ConfigureAwait(false)
+            ?? throw new AuthenticationFailedException($"The credentials stored for {source} can't be used any more.");
+
+        // The linker sends the credentials it's given, as when linking, so the app leaves its requests alone.
+        AccountProfile profile = await WhileManagingAsync(
+                source,
+                () => linker.GetProfileAsync(entry.Credentials, entry.Kind, cancellationToken))
+            .ConfigureAwait(false);
+        LinkedAccount checkedAccount = new(source, entry.Kind, profile, account.LinkedAt);
+        await _accounts.SaveAsync(checkedAccount, CancellationToken.None).ConfigureAwait(false);
+        LogChecked(_logger, source);
+        return checkedAccount;
     }
 
     public async Task<LinkedAccount> LinkAsync(SourceId source, AuthKind kind, IAuthPrompt prompt, CancellationToken cancellationToken)
