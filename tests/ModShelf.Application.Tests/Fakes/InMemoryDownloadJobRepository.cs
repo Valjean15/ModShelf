@@ -23,6 +23,11 @@ internal sealed class InMemoryDownloadJobRepository : IDownloadJobRepository
     public Queue<Exception> UpdateFailures { get; } = new();
 
     /// <summary>
+    /// What the next lists throw, one each, as a database that can't be read does.
+    /// </summary>
+    public Queue<Exception> ListFailures { get; } = new();
+
+    /// <summary>
     /// The IDs of the jobs deleted, in order.
     /// </summary>
     public List<DownloadJobId> Deleted { get; } = [];
@@ -57,7 +62,9 @@ internal sealed class InMemoryDownloadJobRepository : IDownloadJobRepository
     {
         lock (_gate)
         {
-            return Task.FromResult<IReadOnlyList<DownloadJob>>([.. _jobs]);
+            return ListFailures.TryDequeue(out Exception? failure)
+                ? Task.FromException<IReadOnlyList<DownloadJob>>(failure)
+                : Task.FromResult<IReadOnlyList<DownloadJob>>([.. _jobs]);
         }
     }
 

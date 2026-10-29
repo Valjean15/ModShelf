@@ -143,16 +143,21 @@ public sealed class DownloadJobRepositoryTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task ListNamesARowThatHoldsAnImpossibleJob()
+    public async Task ListLeavesOutARowThatHoldsAnImpossibleJobAndNamesIt()
     {
-        DownloadJob job = NewJob();
-        await _database.Repository.AddAsync(job, TestContext.Current.CancellationToken);
-        await _database.QueryAsync("UPDATE DownloadJobs SET Status = 99");
+        // Such as a status a newer ModShelf wrote: one row doesn't keep the rest of the queue from being read.
+        DownloadJob impossible = NewJob("Impossible.7z");
+        DownloadJob fine = NewJob();
+        await _database.Repository.AddAsync(impossible, TestContext.Current.CancellationToken);
+        await _database.Repository.AddAsync(fine, TestContext.Current.CancellationToken);
+        await _database.QueryAsync($"UPDATE DownloadJobs SET Status = 99 WHERE FileName = 'Impossible.7z'");
 
-        InvalidDataException exception = await Assert.ThrowsAsync<InvalidDataException>(
-            () => _database.Repository.ListAsync(TestContext.Current.CancellationToken));
+        IReadOnlyList<DownloadJob> jobs = await _database.Repository.ListAsync(TestContext.Current.CancellationToken);
 
-        Assert.Contains(job.Id.ToString(), exception.Message, StringComparison.Ordinal);
+        Assert.Equal(fine.Id, Assert.Single(jobs).Id);
+        Assert.Contains(
+            _database.Logs.Entries,
+            entry => entry.Contains($"Download job {impossible.Id.Value} in the library database can't be loaded", StringComparison.Ordinal));
     }
 
     private DownloadJob NewJob(string fileName = "SkyUI_5_2_SE.7z")

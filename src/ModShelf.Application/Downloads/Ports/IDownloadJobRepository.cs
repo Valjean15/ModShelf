@@ -15,7 +15,7 @@ public interface IDownloadJobRepository
     Task UpdateAsync(DownloadJob job, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Every stored job, oldest first.
+    /// Every stored job, oldest first, leaving out any the store can't read back as a job.
     /// </summary>
     Task<IReadOnlyList<DownloadJob>> ListAsync(CancellationToken cancellationToken);
 

@@ -33,7 +33,8 @@ namespace ModShelf.Application.Downloads;
 /// </para>
 /// <para>
 /// A job that can't be saved, such as while the database is locked or the disk is full, goes on all the same: the
-/// failure is logged, watchers still hear of the change, and the job is saved again as soon as a save works.
+/// failure is logged, watchers still hear of the change, and the job is saved again as soon as a save works. Stored jobs
+/// that can't be read at start are read again every few seconds, with requests waiting meanwhile.
 /// </para>
 /// <para>
 /// Only the process holding the <see cref="IDownloadQueueLock"/> runs the queue. One that starts while another holds it
@@ -44,6 +45,9 @@ namespace ModShelf.Application.Downloads;
 /// </remarks>
 internal sealed partial class DownloadScheduler : BackgroundService, IDownloadService
 {
+    // How long the scheduler waits before reading the stored jobs again when the database couldn't be read at start.
+    private static readonly TimeSpan LoadRetryDelay = TimeSpan.FromSeconds(5);
+
     private readonly IDownloadJobRepository _repository;
     private readonly ISourceRegistry _sources;
     private readonly IFileTransfer _transfer;
@@ -204,7 +208,11 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
                 return;
             }
 
-            await LoadJobsAsync().ConfigureAwait(false);
+            if (!await LoadJobsAsync(stoppingToken).ConfigureAwait(false))
+            {
+                return;
+            }
+
             await StartQueuedJobsAsync().ConfigureAwait(false);
 
             try
@@ -328,9 +336,37 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
         }
     }
 
-    private async Task LoadJobsAsync()
+    /// <summary>
+    /// Reads the stored jobs, trying again until the database can be read, and requeues those interrupted.
+    /// </summary>
+    /// <returns>False when stopped first.</returns>
+    private async Task<bool> LoadJobsAsync(CancellationToken stoppingToken)
     {
-        _jobs.AddRange(await _repository.ListAsync(CancellationToken.None).ConfigureAwait(false));
+        while (true)
+        {
+            try
+            {
+                _jobs.AddRange(await _repository.ListAsync(stoppingToken).ConfigureAwait(false));
+                break;
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                return false;
+            }
+            catch (Exception exception)
+            {
+                // Such as a database another program holds past SQLite's wait. Requests wait in the inbox meanwhile.
+                LogCantLoadJobs(_logger, exception, LoadRetryDelay);
+                try
+                {
+                    await Task.Delay(LoadRetryDelay, _timeProvider, stoppingToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    return false;
+                }
+            }
+        }
 
         int requeued = 0;
         foreach (DownloadJob job in _jobs)
@@ -347,6 +383,8 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
         {
             LogRequeuedInterruptedJobs(_logger, requeued);
         }
+
+        return true;
     }
 
     private async Task StartQueuedJobsAsync()

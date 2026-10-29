@@ -2,6 +2,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Downloads.Ports;
@@ -28,6 +29,11 @@ internal sealed class TestLibraryDatabase : IAsyncDisposable
     }
 
     public string DatabasePath { get; }
+
+    /// <summary>
+    /// What the database's classes log, across restarts.
+    /// </summary>
+    public RecordingLoggerProvider Logs { get; } = new();
 
     public IDownloadJobRepository Repository => _services.GetRequiredService<IDownloadJobRepository>();
 
@@ -88,7 +94,7 @@ internal sealed class TestLibraryDatabase : IAsyncDisposable
     private ServiceProvider BuildServices()
     {
         ServiceCollection services = new();
-        services.AddLogging();
+        services.AddLogging(logging => logging.AddProvider(Logs));
         services.AddLibraryDatabase(DatabasePath);
         return services.BuildServiceProvider();
     }

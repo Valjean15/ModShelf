@@ -39,4 +39,7 @@ internal sealed partial class DownloadScheduler
 
     [LoggerMessage(EventId = 10, Level = LogLevel.Information, Message = "The other ModShelf process let go of the downloads, so they run here now")]
     private static partial void LogQueueRunsHere(ILogger logger);
+
+    [LoggerMessage(EventId = 11, Level = LogLevel.Warning, Message = "Couldn't read the download queue from the library database; trying again in {Delay}")]
+    private static partial void LogCantLoadJobs(ILogger logger, Exception exception, TimeSpan delay);
 }

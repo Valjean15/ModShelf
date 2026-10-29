@@ -1,4 +1,5 @@
 using ModShelf.Application.Downloads;
+using ModShelf.Application.Tests.Common;
 using ModShelf.Application.Tests.Fakes;
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Domain.Downloads;
@@ -14,6 +15,27 @@ namespace ModShelf.Application.Tests.Downloads;
 public sealed class DownloadSchedulerDatabaseTests
 {
     private static readonly InvalidOperationException Locked = new("database is locked");
+
+    [Fact]
+    public async Task AQueueThatCantBeReadAtFirstIsReadAgainLater()
+    {
+        // Such as a database another program holds past SQLite's wait: the downloads start once it can be read,
+        // rather than the scheduler, and the app with it, stopping.
+        DownloadJob stored = DownloadJob.Create(TestData.File(TestData.Nexus, "35407"), TestData.TargetDirectory, "35407.7z", TestData.Now);
+        await using SchedulerHarness harness = await SchedulerHarness.StartAsync(
+            storedJobs: [stored],
+            beforeStart: harness => harness.Repository.ListFailures.Enqueue(Locked));
+
+        Task<IReadOnlyList<DownloadJobSnapshot>> listed = harness.Scheduler.ListAsync(CancellationToken.None);
+        for (int step = 0; step < 200 && !listed.IsCompleted; step++)
+        {
+            harness.Time.Advance(TimeSpan.FromSeconds(1));
+            await Task.Delay(TimeSpan.FromMilliseconds(10), TestContext.Current.CancellationToken);
+        }
+
+        Assert.Equal(stored.Id, Assert.Single(await listed.WaitAsync(SchedulerTimeouts.Wait, TestContext.Current.CancellationToken)).Id);
+        Assert.Contains(harness.Logger.Entries, entry => entry.StartsWith("Warning: Couldn't read the download queue", StringComparison.Ordinal));
+    }
 
     [Fact]
     public async Task AJobWhoseStartCantBeSavedStillDownloads()

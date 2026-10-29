@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Domain.Downloads;
@@ -9,15 +10,18 @@ namespace ModShelf.Infrastructure.Persistence.Repositories;
 /// <summary>
 /// Stores download jobs in the library database. Each call uses its own short-lived context.
 /// </summary>
-internal sealed class DownloadJobRepository : IDownloadJobRepository
+internal sealed partial class DownloadJobRepository : IDownloadJobRepository
 {
     private readonly IDbContextFactory<ModShelfDbContext> _contextFactory;
+    private readonly ILogger<DownloadJobRepository> _logger;
 
-    public DownloadJobRepository(IDbContextFactory<ModShelfDbContext> contextFactory)
+    public DownloadJobRepository(IDbContextFactory<ModShelfDbContext> contextFactory, ILogger<DownloadJobRepository> logger)
     {
         ArgumentNullException.ThrowIfNull(contextFactory);
+        ArgumentNullException.ThrowIfNull(logger);
 
         _contextFactory = contextFactory;
+        _logger = logger;
     }
 
     public async Task AddAsync(DownloadJob job, CancellationToken cancellationToken)
@@ -67,7 +71,10 @@ internal sealed class DownloadJobRepository : IDownloadJobRepository
         }
     }
 
-    /// <exception cref="InvalidDataException">A stored row holds values no job can have.</exception>
+    /// <summary>
+    /// Every stored job, oldest first. A row that holds values no job can have, such as a status a newer ModShelf
+    /// wrote, is left out and logged, so one row doesn't keep the rest of the queue from being read.
+    /// </summary>
     public async Task<IReadOnlyList<DownloadJob>> ListAsync(CancellationToken cancellationToken)
     {
         ModShelfDbContext context = await _contextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
@@ -79,7 +86,20 @@ internal sealed class DownloadJobRepository : IDownloadJobRepository
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-            return [.. records.Select(record => record.ToJob())];
+            List<DownloadJob> jobs = new(records.Count);
+            foreach (DownloadJobRecord record in records)
+            {
+                try
+                {
+                    jobs.Add(record.ToJob());
+                }
+                catch (InvalidDataException exception)
+                {
+                    LogJobLeftOut(_logger, exception, record.Id);
+                }
+            }
+
+            return jobs;
         }
     }
 
