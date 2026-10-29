@@ -50,6 +50,14 @@ internal static partial class ModCommand
             Description = "The order: Relevance (the default; the most endorsed without words), Endorsements, Downloads, Updated or Newest. The most comes first.",
             DefaultValueFactory = _ => SearchSort.Relevance,
         };
+        sort.Validators.Add(result =>
+        {
+            // An enum option reads a number too, such as 9, which needn't be one of the orders.
+            if (!Enum.IsDefined(result.GetValueOrDefault<SearchSort>()))
+            {
+                result.AddError($"--sort must be one of {string.Join(", ", Enum.GetNames<SearchSort>())}.");
+            }
+        });
         Option<bool> ascending = new("--ascending")
         {
             Description = "Turn the order around, so the least comes first: the least endorsed or downloaded, the longest since updated, the oldest.",

@@ -1,3 +1,5 @@
+using System.Net;
+
 using ModShelf.Cli.Tests.Common;
 using ModShelf.Cli.Tests.Fakes;
 using ModShelf.Domain.Mods;
@@ -115,6 +117,21 @@ public sealed class ModCommandTrackingTests : IAsyncDisposable
         Assert.Equal(exitCode, refused.ExitCode);
         Assert.Contains(message, refused.Errors, StringComparison.Ordinal);
         Assert.Equal(4, _catalog.Tracked.Count);
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.NotFound)]
+    [InlineData(HttpStatusCode.ServiceUnavailable)]
+    public async Task SaysWhenTheSiteCantListTheTrackedMods(HttpStatusCode refusal)
+    {
+        _catalog.WatchlistRefusal = refusal;
+
+        CliResult refused = await _cli.RunAsync(["mod", "tracked", "--source", FakeCatalogSite.SourceId.Value], Cancellation);
+
+        Assert.Equal(Failed, refused.ExitCode);
+        Assert.Equal(
+            $"The site couldn't list the tracked mods: Response status code does not indicate success: {(int)refusal}.",
+            refused.Errors.Trim());
     }
 
     [Fact]

@@ -131,6 +131,7 @@ public sealed class ModCommandSearchTests : IAsyncDisposable
     [InlineData(BadInput, "--page must be 1 or more", "--page", "0")]
     [InlineData(BadInput, "--page-size must be from 1 to 100", "--page-size", "0")]
     [InlineData(BadInput, "--page-size must be from 1 to 100", "--page-size", "101")]
+    [InlineData(BadInput, "--sort must be one of Relevance, Endorsements, Downloads, Updated, Newest.", "--sort", "9")]
     [InlineData(Failed, "couldn't search: Field 'nameStemmed' is not defined.", "broken")]
     [InlineData(Failed, "account link", "locked")]
     public async Task SaysWhyItCantSearch(int exitCode, string message, params string[] arguments)

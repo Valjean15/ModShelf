@@ -1,6 +1,7 @@
 using System.CommandLine;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Net;
 using System.Security.Cryptography;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -155,6 +156,19 @@ internal static class AccountCommand
         catch (AuthenticationFailedException)
         {
             await environment.Error.WriteLineAsync($"{RefusalMessage(source, kind)} Nothing was linked.").ConfigureAwait(false);
+            return ExitCodes.Failed;
+        }
+        catch (HttpRequestException exception) when (exception.StatusCode is HttpStatusCode.TooManyRequests)
+        {
+            await environment.Error.WriteLineAsync($"{source} asked ModShelf to slow down. Try again in a while. Nothing was linked.")
+                .ConfigureAwait(false);
+            return ExitCodes.Failed;
+        }
+        catch (HttpRequestException exception) when (exception.StatusCode is not null)
+        {
+            // It answered, so it was reached; it couldn't do what was asked.
+            await environment.Error.WriteLineAsync($"{source} answered with an error: {exception.Message} Try again later. Nothing was linked.")
+                .ConfigureAwait(false);
             return ExitCodes.Failed;
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException { InnerException: TimeoutException })

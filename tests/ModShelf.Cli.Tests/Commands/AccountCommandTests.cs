@@ -105,6 +105,19 @@ public sealed partial class AccountCommandTests : IAsyncDisposable
         Assert.Equal("- (optional)", Cells((await RunAsync(["account", "list"])).AccountRowFor(KeySource))[1]);
     }
 
+    [Theory]
+    [InlineData(HttpStatusCode.TooManyRequests, "asked ModShelf to slow down. Try again in a while. Nothing was linked.")]
+    [InlineData(HttpStatusCode.BadGateway, "answered with an error: Response status code does not indicate success: 502 (BadGateway). Try again later. Nothing was linked.")]
+    public async Task ASiteThatAnswersWithAnErrorIsntSaidToBeUnreachable(HttpStatusCode refusal, string message)
+    {
+        _site.ProfileRefusal = refusal;
+
+        CliResult refused = await RunAsync(["account", "link", KeySource], _site.ApiKey + "\n");
+
+        Assert.Equal(Failed, refused.ExitCode);
+        Assert.Equal($"{KeySource} {message}", refused.Errors.Trim());
+    }
+
     [Fact]
     public async Task ABlankKeyIsRefusedWithoutAskingTheSite()
     {

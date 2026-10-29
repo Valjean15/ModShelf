@@ -67,7 +67,7 @@ internal static partial class ModCommand
             {
                 tracked = await watchlists.GetWatchedAsync(source, cancellationToken).ConfigureAwait(false);
             }
-            catch (Exception exception) when (TrackingProblem(exception, "list the tracked mods") is { } problem)
+            catch (Exception exception) when (ListingProblem(exception) is { } problem)
             {
                 await environment.Error.WriteLineAsync(problem.Message).ConfigureAwait(false);
                 return problem.ExitCode;
@@ -128,6 +128,17 @@ internal static partial class ModCommand
             await host.StopAsync(CancellationToken.None).ConfigureAwait(false);
         }
     }
+
+    /// <summary>
+    /// What to say when the tracked mods can't be listed. The question isn't about a link, so the site having no such
+    /// list says only that.
+    /// </summary>
+    private static (string Message, int ExitCode)? ListingProblem(Exception exception) => exception switch
+    {
+        AuthenticationFailedException => (LinkedAccountForTracking, ExitCodes.Failed),
+        HttpRequestException or InvalidDataException => ($"The site couldn't list the tracked mods: {exception.Message}", ExitCodes.Failed),
+        _ => null,
+    };
 
     /// <param name="doing">What failed, such as "track the mod".</param>
     private static (string Message, int ExitCode)? TrackingProblem(Exception exception, string doing) => exception switch

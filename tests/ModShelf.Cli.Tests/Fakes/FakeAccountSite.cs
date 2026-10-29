@@ -62,6 +62,12 @@ internal sealed partial class FakeAccountSite : IAsyncDisposable
     public bool UserDeclines { get; set; }
 
     /// <summary>
+    /// What the site answers when asked whose account a request carries, instead of saying, while set: such as asking
+    /// to slow down, or an error of its own.
+    /// </summary>
+    public HttpStatusCode? ProfileRefusal { get; set; }
+
+    /// <summary>
     /// How many times a refresh token was swapped for new tokens.
     /// </summary>
     public int TokenRefreshes
@@ -245,6 +251,11 @@ internal sealed partial class FakeAccountSite : IAsyncDisposable
 
     private Response Me(Request request)
     {
+        if (ProfileRefusal is { } refusal)
+        {
+            return new Response(refusal);
+        }
+
         string? authorization = request.Header("Authorization");
         if (authorization is not null
             && authorization.StartsWith("Bearer ", StringComparison.Ordinal)

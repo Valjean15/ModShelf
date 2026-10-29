@@ -22,11 +22,21 @@ internal sealed partial class FakeCatalogSite : IWatchlistSync
     /// </summary>
     public bool WatchlistNeedsAccount { get; set; }
 
+    /// <summary>
+    /// What listing the tracked mods answers instead, while set, such as a page the site no longer has.
+    /// </summary>
+    public HttpStatusCode? WatchlistRefusal { get; set; }
+
     public IReadOnlyCollection<ModRef> Tracked => [.. _tracked.Keys];
 
     public Task<IReadOnlyList<ModRef>> GetWatchedAsync(CancellationToken cancellationToken)
     {
         RefuseWithoutAccount();
+        if (WatchlistRefusal is { } refusal)
+        {
+            throw new HttpRequestException($"Response status code does not indicate success: {(int)refusal}.", null, refusal);
+        }
+
         return Task.FromResult<IReadOnlyList<ModRef>>([.. _tracked.Keys]);
     }
 
