@@ -92,6 +92,15 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
     private static bool StopsTheSource(Exception exception)
         => exception is AuthenticationFailedException or HttpRequestException { StatusCode: HttpStatusCode.TooManyRequests };
 
+    /// <summary>
+    /// When <paramref name="mod"/> was last checked, as far as can be told: a check later than <paramref name="now"/>,
+    /// recorded before the clock moved back, is taken as none, and a mod never checked was last checked when it was added.
+    /// </summary>
+    private static DateTimeOffset LastChecked(LibraryMod mod, DateTimeOffset now)
+        => mod.CheckedAt is { } checkedAt && checkedAt <= now ? checkedAt
+            : mod.AddedAt <= now ? mod.AddedAt
+            : now;
+
     private async Task CheckGameAsync(Check check, GameRef game, IReadOnlyList<LibraryMod> mods, CancellationToken cancellationToken)
     {
         if (_sources.Find<IModCatalog>(game.Source) is not { } catalog)
@@ -100,10 +109,11 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
             return;
         }
 
-        // Mods checked within the feed's reach, less the margin, are asked about all at once.
+        // Mods checked within the feed's reach, less the margin, are asked about all at once. One checked later than now
+        // is asked about on its own, since when it was checked isn't known.
         IUpdateFeed? feed = _sources.Find<IUpdateFeed>(game.Source);
         DateTimeOffset reach = feed is null ? DateTimeOffset.MaxValue : check.StartedAt - feed.Reach + ReachSlack;
-        LibraryMod[] byFeed = [.. mods.Where(mod => mod.CheckedAt is { } checkedAt && checkedAt - Margin >= reach)];
+        LibraryMod[] byFeed = [.. mods.Where(mod => mod.CheckedAt is { } checkedAt && checkedAt <= check.StartedAt && checkedAt - Margin >= reach)];
         List<LibraryMod> toAsk = [.. mods.Except(byFeed)];
         if (byFeed.Length > 0)
         {
@@ -176,7 +186,7 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
                     mod.Mod,
                     stored => stored is { IsWatched: true }
                         ? stored.Checked(check.StartedAt).WithUpdates(
-                            UpdateFinder.Find(stored, files, (stored.CheckedAt ?? stored.AddedAt) - Margin, check.StartedAt))
+                            UpdateFinder.Find(stored, files, LastChecked(stored, check.StartedAt) - Margin, check.StartedAt))
                         : stored,
                     cancellationToken)
                 .ConfigureAwait(false);

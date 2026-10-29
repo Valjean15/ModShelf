@@ -33,7 +33,13 @@ internal sealed class InMemoryLibraryRepository : ILibraryRepository
         }
     }
 
-    public Task<IReadOnlyList<LibraryMod>> ListAsync(CancellationToken cancellationToken) => Task.FromResult(Mods);
+    /// <summary>
+    /// What listing the library throws instead, as a database that can't be read does.
+    /// </summary>
+    public Exception? ListFailure { get; set; }
+
+    public Task<IReadOnlyList<LibraryMod>> ListAsync(CancellationToken cancellationToken)
+        => ListFailure is { } failure ? Task.FromException<IReadOnlyList<LibraryMod>>(failure) : Task.FromResult(Mods);
 
     public Task<LibraryMod?> FindAsync(ModRef modRef, CancellationToken cancellationToken)
         => Task.FromResult(Mods.FirstOrDefault(mod => mod.Mod == modRef));

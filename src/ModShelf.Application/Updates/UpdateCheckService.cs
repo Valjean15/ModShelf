@@ -14,6 +14,10 @@ namespace ModShelf.Application.Updates;
 /// the oldest check is that old, or at once when a watched mod was never checked, then that long after each check. A
 /// check that finds new updates shows a notice, unless <see cref="AppSettings.NotifyOfUpdates"/> is false.
 /// </summary>
+/// <remarks>
+/// Nothing but stopping ends the checks: whatever fails is logged, and checked again an interval later. No check is due
+/// later than an interval from now, since a later time means the clock has moved back.
+/// </remarks>
 internal sealed partial class UpdateCheckService : BackgroundService
 {
     private readonly IUpdateChecker _checker;
@@ -56,6 +60,11 @@ internal sealed partial class UpdateCheckService : BackgroundService
                 TimeSpan interval = await IntervalAsync(stoppingToken).ConfigureAwait(false);
                 DateTimeOffset due = lastCheck is { } last ? last + interval : await FirstDueAsync(interval, stoppingToken).ConfigureAwait(false);
                 TimeSpan wait = due - _timeProvider.GetUtcNow();
+                if (wait > interval)
+                {
+                    wait = interval;
+                }
+
                 if (wait > TimeSpan.Zero)
                 {
                     await Task.Delay(wait, _timeProvider, stoppingToken).ConfigureAwait(false);
@@ -67,8 +76,9 @@ internal sealed partial class UpdateCheckService : BackgroundService
                 {
                     check = await _checker.CheckAsync(stoppingToken).ConfigureAwait(false);
                 }
-                catch (Exception exception) when (exception is not OperationCanceledException)
+                catch (Exception exception) when (!stoppingToken.IsCancellationRequested)
                 {
+                    // Such as a request that timed out.
                     LogCheckFailed(_logger, exception);
                     continue;
                 }
@@ -91,7 +101,7 @@ internal sealed partial class UpdateCheckService : BackgroundService
         {
             return (await _settings.GetAsync(cancellationToken).ConfigureAwait(false)).UpdateInterval ?? UpdateInterval.Default;
         }
-        catch (InvalidDataException exception)
+        catch (Exception exception) when (!cancellationToken.IsCancellationRequested)
         {
             LogCantReadInterval(_logger, exception);
             return UpdateInterval.Default;
@@ -117,7 +127,7 @@ internal sealed partial class UpdateCheckService : BackgroundService
             {
                 notify = (await _settings.GetAsync(cancellationToken).ConfigureAwait(false)).NotifyOfUpdates ?? true;
             }
-            catch (InvalidDataException)
+            catch (Exception) when (!cancellationToken.IsCancellationRequested)
             {
                 // The interval's read already said the settings can't be read.
                 notify = true;
@@ -129,7 +139,7 @@ internal sealed partial class UpdateCheckService : BackgroundService
                 await _notifications.ShowAsync(UpdateNotices.For(check.Found, library), cancellationToken).ConfigureAwait(false);
             }
         }
-        catch (Exception exception) when (exception is not OperationCanceledException)
+        catch (Exception exception) when (!cancellationToken.IsCancellationRequested)
         {
             LogCantNotify(_logger, exception, check.Found.Count);
         }
@@ -137,7 +147,7 @@ internal sealed partial class UpdateCheckService : BackgroundService
 
     /// <summary>
     /// When the first check is due: now, when a watched mod was never checked; otherwise an interval after the oldest
-    /// check.
+    /// check. When the library can't be read, which is logged, it's an interval from now.
     /// </summary>
     private async Task<DateTimeOffset> FirstDueAsync(TimeSpan interval, CancellationToken cancellationToken)
     {
@@ -149,7 +159,7 @@ internal sealed partial class UpdateCheckService : BackgroundService
                 ? now
                 : watched.Min(mod => mod.CheckedAt!.Value) + interval;
         }
-        catch (InvalidDataException exception)
+        catch (Exception exception) when (!cancellationToken.IsCancellationRequested)
         {
             LogCheckFailed(_logger, exception);
             return now + interval;

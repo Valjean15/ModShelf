@@ -315,6 +315,38 @@ public sealed class UpdateCheckerTests : IDisposable
     }
 
     [Fact]
+    public async Task ModsCheckedLaterThanNowAreAskedAboutOnTheirOwn()
+    {
+        // The clock has moved back since the last check, so when that was isn't known.
+        await CheckedAtAsync(TestData.Now.AddDays(30));
+
+        UpdateCheck check = await CheckAsync(_feed);
+
+        Assert.Empty(_feed.Questions);
+        Assert.Equal(["GetFilesAsync 1", "GetFilesAsync 2", "GetFilesAsync 3"], _site.AskedFor);
+        Assert.Equal(["1 11", "2 11"], check.Found.Select(update => $"{update.File.Mod.Id} {update.File.Id}"));
+        Assert.All(_library.Mods, mod => Assert.Equal(TestData.Now, mod.CheckedAt));
+    }
+
+    [Theory]
+    [InlineData(90)]
+    [InlineData(-30)]
+    public async Task AWatchedModWithoutFilesCheckedLaterThanNowGetsTheMainFilesSinceItWasAdded(int addedDaysAgo)
+    {
+        DateTimeOffset added = TestData.Now.AddDays(-addedDaysAgo);
+        _library.Add(LibraryMod.Watch(FakeModSite.Mod("6"), "Mod 6", null, null, added).Checked(TestData.Now.AddDays(30)));
+        _site.AddMod("6", "Mod 6");
+        _site.AddFile("6", "59", "59.7z", uploadedAt: TestData.Now.AddDays(-100));
+        _site.AddFile("6", "60", "60.7z", uploadedAt: TestData.Now.AddDays(-1));
+        _site.AddFile("6", "61", "61.7z", uploadedAt: TestData.Now.AddMinutes(-5));
+
+        await CheckAsync(_site);
+
+        string[] expected = added > TestData.Now ? ["61"] : ["61", "60"];
+        Assert.Equal(expected, Mod("6").Updates.Select(update => update.File.Id));
+    }
+
+    [Fact]
     public async Task AModUnwatchedDuringTheCheckStaysUnwatched()
     {
         _site.Hold = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
