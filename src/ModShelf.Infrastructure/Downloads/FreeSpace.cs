@@ -15,7 +15,8 @@ internal static class FreeSpace
     {
         try
         {
-            string path = Path.GetFullPath(folder);
+            // A folder behind a link, such as a Downloads folder linked to another disk, is on the link's target's disk.
+            string path = RealPath(folder);
             DriveInfo? volume = OperatingSystem.IsWindows()
                 ? new DriveInfo(Path.GetPathRoot(path)!)
                 : DriveInfo.GetDrives()
@@ -27,6 +28,30 @@ internal static class FreeSpace
         {
             return null;
         }
+    }
+
+    /// <summary>
+    /// <paramref name="path"/> as a full path with every link in it followed, symbolic links and junctions alike, as far
+    /// as its folders exist; the rest, still to be made, as it is.
+    /// </summary>
+    internal static string RealPath(string path)
+    {
+        string full = Path.TrimEndingDirectorySeparator(Path.GetFullPath(path));
+        string root = Path.GetPathRoot(full)!;
+        string[] parts = full[root.Length..].Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+        string current = root;
+        for (int index = 0; index < parts.Length; index++)
+        {
+            string next = Path.Combine(current, parts[index]);
+            if (!Directory.Exists(next))
+            {
+                return Path.Combine([current, .. parts[index..]]);
+            }
+
+            current = new DirectoryInfo(next).ResolveLinkTarget(returnFinalTarget: true)?.FullName ?? next;
+        }
+
+        return current;
     }
 
     /// <summary>
