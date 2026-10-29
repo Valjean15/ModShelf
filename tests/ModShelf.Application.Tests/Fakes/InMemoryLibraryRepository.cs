@@ -43,6 +43,11 @@ internal sealed class InMemoryLibraryRepository : ILibraryRepository
     /// </summary>
     public Exception? UpdateFailure { get; set; }
 
+    /// <summary>
+    /// Runs after each update that succeeded, with what it did.
+    /// </summary>
+    public Action<LibraryChange>? AfterUpdate { get; set; }
+
     public Task<LibraryChange> UpdateAsync(ModRef modRef, Func<LibraryMod?, LibraryMod?> change, CancellationToken cancellationToken)
     {
         lock (_lock)
@@ -72,7 +77,9 @@ internal sealed class InMemoryLibraryRepository : ILibraryRepository
                 _mods.Insert(index < 0 ? _mods.Count : index, after);
             }
 
-            return Task.FromResult(new LibraryChange(modRef, before, after));
+            LibraryChange done = new(modRef, before, after);
+            AfterUpdate?.Invoke(done);
+            return Task.FromResult(done);
         }
     }
 }

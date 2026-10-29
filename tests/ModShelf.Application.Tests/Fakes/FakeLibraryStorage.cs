@@ -26,6 +26,11 @@ internal sealed class FakeLibraryStorage : ILibraryStorage
     public Action<string>? AfterMove { get; set; }
 
     /// <summary>
+    /// Runs before each delete, with the path deleted.
+    /// </summary>
+    public Action<string>? BeforeDelete { get; set; }
+
+    /// <summary>
     /// Every move, in order.
     /// </summary>
     public ConcurrentQueue<(string Source, string Destination)> Moves { get; } = new();
@@ -75,6 +80,7 @@ internal sealed class FakeLibraryStorage : ILibraryStorage
 
     public void DeleteFile(string path)
     {
+        BeforeDelete?.Invoke(path);
         if (Failures.TryGetValue(path, out Exception? failure))
         {
             throw failure;

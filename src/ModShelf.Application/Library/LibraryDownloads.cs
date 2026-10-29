@@ -352,15 +352,15 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
             : new LibraryFile(
                 job.File, details.File.Name, details.File.VersionLabel, details.File.Category, details.File.UploadedAt, relativePath, size, now);
 
-        // Old versions are known from the site's list of files, which is read for a file new to the library. They're moved
-        // or deleted before the library changes, so it never lists a file where it isn't.
+        // Old versions are known from the site's list of files, which is read for a file new to the library. The library
+        // never lists a file where it isn't, and no file is lost when it can't change: old versions are moved before it
+        // changes, and moved back if it can't, and they leave it before they're deleted.
         OldVersionPlan plan = details is null || stored is null
             ? OldVersionPlan.None
             : OldVersions.Plan(stored, job.File, details.Files, settings.OldVersions ?? OldVersionRule.Default);
         IReadOnlyList<(LibraryFile Before, LibraryFile After)> archived = plan.Archive.Count == 0
             ? []
             : Archive(root, await _library.ListAsync(cancellationToken).ConfigureAwait(false), plan.Archive);
-        IReadOnlyList<LibraryFile> deleted = Delete(root, plan.Delete);
         LibraryChange change;
         try
         {
@@ -375,7 +375,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
                             (_, null) => current.WithFile(recorded),
                             _ => current.WithDetails(details.Mod.Name, details.Mod.Author, details.Mod.PageUrl).WithFile(recorded),
                         };
-                        foreach (LibraryFile gone in deleted)
+                        foreach (LibraryFile gone in plan.Delete)
                         {
                             changed = changed.WithoutFile(gone.File)!;
                         }
@@ -399,6 +399,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
         _changes.Publish(change);
         _details.TryRemove(job.Id, out _);
         LogRecorded(_logger, recorded.FileName, mod.Id, mod.Game.Key);
+        IReadOnlyList<LibraryFile> deleted = await DeleteAsync(root, mod, plan.Delete).ConfigureAwait(false);
         LibraryRecord record = new(recorded, [.. archived.Select(moved => moved.After)], deleted);
         Remember(job.Id, record);
         return record;
@@ -472,13 +473,14 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
     }
 
     /// <summary>
-    /// Deletes old versions from the disk. One that can't be deleted, such as one another program has open, stays in the
-    /// library, so the next newer version tries again.
+    /// Deletes old versions the library doesn't list any more from the disk. One that can't be deleted, such as one another
+    /// program has open, is listed again, so the next newer version tries again.
     /// </summary>
     /// <returns>The files deleted, or gone already.</returns>
-    private List<LibraryFile> Delete(string root, IReadOnlyList<LibraryFile> files)
+    private async Task<IReadOnlyList<LibraryFile>> DeleteAsync(string root, ModRef mod, IReadOnlyList<LibraryFile> files)
     {
         List<LibraryFile> deleted = [];
+        List<LibraryFile> kept = [];
         foreach (LibraryFile file in files)
         {
             try
@@ -488,6 +490,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
             {
                 LogCantDelete(_logger, exception, file.FileName);
+                kept.Add(file);
                 continue;
             }
 
@@ -495,7 +498,40 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
             LogDeleted(_logger, file.FileName);
         }
 
+        if (kept.Count > 0)
+        {
+            await ListAgainAsync(mod, kept).ConfigureAwait(false);
+        }
+
         return deleted;
+    }
+
+    /// <summary>
+    /// Lists old versions that couldn't be deleted again. When the library can't take that, they stay on disk unlisted,
+    /// which loses no file.
+    /// </summary>
+    private async Task ListAgainAsync(ModRef mod, List<LibraryFile> kept)
+    {
+        try
+        {
+            // The library has changed already, so this isn't cancelled: it's quick, and leaves the library as the disk is.
+            LibraryChange change = await _library.UpdateAsync(
+                    mod,
+                    current => current is null
+                        ? null
+                        : kept.Where(file => current.Files.All(listed => listed.File != file.File))
+                            .Aggregate(current, (changed, file) => changed.WithFile(file)),
+                    CancellationToken.None)
+                .ConfigureAwait(false);
+            _changes.Publish(change);
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            foreach (LibraryFile file in kept)
+            {
+                LogCantListAgain(_logger, exception, file.FileName);
+            }
+        }
     }
 
     /// <summary>

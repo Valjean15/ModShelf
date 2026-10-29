@@ -33,4 +33,7 @@ internal sealed partial class LibraryDownloads
 
     [LoggerMessage(EventId = 609, Level = LogLevel.Error, Message = "Couldn't move {FileName} back from {ArchivePath} after the library refused the change")]
     private static partial void LogCantPutBack(ILogger logger, Exception exception, string fileName, string archivePath);
+
+    [LoggerMessage(EventId = 614, Level = LogLevel.Error, Message = "Couldn't list the old version {FileName} in the library again after it couldn't be deleted; it's still on disk")]
+    private static partial void LogCantListAgain(ILogger logger, Exception exception, string fileName);
 }

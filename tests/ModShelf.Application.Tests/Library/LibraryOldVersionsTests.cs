@@ -202,6 +202,63 @@ public sealed class LibraryOldVersionsTests : IDisposable
     }
 
     [Fact]
+    public async Task OldVersionsStayOnDiskWhenTheLibraryRefusesTheChange()
+    {
+        _library.UpdateFailure = new InvalidDataException("The database is locked.");
+
+        await Assert.ThrowsAsync<InvalidDataException>(RecordAsync);
+
+        Assert.All(OldIds, id => Assert.True(_storage.FileExists(InRoot(Stored(id).RelativePath))));
+        Assert.Equal(3, LibraryPaths.Count());
+        Assert.DoesNotContain(_logger.Entries, entry => entry.Contains("Deleted the old version", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task OldVersionsLeaveTheDiskOnlyOnceTheLibraryHasChanged()
+    {
+        List<bool> listedWhenDeleted = [];
+        _storage.BeforeDelete = path => listedWhenDeleted.Add(LibraryPaths.Any(listed => InRoot(listed) == path));
+
+        await RecordAsync();
+
+        Assert.Equal([false, false], listedWhenDeleted);
+    }
+
+    [Fact]
+    public async Task AnOldVersionThatCantBeDeletedIsListedAgain()
+    {
+        _storage.Failures[InRoot($"{Folder}/SkyUI 5.1.7z")] = new IOException("In use.");
+        LibraryChanges published = new();
+        using CancellationTokenSource stop = CancellationTokenSource.CreateLinkedTokenSource(Cancellation);
+        IAsyncEnumerable<LibraryChange> watched = published.Watch(stop.Token);
+
+        using (LibraryDownloads library = Create(published))
+        {
+            await library.RecordAsync(Done("53", "SkyUI 5.3.7z"), Cancellation);
+        }
+
+        await stop.CancelAsync();
+        List<LibraryChange> changes = await watched.ToListAsync(Cancellation);
+        Assert.Equal(2, changes.Count);
+        Assert.DoesNotContain(changes[0].After!.Files, file => file.File.Id == "51");
+        Assert.Contains(changes[1].After!.Files, file => file.File.Id == "51");
+        Assert.Equal(LibraryPaths, changes[1].After!.Files.Select(file => file.RelativePath));
+    }
+
+    [Fact]
+    public async Task AnOldVersionThatCantBeDeletedNorListedAgainStaysOnDisk()
+    {
+        _storage.Failures[InRoot($"{Folder}/SkyUI 5.1.7z")] = new IOException("In use.");
+        _library.AfterUpdate = _ => _library.UpdateFailure = new InvalidDataException("The database is locked.");
+
+        LibraryRecord recorded = await RecordAsync();
+
+        Assert.Equal(["50"], recorded.Deleted.Select(file => file.File.Id));
+        Assert.True(_storage.FileExists(InRoot($"{Folder}/SkyUI 5.1.7z")));
+        Assert.Contains(_logger.Entries, entry => entry.StartsWith("Error: Couldn't list the old version SkyUI 5.1.7z", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public async Task RecordingTheSameDownloadAgainSaysWhatWasDone()
     {
         _store.Settings = new AppSettings { OldVersions = OldVersionRule.Archive };
@@ -256,6 +313,6 @@ public sealed class LibraryOldVersionsTests : IDisposable
 
     private string InRoot(string relativePath) => Domain.Library.LibraryPaths.Resolve(Root, relativePath);
 
-    private LibraryDownloads Create()
-        => new(new SourceRegistry([_site]), _downloads, _library, _settings, _storage, new LibraryChanges(), _time, _logger);
+    private LibraryDownloads Create(LibraryChanges? changes = null)
+        => new(new SourceRegistry([_site]), _downloads, _library, _settings, _storage, changes ?? new LibraryChanges(), _time, _logger);
 }
