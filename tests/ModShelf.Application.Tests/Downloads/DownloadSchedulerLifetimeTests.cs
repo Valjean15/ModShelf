@@ -165,6 +165,27 @@ public sealed class DownloadSchedulerLifetimeTests
         await Assert.ThrowsAsync<InvalidOperationException>(() => waiting);
     }
 
+    [Fact]
+    public async Task ASchedulerNeverStartedListsTheSavedJobs()
+    {
+        // As in a process that doesn't run downloads, which has no loop to answer.
+        DownloadJob stored = StoredJob();
+        using DownloadScheduler scheduler = new(
+            new InMemoryDownloadJobRepository([stored]),
+            new SourceRegistry([]),
+            new ControlledFileTransfer(),
+            new ScriptedQueueLock(),
+            new FakeLibraryStorage(),
+            TimeProvider.System,
+            new DownloadSchedulerOptions(),
+            NullLogger<DownloadScheduler>.Instance);
+
+        IReadOnlyList<DownloadJobSnapshot> listed = await scheduler.ListAsync(TestContext.Current.CancellationToken)
+            .WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+
+        Assert.Equal(stored.Id, Assert.Single(listed).Id);
+    }
+
     private static DownloadJob StoredJob()
         => DownloadJob.Create(TestData.File(TestData.Nexus, "35407"), TestData.TargetDirectory, "35407.7z", TestData.Now);
 }

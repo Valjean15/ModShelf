@@ -42,7 +42,7 @@ namespace ModShelf.Application.Downloads;
 /// Only the process holding the <see cref="IDownloadQueueLock"/> runs the queue. One that starts while another holds it
 /// lists the jobs as saved and refuses everything else (<see cref="DownloadQueueBusyException"/>), trying the lock again
 /// every <see cref="DownloadSchedulerOptions.QueueLockRetryInterval"/>. Once it holds it, it loads the jobs and runs
-/// them as at any start.
+/// them as at any start. One that's never started, in a process that doesn't run downloads, lists the jobs as saved too.
 /// </para>
 /// </remarks>
 internal sealed partial class DownloadScheduler : BackgroundService, IDownloadService
@@ -66,6 +66,10 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
 
     private readonly TaskCompletionSource _runsHere = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private volatile bool _busyElsewhere;
+
+    // Whether a host started the scheduler. One that never runs it, such as the CLI's for moving the library, has no
+    // loop to answer, so listing reads the saved jobs.
+    private volatile bool _started;
 
     // Owned by the loop: only read or changed while it handles a message.
     private readonly List<DownloadJob> _jobs = [];
@@ -146,6 +150,11 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
 
     public async Task<IReadOnlyList<DownloadJobSnapshot>> ListAsync(CancellationToken cancellationToken)
     {
+        if (!_started)
+        {
+            return [.. (await _repository.ListAsync(cancellationToken).ConfigureAwait(false)).Select(Snapshot)];
+        }
+
         TaskCompletionSource<IReadOnlyList<DownloadJobSnapshot>> reply = NewReply<IReadOnlyList<DownloadJobSnapshot>>();
         Post(new ListCommand(reply));
         return await reply.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -179,6 +188,7 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
     /// </summary>
     public override Task StartAsync(CancellationToken cancellationToken)
     {
+        _started = true;
         if (_queueLock.TryAcquire())
         {
             _runsHere.TrySetResult();

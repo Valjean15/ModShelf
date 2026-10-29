@@ -53,7 +53,7 @@ public interface IDownloadService
     Task HandOffAsync(ModFileRef file, Uri handoff, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Every job, oldest first.
+    /// Every job, oldest first: as saved, in a process that doesn't run downloads or while another runs the queue.
     /// </summary>
     Task<IReadOnlyList<DownloadJobSnapshot>> ListAsync(CancellationToken cancellationToken);
 
