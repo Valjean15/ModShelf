@@ -163,6 +163,38 @@ public sealed class DownloadSchedulerTests
     }
 
     [Fact]
+    public async Task RefusesAnotherFileWhereAnUnfinishedJobDownloadsTo()
+    {
+        // Two files of the same name for one folder, such as two releases' mod.zip: the second would carry on from the
+        // first one's partial file, and be saved spliced.
+        await using SchedulerHarness harness = await SchedulerHarness.StartAsync();
+        DownloadJobSnapshot first = await harness.Scheduler.EnqueueAsync(
+            TestData.File(TestData.Nexus, "1"), TestData.TargetDirectory, "mod.zip", TestContext.Current.CancellationToken);
+        string sameFolder = TestData.TargetDirectory + Path.DirectorySeparatorChar;
+
+        ArgumentException refused = await Assert.ThrowsAsync<ArgumentException>(() => harness.Scheduler.EnqueueAsync(
+            TestData.File(TestData.Nexus, "2"), sameFolder, "mod.zip", TestContext.Current.CancellationToken));
+
+        Assert.Contains(Path.Combine(TestData.TargetDirectory, "mod.zip"), refused.Message, StringComparison.Ordinal);
+        Assert.Equal(first.Id, Assert.Single(await harness.SettleAsync()).Id);
+    }
+
+    [Fact]
+    public async Task TakesAnotherFileWhereAFinishedJobDownloadedTo()
+    {
+        // Whether a file is in the way is the transfer's to say, which never overwrites one.
+        await using SchedulerHarness harness = await SchedulerHarness.StartAsync();
+        DownloadJobSnapshot first = await harness.Scheduler.EnqueueAsync(
+            TestData.File(TestData.Nexus, "1"), TestData.TargetDirectory, "mod.zip", TestContext.Current.CancellationToken);
+        await harness.Scheduler.CancelAsync(first.Id, TestContext.Current.CancellationToken);
+
+        await harness.Scheduler.EnqueueAsync(
+            TestData.File(TestData.Nexus, "2"), TestData.TargetDirectory, "mod.zip", TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, (await harness.SettleAsync()).Count);
+    }
+
+    [Fact]
     public async Task PublishesProgressAtMostOncePerInterval()
     {
         await using SchedulerHarness harness = await SchedulerHarness.StartAsync();

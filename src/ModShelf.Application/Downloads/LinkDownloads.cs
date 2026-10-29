@@ -1,5 +1,6 @@
 using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Sources;
+using ModShelf.Domain.Common;
 using ModShelf.Domain.Downloads;
 using ModShelf.Sources.Abstractions.Links;
 
@@ -49,8 +50,7 @@ internal sealed class LinkDownloads : ILinkDownloads
         DownloadJobSnapshot? saved = jobs.LastOrDefault(job =>
             job.Status == DownloadJobStatus.Completed
             && job.File == recognized.File
-            && string.Equals(job.TargetDirectory, targetDirectory, StringComparison.Ordinal)
-            && string.Equals(job.FileName, name, StringComparison.Ordinal));
+            && SavesTo(job, targetDirectory, name));
         if (saved is not null && _storage.FileExists(Path.Combine(targetDirectory, name)))
         {
             return new LinkDownload(saved, AlreadyQueued: false, AlreadySaved: true);
@@ -80,8 +80,7 @@ internal sealed class LinkDownloads : ILinkDownloads
         DownloadJobSnapshot? existing = jobs.FirstOrDefault(job =>
             job.Status is not (DownloadJobStatus.Completed or DownloadJobStatus.Cancelled)
             && job.File == recognized.File
-            && string.Equals(job.TargetDirectory, targetDirectory, StringComparison.Ordinal)
-            && string.Equals(job.FileName, fileName, StringComparison.Ordinal));
+            && SavesTo(job, targetDirectory, fileName));
         if (existing is not null)
         {
             return new LinkDownload(existing, AlreadyQueued: true);
@@ -91,4 +90,11 @@ internal sealed class LinkDownloads : ILinkDownloads
             .ConfigureAwait(false);
         return new LinkDownload(added, AlreadyQueued: false);
     }
+
+    /// <summary>
+    /// Whether <paramref name="job"/> saves its file as <paramref name="fileName"/> in <paramref name="targetDirectory"/>,
+    /// however the folder is written: with a trailing separator, or in another case where case doesn't count.
+    /// </summary>
+    private static bool SavesTo(DownloadJobSnapshot job, string targetDirectory, string fileName)
+        => FilePaths.Same(Path.Combine(job.TargetDirectory, job.FileName), Path.Combine(targetDirectory, fileName));
 }

@@ -31,6 +31,9 @@ public interface IDownloadService
     /// Adds a job for <paramref name="file"/>, saved as <paramref name="fileName"/> in
     /// <paramref name="targetDirectory"/> (an absolute path). The scheduler starts it when a slot is free.
     /// </summary>
+    /// <exception cref="ArgumentException">
+    /// The arguments aren't a valid job, or an unfinished job saves to the same place already.
+    /// </exception>
     Task<DownloadJobSnapshot> EnqueueAsync(
         ModFileRef file,
         string targetDirectory,

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Sources;
+using ModShelf.Domain.Common;
 using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Downloads;
@@ -507,6 +508,14 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
 
     private async Task EnqueueAsync(EnqueueCommand command)
     {
+        // Two jobs for one place would share a partial file: the second would carry on from the first one's bytes.
+        string destination = DestinationOf(command.Job);
+        if (_jobs.Exists(job => !job.IsFinished && FilePaths.Same(DestinationOf(job), destination)))
+        {
+            throw new ArgumentException(
+                $"Another download is saving a file to {destination} already. Choose another name or folder, or wait until it's done.");
+        }
+
         await _repository.AddAsync(command.Job, CancellationToken.None).ConfigureAwait(false);
         _jobs.Add(command.Job);
 
@@ -553,10 +562,22 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
         await SaveAsync(job).ConfigureAwait(false);
         if (command.Control == JobControl.Cancel)
         {
-            await _transfer.DeletePartialFileAsync(DestinationOf(job), CancellationToken.None).ConfigureAwait(false);
+            await DeletePartialFileAsync(job).ConfigureAwait(false);
         }
 
         command.Reply.TrySetResult();
+    }
+
+    /// <summary>
+    /// Deletes a cancelled job's partial file, unless another unfinished job saves to the same place: two such jobs,
+    /// stored before they were refused, share it.
+    /// </summary>
+    private Task DeletePartialFileAsync(DownloadJob cancelled)
+    {
+        string destination = DestinationOf(cancelled);
+        return _jobs.Exists(job => job != cancelled && !job.IsFinished && FilePaths.Same(DestinationOf(job), destination))
+            ? Task.CompletedTask
+            : _transfer.DeletePartialFileAsync(destination, CancellationToken.None);
     }
 
     private async Task ClearFinishedAsync(ClearFinishedCommand command)
@@ -661,7 +682,7 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
                 await SaveAsync(job).ConfigureAwait(false);
                 if (deletePartialFile)
                 {
-                    await _transfer.DeletePartialFileAsync(DestinationOf(job), CancellationToken.None).ConfigureAwait(false);
+                    await DeletePartialFileAsync(job).ConfigureAwait(false);
                 }
             }
             catch (Exception exception)

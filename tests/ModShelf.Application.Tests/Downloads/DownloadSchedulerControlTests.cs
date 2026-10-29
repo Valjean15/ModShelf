@@ -95,6 +95,23 @@ public sealed class DownloadSchedulerControlTests
     }
 
     [Fact]
+    public async Task CancellingAJobKeepsAPartialFileAnotherJobUses()
+    {
+        // Two jobs for one place, stored before such jobs were refused: the partial file is the other job's too.
+        DownloadJob first = PausedJob("1");
+        DownloadJob second = PausedJob("2");
+        await using SchedulerHarness harness = await SchedulerHarness.StartAsync(storedJobs: [first, second]);
+
+        await harness.Scheduler.CancelAsync(first.Id, TestContext.Current.CancellationToken);
+
+        Assert.Equal(Cancelled, (await harness.CurrentAsync(first.Id)).Status);
+        Assert.Empty(harness.Transfer.DeletedPartialFiles);
+
+        await harness.Scheduler.CancelAsync(second.Id, TestContext.Current.CancellationToken);
+        Assert.Single(harness.Transfer.DeletedPartialFiles);
+    }
+
+    [Fact]
     public async Task PausingAQueuedJobKeepsItFromStarting()
     {
         await using SchedulerHarness harness = await SchedulerHarness.StartAsync(
@@ -196,5 +213,12 @@ public sealed class DownloadSchedulerControlTests
         call.Progress.Advanced(bytesDownloaded);
         await harness.WaitForAsync(job.Id, snapshot => snapshot.BytesDownloaded == bytesDownloaded);
         return (job, call);
+    }
+
+    private static DownloadJob PausedJob(string fileId)
+    {
+        DownloadJob job = DownloadJob.Create(TestData.File(TestData.Nexus, fileId), TestData.TargetDirectory, "mod.zip", TestData.Now);
+        job.Pause();
+        return job;
     }
 }

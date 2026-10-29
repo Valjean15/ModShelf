@@ -178,6 +178,25 @@ public sealed class LinkDownloadsTests
         Assert.Empty(downloads.Enqueued);
     }
 
+    [Fact]
+    public async Task TheSameFolderWrittenAnotherWayFindsTheUnfinishedJob()
+    {
+        // Typed with a trailing separator; and where case doesn't count, in another case.
+        string folder = TestData.TargetDirectory + Path.DirectorySeparatorChar;
+        if (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS())
+        {
+            folder = folder.ToUpperInvariant();
+        }
+
+        DownloadJobSnapshot earlier = RecordingDownloadService.Job(NexusFile, folder, FileName, Queued);
+        RecordingDownloadService downloads = new(earlier);
+
+        LinkDownload result = await AddAsync(downloads, [ScriptedLinkRecognizer.Always(NexusFile)]);
+
+        Assert.True(result.AlreadyQueued);
+        Assert.Empty(downloads.Enqueued);
+    }
+
     [Theory]
     [InlineData(Completed)]
     [InlineData(Cancelled)]
