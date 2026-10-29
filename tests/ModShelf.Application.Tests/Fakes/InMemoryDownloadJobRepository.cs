@@ -18,6 +18,11 @@ internal sealed class InMemoryDownloadJobRepository : IDownloadJobRepository
     }
 
     /// <summary>
+    /// What the next updates throw, one each, as a database that can't be written does; nothing is saved then.
+    /// </summary>
+    public Queue<Exception> UpdateFailures { get; } = new();
+
+    /// <summary>
     /// The IDs of the jobs deleted, in order.
     /// </summary>
     public List<DownloadJobId> Deleted { get; } = [];
@@ -37,6 +42,11 @@ internal sealed class InMemoryDownloadJobRepository : IDownloadJobRepository
     {
         lock (_gate)
         {
+            if (UpdateFailures.TryDequeue(out Exception? failure))
+            {
+                return Task.FromException(failure);
+            }
+
             _saves.Add((job.Id, job.Status));
         }
 

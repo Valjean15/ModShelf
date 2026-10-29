@@ -30,4 +30,7 @@ internal sealed partial class DownloadScheduler
 
     [LoggerMessage(EventId = 7, Level = LogLevel.Information, Message = "Cleared {Count} finished download jobs from the queue")]
     private static partial void LogClearedFinished(ILogger logger, int count);
+
+    [LoggerMessage(EventId = 8, Level = LogLevel.Warning, Message = "Couldn't save download job {JobId}; it's saved again once the database can be written")]
+    private static partial void LogSaveFailed(ILogger logger, Exception exception, DownloadJobId jobId);
 }

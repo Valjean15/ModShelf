@@ -31,6 +31,10 @@ namespace ModShelf.Application.Downloads;
 /// jobs that were interrupted mid-download, and asks the sources again about jobs that were waiting for a
 /// handoff, since their pages are gone; on stop it requeues the running ones, so they continue next time.
 /// </para>
+/// <para>
+/// A job that can't be saved, such as while the database is locked or the disk is full, goes on all the same: the
+/// failure is logged, watchers still hear of the change, and the job is saved again as soon as a save works.
+/// </para>
 /// </remarks>
 internal sealed partial class DownloadScheduler : BackgroundService, IDownloadService
 {
@@ -52,6 +56,9 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
     private readonly Dictionary<DownloadJobId, long> _lastProgressSnapshot = [];
     private readonly Dictionary<ModFileRef, Uri> _handoffs = [];
     private readonly Dictionary<DownloadJobId, Uri> _handoffPages = [];
+
+    // Jobs whose last save failed, such as while the database was locked: saved again once a save works.
+    private readonly HashSet<DownloadJobId> _unsaved = [];
     private bool _stopping;
 
     public DownloadScheduler(
@@ -225,7 +232,7 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
             if (job.Status is DownloadJobStatus.Resolving or DownloadJobStatus.Downloading or DownloadJobStatus.Verifying)
             {
                 job.Requeue();
-                await _repository.UpdateAsync(job, CancellationToken.None).ConfigureAwait(false);
+                await SaveAsync(job).ConfigureAwait(false);
                 requeued++;
             }
         }
@@ -299,6 +306,8 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
             Message message = await _inbox.Reader.ReadAsync(CancellationToken.None).ConfigureAwait(false);
             await HandleAsync(message).ConfigureAwait(false);
         }
+
+        await SaveUnsavedAsync().ConfigureAwait(false);
     }
 
     private async Task HandleAsync(Message message)
@@ -599,11 +608,54 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
     /// <summary>
     /// Saves and publishes a job that changed, and lets go of the handoff state it no longer needs.
     /// </summary>
+    /// <summary>
+    /// Saves the job and tells the watchers. A save that fails, such as while the database is locked or the disk is full,
+    /// is logged rather than thrown, since the download goes on either way: the job is saved again once a save works.
+    /// </summary>
     private async Task SaveAsync(DownloadJob job)
     {
         ForgetHandoffsNoLongerNeeded(job);
-        await _repository.UpdateAsync(job, CancellationToken.None).ConfigureAwait(false);
+        if (await TrySaveAsync(job).ConfigureAwait(false))
+        {
+            await SaveUnsavedAsync().ConfigureAwait(false);
+        }
+
         _watchers.Publish(Snapshot(job));
+    }
+
+    private async Task<bool> TrySaveAsync(DownloadJob job)
+    {
+        try
+        {
+            await _repository.UpdateAsync(job, CancellationToken.None).ConfigureAwait(false);
+            _unsaved.Remove(job.Id);
+            return true;
+        }
+        catch (Exception exception)
+        {
+            LogSaveFailed(_logger, exception, job.Id);
+            _unsaved.Add(job.Id);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Saves the jobs whose saves failed, as they are now, stopping at the first that fails again. A job cleared from the
+    /// queue meanwhile is forgotten.
+    /// </summary>
+    private async Task SaveUnsavedAsync()
+    {
+        foreach (DownloadJobId id in _unsaved.ToList())
+        {
+            if (_jobs.Find(job => job.Id == id) is not { } job)
+            {
+                _unsaved.Remove(id);
+            }
+            else if (!await TrySaveAsync(job).ConfigureAwait(false))
+            {
+                return;
+            }
+        }
     }
 
     /// <summary>
