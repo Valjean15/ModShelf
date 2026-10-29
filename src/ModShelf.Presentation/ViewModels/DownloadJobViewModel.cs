@@ -202,6 +202,7 @@ public sealed partial class DownloadJobViewModel : ObservableObject
         DownloadFailureReason.Storage => Strings.JobFailedStorage,
         DownloadFailureReason.HashMismatch => Strings.JobFailedHashMismatch,
         DownloadFailureReason.AccountNeeded => Strings.JobFailedAccountNeeded,
+        DownloadFailureReason.RateLimited => Strings.JobFailedRateLimited,
         _ => Strings.JobFailedUnexpected,
     };
 

@@ -19,6 +19,7 @@ public sealed class DownloadFailureReasonTests
             [DownloadFailureReason.HashMismatch] = 5,
             [DownloadFailureReason.Unexpected] = 6,
             [DownloadFailureReason.AccountNeeded] = 7,
+            [DownloadFailureReason.RateLimited] = 8,
         };
 
         Assert.Equal(stored.Keys.Order(), Enum.GetValues<DownloadFailureReason>().Order());

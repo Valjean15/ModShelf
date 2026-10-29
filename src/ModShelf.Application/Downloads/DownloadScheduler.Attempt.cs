@@ -116,12 +116,14 @@ internal sealed partial class DownloadScheduler
 
     /// <summary>
     /// Why resolving failed, for the failures a source reports in the shared way: a refused account, the file
-    /// gone, or the site out of reach. Null for anything else, which fails the job as unexpected.
+    /// gone, the account's rate limit used up, or the site out of reach. Null for anything else, which fails the job as
+    /// unexpected.
     /// </summary>
     private static DownloadFailureReason? ResolveFailure(Exception exception) => exception switch
     {
         AuthenticationFailedException => DownloadFailureReason.AccountNeeded,
         HttpRequestException { StatusCode: HttpStatusCode.NotFound or HttpStatusCode.Gone } => DownloadFailureReason.LinkUnavailable,
+        HttpRequestException { StatusCode: HttpStatusCode.TooManyRequests } => DownloadFailureReason.RateLimited,
         HttpRequestException => DownloadFailureReason.Network,
         _ => null,
     };

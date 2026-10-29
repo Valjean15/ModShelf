@@ -29,4 +29,9 @@ public enum DownloadFailureReason
     /// The source needs a linked account to download the file, or refused the one linked: the user has to link it.
     /// </summary>
     AccountNeeded = 7,
+
+    /// <summary>
+    /// The source's rate limit for the account is used up: the download can go on once it resets.
+    /// </summary>
+    RateLimited = 8,
 }

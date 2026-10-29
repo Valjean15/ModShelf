@@ -118,6 +118,7 @@ public sealed class DownloadSchedulerTests
         { new AuthenticationFailedException("The site refused the account."), DownloadFailureReason.AccountNeeded },
         { new HttpRequestException("Service unavailable.", null, HttpStatusCode.ServiceUnavailable), DownloadFailureReason.Network },
         { new HttpRequestException("No route to host."), DownloadFailureReason.Network },
+        { new HttpRequestException("Rate limit used up.", null, HttpStatusCode.TooManyRequests), DownloadFailureReason.RateLimited },
         { new HttpRequestException("No Mod Found", null, HttpStatusCode.NotFound), DownloadFailureReason.LinkUnavailable },
         { new HttpRequestException("File removed", null, HttpStatusCode.Gone), DownloadFailureReason.LinkUnavailable },
         { new InvalidOperationException("The source broke."), DownloadFailureReason.Unexpected },

@@ -224,6 +224,7 @@ internal static partial class DownloadCommand
         DownloadFailureReason.Storage => "The download failed: the file couldn't be saved. The folder may not be writable, the disk may be full, or a file with that name may exist already.",
         DownloadFailureReason.HashMismatch => "The download failed: the file doesn't match the expected hash, so it was deleted.",
         DownloadFailureReason.AccountNeeded => "The download failed: the site needs a linked account, or refused the one linked. Link it with account link, then run the same command again.",
+        DownloadFailureReason.RateLimited => "The download failed: the site's rate limit for this account is used up. Run the same command again once it resets; account check says when.",
         _ when logFolder is not null => $"The download failed unexpectedly. The details are in the log in {logFolder}.",
         _ => "The download failed unexpectedly.",
     };

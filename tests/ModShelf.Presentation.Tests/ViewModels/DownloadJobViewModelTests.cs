@@ -41,6 +41,10 @@ public sealed class DownloadJobViewModelTests : IDisposable
             "Failed: the site needs a linked account, or refused the one linked. Link it on the Accounts screen, then retry."
         },
         { DownloadFailureReason.Unexpected, "Failed unexpectedly. The log has the details." },
+        {
+            DownloadFailureReason.RateLimited,
+            "Failed: the site's rate limit for this account is used up. Retry once it resets; the Accounts screen says when."
+        },
     };
 
     public void Dispose() => _harness.Dispose();

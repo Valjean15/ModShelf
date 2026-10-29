@@ -74,7 +74,7 @@ internal sealed class FakeHandoffSource(Uri fileUrl) : ILinkRecognizer, IDownloa
 
     /// <summary>
     /// Hands over a ticket for a handoff with the right key, and asks for one otherwise. File <c>crash</c> fails as a
-    /// source with a bug does.
+    /// source with a bug does, and file <c>busy</c> as one whose rate limit for the account is used up.
     /// </summary>
     public Task<ResolveResult> ResolveAsync(ModFileRef file, Uri? handoff, CancellationToken cancellationToken)
     {
@@ -82,6 +82,11 @@ internal sealed class FakeHandoffSource(Uri fileUrl) : ILinkRecognizer, IDownloa
         if (file.Id == "crash")
         {
             throw new InvalidOperationException("The site's answer made no sense.");
+        }
+
+        if (file.Id == "busy")
+        {
+            throw new HttpRequestException("The site's rate limit for this account is used up.", null, HttpStatusCode.TooManyRequests);
         }
 
         _handoffs.Enqueue(handoff);

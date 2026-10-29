@@ -245,6 +245,19 @@ public sealed class DownloadCommandLibraryTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task ADownloadTheSitesRateLimitStoppedSaysSo()
+    {
+        string folder = Path.Combine(_folder.Path, "Elsewhere");
+
+        CliResult failed = await RunAsync("download", HandoffLink("busy").AbsoluteUri, "--to", folder);
+
+        Assert.Equal(Failed, failed.ExitCode);
+        Assert.Equal(
+            "The download failed: the site's rate limit for this account is used up. Run the same command again once it resets; account check says when.",
+            failed.Errors.Trim());
+    }
+
+    [Fact]
     public async Task AFolderThatsAFileIsRefusedBeforeAnythingIsQueued()
     {
         string file = Path.Combine(_folder.Path, "notes.txt");
