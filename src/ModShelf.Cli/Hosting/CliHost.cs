@@ -73,7 +73,12 @@ internal static class CliHost
 
         // Logs go to stderr so they never mix with a command's output; appsettings.json keeps them to warnings there,
         // and lets more through to the log files.
-        builder.Services.Configure<ConsoleLoggerOptions>(options => options.LogToStandardErrorThreshold = LogLevel.Trace);
+        builder.Services.Configure<ConsoleLoggerOptions>(options =>
+        {
+            options.LogToStandardErrorThreshold = LogLevel.Trace;
+            options.FormatterName = CliConsoleFormatter.FormatterName;
+        });
+        builder.Logging.AddConsoleFormatter<CliConsoleFormatter, ConsoleFormatterOptions>();
         builder.Services.AddSingleton<IHostLifetime, CliHostLifetime>();
 
         // The settings sit next to the database, so a database moved elsewhere, such as for tests, takes its settings along.
