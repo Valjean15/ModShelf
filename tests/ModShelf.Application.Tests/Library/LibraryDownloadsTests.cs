@@ -574,6 +574,83 @@ public sealed class LibraryDownloadsTests : IDisposable
         Assert.Contains(_logger.Entries, entry => entry.StartsWith("Warning: Couldn't look for finished downloads", StringComparison.Ordinal));
     }
 
+    [Fact]
+    public async Task AHoldAddsTheMissedDownloadsFirst()
+    {
+        DownloadJobSnapshot missed = Done(SkyUi52, SkyUiFolder, "SkyUI_5_2_SE.7z");
+        _downloads.Update(missed);
+        _storage.Add(Path.Combine(SkyUiFolder, "SkyUI_5_2_SE.7z"));
+        using LibraryDownloads library = Create();
+
+        using (await library.HoldAsync(Cancellation))
+        {
+            Assert.Equal([SkyUi52], Assert.Single(_library.Mods).Files.Select(file => file.File.Id));
+        }
+    }
+
+    [Fact]
+    public async Task AHoldIsRefusedWhileAMissedDownloadCantBeAdded()
+    {
+        _site.ModFailures[SkyUi] = new HttpRequestException("Unreachable.", null, HttpStatusCode.ServiceUnavailable);
+        foreach (DownloadJobSnapshot job in new[] { Done(SkyUi52, SkyUiFolder, "a.7z"), Done(SkyUi53, SkyUiFolder, "b.7z") })
+        {
+            _downloads.Update(job);
+            _storage.Add(Path.Combine(job.TargetDirectory, job.FileName));
+        }
+
+        using LibraryDownloads library = Create();
+
+        InvalidOperationException refused = await Assert.ThrowsAsync<InvalidOperationException>(() => library.HoldAsync(Cancellation));
+
+        Assert.Equal(
+            $"2 downloads into {Root} finished, but couldn't be added to the library just now, so the library can't move yet; the log says why. Try again later.",
+            refused.Message);
+        Assert.Contains(_logger.Entries, entry => entry.StartsWith("Warning: Couldn't add a.7z to the library", StringComparison.Ordinal));
+
+        // It holds nothing.
+        _site.ModFailures.Clear();
+        using (await library.HoldAsync(Cancellation))
+        {
+            Assert.Equal(2, Assert.Single(_library.Mods).Files.Count);
+        }
+    }
+
+    [Fact]
+    public async Task AHoldIsRefusedForOneMissedDownloadSayingSo()
+    {
+        _site.Failures["GetModAsync"] = new HttpRequestException("Unreachable.", null, HttpStatusCode.ServiceUnavailable);
+        _downloads.Update(Done(SkyUi52, SkyUiFolder, "a.7z"));
+        _storage.Add(Path.Combine(SkyUiFolder, "a.7z"));
+        using LibraryDownloads library = Create();
+
+        InvalidOperationException refused = await Assert.ThrowsAsync<InvalidOperationException>(() => library.HoldAsync(Cancellation));
+
+        Assert.StartsWith($"A download into {Root} finished, but couldn't be added", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task NoFileIsPlacedOrRecordedUntilTheHoldEnds()
+    {
+        DownloadJobSnapshot done = Done(SkyUi53, SkyUiFolder, "SkyUI_5_3_SE.7z");
+        _storage.Add(Path.Combine(SkyUiFolder, "SkyUI_5_3_SE.7z"));
+        using LibraryDownloads library = Create();
+        IDisposable hold = await library.HoldAsync(Cancellation);
+
+        Task<LibraryDownload> adding = library.AddAsync(Link(SkyUi, SkyUi52), Cancellation);
+        Task<LibraryRecord?> recording = library.RecordAsync(done, Cancellation);
+        Task missed = library.RecordMissedAsync(Cancellation);
+        await Task.Delay(TimeSpan.FromMilliseconds(50), Cancellation);
+
+        Assert.False(adding.IsCompleted || recording.IsCompleted || missed.IsCompleted);
+        Assert.Empty(_downloads.Enqueued);
+        Assert.Empty(_library.Mods);
+        hold.Dispose();
+        hold.Dispose();
+        await Task.WhenAll(adding, recording, missed).WaitAsync(TimeSpan.FromSeconds(10), Cancellation);
+        Assert.Single(_downloads.Enqueued);
+        Assert.Single(_library.Mods);
+    }
+
     private static LibraryMod ModWith(LibraryFile file) => LibraryMod.Watch(file.File.Mod, "SkyUI", null, null, TestData.Now).WithFile(file);
 
     private static LibraryFile StoredFile(string fileId, string relativePath)

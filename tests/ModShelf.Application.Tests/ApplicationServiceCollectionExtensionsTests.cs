@@ -110,8 +110,22 @@ public sealed class ApplicationServiceCollectionExtensionsTests
         services.AddLibrary();
         services.AddLibraryDownloads();
         services.AddLibraryDownloads();
+        using SettingsService settings = new(new InMemorySettingsStore(), new FakeUserFolders(), new InMemoryLibraryRepository(), new InMemoryDownloadJobRepository([]));
+        using LibraryDownloads downloads = new(
+            new SourceRegistry([]),
+            new RecordingDownloadService(),
+            new InMemoryLibraryRepository(),
+            settings,
+            new FakeLibraryStorage(),
+            new LibraryChanges(),
+            TimeProvider.System,
+            NullLogger<LibraryDownloads>.Instance);
+        OneServiceProvider provider = new(downloads);
 
-        Assert.Equal(typeof(LibraryDownloads), Single<ILibraryDownloads>(services).ImplementationType);
+        // One instance is both, so the mover holds the lock that placing and recording files take.
+        Assert.Equal(typeof(LibraryDownloads), Single<LibraryDownloads>(services).ImplementationType);
+        Assert.Same(downloads, Single<ILibraryDownloads>(services).ImplementationFactory!(provider));
+        Assert.Same(downloads, Single<ILibraryHold>(services).ImplementationFactory!(provider));
         Assert.Equal(typeof(SourceRegistry), Single<ISourceRegistry>(services).ImplementationType);
         Assert.Single(services, descriptor => descriptor.ServiceType == typeof(TimeProvider));
         Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
@@ -126,6 +140,8 @@ public sealed class ApplicationServiceCollectionExtensionsTests
 
         Assert.Equal(typeof(LibraryMover), Single<ILibraryMover>(services).ImplementationType);
         Assert.Equal(ServiceLifetime.Singleton, Single<ILibraryMover>(services).Lifetime);
+        Assert.Equal(typeof(LibraryDownloads), Single<LibraryDownloads>(services).ImplementationType);
+        Assert.Single(services, descriptor => descriptor.ServiceType == typeof(ILibraryHold));
     }
 
     [Fact]
@@ -212,6 +228,11 @@ public sealed class ApplicationServiceCollectionExtensionsTests
             TimeProvider.System,
             new DownloadSchedulerOptions(),
             NullLogger<DownloadScheduler>.Instance);
+
+    private sealed class OneServiceProvider(object service) : IServiceProvider
+    {
+        public object? GetService(Type serviceType) => serviceType == service.GetType() ? service : null;
+    }
 
     private sealed class SettingsProvider(SettingsService settings) : IServiceProvider
     {

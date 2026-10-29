@@ -97,20 +97,24 @@ public static class ApplicationServiceCollectionExtensions
         services.TryAddSingleton(TimeProvider.System);
         services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
         services.TryAddSingleton<LibraryChanges>();
-        services.TryAddSingleton<ILibraryDownloads, LibraryDownloads>();
+
+        // One instance, whose lock the mover holds too.
+        services.TryAddSingleton<LibraryDownloads>();
+        services.TryAddSingleton<ILibraryDownloads>(provider => provider.GetRequiredService<LibraryDownloads>());
+        services.TryAddSingleton<ILibraryHold>(provider => provider.GetRequiredService<LibraryDownloads>());
 
         return services;
     }
 
     /// <summary>
-    /// Registers <see cref="ILibraryMover"/>, which moves the library to another root. Needs the settings
-    /// (<see cref="AddSettings"/>) and Infrastructure's <see cref="Library.Ports.ILibraryRepository"/> and
-    /// <see cref="Library.Ports.ILibraryStorage"/>.
+    /// Registers <see cref="ILibraryMover"/>, which moves the library to another root, with the library downloads
+    /// (<see cref="AddLibraryDownloads"/>), which hold still while it does; it needs what they need.
     /// </summary>
     public static IServiceCollection AddLibraryMover(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
 
+        services.AddLibraryDownloads();
         services.TryAddSingleton<ILibraryMover, LibraryMover>();
 
         return services;

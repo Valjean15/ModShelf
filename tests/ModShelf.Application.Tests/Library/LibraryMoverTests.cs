@@ -22,6 +22,7 @@ public sealed class LibraryMoverTests : IDisposable
     private readonly InMemoryLibraryRepository _library = new();
     private readonly InMemoryDownloadJobRepository _jobs = new([]);
     private readonly FakeLibraryStorage _storage = new();
+    private readonly FakeLibraryHold _hold = new();
     private readonly RecordingLogger<LibraryMover> _logger = new();
     private readonly SettingsService _settings;
 
@@ -132,6 +133,56 @@ public sealed class LibraryMoverTests : IDisposable
 
         Assert.Equal($"A download into {Root} isn't finished. Let it finish, or cancel it, first.", refused.Message);
         Assert.Empty(_storage.Moves);
+    }
+
+    [Fact]
+    public async Task HoldsTheLibraryThroughoutTheMove()
+    {
+        List<bool> heldDuringMoves = [];
+        _storage.AfterMove = _ => heldDuringMoves.Add(_hold.IsHeld);
+
+        await Mover().MoveAsync(Mods, Cancellation);
+
+        Assert.Equal([true, true], heldDuringMoves);
+        Assert.Equal(1, _hold.Holds);
+        Assert.False(_hold.IsHeld);
+    }
+
+    [Fact]
+    public async Task MovesNothingWhileAFinishedDownloadCantBeAddedFirst()
+    {
+        _hold.Refusal = new InvalidOperationException("A download into the library finished, but couldn't be added to the library just now.");
+
+        InvalidOperationException refused = await Assert.ThrowsAsync<InvalidOperationException>(() => Mover().MoveAsync(Mods, Cancellation));
+
+        Assert.Same(_hold.Refusal, refused);
+        Assert.Empty(_storage.Moves);
+        Assert.Equal(Root, await _settings.GetLibraryRootAsync(Cancellation));
+    }
+
+    [Fact]
+    public async Task ADownloadAnotherProcessStartsIntoTheOldRootMeanwhilePutsEveryFileBack()
+    {
+        // Such as the CLI's, while the app moves the library. Its file would be saved where the library isn't.
+        DownloadJob started = DownloadJob.Create(TestData.File(TestData.Nexus, "1"), Old("nexus"), "SKSE.7z", TestData.Now);
+        _storage.AfterMove = destination =>
+        {
+            if (destination == New(SkyUiFile))
+            {
+                // It completes at once.
+                _ = _jobs.AddAsync(started, Cancellation);
+            }
+        };
+
+        InvalidOperationException refused = await Assert.ThrowsAsync<InvalidOperationException>(() => Mover().MoveAsync(Mods, Cancellation));
+
+        Assert.Equal(
+            $"A download into {Root} isn't finished. Let it finish, or cancel it, first. Every file is back where it was, and the library stays in {Root}.",
+            refused.Message);
+        Assert.Equal([Old(SkyUiFile), Old(ArchivedFile)], _storage.Files.Order(StringComparer.Ordinal));
+        Assert.Equal(Root, await _settings.GetLibraryRootAsync(Cancellation));
+        Assert.Contains(_logger.Entries, entry => entry.StartsWith($"Warning: A download into {Root} started while the library moved from it, so the 2 files", StringComparison.Ordinal));
+        Assert.False(_hold.IsHeld);
     }
 
     [Fact]
@@ -256,5 +307,5 @@ public sealed class LibraryMoverTests : IDisposable
 
     private string Old(string relativePath) => LibraryPaths.Resolve(Root, relativePath);
 
-    private LibraryMover Mover() => new(_settings, _library, _storage, _logger);
+    private LibraryMover Mover() => new(_settings, _library, _storage, _hold, _logger);
 }

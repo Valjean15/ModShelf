@@ -23,12 +23,13 @@ namespace ModShelf.Application.Library;
 /// needs no more requests. After a restart, they're read again.
 /// </para>
 /// <para>
-/// Recording takes a lock, so the same job recorded twice at once, such as by the CLI and <see cref="LibraryRecorder"/>,
-/// asks the site once. Placing a file doesn't: as for <see cref="LinkDownloads"/>, two callers adding files at the
-/// same moment can still pick the same name. The CLI and a single desktop window never do.
+/// Placing a file and recording one take one lock, which moving the library holds too (<see cref="ILibraryHold"/>): so
+/// the same job recorded twice at once, such as by the CLI and <see cref="LibraryRecorder"/>, asks the site once; two
+/// files added at once never pick the same name; and no file is placed or recorded under a root the library is leaving.
+/// Other processes have locks of their own.
 /// </para>
 /// </remarks>
-internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
+internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold, IDisposable
 {
     /// <summary>
     /// How many recent records are kept for a second caller, such as the CLI after the recorder.
@@ -44,9 +45,9 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<LibraryDownloads> _logger;
     private readonly ConcurrentDictionary<DownloadJobId, SiteDetails> _details = new();
-    private readonly SemaphoreSlim _recording = new(1, 1);
+    private readonly SemaphoreSlim _lock = new(1, 1);
 
-    // Used only under _recording.
+    // Used only under _lock.
     private readonly Dictionary<DownloadJobId, LibraryRecord> _recent = [];
     private readonly Queue<DownloadJobId> _recentOrder = new();
 
@@ -97,10 +98,91 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
             throw new UnsupportedLinkException("No source knows this link.", exception);
         }
 
-        ModFileRef file = recognized.File;
-        IModCatalog catalog = _sources.Find<IModCatalog>(file.Mod.Game.Source)
+        IModCatalog catalog = _sources.Find<IModCatalog>(recognized.File.Mod.Game.Source)
             ?? throw new UnsupportedLinkException("This link isn't to a mod on a site whose mods ModShelf keeps in a library.");
 
+        await _lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            return await PlaceAsync(recognized, catalog, link, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    public async Task<LibraryRecord?> RecordAsync(DownloadJobSnapshot job, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(job);
+        if (job.Status != DownloadJobStatus.Completed)
+        {
+            if (job.Status == DownloadJobStatus.Cancelled)
+            {
+                _details.TryRemove(job.Id, out _);
+            }
+
+            return null;
+        }
+
+        await _lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            return await RecordCompletedAsync(job, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    public async Task RecordMissedAsync(CancellationToken cancellationToken)
+    {
+        await _lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await RecordMissedHeldAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            LogCantLookForMissed(_logger, exception);
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    public async Task<IDisposable> HoldAsync(CancellationToken cancellationToken)
+    {
+        await _lock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            (string root, int unrecorded) = await RecordMissedHeldAsync(cancellationToken).ConfigureAwait(false);
+            if (unrecorded > 0)
+            {
+                string downloads = unrecorded == 1 ? $"A download into {root} finished" : $"{unrecorded} downloads into {root} finished";
+                throw new InvalidOperationException(
+                    $"{downloads}, but couldn't be added to the library just now, so the library can't move yet; the log says why. Try again later.");
+            }
+
+            return new Hold(_lock);
+        }
+        catch
+        {
+            _lock.Release();
+            throw;
+        }
+    }
+
+    public void Dispose() => _lock.Dispose();
+
+    /// <summary>
+    /// Works out where the file goes, and queues it there, with the lock taken.
+    /// </summary>
+    private async Task<LibraryDownload> PlaceAsync(RecognizedLink recognized, IModCatalog catalog, Uri link, CancellationToken cancellationToken)
+    {
+        ModFileRef file = recognized.File;
         AppSettings settings = await _settings.GetAsync(cancellationToken).ConfigureAwait(false);
         string root = settings.LibraryRoot ?? _settings.DefaultLibraryRoot;
         IReadOnlyList<LibraryMod> library = await _library.ListAsync(cancellationToken).ConfigureAwait(false);
@@ -123,7 +205,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
 
         // Downloaded already, but not recorded yet, such as just before the app stopped.
         if (jobs.LastOrDefault(job => job.File == file && IsMissing(root, job, kept)) is { } missed
-            && await RecordAsync(missed, cancellationToken).ConfigureAwait(false) is { } recorded)
+            && await RecordCompletedAsync(missed, cancellationToken).ConfigureAwait(false) is { } recorded)
         {
             return new LibraryDownload(LibraryPaths.Resolve(root, recorded.File.RelativePath), null);
         }
@@ -148,63 +230,6 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
         _storage.EnsurePathFits(target);
         return new LibraryDownload(target, await QueueAsync(recognized, link, target, details, cancellationToken).ConfigureAwait(false));
     }
-
-    public async Task<LibraryRecord?> RecordAsync(DownloadJobSnapshot job, CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(job);
-        if (job.Status != DownloadJobStatus.Completed)
-        {
-            if (job.Status == DownloadJobStatus.Cancelled)
-            {
-                _details.TryRemove(job.Id, out _);
-            }
-
-            return null;
-        }
-
-        await _recording.WaitAsync(cancellationToken).ConfigureAwait(false);
-        try
-        {
-            return await RecordCompletedAsync(job, cancellationToken).ConfigureAwait(false);
-        }
-        finally
-        {
-            _recording.Release();
-        }
-    }
-
-    public async Task RecordMissedAsync(CancellationToken cancellationToken)
-    {
-        string root;
-        IReadOnlyList<LibraryMod> library;
-        IReadOnlyList<DownloadJobSnapshot> jobs;
-        try
-        {
-            root = await _settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
-            library = await _library.ListAsync(cancellationToken).ConfigureAwait(false);
-            jobs = await _downloads.ListAsync(cancellationToken).ConfigureAwait(false);
-        }
-        catch (Exception exception) when (exception is not OperationCanceledException)
-        {
-            LogCantLookForMissed(_logger, exception);
-            return;
-        }
-
-        Dictionary<ModFileRef, LibraryFile> kept = library.SelectMany(mod => mod.Files).ToDictionary(file => file.File);
-        foreach (DownloadJobSnapshot job in jobs.Where(job => IsMissing(root, job, kept.GetValueOrDefault(job.File))))
-        {
-            try
-            {
-                await RecordAsync(job, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception exception) when (exception is not OperationCanceledException)
-            {
-                LogCantRecord(_logger, exception, job.FileName);
-            }
-        }
-    }
-
-    public void Dispose() => _recording.Dispose();
 
     private static async Task<SiteDetails> ReadDetailsAsync(IModCatalog catalog, ModFileRef file, CancellationToken cancellationToken)
     {
@@ -292,6 +317,35 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
             && LibraryPaths.RelativeTo(root, TargetOf(job)) is not null
             && !(kept is not null && IsRecorded(kept, job))
             && _storage.FileExists(TargetOf(job));
+
+    /// <summary>
+    /// Records the finished downloads under the library root that the library lacks and that are still on disk, with
+    /// the lock taken. Each that can't be is logged.
+    /// </summary>
+    /// <returns>The root, and how many couldn't be recorded.</returns>
+    private async Task<(string Root, int Unrecorded)> RecordMissedHeldAsync(CancellationToken cancellationToken)
+    {
+        string root = await _settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+        IReadOnlyList<LibraryMod> library = await _library.ListAsync(cancellationToken).ConfigureAwait(false);
+        IReadOnlyList<DownloadJobSnapshot> jobs = await _downloads.ListAsync(cancellationToken).ConfigureAwait(false);
+
+        Dictionary<ModFileRef, LibraryFile> kept = library.SelectMany(mod => mod.Files).ToDictionary(file => file.File);
+        int unrecorded = 0;
+        foreach (DownloadJobSnapshot job in jobs.Where(job => IsMissing(root, job, kept.GetValueOrDefault(job.File))))
+        {
+            try
+            {
+                await RecordCompletedAsync(job, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                LogCantRecord(_logger, exception, job.FileName);
+                unrecorded++;
+            }
+        }
+
+        return (root, unrecorded);
+    }
 
     private async Task<LinkDownload> QueueAsync(
         RecognizedLink recognized,
@@ -550,6 +604,16 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, IDisposable
                 LogCantPutBack(_logger, exception, before.FileName, after.RelativePath);
             }
         }
+    }
+
+    /// <summary>
+    /// A hold on the library, ended once when it's disposed.
+    /// </summary>
+    private sealed class Hold(SemaphoreSlim held) : IDisposable
+    {
+        private SemaphoreSlim? _held = held;
+
+        public void Dispose() => Interlocked.Exchange(ref _held, null)?.Release();
     }
 
     /// <summary>

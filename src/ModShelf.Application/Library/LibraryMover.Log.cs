@@ -18,4 +18,7 @@ internal sealed partial class LibraryMover
 
     [LoggerMessage(EventId = 615, Level = LogLevel.Warning, Message = "Couldn't save the library's new root {To}, so the {Count} files moved went back")]
     private static partial void LogCantSaveRoot(ILogger logger, Exception exception, string to, int count);
+
+    [LoggerMessage(EventId = 616, Level = LogLevel.Warning, Message = "A download into {From} started while the library moved from it, so the {Count} files moved went back")]
+    private static partial void LogDownloadStarted(ILogger logger, string from, int count);
 }

@@ -10,23 +10,35 @@ namespace ModShelf.Application.Library;
 /// Moves the library's files from root to root, file by file, and changes the root in the settings once every file is
 /// there. Library paths are relative to the root, so the library itself doesn't change.
 /// </summary>
+/// <remarks>
+/// It holds the library (<see cref="ILibraryHold"/>) throughout, so no file is placed or recorded in this process
+/// meanwhile. A download another process starts into the old root meanwhile undoes the move before the root changes.
+/// </remarks>
 internal sealed partial class LibraryMover : ILibraryMover
 {
     private readonly SettingsService _settings;
     private readonly ILibraryRepository _library;
     private readonly ILibraryStorage _storage;
+    private readonly ILibraryHold _hold;
     private readonly ILogger<LibraryMover> _logger;
 
-    public LibraryMover(SettingsService settings, ILibraryRepository library, ILibraryStorage storage, ILogger<LibraryMover> logger)
+    public LibraryMover(
+        SettingsService settings,
+        ILibraryRepository library,
+        ILibraryStorage storage,
+        ILibraryHold hold,
+        ILogger<LibraryMover> logger)
     {
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(library);
         ArgumentNullException.ThrowIfNull(storage);
+        ArgumentNullException.ThrowIfNull(hold);
         ArgumentNullException.ThrowIfNull(logger);
 
         _settings = settings;
         _library = library;
         _storage = storage;
+        _hold = hold;
         _logger = logger;
     }
 
@@ -39,6 +51,7 @@ internal sealed partial class LibraryMover : ILibraryMover
         }
 
         string to = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root.Trim()));
+        using IDisposable hold = await _hold.HoldAsync(cancellationToken).ConfigureAwait(false);
         string from = await _settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
         // Under another name, the files would be in their own way.
         if (string.Equals(from, to, StringComparison.Ordinal) || _storage.IsSameFolder(from, to))
@@ -83,6 +96,18 @@ internal sealed partial class LibraryMover : ILibraryMover
             }
 
             moved.Add((source, destination));
+        }
+
+        // A download another process started into the old root meanwhile would be saved where the library isn't.
+        try
+        {
+            await _settings.EnsureNoDownloadsIntoAsync(from, cancellationToken).ConfigureAwait(false);
+        }
+        catch (InvalidOperationException exception)
+        {
+            int stuck = MoveBack(moved, to);
+            LogDownloadStarted(_logger, from, moved.Count);
+            throw new InvalidOperationException($"{exception.Message} {Outcome(stuck, from, to)}", exception);
         }
 
         // Settings that can't be saved would leave the library's files where it isn't.
