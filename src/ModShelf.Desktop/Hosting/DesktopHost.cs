@@ -46,6 +46,11 @@ internal static class DesktopHost
     /// </summary>
     public const string NexusClientIdKey = "ModShelf:Nexus:ClientId";
 
+    /// <summary>
+    /// What the desktop app's log files' names start with, such as <c>desktop-20261029.log</c>.
+    /// </summary>
+    private const string LogFilePrefix = "desktop";
+
     public static IHost Create(string[] args)
     {
         // Read configuration next to the executable: desktop shortcuts and nxm:// launches
@@ -59,8 +64,8 @@ internal static class DesktopHost
         // A service missing a dependency fails at start, not when its screen first opens.
         builder.ConfigureContainer(new DefaultServiceProviderFactory(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true }));
 
-        // Console and debugger output only for now; the rolling Serilog file sink from the
-        // plan's tech stack arrives with Infrastructure logging.
+        // The console and the debugger, and a log file a day in a logs folder beside the database (below). The plan's
+        // tech stack named Serilog for the files; a small provider of ModShelf's own writes them without another package.
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole();
         builder.Logging.AddDebug();
@@ -73,12 +78,14 @@ internal static class DesktopHost
         {
             builder.Services.AddLibraryDatabase();
             builder.Services.AddSettingsFile();
+            builder.Services.AddLogFiles(LogFilePrefix);
         }
         else
         {
             string databasePath = Path.GetFullPath(configuredPath);
             builder.Services.AddLibraryDatabase(databasePath);
             builder.Services.AddSettingsFile(Path.Combine(Path.GetDirectoryName(databasePath)!, "settings.json"));
+            builder.Services.AddLogFiles(Path.Combine(Path.GetDirectoryName(databasePath)!, "logs"), LogFilePrefix);
         }
 
         builder.Services.AddPlatformServices(SecretStoreOptionsFrom(builder.Configuration));

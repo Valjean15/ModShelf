@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Http.Resilience;
+using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Accounts;
 using ModShelf.Application.Accounts.Ports;
@@ -14,6 +15,7 @@ using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Infrastructure.Downloads;
 using ModShelf.Infrastructure.Library;
+using ModShelf.Infrastructure.Logging;
 using ModShelf.Infrastructure.Persistence;
 using ModShelf.Infrastructure.Persistence.Repositories;
 using ModShelf.Infrastructure.Settings;
@@ -171,6 +173,42 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<IDownloadQueueLock, FileDownloadQueueLock>();
         services.AddHostedService<LibraryDatabaseMigrator>();
 
+        return services;
+    }
+
+    /// <summary>
+    /// Writes the logs to files in a <c>logs</c> folder beside the library database at its default location, as
+    /// <see cref="AddLogFiles(IServiceCollection, string, string)"/> says.
+    /// </summary>
+    /// <param name="app">What the files' names start with, such as <c>desktop</c>.</param>
+    public static IServiceCollection AddLogFiles(this IServiceCollection services, string app)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        return services.AddLogFiles(Path.Combine(Path.GetDirectoryName(LibraryDatabaseLocation.GetDefaultPath())!, "logs"), app);
+    }
+
+    /// <summary>
+    /// Writes the logs to files in <paramref name="folder"/>, an absolute path, a file a day for the last week, such as
+    /// <c>desktop-20261029.log</c>, and registers the <see cref="LogFolder"/>. The configuration's <c>Logging:File</c>
+    /// section sets what's written, as <c>Logging:Console</c> does for the console; without it, the general rules do.
+    /// </summary>
+    /// <param name="app">What the files' names start with, such as <c>desktop</c>; each app keeps its own files.</param>
+    public static IServiceCollection AddLogFiles(this IServiceCollection services, string folder, string app)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentException.ThrowIfNullOrWhiteSpace(folder);
+        ArgumentException.ThrowIfNullOrWhiteSpace(app);
+        if (!Path.IsPathFullyQualified(folder))
+        {
+            throw new ArgumentException($"'{folder}' is not an absolute path.", nameof(folder));
+        }
+
+        services.AddSingleton(new LogFolder(folder));
+        services.AddSingleton<ILoggerProvider>(provider => new FileLoggerProvider(
+            folder,
+            app,
+            provider.GetService<TimeProvider>() ?? TimeProvider.System));
         return services;
     }
 }

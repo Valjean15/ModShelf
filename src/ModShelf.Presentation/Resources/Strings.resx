@@ -107,8 +107,8 @@
     <comment>The title of the window shown instead of the app when it can't start.</comment>
   </data>
   <data name="StartupFailed" xml:space="preserve">
-    <value>ModShelf couldn't start: {0}</value>
-    <comment>The window shown instead of the app when it can't start for a reason it didn't expect. {0} is what went wrong, a sentence.</comment>
+    <value>ModShelf couldn't start: {0} The details are in the log in {1}.</value>
+    <comment>The window shown instead of the app when it can't start for a reason it didn't expect. {0} is what went wrong, a sentence; {1} is the log files' folder.</comment>
   </data>
   <data name="DownloadsLinkHint" xml:space="preserve">
     <value>Paste a link to a mod or a file, such as a mod's page on Nexus Mods</value>

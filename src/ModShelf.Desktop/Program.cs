@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 
 using ModShelf.Desktop.Hosting;
 using ModShelf.Desktop.Views.Dialogs;
+using ModShelf.Infrastructure.Logging;
 using ModShelf.Infrastructure.Persistence;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.ViewModels;
@@ -35,7 +36,11 @@ internal static partial class Program
             LogCantStart(logger, exception);
             string message = exception is LibraryDatabaseUnavailableException
                 ? exception.Message
-                : string.Format(CultureInfo.CurrentCulture, CompositeFormat.Parse(Strings.StartupFailed), exception.Message);
+                : string.Format(
+                    CultureInfo.CurrentCulture,
+                    CompositeFormat.Parse(Strings.StartupFailed),
+                    exception.Message,
+                    host.Services.GetRequiredService<LogFolder>().Path);
             MessageDialogContent problem = new(Strings.StartupProblemTitle, message, Strings.DialogClose, null);
             Configure(AppBuilder.Configure(() => new App(problem))).StartWithClassicDesktopLifetime(args);
             return 1;

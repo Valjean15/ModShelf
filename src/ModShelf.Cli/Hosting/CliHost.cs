@@ -43,6 +43,11 @@ internal static class CliHost
     /// </summary>
     public const string NexusClientIdKey = "ModShelf:Nexus:ClientId";
 
+    /// <summary>
+    /// What the CLI's log files' names start with, such as <c>cli-20261029.log</c>. They sit beside the desktop app's.
+    /// </summary>
+    private const string LogFilePrefix = "cli";
+
     /// <param name="runDownloads">
     /// Whether queued jobs download while the host runs. A command that only reads the queue leaves this off.
     /// </param>
@@ -66,7 +71,8 @@ internal static class CliHost
             builder.Configuration.AddInMemoryCollection(settings);
         }
 
-        // Logs go to stderr so they never mix with a command's output; appsettings.json keeps them to warnings.
+        // Logs go to stderr so they never mix with a command's output; appsettings.json keeps them to warnings there,
+        // and lets more through to the log files.
         builder.Services.Configure<ConsoleLoggerOptions>(options => options.LogToStandardErrorThreshold = LogLevel.Trace);
         builder.Services.AddSingleton<IHostLifetime, CliHostLifetime>();
 
@@ -76,12 +82,14 @@ internal static class CliHost
         {
             builder.Services.AddLibraryDatabase();
             builder.Services.AddSettingsFile();
+            builder.Services.AddLogFiles(LogFilePrefix);
         }
         else
         {
             string databasePath = Path.GetFullPath(configuredPath);
             builder.Services.AddLibraryDatabase(databasePath);
             builder.Services.AddSettingsFile(Path.Combine(Path.GetDirectoryName(databasePath)!, "settings.json"));
+            builder.Services.AddLogFiles(Path.Combine(Path.GetDirectoryName(databasePath)!, "logs"), LogFilePrefix);
         }
 
         builder.Services.AddPlatformServices(SecretStoreOptionsFrom(builder.Configuration));
