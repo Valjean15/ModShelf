@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Quota;
+using ModShelf.Sources.Nexus.Api;
 using ModShelf.Sources.Nexus.Tests.Common;
 
 namespace ModShelf.Sources.Nexus.Tests;
@@ -55,6 +56,25 @@ public sealed class NexusSourceAccountTests : IDisposable
         Assert.Equal(new Uri(user["profile_url"]!.GetValue<string>()), profile.AvatarUrl);
         Assert.Equal(tier, profile.Tier);
         Assert.Equal(Key, Assert.Single(Assert.Single(_api.Requests).RequestMessage!.Headers!["apikey"]));
+    }
+
+    [Fact]
+    public async Task AKeyIsCheckedEvenWhileTheLastAccountsLimitIsUsedUp()
+    {
+        // The rate limit is each account's: the last one's, used up, doesn't keep another from being linked.
+        _api.Answer("/v1/used-up.json", response => response.WithStatusCode(429));
+        await Assert.ThrowsAsync<HttpRequestException>(
+            () => _services.GetRequiredService<NexusApiClient>().GetAsync<object>("v1/used-up.json", Cancellation));
+        _api.Serve(RecordedNexusApi.Premium, "validate");
+        JsonNode user = RecordedNexusApi.Recording(RecordedNexusApi.Premium, "validate")["response"]!["body"]!;
+
+        AccountProfile profile = await Source.GetProfileAsync(new AccountCredentials(Key), AuthKind.ApiKey, Cancellation);
+
+        Assert.Equal(user["name"]!.GetValue<string>(), profile.DisplayName);
+        Assert.Equal(2, _api.Requests.Count);
+
+        // Its answer brings that account's limit, so requests go out again.
+        Assert.Equal(1997, Assert.IsType<ApiQuota>(Source.Quota).Allowances[^1].Remaining);
     }
 
     [Fact]

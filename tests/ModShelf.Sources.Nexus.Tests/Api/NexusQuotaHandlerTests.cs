@@ -131,6 +131,40 @@ public sealed class NexusQuotaHandlerTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task AHoldBackLastsAnHourAtMostWhateverTheResetTimesSay()
+    {
+        // Reset times far ahead, as a clock running hours behind the API's reads them: the hourly allowance resets
+        // within the hour whatever they say.
+        _api.Answer(Path, response => WithLimit(response.WithStatusCode(200).WithBody("{}"), hourly: 0, daily: 0, _api.Time.GetUtcNow().AddHours(5)));
+        await GetAsync();
+        await Assert.ThrowsAsync<HttpRequestException>(GetAsync);
+
+        _api.Time.Advance(TimeSpan.FromMinutes(61));
+        await GetAsync();
+
+        Assert.Equal(2, _api.Requests.Count);
+    }
+
+    [Fact]
+    public async Task ARefusalWhoseHeadersShowAllowanceLeftHoldsBackBriefly()
+    {
+        // Refused by something that limits bursts rather than by the account's allowances, which have some left.
+        _api.AnswerInTurn(
+            Path,
+            response => WithLimit(response.WithStatusCode(429), hourly: 10, daily: 0, _api.Time.GetUtcNow().AddMinutes(20)),
+            response => WithLimit(response.WithStatusCode(200).WithBody("{}"), hourly: 9, daily: 0, _api.Time.GetUtcNow().AddMinutes(20)));
+        await Assert.ThrowsAsync<HttpRequestException>(GetAsync);
+        await Assert.ThrowsAsync<HttpRequestException>(GetAsync);
+        Assert.Single(_api.Requests);
+
+        _api.Time.Advance(TimeSpan.FromMinutes(2));
+        await GetAsync();
+
+        Assert.Equal(2, _api.Requests.Count);
+        Assert.Equal(9, Quota.Current!.HourlyRemaining);
+    }
+
+    [Fact]
     public async Task ResponsesWithoutTheHeadersKeepTheLastKnownLimit()
     {
         _api.Serve(RecordedNexusApi.Premium, "mod");

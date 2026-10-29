@@ -31,6 +31,7 @@ public sealed partial class NexusSource
             ?? throw new ArgumentException($"Nexus Mods doesn't link accounts with {kind}.", nameof(kind));
 
         HttpRequestMessage request = new(HttpMethod.Get, new Uri(ValidatePath, UriKind.Relative));
+        request.Options.Set(NexusQuotaHandler.ChecksAccount, true);
         strategy.Authorize(request, credentials);
         NexusUser user = await _api.SendAsync<NexusUser>(request, cancellationToken).ConfigureAwait(false);
         return new AccountProfile(user.Name, WebLink(user.ProfileUrl), Tier(user));
