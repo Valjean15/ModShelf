@@ -107,33 +107,70 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
     public partial bool HasFinished { get; private set; }
 
     /// <summary>
+    /// Whether another ModShelf process, such as the command line, runs the downloads now, so nothing downloads here and
+    /// no download can be added or changed until it ends.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsQueueBusyElsewhere { get; private set; }
+
+    /// <summary>
     /// Every download, newest first.
     /// </summary>
     public ObservableCollection<DownloadJobViewModel> Jobs { get; } = [];
 
     /// <summary>
-    /// Lists the queue's downloads, then follows every change to them while the app runs.
+    /// Lists the queue's downloads, then follows every change to them while the app runs. While another process runs
+    /// the queue, it says so, and lists the downloads again once they run here.
     /// </summary>
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
         // Watching first and listing after, so no change from here on is missed.
         IAsyncEnumerable<DownloadJobSnapshot> changes = _downloads.WatchAsync(cancellationToken);
+        bool busyElsewhere = _downloads.IsQueueBusyElsewhere;
         IReadOnlyList<DownloadJobSnapshot> jobs = await _downloads.ListAsync(cancellationToken);
         _uiThread.Post(() =>
         {
+            IsQueueBusyElsewhere = busyElsewhere;
             foreach (DownloadJobSnapshot job in jobs)
             {
                 Show(job);
             }
         });
 
+        Task runsHere = busyElsewhere ? ListOnceTheQueueRunsHereAsync(cancellationToken) : Task.CompletedTask;
         await foreach (DownloadJobSnapshot job in changes)
         {
             _uiThread.Post(() => Show(job));
         }
+
+        await runsHere;
     }
 
     private bool CanAdd() => !IsAdding && !string.IsNullOrWhiteSpace(Link);
+
+    /// <summary>
+    /// Once the other process lets go of the queue, lists the downloads as this one loaded them.
+    /// </summary>
+    private async Task ListOnceTheQueueRunsHereAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _downloads.WhenQueueRunsHereAsync(cancellationToken);
+            IReadOnlyList<DownloadJobSnapshot> jobs = await _downloads.ListAsync(cancellationToken);
+            _uiThread.Post(() =>
+            {
+                IsQueueBusyElsewhere = false;
+                foreach (DownloadJobSnapshot job in jobs)
+                {
+                    Show(job);
+                }
+            });
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // The app is closing.
+        }
+    }
 
     /// <summary>
     /// Downloads the link's file into the library, where its game's folder pattern puts it.

@@ -21,6 +21,7 @@ internal sealed class RangeFileServer : IAsyncDisposable
     private readonly string _fileName;
     private readonly TcpListener _listener = new(IPAddress.Loopback, 0);
     private readonly CancellationTokenSource _stopping = new();
+    private CancellationTokenSource _dropHeld = new();
     private readonly ConcurrentQueue<string?> _ranges = new();
     private readonly Task _accepting;
     private long _holdAt = NoHold;
@@ -51,6 +52,16 @@ internal sealed class RangeFileServer : IAsyncDisposable
     /// </summary>
     public void SendEverything() => Interlocked.Exchange(ref _holdAt, NoHold);
 
+    /// <summary>
+    /// Closes the connections held so far, as a server that gives up on them does, so their clients ask again for the
+    /// rest.
+    /// </summary>
+    public void DropHeldConnections()
+    {
+        using CancellationTokenSource dropped = Interlocked.Exchange(ref _dropHeld, new CancellationTokenSource());
+        dropped.Cancel();
+    }
+
     public async ValueTask DisposeAsync()
     {
         await _stopping.CancelAsync().ConfigureAwait(false);
@@ -58,6 +69,7 @@ internal sealed class RangeFileServer : IAsyncDisposable
         await _accepting.ConfigureAwait(false);
         _listener.Dispose();
         _stopping.Dispose();
+        _dropHeld.Dispose();
     }
 
     private static async Task<string?> ReadRequestHeadAsync(NetworkStream stream, CancellationToken cancellationToken)
@@ -193,7 +205,8 @@ internal sealed class RangeFileServer : IAsyncDisposable
 
         if (end < total)
         {
-            await HoldAsync(stream, cancellationToken).ConfigureAwait(false);
+            using CancellationTokenSource held = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, Volatile.Read(ref _dropHeld).Token);
+            await HoldAsync(stream, held.Token).ConfigureAwait(false);
         }
     }
 }

@@ -107,6 +107,13 @@ internal static partial class DownloadCommand
         ILinkDownloads links = services.GetRequiredService<ILinkDownloads>();
         ILibraryDownloads? library = targetDirectory is null ? services.GetRequiredService<ILibraryDownloads>() : null;
 
+        // Before anything is added: the process running the queue wouldn't start a job added here.
+        if (downloads.IsQueueBusyElsewhere)
+        {
+            await environment.Error.WriteLineAsync(LinkProblems.QueueBusyElsewhere).ConfigureAwait(false);
+            return ExitCodes.Failed;
+        }
+
         LinkDownload added;
         try
         {

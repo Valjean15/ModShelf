@@ -9,10 +9,24 @@ namespace ModShelf.Application.Downloads;
 /// </summary>
 /// <remarks>
 /// Methods that take a job ID throw <see cref="KeyNotFoundException"/> for an unknown job, and
-/// <see cref="InvalidOperationException"/> when the job's status doesn't allow the action.
+/// <see cref="InvalidOperationException"/> when the job's status doesn't allow the action. While another process runs
+/// the queue (<see cref="IsQueueBusyElsewhere"/>), every method but listing and watching throws
+/// <see cref="DownloadQueueBusyException"/>.
 /// </remarks>
 public interface IDownloadService
 {
+    /// <summary>
+    /// Whether another process, such as the desktop app or another CLI command, runs this library's download queue now.
+    /// Until it lets go, this one lists the jobs as they were saved, but can't add, hand off or change any, and nothing
+    /// downloads here. It's known once the host has started.
+    /// </summary>
+    bool IsQueueBusyElsewhere { get; }
+
+    /// <summary>
+    /// Completes once this process runs the queue: at once when it does already, or once the other process lets go.
+    /// </summary>
+    Task WhenQueueRunsHereAsync(CancellationToken cancellationToken);
+
     /// <summary>
     /// Adds a job for <paramref name="file"/>, saved as <paramref name="fileName"/> in
     /// <paramref name="targetDirectory"/> (an absolute path). The scheduler starts it when a slot is free.

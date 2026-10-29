@@ -24,4 +24,9 @@ public sealed record DownloadSchedulerOptions
     /// The shortest time between two progress snapshots of the same job.
     /// </summary>
     public TimeSpan ProgressInterval { get; init; } = TimeSpan.FromMilliseconds(250);
+
+    /// <summary>
+    /// How often the scheduler tries again to run the queue while another process runs it.
+    /// </summary>
+    public TimeSpan QueueLockRetryInterval { get; init; } = TimeSpan.FromSeconds(2);
 }

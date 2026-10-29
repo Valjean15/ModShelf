@@ -10,10 +10,18 @@ namespace ModShelf.Cli.Commands;
 /// </summary>
 internal static class LinkProblems
 {
+    /// <summary>
+    /// What to say when another process, such as the desktop app, runs the downloads.
+    /// </summary>
+    public const string QueueBusyElsewhere =
+        "Another ModShelf process is running the downloads of this library, such as the desktop app or another download "
+        + "command. Add the link there, or run this again once it has finished.";
+
     /// <param name="unsupported">What to say when no source can handle the link; null for the exception's own message.</param>
     /// <returns>The message and exit code, or null for an error that isn't the user's to act on.</returns>
     public static (string Message, int ExitCode)? Describe(Exception exception, string? unsupported = null) => exception switch
     {
+        DownloadQueueBusyException => (QueueBusyElsewhere, ExitCodes.Failed),
         UnsupportedLinkException refused => (unsupported ?? refused.Message, ExitCodes.BadInput),
         ArgumentException refused => (refused.MessageForUser(), ExitCodes.BadInput),
         AuthenticationFailedException => (

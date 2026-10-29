@@ -31,6 +31,7 @@ public sealed class DownloadsViewModelTests : IDisposable
         { new HttpRequestException("No such host is known."), "The site couldn't look that link up: No such host is known." },
         { new PathTooLongException("The path is too long for this system."), "The path is too long for this system. See where files go on the Settings screen." },
         { new InvalidDataException("settings.json isn't valid JSON."), "settings.json isn't valid JSON." },
+        { new DownloadQueueBusyException(), "Another ModShelf process, such as the command line, is running the downloads. Try again once it has finished." },
     };
 
     public void Dispose() => _harness.Dispose();
@@ -46,6 +47,30 @@ public sealed class DownloadsViewModelTests : IDisposable
 
         Assert.Equal(["c.7z", "b.7z", "a.7z"], Screen.Jobs.Select(job => job.FileName));
         Assert.True(Screen.HasJobs);
+    }
+
+    [Fact]
+    public async Task SaysWhileAnotherProcessRunsTheDownloadsAndListsThemAgainOnceTheyRunHere()
+    {
+        _harness.Downloads.RunsHere = new TaskCompletionSource();
+        await _harness.StartWithAsync(TestData.Job("a.7z"));
+        bool busyAtFirst = Screen.IsQueueBusyElsewhere;
+
+        // The other process added a download before it let go.
+        _harness.Downloads.Add(TestData.Job("b.7z", createdAt: TestData.Now.AddMinutes(1)));
+        _harness.Downloads.RunsHere.SetResult();
+        Assert.True(SpinWait.SpinUntil(() => !Screen.IsQueueBusyElsewhere, TimeSpan.FromSeconds(10)));
+
+        Assert.True(busyAtFirst);
+        Assert.Equal(["b.7z", "a.7z"], Screen.Jobs.Select(job => job.FileName));
+    }
+
+    [Fact]
+    public async Task WhenTheDownloadsRunHereNothingElseIsSaid()
+    {
+        await _harness.StartAsync();
+
+        Assert.False(Screen.IsQueueBusyElsewhere);
     }
 
     [Fact]

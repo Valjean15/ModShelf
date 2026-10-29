@@ -26,6 +26,14 @@
                     Command="{Binding AddToFolderCommand}" />
         </Grid>
 
+        <!-- While another process, such as the command line, runs the downloads. -->
+        <TextBlock DockPanel.Dock="Top"
+                   Classes="attention"
+                   Margin="0,8,0,0"
+                   TextWrapping="Wrap"
+                   Text="{x:Static res:Strings.DownloadsQueueBusy}"
+                   IsVisible="{Binding IsQueueBusyElsewhere}" />
+
         <TextBlock DockPanel.Dock="Top"
                    Classes="note"
                    Classes.problem="{Binding IsMessageAProblem}"

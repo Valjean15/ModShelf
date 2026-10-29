@@ -16,6 +16,7 @@ internal static class LinkProblems
     /// <returns>The message; or null for an error that isn't the user's to act on, which belongs in the log.</returns>
     public static string? Describe(Exception exception, bool library) => exception switch
     {
+        DownloadQueueBusyException => Strings.DownloadsQueueBusyRefused,
         // The library wraps the refusal of every source; its own refusal is of a link to a site without a catalog.
         UnsupportedLinkException { InnerException: not UnsupportedLinkException } when library => Strings.DownloadsOnlyModSites,
         UnsupportedLinkException => Strings.DownloadsNoSource,

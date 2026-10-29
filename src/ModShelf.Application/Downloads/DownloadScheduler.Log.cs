@@ -33,4 +33,10 @@ internal sealed partial class DownloadScheduler
 
     [LoggerMessage(EventId = 8, Level = LogLevel.Warning, Message = "Couldn't save download job {JobId}; it's saved again once the database can be written")]
     private static partial void LogSaveFailed(ILogger logger, Exception exception, DownloadJobId jobId);
+
+    [LoggerMessage(EventId = 9, Level = LogLevel.Information, Message = "Another ModShelf process runs the downloads of this library; they start here once it lets go")]
+    private static partial void LogQueueBusyElsewhere(ILogger logger);
+
+    [LoggerMessage(EventId = 10, Level = LogLevel.Information, Message = "The other ModShelf process let go of the downloads, so they run here now")]
+    private static partial void LogQueueRunsHere(ILogger logger);
 }

@@ -26,11 +26,12 @@ internal sealed class SchedulerHarness : IAsyncDisposable
     private readonly Task _watching;
     private bool _disposed;
 
-    private SchedulerHarness(DownloadSchedulerOptions options, IEnumerable<DownloadJob> storedJobs, bool registerModIo)
+    private SchedulerHarness(DownloadSchedulerOptions options, IEnumerable<DownloadJob> storedJobs, bool registerModIo, bool queueBusyElsewhere)
     {
         Repository = new InMemoryDownloadJobRepository(storedJobs);
+        QueueLock.HeldElsewhere = queueBusyElsewhere;
         IModSource[] sources = registerModIo ? [Nexus, ModIo] : [Nexus];
-        Scheduler = new DownloadScheduler(Repository, new SourceRegistry(sources), Transfer, Time, options, Logger);
+        Scheduler = new DownloadScheduler(Repository, new SourceRegistry(sources), Transfer, QueueLock, Time, options, Logger);
 
         IAsyncEnumerable<DownloadJobSnapshot> stream = Scheduler.WatchAsync(_stopWatching.Token);
         _watching = Task.Run(async () =>
@@ -55,18 +56,22 @@ internal sealed class SchedulerHarness : IAsyncDisposable
 
     public ControlledFileTransfer Transfer { get; } = new();
 
+    public ScriptedQueueLock QueueLock { get; } = new();
+
     public RecordingLogger<DownloadScheduler> Logger { get; } = new();
 
     public DownloadScheduler Scheduler { get; }
 
     /// <param name="beforeStart">Runs before the scheduler starts, for scripting the sources that stored jobs meet first.</param>
+    /// <param name="queueBusyElsewhere">Whether another process holds the queue lock when the scheduler starts.</param>
     public static async Task<SchedulerHarness> StartAsync(
         DownloadSchedulerOptions? options = null,
         IEnumerable<DownloadJob>? storedJobs = null,
         bool registerModIo = true,
-        Action<SchedulerHarness>? beforeStart = null)
+        Action<SchedulerHarness>? beforeStart = null,
+        bool queueBusyElsewhere = false)
     {
-        SchedulerHarness harness = new(options ?? new DownloadSchedulerOptions(), storedJobs ?? [], registerModIo);
+        SchedulerHarness harness = new(options ?? new DownloadSchedulerOptions(), storedJobs ?? [], registerModIo, queueBusyElsewhere);
         beforeStart?.Invoke(harness);
         await harness.Scheduler.StartAsync(CancellationToken.None);
         return harness;

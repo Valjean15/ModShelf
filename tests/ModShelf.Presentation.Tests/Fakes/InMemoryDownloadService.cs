@@ -37,6 +37,15 @@ internal sealed class InMemoryDownloadService : IDownloadService
     /// </summary>
     public Task WaitedOn => _watchers.WaitedOn;
 
+    /// <summary>
+    /// Completed once the queue runs here; a test that sets another process running it replaces it.
+    /// </summary>
+    public TaskCompletionSource RunsHere { get; set; } = CompletedRunsHere();
+
+    public bool IsQueueBusyElsewhere => !RunsHere.Task.IsCompleted;
+
+    public Task WhenQueueRunsHereAsync(CancellationToken cancellationToken) => RunsHere.Task.WaitAsync(cancellationToken);
+
     public IReadOnlyList<DownloadJobSnapshot> Jobs
     {
         get
@@ -138,5 +147,12 @@ internal sealed class InMemoryDownloadService : IDownloadService
         DownloadJobSnapshot job = Jobs.SingleOrDefault(listed => listed.Id == id) ?? throw new KeyNotFoundException($"There is no download job {id}.");
         Publish(change(job));
         return Task.CompletedTask;
+    }
+
+    private static TaskCompletionSource CompletedRunsHere()
+    {
+        TaskCompletionSource done = new();
+        done.SetResult();
+        return done;
     }
 }

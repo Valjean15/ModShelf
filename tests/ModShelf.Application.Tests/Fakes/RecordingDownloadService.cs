@@ -19,6 +19,8 @@ internal sealed class RecordingDownloadService(params DownloadJobSnapshot[] exis
 
     public List<DownloadJobSnapshot> Enqueued { get; } = [];
 
+    public bool IsQueueBusyElsewhere => false;
+
     public List<(ModFileRef File, Uri Link)> HandedOff { get; } = [];
 
     /// <summary>
@@ -156,4 +158,6 @@ internal sealed class RecordingDownloadService(params DownloadJobSnapshot[] exis
             return false;
         }
     }
+
+    public Task WhenQueueRunsHereAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }

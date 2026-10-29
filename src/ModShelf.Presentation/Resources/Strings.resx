@@ -870,4 +870,12 @@
     <value>Files in no section</value>
     <comment>A section of a mod's files.</comment>
   </data>
+  <data name="DownloadsQueueBusy" xml:space="preserve">
+    <value>Another ModShelf process, such as the command line, is running the downloads of this library. They run here once it has finished; until then, downloads can't be added or changed here.</value>
+    <comment>Shown on the Downloads screen while another process runs the queue.</comment>
+  </data>
+  <data name="DownloadsQueueBusyRefused" xml:space="preserve">
+    <value>Another ModShelf process, such as the command line, is running the downloads. Try again once it has finished.</value>
+    <comment>When a download is refused because another process runs the queue.</comment>
+  </data>
 </root>

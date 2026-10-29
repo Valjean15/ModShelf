@@ -88,6 +88,7 @@ public sealed class DownloadSchedulerLifetimeTests
             new InMemoryDownloadJobRepository([]),
             new SourceRegistry([]),
             new ControlledFileTransfer(),
+            new ScriptedQueueLock(),
             TimeProvider.System,
             new DownloadSchedulerOptions(),
             NullLogger<DownloadScheduler>.Instance);

@@ -35,12 +35,19 @@ namespace ModShelf.Application.Downloads;
 /// A job that can't be saved, such as while the database is locked or the disk is full, goes on all the same: the
 /// failure is logged, watchers still hear of the change, and the job is saved again as soon as a save works.
 /// </para>
+/// <para>
+/// Only the process holding the <see cref="IDownloadQueueLock"/> runs the queue. One that starts while another holds it
+/// lists the jobs as saved and refuses everything else (<see cref="DownloadQueueBusyException"/>), trying the lock again
+/// every <see cref="DownloadSchedulerOptions.QueueLockRetryInterval"/>. Once it holds it, it loads the jobs and runs
+/// them as at any start.
+/// </para>
 /// </remarks>
 internal sealed partial class DownloadScheduler : BackgroundService, IDownloadService
 {
     private readonly IDownloadJobRepository _repository;
     private readonly ISourceRegistry _sources;
     private readonly IFileTransfer _transfer;
+    private readonly IDownloadQueueLock _queueLock;
     private readonly TimeProvider _timeProvider;
     private readonly DownloadSchedulerOptions _options;
     private readonly ILogger<DownloadScheduler> _logger;
@@ -49,6 +56,9 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
         Channel.CreateUnbounded<Message>(new UnboundedChannelOptions { SingleReader = true });
 
     private readonly DownloadWatchers _watchers = new();
+
+    private readonly TaskCompletionSource _runsHere = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private volatile bool _busyElsewhere;
 
     // Owned by the loop: only read or changed while it handles a message.
     private readonly List<DownloadJob> _jobs = [];
@@ -65,6 +75,7 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
         IDownloadJobRepository repository,
         ISourceRegistry sources,
         IFileTransfer transfer,
+        IDownloadQueueLock queueLock,
         TimeProvider timeProvider,
         DownloadSchedulerOptions options,
         ILogger<DownloadScheduler> logger)
@@ -72,6 +83,7 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
         ArgumentNullException.ThrowIfNull(repository);
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(transfer);
+        ArgumentNullException.ThrowIfNull(queueLock);
         ArgumentNullException.ThrowIfNull(timeProvider);
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(logger);
@@ -79,14 +91,20 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(options.MaxConcurrentDownloadsPerSource);
         ArgumentOutOfRangeException.ThrowIfNegative(options.MaxLinkRefreshes);
         ArgumentOutOfRangeException.ThrowIfLessThan(options.ProgressInterval, TimeSpan.Zero);
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(options.QueueLockRetryInterval, TimeSpan.Zero);
 
         _repository = repository;
         _sources = sources;
         _transfer = transfer;
+        _queueLock = queueLock;
         _timeProvider = timeProvider;
         _options = options;
         _logger = logger;
     }
+
+    public bool IsQueueBusyElsewhere => _busyElsewhere;
+
+    public Task WhenQueueRunsHereAsync(CancellationToken cancellationToken) => _runsHere.Task.WaitAsync(cancellationToken);
 
     public async Task<DownloadJobSnapshot> EnqueueAsync(
         ModFileRef file,
@@ -145,6 +163,25 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
     public IAsyncEnumerable<DownloadJobSnapshot> WatchAsync(CancellationToken cancellationToken)
         => _watchers.Watch(cancellationToken);
 
+    /// <summary>
+    /// Takes the queue lock before anything else starts, so <see cref="IsQueueBusyElsewhere"/> is known once the host
+    /// has started.
+    /// </summary>
+    public override Task StartAsync(CancellationToken cancellationToken)
+    {
+        if (_queueLock.TryAcquire())
+        {
+            _runsHere.TrySetResult();
+        }
+        else
+        {
+            _busyElsewhere = true;
+            LogQueueBusyElsewhere(_logger);
+        }
+
+        return base.StartAsync(cancellationToken);
+    }
+
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         await base.StopAsync(cancellationToken).ConfigureAwait(false);
@@ -154,6 +191,7 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
         if (ExecuteTask is null || ExecuteTask.IsCompleted)
         {
             CloseInbox();
+            _queueLock.Release();
         }
     }
 
@@ -161,6 +199,11 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
     {
         try
         {
+            if (_busyElsewhere && !await WaitForQueueAsync(stoppingToken).ConfigureAwait(false))
+            {
+                return;
+            }
+
             await LoadJobsAsync().ConfigureAwait(false);
             await StartQueuedJobsAsync().ConfigureAwait(false);
 
@@ -181,6 +224,7 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
         finally
         {
             CloseInbox();
+            _queueLock.Release();
         }
     }
 
@@ -219,6 +263,68 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
         if (!_inbox.Writer.TryWrite(message))
         {
             throw new InvalidOperationException("The download scheduler has stopped.");
+        }
+    }
+
+    /// <summary>
+    /// Waits for the queue lock while another process holds it, trying again every so often. Meanwhile listing reads
+    /// the jobs as saved, and anything else is refused.
+    /// </summary>
+    /// <returns>Whether this process holds the lock now; false when the host stopped first.</returns>
+    private async Task<bool> WaitForQueueAsync(CancellationToken stoppingToken)
+    {
+        Task<bool> readable = _inbox.Reader.WaitToReadAsync(stoppingToken).AsTask();
+        Task retry = Task.Delay(_options.QueueLockRetryInterval, _timeProvider, stoppingToken);
+        while (true)
+        {
+            await Task.WhenAny(readable, retry).ConfigureAwait(false);
+            if (stoppingToken.IsCancellationRequested)
+            {
+                return false;
+            }
+
+            if (readable.IsCompleted)
+            {
+                while (_inbox.Reader.TryRead(out Message? message))
+                {
+                    await HandleWhileBusyElsewhereAsync(message).ConfigureAwait(false);
+                }
+
+                readable = _inbox.Reader.WaitToReadAsync(stoppingToken).AsTask();
+            }
+
+            if (retry.IsCompleted)
+            {
+                if (_queueLock.TryAcquire())
+                {
+                    _busyElsewhere = false;
+                    _runsHere.TrySetResult();
+                    LogQueueRunsHere(_logger);
+                    return true;
+                }
+
+                retry = Task.Delay(_options.QueueLockRetryInterval, _timeProvider, stoppingToken);
+            }
+        }
+    }
+
+    private async Task HandleWhileBusyElsewhereAsync(Message message)
+    {
+        if (message is ListCommand list)
+        {
+            try
+            {
+                IReadOnlyList<DownloadJob> saved = await _repository.ListAsync(CancellationToken.None).ConfigureAwait(false);
+                list.Reply.TrySetResult([.. saved.Select(Snapshot)]);
+            }
+            catch (Exception exception)
+            {
+                list.Reject(exception);
+            }
+        }
+        else
+        {
+            (message as Command)?.Reject(new DownloadQueueBusyException());
         }
     }
 
