@@ -1,6 +1,7 @@
 using ModShelf.Application.Library;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
+using ModShelf.Infrastructure.Persistence.Repositories;
 
 namespace ModShelf.Infrastructure.Tests.Persistence.Repositories;
 
@@ -263,6 +264,36 @@ public sealed class LibraryRepositoryTests : IAsyncLifetime
 
     private static string Count(string name, int add = 0)
         => (int.Parse(name, System.Globalization.CultureInfo.InvariantCulture) + add).ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+    [Fact]
+    public async Task AListIsOfOneMomentWhileAnotherProcessChangesTheLibrary()
+    {
+        // An unwatched mod whose one file goes, and the mod with it, between the reads of its rows and of its files.
+        LibraryFile file = File(Smapi, "160380", "nexus/stardewvalley/2400/SMAPI 4.5.2.zip");
+        await StoreAsync(LibraryMod.Restore(Smapi, "SMAPI", null, null, isWatched: false, Added, Added, [file]));
+        ChangeBetweenReads contexts = new(_database.DatabasePath, () => _database.Library.UpdateAsync(Smapi, mod => mod!.WithoutFile(file.File), Cancellation));
+
+        IReadOnlyList<LibraryMod> listed = await new LibraryRepository(contexts).ListAsync(Cancellation);
+        await contexts.Change!;
+
+        // As it was before the change, which waited for the read.
+        Assert.Equal([file.File], Assert.Single(listed).Files.Select(listedFile => listedFile.File));
+        Assert.Empty(await _database.Library.ListAsync(Cancellation));
+    }
+
+    [Fact]
+    public async Task AModFoundIsOfOneMomentWhileAnotherProcessChangesIt()
+    {
+        LibraryFile file = File(Smapi, "160380", "nexus/stardewvalley/2400/SMAPI 4.5.2.zip");
+        await StoreAsync(LibraryMod.Restore(Smapi, "SMAPI", null, null, isWatched: false, Added, Added, [file]));
+        ChangeBetweenReads contexts = new(_database.DatabasePath, () => _database.Library.UpdateAsync(Smapi, mod => mod!.WithoutFile(file.File), Cancellation));
+
+        LibraryMod? found = await new LibraryRepository(contexts).FindAsync(Smapi, Cancellation);
+        await contexts.Change!;
+
+        Assert.Equal([file.File], found!.Files.Select(foundFile => foundFile.File));
+        Assert.Null(await _database.Library.FindAsync(Smapi, Cancellation));
+    }
 
     private static LibraryMod Watched(ModRef mod) => LibraryMod.Watch(mod, "Mod " + mod.Id, null, null, Added);
 
