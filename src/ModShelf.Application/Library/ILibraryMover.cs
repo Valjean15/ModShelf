@@ -21,7 +21,9 @@ public interface ILibraryMover
     /// The new root is inside the library or holds it, downloads into the library aren't finished, or another file is
     /// where one of the library's would go. The message says which.
     /// </exception>
-    /// <exception cref="IOException">A file couldn't be moved. The message says whether every file went back.</exception>
+    /// <exception cref="IOException">
+    /// A file couldn't be moved, or the new root couldn't be saved. The message says whether every file went back.
+    /// </exception>
     /// <exception cref="InvalidDataException">The settings can't be read.</exception>
     Task<LibraryMove> MoveAsync(string root, CancellationToken cancellationToken);
 }

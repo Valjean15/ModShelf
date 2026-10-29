@@ -78,19 +78,24 @@ internal sealed partial class LibraryMover : ILibraryMover
             {
                 int stuck = MoveBack(moved, to);
                 LogFailed(_logger, exception, source, moved.Count);
-                string outcome = stuck switch
-                {
-                    0 => $"Every file is back where it was, and the library stays in {from}.",
-                    1 => $"1 file couldn't go back, so it's in {to}. Move the library there again to finish the move.",
-                    _ => $"{stuck} files couldn't go back, so they're in {to}. Move the library there again to finish the move.",
-                };
-                throw new IOException($"{source} couldn't be moved: {exception.Message} {outcome}", exception);
+                throw new IOException($"{source} couldn't be moved: {exception.Message} {Outcome(stuck, from, to)}", exception);
             }
 
             moved.Add((source, destination));
         }
 
-        await _settings.MoveLibraryRootAsync(to, cancellationToken).ConfigureAwait(false);
+        // Settings that can't be saved would leave the library's files where it isn't.
+        try
+        {
+            await _settings.MoveLibraryRootAsync(to, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception exception) when (exception is IOException or InvalidDataException)
+        {
+            int stuck = MoveBack(moved, to);
+            LogCantSaveRoot(_logger, exception, to, moved.Count);
+            throw new IOException($"The library's new root couldn't be saved: {exception.Message} {Outcome(stuck, from, to)}", exception);
+        }
+
         RemoveEmptiedFolders(from, plan.ToMove.Select(file => file.From));
         LogMoved(_logger, from, to, moved.Count);
         return new LibraryMove(from, to, moved.Count, plan.AlreadyThere, plan.Missing);
@@ -104,6 +109,17 @@ internal sealed partial class LibraryMover : ILibraryMover
             first,
             second,
             OperatingSystem.IsWindows() || OperatingSystem.IsMacOS() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+
+    /// <summary>
+    /// What undoing a move left, as a sentence.
+    /// </summary>
+    /// <param name="stuck">How many files couldn't go back.</param>
+    private static string Outcome(int stuck, string from, string to) => stuck switch
+    {
+        0 => $"Every file is back where it was, and the library stays in {from}.",
+        1 => $"1 file couldn't go back, so it's in {to}. Move the library there again to finish the move.",
+        _ => $"{stuck} files couldn't go back, so they're in {to}. Move the library there again to finish the move.",
+    };
 
     /// <summary>
     /// Where each file is and goes. A file at the new root and gone from the old one, at its size, was moved by a move

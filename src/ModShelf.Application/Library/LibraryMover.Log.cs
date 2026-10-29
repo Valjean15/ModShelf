@@ -15,4 +15,7 @@ internal sealed partial class LibraryMover
 
     [LoggerMessage(EventId = 612, Level = LogLevel.Error, Message = "Couldn't move {Path} back while undoing a move of the library")]
     private static partial void LogCantMoveBack(ILogger logger, Exception exception, string path);
+
+    [LoggerMessage(EventId = 615, Level = LogLevel.Warning, Message = "Couldn't save the library's new root {To}, so the {Count} files moved went back")]
+    private static partial void LogCantSaveRoot(ILogger logger, Exception exception, string to, int count);
 }

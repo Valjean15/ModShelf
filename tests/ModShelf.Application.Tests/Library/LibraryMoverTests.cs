@@ -194,6 +194,33 @@ public sealed class LibraryMoverTests : IDisposable
     }
 
     [Fact]
+    public async Task PutsEveryFileBackWhenTheNewRootCantBeSaved()
+    {
+        _store.SaveFailure = new IOException("The settings couldn't be saved to memory: The disk is full.");
+
+        IOException refused = await Assert.ThrowsAsync<IOException>(() => Mover().MoveAsync(Mods, Cancellation));
+
+        Assert.Equal(
+            $"The library's new root couldn't be saved: The settings couldn't be saved to memory: The disk is full. Every file is back where it was, and the library stays in {Root}.",
+            refused.Message);
+        Assert.Equal([Old(SkyUiFile), Old(ArchivedFile)], _storage.Files.Order(StringComparer.Ordinal));
+        Assert.Equal(Root, await _settings.GetLibraryRootAsync(Cancellation));
+        Assert.Contains(_logger.Entries, entry => entry.StartsWith($"Warning: Couldn't save the library's new root {Mods}, so the 2 files moved went back", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task SaysWhenFilesCouldntGoBackAfterTheNewRootCouldntBeSaved()
+    {
+        _store.SaveFailure = new IOException("The settings couldn't be saved to memory: The disk is full.");
+        _storage.Failures[New(SkyUiFile)] = new IOException("Disk gone.");
+        _storage.Failures[New(ArchivedFile)] = new IOException("Disk gone.");
+
+        IOException refused = await Assert.ThrowsAsync<IOException>(() => Mover().MoveAsync(Mods, Cancellation));
+
+        Assert.EndsWith($"2 files couldn't go back, so they're in {Mods}. Move the library there again to finish the move.", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task StoppingLeavesWhatMovedForTheNextMove()
     {
         using CancellationTokenSource stop = CancellationTokenSource.CreateLinkedTokenSource(Cancellation);
