@@ -4,7 +4,7 @@ ModShelf is a cross-platform desktop app for Windows, macOS and Linux that downl
 
 ModShelf downloads and manages files. **It never installs mods**: it doesn't extract into game folders, deploy, manage load order, detect conflicts, run FOMOD installers or install collections.
 
-> **Status:** Phase 5, the desktop app. The command line downloads files from Nexus Mods and from plain web links, keeps a library of the mods you download or watch, checks them for updates, and links a Nexus Mods account. The desktop app has its six screens in a sidebar, Library, Updates, Browse, Downloads, Accounts and Settings, and does the background work while it's open: queued downloads, recording them into the library, and update checks with a notice of new updates.
+> **Status:** Phase 5, the desktop app. The command line downloads files from Nexus Mods and from plain web links, keeps a library of the mods you download or watch, checks them for updates, and links a Nexus Mods account. The desktop app has its six screens in a sidebar, Library, Updates, Browse, Downloads, Accounts and Settings, and does the background work while it runs, in the tray with its window closed too: queued downloads, recording them into the library, and update checks with a notice of new updates. Every flow of the command line works from the app.
 
 ## Requirements
 
@@ -23,6 +23,8 @@ dotnet run --project src/ModShelf.Desktop    # opens the desktop app
 
 `dotnet test` runs on Microsoft.Testing.Platform, which `global.json` selects for the whole repository.
 
+The tests never call a live mod site. Before a release, someone runs the manual checklists against Nexus Mods with a Premium and a free account: [docs/manual-checklist.md](docs/manual-checklist.md) for the command line, and [docs/manual-checklist-desktop.md](docs/manual-checklist-desktop.md) for the desktop app.
+
 To see a real notice on this computer, as the desktop app will show for new updates, run this one test with `MODSHELF_TEST_NOTICES` set to 1. It fails if the notice couldn't be shown, and says why.
 
 ```powershell
@@ -33,7 +35,9 @@ tests/ModShelf.Platform.Tests/bin/Debug/net10.0/ModShelf.Platform.Tests -method 
 
 ### Desktop app
 
-`dotnet run --project src/ModShelf.Desktop` opens the main window: a sidebar of the screens, Library, Updates, Browse, Downloads, Accounts and Settings, and the one selected. The button at the top of the sidebar hides the screens' names. While the app is open, queued downloads go on, finished ones go into the library, and the watched mods are checked for updates every `updates.interval`. It uses the same library database, settings, accounts and environment variables as the command line, so a library made with one shows in the other. One of them at a time runs the downloads: while a `download` command runs them, the Downloads screen says so, and the app starts its queue once the command has finished. When the library database can't be opened, the app says which file and why in a window, and closes. It logs to a file a day in a `logs` folder beside the database, such as `desktop-20261029.log`, keeping a week of them.
+`dotnet run --project src/ModShelf.Desktop` opens the main window: a sidebar of the screens, Library, Updates, Browse, Downloads, Accounts and Settings, and the one selected. The button at the top of the sidebar hides the screens' names. While the app runs, queued downloads go on, finished ones go into the library, and the watched mods are checked for updates every `updates.interval`.
+
+The first time the window closes, the app asks whether to keep running in the tray or quit, and remembers the answer (`window.closeToTray`, also on the Settings screen). In the tray, its icon opens the window, and its menu has **Open ModShelf**, **Check for updates now**, which says what it found in a notice, and **Quit ModShelf**; its tooltip counts the updates found. On Linux, the tray needs a tray host, which KDE and most desktops run and GNOME has with the AppIndicator extension; without one, closing the window quits. Starting the app again while it runs brings its window back instead of opening a second one; each library folder gets one app. It uses the same library database, settings, accounts and environment variables as the command line, so a library made with one shows in the other. One of them at a time runs the downloads: while a `download` command runs them, the Downloads screen says so, and the app starts its queue once the command has finished. When the library database can't be opened, the app says which file and why in a window, and closes. It logs to a file a day in a `logs` folder beside the database, such as `desktop-20261029.log`, keeping a week of them.
 
 The Library screen lists the mods you downloaded or watch, by game, with a box to filter them by name. Each mod opens its page or its folder, and can be watched or unwatched; expanded, it lists its files, each of which can be deleted from disk, after asking. The Updates screen lists the updates found for the watched mods, with **Check now**, and for each update **Download**, which puts it into the library beside the file it replaces, and **Changes**, its version's entry in the mod's changelog. Both follow the library as it changes, and the badge on Updates counts the updates.
 
@@ -96,6 +100,7 @@ dotnet run --project src/ModShelf.Cli -- account unlink <source>
   - `updates.interval` is how often the desktop app will check the watched mods for updates: minutes, hours or days, such as `30m`, `6h` or `1d`, from 15 minutes to 7 days. The default is `6h`. The command line checks only when asked.
   - `updates.notify` is whether a background check that finds new updates shows a notice: `true`, the default, or `false`. Windows shows it as a toast from ModShelf, macOS through Script Editor for now, and Linux through libnotify, which most desktops have. The command line only prints what `library check` finds.
   - `appearance.theme` is whether the desktop app is `light` or `dark`, or follows the system's mode: `system`, the default.
+  - `window.closeToTray` is whether closing the desktop app's window keeps it running in the tray (`true`) or quits it (`false`). Until it's set, the app asks the first time.
 - `queue list` shows every saved job without starting any download.
 - `account list` shows the sources that support accounts, the account linked on each, and the ways to link one.
 - `account link` asks for what the source needs. An API key isn't shown as you type it. For `browser`, it opens the site's sign-in page and waits until you approve ModShelf there; if no browser opens, it shows the page to open by hand. Linking again replaces the account.
