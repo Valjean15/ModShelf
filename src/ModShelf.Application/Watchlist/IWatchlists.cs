@@ -30,7 +30,9 @@ public interface IWatchlists
     Task<ModRef> WatchAsync(Uri link, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Stops following the mod the link is to. Unfollowing one not followed changes nothing.
+    /// Stops following the mod the link is to. Unfollowing one not followed changes nothing. A link to a library mod's
+    /// page, or to one of its files there, is matched without asking for the mod first, so one its site removed can be
+    /// unfollowed.
     /// </summary>
     /// <returns>The mod no longer followed.</returns>
     /// <inheritdoc cref="WatchAsync(Uri, CancellationToken)" path="/exception"/>

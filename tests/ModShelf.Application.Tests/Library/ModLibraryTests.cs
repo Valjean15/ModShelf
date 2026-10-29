@@ -91,6 +91,18 @@ public sealed class ModLibraryTests : IDisposable
     }
 
     [Fact]
+    public async Task UnwatchesALibraryModByItsPageWithoutAskingItsSite()
+    {
+        // Such as a mod its site removed, whose links it no longer knows.
+        _repository.Add(LibraryMod.Watch(SkyUi, "SkyUI", null, Link, TestData.Now).WithFile(File("35407")));
+
+        LibraryChange change = await Library(_site).UnwatchAsync(new Uri("http://NexusMods.com/skyrimspecialedition/mods/12604/?tab=files&file_id=35407"), Cancellation);
+
+        Assert.False(change.After!.IsWatched);
+        Assert.Empty(_site.Asked);
+    }
+
+    [Fact]
     public async Task UnwatchingAModNotInTheLibraryChangesNothing()
     {
         LibraryChange change = await Library(_site).UnwatchAsync(Link, Cancellation);

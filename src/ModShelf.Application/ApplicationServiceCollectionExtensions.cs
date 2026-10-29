@@ -194,6 +194,7 @@ public static class ApplicationServiceCollectionExtensions
 
     /// <summary>
     /// Registers <see cref="IWatchlists"/>, which reads and changes the mods the linked accounts follow on their sites.
+    /// Needs Infrastructure's <see cref="Library.Ports.ILibraryRepository"/>.
     /// </summary>
     public static IServiceCollection AddWatchlists(this IServiceCollection services)
     {

@@ -40,7 +40,8 @@ public interface IModLibrary
 
     /// <summary>
     /// Stops watching the mod a link is to. A mod with downloaded files stays in the library; one without leaves it.
-    /// Unwatching a mod that isn't watched changes nothing.
+    /// Unwatching a mod that isn't watched changes nothing. A link to a library mod's page, or to one of its files there,
+    /// is matched without asking its site, which may have removed it.
     /// </summary>
     /// <inheritdoc cref="WatchAsync(Uri, CancellationToken)" path="/exception"/>
     Task<LibraryChange> UnwatchAsync(Uri link, CancellationToken cancellationToken);

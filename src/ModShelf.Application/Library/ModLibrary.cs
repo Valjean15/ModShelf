@@ -81,7 +81,10 @@ internal sealed partial class ModLibrary : IModLibrary
 
     public async Task<LibraryChange> UnwatchAsync(Uri link, CancellationToken cancellationToken)
     {
-        ModRef mod = await ModOfAsync(link, cancellationToken).ConfigureAwait(false);
+        // A mod in the library is found by its page there, so one its site removed can still be unwatched.
+        ArgumentNullException.ThrowIfNull(link);
+        ModRef mod = LibraryLinks.ModAt(await _repository.ListAsync(cancellationToken).ConfigureAwait(false), link)
+            ?? await ModOfAsync(link, cancellationToken).ConfigureAwait(false);
         return await UpdateAsync(mod, stored => Unwatched(stored), cancellationToken).ConfigureAwait(false);
     }
 
