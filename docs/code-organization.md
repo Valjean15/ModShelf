@@ -83,7 +83,8 @@ Other projects see a project only through what it makes public, so keep that to 
 | 800–899 | Platform: notices |
 | 900–999 | Presentation: the main window and the screens |
 | 1000–1099 | Desktop: startup |
-| 1100 onward | Next free block |
+| 1100–1199 | CLI: commands |
+| 1200 onward | Next free block |
 
 ## 7. Files
 

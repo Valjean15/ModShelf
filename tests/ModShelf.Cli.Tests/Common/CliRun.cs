@@ -36,7 +36,7 @@ internal sealed class CliRun : IAsyncDisposable
             // An unexpected exception fails the test with its stack trace, rather than becoming exit code 1.
             EnableDefaultExceptionHandler = false,
         };
-        _exitCode = Task.Run(() => parsed.InvokeAsync(invocation, _ctrlC.Token));
+        _exitCode = Task.Run(() => CliCommands.InvokeAsync(parsed, invocation, _ctrlC.Token));
     }
 
     public string Output => _output.Text;
