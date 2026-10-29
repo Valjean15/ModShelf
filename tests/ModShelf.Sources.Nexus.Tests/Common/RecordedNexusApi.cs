@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Time.Testing;
 
+using ModShelf.Sources.Nexus.Api;
 using ModShelf.Testing;
 
 using WireMock.Logging;
@@ -128,7 +129,11 @@ internal sealed class RecordedNexusApi : IDisposable
     /// Whether they run on the system's clock rather than <see cref="Time"/>. Timeouts need it: the retry pipeline
     /// waits on the registered clock.
     /// </param>
-    public ServiceProvider BuildServices(Func<NexusOptions, NexusOptions>? configure = null, bool realClock = false)
+    /// <param name="primaryHandler">What answers in place of the network, for answers a server can't be made to give.</param>
+    public ServiceProvider BuildServices(
+        Func<NexusOptions, NexusOptions>? configure = null,
+        bool realClock = false,
+        Func<HttpMessageHandler>? primaryHandler = null)
     {
         // The sign-in server answers here too, under /oauth/.
         NexusOptions options = new()
@@ -143,6 +148,11 @@ internal sealed class RecordedNexusApi : IDisposable
         services.AddLogging(logging => logging.SetMinimumLevel(LogLevel.Trace).AddProvider(Logs));
         services.AddSingleton(realClock ? TimeProvider.System : Time);
         services.AddNexusSource(configure?.Invoke(options) ?? options);
+        if (primaryHandler is not null)
+        {
+            services.AddHttpClient(NexusApiClient.ClientName).ConfigurePrimaryHttpMessageHandler(primaryHandler);
+        }
+
         return services.BuildServiceProvider();
     }
 

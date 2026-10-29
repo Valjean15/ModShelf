@@ -67,6 +67,21 @@ public static class NexusServiceCollectionExtensions
             http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         });
 
+        // The API answers where it's asked. A redirect is a failure: followed, it would carry the account's key to
+        // wherever it pointed, and turn a POST into a GET that succeeds.
+        client.ConfigurePrimaryHttpMessageHandler((handler, _) =>
+        {
+            switch (handler)
+            {
+                case SocketsHttpHandler sockets:
+                    sockets.AllowAutoRedirect = false;
+                    break;
+                case HttpClientHandler classic:
+                    classic.AllowAutoRedirect = false;
+                    break;
+            }
+        });
+
         client.AddResilienceHandler("nexus", pipeline =>
         {
             if (settings.MaxRetryAttempts > 0)
@@ -79,6 +94,10 @@ public static class NexusServiceCollectionExtensions
                     Delay = settings.RetryDelay,
                     BackoffType = DelayBackoffType.Exponential,
                     UseJitter = true,
+
+                    // A server error's Retry-After, such as a maintenance page's hour, would hold the call that long
+                    // between attempts; the retries keep to their own short waits instead.
+                    ShouldRetryAfterHeader = false,
                     ShouldHandle = arguments => ValueTask.FromResult(
                         arguments.Outcome.Result?.StatusCode != HttpStatusCode.TooManyRequests
                         && HttpClientResiliencePredicates.IsTransient(arguments.Outcome)),
@@ -92,6 +111,9 @@ public static class NexusServiceCollectionExtensions
         client.AddHttpMessageHandler(provider => new NexusQuotaHandler(
             provider.GetRequiredService<NexusQuota>(),
             provider.GetRequiredService<ILogger<NexusQuotaHandler>>()));
+
+        // Inside each attempt's timeout, which otherwise ends once the headers arrive.
+        client.AddHttpMessageHandler(() => new WholeAnswerHandler());
 
         return services;
     }

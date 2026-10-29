@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
@@ -107,6 +108,22 @@ public sealed partial class NexusApiClientTests : IDisposable
     }
 
     [Fact]
+    public async Task AServerErrorsRetryAfterIsntWaitedFor()
+    {
+        // Such as a maintenance page asking for an hour: the retries keep to their own short waits, and the call to
+        // its timeouts.
+        _api.AnswerInTurn(
+            FlakyPath,
+            response => response.WithStatusCode(503).WithHeader("Retry-After", "3600"),
+            response => response.WithStatusCode(200).WithBody("""{"mod_id": 7, "name": "Fine"}"""));
+
+        ModSummary mod = await GetAsync<ModSummary>(FlakyPath).WaitAsync(TimeSpan.FromSeconds(20), Cancellation);
+
+        Assert.Equal("Fine", mod.Name);
+        Assert.Equal(2, _api.Requests.Count);
+    }
+
+    [Fact]
     public async Task ServerErrorsThatLastAreReportedAfterTheRetries()
     {
         _api.Answer(FlakyPath, response => response.WithStatusCode(503).WithBody("""{"message": "Down for maintenance"}"""));
@@ -152,6 +169,41 @@ public sealed partial class NexusApiClientTests : IDisposable
         }
 
         Assert.Equal(2, _api.Requests.Count);
+    }
+
+    [Fact]
+    public async Task AnAnswerThatStallsPartWayIsRetriedThenReported()
+    {
+        // The headers arrive, then nothing more: a connection that dropped without saying so.
+        StallingHandler stalling = new();
+        await using ServiceProvider services = _api.BuildServices(
+            options => options with { MaxRetryAttempts = 1, AttemptTimeout = TimeSpan.FromMilliseconds(300) },
+            realClock: true,
+            primaryHandler: () => stalling);
+
+        HttpRequestException failed = await Assert.ThrowsAsync<HttpRequestException>(
+            () => services.GetRequiredService<NexusApiClient>()
+                .GetAsync<ModSummary>(FlakyPath.TrimStart('/'), Cancellation)
+                .WaitAsync(TimeSpan.FromSeconds(20), Cancellation));
+
+        Assert.IsType<TimeoutRejectedException>(failed.InnerException);
+        Assert.Equal(2, stalling.Requests);
+    }
+
+    [Theory]
+    [InlineData(301)]
+    [InlineData(302)]
+    [InlineData(307)]
+    public async Task ARedirectIsntFollowed(int status)
+    {
+        // A redirect would carry the account's key to wherever it pointed, and turn a POST into a GET that succeeds.
+        _api.Answer("/v1/moved.json", response => response.WithStatusCode(status).WithHeader("Location", $"{_api.BaseAddress}v1/elsewhere.json"));
+        _api.Answer("/v1/elsewhere.json", response => response.WithStatusCode(200).WithBody("""{"mod_id": 7, "name": "Elsewhere"}"""));
+
+        HttpRequestException refused = await Assert.ThrowsAsync<HttpRequestException>(() => GetAsync<ModSummary>("/v1/moved.json"));
+
+        Assert.Equal((HttpStatusCode)status, refused.StatusCode);
+        Assert.Single(_api.Requests);
     }
 
     [Fact]
@@ -285,6 +337,66 @@ public sealed partial class NexusApiClientTests : IDisposable
     }
 
     private sealed record ModSummary(int ModId, string Name);
+
+    /// <summary>
+    /// Answers every request with its headers and a body that never finishes.
+    /// </summary>
+    private sealed class StallingHandler : HttpMessageHandler
+    {
+        private int _requests;
+
+        public int Requests => Volatile.Read(ref _requests);
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            Interlocked.Increment(ref _requests);
+            StreamContent body = new(new StallingStream());
+            body.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            body.Headers.ContentLength = 100;
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { RequestMessage = request, Content = body });
+        }
+    }
+
+    /// <summary>
+    /// A body that waits for good for its next byte, until the read is cancelled.
+    /// </summary>
+    private sealed class StallingStream : Stream
+    {
+        public override bool CanRead => true;
+
+        public override bool CanSeek => false;
+
+        public override bool CanWrite => false;
+
+        public override long Length => throw new NotSupportedException();
+
+        public override long Position
+        {
+            get => throw new NotSupportedException();
+            set => throw new NotSupportedException();
+        }
+
+        public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            await Task.Delay(Timeout.Infinite, cancellationToken).ConfigureAwait(false);
+            return 0;
+        }
+
+        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            => ReadAsync(buffer.AsMemory(offset, count), cancellationToken).AsTask();
+
+        public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
+        public override void Flush()
+        {
+        }
+
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+
+        public override void SetLength(long value) => throw new NotSupportedException();
+
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+    }
 
     private sealed record GraphQlData(ModSummary? Mod);
 }
