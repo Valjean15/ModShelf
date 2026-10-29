@@ -40,7 +40,8 @@ internal sealed partial class LibraryMover : ILibraryMover
 
         string to = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root.Trim()));
         string from = await _settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
-        if (SamePath(from, to))
+        // Under another name, the files would be in their own way.
+        if (string.Equals(from, to, StringComparison.Ordinal) || _storage.IsSameFolder(from, to))
         {
             return new LibraryMove(from, from, 0, 0, 0);
         }

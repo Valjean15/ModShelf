@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 
 using ModShelf.Application.Library.Ports;
+using ModShelf.Domain.Common;
 
 namespace ModShelf.Application.Tests.Fakes;
 
@@ -43,6 +44,12 @@ internal sealed class FakeLibraryStorage : ILibraryStorage
     public IReadOnlyCollection<string> Files => [.. _files.Keys];
 
     /// <summary>
+    /// Folders that lead to the same one, as a link does, both ways round. Otherwise folders are the same when their
+    /// paths are, as this system compares them.
+    /// </summary>
+    public List<(string First, string Second)> SameFolders { get; } = [];
+
+    /// <summary>
     /// Puts a file at <paramref name="path"/>, and notes its folders up to the system's root as folders that can be
     /// removed once empty.
     /// </summary>
@@ -58,6 +65,9 @@ internal sealed class FakeLibraryStorage : ILibraryStorage
     public void Remove(string path) => _files.TryRemove(path, out _);
 
     public bool FileExists(string path) => _files.ContainsKey(path);
+
+    public bool IsSameFolder(string first, string second)
+        => FilePaths.Same(first, second) || SameFolders.Contains((first, second)) || SameFolders.Contains((second, first));
 
     public long? FileSize(string path) => _files.TryGetValue(path, out long size) ? size : null;
 

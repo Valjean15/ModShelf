@@ -17,6 +17,13 @@ public interface ILibraryStorage
     long? FileSize(string path);
 
     /// <summary>
+    /// Whether two paths lead to the same folder, however differently they name it: through a link or junction,
+    /// another drive letter, or in another case or Unicode form on a file system that ignores them. False when either
+    /// isn't a folder.
+    /// </summary>
+    bool IsSameFolder(string first, string second);
+
+    /// <summary>
     /// Checks that this system can save a download at <paramref name="path"/>, with the room the download needs while
     /// it's under way.
     /// </summary>

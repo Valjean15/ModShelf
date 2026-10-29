@@ -116,6 +116,61 @@ public sealed class FileSystemLibraryStorageTests : IDisposable
     }
 
     [Fact]
+    public void AFolderBehindALinkIsTheSameFolder()
+    {
+        (string mods, string link) = LinkedFolders();
+        FileSystemLibraryStorage storage = new();
+
+        Assert.True(storage.IsSameFolder(mods, link));
+        Assert.True(storage.IsSameFolder(link, mods));
+        Assert.Empty(Directory.EnumerateFileSystemEntries(mods));
+    }
+
+    [Fact]
+    public void AnotherCaseIsTheSameFolderOnlyWhereTheFileSystemIgnoresCase()
+    {
+        string mods = Path.Combine(_folder.Path, "Mods");
+        string upper = Path.Combine(_folder.Path, "MODS");
+        Directory.CreateDirectory(mods);
+        FileSystemLibraryStorage storage = new();
+
+        // Wherever the file system ignores case, the other case finds the folder.
+        Assert.Equal(Directory.Exists(upper), storage.IsSameFolder(mods, upper));
+        Assert.Empty(Directory.EnumerateFileSystemEntries(mods));
+    }
+
+    [Fact]
+    public void TwoFoldersAreNotTheSameAndAMissingOneIsNeither()
+    {
+        string mods = Path.Combine(_folder.Path, "Mods");
+        string other = Path.Combine(_folder.Path, "Other");
+        Directory.CreateDirectory(mods);
+        Directory.CreateDirectory(other);
+        FileSystemLibraryStorage storage = new();
+
+        Assert.False(storage.IsSameFolder(mods, other));
+        Assert.False(storage.IsSameFolder(mods, Path.Combine(_folder.Path, "Missing")));
+        Assert.False(storage.IsSameFolder(Path.Combine(_folder.Path, "Missing"), mods));
+        Assert.Empty(Directory.EnumerateFileSystemEntries(mods));
+    }
+
+    [Fact]
+    public void AFolderItCantMarkIsComparedByWhereItsLinksLead()
+    {
+        (string mods, string link) = LinkedFolders();
+        string other = Path.Combine(_folder.Path, "Other");
+        Directory.CreateDirectory(other);
+
+        // A folder in the mark's place, so it can't be made.
+        Directory.CreateDirectory(Path.Combine(mods, "taken"));
+        Directory.CreateDirectory(Path.Combine(other, "taken"));
+        FileSystemLibraryStorage storage = new(OperatingSystem.IsWindows(), () => "taken");
+
+        Assert.True(storage.IsSameFolder(mods, link));
+        Assert.False(storage.IsSameFolder(other, mods));
+    }
+
+    [Fact]
     public void RegistersTheFileSystemOnce()
     {
         ServiceCollection services = new();
@@ -124,5 +179,25 @@ public sealed class FileSystemLibraryStorageTests : IDisposable
 
         ServiceDescriptor storage = Assert.Single(services, descriptor => descriptor.ServiceType == typeof(ILibraryStorage));
         Assert.IsType<FileSystemLibraryStorage>(storage.ImplementationInstance);
+    }
+
+    /// <summary>
+    /// A folder, and a link to it; skips the test where links can't be made.
+    /// </summary>
+    private (string Folder, string Link) LinkedFolders()
+    {
+        string mods = Path.Combine(_folder.Path, "Mods");
+        string link = Path.Combine(_folder.Path, "Library");
+        Directory.CreateDirectory(mods);
+        try
+        {
+            Directory.CreateSymbolicLink(link, mods);
+        }
+        catch (Exception exception) when (exception is UnauthorizedAccessException or IOException)
+        {
+            Assert.Skip("This system doesn't let the tests make links.");
+        }
+
+        return (mods, link);
     }
 }

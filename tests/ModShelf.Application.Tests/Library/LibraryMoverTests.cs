@@ -90,6 +90,21 @@ public sealed class LibraryMoverTests : IDisposable
     }
 
     [Fact]
+    public async Task MovingToTheRootItHasUnderAnotherNameChangesNothing()
+    {
+        // Such as a link to it: its files are there already, and nothing is in their way.
+        _storage.SameFolders.Add((Root, Mods));
+        _storage.Add(New(SkyUiFile), 100);
+        _storage.Add(New(ArchivedFile), 90);
+
+        LibraryMove move = await Mover().MoveAsync(Mods, Cancellation);
+
+        Assert.Equal(new LibraryMove(Root, Root, 0, 0, 0), move);
+        Assert.Equal(0, _store.Saves);
+        Assert.Empty(_storage.Moves);
+    }
+
+    [Fact]
     public async Task RefusesARootInsideTheLibraryOrHoldingIt()
     {
         InvalidOperationException inside = await Assert.ThrowsAsync<InvalidOperationException>(

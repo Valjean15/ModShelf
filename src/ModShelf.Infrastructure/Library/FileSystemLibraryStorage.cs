@@ -1,4 +1,5 @@
 using ModShelf.Application.Library.Ports;
+using ModShelf.Domain.Common;
 using ModShelf.Infrastructure.Downloads;
 
 namespace ModShelf.Infrastructure.Library;
@@ -17,6 +18,7 @@ internal sealed class FileSystemLibraryStorage : ILibraryStorage
     internal const int MaxWindowsPath = 259;
 
     private readonly bool _isWindows;
+    private readonly Func<string> _markName;
 
     public FileSystemLibraryStorage()
         : this(OperatingSystem.IsWindows())
@@ -24,9 +26,40 @@ internal sealed class FileSystemLibraryStorage : ILibraryStorage
     }
 
     /// <param name="isWindows">Whether Windows' limits apply. Tests check them on any system.</param>
-    internal FileSystemLibraryStorage(bool isWindows) => _isWindows = isWindows;
+    /// <param name="markName">The name of the file that marks a folder while it's looked for under another name.</param>
+    internal FileSystemLibraryStorage(bool isWindows, Func<string>? markName = null)
+    {
+        _isWindows = isWindows;
+        _markName = markName ?? (() => $".modshelf-{Guid.NewGuid():N}.tmp");
+    }
 
     public bool FileExists(string path) => File.Exists(path);
+
+    public bool IsSameFolder(string first, string second)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(first);
+        ArgumentException.ThrowIfNullOrWhiteSpace(second);
+
+        if (!Directory.Exists(first) || !Directory.Exists(second))
+        {
+            return false;
+        }
+
+        // A file put in the first is in the second only when they're one folder, whatever names, links, drives or
+        // file system rules lead there. It's deleted as it's closed.
+        string name = _markName();
+        try
+        {
+            using FileStream mark = new(
+                Path.Combine(first, name), FileMode.CreateNew, FileAccess.Write, FileShare.ReadWrite | FileShare.Delete, 1, FileOptions.DeleteOnClose);
+            return File.Exists(Path.Combine(second, name));
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            // A folder this user can't write in: compared by name, as this system does, with its links followed.
+            return FilePaths.Same(FreeSpace.RealPath(first), FreeSpace.RealPath(second));
+        }
+    }
 
     public long? FileSize(string path)
     {
