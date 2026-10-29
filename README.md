@@ -4,7 +4,7 @@ ModShelf is a cross-platform desktop app for Windows, macOS and Linux that downl
 
 ModShelf downloads and manages files. **It never installs mods**: it doesn't extract into game folders, deploy, manage load order, detect conflicts, run FOMOD installers or install collections.
 
-> **Status:** Phase 5, the desktop app. The command line downloads files from Nexus Mods and from plain web links, keeps a library of the mods you download or watch, checks them for updates, and links a Nexus Mods account. The desktop app has its six screens in a sidebar, of which Library, Updates, Browse and Downloads work so far, and does the background work while it's open: queued downloads, recording them into the library, and update checks with a notice of new updates.
+> **Status:** Phase 5, the desktop app. The command line downloads files from Nexus Mods and from plain web links, keeps a library of the mods you download or watch, checks them for updates, and links a Nexus Mods account. The desktop app has its six screens in a sidebar, Library, Updates, Browse, Downloads, Accounts and Settings, and does the background work while it's open: queued downloads, recording them into the library, and update checks with a notice of new updates.
 
 ## Requirements
 
@@ -33,13 +33,17 @@ tests/ModShelf.Platform.Tests/bin/Debug/net10.0/ModShelf.Platform.Tests -method 
 
 ### Desktop app
 
-`dotnet run --project src/ModShelf.Desktop` opens the main window: a sidebar of the screens, Library, Updates, Browse, Downloads, Accounts and Settings, and the one selected. The button at the top of the sidebar hides the screens' names. The screens fill in over Phase 5. While the app is open, queued downloads go on, finished ones go into the library, and the watched mods are checked for updates every `updates.interval`. It uses the same library database, settings, accounts and environment variables as the command line, so a library made with one shows in the other. One of them at a time runs the downloads: while a `download` command runs them, the Downloads screen says so, and the app starts its queue once the command has finished. When the library database can't be opened, the app says which file and why in a window, and closes. It logs to a file a day in a `logs` folder beside the database, such as `desktop-20261029.log`, keeping a week of them.
+`dotnet run --project src/ModShelf.Desktop` opens the main window: a sidebar of the screens, Library, Updates, Browse, Downloads, Accounts and Settings, and the one selected. The button at the top of the sidebar hides the screens' names. While the app is open, queued downloads go on, finished ones go into the library, and the watched mods are checked for updates every `updates.interval`. It uses the same library database, settings, accounts and environment variables as the command line, so a library made with one shows in the other. One of them at a time runs the downloads: while a `download` command runs them, the Downloads screen says so, and the app starts its queue once the command has finished. When the library database can't be opened, the app says which file and why in a window, and closes. It logs to a file a day in a `logs` folder beside the database, such as `desktop-20261029.log`, keeping a week of them.
 
 The Library screen lists the mods you downloaded or watch, by game, with a box to filter them by name. Each mod opens its page or its folder, and can be watched or unwatched; expanded, it lists its files, each of which can be deleted from disk, after asking. The Updates screen lists the updates found for the watched mods, with **Check now**, and for each update **Download**, which puts it into the library beside the file it replaces, and **Changes**, its version's entry in the mod's changelog. Both follow the library as it changes, and the badge on Updates counts the updates.
 
 The Browse screen searches a game's mods on Nexus Mods, which needs a linked account. Pick the game from the box, which lists the site's games, and search by words or author, in one of nine orders, with or without adult content; **Load more** lists the next page. A link to a mod in the search box opens that mod. Clicking a mod opens it: its details, its files by section, with **Download** into the library and **Save to a folder…** for each, and its changelog. It can be watched in the library, and tracked on Nexus Mods. **Tracked mods** lists the mods of the game you track there.
 
 The Downloads screen takes a link to a mod or a file: **Download** puts it into the library, and **Save to a folder…** into a folder you pick. It lists every download, newest first, with its progress, speed and time left, and the buttons to pause, resume, retry or cancel it. Cancelling a download with bytes saved asks first. **Clear finished** removes the done and cancelled downloads from the list; their files stay. A download Nexus Mods wants started on its website shows **Open on Nexus Mods** and **Paste link…**: start it there with the download for mod managers, copy the `nxm://` link its button holds, and paste it. The badge on Downloads counts the downloads waiting for you, to be started or because they failed.
+
+The Accounts screen has a card for each site that can link an account: the account's name, level and the day it was linked, and what's left of the site's API requests, as it last said. A button for each way the site offers links an account: an API key pasted into a box that hides it, with a button that opens the site's API keys page; a code the site emails; or approving ModShelf in the browser, with **Open page again** and **Cancel** while it waits. **Check** asks the site who the account is now, which also brings the API requests left up to date; ModShelf asks the site nothing on this screen otherwise. **Unlink** removes the account and its stored credentials, after asking.
+
+The Settings screen changes what `settings set` does. **Choose another folder…** moves the library, with its files after asking, and **Use the default folder** moves it back. The folder patterns, for every game and for the games you add, show where a sample file would go as you type, and are saved with **Save**. What happens to old versions, how often to check for updates, whether to show a notice, and whether the app is light or dark are saved as you choose them; the theme changes at once. The screen also says where the settings are kept, and warns when no keyring protects the credentials.
 
 ### Command line
 
@@ -65,6 +69,7 @@ dotnet run --project src/ModShelf.Cli -- settings reset <setting>
 dotnet run --project src/ModShelf.Cli -- queue list
 dotnet run --project src/ModShelf.Cli -- account list
 dotnet run --project src/ModShelf.Cli -- account link <source> [--with api-key|browser|email]
+dotnet run --project src/ModShelf.Cli -- account check <source>
 dotnet run --project src/ModShelf.Cli -- account unlink <source>
 ```
 
@@ -90,9 +95,11 @@ dotnet run --project src/ModShelf.Cli -- account unlink <source>
   - `library.oldVersions` is what happens to a file's old versions when a newer one is downloaded: `all` keeps them, `archive` moves them to an `_archive` folder in their folder, and a number keeps that many versions, the newest first, and deletes the others. The default is `2`.
   - `updates.interval` is how often the desktop app will check the watched mods for updates: minutes, hours or days, such as `30m`, `6h` or `1d`, from 15 minutes to 7 days. The default is `6h`. The command line checks only when asked.
   - `updates.notify` is whether a background check that finds new updates shows a notice: `true`, the default, or `false`. Windows shows it as a toast from ModShelf, macOS through Script Editor for now, and Linux through libnotify, which most desktops have. The command line only prints what `library check` finds.
+  - `appearance.theme` is whether the desktop app is `light` or `dark`, or follows the system's mode: `system`, the default.
 - `queue list` shows every saved job without starting any download.
 - `account list` shows the sources that support accounts, the account linked on each, and the ways to link one.
 - `account link` asks for what the source needs. An API key isn't shown as you type it. For `browser`, it opens the site's sign-in page and waits until you approve ModShelf there; if no browser opens, it shows the page to open by hand. Linking again replaces the account.
+- `account check` asks the site who the linked account is now, keeping a changed level, and shows what's left of the site's API requests: per day and per hour for Nexus Mods, with when each starts over.
 - `account unlink` removes the account and deletes its stored credentials.
 - **Nexus Mods:** `account link nexus` asks for your personal API key, from [your API keys page](https://next.nexusmods.com/settings/api-keys), and shows the account's name and level (Premium, Supporter or Free). Signing in through the browser is built, but Nexus Mods has to issue ModShelf a client ID first; to try it with one, set `ModShelf__Nexus__ClientId`, and `account link nexus --with browser` becomes available. Never commit a client ID.
 - Exit codes: 0 done, 1 failed or refused, 2 bad input (arguments the command line can't read too), 3 still waiting to be started on the site, 70 something ModShelf didn't expect (said in a line, with the details in the log), 130 stopped with Ctrl+C.
@@ -118,7 +125,7 @@ src/
 tests/
   ModShelf.<Library>.Tests        one test project per library
   ModShelf.Architecture.Tests     enforces the dependency rules
-  ModShelf.Cli.Tests              runs the CLI end to end: stop, kill and resume a download; finish one through a handoff; download into the library, move it and check it for updates; look up and search mods; link, refresh and unlink fake accounts
+  ModShelf.Cli.Tests              runs the CLI end to end: stop, kill and resume a download; finish one through a handoff; download into the library, move it and check it for updates; look up and search mods; link, check, refresh and unlink fake accounts
   Shared                          code several test projects compile in: SourceContractTests, TempFolder, the log recorders
 ```
 
