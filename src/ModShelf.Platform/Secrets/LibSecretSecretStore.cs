@@ -20,6 +20,18 @@ internal sealed class LibSecretSecretStore : ISecretStore
 {
     private const string SchemaName = "app.modshelf.Secret";
 
+    private const string DBusErrors = "g-dbus-error-quark";
+    private const string IoErrors = "g-io-error-quark";
+
+    // GDBusError codes: no program owns the Secret Service's name, or can be started to; or there's no bus.
+    private const int DBusServiceUnknown = 2;
+    private const int DBusNameHasNoOwner = 3;
+    private const int DBusNoServer = 11;
+
+    // GIOErrorEnum codes from a call that was cancelled, or that a service on the bus didn't answer in time.
+    private const int IoCancelled = 19;
+    private const int IoTimedOut = 24;
+
     private static readonly Lock Gate = new();
 
     // Created once and kept for the life of the process, like the static schemas C programs declare.
@@ -42,16 +54,44 @@ internal sealed class LibSecretSecretStore : ISecretStore
     /// <summary>
     /// Whether libsecret is installed and a Secret Service answers on the session bus.
     /// </summary>
-    public static bool IsAvailable()
+    public static bool IsAvailable() => Probe() is null;
+
+    /// <summary>
+    /// Asks the Secret Service for a secret that isn't there, to see whether it answers.
+    /// </summary>
+    /// <returns>
+    /// Null when it answered. Otherwise why not, and whether that's because there's no keyring: libsecret isn't
+    /// installed, there's no session bus, or no Secret Service on it; rather than a keyring that's there but failing.
+    /// </returns>
+    public static (bool NoKeyring, string Reason)? Probe()
     {
         try
         {
-            new LibSecretSecretStore("ModShelf.Probe").Lookup("probe");
-            return true;
+            lock (Gate)
+            {
+                return WithHashTable(
+                    [("scope", "ModShelf.Probe"), ("name", "probe")],
+                    attributes =>
+                    {
+                        IntPtr password = PasswordLookup(Schema.Value, attributes, IntPtr.Zero, out IntPtr error);
+                        if (password != IntPtr.Zero)
+                        {
+                            PasswordFree(password);
+                        }
+
+                        if (error == IntPtr.Zero)
+                        {
+                            return ((bool, string)?)null;
+                        }
+
+                        (string? domain, int code, string? message) = ReadError(error);
+                        return (MeansNoKeyring(domain, code), message ?? $"{domain} error {code}");
+                    });
+            }
         }
-        catch (Exception exception) when (exception is DllNotFoundException or EntryPointNotFoundException or InvalidOperationException)
+        catch (Exception exception) when (exception is DllNotFoundException or EntryPointNotFoundException)
         {
-            return false;
+            return (true, exception.Message);
         }
     }
 
@@ -104,6 +144,22 @@ internal sealed class LibSecretSecretStore : ISecretStore
             },
             cancellationToken);
     }
+
+    /// <summary>
+    /// Whether an error asking the Secret Service means there's none: no program owns its name on the bus, or can be
+    /// started to, or there's no bus to connect to. Other errors, such as a call it didn't answer in time, come from a
+    /// keyring that's there but failing.
+    /// </summary>
+    /// <param name="domain">GLib's name for the error's domain.</param>
+    /// <param name="code">The error's code in that domain.</param>
+    internal static bool MeansNoKeyring(string? domain, int code) => domain switch
+    {
+        DBusErrors => code is DBusServiceUnknown or DBusNameHasNoOwner or DBusNoServer,
+
+        // Connecting to the bus fails with these, such as "Cannot autolaunch D-Bus without X11 $DISPLAY".
+        IoErrors => code is not (IoCancelled or IoTimedOut),
+        _ => false,
+    };
 
     private string? Lookup(string name)
     {

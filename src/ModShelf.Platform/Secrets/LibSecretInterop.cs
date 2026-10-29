@@ -93,10 +93,22 @@ internal static partial class LibSecretInterop
             return;
         }
 
+        (_, _, string? message) = ReadError(error);
+        throw new InvalidOperationException($"The Secret Service couldn't {action}: {message}");
+    }
+
+    /// <summary>
+    /// Reads <paramref name="error"/>, then frees it.
+    /// </summary>
+    /// <returns>GLib's name for its domain, such as <c>g-dbus-error-quark</c>; its code in that domain; and its message.</returns>
+    public static (string? Domain, int Code, string? Message) ReadError(IntPtr error)
+    {
         // struct GError { GQuark domain; gint code; gchar *message; }: the message follows two 32-bit fields.
+        string? domain = Marshal.PtrToStringUTF8(QuarkToString(unchecked((uint)Marshal.ReadInt32(error))));
+        int code = Marshal.ReadInt32(error, sizeof(int));
         string? message = Marshal.PtrToStringUTF8(Marshal.ReadIntPtr(error, 2 * sizeof(int)));
         ErrorFree(error);
-        throw new InvalidOperationException($"The Secret Service couldn't {action}: {message}");
+        return (domain, code, message);
     }
 
     [LibraryImport(GLib, EntryPoint = "g_hash_table_new")]
@@ -110,4 +122,8 @@ internal static partial class LibSecretInterop
 
     [LibraryImport(GLib, EntryPoint = "g_error_free")]
     private static partial void ErrorFree(IntPtr error);
+
+    /// <returns>The quark's string, which GLib owns.</returns>
+    [LibraryImport(GLib, EntryPoint = "g_quark_to_string")]
+    private static partial IntPtr QuarkToString(uint quark);
 }

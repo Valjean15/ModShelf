@@ -1,3 +1,5 @@
+using System.Runtime.Versioning;
+
 using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Accounts.Ports;
@@ -23,8 +25,9 @@ internal static partial class SecretStores
     }
 
     /// <summary>
-    /// DPAPI on Windows, the Keychain on macOS, and on Linux the Secret Service when one is running; otherwise
-    /// the encrypted-file fallback, which logs a warning and reports <see cref="ISecretStore.IsProtectedByOs"/> as false.
+    /// DPAPI on Windows, the Keychain on macOS, and on Linux the Secret Service unless there's none (see
+    /// <see cref="ForLinux"/>); otherwise the encrypted-file fallback, which logs a warning and reports
+    /// <see cref="ISecretStore.IsProtectedByOs"/> as false.
     /// </summary>
     /// <param name="folder">The folder for secret files, used by the Windows store and the fallback.</param>
     /// <param name="scope">What keeps these secrets apart in the Keychain and the Secret Service.</param>
@@ -44,12 +47,34 @@ internal static partial class SecretStores
             return new KeychainSecretStore(scope);
         }
 
-        if (OperatingSystem.IsLinux() && LibSecretSecretStore.IsAvailable())
+        if (OperatingSystem.IsLinux())
         {
-            return new LibSecretSecretStore(scope);
+            return ForLinux(folder, scope, LibSecretSecretStore.Probe(), logger);
         }
 
         LogNoKeyring(logger);
         return new EncryptedFileSecretStore(folder);
+    }
+
+    /// <summary>
+    /// The Secret Service, unless there's none: then the encrypted-file fallback, which logs a warning. A keyring that's
+    /// there but failed the probe is used all the same, and that's logged as an error: reading and saving secrets fail
+    /// until it works, rather than secrets going quietly to files the user didn't choose.
+    /// </summary>
+    /// <param name="probe">What <see cref="LibSecretSecretStore.Probe"/> found.</param>
+    [SupportedOSPlatform("linux")]
+    internal static ISecretStore ForLinux(string folder, string scope, (bool NoKeyring, string Reason)? probe, ILogger logger)
+    {
+        switch (probe)
+        {
+            case null:
+                return new LibSecretSecretStore(scope);
+            case { NoKeyring: false, Reason: var reason }:
+                LogKeyringFailing(logger, reason);
+                return new LibSecretSecretStore(scope);
+            default:
+                LogNoKeyring(logger);
+                return new EncryptedFileSecretStore(folder);
+        }
     }
 }
