@@ -1,6 +1,7 @@
 using System.CommandLine;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Security.Cryptography;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -168,6 +169,12 @@ internal static class AccountCommand
             await environment.Error.WriteLineAsync($"{exception.MessageForUser()} Nothing was linked.").ConfigureAwait(false);
             return ExitCodes.BadInput;
         }
+        catch (Exception exception) when (IsFailureWithReason(exception))
+        {
+            // Such as a keyring that's locked or doesn't answer, or a site that answered in a way it shouldn't have.
+            await environment.Error.WriteLineAsync($"{exception.Message} Nothing was linked.").ConfigureAwait(false);
+            return ExitCodes.Failed;
+        }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             await environment.Error.WriteLineAsync("Stopped. Nothing was linked.").ConfigureAwait(false);
@@ -195,7 +202,17 @@ internal static class AccountCommand
                 .FirstOrDefault(offered => offered.Source == source);
 
             // A source that's no longer here can still have an account stored, so unlinking it cleans that up.
-            await accounts.UnlinkAsync(source, cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await accounts.UnlinkAsync(source, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception exception) when (IsFailureWithReason(exception))
+            {
+                await environment.Error.WriteLineAsync($"{exception.Message} The account stays linked; unlink it again once that's fixed.")
+                    .ConfigureAwait(false);
+                return ExitCodes.Failed;
+            }
+
             environment.Output.WriteLine(status switch
             {
                 null => $"{source} isn't a source here. Any account stored for it is removed.",
@@ -209,6 +226,13 @@ internal static class AccountCommand
             await host.StopAsync(CancellationToken.None).ConfigureAwait(false);
         }
     }
+
+    /// <summary>
+    /// Whether keeping or removing credentials failed: the keyring, Keychain or protected files refused, or a step of
+    /// linking went wrong. The message says which, in words the user can act on.
+    /// </summary>
+    private static bool IsFailureWithReason(Exception exception)
+        => exception is InvalidOperationException or IOException or UnauthorizedAccessException or CryptographicException;
 
     private static bool TryReadSource(CliEnvironment environment, string text, [NotNullWhen(true)] out SourceId? source)
     {
