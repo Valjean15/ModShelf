@@ -32,6 +32,66 @@ public sealed class DownloadSchedulerLifetimeTests
     }
 
     [Fact]
+    public async Task AJobWhoseFileWasSavedButNotItsStatusIsCompleted()
+    {
+        // The file was moved into place, then the app was ended, or the database was held, before Completed was saved.
+        DownloadJob verifying = StoredJob();
+        verifying.StartResolving();
+        verifying.StartDownloading(0, 100);
+        verifying.ReportProgress(100);
+        verifying.StartVerifying();
+
+        await using SchedulerHarness harness = await SchedulerHarness.StartAsync(
+            storedJobs: [verifying],
+            beforeStart: harness => harness.Storage.Add(Path.Combine(TestData.TargetDirectory, "35407.7z"), size: 100));
+
+        Assert.Equal(Completed, (await harness.CurrentAsync(verifying.Id)).Status);
+        Assert.Equal([Completed], harness.Repository.SavedStatuses(verifying.Id));
+        Assert.Equal(0, harness.Transfer.CallCount);
+        Assert.Contains(harness.Logger.Entries, entry => entry.Contains($"Download job {verifying.Id.Value} was saved", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task AJobWhoseWholeFileIsInPlaceIsCompletedEvenIfItWasDownloading()
+    {
+        // Verifying wasn't saved either.
+        DownloadJob downloading = StoredJob();
+        downloading.StartResolving();
+        downloading.StartDownloading(0, 100);
+
+        await using SchedulerHarness harness = await SchedulerHarness.StartAsync(
+            storedJobs: [downloading],
+            beforeStart: harness => harness.Storage.Add(Path.Combine(TestData.TargetDirectory, "35407.7z"), size: 100));
+
+        Assert.Equal(Completed, (await harness.CurrentAsync(downloading.Id)).Status);
+        Assert.Equal(0, harness.Transfer.CallCount);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData(60L)]
+    public async Task ADownloadingJobIsntCompletedByAFileItCantTellIsIts(long? fileSize)
+    {
+        // No file, or one of another size: the download goes on, and the transfer says if a file is in the way.
+        DownloadJob downloading = StoredJob();
+        downloading.StartResolving();
+        downloading.StartDownloading(40, 100);
+
+        await using SchedulerHarness harness = await SchedulerHarness.StartAsync(
+            storedJobs: [downloading],
+            beforeStart: harness =>
+            {
+                if (fileSize is { } size)
+                {
+                    harness.Storage.Add(Path.Combine(TestData.TargetDirectory, "35407.7z"), size);
+                }
+            });
+
+        await harness.Transfer.NextCallAsync();
+        Assert.Equal([Queued, Resolving], harness.Repository.SavedStatuses(downloading.Id));
+    }
+
+    [Fact]
     public async Task AsksTheSourceAgainAboutJobsThatWereWaitingForAHandoff()
     {
         // The page to start the download on is only kept in memory, so it's gone after a restart.
@@ -89,6 +149,7 @@ public sealed class DownloadSchedulerLifetimeTests
             new SourceRegistry([]),
             new ControlledFileTransfer(),
             new ScriptedQueueLock(),
+            new FakeLibraryStorage(),
             TimeProvider.System,
             new DownloadSchedulerOptions(),
             NullLogger<DownloadScheduler>.Instance);

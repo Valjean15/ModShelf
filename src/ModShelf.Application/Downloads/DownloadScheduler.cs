@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Downloads.Ports;
+using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Sources;
 using ModShelf.Domain.Common;
 using ModShelf.Domain.Downloads;
@@ -53,6 +54,7 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
     private readonly ISourceRegistry _sources;
     private readonly IFileTransfer _transfer;
     private readonly IDownloadQueueLock _queueLock;
+    private readonly ILibraryStorage _storage;
     private readonly TimeProvider _timeProvider;
     private readonly DownloadSchedulerOptions _options;
     private readonly ILogger<DownloadScheduler> _logger;
@@ -81,6 +83,7 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
         ISourceRegistry sources,
         IFileTransfer transfer,
         IDownloadQueueLock queueLock,
+        ILibraryStorage storage,
         TimeProvider timeProvider,
         DownloadSchedulerOptions options,
         ILogger<DownloadScheduler> logger)
@@ -89,6 +92,7 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(transfer);
         ArgumentNullException.ThrowIfNull(queueLock);
+        ArgumentNullException.ThrowIfNull(storage);
         ArgumentNullException.ThrowIfNull(timeProvider);
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(logger);
@@ -102,6 +106,7 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
         _sources = sources;
         _transfer = transfer;
         _queueLock = queueLock;
+        _storage = storage;
         _timeProvider = timeProvider;
         _options = options;
         _logger = logger;
@@ -374,9 +379,24 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
         {
             if (job.Status is DownloadJobStatus.Resolving or DownloadJobStatus.Downloading or DownloadJobStatus.Verifying)
             {
-                job.Requeue();
+                if (IsInPlace(job))
+                {
+                    // Its file was moved into place, but the app was ended, or the database held, before that was saved.
+                    if (job.Status == DownloadJobStatus.Downloading)
+                    {
+                        job.StartVerifying();
+                    }
+
+                    job.Complete();
+                    LogCompletedOnStart(_logger, job.Id.Value);
+                }
+                else
+                {
+                    job.Requeue();
+                    requeued++;
+                }
+
                 await SaveAsync(job).ConfigureAwait(false);
-                requeued++;
             }
         }
 
@@ -386,6 +406,31 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Whether an interrupted job's file is in place already: one that was being verified, whose file is there; or one
+    /// that was downloading, whose file is there whole. The transfer never starts with a file in the way, and moves the
+    /// verified file into place in one step, so such a file is the job's.
+    /// </summary>
+    private bool IsInPlace(DownloadJob job)
+    {
+        long? size;
+        try
+        {
+            size = _storage.FileSize(DestinationOf(job));
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            return false;
+        }
+
+        return job.Status switch
+        {
+            DownloadJobStatus.Verifying => size is { } verified && (job.TotalBytes is null || verified == job.TotalBytes),
+            DownloadJobStatus.Downloading => size is { } whole && whole == job.TotalBytes,
+            _ => false,
+        };
     }
 
     private async Task StartQueuedJobsAsync()

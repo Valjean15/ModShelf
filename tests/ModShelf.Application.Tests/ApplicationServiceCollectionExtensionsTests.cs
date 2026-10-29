@@ -208,6 +208,7 @@ public sealed class ApplicationServiceCollectionExtensionsTests
             new SourceRegistry([]),
             new ControlledFileTransfer(),
             new ScriptedQueueLock(),
+            new FakeLibraryStorage(),
             TimeProvider.System,
             new DownloadSchedulerOptions(),
             NullLogger<DownloadScheduler>.Instance);

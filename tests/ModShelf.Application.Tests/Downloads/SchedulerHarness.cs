@@ -31,7 +31,7 @@ internal sealed class SchedulerHarness : IAsyncDisposable
         Repository = new InMemoryDownloadJobRepository(storedJobs);
         QueueLock.HeldElsewhere = queueBusyElsewhere;
         IModSource[] sources = registerModIo ? [Nexus, ModIo] : [Nexus];
-        Scheduler = new DownloadScheduler(Repository, new SourceRegistry(sources), Transfer, QueueLock, Time, options, Logger);
+        Scheduler = new DownloadScheduler(Repository, new SourceRegistry(sources), Transfer, QueueLock, Storage, Time, options, Logger);
 
         IAsyncEnumerable<DownloadJobSnapshot> stream = Scheduler.WatchAsync(_stopWatching.Token);
         _watching = Task.Run(async () =>
@@ -57,6 +57,11 @@ internal sealed class SchedulerHarness : IAsyncDisposable
     public ControlledFileTransfer Transfer { get; } = new();
 
     public ScriptedQueueLock QueueLock { get; } = new();
+
+    /// <summary>
+    /// The disk the downloads are saved to, as far as the scheduler looks at it.
+    /// </summary>
+    public FakeLibraryStorage Storage { get; } = new();
 
     public RecordingLogger<DownloadScheduler> Logger { get; } = new();
 

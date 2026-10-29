@@ -42,4 +42,7 @@ internal sealed partial class DownloadScheduler
 
     [LoggerMessage(EventId = 11, Level = LogLevel.Warning, Message = "Couldn't read the download queue from the library database; trying again in {Delay}")]
     private static partial void LogCantLoadJobs(ILogger logger, Exception exception, TimeSpan delay);
+
+    [LoggerMessage(EventId = 12, Level = LogLevel.Information, Message = "Download job {JobId} was saved before ModShelf last closed, but not marked so; it's completed now")]
+    private static partial void LogCompletedOnStart(ILogger logger, Guid jobId);
 }
