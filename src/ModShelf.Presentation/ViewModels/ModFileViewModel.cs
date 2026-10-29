@@ -153,9 +153,12 @@ public sealed partial class ModFileViewModel : ObservableObject
                 if (added is not null)
                 {
                     Tell(
-                        added.AlreadyQueued
-                            ? Strings.UpdateDownloadingAlready
-                            : Text.Format(Strings.DownloadsDownloadingInto, added.Job.FileName, added.Job.TargetDirectory),
+                        added switch
+                        {
+                            { AlreadySaved: true } => Text.Format(Strings.DownloadsSavedAlready, added.Job.FileName, added.Job.TargetDirectory),
+                            { AlreadyQueued: true } => Strings.UpdateDownloadingAlready,
+                            _ => Text.Format(Strings.DownloadsDownloadingInto, added.Job.FileName, added.Job.TargetDirectory),
+                        },
                         isProblem: false);
                 }
             },

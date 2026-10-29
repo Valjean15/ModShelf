@@ -120,6 +120,11 @@ internal static partial class DownloadCommand
             if (library is null)
             {
                 added = await links.AddAsync(link, targetDirectory!, fileName, cancellationToken).ConfigureAwait(false);
+                if (added.AlreadySaved)
+                {
+                    environment.Output.WriteLine($"{Path.Combine(added.Job.TargetDirectory, added.Job.FileName)} is saved already.");
+                    return ExitCodes.Done;
+                }
             }
             else
             {

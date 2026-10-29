@@ -158,7 +158,7 @@ public sealed class LinkDownloadsTests
     [Fact]
     public async Task RejectsARelativeLink()
     {
-        LinkDownloads links = new(new SourceRegistry([ScriptedLinkRecognizer.Always(NexusFile)]), new RecordingDownloadService());
+        LinkDownloads links = new(new SourceRegistry([ScriptedLinkRecognizer.Always(NexusFile)]), new RecordingDownloadService(), new FakeLibraryStorage());
 
         await Assert.ThrowsAsync<ArgumentException>(() => links.AddAsync(
             new Uri("files/SkyUI.7z", UriKind.Relative), TestData.TargetDirectory, null, TestContext.Current.CancellationToken));
@@ -206,10 +206,53 @@ public sealed class LinkDownloadsTests
         Assert.Single(downloads.Enqueued);
     }
 
+    [Fact]
+    public async Task AFileAFinishedJobSavedThereIsntDownloadedAgain()
+    {
+        DownloadJobSnapshot finished = RecordingDownloadService.Job(NexusFile, TestData.TargetDirectory, FileName, Completed);
+        RecordingDownloadService downloads = new(finished);
+        FakeLibraryStorage storage = new();
+        storage.Add(Path.Combine(TestData.TargetDirectory, FileName));
+
+        LinkDownload result = await AddAsync(downloads, [ScriptedLinkRecognizer.Always(NexusFile, isHandoff: true)], storage: storage);
+
+        Assert.Equal(new LinkDownload(finished, AlreadyQueued: false, AlreadySaved: true), result);
+        Assert.Empty(downloads.Changes);
+    }
+
+    [Fact]
+    public async Task AFileAFinishedJobSavedButThatsGoneSinceIsDownloadedAgain()
+    {
+        RecordingDownloadService downloads = new(RecordingDownloadService.Job(NexusFile, TestData.TargetDirectory, FileName, Completed));
+
+        LinkDownload result = await AddAsync(downloads, [ScriptedLinkRecognizer.Always(NexusFile)]);
+
+        Assert.False(result.AlreadySaved);
+        Assert.Same(Assert.Single(downloads.Enqueued), result.Job);
+    }
+
+    [Theory]
+    [InlineData("Elsewhere", FileName)]
+    [InlineData(null, "SkyUI-copy.7z")]
+    public async Task AFileSavedInAnotherFolderOrUnderAnotherNameIsDownloadedHere(string? otherFolder, string otherName)
+    {
+        string folder = otherFolder is null ? TestData.TargetDirectory : Path.Combine(TestData.TargetDirectory, otherFolder);
+        RecordingDownloadService downloads = new(RecordingDownloadService.Job(NexusFile, folder, otherName, Completed));
+        FakeLibraryStorage storage = new();
+        storage.Add(Path.Combine(folder, otherName));
+        storage.Add(Path.Combine(TestData.TargetDirectory, FileName));
+
+        LinkDownload result = await AddAsync(downloads, [ScriptedLinkRecognizer.Always(NexusFile)], storage: storage);
+
+        Assert.False(result.AlreadySaved);
+        Assert.Single(downloads.Enqueued);
+    }
+
     private static Task<LinkDownload> AddAsync(
         RecordingDownloadService downloads,
         IModSource[] sources,
-        string? fileName = null)
-        => new LinkDownloads(new SourceRegistry(sources), downloads)
+        string? fileName = null,
+        FakeLibraryStorage? storage = null)
+        => new LinkDownloads(new SourceRegistry(sources), downloads, storage ?? new FakeLibraryStorage())
             .AddAsync(Link, TestData.TargetDirectory, fileName, TestContext.Current.CancellationToken);
 }

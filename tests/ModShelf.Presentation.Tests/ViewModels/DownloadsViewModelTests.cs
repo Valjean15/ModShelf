@@ -306,6 +306,23 @@ public sealed class DownloadsViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task SavingAFileSavedThereAlreadySaysSo()
+    {
+        await _harness.StartAsync();
+        _harness.Dialogs.Folders.Enqueue(TestData.Folder);
+        DownloadJobSnapshot job = TestData.Job(status: Domain.Downloads.DownloadJobStatus.Completed, folder: TestData.Folder);
+        _harness.Links.Answer = (_, _, _) => new LinkDownload(job, AlreadyQueued: false, AlreadySaved: true);
+        Screen.Link = TestData.ModPage.AbsoluteUri;
+
+        await Screen.AddToFolderCommand.ExecuteAsync(null);
+
+        Assert.Equal($"{job.FileName} is saved in {TestData.Folder} already.", Screen.Message);
+        Assert.False(Screen.IsMessageAProblem);
+        Assert.Equal(string.Empty, Screen.Link);
+        Assert.Empty(Screen.Jobs);
+    }
+
+    [Fact]
     public async Task SaveToAFolderDownloadsIntoTheFolderPicked()
     {
         await _harness.StartAsync();

@@ -285,11 +285,18 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
 
     /// <summary>
     /// Lists the job a link added, and says so. A job added earlier goes on: a paused one resumes, and a failed one is
-    /// retried.
+    /// retried. A file saved there already only says so.
     /// </summary>
     private async Task FollowAsync(LinkDownload added, CancellationToken cancellationToken)
     {
         DownloadJobSnapshot job = added.Job;
+        if (added.AlreadySaved)
+        {
+            Link = string.Empty;
+            Say(Text.Format(Strings.DownloadsSavedAlready, job.FileName, job.TargetDirectory));
+            return;
+        }
+
         _uiThread.Post(() => ShowNew(job));
         Link = string.Empty;
         if (!added.AlreadyQueued)

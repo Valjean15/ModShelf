@@ -878,4 +878,8 @@
     <value>Another ModShelf process, such as the command line, is running the downloads. Try again once it has finished.</value>
     <comment>When a download is refused because another process runs the queue.</comment>
   </data>
+  <data name="DownloadsSavedAlready" xml:space="preserve">
+    <value>{0} is saved in {1} already.</value>
+    <comment>{0} is the file, {1} its folder: a download asked for again once it finished.</comment>
+  </data>
 </root>

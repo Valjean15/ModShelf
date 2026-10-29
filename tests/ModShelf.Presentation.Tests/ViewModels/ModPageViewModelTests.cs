@@ -172,6 +172,19 @@ public sealed class ModPageViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task SavingAFileSavedThereAlreadySaysSo()
+    {
+        await _harness.StartAsync();
+        _harness.Dialogs.Folders.Enqueue(TestData.Folder);
+        _harness.Links.Answer = (_, folder, _) => new LinkDownload(TestData.Job("file-1.7z", folder: folder), AlreadyQueued: false, AlreadySaved: true);
+        ModFileViewModel file = await OpenFileAsync();
+
+        await file.SaveToFolderCommand.ExecuteAsync(null);
+
+        Assert.Equal($"file-1.7z is saved in {TestData.Folder} already.", file.Note);
+    }
+
+    [Fact]
     public async Task FilesOfAHiddenModOrWithoutALinkCantBeDownloaded()
     {
         await _harness.StartAsync();

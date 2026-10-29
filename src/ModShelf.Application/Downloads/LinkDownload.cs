@@ -7,4 +7,8 @@ namespace ModShelf.Application.Downloads;
 /// <param name="AlreadyQueued">
 /// Whether the job existed already, unfinished, possibly Paused or Failed; if so, nothing new was added.
 /// </param>
-public sealed record LinkDownload(DownloadJobSnapshot Job, bool AlreadyQueued);
+/// <param name="AlreadySaved">
+/// Whether a finished job saved the file there already, and it's still there; if so, <paramref name="Job"/> is that
+/// job, nothing new was added, and nothing downloads.
+/// </param>
+public sealed record LinkDownload(DownloadJobSnapshot Job, bool AlreadyQueued, bool AlreadySaved = false);

@@ -1,3 +1,4 @@
+using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Sources;
 using ModShelf.Domain.Downloads;
 using ModShelf.Sources.Abstractions.Links;
@@ -16,14 +17,17 @@ internal sealed class LinkDownloads : ILinkDownloads
 {
     private readonly ISourceRegistry _sources;
     private readonly IDownloadService _downloads;
+    private readonly ILibraryStorage _storage;
 
-    public LinkDownloads(ISourceRegistry sources, IDownloadService downloads)
+    public LinkDownloads(ISourceRegistry sources, IDownloadService downloads, ILibraryStorage storage)
     {
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(downloads);
+        ArgumentNullException.ThrowIfNull(storage);
 
         _sources = sources;
         _downloads = downloads;
+        _storage = storage;
     }
 
     public async Task<LinkDownload> AddAsync(Uri link, string targetDirectory, string? fileName, CancellationToken cancellationToken)
@@ -39,6 +43,18 @@ internal sealed class LinkDownloads : ILinkDownloads
         string name = fileName
             ?? recognized.SuggestedFileName
             ?? throw new ArgumentException("The link doesn't say what the file is called, so a file name is needed.", nameof(fileName));
+
+        // A file saved there already isn't downloaded again: a new job would only fail on it.
+        IReadOnlyList<DownloadJobSnapshot> jobs = await _downloads.ListAsync(cancellationToken).ConfigureAwait(false);
+        DownloadJobSnapshot? saved = jobs.LastOrDefault(job =>
+            job.Status == DownloadJobStatus.Completed
+            && job.File == recognized.File
+            && string.Equals(job.TargetDirectory, targetDirectory, StringComparison.Ordinal)
+            && string.Equals(job.FileName, name, StringComparison.Ordinal));
+        if (saved is not null && _storage.FileExists(Path.Combine(targetDirectory, name)))
+        {
+            return new LinkDownload(saved, AlreadyQueued: false, AlreadySaved: true);
+        }
 
         return await AddRecognizedAsync(_downloads, recognized, link, targetDirectory, name, cancellationToken).ConfigureAwait(false);
     }

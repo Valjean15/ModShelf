@@ -15,9 +15,11 @@ public interface ILinkDownloads
     /// <param name="fileName">The name to save the file under, or null for the name the link suggests.</param>
     /// <returns>
     /// The new job; or, when an unfinished job already downloads the same file under the same name to the
-    /// same folder, that job, so that adding a link twice doesn't download it twice.
+    /// same folder, that job, so that adding a link twice doesn't download it twice; or, when a finished job saved it
+    /// there already and the file is still there, that job (<see cref="LinkDownload.AlreadySaved"/>).
     /// </returns>
     /// <exception cref="UnsupportedLinkException">No registered source recognizes the link.</exception>
+    /// <exception cref="DownloadQueueBusyException">Another process runs the download queue.</exception>
     /// <exception cref="ArgumentException">
     /// The link is malformed, or neither <paramref name="fileName"/> nor the link gives a valid file name.
     /// </exception>

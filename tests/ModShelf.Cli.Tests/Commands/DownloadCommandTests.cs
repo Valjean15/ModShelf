@@ -99,6 +99,21 @@ public sealed class DownloadCommandTests : IAsyncDisposable
         await AssertFinishedFromThePartialFileAsync();
     }
 
+    [Fact]
+    public async Task TheSameCommandAfterTheFileIsSavedSaysSo()
+    {
+        CliResult saved = await RunAsync(DownloadCommand);
+
+        CliResult again = await RunAsync(DownloadCommand);
+
+        Assert.Equal((Done, Done), (saved.ExitCode, again.ExitCode));
+        Assert.Contains($"{Destination} is saved already.", again.Output, StringComparison.Ordinal);
+        Assert.Equal([null], _server.Ranges);
+        string queue = (await RunAsync(["queue", "list"])).Output;
+        Assert.Single(queue.Split('\n'), line => line.Contains(FileName, StringComparison.Ordinal));
+        Assert.DoesNotContain("Failed", queue, StringComparison.Ordinal);
+    }
+
     private static string HashOf(byte[] bytes) => Convert.ToHexStringLower(SHA256.HashData(bytes));
 
     private long PartialLength() => File.Exists(PartialFile) ? new FileInfo(PartialFile).Length : 0;
