@@ -79,6 +79,7 @@ internal static class DesktopHost
             builder.Services.AddLibraryDatabase();
             builder.Services.AddSettingsFile();
             builder.Services.AddLogFiles(LogFilePrefix);
+            builder.Services.AddSingleInstance();
         }
         else
         {
@@ -86,6 +87,7 @@ internal static class DesktopHost
             builder.Services.AddLibraryDatabase(databasePath);
             builder.Services.AddSettingsFile(Path.Combine(Path.GetDirectoryName(databasePath)!, "settings.json"));
             builder.Services.AddLogFiles(Path.Combine(Path.GetDirectoryName(databasePath)!, "logs"), LogFilePrefix);
+            builder.Services.AddSingleInstance(Path.GetDirectoryName(databasePath)!);
         }
 
         builder.Services.AddPlatformServices(SecretStoreOptionsFrom(builder.Configuration));

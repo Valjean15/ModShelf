@@ -1266,4 +1266,8 @@
     <value>Settings are kept in {0}.</value>
     <comment>{0} is the settings file's path.</comment>
   </data>
+  <data name="StartupNotAnswering" xml:space="preserve">
+    <value>ModShelf is running already, but didn't answer. Quit the ModShelf that's running, or end it if it won't quit, then start ModShelf again.</value>
+    <comment>The window shown when another ModShelf holds the library but doesn't answer a second launch.</comment>
+  </data>
 </root>

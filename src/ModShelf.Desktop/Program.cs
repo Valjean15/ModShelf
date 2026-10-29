@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+using ModShelf.Application.Desktop.Ports;
 using ModShelf.Desktop.Hosting;
 using ModShelf.Desktop.Views.Dialogs;
 using ModShelf.Infrastructure.Logging;
@@ -25,6 +26,25 @@ internal static partial class Program
     public static int Main(string[] args)
     {
         using IHost host = DesktopHost.Create(args);
+        ILogger logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(Program).FullName!);
+
+        // One app per library: a second launch shows the one running instead, before this one starts any work.
+        ISingleInstance instance = host.Services.GetRequiredService<ISingleInstance>();
+        try
+        {
+            if (!instance.TryClaim(args))
+            {
+                LogHandedOver(logger);
+                return 0;
+            }
+        }
+        catch (TimeoutException exception)
+        {
+            LogNotAnswering(logger, exception);
+            ShowProblem(new MessageDialogContent(Strings.StartupProblemTitle, Strings.StartupNotAnswering, Strings.DialogClose, null), args);
+            return 1;
+        }
+
         try
         {
             host.Start();
@@ -32,7 +52,6 @@ internal static partial class Program
         catch (Exception exception)
         {
             // Such as a library database that can't be opened: said in a window, rather than the app closing unseen.
-            ILogger logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(Program).FullName!);
             LogCantStart(logger, exception);
             string message = exception is LibraryDatabaseUnavailableException
                 ? exception.Message
@@ -41,14 +60,13 @@ internal static partial class Program
                     CompositeFormat.Parse(Strings.StartupFailed),
                     exception.Message,
                     host.Services.GetRequiredService<LogFolder>().Path);
-            MessageDialogContent problem = new(Strings.StartupProblemTitle, message, Strings.DialogClose, null);
-            Configure(AppBuilder.Configure(() => new App(problem))).StartWithClassicDesktopLifetime(args);
+            ShowProblem(new MessageDialogContent(Strings.StartupProblemTitle, message, Strings.DialogClose, null), args);
             return 1;
         }
 
         try
         {
-            return CreateAppBuilder(host.Services).StartWithClassicDesktopLifetime(args);
+            return CreateAppBuilder(host.Services, instance).StartWithClassicDesktopLifetime(args);
         }
         finally
         {
@@ -68,9 +86,15 @@ internal static partial class Program
     public static AppBuilder BuildAvaloniaApp()
         => Configure(AppBuilder.Configure<App>());
 
-    private static AppBuilder CreateAppBuilder(IServiceProvider services)
+    private static AppBuilder CreateAppBuilder(IServiceProvider services, ISingleInstance instance)
         => Configure(AppBuilder.Configure(
-            () => new App(() => services.GetRequiredService<MainWindowViewModel>())));
+            () => new App(() => services.GetRequiredService<MainWindowViewModel>(), instance)));
+
+    /// <summary>
+    /// Shows why ModShelf can't start, in a window of its own, until it's closed.
+    /// </summary>
+    private static void ShowProblem(MessageDialogContent problem, string[] args)
+        => Configure(AppBuilder.Configure(() => new App(problem))).StartWithClassicDesktopLifetime(args);
 
     private static AppBuilder Configure(AppBuilder builder)
         => builder

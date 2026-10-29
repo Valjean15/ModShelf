@@ -3,9 +3,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 using ModShelf.Application.Accounts.Ports;
+using ModShelf.Application.Desktop.Ports;
 using ModShelf.Application.Notifications.Ports;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Platform.Browser;
+using ModShelf.Platform.Instances;
 using ModShelf.Platform.OAuth;
 using ModShelf.Platform.Secrets;
 using ModShelf.Testing;
@@ -58,6 +60,19 @@ public sealed class PlatformServiceCollectionExtensionsTests : IDisposable
         object notices = Single<INotificationService>(services).ImplementationFactory!(new StubServiceProvider());
 
         Assert.IsAssignableFrom<INotificationService>(notices);
+    }
+
+    [Fact]
+    public void RegistersTheSingleInstanceForTheLibrarysFolder()
+    {
+        ServiceCollection services = new();
+        services.AddSingleInstance(_folder.Path);
+
+        using PipeSingleInstance instance = Assert.IsType<PipeSingleInstance>(Single<ISingleInstance>(services).ImplementationFactory!(new StubServiceProvider()));
+
+        Assert.True(instance.TryClaim([]));
+        Assert.True(File.Exists(Path.Combine(_folder.Path, "desktop.lock")));
+        Assert.Equal(ServiceLifetime.Singleton, Single<ISingleInstance>(services).Lifetime);
     }
 
     [Fact]

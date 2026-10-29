@@ -2,10 +2,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Accounts.Ports;
+using ModShelf.Application.Desktop.Ports;
 using ModShelf.Application.Notifications.Ports;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Platform.Browser;
 using ModShelf.Platform.Folders;
+using ModShelf.Platform.Instances;
 using ModShelf.Platform.Notifications;
 using ModShelf.Platform.OAuth;
 using ModShelf.Platform.Secrets;
@@ -39,5 +41,33 @@ public static class PlatformServiceCollectionExtensions
             provider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(NotificationServices).FullName!)));
 
         return services;
+    }
+
+    /// <summary>
+    /// Registers the desktop app's <see cref="ISingleInstance"/>: one app at a time for the library in
+    /// <paramref name="folder"/>, which defaults to ModShelf's folder in the user's local application data, where the
+    /// library database is unless it's moved. A second launch waits up to 5 seconds for the running app to answer.
+    /// </summary>
+    /// <param name="folder">The folder of the library database, an absolute path.</param>
+    /// <exception cref="InvalidOperationException">No folder is given, and the system has none for this user's local application data.</exception>
+    public static IServiceCollection AddSingleInstance(this IServiceCollection services, string? folder = null)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        string libraryFolder = folder ?? DefaultFolder();
+        services.AddSingleton<ISingleInstance>(provider => new PipeSingleInstance(
+            libraryFolder,
+            TimeSpan.FromSeconds(5),
+            provider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(PipeSingleInstance).FullName!)));
+
+        return services;
+    }
+
+    private static string DefaultFolder()
+    {
+        string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        return string.IsNullOrEmpty(appData)
+            ? throw new InvalidOperationException("This user has no local application data folder for ModShelf.")
+            : Path.Combine(appData, "ModShelf");
     }
 }
