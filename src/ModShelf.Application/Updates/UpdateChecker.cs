@@ -115,8 +115,9 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
         // Mods checked within the feed's reach, less the margin, are asked about all at once. One checked later than now
         // is asked about on its own, since when it was checked isn't known; so is one whose library side changed since
         // its check, since the feed only says what changed on the site.
+        // The feed takes the question by the site's clock when it's asked, which may be minutes into the check.
         IUpdateFeed? feed = _sources.Find<IUpdateFeed>(game.Source);
-        DateTimeOffset reach = feed is null ? DateTimeOffset.MaxValue : check.StartedAt - feed.Reach + ReachSlack;
+        DateTimeOffset reach = feed is null ? DateTimeOffset.MaxValue : _timeProvider.GetUtcNow() - feed.Reach + ReachSlack;
         LibraryMod[] byFeed =
         [
             .. mods.Where(mod => !mod.NeedsFullCheck
@@ -128,11 +129,18 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
         if (byFeed.Length > 0)
         {
             DateTimeOffset since = byFeed.Min(mod => mod.CheckedAt!.Value) - Margin;
-            IReadOnlyList<ModUpdate> changed;
+            IReadOnlyList<ModUpdate>? changed;
             try
             {
                 check.Requests++;
                 changed = await feed!.GetUpdatesAsync(game, since, cancellationToken).ConfigureAwait(false);
+            }
+            catch (ArgumentOutOfRangeException exception)
+            {
+                // The feed's clock found the question beyond its reach after all: its mods are asked about one by one.
+                LogFeedOutOfReach(_logger, exception, game.Key, game.Source.Value);
+                toAsk.AddRange(byFeed);
+                changed = null;
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
@@ -147,12 +155,12 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
             }
 
             Dictionary<ModRef, ModUpdate> byMod = [];
-            foreach (ModUpdate update in changed)
+            foreach (ModUpdate update in changed ?? [])
             {
                 byMod[update.Mod] = update;
             }
 
-            foreach (LibraryMod mod in byFeed)
+            foreach (LibraryMod mod in changed is null ? [] : byFeed)
             {
                 // A feed that doesn't say when the files changed is taken to mean they might have.
                 if (byMod.TryGetValue(mod.Mod, out ModUpdate? update) && !(update.FilesUpdatedAt < mod.CheckedAt!.Value - Margin))

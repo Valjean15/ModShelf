@@ -242,6 +242,38 @@ public sealed class UpdateCheckerTests : IDisposable
     }
 
     [Fact]
+    public async Task AGameAskedAboutLaterInALongCheckGoesByTheClockThen()
+    {
+        // The feed takes "since" by the site's clock when it's asked: minutes into a check, a mod checked at the edge of
+        // its reach when the check began is beyond it.
+        DateTimeOffset edge = TestData.Now - _feed.Reach + TimeSpan.FromMinutes(11.5);
+        _library.Add(LibraryMod.Watch(new ModRef(Fallout, "5"), "Mod 5", null, null, TestData.Now.AddDays(-90)).Checked(edge));
+        _site.Hold = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        Task<UpdateCheck> checking = CheckAsync(_feed);
+        await WaitUntilAsync(() => _site.AskedFor.Count > 0);
+
+        _time.Advance(TimeSpan.FromMinutes(5));
+        _site.Hold.SetResult();
+        UpdateCheck check = await checking.WaitAsync(TimeSpan.FromSeconds(10), Cancellation);
+
+        Assert.Empty(check.Failures);
+        Assert.Contains("GetFilesAsync 5", _site.AskedFor);
+    }
+
+    [Fact]
+    public async Task AFeedThatFindsTheQuestionBeyondItsReachLeavesTheModsToBeAskedAbout()
+    {
+        await CheckedAtAsync(TestData.Now.AddHours(-2));
+        _feed.Failure = new ArgumentOutOfRangeException("since", "Too far back.");
+
+        UpdateCheck check = await CheckAsync(_feed);
+
+        Assert.Empty(check.Failures);
+        Assert.Equal((3, 4), (check.Checked, check.Requests));
+        Assert.Equal(["GetFilesAsync 1", "GetFilesAsync 2", "GetFilesAsync 3"], _site.AskedFor);
+    }
+
+    [Fact]
     public async Task ARefusedAccountStopsAskingThatSite()
     {
         _library.Add(LibraryMod.Watch(new ModRef(Fallout, "5"), "Mod 5", null, null, TestData.Now.AddDays(-9)));
