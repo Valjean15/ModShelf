@@ -67,6 +67,22 @@ public sealed class EncryptedFileSecretStoreTests : SecretStoreContractTests
     }
 
     [Fact]
+    public async Task AMachineIdThatCantBeReadIsReadAgainNextTime()
+    {
+        int reads = 0;
+        EncryptedFileSecretStore store = new(_folder.Path, readMachineId: () => ++reads == 1 ? throw new IOException("Busy.") : "machine-a");
+        EncryptedFileSecretStore same = new(_folder.Path, machineId: "machine-a");
+        CancellationToken cancellation = TestContext.Current.CancellationToken;
+
+        await Assert.ThrowsAsync<IOException>(() => store.WriteAsync("account/test", "secret", cancellation));
+        await store.WriteAsync("account/test", "secret", cancellation);
+        await store.ReadAsync("account/test", cancellation);
+
+        Assert.Equal("secret", await same.ReadAsync("account/test", cancellation));
+        Assert.Equal(2, reads);
+    }
+
+    [Fact]
     public async Task OnlyTheUserCanReadTheFiles()
     {
         Assert.SkipWhen(OperatingSystem.IsWindows(), "Unix file permissions don't apply on Windows.");

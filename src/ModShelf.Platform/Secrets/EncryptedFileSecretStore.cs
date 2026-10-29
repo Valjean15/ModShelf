@@ -25,7 +25,9 @@ internal sealed class EncryptedFileSecretStore : ISecretStore
     private static readonly string[] MachineIdFiles = ["/etc/machine-id", "/var/lib/dbus/machine-id"];
 
     private readonly string _folder;
-    private readonly Lazy<byte[]> _machineId;
+    private readonly Func<string> _readMachineId;
+    private readonly Lock _machineIdGate = new();
+    private byte[]? _machineId;
 
     /// <param name="folder">The folder for the encrypted files, such as <c>~/.local/share/ModShelf/Secrets</c>.</param>
     /// <param name="machineId">
@@ -33,6 +35,16 @@ internal sealed class EncryptedFileSecretStore : ISecretStore
     /// a random ID kept in <paramref name="folder"/>.
     /// </param>
     public EncryptedFileSecretStore(string folder, string? machineId = null)
+        : this(folder, machineId is null ? null : () => machineId)
+    {
+    }
+
+    /// <param name="folder">The folder for the encrypted files.</param>
+    /// <param name="readMachineId">
+    /// Reads what ties the secrets to this computer, the first time it's needed, and again after it fails; by default,
+    /// as the other constructor says.
+    /// </param>
+    internal EncryptedFileSecretStore(string folder, Func<string>? readMachineId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(folder);
         if (!AesGcm.IsSupported)
@@ -41,7 +53,7 @@ internal sealed class EncryptedFileSecretStore : ISecretStore
         }
 
         _folder = folder;
-        _machineId = new Lazy<byte[]>(() => Encoding.UTF8.GetBytes(machineId ?? ReadMachineId()));
+        _readMachineId = readMachineId ?? ReadMachineId;
     }
 
     public bool IsProtectedByOs => false;
@@ -118,10 +130,22 @@ internal sealed class EncryptedFileSecretStore : ISecretStore
     private byte[] KeyFor(string name)
         => HKDF.DeriveKey(
             HashAlgorithmName.SHA256,
-            _machineId.Value,
+            MachineId(),
             outputLength: 32,
             Salt,
             Encoding.UTF8.GetBytes($"{Environment.UserName}\n{name}"));
+
+    /// <summary>
+    /// The machine ID, read once it's needed. One that can't be read is read again next time, rather than every secret
+    /// failing until ModShelf restarts.
+    /// </summary>
+    private byte[] MachineId()
+    {
+        lock (_machineIdGate)
+        {
+            return _machineId ??= Encoding.UTF8.GetBytes(_readMachineId());
+        }
+    }
 
     private string ReadMachineId()
     {
