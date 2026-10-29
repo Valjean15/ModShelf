@@ -128,6 +128,55 @@ public sealed class JsonSettingsStoreTests : IDisposable
         Assert.StartsWith($"The settings in {FilePath} can't be read:", refused.Message, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task SaysWhichFileItCantOpen()
+    {
+        Directory.CreateDirectory(FilePath);
+
+        InvalidDataException refused = await Assert.ThrowsAsync<InvalidDataException>(() => Store().LoadAsync(Cancellation));
+
+        Assert.StartsWith($"The settings in {FilePath} can't be read:", refused.Message, StringComparison.Ordinal);
+        Assert.True(refused.InnerException is IOException or UnauthorizedAccessException);
+    }
+
+    [Fact]
+    public async Task SaysWhichFileItCantSave()
+    {
+        // The folder the file goes in is a file.
+        string folder = Path.GetDirectoryName(FilePath)!;
+        await File.WriteAllTextAsync(folder, "not a folder", Cancellation);
+
+        IOException refused = await Assert.ThrowsAsync<IOException>(() => Store().SaveAsync(new AppSettings { NotifyOfUpdates = false }, Cancellation));
+
+        Assert.StartsWith($"The settings couldn't be saved to {FilePath}:", refused.Message, StringComparison.Ordinal);
+        Assert.Equal([folder], Directory.GetFileSystemEntries(_folder.Path));
+    }
+
+    [Fact]
+    public async Task AFileThatCantBeReplacedLeavesNoTemporaryFileBehind()
+    {
+        // A folder where the file goes can't be replaced by it.
+        string folder = Path.GetDirectoryName(FilePath)!;
+        Directory.CreateDirectory(Path.Combine(FilePath, "taken"));
+
+        Exception? refused = await Record.ExceptionAsync(() => JsonSettingsStore.ReplaceAsync(FilePath, "{}", Cancellation));
+
+        Assert.True(refused is IOException or UnauthorizedAccessException, refused?.ToString());
+        Assert.Equal([FilePath], Directory.GetFileSystemEntries(folder));
+    }
+
+    [Fact]
+    public async Task EachSaveWritesItsOwnTemporaryFile()
+    {
+        // Left by a save that was cut short, such as one of an earlier version.
+        await WriteAsync("{}");
+        Directory.CreateDirectory(FilePath + ".tmp");
+
+        await Store().SaveAsync(new AppSettings { NotifyOfUpdates = false }, Cancellation);
+
+        Assert.False((await Store().LoadAsync(Cancellation)).NotifyOfUpdates);
+    }
+
     [Theory]
     [InlineData("all", "\"all\"")]
     [InlineData("archive", "\"archive\"")]

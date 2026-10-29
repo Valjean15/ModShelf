@@ -59,7 +59,9 @@ internal sealed class JsonSettingsStore : ISettingsStore
 
     public string Location => _path;
 
-    /// <exception cref="InvalidDataException">The file isn't JSON, or holds a setting no value can have.</exception>
+    /// <exception cref="InvalidDataException">
+    /// The file can't be opened, isn't JSON, or holds a setting no value can have.
+    /// </exception>
     public async Task<AppSettings> LoadAsync(CancellationToken cancellationToken)
     {
         JsonObject? file = await ReadAsync(cancellationToken).ConfigureAwait(false);
@@ -104,6 +106,8 @@ internal sealed class JsonSettingsStore : ISettingsStore
         }
     }
 
+    /// <exception cref="InvalidDataException">The file there can't be read.</exception>
+    /// <exception cref="IOException">The file can't be written.</exception>
     public async Task SaveAsync(AppSettings settings, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(settings);
@@ -169,11 +173,42 @@ internal sealed class JsonSettingsStore : ISettingsStore
             file[Updates] = updatesSection;
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
-        string temporary = _path + ".tmp";
-        await File.WriteAllTextAsync(temporary, file.ToJsonString(Writing) + Environment.NewLine, new UTF8Encoding(false), cancellationToken)
-            .ConfigureAwait(false);
-        File.Move(temporary, _path, overwrite: true);
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
+            await ReplaceAsync(_path, file.ToJsonString(Writing) + Environment.NewLine, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            throw new IOException($"The settings couldn't be saved to {_path}: {exception.Message}", exception);
+        }
+    }
+
+    /// <summary>
+    /// Writes <paramref name="text"/> to a temporary file of its own beside <paramref name="path"/>, then puts it in
+    /// place in one step. When that fails, the temporary file goes too.
+    /// </summary>
+    internal static async Task ReplaceAsync(string path, string text, CancellationToken cancellationToken)
+    {
+        string temporary = $"{path}.{Guid.NewGuid():N}.tmp";
+        try
+        {
+            await File.WriteAllTextAsync(temporary, text, new UTF8Encoding(false), cancellationToken).ConfigureAwait(false);
+            File.Move(temporary, path, overwrite: true);
+        }
+        catch
+        {
+            try
+            {
+                File.Delete(temporary);
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                // What went wrong first says more.
+            }
+
+            throw;
+        }
     }
 
     private static string? Text(JsonObject section, string name, string sectionName = Library) => section[name] switch
@@ -207,7 +242,7 @@ internal sealed class JsonSettingsStore : ISettingsStore
     }
 
     /// <returns>The file's object, or null when there's no file yet.</returns>
-    /// <exception cref="InvalidDataException">The file isn't a JSON object.</exception>
+    /// <exception cref="InvalidDataException">The file can't be opened, or isn't a JSON object.</exception>
     private async Task<JsonObject?> ReadAsync(CancellationToken cancellationToken)
     {
         string text;
@@ -218,6 +253,11 @@ internal sealed class JsonSettingsStore : ISettingsStore
         catch (Exception exception) when (exception is FileNotFoundException or DirectoryNotFoundException)
         {
             return null;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            // Such as a file another program has locked, or a folder in its place.
+            throw new InvalidDataException($"The settings in {_path} can't be read: {exception.Message}", exception);
         }
 
         try

@@ -177,6 +177,19 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         Assert.Contains("Fix the file, or delete it to start again.", set.Errors, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task SaysWhenTheSettingsFileCantBeOpened()
+    {
+        Directory.CreateDirectory(SettingsFile);
+
+        CliResult shown = await RunAsync("show");
+        CliResult set = await RunAsync("set", "updates.notify", "false");
+
+        Assert.Equal((Failed, Failed), (shown.ExitCode, set.ExitCode));
+        Assert.StartsWith($"The settings in {SettingsFile} can't be read:", shown.Errors, StringComparison.Ordinal);
+        Assert.StartsWith($"The settings in {SettingsFile} can't be read:", set.Errors, StringComparison.Ordinal);
+    }
+
     /// <summary>
     /// The value <c>settings show</c> gives a setting.
     /// </summary>

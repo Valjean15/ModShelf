@@ -6,6 +6,10 @@ namespace ModShelf.Application.Settings;
 /// <summary>
 /// Reads and changes ModShelf's settings, applying their defaults and rules.
 /// </summary>
+/// <remarks>
+/// Each change throws <see cref="InvalidDataException"/> when the stored settings can't be read, and
+/// <see cref="IOException"/> when they can't be stored, naming where they're kept.
+/// </remarks>
 public interface ISettingsService
 {
     /// <summary>

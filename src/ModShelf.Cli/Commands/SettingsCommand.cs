@@ -200,7 +200,7 @@ internal static class SettingsCommand
             await environment.Error.WriteLineAsync(exception.MessageForUser()).ConfigureAwait(false);
             return ExitCodes.BadInput;
         }
-        catch (Exception exception) when (exception is InvalidOperationException or InvalidDataException)
+        catch (Exception exception) when (exception is InvalidOperationException or InvalidDataException or IOException)
         {
             await environment.Error.WriteLineAsync(exception.Message).ConfigureAwait(false);
             return ExitCodes.Failed;
