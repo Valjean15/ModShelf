@@ -75,6 +75,13 @@ internal static partial class DownloadCommand
             return ExitCodes.BadInput;
         }
 
+        if (folder is not null && File.Exists(folder.FullName))
+        {
+            await environment.Error.WriteLineAsync($"{folder.FullName} is a file. Give --to a folder; it's created if it doesn't exist.")
+                .ConfigureAwait(false);
+            return ExitCodes.BadInput;
+        }
+
         string? targetDirectory = folder is null ? null : Path.TrimEndingDirectorySeparator(folder.FullName);
 
         using IHost host = environment.BuildHost(true);
@@ -185,7 +192,7 @@ internal static partial class DownloadCommand
     {
         await environment.Error.WriteLineAsync(waitingForHandoff
                 ? "Stopped. The download is still waiting to be started on the site; run the same command again to continue."
-                : "Stopped. The partly downloaded file is kept; run the same command again to continue.")
+                : "Stopped. What's downloaded so far is kept; run the same command again to continue.")
             .ConfigureAwait(false);
         return ExitCodes.Interrupted;
     }

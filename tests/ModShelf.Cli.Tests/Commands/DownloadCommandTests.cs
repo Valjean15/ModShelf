@@ -87,6 +87,7 @@ public sealed class DownloadCommandTests : IAsyncDisposable
         }
 
         Assert.Equal(Interrupted, stopped.ExitCode);
+        Assert.Contains("Stopped. What's downloaded so far is kept; run the same command again to continue.", stopped.Errors, StringComparison.Ordinal);
         Assert.Equal(StopsAt, PartialLength());
         Assert.False(File.Exists(Destination));
         Assert.Contains("Queued", (await RunAsync(["queue", "list"])).QueueRowFor(FileName), StringComparison.Ordinal);

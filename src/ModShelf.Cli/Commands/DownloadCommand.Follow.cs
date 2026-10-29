@@ -34,6 +34,7 @@ internal static partial class DownloadCommand
         private readonly ProgressDisplay _display = new(environment.Output, interactive: environment.OutputIsTerminal);
         private Task<string?>? _typed;
         private bool _waitingForHandoff;
+        private string? _saved;
 
         /// <param name="updates">Every job's snapshots, watched since before the job was read.</param>
         /// <param name="stopWatching">Ends <paramref name="updates"/>.</param>
@@ -95,6 +96,15 @@ internal static partial class DownloadCommand
 
             // The updates end when Ctrl+C cancels the token, or when the engine stops on its own.
             _display.Finish();
+            if (cancellationToken.IsCancellationRequested && _saved is { } saved)
+            {
+                // Ctrl+C while the file was being added to the library.
+                await environment.Error.WriteLineAsync(
+                        $"Stopped. {saved} is saved; it's added to the library the next time a download command runs, or the desktop app starts.")
+                    .ConfigureAwait(false);
+                return ExitCodes.Interrupted;
+            }
+
             if (cancellationToken.IsCancellationRequested)
             {
                 return await StoppedAsync(environment, _waitingForHandoff).ConfigureAwait(false);
@@ -113,7 +123,8 @@ internal static partial class DownloadCommand
             {
                 case DownloadJobStatus.Completed:
                     _display.Finish();
-                    environment.Output.WriteLine($"Saved {Path.Combine(update.TargetDirectory, update.FileName)}");
+                    _saved = Path.Combine(update.TargetDirectory, update.FileName);
+                    environment.Output.WriteLine($"Saved {_saved}");
                     return library is null ? ExitCodes.Done : await RecordAsync(library, update, cancellationToken).ConfigureAwait(false);
 
                 case DownloadJobStatus.Failed:
@@ -216,8 +227,10 @@ internal static partial class DownloadCommand
 
                 return ExitCodes.Done;
             }
-            catch (Exception exception) when (exception is ArgumentException or InvalidDataException or HttpRequestException)
+            catch (Exception exception) when (exception is not OperationCanceledException)
             {
+                // Whatever went wrong, such as a site that refused the account or a database that couldn't be written,
+                // the file is saved, and the user should know that first.
                 string reason = exception is ArgumentException refused ? refused.MessageForUser() : exception.Message;
                 await environment.Error.WriteLineAsync($"The file is saved, but it couldn't be added to the library: {reason}")
                     .ConfigureAwait(false);

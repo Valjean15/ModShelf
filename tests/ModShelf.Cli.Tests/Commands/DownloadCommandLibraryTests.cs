@@ -1,5 +1,9 @@
 using System.Security.Cryptography;
 
+using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.DependencyInjection;
+
+using ModShelf.Application.Library.Ports;
 using ModShelf.Cli.Tests.Common;
 using ModShelf.Cli.Tests.Fakes;
 using ModShelf.Testing;
@@ -19,6 +23,7 @@ public sealed class DownloadCommandLibraryTests : IAsyncDisposable
     private const int Failed = 1;
     private const int BadInput = 2;
     private const int Waiting = 3;
+    private const int Interrupted = 130;
 
     private static readonly byte[] Content = RandomNumberGenerator.GetBytes(64 * 1024);
 
@@ -194,6 +199,53 @@ public sealed class DownloadCommandLibraryTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task ADownloadTheLibraryCantRecordIsSaidToBeSaved()
+    {
+        await using InProcessCli cli = WithLibraryChanges(_ => throw new SqliteException("SQLite Error 5: 'database is locked'.", 5));
+
+        CliResult result = await cli.RunAsync(["download", HandoffLink("3").AbsoluteUri], Cancellation);
+
+        Assert.Equal(Failed, result.ExitCode);
+        Assert.Contains($"Saved {Path.Combine(ModFolderIn(cli), FileNameOf("3"))}", result.Output, StringComparison.Ordinal);
+        Assert.Equal("The file is saved, but it couldn't be added to the library: SQLite Error 5: 'database is locked'.", result.Errors.Trim());
+    }
+
+    [Fact]
+    public async Task CtrlCWhileTheDownloadIsRecordedSaysTheFileIsSaved()
+    {
+        TaskCompletionSource recording = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        await using InProcessCli cli = WithLibraryChanges(async cancellationToken =>
+        {
+            recording.TrySetResult();
+            await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+        });
+        await using CliRun run = cli.Start(["download", HandoffLink("3").AbsoluteUri], TextReader.Null);
+        await run.WaitForOutputAsync("Saved ", Cancellation);
+        await recording.Task.WaitAsync(TimeSpan.FromSeconds(60), Cancellation);
+
+        await run.PressCtrlCAsync();
+        CliResult stopped = await run.WaitForExitAsync(Cancellation);
+
+        Assert.Equal(Interrupted, stopped.ExitCode);
+        Assert.Equal(
+            $"Stopped. {Path.Combine(ModFolderIn(cli), FileNameOf("3"))} is saved; it's added to the library the next time a download command runs, or the desktop app starts.",
+            stopped.Errors.Trim());
+    }
+
+    [Fact]
+    public async Task AFolderThatsAFileIsRefusedBeforeAnythingIsQueued()
+    {
+        string file = Path.Combine(_folder.Path, "notes.txt");
+        await File.WriteAllTextAsync(file, "not a folder", Cancellation);
+
+        CliResult refused = await RunAsync("download", _server.FileUrl.AbsoluteUri, "--to", file);
+
+        Assert.Equal(BadInput, refused.ExitCode);
+        Assert.Equal($"{file} is a file. Give --to a folder; it's created if it doesn't exist.", refused.Errors.Trim());
+        Assert.Contains("The queue is empty.", (await RunAsync("queue", "list")).Output, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task ANameNeedsAFolder()
     {
         CliResult refused = await RunAsync("download", HandoffLink("3").AbsoluteUri, "--name", "mine.zip");
@@ -247,5 +299,20 @@ public sealed class DownloadCommandLibraryTests : IAsyncDisposable
                 .Select(line => line.Split(' ', StringSplitOptions.RemoveEmptyEntries)),
         ];
 
+    private static string ModFolderIn(InProcessCli cli) => Path.Combine(cli.Downloads, "ModShelf", "fake-handoff", "game", $"{ModName} (mod)");
+
     private Task<CliResult> RunAsync(params string[] arguments) => _cli.RunAsync(arguments, Cancellation);
+
+    /// <summary>
+    /// The CLI, with each change to the library first doing what <paramref name="beforeChange"/> says.
+    /// </summary>
+    private InProcessCli WithLibraryChanges(Func<CancellationToken, Task> beforeChange)
+        => new(_site, _browser, sources: [new FakeHandoffSource(_server.FileUrl)], configureServices: services =>
+        {
+            ServiceDescriptor database = services.Last(service => service.ServiceType == typeof(ILibraryRepository));
+            services.Remove(database);
+            services.AddSingleton<ILibraryRepository>(provider => new ScriptedLibraryRepository(
+                (ILibraryRepository)ActivatorUtilities.CreateInstance(provider, database.ImplementationType!),
+                beforeChange));
+        });
 }
