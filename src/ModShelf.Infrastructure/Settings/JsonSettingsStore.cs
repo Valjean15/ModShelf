@@ -22,7 +22,8 @@ namespace ModShelf.Infrastructure.Settings;
 ///     "oldVersions": 2
 ///   },
 ///   "updates": { "interval": "6h" },
-///   "appearance": { "theme": "dark" }
+///   "appearance": { "theme": "dark" },
+///   "window": { "closeToTray": true }
 /// }
 /// </code>
 /// </summary>
@@ -42,6 +43,8 @@ internal sealed class JsonSettingsStore : ISettingsStore
     private const string Notify = "notify";
     private const string Appearance = "appearance";
     private const string Theme = "theme";
+    private const string Window = "window";
+    private const string CloseToTray = "closeToTray";
 
     private static readonly JsonDocumentOptions Reading = new() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
     private static readonly JsonSerializerOptions Writing = new() { WriteIndented = true };
@@ -71,6 +74,7 @@ internal sealed class JsonSettingsStore : ISettingsStore
         JsonObject library = file?[Library] as JsonObject ?? [];
         JsonObject updates = file?[Updates] as JsonObject ?? [];
         JsonObject appearance = file?[Appearance] as JsonObject ?? [];
+        JsonObject window = file?[Window] as JsonObject ?? [];
         try
         {
             string? root = Text(library, Root);
@@ -96,12 +100,8 @@ internal sealed class JsonSettingsStore : ISettingsStore
                 GameFolders = games.ToImmutable(),
                 OldVersions = ReadOldVersions(library),
                 UpdateInterval = Text(updates, Interval, Updates) is { } interval ? UpdateInterval.Parse(interval) : null,
-                NotifyOfUpdates = updates[Notify] switch
-                {
-                    null => null,
-                    JsonValue value when value.TryGetValue(out bool notify) => notify,
-                    _ => throw new InvalidDataException($"{Updates}.{Notify} must be true or false."),
-                },
+                NotifyOfUpdates = Flag(updates, Notify, Updates),
+                CloseToTray = Flag(window, CloseToTray, Window),
                 Theme = Text(appearance, Theme, Appearance) is { } theme
                     ? ThemeNamed(theme) ?? throw new InvalidDataException($"{Appearance}.{Theme} must be system, light or dark.")
                     : null,
@@ -180,6 +180,25 @@ internal sealed class JsonSettingsStore : ISettingsStore
             file[Updates] = updatesSection;
         }
 
+        JsonObject windowSection = file[Window] as JsonObject ?? [];
+        if (settings.CloseToTray is { } closeToTray)
+        {
+            windowSection[CloseToTray] = closeToTray;
+        }
+        else
+        {
+            windowSection.Remove(CloseToTray);
+        }
+
+        if (windowSection.Count == 0)
+        {
+            file.Remove(Window);
+        }
+        else
+        {
+            file[Window] = windowSection;
+        }
+
         JsonObject appearanceSection = file[Appearance] as JsonObject ?? [];
         Set(appearanceSection, Theme, settings.Theme is { } theme ? ThemeName(theme) : null);
         if (appearanceSection.Count == 0)
@@ -234,6 +253,16 @@ internal sealed class JsonSettingsStore : ISettingsStore
         null => null,
         JsonValue value when value.TryGetValue(out string? text) => string.IsNullOrWhiteSpace(text) ? null : text,
         _ => throw new InvalidDataException($"{sectionName}.{name} must be text."),
+    };
+
+    /// <summary>
+    /// A setting that's true or false; null when it's left out.
+    /// </summary>
+    private static bool? Flag(JsonObject section, string name, string sectionName) => section[name] switch
+    {
+        null => null,
+        JsonValue value when value.TryGetValue(out bool flag) => flag,
+        _ => throw new InvalidDataException($"{sectionName}.{name} must be true or false."),
     };
 
     /// <summary>

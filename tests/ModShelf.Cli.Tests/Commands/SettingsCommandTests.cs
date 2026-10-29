@@ -57,6 +57,7 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         Assert.Equal("6h (default)", Value(shown, "updates.interval"));
         Assert.Equal("true (default)", Value(shown, "updates.notify"));
         Assert.Equal("system (default)", Value(shown, "appearance.theme"));
+        Assert.Equal("ask (default)", Value(shown, "window.closeToTray"));
         Assert.Contains("To change a setting: settings set <setting> <value>", shown.Output, StringComparison.Ordinal);
     }
 
@@ -134,10 +135,11 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     [InlineData("set", "library.root", "Mods", "isn't a full path")]
     [InlineData("set", "library.folders", "{mod}", "The last part must be exactly {file}.")]
     [InlineData("set", "library.folders.skyrimspecialedition", "{name}/{file}", "{name} isn't a folder's part.")]
-    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<game>, library.oldVersions, updates.interval, updates.notify, appearance.theme.")]
+    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<game>, library.oldVersions, updates.interval, updates.notify, appearance.theme, window.closeToTray.")]
     [InlineData("reset", "library.folders.", null, "There's no setting called library.folders.")]
     [InlineData("set", "library.oldVersions", "0", "'0' isn't a rule for old versions. Use all, archive, or how many versions to keep, from 1 to 99, such as 2.")]
     [InlineData("set", "appearance.theme", "blue", "'blue' isn't system, light or dark.")]
+    [InlineData("set", "window.closeToTray", "yes", "'yes' isn't true or false.")]
     public async Task SaysWhatsWrongWithASetting(string command, string name, string? value, string message)
     {
         CliResult refused = await RunAsync([command, name, .. value is null ? Array.Empty<string>() : [value]]);
@@ -163,6 +165,24 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         Assert.Equal(Done, reset.ExitCode);
         Assert.Equal("appearance.theme is back to its default, system: the desktop app is light or dark as the system is.", reset.Output.Trim());
         Assert.Equal("system (default)", Value(await RunAsync("show"), "appearance.theme"));
+    }
+
+    [Fact]
+    public async Task SetsWhetherClosingTheWindowKeepsModShelfInTheTray()
+    {
+        CliResult kept = await RunAsync("set", "Window.CloseToTray", "true");
+        string file = await File.ReadAllTextAsync(SettingsFile, Cancellation);
+        CliResult quits = await RunAsync("set", "window.closeToTray", "False");
+        string shown = Value(await RunAsync("show"), "window.closeToTray");
+        CliResult reset = await RunAsync("reset", "window.closeToTray");
+
+        Assert.Equal(Done, kept.ExitCode);
+        Assert.Equal("window.closeToTray is now true: closing the desktop app's window keeps ModShelf running in the tray.", kept.Output.Trim());
+        Assert.Contains("\"closeToTray\": true", file, StringComparison.Ordinal);
+        Assert.Equal("window.closeToTray is now false: closing the desktop app's window quits ModShelf.", quits.Output.Trim());
+        Assert.Equal("false", shown);
+        Assert.Equal("window.closeToTray is back to its default: the desktop app asks the first time its window closes.", reset.Output.Trim());
+        Assert.Equal("ask (default)", Value(await RunAsync("show"), "window.closeToTray"));
     }
 
     [Fact]

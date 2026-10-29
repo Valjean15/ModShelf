@@ -351,6 +351,45 @@ public sealed class JsonSettingsStoreTests : IDisposable
         Assert.StartsWith($"The settings in {FilePath} can't be read: {message}", refused.Message, StringComparison.Ordinal);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task KeepsWhetherClosingTheWindowKeepsModShelfInTheTray(bool closeToTray)
+    {
+        await WriteAsync("""{ "window": { "width": 900 } }""");
+
+        await Store().SaveAsync(new AppSettings { CloseToTray = closeToTray }, Cancellation);
+
+        Assert.Equal(closeToTray, (await Store().LoadAsync(Cancellation)).CloseToTray);
+        string file = await File.ReadAllTextAsync(FilePath, Cancellation);
+        Assert.Contains("\"window\": {", file, StringComparison.Ordinal);
+        Assert.Contains($"\"closeToTray\": {(closeToTray ? "true" : "false")}", file, StringComparison.Ordinal);
+        Assert.Contains("\"width\": 900", file, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task AskingWhenTheWindowClosesLeavesTheFile()
+    {
+        await Store().SaveAsync(new AppSettings { CloseToTray = true }, Cancellation);
+
+        await Store().SaveAsync(new AppSettings(), Cancellation);
+
+        Assert.Null((await Store().LoadAsync(Cancellation)).CloseToTray);
+        Assert.Equal("{}", (await File.ReadAllTextAsync(FilePath, Cancellation)).Trim());
+    }
+
+    [Theory]
+    [InlineData("""{ "window": { "closeToTray": "yes" } }""")]
+    [InlineData("""{ "window": { "closeToTray": 1 } }""")]
+    public async Task SaysWhenCloseToTrayIsntTrueOrFalse(string content)
+    {
+        await WriteAsync(content);
+
+        InvalidDataException refused = await Assert.ThrowsAsync<InvalidDataException>(() => Store().LoadAsync(Cancellation));
+
+        Assert.StartsWith($"The settings in {FilePath} can't be read: window.closeToTray must be true or false.", refused.Message, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void RefusesARelativePath()
     {

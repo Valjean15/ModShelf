@@ -49,6 +49,12 @@ public sealed record AppSettings
     public AppTheme? Theme { get; init; }
 
     /// <summary>
+    /// Whether closing the desktop app's window keeps ModShelf running in the tray (true) or quits it (false); null to
+    /// ask the first time the window closes.
+    /// </summary>
+    public bool? CloseToTray { get; init; }
+
+    /// <summary>
     /// The pattern files of <paramref name="game"/> go by.
     /// </summary>
     public FolderPattern FoldersFor(string game)

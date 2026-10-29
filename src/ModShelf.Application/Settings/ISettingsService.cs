@@ -73,4 +73,10 @@ public interface ISettingsService
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="theme"/> isn't an <see cref="AppTheme"/>.</exception>
     Task SetThemeAsync(AppTheme? theme, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets whether closing the desktop app's window keeps ModShelf running in the tray or quits it, or sets it back to
+    /// asking the next time with null.
+    /// </summary>
+    Task SetCloseToTrayAsync(bool? closeToTray, CancellationToken cancellationToken);
 }

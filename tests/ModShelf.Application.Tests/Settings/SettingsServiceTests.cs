@@ -198,6 +198,18 @@ public sealed class SettingsServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task SetsWhetherClosingKeepsModShelfInTheTrayAndBackToAsking()
+    {
+        await _settings.SetCloseToTrayAsync(false, Cancellation);
+        bool? set = (await _settings.GetAsync(Cancellation)).CloseToTray;
+
+        await _settings.SetCloseToTrayAsync(null, Cancellation);
+
+        Assert.False(set);
+        Assert.Null((await _settings.GetAsync(Cancellation)).CloseToTray);
+    }
+
+    [Fact]
     public async Task RefusesAThemeThatIsntOne()
     {
         await _settings.SetThemeAsync(AppTheme.Light, Cancellation);

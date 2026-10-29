@@ -24,7 +24,8 @@ internal static class SettingsCommand
     private const string Interval = "updates.interval";
     private const string Notify = "updates.notify";
     private const string Theme = "appearance.theme";
-    private const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<game>, {OldVersions}, {Interval}, {Notify}, {Theme}";
+    private const string CloseToTray = "window.closeToTray";
+    private const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<game>, {OldVersions}, {Interval}, {Notify}, {Theme}, {CloseToTray}";
 
     public static Command Create(CliEnvironment environment)
     {
@@ -36,7 +37,7 @@ internal static class SettingsCommand
         {
             Description = "Its new value: a full path for library.root; all, archive or how many versions to keep for "
                 + "library.oldVersions; minutes, hours or days, such as 30m, 6h or 1d, for updates.interval; true or false for "
-                + "updates.notify; system, light or dark for appearance.theme; a folder pattern, "
+                + "updates.notify and window.closeToTray; system, light or dark for appearance.theme; a folder pattern, "
                 + "such as \"{source}/{game}/{mod} ({modid})/{file}\", for the others.",
         };
         Command set = new("set", "Changes a setting.") { setName, value };
@@ -46,7 +47,7 @@ internal static class SettingsCommand
         Command reset = new("reset", "Sets a setting back to its default.") { resetName };
         reset.SetAction((parsed, cancellationToken) => ChangeAsync(environment, parsed.GetValue(resetName)!, null, cancellationToken));
 
-        return new Command("settings", "Shows and changes the settings: where the library is, how its folders are named, what happens to old versions, and how often to check for updates and whether to say so, and whether the desktop app is light or dark.")
+        return new Command("settings", "Shows and changes the settings: where the library is, how its folders are named, what happens to old versions, and how often to check for updates and whether to say so, whether the desktop app is light or dark, and whether closing its window keeps it running in the tray.")
         {
             show,
             set,
@@ -85,6 +86,7 @@ internal static class SettingsCommand
                 [Interval, stored.UpdateInterval is { } every ? UpdateInterval.Format(every) : $"{UpdateInterval.Format(UpdateInterval.Default)} (default)"],
                 [Notify, stored.NotifyOfUpdates is { } notify ? Text(notify) : $"{Text(true)} (default)"],
                 [Theme, stored.Theme is { } theme ? ThemeName(theme) : $"{ThemeName(AppTheme.System)} (default)"],
+                [CloseToTray, stored.CloseToTray is { } closeToTray ? Text(closeToTray) : "ask (default)"],
             ];
             TextTable.Write(environment.Output, rows);
             environment.Output.WriteLine(
@@ -97,6 +99,9 @@ internal static class SettingsCommand
                 $"The desktop app checks the watched mods for updates every {Interval}, and shows a notice of new ones unless "
                 + $"{Notify} is false; library check checks them now.");
             environment.Output.WriteLine($"The desktop app is light or dark as {Theme} says, or follows the system's mode (system).");
+            environment.Output.WriteLine(
+                $"Closing the desktop app's window keeps ModShelf running in the tray when {CloseToTray} is true, and quits it "
+                + "when it's false; until it's set, the app asks the first time.");
             environment.Output.WriteLine("To change a setting: settings set <setting> <value>");
             return ExitCodes.Done;
         }
@@ -151,7 +156,8 @@ internal static class SettingsCommand
         string setting = name.Trim().ToLowerInvariant();
         string? game = setting.StartsWith(GamePrefix, StringComparison.Ordinal) ? name.Trim()[GamePrefix.Length..] : null;
         bool oldVersions = setting.Equals(OldVersions, StringComparison.OrdinalIgnoreCase);
-        if (setting is not (LibraryRoot or LibraryFolders or Interval or Notify or Theme) && !oldVersions && string.IsNullOrWhiteSpace(game))
+        bool closeToTray = setting.Equals(CloseToTray, StringComparison.OrdinalIgnoreCase);
+        if (setting is not (LibraryRoot or LibraryFolders or Interval or Notify or Theme) && !closeToTray && !oldVersions && string.IsNullOrWhiteSpace(game))
         {
             await environment.Error.WriteLineAsync($"There's no setting called {name}. Settings: {Names}.").ConfigureAwait(false);
             return ExitCodes.BadInput;
@@ -196,6 +202,17 @@ internal static class SettingsCommand
                     ? "the desktop app shows a notice when a background check finds new updates."
                     : "the desktop app shows no notice when a background check finds new updates.";
                 environment.Output.WriteLine(notify is { } now ? $"{Notify} is now {Text(now)}: {what}" : $"{Notify} is back to its default, {Text(true)}: {what}");
+            }
+            else if (closeToTray)
+            {
+                bool? keepRunning = value is null ? null : ParseBool(value);
+                await settings.SetCloseToTrayAsync(keepRunning, cancellationToken).ConfigureAwait(false);
+                environment.Output.WriteLine(keepRunning switch
+                {
+                    true => $"{CloseToTray} is now true: closing the desktop app's window keeps ModShelf running in the tray.",
+                    false => $"{CloseToTray} is now false: closing the desktop app's window quits ModShelf.",
+                    null => $"{CloseToTray} is back to its default: the desktop app asks the first time its window closes.",
+                });
             }
             else if (setting == Theme)
             {
