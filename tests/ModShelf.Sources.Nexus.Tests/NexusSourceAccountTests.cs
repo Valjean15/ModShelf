@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Accounts;
+using ModShelf.Sources.Abstractions.Quota;
 using ModShelf.Sources.Nexus.Tests.Common;
 
 namespace ModShelf.Sources.Nexus.Tests;
@@ -54,6 +55,43 @@ public sealed class NexusSourceAccountTests : IDisposable
         Assert.Equal(new Uri(user["profile_url"]!.GetValue<string>()), profile.AvatarUrl);
         Assert.Equal(tier, profile.Tier);
         Assert.Equal(Key, Assert.Single(Assert.Single(_api.Requests).RequestMessage!.Headers!["apikey"]));
+    }
+
+    [Fact]
+    public async Task TheQuotaIsWhatTheLastAnswerSaid()
+    {
+        Assert.Null(Source.Quota);
+        _api.Serve(RecordedNexusApi.Premium, "validate");
+
+        await Source.GetProfileAsync(new AccountCredentials(Key), AuthKind.ApiKey, Cancellation);
+
+        ApiQuota quota = Assert.IsType<ApiQuota>(Source.Quota);
+        Assert.Equal(
+            [
+                (TimeSpan.FromDays(1), 20000, 19997, new DateTimeOffset(2026, 10, 24, 22, 54, 23, TimeSpan.Zero)),
+                (TimeSpan.FromHours(1), 2000, 1997, new DateTimeOffset(2026, 10, 23, 23, 0, 0, TimeSpan.Zero)),
+            ],
+            quota.Allowances.Select(allowance => (allowance.Period, allowance.Limit, allowance.Remaining, allowance.ResetsAt)));
+    }
+
+    [Fact]
+    public async Task ACountBelowZeroInTheQuotaIsNone()
+    {
+        JsonNode user = RecordedNexusApi.Recording(RecordedNexusApi.Premium, "validate")["response"]!["body"]!;
+        _api.Answer("/v1/users/validate.json", response => response
+            .WithStatusCode(200)
+            .WithHeader("Content-Type", "application/json")
+            .WithBody(user.ToJsonString())
+            .WithHeader("X-RL-Hourly-Limit", "-1")
+            .WithHeader("X-RL-Hourly-Remaining", "-3")
+            .WithHeader("X-RL-Hourly-Reset", "2026-10-23 23:00:00 +0000")
+            .WithHeader("X-RL-Daily-Limit", "20000")
+            .WithHeader("X-RL-Daily-Remaining", "-1")
+            .WithHeader("X-RL-Daily-Reset", "2026-10-24 22:54:23 +0000"));
+
+        await Source.GetProfileAsync(new AccountCredentials(Key), AuthKind.ApiKey, Cancellation);
+
+        Assert.Equal([(20000, 0), (0, 0)], Source.Quota!.Allowances.Select(allowance => (allowance.Limit, allowance.Remaining)));
     }
 
     [Fact]

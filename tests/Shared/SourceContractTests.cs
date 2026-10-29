@@ -4,6 +4,7 @@ using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Downloads;
 using ModShelf.Sources.Abstractions.Links;
+using ModShelf.Sources.Abstractions.Quota;
 using ModShelf.Sources.Abstractions.Search;
 using ModShelf.Sources.Abstractions.Updates;
 using ModShelf.Sources.Abstractions.Watchlist;
@@ -275,6 +276,14 @@ public abstract class SourceContractTests<TSource>
         Assert.Single(watching, watched => watched == mod);
         Assert.DoesNotContain(mod, watchingNoMore);
         Assert.All([.. watching, .. watchingNoMore], watched => Assert.Equal(ExpectedId, watched.Game.Source));
+    }
+
+    [Fact]
+    public void KnowsNoQuotaBeforeTheSiteHasAnswered()
+    {
+        IApiQuota quota = Capability<IApiQuota>();
+
+        Assert.Null(quota.Quota);
     }
 
     /// <summary>
