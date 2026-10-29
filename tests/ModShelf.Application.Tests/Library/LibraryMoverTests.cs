@@ -186,6 +186,18 @@ public sealed class LibraryMoverTests : IDisposable
     }
 
     [Fact]
+    public async Task MovesNothingWhenAFilesPathThereWouldBeTooLong()
+    {
+        _storage.MaxPath = New(ArchivedFile).Length - 1;
+
+        InvalidOperationException refused = await Assert.ThrowsAsync<InvalidOperationException>(() => Mover().MoveAsync(Mods, Cancellation));
+
+        Assert.Equal($"{New(ArchivedFile)} is too long.", refused.Message);
+        Assert.Empty(_storage.Moves);
+        Assert.Equal(Root, await _settings.GetLibraryRootAsync(Cancellation));
+    }
+
+    [Fact]
     public async Task NeverMovesOverAnotherFile()
     {
         _storage.Add(New(ArchivedFile), 90);

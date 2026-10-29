@@ -14,7 +14,7 @@ internal sealed class FakeLibraryStorage : ILibraryStorage
     private readonly ConcurrentDictionary<string, long> _files = new(StringComparer.Ordinal);
     private readonly HashSet<string> _folders = new(StringComparer.Ordinal);
 
-    public int MaxPath { get; init; } = int.MaxValue;
+    public int MaxPath { get; set; } = int.MaxValue;
 
     /// <summary>
     /// What moving or deleting the file at a path throws instead.

@@ -39,4 +39,7 @@ internal sealed partial class LibraryDownloads
 
     [LoggerMessage(EventId = 617, Level = LogLevel.Information, Message = "Found the old version {FileName} in its _archive folder already, from a record that stopped part-way")]
     private static partial void LogFoundArchived(ILogger logger, string fileName);
+
+    [LoggerMessage(EventId = 618, Level = LogLevel.Warning, Message = "Didn't archive the old version {FileName}: its path in the _archive folder would be too long for this system")]
+    private static partial void LogArchivePathTooLong(ILogger logger, string fileName);
 }

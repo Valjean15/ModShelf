@@ -154,6 +154,20 @@ public sealed class LibraryOldVersionsTests : IDisposable
     }
 
     [Fact]
+    public async Task AnOldVersionWhosePathInTheArchiveWouldBeTooLongStaysWhereItIs()
+    {
+        _store.Settings = new AppSettings { OldVersions = OldVersionRule.Archive };
+        _storage.MaxPath = InRoot($"{Folder}/_archive/SkyUI 5.2.7z").Length - 1;
+
+        LibraryRecord recorded = await RecordAsync();
+
+        Assert.Empty(recorded.Archived);
+        Assert.Contains($"{Folder}/SkyUI 5.2.7z", LibraryPaths);
+        Assert.Empty(_storage.Moves);
+        Assert.Contains(_logger.Entries, entry => entry.StartsWith("Warning: Didn't archive the old version SkyUI 5.2.7z: its path in the _archive folder would be too long", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public async Task AnOldVersionGoneFromDiskIsntArchived()
     {
         _store.Settings = new AppSettings { OldVersions = OldVersionRule.Archive };

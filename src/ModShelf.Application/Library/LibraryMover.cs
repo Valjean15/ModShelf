@@ -80,6 +80,19 @@ internal sealed partial class LibraryMover : ILibraryMover
                 + "a partial copy. Move or delete it, then move the library again.");
         }
 
+        // Before any file moves, so a path too long for this system stops the move with every file in place.
+        foreach ((_, string destination) in plan.ToMove)
+        {
+            try
+            {
+                _storage.EnsurePathFits(destination);
+            }
+            catch (PathTooLongException exception)
+            {
+                throw new InvalidOperationException(exception.Message, exception);
+            }
+        }
+
         List<(string From, string To)> moved = [];
         foreach ((string source, string destination) in plan.ToMove)
         {

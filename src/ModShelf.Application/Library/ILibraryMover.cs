@@ -19,8 +19,9 @@ public interface ILibraryMover
     /// <exception cref="ArgumentException"><paramref name="root"/> isn't an absolute path.</exception>
     /// <exception cref="InvalidOperationException">
     /// The new root is inside the library or holds it, downloads into the library aren't finished or one started while
-    /// it moved, a finished one couldn't be added to the library first, or another file is where one of the library's
-    /// would go. The message says which, and whether every file went back.
+    /// it moved, a finished one couldn't be added to the library first, another file is where one of the library's
+    /// would go, or a file's path there would be too long for this system. The message says which, and whether every
+    /// file went back.
     /// </exception>
     /// <exception cref="IOException">
     /// A file couldn't be moved, or the new root couldn't be saved. The message says whether every file went back.

@@ -481,8 +481,9 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
     }
 
     /// <summary>
-    /// Moves old versions into the <c>_archive</c> folder in their folder. One that can't be moved stays as it is; a name
-    /// another library file or a file on disk has there gets the file's ID added. One that isn't on disk stays as it is,
+    /// Moves old versions into the <c>_archive</c> folder in their folder. One that can't be moved, or whose path there
+    /// would be too long for this system, stays as it is; a name another library file or a file on disk has there gets
+    /// the file's ID added. One that isn't on disk stays as it is,
     /// unless it's in the <c>_archive</c> folder already at its size: moved there by a record that stopped before the
     /// library changed, such as when the app stopped.
     /// </summary>
@@ -511,10 +512,19 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
             }
             else
             {
-                archivePath = candidates.FirstOrDefault(candidate => !_storage.FileExists(LibraryPaths.Resolve(root, candidate)));
+                string[] free = [.. candidates.Where(candidate => !_storage.FileExists(LibraryPaths.Resolve(root, candidate)))];
+                archivePath = free.FirstOrDefault(candidate => Fits(LibraryPaths.Resolve(root, candidate)));
                 if (archivePath is null)
                 {
-                    LogNoArchiveName(_logger, file.FileName);
+                    if (free.Length == 0)
+                    {
+                        LogNoArchiveName(_logger, file.FileName);
+                    }
+                    else
+                    {
+                        LogArchivePathTooLong(_logger, file.FileName);
+                    }
+
                     continue;
                 }
 
@@ -537,6 +547,22 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
         }
 
         return moved;
+    }
+
+    /// <summary>
+    /// Whether this system takes a library file at <paramref name="path"/>.
+    /// </summary>
+    private bool Fits(string path)
+    {
+        try
+        {
+            _storage.EnsurePathFits(path);
+            return true;
+        }
+        catch (PathTooLongException)
+        {
+            return false;
+        }
     }
 
     /// <summary>
