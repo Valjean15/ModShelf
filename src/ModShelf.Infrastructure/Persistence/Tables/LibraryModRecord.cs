@@ -33,6 +33,11 @@ internal sealed class LibraryModRecord
 
     public DateTimeOffset? CheckedAt { get; set; }
 
+    /// <summary>
+    /// Whether the next update check asks the mod's site about it directly (<see cref="LibraryMod.NeedsFullCheck"/>).
+    /// </summary>
+    public bool NeedsFullCheck { get; set; }
+
     public List<LibraryFileRecord> Files { get; set; } = [];
 
     public List<LibraryUpdateRecord> Updates { get; set; } = [];
@@ -62,6 +67,7 @@ internal sealed class LibraryModRecord
         IsWatched = mod.IsWatched;
         AddedAt = mod.AddedAt;
         CheckedAt = mod.CheckedAt;
+        NeedsFullCheck = mod.NeedsFullCheck;
 
         Files.RemoveAll(record => mod.Files.All(file => file.File.Id != record.FileId));
         foreach (LibraryFile file in mod.Files)
@@ -109,7 +115,8 @@ internal sealed class LibraryModRecord
                 AddedAt,
                 CheckedAt,
                 Files.OrderBy(file => file.Sequence).Select(file => file.ToFile(mod)),
-                Updates.OrderBy(update => update.Position).Select(update => update.ToUpdate(mod)));
+                Updates.OrderBy(update => update.Position).Select(update => update.ToUpdate(mod)),
+                NeedsFullCheck);
         }
         catch (Exception exception) when (exception is ArgumentException or UriFormatException)
         {

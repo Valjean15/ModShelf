@@ -147,6 +147,9 @@ namespace ModShelf.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("NeedsFullCheck")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("PageUrl")
                         .HasColumnType("TEXT");
 

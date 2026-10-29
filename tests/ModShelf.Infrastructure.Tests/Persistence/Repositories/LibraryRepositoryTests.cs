@@ -41,6 +41,21 @@ public sealed class LibraryRepositoryTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task WhetherAModNeedsAFullCheckSurvivesARestartAndAChange()
+    {
+        LibraryFile main = File(Smapi, "160380", "nexus/stardewvalley/2400/SMAPI 4.5.2.zip");
+        await StoreAsync(LibraryMod.Restore(Smapi, "SMAPI", null, null, isWatched: false, Added, Added.AddHours(5), [main]).Watched());
+
+        await _database.RestartAsync();
+        bool stored = (await _database.Library.FindAsync(Smapi, Cancellation))!.NeedsFullCheck;
+        await _database.Library.UpdateAsync(Smapi, mod => mod!.Checked(Added.AddDays(1)), Cancellation);
+        await _database.RestartAsync();
+
+        Assert.True(stored);
+        Assert.False((await _database.Library.FindAsync(Smapi, Cancellation))!.NeedsFullCheck);
+    }
+
+    [Fact]
     public async Task ListsTheModsInTheOrderTheyWereAdded()
     {
         await StoreAsync(Watched(Smapi));

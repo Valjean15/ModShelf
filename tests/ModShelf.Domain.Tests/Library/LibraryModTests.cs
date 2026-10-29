@@ -289,6 +289,58 @@ public sealed class LibraryModTests
             TestData.SkyUi, "SkyUI", null, null, false, TestData.CreatedAt, Later, [File("35407")], [Update("35408")]));
     }
 
+    [Fact]
+    public void WatchingAgainNeedsAFullCheck()
+    {
+        // The updates went when it was unwatched, and a site's feed of changed mods wouldn't bring them back.
+        LibraryMod checkedMod = Watched().WithFile(File("1")).Checked(Later);
+
+        LibraryMod again = checkedMod.Unwatched()!.Watched();
+
+        Assert.False(checkedMod.NeedsFullCheck);
+        Assert.True(again.NeedsFullCheck);
+        Assert.Equal(Later, again.CheckedAt);
+    }
+
+    [Fact]
+    public void AnotherFileNeedsAFullCheck()
+    {
+        // Such as an older version downloaded from a guide's link: the newer files are updates of it now.
+        LibraryMod checkedMod = Watched().WithFile(File("2")).Checked(Later);
+
+        Assert.True(checkedMod.WithFile(File("1", "SkyUI_old.7z")).NeedsFullCheck);
+        Assert.False(checkedMod.WithFile(File("2", "SkyUI_moved.7z")).NeedsFullCheck);
+    }
+
+    [Fact]
+    public void AFileGoneNeedsAFullCheck()
+    {
+        // The update of the file gone went with it, and the files left may have updates of their own.
+        LibraryMod checkedMod = Watched().WithFile(File("1")).WithFile(File("2", "SkyUI_new.7z")).Checked(Later);
+
+        Assert.True(checkedMod.WithoutFile(Ref("2"))!.NeedsFullCheck);
+    }
+
+    [Fact]
+    public void ACheckLeavesNoFullCheckNeeded()
+    {
+        LibraryMod needing = Watched().WithFile(File("1")).Checked(Later).Unwatched()!.Watched();
+
+        LibraryMod checkedAgain = needing.Checked(Later.AddDays(1));
+
+        Assert.False(checkedAgain.NeedsFullCheck);
+    }
+
+    [Fact]
+    public void OtherChangesKeepWhetherAFullCheckIsNeeded()
+    {
+        LibraryMod needing = Watched().WithFile(File("1")).Checked(Later).Unwatched()!.Watched();
+
+        Assert.True(needing.WithDetails("SkyUI 5", null, Page).NeedsFullCheck);
+        Assert.True(needing.WithUpdates([Update("2", replaces: "1")]).NeedsFullCheck);
+        Assert.True(LibraryMod.Restore(TestData.SkyUi, "SkyUI", null, null, true, TestData.CreatedAt, Later, [File("1")], needsFullCheck: true).NeedsFullCheck);
+    }
+
     private static LibraryMod Watched() => LibraryMod.Watch(TestData.SkyUi, "SkyUI", "schlangster", Page, TestData.CreatedAt);
 
     private static ModFileRef Ref(string id) => new(TestData.SkyUi, id);

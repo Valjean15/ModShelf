@@ -96,6 +96,23 @@ public sealed class UpdateCheckerTests : IDisposable
     }
 
     [Fact]
+    public async Task AModWhoseLibrarySideChangedIsAskedAboutWhateverTheFeedSays()
+    {
+        // Watched again, say: its updates went when it was unwatched, and the site's files haven't changed since, so the
+        // feed alone would leave it without them for good.
+        await CheckedAtAsync(TestData.Now.AddHours(-2));
+        await _library.UpdateAsync(Mod("1").Mod, stored => stored!.Unwatched()!.Watched(), Cancellation);
+        _time.Advance(TimeSpan.FromHours(1));
+
+        UpdateCheck check = await CheckAsync(_feed);
+
+        Assert.Equal(["GetFilesAsync 1"], _site.AskedFor);
+        Assert.Equal((3, 2), (check.Checked, check.Requests));
+        Assert.Equal("11", Assert.Single(Mod("1").Updates).File.Id);
+        Assert.False(Mod("1").NeedsFullCheck);
+    }
+
+    [Fact]
     public async Task ALaterCheckAsksTheFeedOnceThenOnlyAboutModsWhoseFilesChanged()
     {
         await CheckedAtAsync(TestData.Now.AddHours(-2));

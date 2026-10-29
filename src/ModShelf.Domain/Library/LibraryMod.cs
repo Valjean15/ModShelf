@@ -23,7 +23,8 @@ public sealed class LibraryMod
         DateTimeOffset addedAt,
         DateTimeOffset? checkedAt,
         LibraryFile[] files,
-        LibraryUpdate[] updates)
+        LibraryUpdate[] updates,
+        bool needsFullCheck)
     {
         Mod = mod;
         Name = name;
@@ -34,6 +35,7 @@ public sealed class LibraryMod
         CheckedAt = checkedAt;
         Files = Array.AsReadOnly(files);
         Updates = Array.AsReadOnly(updates);
+        NeedsFullCheck = needsFullCheck;
     }
 
     public ModRef Mod { get; }
@@ -73,6 +75,13 @@ public sealed class LibraryMod
     public IReadOnlyList<LibraryUpdate> Updates { get; }
 
     /// <summary>
+    /// Whether the library's side of the mod changed since its last check, so the next check asks its site about it
+    /// rather than going by the site's feed of changed mods: it was watched again, or a file came or went. The feed says
+    /// what changed on the site, so it would leave the mod's updates as the change left them.
+    /// </summary>
+    public bool NeedsFullCheck { get; }
+
+    /// <summary>
     /// A mod the user starts watching, without any files yet.
     /// </summary>
     /// <exception cref="ArgumentException">The name is blank, or the page isn't an absolute HTTP or HTTPS URL.</exception>
@@ -81,7 +90,7 @@ public sealed class LibraryMod
         ArgumentNullException.ThrowIfNull(mod);
         EnsureDetails(name, pageUrl);
 
-        return new LibraryMod(mod, name, Blank(author), pageUrl, isWatched: true, addedAt, checkedAt: null, [], []);
+        return new LibraryMod(mod, name, Blank(author), pageUrl, isWatched: true, addedAt, checkedAt: null, [], [], needsFullCheck: false);
     }
 
     /// <summary>
@@ -100,7 +109,8 @@ public sealed class LibraryMod
         DateTimeOffset addedAt,
         DateTimeOffset? checkedAt,
         IEnumerable<LibraryFile> files,
-        IEnumerable<LibraryUpdate>? updates = null)
+        IEnumerable<LibraryUpdate>? updates = null,
+        bool needsFullCheck = false)
     {
         ArgumentNullException.ThrowIfNull(mod);
         EnsureDetails(name, pageUrl);
@@ -119,19 +129,20 @@ public sealed class LibraryMod
 
         LibraryUpdate[] updateList = [.. updates ?? []];
         EnsureUpdates(mod, isWatched, fileList, updateList, nameof(updates));
-        return new LibraryMod(mod, name, Blank(author), pageUrl, isWatched, addedAt, checkedAt, fileList, updateList);
+        return new LibraryMod(mod, name, Blank(author), pageUrl, isWatched, addedAt, checkedAt, fileList, updateList, needsFullCheck);
     }
 
     /// <summary>
-    /// The mod, watched for updates.
+    /// The mod, watched for updates. A mod watched again needs a full check, since its updates went when it was
+    /// unwatched.
     /// </summary>
-    public LibraryMod Watched() => IsWatched ? this : With(isWatched: true);
+    public LibraryMod Watched() => IsWatched ? this : With(isWatched: true, needsFullCheck: true);
 
     /// <summary>
     /// The mod, no longer watched and without updates; or null when it has no files, so nothing keeps it in the library.
     /// </summary>
     public LibraryMod? Unwatched()
-        => Files.Count == 0 ? null : new LibraryMod(Mod, Name, Author, PageUrl, isWatched: false, AddedAt, CheckedAt, [.. Files], []);
+        => Files.Count == 0 ? null : new LibraryMod(Mod, Name, Author, PageUrl, isWatched: false, AddedAt, CheckedAt, [.. Files], [], NeedsFullCheck);
 
     /// <summary>
     /// The mod with its details as its site gives them now.
@@ -141,13 +152,13 @@ public sealed class LibraryMod
     {
         EnsureDetails(name, pageUrl);
 
-        return new LibraryMod(Mod, name, Blank(author), pageUrl, IsWatched, AddedAt, CheckedAt, [.. Files], [.. Updates]);
+        return new LibraryMod(Mod, name, Blank(author), pageUrl, IsWatched, AddedAt, CheckedAt, [.. Files], [.. Updates], NeedsFullCheck);
     }
 
     /// <summary>
-    /// The mod, last checked for updates at <paramref name="at"/>.
+    /// The mod, last checked for updates at <paramref name="at"/>, with no full check needed.
     /// </summary>
-    public LibraryMod Checked(DateTimeOffset at) => new(Mod, Name, Author, PageUrl, IsWatched, AddedAt, at, [.. Files], [.. Updates]);
+    public LibraryMod Checked(DateTimeOffset at) => new(Mod, Name, Author, PageUrl, IsWatched, AddedAt, at, [.. Files], [.. Updates], needsFullCheck: false);
 
     /// <summary>
     /// The mod with the updates a check found, in place of the ones it had. An update of a file it had already keeps
@@ -171,7 +182,7 @@ public sealed class LibraryMod
         }
 
         EnsureUpdates(Mod, IsWatched, [.. Files], updateList, nameof(updates));
-        return new LibraryMod(Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt, [.. Files], updateList);
+        return new LibraryMod(Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt, [.. Files], updateList, NeedsFullCheck);
     }
 
     /// <summary>
@@ -186,7 +197,9 @@ public sealed class LibraryMod
 
         int index = Files.ToList().FindIndex(other => other.File == file.File);
         LibraryFile[] files = index < 0 ? [.. Files, file] : [.. Files.Take(index), file, .. Files.Skip(index + 1)];
-        return new LibraryMod(Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt, files, [.. Updates.Where(update => update.File != file.File)]);
+        // Another file, unlike the same one moved, may have updates of its own, or be older than the ones found.
+        return new LibraryMod(
+            Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt, files, [.. Updates.Where(update => update.File != file.File)], NeedsFullCheck || index < 0);
     }
 
     /// <summary>
@@ -199,7 +212,8 @@ public sealed class LibraryMod
         LibraryFile[] files = [.. Files.Where(other => other.File != file)];
         return !IsWatched && files.Length == 0
             ? null
-            : new LibraryMod(Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt, files, [.. Updates.Where(update => update.Replaces != file)]);
+            : new LibraryMod(
+                Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt, files, [.. Updates.Where(update => update.Replaces != file)], needsFullCheck: true);
     }
 
     private static void EnsureDetails(string name, Uri? pageUrl)
@@ -285,5 +299,6 @@ public sealed class LibraryMod
 
     private static string? Blank(string? text) => string.IsNullOrWhiteSpace(text) ? null : text;
 
-    private LibraryMod With(bool isWatched) => new(Mod, Name, Author, PageUrl, isWatched, AddedAt, CheckedAt, [.. Files], [.. Updates]);
+    private LibraryMod With(bool isWatched, bool needsFullCheck)
+        => new(Mod, Name, Author, PageUrl, isWatched, AddedAt, CheckedAt, [.. Files], [.. Updates], needsFullCheck);
 }

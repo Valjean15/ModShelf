@@ -113,10 +113,17 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
         }
 
         // Mods checked within the feed's reach, less the margin, are asked about all at once. One checked later than now
-        // is asked about on its own, since when it was checked isn't known.
+        // is asked about on its own, since when it was checked isn't known; so is one whose library side changed since
+        // its check, since the feed only says what changed on the site.
         IUpdateFeed? feed = _sources.Find<IUpdateFeed>(game.Source);
         DateTimeOffset reach = feed is null ? DateTimeOffset.MaxValue : check.StartedAt - feed.Reach + ReachSlack;
-        LibraryMod[] byFeed = [.. mods.Where(mod => mod.CheckedAt is { } checkedAt && checkedAt <= check.StartedAt && checkedAt - Margin >= reach)];
+        LibraryMod[] byFeed =
+        [
+            .. mods.Where(mod => !mod.NeedsFullCheck
+                && mod.CheckedAt is { } checkedAt
+                && checkedAt <= check.StartedAt
+                && checkedAt - Margin >= reach),
+        ];
         List<LibraryMod> toAsk = [.. mods.Except(byFeed)];
         if (byFeed.Length > 0)
         {
