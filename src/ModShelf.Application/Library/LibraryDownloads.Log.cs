@@ -36,4 +36,7 @@ internal sealed partial class LibraryDownloads
 
     [LoggerMessage(EventId = 614, Level = LogLevel.Error, Message = "Couldn't list the old version {FileName} in the library again after it couldn't be deleted; it's still on disk")]
     private static partial void LogCantListAgain(ILogger logger, Exception exception, string fileName);
+
+    [LoggerMessage(EventId = 617, Level = LogLevel.Information, Message = "Found the old version {FileName} in its _archive folder already, from a record that stopped part-way")]
+    private static partial void LogFoundArchived(ILogger logger, string fileName);
 }

@@ -481,8 +481,10 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
     }
 
     /// <summary>
-    /// Moves old versions into the <c>_archive</c> folder in their folder. One that isn't on disk, or that can't be moved,
-    /// stays as it is; a name another library file or a file on disk has there gets the file's ID added.
+    /// Moves old versions into the <c>_archive</c> folder in their folder. One that can't be moved stays as it is; a name
+    /// another library file or a file on disk has there gets the file's ID added. One that isn't on disk stays as it is,
+    /// unless it's in the <c>_archive</c> folder already at its size: moved there by a record that stopped before the
+    /// library changed, such as when the app stopped.
     /// </summary>
     /// <returns>Each file moved, as it was and as it is now.</returns>
     private List<(LibraryFile Before, LibraryFile After)> Archive(string root, IReadOnlyList<LibraryMod> library, IReadOnlyList<LibraryFile> files)
@@ -492,35 +494,46 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
         foreach (LibraryFile file in files)
         {
             string from = LibraryPaths.Resolve(root, file.RelativePath);
+            string withId = LibraryNames.File($"{Path.GetFileNameWithoutExtension(file.FileName)} ({file.File.Id}){Path.GetExtension(file.FileName)}");
+            string[] candidates = [.. new[] { file.FileName, withId }
+                .Select(name => OldVersions.ArchivePath(file.RelativePath, name))
+                .Where(candidate => !taken.Contains(candidate))];
+            string? archivePath;
             if (!_storage.FileExists(from))
             {
-                continue;
-            }
+                archivePath = candidates.FirstOrDefault(candidate => _storage.FileSize(LibraryPaths.Resolve(root, candidate)) == file.SizeInBytes);
+                if (archivePath is null)
+                {
+                    continue;
+                }
 
-            string withId = LibraryNames.File($"{Path.GetFileNameWithoutExtension(file.FileName)} ({file.File.Id}){Path.GetExtension(file.FileName)}");
-            string? archivePath = new[] { file.FileName, withId }
-                .Select(name => OldVersions.ArchivePath(file.RelativePath, name))
-                .FirstOrDefault(candidate => !taken.Contains(candidate) && !_storage.FileExists(LibraryPaths.Resolve(root, candidate)));
-            if (archivePath is null)
-            {
-                LogNoArchiveName(_logger, file.FileName);
-                continue;
+                LogFoundArchived(_logger, file.FileName);
             }
+            else
+            {
+                archivePath = candidates.FirstOrDefault(candidate => !_storage.FileExists(LibraryPaths.Resolve(root, candidate)));
+                if (archivePath is null)
+                {
+                    LogNoArchiveName(_logger, file.FileName);
+                    continue;
+                }
 
-            try
-            {
-                _storage.MoveFile(from, LibraryPaths.Resolve(root, archivePath));
-            }
-            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
-            {
-                LogCantArchive(_logger, exception, file.FileName);
-                continue;
+                try
+                {
+                    _storage.MoveFile(from, LibraryPaths.Resolve(root, archivePath));
+                }
+                catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+                {
+                    LogCantArchive(_logger, exception, file.FileName);
+                    continue;
+                }
+
+                LogArchived(_logger, file.FileName);
             }
 
             taken.Add(archivePath);
             moved.Add((file, new LibraryFile(
                 file.File, file.Name, file.VersionLabel, file.Category, file.UploadedAt, archivePath, file.SizeInBytes, file.DownloadedAt)));
-            LogArchived(_logger, file.FileName);
         }
 
         return moved;

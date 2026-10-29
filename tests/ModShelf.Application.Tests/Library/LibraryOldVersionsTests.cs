@@ -167,6 +167,35 @@ public sealed class LibraryOldVersionsTests : IDisposable
     }
 
     [Fact]
+    public async Task AnOldVersionInTheArchiveAlreadyAtItsSizeIsListedThere()
+    {
+        // A record that stopped after archiving 5.0, such as when the app stopped, before the library changed.
+        _store.Settings = new AppSettings { OldVersions = OldVersionRule.Archive };
+        _storage.Remove(InRoot($"{Folder}/SkyUI 5.0.7z"));
+        _storage.Add(InRoot($"{Folder}/_archive/SkyUI 5.0.7z"));
+
+        LibraryRecord recorded = await RecordAsync();
+
+        Assert.Equal(["52", "51", "50"], recorded.Archived.Select(file => file.File.Id));
+        Assert.Contains($"{Folder}/_archive/SkyUI 5.0.7z", LibraryPaths);
+        Assert.DoesNotContain(_storage.Moves, move => move.Destination == InRoot($"{Folder}/_archive/SkyUI 5.0.7z"));
+        Assert.Contains(_logger.Entries, entry => entry.StartsWith("Information: Found the old version SkyUI 5.0.7z in its _archive folder already", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task AnotherFileInTheArchiveUnderAnOldVersionsNameIsntIt()
+    {
+        _store.Settings = new AppSettings { OldVersions = OldVersionRule.Archive };
+        _storage.Remove(InRoot($"{Folder}/SkyUI 5.0.7z"));
+        _storage.Add(InRoot($"{Folder}/_archive/SkyUI 5.0.7z"), 99);
+
+        LibraryRecord recorded = await RecordAsync();
+
+        Assert.Equal(["52", "51"], recorded.Archived.Select(file => file.File.Id));
+        Assert.Contains($"{Folder}/SkyUI 5.0.7z", LibraryPaths);
+    }
+
+    [Fact]
     public async Task AnOldVersionThatCantBeDeletedStaysInTheLibrary()
     {
         _storage.Failures[InRoot($"{Folder}/SkyUI 5.1.7z")] = new UnauthorizedAccessException("Read-only.");
