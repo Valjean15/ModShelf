@@ -368,9 +368,8 @@ public sealed partial class DownloadJobViewModel : ObservableObject
             cancellationToken);
 
     /// <summary>
-    /// Hands <paramref name="text"/> to the queue as the link for this download, the way the job was added: through the
-    /// library for a file that goes into it, which keeps the place the job was queued for; otherwise into the job's
-    /// folder, under the name the link gives, as the CLI does.
+    /// Hands <paramref name="text"/> to this download as its link, which the source checks: when it's the link the site
+    /// handed over for the file, the download goes on with it.
     /// </summary>
     /// <returns>Why the link wasn't taken; or null when it was this download's.</returns>
     private async Task<string?> HandOffAsync(string text, CancellationToken cancellationToken)
@@ -380,43 +379,23 @@ public sealed partial class DownloadJobViewModel : ObservableObject
             return Text.Format(Strings.PasteLinkNotALink, SiteName);
         }
 
-        DownloadJobSnapshot job = _job;
-        bool library = false;
-        LinkDownload? handed;
-        string handedName;
+        HandoffResult handed;
         try
         {
-            string root = await _services.Settings.GetLibraryRootAsync(cancellationToken);
-            library = LibraryPaths.RelativeTo(root, Path.Combine(job.TargetDirectory, job.FileName)) is not null;
-            if (library)
-            {
-                LibraryDownload placed = await _services.Library.AddAsync(link, cancellationToken);
-                handed = placed.Queued;
-                handedName = Path.GetFileName(placed.Path);
-            }
-            else
-            {
-                handed = await _services.Links.AddAsync(link, job.TargetDirectory, null, cancellationToken);
-                handedName = handed.Job.FileName;
-            }
+            handed = await _services.Links.HandOverAsync(Id, link, cancellationToken);
         }
-        catch (Exception exception) when (LinkProblems.Describe(exception, library) is { } problem)
+        catch (Exception exception) when (LinkProblems.Describe(exception, library: false) is { } problem)
         {
             return problem;
         }
 
-        if (handed?.Job.Id == job.Id)
+        return handed switch
         {
-            return null;
-        }
-
-        // The link was to another file. A job added just now for it isn't what the user asked for.
-        if (handed is { AlreadyQueued: false })
-        {
-            await IgnoringRacesAsync(() => _services.Downloads.CancelAsync(handed.Job.Id, cancellationToken));
-        }
-
-        return Text.Format(Strings.PasteLinkToAnotherFile, handedName, job.FileName);
+            { Answer: HandoffAnswer.Taken } => null,
+            { Answer: HandoffAnswer.NotAHandoff } => Text.Format(Strings.PasteLinkNotTheHandoff, _job.FileName, SiteName),
+            { OtherFileName: { } name } => Text.Format(Strings.PasteLinkToAnotherFile, name, _job.FileName),
+            _ => Text.Format(Strings.PasteLinkToAnotherUnnamedFile, _job.FileName),
+        };
     }
 
     /// <summary>

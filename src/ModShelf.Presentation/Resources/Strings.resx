@@ -338,6 +338,14 @@
     <value>That link is to another file, {0}. Paste the link for {1}.</value>
     <comment>{0} and {1} are file names.</comment>
   </data>
+  <data name="PasteLinkToAnotherUnnamedFile" xml:space="preserve">
+    <value>That link is to another file. Paste the link for {0}.</value>
+    <comment>{0} is a file name.</comment>
+  </data>
+  <data name="PasteLinkNotTheHandoff" xml:space="preserve">
+    <value>That's a link to {0}, but not the one {1} hands over. Start the download on its page, then paste the link its download button holds.</value>
+    <comment>When the link pasted for a handoff is the file's page. {0} is the file's name, {1} the site's name.</comment>
+  </data>
   <data name="PasteLinkProblemTitle" xml:space="preserve">
     <value>That link didn't work</value>
     <comment>Title of the message when a pasted link didn't continue the download.</comment>

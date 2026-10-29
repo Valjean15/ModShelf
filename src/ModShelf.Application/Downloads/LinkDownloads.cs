@@ -64,8 +64,38 @@ internal sealed class LinkDownloads : ILinkDownloads
         return await AddRecognizedAsync(_downloads, recognized, link, targetDirectory, name, cancellationToken).ConfigureAwait(false);
     }
 
+    public async Task<HandoffResult> HandOverAsync(DownloadJobId waiting, Uri link, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(waiting);
+        ArgumentNullException.ThrowIfNull(link);
+        if (!link.IsAbsoluteUri)
+        {
+            throw new ArgumentException("The link must be absolute.", nameof(link));
+        }
+
+        IReadOnlyList<DownloadJobSnapshot> jobs = await _downloads.ListAsync(cancellationToken).ConfigureAwait(false);
+        DownloadJobSnapshot job = jobs.FirstOrDefault(listed => listed.Id == waiting)
+            ?? throw new KeyNotFoundException($"There is no download job {waiting}.");
+
+        RecognizedLink recognized = await _sources.RecognizeAsync(link, cancellationToken).ConfigureAwait(false);
+        if (recognized.File != job.File)
+        {
+            return new HandoffResult(HandoffAnswer.OtherFile, recognized.SuggestedFileName);
+        }
+
+        if (!recognized.IsHandoff)
+        {
+            // Such as the file's page, which the download was started from: the site's link comes once it's started there.
+            return new HandoffResult(HandoffAnswer.NotAHandoff);
+        }
+
+        await _downloads.HandOffAsync(recognized.File, link, cancellationToken).ConfigureAwait(false);
+        return new HandoffResult(HandoffAnswer.Taken);
+    }
+
     /// <summary>
     /// Queues the file of a link already recognized, as <see cref="AddAsync"/> does once it knows where the file goes.
+    /// A job for it queued earlier goes on: a paused one is resumed, and a failed one retried.
     /// </summary>
     internal static async Task<LinkDownload> AddRecognizedAsync(
         IDownloadService downloads,
@@ -88,12 +118,41 @@ internal sealed class LinkDownloads : ILinkDownloads
             && SavesTo(job, targetDirectory, fileName));
         if (existing is not null)
         {
-            return new LinkDownload(existing, AlreadyQueued: true);
+            return new LinkDownload(await GoOnAsync(downloads, existing, cancellationToken).ConfigureAwait(false), AlreadyQueued: true);
         }
 
         DownloadJobSnapshot added = await downloads.EnqueueAsync(recognized.File, targetDirectory, fileName, cancellationToken)
             .ConfigureAwait(false);
         return new LinkDownload(added, AlreadyQueued: false);
+    }
+
+    /// <summary>
+    /// Resumes <paramref name="job"/> when it's paused, and retries it when it failed, so that adding its link again
+    /// goes on with it, wherever the link was added; and returns it as it is then.
+    /// </summary>
+    private static async Task<DownloadJobSnapshot> GoOnAsync(IDownloadService downloads, DownloadJobSnapshot job, CancellationToken cancellationToken)
+    {
+        try
+        {
+            switch (job.Status)
+            {
+                case DownloadJobStatus.Paused:
+                    await downloads.ResumeAsync(job.Id, cancellationToken).ConfigureAwait(false);
+                    break;
+                case DownloadJobStatus.Failed:
+                    await downloads.RetryAsync(job.Id, cancellationToken).ConfigureAwait(false);
+                    break;
+                default:
+                    return job;
+            }
+        }
+        catch (Exception exception) when (exception is InvalidOperationException or KeyNotFoundException)
+        {
+            // It went on meanwhile, or was cleared.
+        }
+
+        IReadOnlyList<DownloadJobSnapshot> jobs = await downloads.ListAsync(cancellationToken).ConfigureAwait(false);
+        return jobs.FirstOrDefault(listed => listed.Id == job.Id) ?? job;
     }
 
     /// <summary>

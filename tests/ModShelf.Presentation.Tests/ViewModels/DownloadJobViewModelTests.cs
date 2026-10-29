@@ -405,7 +405,6 @@ public sealed class DownloadJobViewModelTests : IDisposable
         DownloadJobSnapshot job = TestData.Job(status: DownloadJobStatus.AwaitingHandoff);
         DownloadJobViewModel row = await ShowAsync(job);
         _harness.Dialogs.Answers.Enqueue($" {TestData.HandoffLink} ");
-        _harness.Links.Answer = (_, _, _) => new LinkDownload(job, AlreadyQueued: true);
 
         await row.PasteLinkCommand.ExecuteAsync(null);
 
@@ -414,78 +413,78 @@ public sealed class DownloadJobViewModelTests : IDisposable
                 + "holds the link to paste here, such as one starting with nxm://. Right-click the button, copy the link, and paste it "
                 + "here.|nxm://…|Continue",
             string.Join('|', _harness.Dialogs.Questions.Select(question => $"{question.Title}|{question.Message}|{question.Hint}|{question.ConfirmLabel}")));
-        Assert.Equal([(TestData.HandoffLink, TestData.Folder, (string?)null)], _harness.Links.Added);
+        Assert.Equal([(job.Id, TestData.HandoffLink)], _harness.Links.HandedOver);
+        Assert.Empty(_harness.Links.Added);
         Assert.Empty(_harness.Library.Added);
         Assert.Empty(_harness.Downloads.Controls);
         Assert.Empty(_harness.Dialogs.Messages);
     }
 
     [Fact]
-    public async Task ADownloadIntoTheLibraryIsHandedItsLinkThroughTheLibrary()
+    public async Task ADownloadIntoTheLibraryIsHandedItsLinkAsAnyOther()
     {
+        // Handed to the download itself, so it keeps the place it was queued for, wherever the library is now.
         string folder = Path.Combine(TestData.LibraryRoot, "nexus", "skyrimspecialedition", "SkyUI (12604)");
         DownloadJobSnapshot job = TestData.Job(status: DownloadJobStatus.AwaitingHandoff, folder: folder);
         DownloadJobViewModel row = await ShowAsync(job);
         _harness.Dialogs.Answers.Enqueue(TestData.HandoffLink.AbsoluteUri);
-        _harness.Library.Answer = _ => new LibraryDownload(Path.Combine(folder, job.FileName), new LinkDownload(job, AlreadyQueued: true));
 
         await row.PasteLinkCommand.ExecuteAsync(null);
 
-        Assert.Equal([TestData.HandoffLink], _harness.Library.Added);
-        Assert.Empty(_harness.Links.Added);
+        Assert.Equal([(job.Id, TestData.HandoffLink)], _harness.Links.HandedOver);
+        Assert.Empty(_harness.Library.Added);
         Assert.Empty(_harness.Dialogs.Messages);
     }
 
     [Fact]
-    public async Task ALinkToAnotherFileIsRefusedAndWhatItAddedCancelled()
+    public async Task ALinkToAnotherFileIsRefusedAndAddsNothing()
     {
         DownloadJobSnapshot job = TestData.Job(status: DownloadJobStatus.AwaitingHandoff);
-        DownloadJobViewModel row = await ShowAsync(job);
-        DownloadJobSnapshot other = TestData.Job("other.7z", createdAt: TestData.Now.AddMinutes(1));
+        DownloadJobSnapshot other = TestData.Job("other.7z", DownloadJobStatus.Paused);
+        DownloadJobViewModel row = await ShowAsync(job, other);
         _harness.Dialogs.Answers.Enqueue(TestData.HandoffLink.AbsoluteUri);
-        _harness.Links.Answer = (_, _, _) =>
-        {
-            _harness.Downloads.Publish(other);
-            return new LinkDownload(other, AlreadyQueued: false);
-        };
+        _harness.Links.HandoffAnswer = new HandoffResult(HandoffAnswer.OtherFile, "other.7z");
 
         await row.PasteLinkCommand.ExecuteAsync(null);
 
-        Assert.Equal([("Cancel", other.Id)], _harness.Downloads.Controls);
-        Assert.Equal(DownloadJobStatus.Cancelled, _harness.Row(other).Status);
+        Assert.Empty(_harness.Downloads.Controls);
+        Assert.Empty(_harness.Links.Added);
         Assert.Equal(
             [("That link didn't work", $"That link is to another file, other.7z. Paste the link for {TestData.FileName}.")],
             _harness.Dialogs.Messages);
     }
 
     [Fact]
-    public async Task ALinkToAnotherFileQueuedEarlierLeavesItsDownload()
+    public async Task ALinkToAnotherFileWithoutANameIsRefusedToo()
     {
-        DownloadJobSnapshot job = TestData.Job(status: DownloadJobStatus.AwaitingHandoff);
-        DownloadJobSnapshot other = TestData.Job("other.7z", DownloadJobStatus.Paused);
-        DownloadJobViewModel row = await ShowAsync(job, other);
+        DownloadJobViewModel row = await ShowAsync(TestData.Job(status: DownloadJobStatus.AwaitingHandoff));
         _harness.Dialogs.Answers.Enqueue(TestData.HandoffLink.AbsoluteUri);
-        _harness.Links.Answer = (_, _, _) => new LinkDownload(other, AlreadyQueued: true);
-
-        await row.PasteLinkCommand.ExecuteAsync(null);
-
-        Assert.Empty(_harness.Downloads.Controls);
-        Assert.Equal("That link didn't work", Assert.Single(_harness.Dialogs.Messages).Title);
-    }
-
-    [Fact]
-    public async Task ALinkToAnotherFileInTheLibraryAlreadyIsRefused()
-    {
-        string folder = Path.Combine(TestData.LibraryRoot, "nexus");
-        DownloadJobSnapshot job = TestData.Job(status: DownloadJobStatus.AwaitingHandoff, folder: folder);
-        DownloadJobViewModel row = await ShowAsync(job);
-        _harness.Dialogs.Answers.Enqueue(TestData.HandoffLink.AbsoluteUri);
-        _harness.Library.Answer = _ => new LibraryDownload(Path.Combine(folder, "other.7z"), null);
+        _harness.Links.HandoffAnswer = new HandoffResult(HandoffAnswer.OtherFile);
 
         await row.PasteLinkCommand.ExecuteAsync(null);
 
         Assert.Equal(
-            [("That link didn't work", $"That link is to another file, other.7z. Paste the link for {TestData.FileName}.")],
+            [("That link didn't work", $"That link is to another file. Paste the link for {TestData.FileName}.")],
+            _harness.Dialogs.Messages);
+    }
+
+    [Fact]
+    public async Task TheFilesOwnPageIsntTheLinkToPaste()
+    {
+        DownloadJobViewModel row = await ShowAsync(TestData.Job(status: DownloadJobStatus.AwaitingHandoff));
+        _harness.Dialogs.Answers.Enqueue(TestData.ModPage.AbsoluteUri);
+        _harness.Links.HandoffAnswer = new HandoffResult(HandoffAnswer.NotAHandoff);
+
+        await row.PasteLinkCommand.ExecuteAsync(null);
+
+        Assert.Equal(
+            [
+                (
+                    "That link didn't work",
+                    $"That's a link to {TestData.FileName}, but not the one Nexus Mods hands over. Start the download on its page, then "
+                        + "paste the link its download button holds."
+                ),
+            ],
             _harness.Dialogs.Messages);
     }
 
@@ -497,7 +496,7 @@ public sealed class DownloadJobViewModelTests : IDisposable
 
         await row.PasteLinkCommand.ExecuteAsync(null);
 
-        Assert.Empty(_harness.Links.Added);
+        Assert.Empty(_harness.Links.HandedOver);
         Assert.Equal(
             [("That link didn't work", "That isn't a link. Copy the link the download button on Nexus Mods holds, and paste that.")],
             _harness.Dialogs.Messages);
@@ -513,7 +512,7 @@ public sealed class DownloadJobViewModelTests : IDisposable
 
         await row.PasteLinkCommand.ExecuteAsync(null);
 
-        Assert.Empty(_harness.Links.Added);
+        Assert.Empty(_harness.Links.HandedOver);
         Assert.Empty(_harness.Dialogs.Messages);
     }
 

@@ -127,8 +127,24 @@ public sealed class DownloadCommandHandoffTests : IAsyncDisposable
         input.Type(HandoffLink("1").AbsoluteUri);
 
         Assert.Equal(Done, (await run.WaitForExitAsync(Cancellation)).ExitCode);
-        Assert.Contains("Cancelled", (await RunAsync(["queue", "list"])).QueueRowFor(FileNameOf("2")), StringComparison.Ordinal);
+        Assert.DoesNotContain(FileNameOf("2"), (await RunAsync(["queue", "list"])).Output, StringComparison.Ordinal);
         Assert.False(File.Exists(SavedFile("2")));
+    }
+
+    [Fact]
+    public async Task SaysTheFilesOwnPageIsntTheLinkToPaste()
+    {
+        // The page the CLI shows, pasted back: it's the file's, but the site's link comes once the download starts there.
+        using ControlledTextReader input = new();
+        await using CliRun run = _cli.Start(Download(FileLink("1")), input);
+        await run.WaitForOutputAsync("Link: ", Cancellation);
+
+        input.Type(FileLink("1").AbsoluteUri);
+        await run.WaitForOutputAsync($"That's a link to {FileNameOf("1")}, but not the one the site hands over", Cancellation);
+        input.Type(HandoffLink("1").AbsoluteUri);
+
+        Assert.Equal(Done, (await run.WaitForExitAsync(Cancellation)).ExitCode);
+        Assert.True(File.Exists(SavedFile("1")));
     }
 
     [Fact]

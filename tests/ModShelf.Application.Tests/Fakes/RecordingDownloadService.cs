@@ -8,8 +8,8 @@ using ModShelf.Domain.Mods;
 namespace ModShelf.Application.Tests.Fakes;
 
 /// <summary>
-/// A download queue that only lists jobs, adds them and takes handoff links, recording what it was given. The test
-/// changes jobs with <see cref="Update"/>, which one watcher sees.
+/// A download queue that only lists jobs, adds them, takes handoff links, and resumes and retries them, recording what
+/// it was given. The test changes jobs with <see cref="Update"/>, which one watcher sees.
 /// </summary>
 internal sealed class RecordingDownloadService(params DownloadJobSnapshot[] existingJobs) : IDownloadService
 {
@@ -121,13 +121,39 @@ internal sealed class RecordingDownloadService(params DownloadJobSnapshot[] exis
 
     public Task PauseAsync(DownloadJobId id, CancellationToken cancellationToken) => throw new NotSupportedException();
 
-    public Task ResumeAsync(DownloadJobId id, CancellationToken cancellationToken) => throw new NotSupportedException();
+    /// <summary>
+    /// What the next resume or retry throws, as the scheduler does for a job that went on meanwhile.
+    /// </summary>
+    public Exception? ControlRefusal { get; set; }
 
-    public Task RetryAsync(DownloadJobId id, CancellationToken cancellationToken) => throw new NotSupportedException();
+    public Task ResumeAsync(DownloadJobId id, CancellationToken cancellationToken) => GoOn(id, nameof(ResumeAsync));
+
+    public Task RetryAsync(DownloadJobId id, CancellationToken cancellationToken) => GoOn(id, nameof(RetryAsync));
 
     public Task CancelAsync(DownloadJobId id, CancellationToken cancellationToken) => throw new NotSupportedException();
 
     public Task<int> ClearFinishedAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    /// <summary>
+    /// Queues the job again, as resuming or retrying it does, and records the call.
+    /// </summary>
+    private Task GoOn(DownloadJobId id, string method)
+    {
+        Changes.Add(method);
+        if (ControlRefusal is { } refusal)
+        {
+            ControlRefusal = null;
+            return Task.FromException(refusal);
+        }
+
+        lock (_lock)
+        {
+            int index = _jobs.FindIndex(listed => listed.Id == id);
+            _jobs[index] = _jobs[index] with { Status = DownloadJobStatus.Queued, FailureReason = null };
+        }
+
+        return Task.CompletedTask;
+    }
 
     /// <summary>
     /// The jobs <see cref="Update"/> changes from now on, until <see cref="Stop"/>. One watcher at a time.

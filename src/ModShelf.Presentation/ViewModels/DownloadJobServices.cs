@@ -2,8 +2,6 @@ using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Downloads;
-using ModShelf.Application.Library;
-using ModShelf.Application.Settings;
 using ModShelf.Presentation.Services;
 
 namespace ModShelf.Presentation.ViewModels;
@@ -13,9 +11,7 @@ namespace ModShelf.Presentation.ViewModels;
 /// </summary>
 internal sealed class DownloadJobServices(
     IDownloadService downloads,
-    ILibraryDownloads library,
     ILinkDownloads links,
-    ISettingsService settings,
     IBrowserLauncher browser,
     IDialogService dialogs,
     TimeProvider timeProvider,
@@ -23,11 +19,7 @@ internal sealed class DownloadJobServices(
 {
     public IDownloadService Downloads { get; } = downloads ?? throw new ArgumentNullException(nameof(downloads));
 
-    public ILibraryDownloads Library { get; } = library ?? throw new ArgumentNullException(nameof(library));
-
     public ILinkDownloads Links { get; } = links ?? throw new ArgumentNullException(nameof(links));
-
-    public ISettingsService Settings { get; } = settings ?? throw new ArgumentNullException(nameof(settings));
 
     public IBrowserLauncher Browser { get; } = browser ?? throw new ArgumentNullException(nameof(browser));
 

@@ -209,6 +209,21 @@ public sealed class LibraryDownloadsTests : IDisposable
     }
 
     [Fact]
+    public async Task AddingAFilePausedOnItsWayIntoTheLibraryResumesIt()
+    {
+        // As Browse's and Updates' downloads do, like the Downloads screen's.
+        DownloadJobSnapshot paused = RecordingDownloadService.Job(File(SkyUi, SkyUi52), InRoot("earlier"), "named earlier.7z", DownloadJobStatus.Paused);
+        _downloads.Update(paused);
+        using LibraryDownloads library = Create();
+
+        LibraryDownload added = await library.AddAsync(Link(SkyUi, SkyUi52), Cancellation);
+
+        Assert.Equal([nameof(IDownloadService.ResumeAsync)], _downloads.Changes);
+        Assert.Equal((paused.Id, DownloadJobStatus.Queued), (added.Queued!.Job.Id, added.Queued.Job.Status));
+        Assert.True(added.Queued.AlreadyQueued);
+    }
+
+    [Fact]
     public async Task QueuesAFileDownloadedOutsideTheLibraryAgain()
     {
         string elsewhere = Path.Combine(Path.GetTempPath(), "ModShelf.Tests", "Elsewhere");

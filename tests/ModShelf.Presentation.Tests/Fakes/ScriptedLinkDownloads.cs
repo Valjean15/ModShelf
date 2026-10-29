@@ -1,4 +1,5 @@
 using ModShelf.Application.Downloads;
+using ModShelf.Domain.Downloads;
 
 namespace ModShelf.Presentation.Tests.Fakes;
 
@@ -18,6 +19,24 @@ internal sealed class ScriptedLinkDownloads : ILinkDownloads
     /// What the next adds throw, one each, before any answers.
     /// </summary>
     public Queue<Exception> Refusals { get; } = new();
+
+    /// <summary>
+    /// Each link handed over, with the download it was for.
+    /// </summary>
+    public List<(DownloadJobId Waiting, Uri Link)> HandedOver { get; } = [];
+
+    /// <summary>
+    /// What handing a link over answers.
+    /// </summary>
+    public HandoffResult HandoffAnswer { get; set; } = new(Application.Downloads.HandoffAnswer.Taken);
+
+    public Task<HandoffResult> HandOverAsync(DownloadJobId waiting, Uri link, CancellationToken cancellationToken)
+    {
+        HandedOver.Add((waiting, link));
+        return Refusals.TryDequeue(out Exception? refusal)
+            ? Task.FromException<HandoffResult>(refusal)
+            : Task.FromResult(HandoffAnswer);
+    }
 
     public Task<LinkDownload> AddAsync(Uri link, string targetDirectory, string? fileName, CancellationToken cancellationToken)
     {

@@ -103,7 +103,7 @@ public sealed class DownloadCommandLibraryTests : IAsyncDisposable
         input.Type(HandoffLink("1").AbsoluteUri);
 
         Assert.Equal(Done, (await run.WaitForExitAsync(Cancellation)).ExitCode);
-        Assert.Contains("Cancelled", (await RunAsync("queue", "list")).QueueRowFor(FileNameOf("2")), StringComparison.Ordinal);
+        Assert.DoesNotContain(FileNameOf("2"), (await RunAsync("queue", "list")).Output, StringComparison.Ordinal);
         Assert.Single(Rows(await RunAsync("library", "list")));
     }
 

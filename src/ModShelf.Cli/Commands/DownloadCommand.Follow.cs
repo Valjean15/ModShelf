@@ -13,22 +13,18 @@ internal static partial class DownloadCommand
 {
     /// <summary>
     /// Shows the job's progress and how it ended, and asks for the link that completes its handoff whenever it waits
-    /// for one. A link the user pastes goes through <see cref="ILinkDownloads"/>, or <see cref="ILibraryDownloads"/>
-    /// for the library, as the same command run with that link would, so the source checks it. A download into the
-    /// library is recorded there once it's done.
+    /// for one. A link the user pastes is handed to the job through <see cref="ILinkDownloads.HandOverAsync"/>, so the
+    /// source checks it. A download into the library is recorded there once it's done.
     /// </summary>
     /// <param name="library">The library the file goes into; or null for a download with --to.</param>
     /// <param name="job">The job as it was read once the watch began.</param>
-    /// <param name="fileName">The name the user chose with --name, if any.</param>
     /// <param name="logFolder">Where the log files are, to point to when the job fails unexpectedly.</param>
     private sealed class Follow(
         CliEnvironment environment,
-        IDownloadService downloads,
         ILinkDownloads links,
         ILibraryDownloads? library,
         HandoffPrompt prompt,
         DownloadJobSnapshot job,
-        string? fileName,
         string? logFolder)
     {
         private const string PasteOrStop = "Paste the link the site handed over, or press Ctrl+C to stop.";
@@ -151,7 +147,7 @@ internal static partial class DownloadCommand
         }
 
         /// <summary>
-        /// Hands the line the user typed to the queue as a link. When it's the link the job waits for, the job resolves
+        /// Hands the line the user typed to the job as its link. When it's the link the job waits for, the job resolves
         /// again with it; when it isn't, the user is asked again.
         /// </summary>
         private async Task HandOffAsync(string line, CancellationToken cancellationToken)
@@ -162,48 +158,31 @@ internal static partial class DownloadCommand
                 return;
             }
 
-            // The library keeps the place the job was queued for, so the link finds the job whatever name it was given.
-            LinkDownload? handed;
-            string handedName;
+            HandoffResult handed;
             try
             {
-                if (library is null)
-                {
-                    handed = await links.AddAsync(link, job.TargetDirectory, fileName, cancellationToken).ConfigureAwait(false);
-                    handedName = handed.Job.FileName;
-                }
-                else
-                {
-                    LibraryDownload placed = await library.AddAsync(link, cancellationToken).ConfigureAwait(false);
-                    handed = placed.Queued;
-                    handedName = Path.GetFileName(placed.Path);
-                }
+                handed = await links.HandOverAsync(job.Id, link, cancellationToken).ConfigureAwait(false);
             }
-            catch (Exception exception) when (Problem(exception, library is not null) is { } problem)
+            catch (Exception exception) when (Problem(exception, library: false) is { } problem)
             {
                 _typed = prompt.AskAgain($"{problem.Message} {PasteOrStop}");
                 return;
             }
 
-            if (handed?.Job.Id == job.Id)
+            switch (handed.Answer)
             {
-                return;
+                case HandoffAnswer.Taken:
+                    return;
+                case HandoffAnswer.NotAHandoff:
+                    _typed = prompt.AskAgain(
+                        $"That's a link to {job.FileName}, but not the one the site hands over: start the download on the page above, then "
+                        + "paste the link its download button holds, or press Ctrl+C to stop.");
+                    return;
+                default:
+                    string other = handed.OtherFileName is { } name ? $"another file, {name}" : "another file";
+                    _typed = prompt.AskAgain($"That link is to {other}. Paste the link for {job.FileName}, or press Ctrl+C to stop.");
+                    return;
             }
-
-            // The link was to another file. A job added just now for it isn't what the user asked for.
-            if (handed is { AlreadyQueued: false })
-            {
-                try
-                {
-                    await downloads.CancelAsync(handed.Job.Id, cancellationToken).ConfigureAwait(false);
-                }
-                catch (InvalidOperationException)
-                {
-                    // It finished already.
-                }
-            }
-
-            _typed = prompt.AskAgain($"That link is to another file, {handedName}. Paste the link for {job.FileName}, or press Ctrl+C to stop.");
         }
 
         /// <summary>

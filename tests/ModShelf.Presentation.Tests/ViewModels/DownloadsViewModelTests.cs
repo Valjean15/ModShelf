@@ -211,18 +211,25 @@ public sealed class DownloadsViewModelTests : IDisposable
     }
 
     [Theory]
-    [InlineData(DownloadJobStatus.Paused, "Resume")]
-    [InlineData(DownloadJobStatus.Failed, "Retry")]
-    public async Task AddingAJobAddedEarlierGoesOnWithIt(DownloadJobStatus status, string action)
+    [InlineData(DownloadJobStatus.Paused)]
+    [InlineData(DownloadJobStatus.Failed)]
+    public async Task AddingAJobAddedEarlierGoesOnWithIt(DownloadJobStatus status)
     {
+        // Adding its link again resumed or retried it already, as it does wherever the link is added.
         DownloadJobSnapshot job = TestData.Job(status: status);
         await _harness.StartWithAsync(job);
-        _harness.Library.Answer = _ => new LibraryDownload(Path.Combine(job.TargetDirectory, job.FileName), new LinkDownload(job, AlreadyQueued: true));
+        DownloadJobSnapshot goneOn = job with { Status = DownloadJobStatus.Queued, FailureReason = null };
+        _harness.Library.Answer = _ =>
+        {
+            // As the queue tells its watchers once the job goes on.
+            _harness.Downloads.Publish(goneOn);
+            return new LibraryDownload(Path.Combine(job.TargetDirectory, job.FileName), new LinkDownload(goneOn, AlreadyQueued: true));
+        };
         Screen.Link = TestData.ModPage.AbsoluteUri;
 
         await Screen.AddCommand.ExecuteAsync(null);
 
-        Assert.Equal([(action, job.Id)], _harness.Downloads.Controls);
+        Assert.Empty(_harness.Downloads.Controls);
         Assert.Equal($"Continuing the download of {job.FileName}, added earlier.", Screen.Message);
         Assert.Equal(DownloadJobStatus.Queued, Assert.Single(Screen.Jobs).Status);
     }

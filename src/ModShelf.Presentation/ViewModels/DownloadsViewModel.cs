@@ -59,7 +59,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         _sources = sources;
         _uiThread = uiThread;
         _logger = logger;
-        _jobServices = new DownloadJobServices(downloads, library, links, settings, browser, dialogs, timeProvider, logger);
+        _jobServices = new DownloadJobServices(downloads, links, browser, dialogs, timeProvider, logger);
     }
 
     public override Screen Screen => Screen.Downloads;
@@ -256,7 +256,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         {
             if (await add(link) is { } added)
             {
-                await FollowAsync(added, cancellationToken);
+                Follow(added);
             }
             else if (Message is not null)
             {
@@ -284,10 +284,10 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
     }
 
     /// <summary>
-    /// Lists the job a link added, and says so. A job added earlier goes on: a paused one resumes, and a failed one is
-    /// retried. A file saved there already only says so.
+    /// Lists the job a link added, and says so. A job added earlier goes on, as adding its link again resumed or retried
+    /// it. A file saved there already only says so.
     /// </summary>
-    private async Task FollowAsync(LinkDownload added, CancellationToken cancellationToken)
+    private void Follow(LinkDownload added)
     {
         DownloadJobSnapshot job = added.Job;
         if (added.AlreadySaved)
@@ -306,21 +306,6 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         }
 
         Say(Text.Format(Strings.DownloadsContinuing, job.FileName));
-        try
-        {
-            if (job.Status == DownloadJobStatus.Paused)
-            {
-                await _downloads.ResumeAsync(job.Id, cancellationToken);
-            }
-            else if (job.Status == DownloadJobStatus.Failed)
-            {
-                await _downloads.RetryAsync(job.Id, cancellationToken);
-            }
-        }
-        catch (Exception exception) when (exception is InvalidOperationException or KeyNotFoundException)
-        {
-            // It went on meanwhile, or was cleared.
-        }
     }
 
     /// <summary>

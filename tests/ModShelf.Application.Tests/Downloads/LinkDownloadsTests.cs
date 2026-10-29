@@ -201,8 +201,97 @@ public sealed class LinkDownloadsTests
         LinkDownload result = await AddAsync(downloads, [ScriptedLinkRecognizer.Always(NexusFile)]);
 
         Assert.True(result.AlreadyQueued);
-        Assert.Same(earlier, result.Job);
+        Assert.Equal(earlier.Id, result.Job.Id);
         Assert.Empty(downloads.Enqueued);
+    }
+
+    [Theory]
+    [InlineData(Paused, nameof(IDownloadService.ResumeAsync))]
+    [InlineData(Failed, nameof(IDownloadService.RetryAsync))]
+    public async Task AddingTheLinkAgainGoesOnWithAJobThatStopped(DownloadJobStatus status, string control)
+    {
+        // Wherever the link is added again, as the CLI, the Downloads screen, Browse and Updates all do.
+        DownloadJobSnapshot earlier = RecordingDownloadService.Job(NexusFile, TestData.TargetDirectory, FileName, status);
+        RecordingDownloadService downloads = new(earlier);
+
+        LinkDownload result = await AddAsync(downloads, [ScriptedLinkRecognizer.Always(NexusFile)]);
+
+        Assert.Equal([control], downloads.Changes);
+        Assert.Equal(Queued, result.Job.Status);
+        Assert.True(result.AlreadyQueued);
+    }
+
+    [Fact]
+    public async Task AJobThatWentOnMeanwhileIsReturnedAsItIs()
+    {
+        DownloadJobSnapshot earlier = RecordingDownloadService.Job(NexusFile, TestData.TargetDirectory, FileName, Paused);
+        RecordingDownloadService downloads = new(earlier) { ControlRefusal = new InvalidOperationException("It's Downloading already.") };
+
+        LinkDownload result = await AddAsync(downloads, [ScriptedLinkRecognizer.Always(NexusFile)]);
+
+        Assert.Equal(earlier.Id, result.Job.Id);
+        Assert.True(result.AlreadyQueued);
+    }
+
+    [Theory]
+    [InlineData(Queued)]
+    [InlineData(Downloading)]
+    [InlineData(AwaitingHandoff)]
+    public async Task AJobUnderWayIsLeftAsItIs(DownloadJobStatus status)
+    {
+        DownloadJobSnapshot earlier = RecordingDownloadService.Job(NexusFile, TestData.TargetDirectory, FileName, status);
+        RecordingDownloadService downloads = new(earlier);
+
+        await AddAsync(downloads, [ScriptedLinkRecognizer.Always(NexusFile)]);
+
+        Assert.Empty(downloads.Changes);
+    }
+
+    [Fact]
+    public async Task AHandoffLinkForTheWaitingDownloadsFileIsTaken()
+    {
+        DownloadJobSnapshot waiting = RecordingDownloadService.Job(NexusFile, TestData.TargetDirectory, FileName, AwaitingHandoff);
+        RecordingDownloadService downloads = new(waiting);
+
+        HandoffResult result = await HandOverAsync(downloads, waiting.Id, ScriptedLinkRecognizer.Always(NexusFile, isHandoff: true));
+
+        Assert.Equal(new HandoffResult(HandoffAnswer.Taken), result);
+        Assert.Equal((NexusFile, Link), Assert.Single(downloads.HandedOff));
+        Assert.Empty(downloads.Enqueued);
+    }
+
+    [Fact]
+    public async Task ALinkToTheFileThatIsntTheSitesHandoffIsSaidToBeSo()
+    {
+        // Such as the file's page, pasted where the link the site hands over goes.
+        DownloadJobSnapshot waiting = RecordingDownloadService.Job(NexusFile, TestData.TargetDirectory, FileName, AwaitingHandoff);
+        RecordingDownloadService downloads = new(waiting);
+
+        HandoffResult result = await HandOverAsync(downloads, waiting.Id, ScriptedLinkRecognizer.Always(NexusFile));
+
+        Assert.Equal(new HandoffResult(HandoffAnswer.NotAHandoff), result);
+        Assert.Empty(downloads.Changes);
+    }
+
+    [Fact]
+    public async Task ALinkToAnotherFileAddsNothingAndNamesIt()
+    {
+        DownloadJobSnapshot waiting = RecordingDownloadService.Job(NexusFile, TestData.TargetDirectory, FileName, AwaitingHandoff);
+        RecordingDownloadService downloads = new(waiting);
+        ScriptedLinkRecognizer other = ScriptedLinkRecognizer.Always(TestData.File(TestData.Nexus, "99"), isHandoff: true);
+
+        HandoffResult result = await HandOverAsync(downloads, waiting.Id, other);
+
+        Assert.Equal(HandoffAnswer.OtherFile, result.Answer);
+        Assert.Equal(FileName, result.OtherFileName);
+        Assert.Empty(downloads.Changes);
+    }
+
+    [Fact]
+    public async Task HandingOverToADownloadThatIsntThereSaysSo()
+    {
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            () => HandOverAsync(new RecordingDownloadService(), DownloadJobId.New(), ScriptedLinkRecognizer.Always(NexusFile, isHandoff: true)));
     }
 
     [Fact]
@@ -293,6 +382,10 @@ public sealed class LinkDownloadsTests
         Assert.False(result.AlreadySaved);
         Assert.Single(downloads.Enqueued);
     }
+
+    private static Task<HandoffResult> HandOverAsync(RecordingDownloadService downloads, DownloadJobId waiting, IModSource source)
+        => new LinkDownloads(new SourceRegistry([source]), downloads, new FakeLibraryStorage())
+            .HandOverAsync(waiting, Link, TestContext.Current.CancellationToken);
 
     private static Task<LinkDownload> AddAsync(
         RecordingDownloadService downloads,

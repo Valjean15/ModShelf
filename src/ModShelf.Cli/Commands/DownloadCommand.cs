@@ -153,18 +153,11 @@ internal static partial class DownloadCommand
             return problem.ExitCode;
         }
 
+        // A job added earlier goes on: adding its link again resumed it when it was paused, and retried it when it failed.
         DownloadJobSnapshot job = added.Job;
         if (added.AlreadyQueued)
         {
             environment.Output.WriteLine($"Continuing the download of {job.FileName} added earlier.");
-            if (job.Status == DownloadJobStatus.Paused)
-            {
-                await downloads.ResumeAsync(job.Id, cancellationToken).ConfigureAwait(false);
-            }
-            else if (job.Status == DownloadJobStatus.Failed)
-            {
-                await downloads.RetryAsync(job.Id, cancellationToken).ConfigureAwait(false);
-            }
         }
         else
         {
@@ -180,12 +173,10 @@ internal static partial class DownloadCommand
 
         Follow follow = new(
             environment,
-            downloads,
             links,
             library,
             new HandoffPrompt(environment, services.GetRequiredService<IBrowserLauncher>()),
             current,
-            fileName,
             services.GetService<LogFolder>()?.Path);
         return await follow.RunAsync(updates, watching, cancellationToken).ConfigureAwait(false);
     }
