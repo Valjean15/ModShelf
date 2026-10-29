@@ -184,6 +184,30 @@ public sealed class SettingsServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task SetsTheThemeAndBackToTheDefault()
+    {
+        await _settings.SetNotifyOfUpdatesAsync(false, Cancellation);
+        await _settings.SetThemeAsync(AppTheme.Dark, Cancellation);
+        AppSettings set = await _settings.GetAsync(Cancellation);
+
+        await _settings.SetThemeAsync(null, Cancellation);
+
+        Assert.Equal((AppTheme.Dark, false), (set.Theme, set.NotifyOfUpdates));
+        Assert.Null((await _settings.GetAsync(Cancellation)).Theme);
+        Assert.False((await _settings.GetAsync(Cancellation)).NotifyOfUpdates);
+    }
+
+    [Fact]
+    public async Task RefusesAThemeThatIsntOne()
+    {
+        await _settings.SetThemeAsync(AppTheme.Light, Cancellation);
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _settings.SetThemeAsync((AppTheme)3, Cancellation));
+
+        Assert.Equal(AppTheme.Light, (await _settings.GetAsync(Cancellation)).Theme);
+    }
+
+    [Fact]
     public async Task SetsThePatternForEveryGameAndForOne()
     {
         FolderPattern byId = FolderPattern.Parse("{source}/{game}/{modid}/{file}");

@@ -44,6 +44,11 @@ public sealed record AppSettings
     public bool? NotifyOfUpdates { get; init; }
 
     /// <summary>
+    /// Whether the desktop app is light or dark; null for <see cref="AppTheme.System"/>.
+    /// </summary>
+    public AppTheme? Theme { get; init; }
+
+    /// <summary>
     /// The pattern files of <paramref name="game"/> go by.
     /// </summary>
     public FolderPattern FoldersFor(string game)

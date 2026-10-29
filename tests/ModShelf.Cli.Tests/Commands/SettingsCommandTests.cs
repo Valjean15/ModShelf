@@ -56,6 +56,7 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         Assert.Equal("2 (default)", Value(shown, "library.oldVersions"));
         Assert.Equal("6h (default)", Value(shown, "updates.interval"));
         Assert.Equal("true (default)", Value(shown, "updates.notify"));
+        Assert.Equal("system (default)", Value(shown, "appearance.theme"));
         Assert.Contains("To change a setting: settings set <setting> <value>", shown.Output, StringComparison.Ordinal);
     }
 
@@ -133,9 +134,10 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     [InlineData("set", "library.root", "Mods", "isn't a full path")]
     [InlineData("set", "library.folders", "{mod}", "The last part must be exactly {file}.")]
     [InlineData("set", "library.folders.skyrimspecialedition", "{name}/{file}", "{name} isn't a folder's part.")]
-    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<game>, library.oldVersions, updates.interval, updates.notify.")]
+    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<game>, library.oldVersions, updates.interval, updates.notify, appearance.theme.")]
     [InlineData("reset", "library.folders.", null, "There's no setting called library.folders.")]
     [InlineData("set", "library.oldVersions", "0", "'0' isn't a rule for old versions. Use all, archive, or how many versions to keep, from 1 to 99, such as 2.")]
+    [InlineData("set", "appearance.theme", "blue", "'blue' isn't system, light or dark.")]
     public async Task SaysWhatsWrongWithASetting(string command, string name, string? value, string message)
     {
         CliResult refused = await RunAsync([command, name, .. value is null ? Array.Empty<string>() : [value]]);
@@ -144,6 +146,23 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         Assert.Contains(message, refused.Errors, StringComparison.Ordinal);
         Assert.DoesNotContain("(Parameter", refused.Errors, StringComparison.Ordinal);
         Assert.False(File.Exists(SettingsFile));
+    }
+
+    [Fact]
+    public async Task SetsWhetherTheDesktopAppIsLightOrDark()
+    {
+        CliResult set = await RunAsync("set", "Appearance.Theme", " Dark ");
+        string file = await File.ReadAllTextAsync(SettingsFile, Cancellation);
+        string shownSet = Value(await RunAsync("show"), "appearance.theme");
+        CliResult reset = await RunAsync("reset", "appearance.theme");
+
+        Assert.Equal(Done, set.ExitCode);
+        Assert.Equal("appearance.theme is now dark: the desktop app is dark.", set.Output.Trim());
+        Assert.Contains("\"theme\": \"dark\"", file, StringComparison.Ordinal);
+        Assert.Equal("dark", shownSet);
+        Assert.Equal(Done, reset.ExitCode);
+        Assert.Equal("appearance.theme is back to its default, system: the desktop app is light or dark as the system is.", reset.Output.Trim());
+        Assert.Equal("system (default)", Value(await RunAsync("show"), "appearance.theme"));
     }
 
     [Fact]

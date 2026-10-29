@@ -109,6 +109,16 @@ internal sealed class SettingsService : ISettingsService, IDisposable
     public Task SetNotifyOfUpdatesAsync(bool? notify, CancellationToken cancellationToken)
         => ChangeAsync((settings, _) => Task.FromResult(settings with { NotifyOfUpdates = notify }), cancellationToken);
 
+    public Task SetThemeAsync(AppTheme? theme, CancellationToken cancellationToken)
+    {
+        if (theme is { } value && !Enum.IsDefined(value))
+        {
+            throw new ArgumentOutOfRangeException(nameof(theme), value, "The theme must be System, Light or Dark.");
+        }
+
+        return ChangeAsync((settings, _) => Task.FromResult(settings with { Theme = theme }), cancellationToken);
+    }
+
     public void Dispose() => _changing.Dispose();
 
     /// <summary>

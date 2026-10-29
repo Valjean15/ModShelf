@@ -80,12 +80,14 @@ public sealed class JsonSettingsStoreTests : IDisposable
     [Fact]
     public async Task KeepsWhatElseTheFileHolds()
     {
-        await WriteAsync("""{ "appearance": { "theme": "dark" }, "library": { "keep": 3, "root": "/old" } }""");
+        // Settings of a newer version, beside these and in their sections.
+        await WriteAsync("""{ "window": { "width": 900 }, "appearance": { "accent": "teal" }, "library": { "keep": 3, "root": "/old" } }""");
 
         await Store().SaveAsync(new AppSettings { LibraryFolders = FolderPattern.Default }, Cancellation);
 
         string file = await File.ReadAllTextAsync(FilePath, Cancellation);
-        Assert.Contains("\"theme\": \"dark\"", file, StringComparison.Ordinal);
+        Assert.Contains("\"width\": 900", file, StringComparison.Ordinal);
+        Assert.Contains("\"accent\": \"teal\"", file, StringComparison.Ordinal);
         Assert.Contains("\"keep\": 3", file, StringComparison.Ordinal);
         Assert.DoesNotContain("/old", file, StringComparison.Ordinal);
         Assert.False(File.Exists(FilePath + ".tmp"));
@@ -295,6 +297,58 @@ public sealed class JsonSettingsStoreTests : IDisposable
         InvalidDataException refused = await Assert.ThrowsAsync<InvalidDataException>(() => Store().LoadAsync(Cancellation));
 
         Assert.Contains("updates.notify must be true or false.", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(AppTheme.System, "system")]
+    [InlineData(AppTheme.Light, "light")]
+    [InlineData(AppTheme.Dark, "dark")]
+    public async Task KeepsTheTheme(AppTheme theme, string name)
+    {
+        await WriteAsync("""{ "appearance": { "accent": "teal" } }""");
+
+        await Store().SaveAsync(new AppSettings { Theme = theme }, Cancellation);
+
+        Assert.Equal(theme, (await Store().LoadAsync(Cancellation)).Theme);
+        string file = await File.ReadAllTextAsync(FilePath, Cancellation);
+        Assert.Contains("\"appearance\": {", file, StringComparison.Ordinal);
+        Assert.Contains($"\"theme\": \"{name}\"", file, StringComparison.Ordinal);
+        Assert.Contains("\"accent\": \"teal\"", file, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task TheDefaultThemeLeavesTheFile()
+    {
+        await Store().SaveAsync(new AppSettings { Theme = AppTheme.Dark }, Cancellation);
+
+        await Store().SaveAsync(new AppSettings(), Cancellation);
+
+        Assert.Null((await Store().LoadAsync(Cancellation)).Theme);
+        Assert.Equal("{}", (await File.ReadAllTextAsync(FilePath, Cancellation)).Trim());
+    }
+
+    [Theory]
+    [InlineData("\" Dark \"", AppTheme.Dark)]
+    [InlineData("\"LIGHT\"", AppTheme.Light)]
+    [InlineData("\"\"", null)]
+    public async Task ReadsAThemeWrittenByHand(string json, AppTheme? theme)
+    {
+        await WriteAsync($$"""{ "appearance": { "theme": {{json}} } }""");
+
+        Assert.Equal(theme, (await Store().LoadAsync(Cancellation)).Theme);
+    }
+
+    [Theory]
+    [InlineData("""{ "appearance": { "theme": "blue" } }""", "appearance.theme must be system, light or dark.")]
+    [InlineData("""{ "appearance": { "theme": "1" } }""", "appearance.theme must be system, light or dark.")]
+    [InlineData("""{ "appearance": { "theme": 2 } }""", "appearance.theme must be text.")]
+    public async Task SaysWhenTheThemeIsWrong(string content, string message)
+    {
+        await WriteAsync(content);
+
+        InvalidDataException refused = await Assert.ThrowsAsync<InvalidDataException>(() => Store().LoadAsync(Cancellation));
+
+        Assert.StartsWith($"The settings in {FilePath} can't be read: {message}", refused.Message, StringComparison.Ordinal);
     }
 
     [Fact]

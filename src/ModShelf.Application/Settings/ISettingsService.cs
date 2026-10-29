@@ -67,4 +67,10 @@ public interface ISettingsService
     /// Sets whether a background check that finds new updates shows a notice, or sets it back to yes with null.
     /// </summary>
     Task SetNotifyOfUpdatesAsync(bool? notify, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets whether the desktop app is light or dark, or sets it back to <see cref="AppTheme.System"/> with null.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="theme"/> isn't an <see cref="AppTheme"/>.</exception>
+    Task SetThemeAsync(AppTheme? theme, CancellationToken cancellationToken);
 }

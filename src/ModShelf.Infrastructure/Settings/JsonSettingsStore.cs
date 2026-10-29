@@ -21,7 +21,8 @@ namespace ModShelf.Infrastructure.Settings;
 ///     "gameFolders": { "skyrimspecialedition": "{source}/{game}/{mod}/{file}" },
 ///     "oldVersions": 2
 ///   },
-///   "updates": { "interval": "6h" }
+///   "updates": { "interval": "6h" },
+///   "appearance": { "theme": "dark" }
 /// }
 /// </code>
 /// </summary>
@@ -39,6 +40,8 @@ internal sealed class JsonSettingsStore : ISettingsStore
     private const string Updates = "updates";
     private const string Interval = "interval";
     private const string Notify = "notify";
+    private const string Appearance = "appearance";
+    private const string Theme = "theme";
 
     private static readonly JsonDocumentOptions Reading = new() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
     private static readonly JsonSerializerOptions Writing = new() { WriteIndented = true };
@@ -67,6 +70,7 @@ internal sealed class JsonSettingsStore : ISettingsStore
         JsonObject? file = await ReadAsync(cancellationToken).ConfigureAwait(false);
         JsonObject library = file?[Library] as JsonObject ?? [];
         JsonObject updates = file?[Updates] as JsonObject ?? [];
+        JsonObject appearance = file?[Appearance] as JsonObject ?? [];
         try
         {
             string? root = Text(library, Root);
@@ -98,6 +102,9 @@ internal sealed class JsonSettingsStore : ISettingsStore
                     JsonValue value when value.TryGetValue(out bool notify) => notify,
                     _ => throw new InvalidDataException($"{Updates}.{Notify} must be true or false."),
                 },
+                Theme = Text(appearance, Theme, Appearance) is { } theme
+                    ? ThemeNamed(theme) ?? throw new InvalidDataException($"{Appearance}.{Theme} must be system, light or dark.")
+                    : null,
             };
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or InvalidDataException or FormatException)
@@ -173,6 +180,17 @@ internal sealed class JsonSettingsStore : ISettingsStore
             file[Updates] = updatesSection;
         }
 
+        JsonObject appearanceSection = file[Appearance] as JsonObject ?? [];
+        Set(appearanceSection, Theme, settings.Theme is { } theme ? ThemeName(theme) : null);
+        if (appearanceSection.Count == 0)
+        {
+            file.Remove(Appearance);
+        }
+        else
+        {
+            file[Appearance] = appearanceSection;
+        }
+
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
@@ -217,6 +235,20 @@ internal sealed class JsonSettingsStore : ISettingsStore
         JsonValue value when value.TryGetValue(out string? text) => string.IsNullOrWhiteSpace(text) ? null : text,
         _ => throw new InvalidDataException($"{sectionName}.{name} must be text."),
     };
+
+    /// <summary>
+    /// A theme as the file names it: system, light or dark.
+    /// </summary>
+    private static string ThemeName(AppTheme theme) => theme switch
+    {
+        AppTheme.Light => "light",
+        AppTheme.Dark => "dark",
+        _ => "system",
+    };
+
+    /// <returns>The theme named, in any case; null for a name that's none.</returns>
+    private static AppTheme? ThemeNamed(string name)
+        => Enum.GetValues<AppTheme>().Cast<AppTheme?>().FirstOrDefault(theme => string.Equals(ThemeName(theme!.Value), name.Trim(), StringComparison.OrdinalIgnoreCase));
 
     /// <summary>
     /// The rule for old versions: a count, or text as <see cref="OldVersionRule.Parse"/> reads it.
