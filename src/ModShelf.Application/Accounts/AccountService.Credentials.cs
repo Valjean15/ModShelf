@@ -151,8 +151,18 @@ internal sealed partial class AccountService
             return null;
         }
 
-        await _vault.SaveAsync(source, entry with { Credentials = refreshed }, CancellationToken.None).ConfigureAwait(false);
-        LogRefreshed(_logger, source);
+        try
+        {
+            await _vault.SaveAsync(source, entry with { Credentials = refreshed }, CancellationToken.None).ConfigureAwait(false);
+            LogRefreshed(_logger, source);
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            // The site may have retired the credentials refreshed, so the new ones are kept, while ModShelf runs at least.
+            _vault.Keep(source, entry with { Credentials = refreshed });
+            LogCantSaveRefreshed(_logger, exception, source);
+        }
+
         return refreshed;
     }
 

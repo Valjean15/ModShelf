@@ -152,6 +152,48 @@ public sealed class CredentialRefreshTests
     }
 
     [Fact]
+    public async Task RefreshedCredentialsThatCantBeSavedAreKeptWhileTheAppRuns()
+    {
+        await _harness.LinkAsync(TestData.Nexus, AuthKind.OAuthPkce);
+        AccountCredentials refused = (await AuthorizeAsync())!;
+        _harness.Secrets.WriteFailure = new InvalidOperationException("The Secret Service couldn't store a secret: Timeout was reached");
+
+        AccountCredentials? refreshed = await RefreshAsync(refused);
+
+        Assert.Equal("access-2", refreshed?.AccessToken);
+        Assert.Equal("access-2", (await AuthorizeAsync())?.AccessToken);
+        Assert.Equal(1, _harness.NexusOAuth.RefreshCalls);
+        Assert.Contains(_harness.Logger.Entries, entry => entry.StartsWith("Error: Couldn't save the refreshed credentials for nexus", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task CredentialsRefreshedBeforeUseThatCantBeSavedAreKeptWhileTheAppRuns()
+    {
+        await _harness.LinkAsync(TestData.Nexus, AuthKind.OAuthPkce);
+        _harness.Time.Advance(TimeSpan.FromMinutes(59.5));
+        _harness.Secrets.WriteFailure = new InvalidOperationException("The Secret Service couldn't store a secret: Timeout was reached");
+
+        Assert.Equal("access-2", (await AuthorizeAsync())?.AccessToken);
+        Assert.Equal("access-2", (await AuthorizeAsync())?.AccessToken);
+        Assert.Equal(1, _harness.NexusOAuth.RefreshCalls);
+    }
+
+    [Fact]
+    public async Task RefreshedCredentialsAreSavedOnceTheyCanBe()
+    {
+        await _harness.LinkAsync(TestData.Nexus, AuthKind.OAuthPkce);
+        AccountCredentials refused = (await AuthorizeAsync())!;
+        _harness.Secrets.WriteFailure = new InvalidOperationException("The Secret Service couldn't store a secret: Timeout was reached");
+        AccountCredentials refreshed = (await RefreshAsync(refused))!;
+        _harness.Secrets.WriteFailure = null;
+
+        await RefreshAsync(refreshed);
+        _harness.Restart();
+
+        Assert.Equal("access-3", (await AuthorizeAsync())?.AccessToken);
+    }
+
+    [Fact]
     public async Task DamagedCredentialsCountAsNone()
     {
         await _harness.LinkAsync(TestData.Nexus, AuthKind.ApiKey);

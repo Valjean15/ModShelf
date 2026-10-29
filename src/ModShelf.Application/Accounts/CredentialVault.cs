@@ -72,6 +72,12 @@ internal sealed partial class CredentialVault(ISecretStore store, ILogger logger
     }
 
     /// <summary>
+    /// Keeps the entry in memory only, until ModShelf closes, for when it can't be stored. Call while holding the
+    /// source's lock.
+    /// </summary>
+    public void Keep(SourceId source, VaultEntry entry) => _cache[source] = entry;
+
+    /// <summary>
     /// Removes the source's credentials. Call while holding the source's lock.
     /// </summary>
     public async Task DeleteAsync(SourceId source, CancellationToken cancellationToken)

@@ -31,4 +31,7 @@ internal sealed partial class AccountService
 
     [LoggerMessage(EventId = 407, Level = LogLevel.Warning, Message = "Can't add the account to requests for {Source}: the source isn't registered or no longer offers {Kind}; link the account again")]
     private static partial void LogCannotAuthorize(ILogger logger, SourceId source, AuthKind kind);
+
+    [LoggerMessage(EventId = 408, Level = LogLevel.Error, Message = "Couldn't save the refreshed credentials for {Source}; they're kept until ModShelf closes, and the account may have to be linked again after that")]
+    private static partial void LogCantSaveRefreshed(ILogger logger, Exception exception, SourceId source);
 }
