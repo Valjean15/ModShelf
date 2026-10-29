@@ -98,6 +98,18 @@
     <value>Cancel</value>
     <comment>The button that turns down what a dialog asks.</comment>
   </data>
+  <data name="DialogClose" xml:space="preserve">
+    <value>Close</value>
+    <comment>The button that closes a message, and with it the app.</comment>
+  </data>
+  <data name="StartupProblemTitle" xml:space="preserve">
+    <value>ModShelf can't start</value>
+    <comment>The title of the window shown instead of the app when it can't start.</comment>
+  </data>
+  <data name="StartupFailed" xml:space="preserve">
+    <value>ModShelf couldn't start: {0}</value>
+    <comment>The window shown instead of the app when it can't start for a reason it didn't expect. {0} is what went wrong, a sentence.</comment>
+  </data>
   <data name="DownloadsLinkHint" xml:space="preserve">
     <value>Paste a link to a mod or a file, such as a mod's page on Nexus Mods</value>
     <comment>The empty box at the top of the Downloads screen.</comment>

@@ -1,3 +1,4 @@
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -40,6 +41,51 @@ public sealed class LibraryDatabaseTests
         Assert.Equal(
             context.Database.GetMigrations(),
             await context.Database.GetAppliedMigrationsAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task AFileThatIsntADatabaseStopsTheStartAndStaysAsItWas()
+    {
+        await using TestLibraryDatabase database = new();
+        byte[] notADatabase = [.. Enumerable.Repeat((byte)'x', 4096)];
+        await File.WriteAllBytesAsync(database.DatabasePath, notADatabase, TestContext.Current.CancellationToken);
+
+        LibraryDatabaseUnavailableException refused = await Assert.ThrowsAsync<LibraryDatabaseUnavailableException>(database.StartAsync);
+
+        Assert.StartsWith(
+            $"The library database {database.DatabasePath} can't be opened: it isn't a ModShelf library database, or it's damaged.",
+            refused.Message,
+            StringComparison.Ordinal);
+        Assert.Equal(notADatabase, await File.ReadAllBytesAsync(database.DatabasePath, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task AFolderThatCantBeCreatedStopsTheStart()
+    {
+        await using TestLibraryDatabase database = new("App Data", "library.db");
+        await File.WriteAllTextAsync(Path.GetDirectoryName(database.DatabasePath)!, "a file where the folder goes", TestContext.Current.CancellationToken);
+
+        LibraryDatabaseUnavailableException refused = await Assert.ThrowsAsync<LibraryDatabaseUnavailableException>(database.StartAsync);
+
+        Assert.StartsWith($"The library database {database.DatabasePath} can't be opened: its folder can't be created.", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(26, "it isn't a ModShelf library database, or it's damaged.")]
+    [InlineData(11, "it isn't a ModShelf library database, or it's damaged.")]
+    [InlineData(5, "another program is using it.")]
+    [InlineData(6, "another program is using it.")]
+    [InlineData(14, "it can't be opened.")]
+    [InlineData(3, "it can't be opened.")]
+    [InlineData(23, "it can't be opened.")]
+    [InlineData(8, "it can't be written.")]
+    [InlineData(13, "the disk is full.")]
+    [InlineData(10, "SQLite Error 10: 'disk I/O error'.")]
+    public void SaysWhatsWrongWithTheDatabase(int errorCode, string problem)
+    {
+        SqliteException exception = new($"SQLite Error {errorCode}: 'disk I/O error'.", errorCode);
+
+        Assert.StartsWith(problem, LibraryDatabaseMigrator.Problem(exception), StringComparison.Ordinal);
     }
 
     [Fact]

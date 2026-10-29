@@ -1,14 +1,21 @@
+using System.Globalization;
+using System.Text;
+
 using Avalonia;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 using ModShelf.Desktop.Hosting;
+using ModShelf.Desktop.Views.Dialogs;
+using ModShelf.Infrastructure.Persistence;
+using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.ViewModels;
 
 namespace ModShelf.Desktop;
 
-internal static class Program
+internal static partial class Program
 {
     // Initialization code. Don't use any Avalonia APIs or SynchronizationContext-reliant code
     // before StartWithClassicDesktopLifetime runs: Avalonia isn't initialized yet. Starting the
@@ -17,7 +24,22 @@ internal static class Program
     public static int Main(string[] args)
     {
         using IHost host = DesktopHost.Create(args);
-        host.Start();
+        try
+        {
+            host.Start();
+        }
+        catch (Exception exception)
+        {
+            // Such as a library database that can't be opened: said in a window, rather than the app closing unseen.
+            ILogger logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(Program).FullName!);
+            LogCantStart(logger, exception);
+            string message = exception is LibraryDatabaseUnavailableException
+                ? exception.Message
+                : string.Format(CultureInfo.CurrentCulture, CompositeFormat.Parse(Strings.StartupFailed), exception.Message);
+            MessageDialogContent problem = new(Strings.StartupProblemTitle, message, Strings.DialogClose, null);
+            Configure(AppBuilder.Configure(() => new App(problem))).StartWithClassicDesktopLifetime(args);
+            return 1;
+        }
 
         try
         {

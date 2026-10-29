@@ -12,4 +12,7 @@ internal sealed partial class LibraryDatabaseMigrator
 
     [LoggerMessage(EventId = 201, Level = LogLevel.Debug, Message = "The library database is up to date")]
     private static partial void LogUpToDate(ILogger logger);
+
+    [LoggerMessage(EventId = 202, Level = LogLevel.Error, Message = "The library database {Path} can't be opened")]
+    private static partial void LogUnavailable(ILogger logger, Exception exception, string path);
 }
