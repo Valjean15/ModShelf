@@ -149,12 +149,18 @@ public sealed class NexusSourceLinkTests : IDisposable
         Assert.Equal(HttpStatusCode.NotFound, refused.StatusCode);
     }
 
-    [Theory]
-    [InlineData("https://example.com/stardewvalley/mods/2400")]
-    [InlineData("https://cf-files.nexusmods.com/cdn/1303/2400/SMAPI.zip?expires=1792810466&md5=abc")]
-    public async Task LeavesOtherSitesLinksAloneWithoutAskingTheApi(string link)
+    [Fact]
+    public async Task LeavesOtherSitesLinksAloneWithoutAskingTheApi()
     {
-        Assert.Null(await Source.RecognizeAsync(new Uri(link), Cancellation));
+        Assert.Null(await Source.RecognizeAsync(new Uri("https://example.com/stardewvalley/mods/2400"), Cancellation));
+        Assert.Empty(_api.Requests);
+    }
+
+    [Fact]
+    public async Task RefusesADownloadLinkFromItsServersWithoutAskingTheApi()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() => Source.RecognizeAsync(
+            new Uri("https://cf-files.nexusmods.com/cdn/1303/2400/SMAPI.zip?expires=1792810466&md5=abc"), Cancellation));
         Assert.Empty(_api.Requests);
     }
 

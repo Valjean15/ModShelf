@@ -25,9 +25,16 @@ internal sealed record NexusLink(string Game, string ModId, string? FileId, bool
 
     private const string NotCollections = "ModShelf downloads single files, not collections.";
 
+    private const string NotPages = "That's a link to Nexus Mods' servers, not to a page: a download link from them stops "
+        + "working after a while. Copy the mod's page link, or the file's link on its Files tab, instead.";
+
     // Mod pages are on www. The next. site redirects its game pages there and hosts collections, so its links are
     // read too: a collection gets a clear refusal instead of being fetched as a web page by the direct-link source.
     private static readonly string[] WebsiteHosts = ["nexusmods.com", "www.nexusmods.com", "next.nexusmods.com"];
+
+    // The rest of the site's hosts serve files and the API, under these domains. Their links get a clear refusal too:
+    // fetched by the direct-link source, a download link would be saved with its signature, and soon stop working.
+    private static readonly string[] ServerDomains = ["nexusmods.com", "nexus-cdn.com"];
 
     /// <summary>
     /// Reads a link the user gives: a mod's page, such as <c>https://www.nexusmods.com/skyrimspecialedition/mods/12604</c>;
@@ -49,9 +56,17 @@ internal sealed record NexusLink(string Game, string ModId, string? FileId, bool
             return ReadHandoff(link);
         }
 
-        bool isWebsite = (link.Scheme == Uri.UriSchemeHttps || link.Scheme == Uri.UriSchemeHttp)
-            && WebsiteHosts.Contains(link.IdnHost, StringComparer.OrdinalIgnoreCase);
-        return isWebsite ? ReadPage(link) : null;
+        if (link.Scheme != Uri.UriSchemeHttps && link.Scheme != Uri.UriSchemeHttp)
+        {
+            return null;
+        }
+
+        if (WebsiteHosts.Contains(link.IdnHost, StringComparer.OrdinalIgnoreCase))
+        {
+            return ReadPage(link);
+        }
+
+        return IsServer(link.IdnHost) ? throw new ArgumentException(NotPages, nameof(link)) : null;
     }
 
     /// <summary>
@@ -108,6 +123,10 @@ internal sealed record NexusLink(string Game, string ModId, string? FileId, bool
         => game is not null && GameDomain(game) is { } domain && modId > 0
             ? new NexusLink(domain, modId.ToString(CultureInfo.InvariantCulture), FileId: null, IsHandoff: false)
             : null;
+
+    private static bool IsServer(string host)
+        => ServerDomains.Any(domain => string.Equals(host, domain, StringComparison.OrdinalIgnoreCase)
+            || host.EndsWith("." + domain, StringComparison.OrdinalIgnoreCase));
 
     /// <summary>
     /// <c>/{game}/mods/{mod}</c>, with the file in the <c>file_id</c> parameter when there is one.

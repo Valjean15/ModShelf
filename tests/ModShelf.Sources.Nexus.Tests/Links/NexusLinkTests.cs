@@ -37,7 +37,6 @@ public sealed class NexusLinkTests
     [Theory]
     [InlineData("https://example.com/skyrimspecialedition/mods/12604")]
     [InlineData("https://nexusmods.com.example.com/skyrimspecialedition/mods/12604")]
-    [InlineData("https://cf-files.nexusmods.com/cdn/1704/12604/SkyUI_5_2_SE.7z?expires=1792810466&md5=abc")]
     [InlineData("ftp://www.nexusmods.com/skyrimspecialedition/mods/12604")]
     [InlineData("file:///C:/nexusmods.com/skyrimspecialedition/mods/12604")]
     public void LeavesOtherLinksAlone(string link)
@@ -91,6 +90,20 @@ public sealed class NexusLinkTests
         ModFileRef file = new(new ModRef(new GameRef(new SourceId(source), game), mod), fileId);
 
         Assert.Throws<ArgumentException>(() => NexusLink.ForFile(file));
+    }
+
+    [Theory]
+    [InlineData("https://cf-files.nexusmods.com/cdn/1704/12604/SkyUI_5_2_SE.7z?expires=1792810466&md5=abc")]
+    [InlineData("https://amsterdam-premium.nexus-cdn.com/1704/12604/SkyUI_5_2_SE.7z?expires=1792810466&md5=abc")]
+    [InlineData("https://NEXUS-CDN.COM/1704/12604/SkyUI_5_2_SE.7z")]
+    [InlineData("https://api.nexusmods.com/v1/games/skyrimspecialedition/mods/12604.json")]
+    public void SaysWhenALinkIsToItsServersRatherThanAPage(string link)
+    {
+        // A download link from the file servers stops working soon, and saved as a direct link it would keep a
+        // signed address; the API's own links aren't pages either.
+        ArgumentException refused = Assert.Throws<ArgumentException>(() => NexusLink.Read(new Uri(link)));
+
+        Assert.Contains("Copy the mod's page link", refused.Message, StringComparison.Ordinal);
     }
 
     [Theory]
