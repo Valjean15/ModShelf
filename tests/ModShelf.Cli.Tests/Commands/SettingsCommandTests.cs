@@ -1,7 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 using ModShelf.Application.Library;
 using ModShelf.Application.Library.Ports;
+using ModShelf.Application.Settings;
+using ModShelf.Application.Settings.Ports;
 using ModShelf.Cli.Tests.Common;
 using ModShelf.Cli.Tests.Fakes;
 using ModShelf.Domain.Library;
@@ -188,6 +191,23 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         Assert.Equal((Failed, Failed), (shown.ExitCode, set.ExitCode));
         Assert.StartsWith($"The settings in {SettingsFile} can't be read:", shown.Errors, StringComparison.Ordinal);
         Assert.StartsWith($"The settings in {SettingsFile} can't be read:", set.Errors, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SaysWhenTheSettingsCantBeSaved()
+    {
+        await using InProcessCli cli = new(_site, _browser, configureServices: services =>
+        {
+            services.RemoveAll<ISettingsStore>();
+            services.AddSingleton<ISettingsStore>(new ScriptedSettingsStore(
+                _ => Task.FromResult(new AppSettings()),
+                (_, _) => Task.FromException(new IOException("The settings couldn't be saved to settings.json: The disk is full."))));
+        });
+
+        CliResult refused = await cli.RunAsync(["settings", "set", "updates.notify", "false"], Cancellation);
+
+        Assert.Equal(Failed, refused.ExitCode);
+        Assert.Equal("The settings couldn't be saved to settings.json: The disk is full.", refused.Errors.Trim());
     }
 
     /// <summary>
