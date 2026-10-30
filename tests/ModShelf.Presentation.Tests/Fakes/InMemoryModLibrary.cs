@@ -83,7 +83,20 @@ internal sealed class InMemoryModLibrary : IModLibrary
         return change;
     }
 
-    public Task<IReadOnlyList<LibraryMod>> ListAsync(CancellationToken cancellationToken) => Task.FromResult(Mods);
+    /// <summary>
+    /// Holds each listing until set, as a slow database does; null to list at once.
+    /// </summary>
+    public TaskCompletionSource? ListingHeld { get; init; }
+
+    public async Task<IReadOnlyList<LibraryMod>> ListAsync(CancellationToken cancellationToken)
+    {
+        if (ListingHeld is { } held)
+        {
+            await held.Task.WaitAsync(cancellationToken);
+        }
+
+        return Mods;
+    }
 
     public Task<LibraryMod?> FindAsync(ModRef modRef, CancellationToken cancellationToken)
         => Task.FromResult(Mods.FirstOrDefault(mod => mod.Mod == modRef));

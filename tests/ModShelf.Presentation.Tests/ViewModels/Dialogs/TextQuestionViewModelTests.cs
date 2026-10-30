@@ -36,6 +36,16 @@ public sealed class TextQuestionViewModelTests
         => Assert.False(new TextQuestionViewModel(Question with { HelpPageLabel = label }, _browser).HasHelpPage);
 
     [Fact]
+    public async Task APageWithoutALabelIsntOpened()
+    {
+        TextQuestionViewModel asked = new(Question with { HelpPageLabel = null }, _browser);
+
+        await asked.OpenHelpPageCommand.ExecuteAsync(null);
+
+        Assert.Empty(_browser.Opened);
+    }
+
+    [Fact]
     public async Task OpensTheHelpPage()
     {
         TextQuestionViewModel asked = new(Question, _browser);
