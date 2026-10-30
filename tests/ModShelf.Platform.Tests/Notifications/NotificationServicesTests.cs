@@ -1,3 +1,4 @@
+using ModShelf.Application.Links;
 using ModShelf.Application.Notifications.Ports;
 using ModShelf.Platform.Notifications;
 using ModShelf.Testing;
@@ -16,7 +17,7 @@ public sealed class NotificationServicesTests
     [Fact]
     public void PicksTheNoticesOfThisSystem()
     {
-        INotificationService notices = NotificationServices.ForThisSystem(_logger);
+        INotificationService notices = NotificationServices.ForThisSystem(new MemorySchemeRegistration(), _logger);
 
         Type expected = OperatingSystem.IsWindows() ? typeof(ToastNotificationService)
             : OperatingSystem.IsMacOS() ? typeof(OsascriptNotificationService)
@@ -27,14 +28,16 @@ public sealed class NotificationServicesTests
     }
 
     /// <summary>
-    /// Shows a real notice, for a person to see: <c>MODSHELF_TEST_NOTICES=1</c>, then run this test.
+    /// Shows a real notice, for a person to see: <c>MODSHELF_TEST_NOTICES=1</c>, then run this test. There's no desktop
+    /// app beside the tests, so a click on it opens nothing.
     /// </summary>
     [Fact]
     public async Task ShowsARealNotice()
     {
         Assert.SkipUnless(Environment.GetEnvironmentVariable(ShowNoticesVariable) == "1", $"Set {ShowNoticesVariable}=1 to see a real notice.");
 
-        await NotificationServices.ForThisSystem(_logger)
+        MemorySchemeRegistration noDesktopApp = new() { States = { [NoticeClicks.Scheme] = SchemeState.Unavailable } };
+        await NotificationServices.ForThisSystem(noDesktopApp, _logger)
             .ShowAsync(new Notification("1 new update", "If you can see this, ModShelf's notices work."), TestContext.Current.CancellationToken);
 
         Assert.Empty(_logger.Entries);

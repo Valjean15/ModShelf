@@ -192,5 +192,45 @@ public sealed class MainWindowViewModelTests : IDisposable
         Assert.Empty(downloads.Opened.Opened);
     }
 
+    [Theory]
+    [InlineData("modshelf://updates", Screen.Updates)]
+    [InlineData("ModShelf://Settings/", Screen.Settings)]
+    public async Task ModShelfsOwnLinkGoesToTheScreenItNames(string link, Screen expected)
+    {
+        using DownloadsHarness downloads = new();
+        using MainWindowViewModel window = Window([.. TestScreen.OneOfEach().Where(screen => screen.Screen != Screen.Downloads), downloads.Screen]);
+
+        await window.OpenLinksAsync([link]);
+
+        Assert.Equal(expected, window.CurrentScreen.Screen);
+        Assert.Empty(downloads.Opened.Opened);
+    }
+
+    [Theory]
+    [InlineData("modshelf://nowhere")]
+    [InlineData("modshelf://3")]
+    public async Task AnOwnLinkToNoScreenStaysWhereItIs(string link)
+    {
+        using DownloadsHarness downloads = new();
+        using MainWindowViewModel window = Window([.. TestScreen.OneOfEach().Where(screen => screen.Screen != Screen.Downloads), downloads.Screen]);
+
+        await window.OpenLinksAsync([link]);
+
+        Assert.Equal(Screen.Library, window.CurrentScreen.Screen);
+        Assert.Empty(downloads.Opened.Opened);
+    }
+
+    [Fact]
+    public async Task ASitesLinkBesideAnOwnOneIsStillOpened()
+    {
+        using DownloadsHarness downloads = new();
+        using MainWindowViewModel window = Window([.. TestScreen.OneOfEach().Where(screen => screen.Screen != Screen.Downloads), downloads.Screen]);
+
+        await window.OpenLinksAsync(["modshelf://updates", TestData.HandoffLink.OriginalString]);
+
+        Assert.Equal(Screen.Downloads, window.CurrentScreen.Screen);
+        Assert.Equal([TestData.HandoffLink], downloads.Opened.Opened);
+    }
+
     private MainWindowViewModel Window(IEnumerable<ScreenViewModel> screens) => new(_navigation, _uiThread, screens, _logger);
 }

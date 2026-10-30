@@ -69,15 +69,18 @@ public sealed class ToastNotificationServiceTests : IDisposable
         ToastInterop.Initialize();
 
         IntPtr toast = ToastInterop.CreateToast(ToastContent.For(new Notification("1 new update", "Never shown.")));
+        IntPtr opening = ToastInterop.CreateToast(ToastContent.For(new Notification("1 new update", "Never shown."), NoticeClicks.UpdatesLink));
         IntPtr notifier = ToastInterop.CreateNotifier(_applicationId);
         try
         {
             Assert.NotEqual(IntPtr.Zero, toast);
+            Assert.NotEqual(IntPtr.Zero, opening);
             Assert.NotEqual(IntPtr.Zero, notifier);
         }
         finally
         {
             _ = Marshal.Release(toast);
+            _ = Marshal.Release(opening);
             _ = Marshal.Release(notifier);
         }
     }

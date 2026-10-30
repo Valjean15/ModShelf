@@ -138,6 +138,9 @@ public sealed class PlatformServiceCollectionExtensionsTests : IDisposable
 
     private sealed class StubServiceProvider : IServiceProvider
     {
-        public object? GetService(Type serviceType) => serviceType == typeof(ILoggerFactory) ? NullLoggerFactory.Instance : null;
+        public object? GetService(Type serviceType)
+            => serviceType == typeof(ILoggerFactory) ? NullLoggerFactory.Instance
+            : serviceType == typeof(ISchemeRegistration) ? new MemorySchemeRegistration()
+            : null;
     }
 }

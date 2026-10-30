@@ -9,12 +9,18 @@ namespace ModShelf.Platform.Notifications;
 /// </summary>
 internal static class ToastContent
 {
-    public static string For(Notification notification)
+    /// <param name="link">
+    /// The link a click on the toast opens, through the app the system opens its scheme with; null for none, and a
+    /// click only closes it.
+    /// </param>
+    public static string For(Notification notification, string? link = null)
     {
         ArgumentNullException.ThrowIfNull(notification);
 
         XElement toast = new(
             "toast",
+            link is null ? null : new XAttribute("launch", link),
+            link is null ? null : new XAttribute("activationType", "protocol"),
             new XElement(
                 "visual",
                 new XElement(

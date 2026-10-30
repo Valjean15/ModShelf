@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 
+using ModShelf.Application.Links.Ports;
 using ModShelf.Application.Notifications.Ports;
 
 namespace ModShelf.Platform.Notifications;
@@ -18,13 +19,15 @@ internal static partial class NotificationServices
     /// Toasts on Windows, <c>osascript</c> on macOS, and libnotify on Linux when it's installed. Otherwise notices are
     /// only logged, which is logged as a warning.
     /// </summary>
-    public static INotificationService ForThisSystem(ILogger logger)
+    /// <param name="links">The system's register of link schemes, where a click on a Windows toast finds ModShelf.</param>
+    public static INotificationService ForThisSystem(ISchemeRegistration links, ILogger logger)
     {
+        ArgumentNullException.ThrowIfNull(links);
         ArgumentNullException.ThrowIfNull(logger);
 
         if (OperatingSystem.IsWindows())
         {
-            return new ToastNotificationService(logger);
+            return new ToastNotificationService(new NoticeClicks(links, logger), logger);
         }
 
         if (OperatingSystem.IsMacOS())

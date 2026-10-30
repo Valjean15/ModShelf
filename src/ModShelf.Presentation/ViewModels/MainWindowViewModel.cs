@@ -15,6 +15,11 @@ namespace ModShelf.Presentation.ViewModels;
 /// </summary>
 public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
 {
+    /// <summary>
+    /// The scheme of ModShelf's own links, such as <c>modshelf://updates</c>, which a click on a Windows notice opens.
+    /// </summary>
+    private const string OwnScheme = "modshelf";
+
     private readonly INavigationService _navigation;
     private readonly IUiThread _uiThread;
     private readonly ILogger<MainWindowViewModel> _logger;
@@ -91,14 +96,24 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
 
     /// <summary>
     /// Opens the links among a launch's arguments, such as the <c>nxm://</c> link the system started ModShelf with, or
-    /// handed a second launch: on the Downloads screen, which says what became of each. Other arguments, such as a
-    /// file's path or a setting, are passed over. Runs on the UI thread.
+    /// handed a second launch: on the Downloads screen, which says what became of each. ModShelf's own links, such as
+    /// <c>modshelf://updates</c> from a click on a notice, go to the screen they name. Other arguments, such as a file's
+    /// path or a setting, are passed over. Runs on the UI thread.
     /// </summary>
     public async Task OpenLinksAsync(IEnumerable<string> arguments)
     {
         ArgumentNullException.ThrowIfNull(arguments);
 
-        Uri[] links = [.. arguments.Select(LinkIn).OfType<Uri>()];
+        Uri[] all = [.. arguments.Select(LinkIn).OfType<Uri>()];
+        foreach (Uri own in all.Where(IsOwn))
+        {
+            if (ScreenNamed(own.Host) is { } named)
+            {
+                _navigation.NavigateTo(named);
+            }
+        }
+
+        Uri[] links = [.. all.Where(link => !IsOwn(link))];
         if (links.Length == 0)
         {
             return;
@@ -162,4 +177,10 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
     // An absolute link, but not to a file: an argument like C:\Mods or /home/jean/mods reads as a file:// link.
     private static Uri? LinkIn(string argument)
         => Uri.TryCreate(argument, UriKind.Absolute, out Uri? link) && !link.IsFile && !link.IsUnc ? link : null;
+
+    private static bool IsOwn(Uri link) => string.Equals(link.Scheme, OwnScheme, StringComparison.OrdinalIgnoreCase);
+
+    // By the screen's name, such as "updates"; never by its number.
+    private static Screen? ScreenNamed(string name)
+        => Enum.GetValues<Screen>().Cast<Screen?>().FirstOrDefault(screen => string.Equals(screen.ToString(), name, StringComparison.OrdinalIgnoreCase));
 }

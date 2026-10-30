@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Desktop.Ports;
+using ModShelf.Application.Links.Ports;
 using ModShelf.Application.Notifications.Ports;
 using ModShelf.Application.Releases.Ports;
 using ModShelf.Application.Settings.Ports;
@@ -51,9 +52,10 @@ public static class PlatformServiceCollectionExtensions
         services.AddSingleton<IOAuthRedirectListener, LoopbackRedirectListener>();
         services.AddSingleton<IBrowserLauncher>(_ => new SystemBrowserLauncher());
         services.AddSingleton(_ => UserFolders.ForThisSystem());
-        services.AddSingleton(provider => NotificationServices.ForThisSystem(
-            provider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(NotificationServices).FullName!)));
         services.AddSingleton(_ => SchemeRegistrations.ForThisSystem(handler));
+        services.AddSingleton(provider => NotificationServices.ForThisSystem(
+            provider.GetRequiredService<ISchemeRegistration>(),
+            provider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(NotificationServices).FullName!)));
 
         return services;
     }

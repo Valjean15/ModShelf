@@ -16,6 +16,14 @@ public sealed class ToastContentTests
     }
 
     [Fact]
+    public void AClickOpensTheLinkGiven()
+    {
+        string xml = ToastContent.For(new Notification("2 new updates", "SkyUI and SMAPI"), "modshelf://updates");
+
+        Assert.StartsWith("""<toast launch="modshelf://updates" activationType="protocol"><visual>""", xml, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void EscapesWhatXmlWouldRead()
     {
         string xml = ToastContent.For(new Notification("1 new update", "Bits & <Pieces>"));
