@@ -43,10 +43,10 @@ public sealed partial class NexusSource : IModSearch
             node.Summary,
             node.Author,
             node.Version,
-            pageUrl: new Uri(Website, $"{domain}/mods/{id}"),
+            pageUrl: new NexusLink(domain, id, FileId: null, IsHandoff: false).PageUrl,
             pictureUrl: WebLink(node.PictureUrl),
             updatedAt: node.UpdatedAt,
-            isAvailable: node.Status is null || node.Status == "published",
+            isAvailable: IsAvailable(available: null, node.Status),
             hasAdultContent: node.AdultContent == true,
             downloads: Count(node.Downloads),
             endorsements: Count(node.Endorsements));

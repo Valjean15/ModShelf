@@ -32,10 +32,9 @@ public sealed partial class NexusSource : ILinkRecognizer
             return null;
         }
 
-        string mod = $"v1/games/{nexus.Game}/mods/{nexus.ModId}";
-        NexusFile file = nexus.FileId is { } fileId
-            ? await _api.GetAsync<NexusFile>($"{mod}/files/{fileId}.json", cancellationToken).ConfigureAwait(false)
-            : NewestMainFile(await _api.GetAsync<NexusModFiles>($"{mod}/files.json", cancellationToken).ConfigureAwait(false));
+        NexusFile file = nexus.FileId is not null
+            ? await _api.GetAsync<NexusFile>($"{nexus.FileApiPath}.json", cancellationToken).ConfigureAwait(false)
+            : NewestMainFile(await _api.GetAsync<NexusModFiles>($"{nexus.ModApiPath}/files.json", cancellationToken).ConfigureAwait(false));
 
         ModFileRef found = new(
             new ModRef(new GameRef(NexusId, nexus.Game), nexus.ModId),

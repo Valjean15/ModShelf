@@ -60,7 +60,7 @@ public sealed partial class NexusSource : IDownloadResolver
         catch (HttpRequestException exception) when (exception.StatusCode == HttpStatusCode.Forbidden)
         {
             // Only Premium accounts may download files that weren't started on the website.
-            return new HandoffRequired(DownloadPage(own));
+            return new HandoffRequired(own.HandoffPage);
         }
     }
 
@@ -90,13 +90,6 @@ public sealed partial class NexusSource : IDownloadResolver
         => exception.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.Forbidden or HttpStatusCode.Gone;
 
     /// <summary>
-    /// The file's page, opened where the website offers its "Mod Manager Download", which hands over the
-    /// <c>nxm://</c> link.
-    /// </summary>
-    private static Uri DownloadPage(NexusLink file)
-        => new(Website, $"{file.Game}/mods/{file.ModId}?tab=files&file_id={file.FileId}&nmm=1");
-
-    /// <summary>
     /// When a server's link stops working: its <c>expires</c> parameter, in seconds since 1970. Null when it doesn't say.
     /// </summary>
     private static DateTimeOffset? ExpiryOf(Uri url)
@@ -110,7 +103,7 @@ public sealed partial class NexusSource : IDownloadResolver
 
     private async Task<DownloadTicket> TicketAsync(NexusLink file, HandoffKey? key, CancellationToken cancellationToken)
     {
-        string path = $"v1/games/{file.Game}/mods/{file.ModId}/files/{file.FileId}/download_link.json";
+        string path = $"{file.FileApiPath}/download_link.json";
         if (key is { } given)
         {
             path += $"?key={Uri.EscapeDataString(given.Key)}&expires={given.Expires}";

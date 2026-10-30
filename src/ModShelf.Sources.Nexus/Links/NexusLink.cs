@@ -23,6 +23,11 @@ internal sealed record NexusLink(string Game, string ModId, string? FileId, bool
 
     private const int MaxGameLength = 100;
 
+    /// <summary>
+    /// The website, where games, mods and files have their pages.
+    /// </summary>
+    public static readonly Uri Website = new("https://www.nexusmods.com/");
+
     private const string NotCollections = "ModShelf downloads single files, not collections.";
 
     private const string NotPages = "That's a link to Nexus Mods' servers, not to a page: a download link from them stops "
@@ -35,6 +40,38 @@ internal sealed record NexusLink(string Game, string ModId, string? FileId, bool
     // The rest of the site's hosts serve files and the API, under these domains. Their links get a clear refusal too:
     // fetched by the direct-link source, a download link would be saved with its signature, and soon stop working.
     private static readonly string[] ServerDomains = ["nexusmods.com", "nexus-cdn.com"];
+
+    /// <summary>
+    /// The page on the website: the mod's, or, for a link to a file, the file on the mod's Files tab.
+    /// </summary>
+    public Uri PageUrl => new(Website, FileId is null ? $"{Game}/mods/{ModId}" : $"{Game}/mods/{ModId}?tab=files&file_id={FileId}");
+
+    /// <summary>
+    /// The file's page where the website offers its "Mod Manager Download", which hands the <c>nxm://</c> link over.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The link is to a mod, not a file.</exception>
+    public Uri HandoffPage => new(Website, $"{Game}/mods/{ModId}?tab=files&file_id={RequireFile()}&nmm=1");
+
+    /// <summary>
+    /// The mod's path in the API, such as <c>v1/games/stardewvalley/mods/2400</c>, whether or not the link is to a file.
+    /// </summary>
+    public string ModApiPath => $"{GameApiPath(Game)}/mods/{ModId}";
+
+    /// <summary>
+    /// The file's path in the API, such as <c>v1/games/stardewvalley/mods/2400/files/160380</c>.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The link is to a mod, not a file.</exception>
+    public string FileApiPath => $"{ModApiPath}/files/{RequireFile()}";
+
+    /// <summary>
+    /// A game's page on the website, by its domain name.
+    /// </summary>
+    public static Uri GamePage(string game) => new(Website, game);
+
+    /// <summary>
+    /// A game's path in the API, by its domain name, such as <c>v1/games/stardewvalley</c>.
+    /// </summary>
+    public static string GameApiPath(string game) => $"v1/games/{game}";
 
     /// <summary>
     /// Reads a link the user gives: a mod's page, such as <c>https://www.nexusmods.com/skyrimspecialedition/mods/12604</c>;
@@ -123,6 +160,8 @@ internal sealed record NexusLink(string Game, string ModId, string? FileId, bool
         => game is not null && GameDomain(game) is { } domain && modId > 0
             ? new NexusLink(domain, modId.ToString(CultureInfo.InvariantCulture), FileId: null, IsHandoff: false)
             : null;
+
+    private string RequireFile() => FileId ?? throw new InvalidOperationException("The link is to a mod, not to one of its files.");
 
     private static bool IsServer(string host)
         => ServerDomains.Any(domain => string.Equals(host, domain, StringComparison.OrdinalIgnoreCase)

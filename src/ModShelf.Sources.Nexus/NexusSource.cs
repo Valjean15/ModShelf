@@ -16,11 +16,6 @@ public sealed partial class NexusSource : IAccountLinker
     /// </summary>
     internal static readonly SourceId NexusId = new("nexus");
 
-    /// <summary>
-    /// The website, where mods and files have their pages.
-    /// </summary>
-    private static readonly Uri Website = new("https://www.nexusmods.com/");
-
     private readonly NexusApiClient _api;
     private readonly NexusQuota _quota;
     private readonly TimeProvider _timeProvider;
@@ -48,6 +43,11 @@ public sealed partial class NexusSource : IAccountLinker
     /// A count the API gives, or null when it gives none or a negative one.
     /// </summary>
     private static long? Count(long? count) => count is >= 0 ? count : null;
+
+    /// <summary>
+    /// Whether a mod can be downloaded: not marked unavailable, and published, as far as the API says.
+    /// </summary>
+    private static bool IsAvailable(bool? available, string? status) => available != false && (status is null || status == "published");
 
     /// <summary>
     /// An absolute HTTP or HTTPS link, or null for anything else, which the app must never open.

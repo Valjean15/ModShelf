@@ -42,7 +42,7 @@ public sealed partial class NexusSource : IModCatalog
     public async Task<GameInfo> GetGameAsync(GameRef game, CancellationToken cancellationToken)
     {
         string domain = NexusLink.ForGame(game);
-        NexusGame found = await _api.GetAsync<NexusGame>($"v1/games/{domain}.json", cancellationToken).ConfigureAwait(false);
+        NexusGame found = await _api.GetAsync<NexusGame>($"{NexusLink.GameApiPath(domain)}.json", cancellationToken).ConfigureAwait(false);
         return ToGameInfo(game, domain, found);
     }
 
@@ -51,17 +51,17 @@ public sealed partial class NexusSource : IModCatalog
     public async Task<ModInfo> GetModAsync(ModRef modRef, CancellationToken cancellationToken)
     {
         NexusLink mod = NexusLink.ForMod(modRef);
-        NexusMod found = await _api.GetAsync<NexusMod>($"{ModPath(mod)}.json", cancellationToken).ConfigureAwait(false);
+        NexusMod found = await _api.GetAsync<NexusMod>($"{mod.ModApiPath}.json", cancellationToken).ConfigureAwait(false);
         return new ModInfo(
             modRef,
             string.IsNullOrWhiteSpace(found.Name) ? $"Mod {mod.ModId}" : found.Name,
             found.Summary,
             found.Author,
             found.Version,
-            pageUrl: new Uri(Website, $"{mod.Game}/mods/{mod.ModId}"),
+            pageUrl: mod.PageUrl,
             pictureUrl: WebLink(found.PictureUrl),
             updatedAt: found.UpdatedTimestamp is { } updated ? FromUnixSeconds(updated) : null,
-            isAvailable: found.Available != false && (found.Status is null || found.Status == "published"),
+            isAvailable: IsAvailable(found.Available, found.Status),
             hasAdultContent: found.ContainsAdultContent == true,
             downloads: Count(found.ModDownloads),
             endorsements: Count(found.EndorsementCount));
@@ -72,7 +72,7 @@ public sealed partial class NexusSource : IModCatalog
     public async Task<IReadOnlyList<ModFile>> GetFilesAsync(ModRef modRef, CancellationToken cancellationToken)
     {
         NexusLink mod = NexusLink.ForMod(modRef);
-        NexusModFiles found = await _api.GetAsync<NexusModFiles>($"{ModPath(mod)}/files.json", cancellationToken).ConfigureAwait(false);
+        NexusModFiles found = await _api.GetAsync<NexusModFiles>($"{mod.ModApiPath}/files.json", cancellationToken).ConfigureAwait(false);
 
         // A later link for the same file wins, though Nexus Mods lists each file once.
         Dictionary<long, long> replacedBy = [];
@@ -93,7 +93,7 @@ public sealed partial class NexusSource : IModCatalog
     public async Task<IReadOnlyList<ModChangelog>> GetChangelogsAsync(ModRef modRef, CancellationToken cancellationToken)
     {
         NexusLink mod = NexusLink.ForMod(modRef);
-        JsonElement found = await _api.GetAsync<JsonElement>($"{ModPath(mod)}/changelogs.json", cancellationToken).ConfigureAwait(false);
+        JsonElement found = await _api.GetAsync<JsonElement>($"{mod.ModApiPath}/changelogs.json", cancellationToken).ConfigureAwait(false);
 
         // An object whose names are versions and whose values are lists of changes, such as {"1.2": ["Fixed …"]}.
         // A mod without a changelog answers {}, and sometimes [].
@@ -112,8 +112,6 @@ public sealed partial class NexusSource : IModCatalog
         ];
     }
 
-    private static string ModPath(NexusLink mod) => $"v1/games/{mod.Game}/mods/{mod.ModId}";
-
     /// <summary>
     /// The game by its name, or its domain name if it has none, with its page, or the page its domain name gives.
     /// </summary>
@@ -121,7 +119,7 @@ public sealed partial class NexusSource : IModCatalog
         => new(
             game,
             string.IsNullOrWhiteSpace(found.Name) ? domain : found.Name,
-            WebLink(found.NexusmodsUrl) ?? new Uri(Website, domain));
+            WebLink(found.NexusmodsUrl) ?? NexusLink.GamePage(domain));
 
     /// <param name="replacedBy">The ID of the file Nexus Mods says replaced this one, if any.</param>
     private static ModFile ToModFile(ModRef modRef, NexusLink mod, NexusFile file, long? replacedBy)
@@ -137,7 +135,7 @@ public sealed partial class NexusSource : IModCatalog
             size is >= 0 ? size : null,
             FromUnixSeconds(file.UploadedTimestamp),
             hashes: [],
-            pageUrl: new Uri(Website, $"{mod.Game}/mods/{mod.ModId}?tab=files&file_id={fileId}"),
+            pageUrl: (mod with { FileId = fileId }).PageUrl,
             replacedBy: replacedBy is { } newer ? new ModFileRef(modRef, newer.ToString(CultureInfo.InvariantCulture)) : null);
     }
 

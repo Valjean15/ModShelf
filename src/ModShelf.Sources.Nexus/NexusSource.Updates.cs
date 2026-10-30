@@ -47,7 +47,7 @@ public sealed partial class NexusSource : IUpdateFeed
         }
 
         string period = back <= Day ? "1d" : back <= Week ? "1w" : "1m";
-        NexusUpdatedMod[] updated = await _api.GetAsync<NexusUpdatedMod[]>($"v1/games/{domain}/mods/updated.json?period={period}", cancellationToken)
+        NexusUpdatedMod[] updated = await _api.GetAsync<NexusUpdatedMod[]>($"{NexusLink.GameApiPath(domain)}/mods/updated.json?period={period}", cancellationToken)
             .ConfigureAwait(false);
 
         // The period can reach further back than asked, and an entry without an activity time can't say it's recent.
@@ -66,6 +66,6 @@ public sealed partial class NexusSource : IUpdateFeed
             new ModRef(game, id),
             FromUnixSeconds(mod.LatestModActivity!.Value),
             mod.LatestFileUpdate is > 0 and { } files ? FromUnixSeconds(files) : null,
-            new Uri(Website, $"{domain}/mods/{id}"));
+            new NexusLink(domain, id, FileId: null, IsHandoff: false).PageUrl);
     }
 }

@@ -5,6 +5,23 @@ namespace ModShelf.Sources.Nexus.Tests.Links;
 
 public sealed class NexusLinkTests
 {
+    [Fact]
+    public void BuildsThePagesAndApiPathsItReads()
+    {
+        NexusLink mod = new("stardewvalley", "2400", FileId: null, IsHandoff: false);
+        NexusLink file = mod with { FileId = "160380" };
+
+        Assert.Equal("https://www.nexusmods.com/stardewvalley/mods/2400", mod.PageUrl.AbsoluteUri);
+        Assert.Equal("https://www.nexusmods.com/stardewvalley/mods/2400?tab=files&file_id=160380", file.PageUrl.AbsoluteUri);
+        Assert.Equal("https://www.nexusmods.com/stardewvalley/mods/2400?tab=files&file_id=160380&nmm=1", file.HandoffPage.AbsoluteUri);
+        Assert.Equal("https://www.nexusmods.com/stardewvalley", NexusLink.GamePage("stardewvalley").AbsoluteUri);
+        Assert.Equal(("v1/games/stardewvalley/mods/2400", "v1/games/stardewvalley/mods/2400/files/160380"), (file.ModApiPath, file.FileApiPath));
+        Assert.Equal("v1/games/stardewvalley", NexusLink.GameApiPath("stardewvalley"));
+        Assert.Equal((mod, file, file), (NexusLink.Read(mod.PageUrl), NexusLink.Read(file.PageUrl), NexusLink.Read(file.HandoffPage)));
+        Assert.Throws<InvalidOperationException>(() => mod.FileApiPath);
+        Assert.Throws<InvalidOperationException>(() => mod.HandoffPage);
+    }
+
     [Theory]
     [InlineData("https://www.nexusmods.com/skyrimspecialedition/mods/12604?tab=files&file_id=35407")]
     [InlineData("https://nexusmods.com/skyrimspecialedition/mods/12604?tab=files&file_id=35407")]
