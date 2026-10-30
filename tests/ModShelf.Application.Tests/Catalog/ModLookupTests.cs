@@ -16,6 +16,8 @@ public sealed class ModLookupTests
 {
     private static readonly Uri Link = new("https://www.nexusmods.com/skyrimspecialedition/mods/12604");
 
+    private static CancellationToken Cancellation => TestContext.Current.CancellationToken;
+
     [Fact]
     public async Task AsksTheLinksSourceAboutItsMod()
     {
@@ -31,6 +33,46 @@ public sealed class ModLookupTests
         Assert.Equal(
             ["GetChangelogsAsync", "GetFilesAsync", "GetGameAsync", "GetModAsync", "RecognizeAsync"],
             site.Asked.Order(StringComparer.Ordinal));
+    }
+
+    [Fact]
+    public async Task TellsWhatChangedInAVersionReadingEachChangelogOnce()
+    {
+        FakeCatalogSource site = new(TestData.Nexus);
+        ModLookup lookup = new(new SourceRegistry([site]));
+        ModRef mod = site.LinkedFile.Mod;
+
+        IReadOnlyList<string>? changed = await lookup.GetChangesAsync(mod, "5.2", Cancellation);
+        IReadOnlyList<string>? unlisted = await lookup.GetChangesAsync(mod, "5.3", Cancellation);
+        IReadOnlyList<string>? otherCase = await lookup.GetChangesAsync(mod, "5.2 ", Cancellation);
+
+        Assert.Equal(["Fixed the menus."], changed);
+        Assert.Empty(unlisted!);
+        Assert.Empty(otherCase!);
+        Assert.Equal(["GetChangelogsAsync"], site.Asked);
+    }
+
+    [Fact]
+    public async Task AChangelogThatCouldntBeReadIsReadAgain()
+    {
+        FakeCatalogSource site = new(TestData.Nexus);
+        site.Failures["GetChangelogsAsync"] = new HttpRequestException("The site didn't answer.");
+        ModLookup lookup = new(new SourceRegistry([site]));
+
+        await Assert.ThrowsAsync<HttpRequestException>(() => lookup.GetChangesAsync(site.LinkedFile.Mod, "5.2", Cancellation));
+        IReadOnlyList<string>? changed = await lookup.GetChangesAsync(site.LinkedFile.Mod, "5.2", Cancellation);
+
+        Assert.Equal(["Fixed the menus."], changed);
+        Assert.Equal(["GetChangelogsAsync", "GetChangelogsAsync"], site.Asked);
+    }
+
+    [Fact]
+    public async Task AModOfASiteWithoutCatalogHasNoChanges()
+    {
+        ModLookup lookup = new(new SourceRegistry([ScriptedLinkRecognizer.Never(TestData.Nexus)]));
+
+        Assert.Null(await lookup.GetChangesAsync(TestData.File(TestData.Nexus, "35407").Mod, "5.2", Cancellation));
+        Assert.Null(await lookup.GetChangesAsync(TestData.File(TestData.ModIo, "1").Mod, "5.2", Cancellation));
     }
 
     [Fact]

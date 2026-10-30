@@ -37,6 +37,11 @@ internal sealed class ScriptedLookup : IModLookup
     public Dictionary<Uri, ModPage> LinkedPages { get; } = [];
 
     /// <summary>
+    /// What changed in each mod's versions, by the mod and the version's label.
+    /// </summary>
+    public Dictionary<(ModRef Mod, string Version), IReadOnlyList<string>> Changes { get; } = [];
+
+    /// <summary>
     /// What the next calls throw, by method name, one each.
     /// </summary>
     public ConcurrentDictionary<string, Exception> Refusals { get; } = new();
@@ -71,6 +76,12 @@ internal sealed class ScriptedLookup : IModLookup
         return Answer(nameof(LookUpAsync), () => Pages.TryGetValue(modRef, out ModPage? page)
             ? page
             : throw new HttpRequestException("No Mod Found", null, System.Net.HttpStatusCode.NotFound));
+    }
+
+    public Task<IReadOnlyList<string>?> GetChangesAsync(ModRef modRef, string version, CancellationToken cancellationToken)
+    {
+        _asked.Enqueue($"GetChangesAsync {modRef.Id} {version}");
+        return Answer(nameof(GetChangesAsync), () => (IReadOnlyList<string>?)(Changes.GetValueOrDefault((modRef, version)) ?? []));
     }
 
     public Task<IReadOnlyList<GameInfo>> GetGamesAsync(SourceId source, CancellationToken cancellationToken)

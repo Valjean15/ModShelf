@@ -11,7 +11,7 @@ namespace ModShelf.Application.Catalog;
 /// <summary>
 /// Finds the source a link belongs to, as <see cref="Downloads.ILinkDownloads"/> does, and asks its <see cref="IModCatalog"/>
 /// about the mod, all four questions at once. Searches go to the game's source's <see cref="IModSearch"/>. Each
-/// source's games are kept once read.
+/// source's games, and each mod's changelog asked about by version, are kept once read.
 /// </summary>
 internal sealed class ModLookup : IModLookup
 {
@@ -19,6 +19,9 @@ internal sealed class ModLookup : IModLookup
 
     // Only lists that were read: a failed read is tried again. Two first reads at once both ask, and either list is kept.
     private readonly ConcurrentDictionary<SourceId, IReadOnlyList<GameInfo>> _games = new();
+
+    // Each mod's changelog, read once for every caller: a read that failed is dropped, so the next one asks again.
+    private readonly ConcurrentDictionary<ModRef, Lazy<Task<IReadOnlyList<ModChangelog>>>> _changelogs = new();
 
     public ModLookup(ISourceRegistry sources)
     {
@@ -43,6 +46,34 @@ internal sealed class ModLookup : IModLookup
 
         IModCatalog catalog = _sources.Require<IModCatalog>(modRef.Game.Source, "can't describe its mods", nameof(modRef));
         return DescribeAsync(catalog, modRef, linkedFile: null, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<string>?> GetChangesAsync(ModRef modRef, string version, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(modRef);
+        ArgumentNullException.ThrowIfNull(version);
+
+        if (_sources.Find<IModCatalog>(modRef.Game.Source) is not { } catalog)
+        {
+            return null;
+        }
+
+        // Read for whoever asks first and those who ask meanwhile, so one caller giving up doesn't stop the others.
+        Lazy<Task<IReadOnlyList<ModChangelog>>> reading = _changelogs.GetOrAdd(
+            modRef,
+            mod => new Lazy<Task<IReadOnlyList<ModChangelog>>>(() => catalog.GetChangelogsAsync(mod, CancellationToken.None)));
+        IReadOnlyList<ModChangelog> changelogs;
+        try
+        {
+            changelogs = await reading.Value.WaitAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception) when (reading.Value.IsFaulted || reading.Value.IsCanceled)
+        {
+            _changelogs.TryRemove(KeyValuePair.Create(modRef, reading));
+            throw;
+        }
+
+        return changelogs.FirstOrDefault(entry => string.Equals(entry.Version, version, StringComparison.Ordinal))?.Changes ?? [];
     }
 
     public async Task<IReadOnlyList<GameInfo>> GetGamesAsync(SourceId source, CancellationToken cancellationToken)
