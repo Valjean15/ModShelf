@@ -22,7 +22,7 @@
                     Content="{x:Static res:Strings.DownloadsAdd}"
                     Command="{Binding AddCommand}" />
             <Button Grid.Column="2"
-                    Content="{x:Static res:Strings.DownloadsAddToFolder}"
+                    Content="{x:Static res:Strings.SaveToFolder}"
                     Command="{Binding AddToFolderCommand}" />
         </Grid>
 

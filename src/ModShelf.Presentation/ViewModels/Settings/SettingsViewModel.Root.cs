@@ -107,7 +107,7 @@ public sealed partial class SettingsViewModel
         {
             RootNote = missing is null
                 ? Text.Format(Strings.SettingsLibraryIsIn, LibraryRoot)
-                : $"{Text.Format(Strings.SettingsLibraryIsIn, LibraryRoot)} {missing}";
+                : Text.Format(Strings.SettingsLibraryIsInMissing, LibraryRoot, missing);
         }
 
         Problem = readProblem;

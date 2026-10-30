@@ -154,11 +154,11 @@
                                         </StackPanel>
 
                                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
-                                            <Button Content="{x:Static res:Strings.LibraryOpenPage}" Command="{Binding OpenPageCommand}" />
+                                            <Button Content="{x:Static res:Strings.ModOpenPage}" Command="{Binding OpenPageCommand}" />
                                             <Button Command="{Binding ToggleWatchCommand}">
                                                 <Panel>
-                                                    <TextBlock Text="{x:Static res:Strings.LibraryWatch}" IsVisible="{Binding !IsWatched}" />
-                                                    <TextBlock Text="{x:Static res:Strings.LibraryUnwatch}" IsVisible="{Binding IsWatched}" />
+                                                    <TextBlock Text="{x:Static res:Strings.ModWatch}" IsVisible="{Binding !IsWatched}" />
+                                                    <TextBlock Text="{x:Static res:Strings.ModUnwatch}" IsVisible="{Binding IsWatched}" />
                                                 </Panel>
                                             </Button>
                                             <Button Command="{Binding ToggleTrackCommand}" IsVisible="{Binding CanTrack}">
@@ -218,8 +218,8 @@
                                                                                        Text="{Binding Note}" />
                                                                         </StackPanel>
                                                                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                                                            <Button Content="{x:Static res:Strings.DownloadsAddToFolder}" Command="{Binding SaveToFolderCommand}" />
-                                                                            <Button Classes="accent" Content="{x:Static res:Strings.UpdateDownload}" Command="{Binding DownloadCommand}" />
+                                                                            <Button Content="{x:Static res:Strings.SaveToFolder}" Command="{Binding SaveToFolderCommand}" />
+                                                                            <Button Classes="accent" Content="{x:Static res:Strings.FileDownload}" Command="{Binding DownloadCommand}" />
                                                                         </StackPanel>
                                                                     </Grid>
                                                                 </Border>

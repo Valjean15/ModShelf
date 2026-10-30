@@ -118,7 +118,7 @@
     <value>Download</value>
     <comment>Button: download the pasted link into the library.</comment>
   </data>
-  <data name="DownloadsAddToFolder" xml:space="preserve">
+  <data name="SaveToFolder" xml:space="preserve">
     <value>Save to a folder…</value>
     <comment>Button: download the pasted link into a folder the user picks, outside the library.</comment>
   </data>
@@ -134,15 +134,15 @@
     <value>That isn't a complete web link, such as https://www.nexusmods.com/skyrimspecialedition/mods/12604.</value>
     <comment>When the pasted text isn't a link.</comment>
   </data>
-  <data name="DownloadsDownloadingInto" xml:space="preserve">
+  <data name="AddedDownloadingFileInto" xml:space="preserve">
     <value>Downloading {0} into {1}.</value>
     <comment>{0} is the file's name, {1} the folder.</comment>
   </data>
-  <data name="DownloadsContinuing" xml:space="preserve">
+  <data name="AddedContinuing" xml:space="preserve">
     <value>Continuing the download of {0}, added earlier.</value>
     <comment>{0} is the file's name.</comment>
   </data>
-  <data name="DownloadsInLibraryAlready" xml:space="preserve">
+  <data name="AddedInLibraryAlready" xml:space="preserve">
     <value>{0} is in the library already.</value>
     <comment>{0} is the file's full path.</comment>
   </data>
@@ -310,11 +310,11 @@
     <value>Stop and delete</value>
     <comment>Button that cancels a download for good. The dialog's other button, Cancel, keeps the download.</comment>
   </data>
-  <data name="OpenPageFailedTitle" xml:space="preserve">
+  <data name="BrowserDidntOpenTitle" xml:space="preserve">
     <value>Couldn't open the browser</value>
     <comment>Title of the message when no browser opened.</comment>
   </data>
-  <data name="OpenPageFailed" xml:space="preserve">
+  <data name="OpenHandoffPageByHand" xml:space="preserve">
     <value>Open this page in your browser to start the download: {0}</value>
     <comment>{0} is the page's address.</comment>
   </data>
@@ -406,7 +406,7 @@
     <value>{0:N0} mods</value>
     <comment>How many of a game's mods the library has, more than one.</comment>
   </data>
-  <data name="LibraryByAuthor" xml:space="preserve">
+  <data name="ModByAuthor" xml:space="preserve">
     <value>by {0}</value>
     <comment>A mod's author, under its name.</comment>
   </data>
@@ -438,7 +438,7 @@
     <value>{0:N0} updates</value>
     <comment>How many updates were found for a mod, more than one.</comment>
   </data>
-  <data name="LibraryOpenPage" xml:space="preserve">
+  <data name="ModOpenPage" xml:space="preserve">
     <value>Open page</value>
     <comment>Button: open the mod's page on its site.</comment>
   </data>
@@ -446,15 +446,15 @@
     <value>Open folder</value>
     <comment>Button: open the folder of the mod's files.</comment>
   </data>
-  <data name="LibraryWatch" xml:space="preserve">
+  <data name="ModWatch" xml:space="preserve">
     <value>Watch</value>
     <comment>Button: watch the mod for updates.</comment>
   </data>
-  <data name="LibraryUnwatch" xml:space="preserve">
+  <data name="ModUnwatch" xml:space="preserve">
     <value>Unwatch</value>
     <comment>Button: stop watching the mod for updates.</comment>
   </data>
-  <data name="LibraryFileVersion" xml:space="preserve">
+  <data name="FileVersion" xml:space="preserve">
     <value>Version {0}</value>
     <comment>A file's version, such as 5.2.</comment>
   </data>
@@ -494,7 +494,7 @@
     <value>{0} couldn't be opened. It may have been moved or deleted.</value>
     <comment>{0} is the folder's path.</comment>
   </data>
-  <data name="PageOpenFailed" xml:space="preserve">
+  <data name="OpenPageByHand" xml:space="preserve">
     <value>Open this page in your browser: {0}</value>
     <comment>{0} is the page's address.</comment>
   </data>
@@ -539,8 +539,8 @@
     <comment>In a check's summary: how many questions it asked the sites, other than one.</comment>
   </data>
   <data name="CheckSummary" xml:space="preserve">
-    <value>Checked {0} with {1}.</value>
-    <comment>What a check did. {0} is such as 12 mods, {1} such as 3 requests.</comment>
+    <value>Checked {0} with {1}. {2}</value>
+    <comment>What a check did. {0} is such as 12 mods, {1} such as 3 requests, and {2} what it found, such as 2 new updates.</comment>
   </data>
   <data name="CheckNoNewUpdates" xml:space="preserve">
     <value>No new updates.</value>
@@ -562,7 +562,7 @@
     <value>Couldn't check the mods of {0} on {1}: {2}</value>
     <comment>{0} is a game, {1} a site's name, {2} why.</comment>
   </data>
-  <data name="UpdateUploaded" xml:space="preserve">
+  <data name="FileUploaded" xml:space="preserve">
     <value>Uploaded {0}</value>
     <comment>When an update was uploaded. {0} is a date.</comment>
   </data>
@@ -570,7 +570,7 @@
     <value>Replaces {0}</value>
     <comment>The library's file an update replaces. {0} is its file name.</comment>
   </data>
-  <data name="UpdateDownload" xml:space="preserve">
+  <data name="FileDownload" xml:space="preserve">
     <value>Download</value>
     <comment>Button: download the update into the library.</comment>
   </data>
@@ -578,11 +578,11 @@
     <value>Changes</value>
     <comment>Button: show or hide the update's changes, from its mod's changelog.</comment>
   </data>
-  <data name="UpdateDownloading" xml:space="preserve">
+  <data name="AddedDownloadingInto" xml:space="preserve">
     <value>Downloading into {0}. It shows on the Downloads screen.</value>
     <comment>{0} is the folder.</comment>
   </data>
-  <data name="UpdateDownloadingAlready" xml:space="preserve">
+  <data name="AddedDownloadingAlready" xml:space="preserve">
     <value>It's on the Downloads screen already.</value>
     <comment>When the update's download was added before.</comment>
   </data>
@@ -694,7 +694,7 @@
     <value>No site ModShelf knows can search its mods.</value>
     <comment>When no source can search.</comment>
   </data>
-  <data name="BrowseAccountNeeded" xml:space="preserve">
+  <data name="SiteNeedsAccount" xml:space="preserve">
     <value>{0} needs your account linked, or refused the one linked. Link it on the Accounts screen, then try again.</value>
     <comment>{0} is the site's name.</comment>
   </data>
@@ -898,7 +898,7 @@
     <value>Another ModShelf process, such as the command line, is running the downloads. Try again once it has finished.</value>
     <comment>When a download is refused because another process runs the queue.</comment>
   </data>
-  <data name="DownloadsSavedAlready" xml:space="preserve">
+  <data name="AddedSavedAlready" xml:space="preserve">
     <value>{0} is saved in {1} already.</value>
     <comment>{0} is the file, {1} its folder: a download asked for again once it finished.</comment>
   </data>
@@ -906,7 +906,7 @@
     <value>No site here supports accounts.</value>
     <comment>On the Accounts screen, when no source can link an account.</comment>
   </data>
-  <data name="AccountsNotProtected" xml:space="preserve">
+  <data name="CredentialsNotProtected" xml:space="preserve">
     <value>No keyring is running, so credentials are stored in a file encrypted for this computer. Install and unlock a keyring, such as GNOME Keyring or KWallet, to protect them better.</value>
     <comment>On Linux without a keyring: other programs running as the user can read the encrypted file.</comment>
   </data>
@@ -1137,6 +1137,10 @@
   <data name="SettingsLibraryIsIn" xml:space="preserve">
     <value>The library is in {0} now.</value>
     <comment>{0} is the library's folder, after it changed.</comment>
+  </data>
+  <data name="SettingsLibraryIsInMissing" xml:space="preserve">
+    <value>The library is in {0} now. {1}</value>
+    <comment>{0} is the library's folder, after it changed; {1} says how many of its files weren't on disk.</comment>
   </data>
   <data name="SettingsMissingOne" xml:space="preserve">
     <value>One of its files wasn't on disk; it stays in the library, to download again.</value>

@@ -284,7 +284,7 @@ public sealed partial class ModPageViewModel : ObservableObject
         => RunAsync(
             PageAction.OpenPage,
             () => _info.PageUrl is { } page
-                ? Pages.OpenAsync(page, _services.Browser, _services.Dialogs, Strings.PageOpenFailed, cancellationToken)
+                ? Pages.OpenAsync(page, _services.Browser, _services.Dialogs, Strings.OpenPageByHand, cancellationToken)
                 : Task.CompletedTask,
             cancellationToken);
 

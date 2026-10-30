@@ -21,9 +21,9 @@ internal sealed record ModInfoText(string Author, string Summary, string Version
         ArgumentNullException.ThrowIfNull(timeProvider);
 
         return new ModInfoText(
-            mod.Author is { } author ? Text.Format(Strings.LibraryByAuthor, author) : string.Empty,
+            mod.Author is { } author ? Text.Format(Strings.ModByAuthor, author) : string.Empty,
             mod.Summary ?? string.Empty,
-            mod.Version is { } version ? Text.Format(Strings.LibraryFileVersion, version) : string.Empty,
+            mod.Version is { } version ? Text.Format(Strings.FileVersion, version) : string.Empty,
             mod.UpdatedAt is { } updated ? Text.Format(Strings.BrowseUpdated, Dates.Day(updated, timeProvider)) : string.Empty,
             mod.Downloads is { } downloads ? Counts.Of(downloads, Strings.BrowseOneDownload, Strings.BrowseDownloads) : string.Empty,
             mod.Endorsements is { } endorsements ? Counts.Of(endorsements, Strings.BrowseOneEndorsement, Strings.BrowseEndorsements) : string.Empty);

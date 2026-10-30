@@ -148,7 +148,11 @@ public sealed partial class UpdatesViewModel : ScreenViewModel
             {
                 UpdateCheck check = await _checker.CheckAsync(cancellationToken);
                 string found = Counts.Of(check.Found.Count, Strings.CheckNoNewUpdates, Strings.CheckOneNewUpdate, Strings.CheckNewUpdates);
-                CheckResult = $"{Text.Format(Strings.CheckSummary, Counts.Of(check.Checked, Strings.CheckOneMod, Strings.CheckMods), Counts.Of(check.Requests, Strings.CheckOneRequest, Strings.CheckRequests))} {found}";
+                CheckResult = Text.Format(
+                    Strings.CheckSummary,
+                    Counts.Of(check.Checked, Strings.CheckOneMod, Strings.CheckMods),
+                    Counts.Of(check.Requests, Strings.CheckOneRequest, Strings.CheckRequests),
+                    found);
                 foreach (UpdateCheckFailure failure in check.Failures)
                 {
                     CheckFailures.Add(Describe(failure));

@@ -21,7 +21,7 @@ internal static class Pages
 
         if (!await browser.TryOpenAsync(page, cancellationToken))
         {
-            await dialogs.ShowMessageAsync(Strings.OpenPageFailedTitle, Text.Format(openByHand, page.AbsoluteUri), cancellationToken);
+            await dialogs.ShowMessageAsync(Strings.BrowserDidntOpenTitle, Text.Format(openByHand, page.AbsoluteUri), cancellationToken);
         }
     }
 }

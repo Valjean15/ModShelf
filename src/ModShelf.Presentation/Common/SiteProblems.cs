@@ -28,7 +28,7 @@ internal static class SiteProblems
     /// site's name and what went wrong.</param>
     public static string? Describe(Exception exception, string site, string failed) => exception switch
     {
-        AuthenticationFailedException => Text.Format(Strings.BrowseAccountNeeded, site),
+        AuthenticationFailedException => Text.Format(Strings.SiteNeedsAccount, site),
         _ when IsSiteProblem(exception) => Text.Format(failed, site, exception.Message),
         _ => null,
     };

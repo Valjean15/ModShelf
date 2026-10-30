@@ -60,7 +60,7 @@ public sealed partial class LibraryFileViewModel : ObservableObject
 
         FileName = file.FileName;
         Name = file.Name;
-        VersionText = file.VersionLabel is { } version ? Text.Format(Strings.LibraryFileVersion, version) : string.Empty;
+        VersionText = file.VersionLabel is { } version ? Text.Format(Strings.FileVersion, version) : string.Empty;
         SizeText = Sizes.Format(file.SizeInBytes);
         DownloadedText = Text.Format(Strings.LibraryFileDownloaded, Dates.Day(file.DownloadedAt, _services.TimeProvider));
     }

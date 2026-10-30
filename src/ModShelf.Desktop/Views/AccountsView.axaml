@@ -14,7 +14,7 @@
                    Margin="0,0,0,12"
                    Classes="problem"
                    TextWrapping="Wrap"
-                   Text="{x:Static res:Strings.AccountsNotProtected}"
+                   Text="{x:Static res:Strings.CredentialsNotProtected}"
                    IsVisible="{Binding IsStoreUnprotected}" />
 
         <ProgressBar DockPanel.Dock="Top" IsIndeterminate="True" IsVisible="{Binding IsLoading}" />

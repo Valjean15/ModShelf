@@ -35,8 +35,8 @@ internal static class DownloadNotes
             placed.Queued switch
             {
                 null => InLibraryAlready(placed),
-                { AlreadyQueued: true } => Strings.UpdateDownloadingAlready,
-                _ => Text.Format(Strings.UpdateDownloading, Path.GetDirectoryName(placed.Path)),
+                { AlreadyQueued: true } => Strings.AddedDownloadingAlready,
+                _ => Text.Format(Strings.AddedDownloadingInto, Path.GetDirectoryName(placed.Path)),
             },
             false);
     }
@@ -48,7 +48,7 @@ internal static class DownloadNotes
     public static string InLibraryAlready(LibraryDownload placed)
     {
         ArgumentNullException.ThrowIfNull(placed);
-        return Text.Format(Strings.DownloadsInLibraryAlready, placed.Path);
+        return Text.Format(Strings.AddedInLibraryAlready, placed.Path);
     }
 
     /// <summary>
@@ -63,9 +63,9 @@ internal static class DownloadNotes
         DownloadJobSnapshot job = added.Job;
         return added switch
         {
-            { AlreadySaved: true } => Text.Format(Strings.DownloadsSavedAlready, job.FileName, job.TargetDirectory),
-            { AlreadyQueued: true } => onDownloadsScreen ? Text.Format(Strings.DownloadsContinuing, job.FileName) : Strings.UpdateDownloadingAlready,
-            _ => Text.Format(Strings.DownloadsDownloadingInto, job.FileName, job.TargetDirectory),
+            { AlreadySaved: true } => Text.Format(Strings.AddedSavedAlready, job.FileName, job.TargetDirectory),
+            { AlreadyQueued: true } => onDownloadsScreen ? Text.Format(Strings.AddedContinuing, job.FileName) : Strings.AddedDownloadingAlready,
+            _ => Text.Format(Strings.AddedDownloadingFileInto, job.FileName, job.TargetDirectory),
         };
     }
 }

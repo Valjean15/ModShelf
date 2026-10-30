@@ -123,8 +123,8 @@ public sealed partial class UpdateViewModel : ObservableObject
         ModName = mod.Name;
         Name = update.Name;
         FileName = update.FileName;
-        VersionText = update.VersionLabel is { } version ? Text.Format(Strings.LibraryFileVersion, version) : string.Empty;
-        UploadedText = Text.Format(Strings.UpdateUploaded, Dates.Day(update.UploadedAt, _services.TimeProvider));
+        VersionText = update.VersionLabel is { } version ? Text.Format(Strings.FileVersion, version) : string.Empty;
+        UploadedText = Text.Format(Strings.FileUploaded, Dates.Day(update.UploadedAt, _services.TimeProvider));
         ReplacesText = mod.Files.FirstOrDefault(file => file.File == update.Replaces) is { } replaced
             ? Text.Format(Strings.UpdateReplaces, replaced.FileName)
             : string.Empty;

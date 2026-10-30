@@ -62,7 +62,7 @@
 
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                                 <Button Content="{x:Static res:Strings.UpdateChanges}" Command="{Binding ToggleChangesCommand}" />
-                                <Button Classes="accent" Content="{x:Static res:Strings.UpdateDownload}" Command="{Binding DownloadCommand}" />
+                                <Button Classes="accent" Content="{x:Static res:Strings.FileDownload}" Command="{Binding DownloadCommand}" />
                             </StackPanel>
 
                             <!-- The update's version in its mod's changelog. -->

@@ -153,7 +153,7 @@
                     <SelectableTextBlock Classes="note" TextWrapping="Wrap" Text="{Binding KeptInText}" />
                     <TextBlock Classes="problem"
                                TextWrapping="Wrap"
-                               Text="{x:Static res:Strings.AccountsNotProtected}"
+                               Text="{x:Static res:Strings.CredentialsNotProtected}"
                                IsVisible="{Binding IsStoreUnprotected}" />
                 </StackPanel>
             </StackPanel>

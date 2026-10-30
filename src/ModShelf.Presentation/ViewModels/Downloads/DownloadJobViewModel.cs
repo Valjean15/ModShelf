@@ -329,7 +329,7 @@ public sealed partial class DownloadJobViewModel : ObservableObject
         => RunAsync(
             JobAction.OpenPage,
             () => _job.HandoffPage is { } page
-                ? Pages.OpenAsync(page, _services.Browser, _services.Dialogs, Strings.OpenPageFailed, cancellationToken)
+                ? Pages.OpenAsync(page, _services.Browser, _services.Dialogs, Strings.OpenHandoffPageByHand, cancellationToken)
                 : Task.CompletedTask,
             cancellationToken);
 

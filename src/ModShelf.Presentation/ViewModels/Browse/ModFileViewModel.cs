@@ -28,9 +28,9 @@ public sealed partial class ModFileViewModel : ObservableObject
         _services = services;
         Name = file.Name;
         FileName = file.FileName;
-        VersionText = file.VersionLabel is { } version ? Text.Format(Strings.LibraryFileVersion, version) : string.Empty;
+        VersionText = file.VersionLabel is { } version ? Text.Format(Strings.FileVersion, version) : string.Empty;
         SizeText = file.SizeInBytes is { } size ? Sizes.Format(size) : string.Empty;
-        UploadedText = Text.Format(Strings.UpdateUploaded, Dates.Day(file.UploadedAt, services.TimeProvider));
+        UploadedText = Text.Format(Strings.FileUploaded, Dates.Day(file.UploadedAt, services.TimeProvider));
         IsLinked = isLinked;
         CanDownload = modIsAvailable && file.PageUrl is not null;
     }

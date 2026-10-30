@@ -110,7 +110,7 @@ public sealed partial class LibraryModViewModel : ObservableObject
 
         _mod = mod;
         Name = mod.Name;
-        AuthorText = mod.Author is { } author ? Text.Format(Strings.LibraryByAuthor, author) : string.Empty;
+        AuthorText = mod.Author is { } author ? Text.Format(Strings.ModByAuthor, author) : string.Empty;
         IsWatched = mod.IsWatched;
         WatchedText = mod.IsWatched ? Strings.LibraryWatched : Strings.LibraryNotWatched;
         FilesText = Counts.Of(mod.Files.Count, Strings.LibraryNoFiles, Strings.LibraryOneFile, Strings.LibraryFiles);
@@ -151,7 +151,7 @@ public sealed partial class LibraryModViewModel : ObservableObject
         => RunAsync(
             ModAction.OpenPage,
             () => _mod.PageUrl is { } page
-                ? Pages.OpenAsync(page, _services.Browser, _services.Dialogs, Strings.PageOpenFailed, cancellationToken)
+                ? Pages.OpenAsync(page, _services.Browser, _services.Dialogs, Strings.OpenPageByHand, cancellationToken)
                 : Task.CompletedTask,
             cancellationToken);
 
