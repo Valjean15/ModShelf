@@ -1,5 +1,7 @@
 using System.Security;
 
+using ModShelf.Domain.Common;
+
 namespace ModShelf.Infrastructure.Downloads;
 
 /// <summary>
@@ -60,8 +62,7 @@ internal static class FreeSpace
     /// </summary>
     internal static bool Holds(string root, string path)
     {
-        StringComparison comparison = OperatingSystem.IsLinux() ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
         string under = Path.EndsInDirectorySeparator(root) ? root : root + Path.DirectorySeparatorChar;
-        return path.Equals(Path.TrimEndingDirectorySeparator(root), comparison) || path.StartsWith(under, comparison);
+        return path.Equals(Path.TrimEndingDirectorySeparator(root), FilePaths.Comparison) || path.StartsWith(under, FilePaths.Comparison);
     }
 }

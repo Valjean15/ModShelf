@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Desktop;
 using ModShelf.Application.Desktop.Ports;
+using ModShelf.Domain.Common;
 
 namespace ModShelf.Platform.Instances;
 
@@ -147,7 +148,7 @@ internal sealed partial class PipeSingleInstance : ISingleInstance, IDisposable
     internal static string PipeNameFor(string folder, string? runtimeFolder = null)
     {
         string path = Path.TrimEndingDirectorySeparator(Path.GetFullPath(folder));
-        if (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS())
+        if (FilePaths.Comparison == StringComparison.OrdinalIgnoreCase)
         {
             path = path.ToUpperInvariant();
         }

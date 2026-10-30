@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Settings.Ports;
+using ModShelf.Domain.Common;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Updates;
 
@@ -51,7 +52,7 @@ internal sealed class SettingsService : ISettingsService, IDisposable
                 async (settings, token) =>
                 {
                     string current = settings.LibraryRoot ?? DefaultLibraryRoot;
-                    if (!SamePath(current, normalized ?? DefaultLibraryRoot))
+                    if (!FilePaths.Same(current, normalized ?? DefaultLibraryRoot))
                     {
                         if ((await _library.ListAsync(token).ConfigureAwait(false)).Any(mod => mod.Files.Count > 0))
                         {
@@ -152,23 +153,14 @@ internal sealed class SettingsService : ISettingsService, IDisposable
     }
 
     /// <summary>
-    /// Whether two paths name the same folder: ignoring case on Windows and macOS, whose usual file systems do.
-    /// </summary>
-    private static bool SamePath(string first, string second)
-        => string.Equals(
-            first,
-            second,
-            OperatingSystem.IsWindows() || OperatingSystem.IsMacOS() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
-
-    /// <summary>
     /// A root as it's stored: a full path, without an ending separator.
     /// </summary>
     /// <exception cref="ArgumentException">It isn't a full path.</exception>
-    private string FullRoot(string root, string paramName)
+    internal string FullRoot(string root, string paramName)
     {
         if (!Path.IsPathFullyQualified(root.Trim()))
         {
-            throw new ArgumentException($"'{root}' isn't a full path, such as {Path.Combine(_folders.Downloads, LibraryFolderName)}.", paramName);
+            throw new ArgumentException($"'{root}' isn't a full path, such as {DefaultLibraryRoot}.", paramName);
         }
 
         return Path.TrimEndingDirectorySeparator(Path.GetFullPath(root.Trim()));

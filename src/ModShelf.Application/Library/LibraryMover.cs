@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Settings;
+using ModShelf.Domain.Common;
 using ModShelf.Domain.Library;
 
 namespace ModShelf.Application.Library;
@@ -45,12 +46,7 @@ internal sealed partial class LibraryMover : ILibraryMover
     public async Task<LibraryMove> MoveAsync(string root, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(root);
-        if (!Path.IsPathFullyQualified(root.Trim()))
-        {
-            throw new ArgumentException($"'{root}' isn't a full path, such as {_settings.DefaultLibraryRoot}.", nameof(root));
-        }
-
-        string to = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root.Trim()));
+        string to = _settings.FullRoot(root, nameof(root));
         using IDisposable hold = await _hold.HoldAsync(cancellationToken).ConfigureAwait(false);
         string from = await _settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
         // Under another name, the files would be in their own way.
@@ -141,15 +137,6 @@ internal sealed partial class LibraryMover : ILibraryMover
     }
 
     /// <summary>
-    /// Whether two paths name the same folder: ignoring case on Windows and macOS, whose usual file systems do.
-    /// </summary>
-    private static bool SamePath(string first, string second)
-        => string.Equals(
-            first,
-            second,
-            OperatingSystem.IsWindows() || OperatingSystem.IsMacOS() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
-
-    /// <summary>
     /// What undoing a move left, as a sentence.
     /// </summary>
     /// <param name="stuck">How many files couldn't go back.</param>
@@ -230,7 +217,7 @@ internal sealed partial class LibraryMover : ILibraryMover
         foreach (string folder in files.Select(Path.GetDirectoryName).OfType<string>().Distinct().OrderByDescending(folder => folder.Length))
         {
             for (string? current = folder;
-                current is not null && (SamePath(current, root) || LibraryPaths.RelativeTo(root, current) is not null);
+                current is not null && (FilePaths.Same(current, root) || LibraryPaths.RelativeTo(root, current) is not null);
                 current = Path.GetDirectoryName(current))
             {
                 if (!_storage.RemoveFolderIfEmpty(current))
