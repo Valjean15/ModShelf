@@ -586,10 +586,6 @@
     <value>It's on the Downloads screen already.</value>
     <comment>When the update's download was added before.</comment>
   </data>
-  <data name="UpdateInLibraryAlready" xml:space="preserve">
-    <value>{0} is in the library already.</value>
-    <comment>{0} is the file's path.</comment>
-  </data>
   <data name="ChangelogReading" xml:space="preserve">
     <value>Reading the changelog…</value>
     <comment>Shown while the site is asked for the changelog.</comment>

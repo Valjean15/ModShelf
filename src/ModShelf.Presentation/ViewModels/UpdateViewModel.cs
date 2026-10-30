@@ -1,8 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-using ModShelf.Application.Downloads;
-using ModShelf.Application.Library;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
@@ -142,30 +140,10 @@ public sealed partial class UpdateViewModel : ObservableObject
             UpdateAction.Download,
             async () =>
             {
-                if (_update.PageUrl is not { } link)
+                if (_update.PageUrl is { } link)
                 {
-                    return;
+                    await DownloadNotes.AddToLibraryAsync(_services.Downloads, link, Tell, cancellationToken);
                 }
-
-                LibraryDownload placed;
-                try
-                {
-                    placed = await _services.Downloads.AddAsync(link, cancellationToken);
-                }
-                catch (Exception exception) when (LinkProblems.Describe(exception, library: true) is { } problem)
-                {
-                    Tell(problem, isProblem: true);
-                    return;
-                }
-
-                Tell(
-                    placed.Queued switch
-                    {
-                        null => Text.Format(Strings.UpdateInLibraryAlready, placed.Path),
-                        { AlreadyQueued: true } => Strings.UpdateDownloadingAlready,
-                        _ => Text.Format(Strings.UpdateDownloading, Path.GetDirectoryName(placed.Path)),
-                    },
-                    isProblem: false);
             },
             cancellationToken);
 

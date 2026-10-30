@@ -183,7 +183,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
                 LibraryDownload placed = await _library.AddAsync(link, cancellationToken);
                 if (placed.Queued is null)
                 {
-                    Say(Text.Format(Strings.DownloadsInLibraryAlready, placed.Path));
+                    Say(DownloadNotes.InLibraryAlready(placed));
                     return null;
                 }
 
@@ -288,23 +288,13 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
     /// </summary>
     private void Follow(LinkDownload added)
     {
-        DownloadJobSnapshot job = added.Job;
-        if (added.AlreadySaved)
+        if (!added.AlreadySaved)
         {
-            Link = string.Empty;
-            Say(Text.Format(Strings.DownloadsSavedAlready, job.FileName, job.TargetDirectory));
-            return;
+            _uiThread.Post(() => ShowNew(added.Job));
         }
 
-        _uiThread.Post(() => ShowNew(job));
         Link = string.Empty;
-        if (!added.AlreadyQueued)
-        {
-            Say(Text.Format(Strings.DownloadsDownloadingInto, job.FileName, job.TargetDirectory));
-            return;
-        }
-
-        Say(Text.Format(Strings.DownloadsContinuing, job.FileName));
+        Say(DownloadNotes.Added(added, onDownloadsScreen: true));
     }
 
     /// <summary>

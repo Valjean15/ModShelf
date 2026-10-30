@@ -2,7 +2,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using ModShelf.Application.Downloads;
-using ModShelf.Application.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
@@ -105,28 +104,7 @@ public sealed partial class ModFileViewModel : ObservableObject
     private Task DownloadAsync(CancellationToken cancellationToken)
         => RunAsync(
             FileAction.Download,
-            async () =>
-            {
-                LibraryDownload placed;
-                try
-                {
-                    placed = await _services.LibraryDownloads.AddAsync(_file.PageUrl!, cancellationToken);
-                }
-                catch (Exception exception) when (LinkProblems.Describe(exception, library: true) is { } problem)
-                {
-                    Tell(problem, isProblem: true);
-                    return;
-                }
-
-                Tell(
-                    placed.Queued switch
-                    {
-                        null => Text.Format(Strings.UpdateInLibraryAlready, placed.Path),
-                        { AlreadyQueued: true } => Strings.UpdateDownloadingAlready,
-                        _ => Text.Format(Strings.UpdateDownloading, Path.GetDirectoryName(placed.Path)),
-                    },
-                    isProblem: false);
-            },
+            () => DownloadNotes.AddToLibraryAsync(_services.LibraryDownloads, _file.PageUrl!, Tell, cancellationToken),
             cancellationToken);
 
     /// <summary>
@@ -152,14 +130,7 @@ public sealed partial class ModFileViewModel : ObservableObject
 
                 if (added is not null)
                 {
-                    Tell(
-                        added switch
-                        {
-                            { AlreadySaved: true } => Text.Format(Strings.DownloadsSavedAlready, added.Job.FileName, added.Job.TargetDirectory),
-                            { AlreadyQueued: true } => Strings.UpdateDownloadingAlready,
-                            _ => Text.Format(Strings.DownloadsDownloadingInto, added.Job.FileName, added.Job.TargetDirectory),
-                        },
-                        isProblem: false);
+                    Tell(DownloadNotes.Added(added, onDownloadsScreen: false), isProblem: false);
                 }
             },
             cancellationToken);
