@@ -163,7 +163,7 @@ internal static partial class LibraryCommand
 
     /// <summary>
     /// Each update's changes, from its mod's changelog: the entry for the update's version label, when there's one, as
-    /// the site names it. Each mod's site is asked once.
+    /// the site names it. Each mod's changelog is read once.
     /// </summary>
     private static async Task WriteChangelogsAsync(
         CliEnvironment environment,
@@ -171,12 +171,18 @@ internal static partial class LibraryCommand
         IReadOnlyList<LibraryUpdate> updates,
         CancellationToken cancellationToken)
     {
-        foreach (IGrouping<ModRef, LibraryUpdate> mod in updates.Where(update => update.PageUrl is not null).GroupBy(update => update.File.Mod))
+        foreach (IGrouping<ModRef, LibraryUpdate> mod in updates.GroupBy(update => update.File.Mod))
         {
-            IReadOnlyList<ModChangelog> changelogs;
+            List<(LibraryUpdate Update, IReadOnlyList<string> Changes)> entries = [];
             try
             {
-                changelogs = (await lookup.LookUpAsync(mod.First().PageUrl!, cancellationToken).ConfigureAwait(false)).Changelogs;
+                foreach (LibraryUpdate update in mod.OrderByDescending(update => update.UploadedAt))
+                {
+                    IReadOnlyList<string> changes = update.VersionLabel is { } version
+                        ? await lookup.GetChangesAsync(mod.Key, version, cancellationToken).ConfigureAwait(false) ?? []
+                        : [];
+                    entries.Add((update, changes));
+                }
             }
             catch (Exception exception) when (LinkProblems.Describe(exception) is { } problem)
             {
@@ -184,18 +190,17 @@ internal static partial class LibraryCommand
                 continue;
             }
 
-            foreach (LibraryUpdate update in mod.OrderByDescending(update => update.UploadedAt))
+            foreach ((LibraryUpdate update, IReadOnlyList<string> changes) in entries)
             {
                 environment.Output.WriteLine();
                 environment.Output.WriteLine(update.VersionLabel is null ? $"{update.Name}:" : $"{update.Name} ({update.VersionLabel}):");
-                ModChangelog? entry = changelogs.FirstOrDefault(changelog => string.Equals(changelog.Version, update.VersionLabel, StringComparison.Ordinal));
-                if (entry is null || entry.Changes.Count == 0)
+                if (changes.Count == 0)
                 {
                     environment.Output.WriteLine("  The changelog says nothing about this version.");
                     continue;
                 }
 
-                foreach (string change in entry.Changes)
+                foreach (string change in changes)
                 {
                     environment.Output.WriteLine($"  - {change}");
                 }
