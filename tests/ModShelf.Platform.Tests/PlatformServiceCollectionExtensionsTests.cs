@@ -7,6 +7,7 @@ using ModShelf.Application.Desktop.Ports;
 using ModShelf.Application.Links;
 using ModShelf.Application.Links.Ports;
 using ModShelf.Application.Notifications.Ports;
+using ModShelf.Application.Releases.Ports;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Platform.Browser;
 using ModShelf.Platform.Instances;
@@ -64,6 +65,19 @@ public sealed class PlatformServiceCollectionExtensionsTests : IDisposable
         object notices = Single<INotificationService>(services).ImplementationFactory!(new StubServiceProvider());
 
         Assert.IsAssignableFrom<INotificationService>(notices);
+    }
+
+    [Fact]
+    public async Task RegistersModShelfsReleasesWhichATestDoesntInstall()
+    {
+        ServiceCollection services = new();
+        services.AddAppReleases(Path.Combine(_folder.Path, "feed"));
+
+        IAppReleases releases = Assert.IsAssignableFrom<IAppReleases>(Single<IAppReleases>(services).ImplementationFactory!(new StubServiceProvider()));
+
+        Assert.False(releases.IsInstalled);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => releases.CheckAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(ServiceLifetime.Singleton, Single<IAppReleases>(services).Lifetime);
     }
 
     [Fact]

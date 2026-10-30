@@ -52,6 +52,12 @@ internal static class HostServices
     public const string DesktopAppKey = "ModShelf:DesktopApp";
 
     /// <summary>
+    /// The configuration key, or <c>ModShelf__UpdateFeed</c>, for a folder or an http(s) address holding Velopack's
+    /// release feed, which an installed ModShelf updates itself from in place of its GitHub releases, such as for testing.
+    /// </summary>
+    public const string UpdateFeedKey = "ModShelf:UpdateFeed";
+
+    /// <summary>
     /// Registers ModShelf's files, where the configuration says, and every service both hosts have.
     /// </summary>
     /// <param name="app">What the host's log files' names start with, such as <c>cli</c>.</param>
@@ -62,6 +68,7 @@ internal static class HostServices
         string folder = services.AddLibraryFiles(string.IsNullOrWhiteSpace(databasePath) ? null : Path.GetFullPath(databasePath), app);
 
         services.AddPlatformServices(SecretStoreOptionsFrom(configuration), SchemeHandlerOptionsFrom(configuration));
+        services.AddAppReleases(string.IsNullOrWhiteSpace(configuration[UpdateFeedKey]) ? null : configuration[UpdateFeedKey]);
         services.AddHttpFileTransfer();
         services.AddSourceHttpClients();
         services.AddDownloadEngine();

@@ -1,9 +1,11 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using ModShelf.Application.Releases.Ports;
 using ModShelf.Hosting;
 using ModShelf.Platform;
 using ModShelf.Platform.Links;
+using ModShelf.Testing;
 
 namespace ModShelf.Cli.Tests.Hosting;
 
@@ -48,6 +50,27 @@ public sealed class HostServicesTests
                 "--ModShelf:SecretScope=ModShelf.Checklist",
             ],
             options.Arguments);
+    }
+
+    [Fact]
+    public async Task OnlyAnInstalledAppLooksForANewerModShelf()
+    {
+        using TempFolder folder = new();
+        IConfiguration configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                [HostServices.DatabasePathKey] = Path.Combine(folder.Path, "library.db"),
+                [HostServices.UpdateFeedKey] = Path.Combine(folder.Path, "feed"),
+            })
+            .Build();
+        ServiceCollection services = new();
+        services.AddModShelf(configuration, "cli");
+        await using ServiceProvider provider = services.BuildServiceProvider();
+
+        IAppReleases releases = provider.GetRequiredService<IAppReleases>();
+
+        Assert.False(releases.IsInstalled);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => releases.CheckAsync(TestContext.Current.CancellationToken));
     }
 
     [Fact]

@@ -36,6 +36,10 @@
     <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="10.0.13" />
   </ItemGroup>
 
+  <ItemGroup Label="Installing and updating">
+    <PackageVersion Include="Velopack" Version="1.2.161" />
+  </ItemGroup>
+
   <ItemGroup Label="Build">
     <PackageVersion Include="MinVer" Version="8.0.0" />
   </ItemGroup>

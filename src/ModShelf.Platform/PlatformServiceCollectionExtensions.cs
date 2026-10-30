@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Desktop.Ports;
 using ModShelf.Application.Notifications.Ports;
+using ModShelf.Application.Releases.Ports;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Platform.Browser;
 using ModShelf.Platform.Folders;
@@ -11,6 +12,7 @@ using ModShelf.Platform.Instances;
 using ModShelf.Platform.Links;
 using ModShelf.Platform.Notifications;
 using ModShelf.Platform.OAuth;
+using ModShelf.Platform.Releases;
 using ModShelf.Platform.Secrets;
 using ModShelf.Platform.Tray;
 
@@ -61,6 +63,22 @@ public static class PlatformServiceCollectionExtensions
     /// </summary>
     public static string DefaultDesktopApp
         => Path.Combine(AppContext.BaseDirectory, OperatingSystem.IsWindows() ? "ModShelf.Desktop.exe" : "ModShelf.Desktop");
+
+    /// <summary>
+    /// Registers <see cref="IAppReleases"/>: ModShelf's own releases, which an installed ModShelf updates itself from.
+    /// </summary>
+    /// <param name="feed">
+    /// A folder or an http(s) address that holds Velopack's release feed, in place of ModShelf's GitHub releases, such as
+    /// for testing; null for GitHub.
+    /// </param>
+    public static IServiceCollection AddAppReleases(this IServiceCollection services, string? feed = null)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddSingleton<IAppReleases>(_ => new VelopackAppReleases(AppReleaseSources.For(feed)));
+
+        return services;
+    }
 
     /// <summary>
     /// Registers the desktop app's <see cref="ISingleInstance"/>: one app at a time for the library in
