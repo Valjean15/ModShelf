@@ -1,0 +1,55 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/v2/graphql",
+    "query": "",
+    "body": {
+      "operationName": "SearchMods",
+      "variables": {
+        "filter": {
+          "gameDomainName": [
+            {
+              "value": "stardewvalley",
+              "op": "EQUALS"
+            }
+          ],
+          "nameStemmed": [
+            {
+              "value": "zqxj no such mod zqxj",
+              "op": "MATCHES"
+            }
+          ],
+          "adultContent": [
+            {
+              "value": false,
+              "op": "EQUALS"
+            }
+          ]
+        },
+        "sort": [
+          {
+            "relevance": {
+              "direction": "DESC"
+            }
+          }
+        ],
+        "offset": 0,
+        "count": 5
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": {
+        "mods": {
+          "totalCount": 0,
+          "nodes": []
+        }
+      }
+    }
+  }
+}

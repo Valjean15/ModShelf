@@ -97,6 +97,19 @@ public sealed class NexusSourceCatalogTests : IDisposable
     }
 
     [Fact]
+    public async Task ListsTheGamesAsNexusModsListedThem()
+    {
+        _api.Serve(RecordedNexusApi.Premium, "games");
+
+        IReadOnlyList<GameInfo> games = await Source.GetGamesAsync(Cancellation);
+
+        Assert.Equal(
+            [("morrowind", "Morrowind"), ("oblivion", "Oblivion"), ("shadowrunreturns", "Shadowrun Returns"), ("stardewvalley", "Stardew Valley")],
+            games.Select(game => (game.Game.Key, game.Name)));
+        Assert.Equal(new Uri("https://www.nexusmods.com/stardewvalley"), games[^1].PageUrl);
+    }
+
+    [Fact]
     public async Task ListsEachGameOnceAndLeavesOutThoseWithoutADomainNameForLinks()
     {
         JsonNode again = RecordedGame();
@@ -376,8 +389,8 @@ public sealed class NexusSourceCatalogTests : IDisposable
     }
 
     /// <summary>
-    /// The recorded game, as one entry of the list of games. Until the list is recorded, its entries are taken to have
-    /// the same shape as the game answer, as the API documents.
+    /// The recorded game, as one entry of a list of games written by hand: the recorded list's entries have the same
+    /// shape, but for the game's categories.
     /// </summary>
     private static JsonNode RecordedGame() => RecordedNexusApi.Recording(RecordedNexusApi.Premium, "game")["response"]!["body"]!.DeepClone();
 

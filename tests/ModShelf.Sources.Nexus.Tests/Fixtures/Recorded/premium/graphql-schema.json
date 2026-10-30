@@ -1,0 +1,1113 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/v2/graphql",
+    "query": "",
+    "body": {
+      "operationName": "Schema"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": {
+        "query": {
+          "fields": [
+            {
+              "name": "mods",
+              "args": [
+                {
+                  "name": "viewUploaderHidden",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  }
+                },
+                {
+                  "name": "viewUserBlockedContent",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  }
+                },
+                {
+                  "name": "facets",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "ModsFacet",
+                    "ofType": null
+                  }
+                },
+                {
+                  "name": "filter",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "ModsFilter",
+                    "ofType": null
+                  }
+                },
+                {
+                  "name": "postFilter",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "ModsFilter",
+                    "ofType": null
+                  }
+                },
+                {
+                  "name": "sort",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "INPUT_OBJECT",
+                        "name": "ModsSort",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                {
+                  "name": "offset",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                },
+                {
+                  "name": "count",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
+                }
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "ModPage",
+                  "ofType": null
+                }
+              }
+            }
+          ]
+        },
+        "modsFilter": {
+          "inputFields": [
+            {
+              "name": "filter",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "ModsFilter",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "op",
+              "type": {
+                "kind": "ENUM",
+                "name": "FilterLogicalOperator",
+                "ofType": null
+              }
+            },
+            {
+              "name": "name",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BaseFilterValueEqualsWildcard",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "nameStemmed",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BaseFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "modId",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BaseFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "id",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BaseFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "gameId",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BaseFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "gameDomainName",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BaseFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "createdAt",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BaseFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "updatedAt",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BaseFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "hasUpdated",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BooleanFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "uploaderId",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BaseFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "adultContent",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BooleanFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "fileSize",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "IntFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "downloads",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "IntFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "endorsements",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "IntFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "tag",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BaseFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "description",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BaseFilterValueEqualsMatches",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "author",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BaseFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "uploader",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BaseFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "supportsVortex",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BooleanFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "languageName",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BaseFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "categoryName",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BaseFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "status",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BaseFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "gameName",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BaseFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "primaryImage",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BaseFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "directDownloadEnabled",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BooleanFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "modsSort": {
+          "inputFields": [
+            {
+              "name": "relevance",
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "BaseSortValue",
+                "ofType": null
+              }
+            },
+            {
+              "name": "name",
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "BaseSortValue",
+                "ofType": null
+              }
+            },
+            {
+              "name": "downloads",
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "BaseSortValue",
+                "ofType": null
+              }
+            },
+            {
+              "name": "uniqueDownloads",
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "BaseSortValue",
+                "ofType": null
+              }
+            },
+            {
+              "name": "endorsements",
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "BaseSortValue",
+                "ofType": null
+              }
+            },
+            {
+              "name": "random",
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "RandomSortValue",
+                "ofType": null
+              }
+            },
+            {
+              "name": "createdAt",
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "BaseSortValue",
+                "ofType": null
+              }
+            },
+            {
+              "name": "updatedAt",
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "BaseSortValue",
+                "ofType": null
+              }
+            },
+            {
+              "name": "size",
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "BaseSortValue",
+                "ofType": null
+              }
+            },
+            {
+              "name": "lastComment",
+              "type": {
+                "kind": "INPUT_OBJECT",
+                "name": "BaseSortValue",
+                "ofType": null
+              }
+            }
+          ]
+        },
+        "mod": {
+          "fields": [
+            {
+              "name": "adultContent",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            {
+              "name": "author",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            {
+              "name": "category",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "createdAt",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "description",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "directDownloadEnabled",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "downloads",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "endorsements",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "fileSize",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            {
+              "name": "game",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "Game",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "gameId",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "id",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "isBlockedFromEarningDp",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            {
+              "name": "legacyModRequirementsEnabled",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "mirrors",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "ModMirror",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "modCategory",
+              "type": {
+                "kind": "OBJECT",
+                "name": "ModCategory",
+                "ofType": null
+              }
+            },
+            {
+              "name": "modId",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "modRequirements",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "ModRequirements",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "name",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "pictureUrl",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            {
+              "name": "status",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "summary",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "supportsVortex",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "tags",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "OBJECT",
+                      "name": "LegacyTag"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "thumbnailBlurredUrl",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            {
+              "name": "thumbnailLargeBlurredUrl",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            {
+              "name": "thumbnailLargeUrl",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            {
+              "name": "thumbnailUrl",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            {
+              "name": "uid",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "updatedAt",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "DateTime",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "uploader",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "User",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "version",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "viewerBlocked",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "viewerDownloaded",
+              "type": {
+                "kind": "SCALAR",
+                "name": "DateTime",
+                "ofType": null
+              }
+            },
+            {
+              "name": "viewerEndorsed",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            {
+              "name": "viewerIsBlocked",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            {
+              "name": "viewerTracked",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "viewerUpdateAvailable",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            }
+          ]
+        },
+        "baseFilterValue": {
+          "inputFields": [
+            {
+              "name": "value",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "op",
+              "type": {
+                "kind": "ENUM",
+                "name": "FilterComparisonOperator",
+                "ofType": null
+              }
+            }
+          ]
+        },
+        "booleanFilterValue": {
+          "inputFields": [
+            {
+              "name": "value",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "op",
+              "type": {
+                "kind": "ENUM",
+                "name": "FilterComparisonOperator",
+                "ofType": null
+              }
+            }
+          ]
+        },
+        "comparison": {
+          "enumValues": [
+            {
+              "name": "EQUALS"
+            },
+            {
+              "name": "NOT_EQUALS"
+            },
+            {
+              "name": "MATCHES"
+            },
+            {
+              "name": "WILDCARD"
+            },
+            {
+              "name": "GT"
+            },
+            {
+              "name": "GTE"
+            },
+            {
+              "name": "LT"
+            },
+            {
+              "name": "LTE"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

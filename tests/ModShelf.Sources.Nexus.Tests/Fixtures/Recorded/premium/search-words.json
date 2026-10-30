@@ -1,0 +1,136 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/v2/graphql",
+    "query": "",
+    "body": {
+      "operationName": "SearchMods",
+      "variables": {
+        "filter": {
+          "gameDomainName": [
+            {
+              "value": "stardewvalley",
+              "op": "EQUALS"
+            }
+          ],
+          "nameStemmed": [
+            {
+              "value": "SMAPI",
+              "op": "MATCHES"
+            }
+          ],
+          "adultContent": [
+            {
+              "value": false,
+              "op": "EQUALS"
+            }
+          ]
+        },
+        "sort": [
+          {
+            "relevance": {
+              "direction": "DESC"
+            }
+          }
+        ],
+        "offset": 0,
+        "count": 5
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": {
+        "mods": {
+          "totalCount": 33,
+          "nodes": [
+            {
+              "modId": 2367,
+              "name": "SMAPI Templates",
+              "summary": "A collection of SMAPI Templates for Visual Studio",
+              "author": "Platonymous",
+              "version": "1.4.3",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/2367/2367-1528675903-1038100234.jpeg",
+              "updatedAt": "2020-03-02T15:12:03Z",
+              "endorsements": 71,
+              "downloads": 1613,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 4483,
+              "name": "Hello SMAPI",
+              "summary": "An ambitious mod that lets you say Hello, Hey or Hi to SMAPI and it will pick one of 60 (configurable, 60 by default) responses. You can add more or remove some responses in the config.json.",
+              "author": "Jessebot",
+              "version": "1.0.0",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/4483/4483-1568569369-1230704823.png",
+              "updatedAt": "2019-09-15T18:07:56Z",
+              "endorsements": 40,
+              "downloads": 599,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 6514,
+              "name": "Goodbye SMAPI",
+              "summary": "The spin off to Hello SMAPI, this mod lets you say bye to SMAPI and it will drop one of the many (configurable) responses. Closes your game after as well.",
+              "author": "Jessebot",
+              "version": "1.0.0",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/6514/6514-1596127616-1577494932.png",
+              "updatedAt": "2020-07-30T17:08:30Z",
+              "endorsements": 12,
+              "downloads": 207,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 32453,
+              "name": "Minimize SMAPI",
+              "summary": "Simple mod, it minimizes the SMAPI console window at the start of the game.",
+              "author": "Prism 99",
+              "version": "1.0.0",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/32453/32453-1766417442-1330668221.jpg",
+              "updatedAt": "2025-12-22T10:55:10Z",
+              "endorsements": 9,
+              "downloads": 397,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 46601,
+              "name": "StardewUtils SMAPI",
+              "summary": "Six essential cheats in one mod. Freeze time, infinite stamina, infinite health, instant gold, instant crop growth, and max friendship — all toggled with hotkeys. Lightweight, no config needed.",
+              "author": "trifected",
+              "version": "1",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/46601/46601-1779568895-1341658776.jpg",
+              "updatedAt": "2026-05-23T20:46:45Z",
+              "endorsements": 6,
+              "downloads": 409,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -8,6 +8,7 @@ using ModShelf.Sources.Nexus.Api;
 using ModShelf.Testing;
 
 using WireMock.Logging;
+using WireMock.Matchers;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
@@ -52,20 +53,43 @@ internal sealed class RecordedNexusApi : IDisposable
             ?? throw new InvalidDataException($"The recording {account}/{name} is empty.");
 
     /// <summary>
-    /// From now on, the API answers the recorded request with the recorded response.
+    /// A text file the recording run saved, such as <c>nxm-link.txt</c>, the link as a browser hands it over.
     /// </summary>
+    public static string RecordedText(string account, string file)
+        => File.ReadAllText(Path.Combine(RecordedFolder, account, file)).Trim();
+
+    /// <summary>
+    /// From now on, the API answers the recorded request with the recorded response; a request that differs, in its
+    /// method, path, query or body, isn't answered.
+    /// </summary>
+    /// <remarks>
+    /// A form, such as <c>mod_id=2400</c>, is matched exactly. A GraphQL query is matched by its operation's name, in
+    /// its text, and its variables: the recording keeps those, not the text.
+    /// </remarks>
     public void Serve(string account, string name)
     {
         JsonNode recording = Recording(account, name);
         JsonNode request = recording["request"]!;
         JsonNode response = recording["response"]!;
 
-        IRequestBuilder match = Request.Create().UsingGet().WithPath(request["path"]!.GetValue<string>());
-        foreach (string pair in request["query"]!.GetValue<string>().Split('&', StringSplitOptions.RemoveEmptyEntries))
+        string method = request["method"]?.GetValue<string>() ?? "GET";
+        IRequestBuilder match = Request.Create().UsingMethod(method).WithPath(request["path"]!.GetValue<string>());
+        foreach (string pair in (request["query"]?.GetValue<string>() ?? string.Empty).Split('&', StringSplitOptions.RemoveEmptyEntries))
         {
             string[] parts = pair.Split('=', 2);
             match = match.WithParam(parts[0], Uri.UnescapeDataString(parts[1]));
         }
+
+        match = request["body"] switch
+        {
+            JsonValue form => match.WithBody(new ExactMatcher(form.GetValue<string>())),
+            JsonObject query => match.WithBody(new JsonPartialWildcardMatcher(new JsonObject
+            {
+                ["query"] = $"*query {query["operationName"]!.GetValue<string>()}(*",
+                ["variables"] = query["variables"]!.DeepClone(),
+            }.ToJsonString())),
+            _ => match,
+        };
 
         IResponseBuilder answer = Response.Create().WithStatusCode(response["status"]!.GetValue<int>());
         foreach ((string header, JsonNode? value) in response["headers"]!.AsObject())

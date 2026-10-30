@@ -1,0 +1,130 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/v2/graphql",
+    "query": "",
+    "body": {
+      "operationName": "SearchMods",
+      "variables": {
+        "filter": {
+          "gameDomainName": [
+            {
+              "value": "stardewvalley",
+              "op": "EQUALS"
+            }
+          ],
+          "adultContent": [
+            {
+              "value": false,
+              "op": "EQUALS"
+            }
+          ]
+        },
+        "sort": [
+          {
+            "endorsements": {
+              "direction": "DESC"
+            }
+          }
+        ],
+        "offset": 5,
+        "count": 5
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": {
+        "mods": {
+          "totalCount": 33710,
+          "nodes": [
+            {
+              "modId": 4,
+              "name": "CJB Cheats Menu",
+              "summary": "A simple in-game cheats menu with lots of cheats.",
+              "author": "CJBok and Pathoschild",
+              "version": "1.42.0",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/4-0-1457716661.gif",
+              "updatedAt": "2026-04-20T01:07:25Z",
+              "endorsements": 235153,
+              "downloads": 10410945,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 3753,
+              "name": "Stardew Valley Expanded",
+              "summary": "Stardew Valley Expanded is a fanmade expansion for ConcernedApe's Stardew Valley. This mod adds 28 new NPCs,  58 locations, 278 character events, 43 fish, reimagined vanilla areas, three farm maps, a reimagined world map reflecting all",
+              "author": "FlashShifter",
+              "version": "1.15.11",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/3753/3753-1790012349-428345650.png",
+              "updatedAt": "2025-06-30T23:19:24Z",
+              "endorsements": 227793,
+              "downloads": 22325788,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 3231,
+              "name": "Farm Type Manager (FTM)",
+              "summary": "Farm Type Manager (FTM) is a framework that lets other mods spawn objects and monsters anywhere in the game, with various controls and customization options.",
+              "author": "Esca-MMC",
+              "version": "1.26.1",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/3231/3231-1549594226-514724928.png",
+              "updatedAt": "2025-11-14T17:55:30Z",
+              "endorsements": 213641,
+              "downloads": 11240043,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 541,
+              "name": "Lookup Anything",
+              "summary": "See live info about whatever's under your cursor when you press F1. Learn a villager's favourite gifts, when a crop will be ready to harvest, how long a fence will last, why your farm animals are unhappy, and more.",
+              "author": "Pathoschild",
+              "version": "1.55.0",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/541-0-1482010183.png",
+              "updatedAt": "2026-03-15T02:54:41Z",
+              "endorsements": 203937,
+              "downloads": 10028851,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 93,
+              "name": "CJB Item Spawner",
+              "summary": "An easy-to-use in-game item spawner menu.",
+              "author": "CJBok and Pathoschild",
+              "version": "2.5.6",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/93/93-1604102595-721584267.png",
+              "updatedAt": "2026-03-15T16:49:27Z",
+              "endorsements": 188288,
+              "downloads": 7900089,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

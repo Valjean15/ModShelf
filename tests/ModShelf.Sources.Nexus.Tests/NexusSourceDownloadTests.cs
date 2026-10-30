@@ -72,6 +72,33 @@ public sealed class NexusSourceDownloadTests : IDisposable
     }
 
     [Fact]
+    public async Task AFreeAccountsHandoffGetsTheFileAsNexusModsAnswered()
+    {
+        _api.Serve(RecordedNexusApi.Free, "download-link-with-nxm-key");
+        string first = RecordedNexusApi.Recording(RecordedNexusApi.Free, "download-link-with-nxm-key")["response"]!["body"]![0]!["URI"]!.GetValue<string>();
+
+        DownloadTicket ticket = Assert.IsType<DownloadTicket>(
+            await Source.ResolveAsync(Smapi, new Uri(RecordedNexusApi.RecordedText(RecordedNexusApi.Free, "nxm-link.txt")), Cancellation));
+
+        Assert.Equal(new Uri(first), ticket.Url);
+        Assert.Single(_api.Requests);
+    }
+
+    [Fact]
+    public async Task AKeyNexusModsNeverGaveIsRefusedAndTheAccountSentToTheFilesPage()
+    {
+        // Nexus Mods refuses the made-up key with 400, then the free account without a key with 403.
+        _api.Serve(RecordedNexusApi.Free, "download-link-without-key");
+        _api.Serve(RecordedNexusApi.Free, "download-link-with-wrong-nxm-key");
+
+        HandoffRequired handoff = Assert.IsType<HandoffRequired>(await Source.ResolveAsync(
+            Smapi, new Uri("nxm://stardewvalley/mods/2400/files/160380?key=not-a-real-nxm-key&expires=1793560033&user_id=1000002"), Cancellation));
+
+        Assert.Equal(FilePage, handoff.PageUrl);
+        Assert.Equal([400, 403], _api.Requests.Select(request => (int)request.ResponseMessage!.StatusCode!));
+    }
+
+    [Fact]
     public async Task SendsTheKeyAndExpiryOfTheHandoff()
     {
         _api.Answer(DownloadLinkPath, Servers);

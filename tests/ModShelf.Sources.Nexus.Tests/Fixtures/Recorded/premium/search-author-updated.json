@@ -1,0 +1,136 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/v2/graphql",
+    "query": "",
+    "body": {
+      "operationName": "SearchMods",
+      "variables": {
+        "filter": {
+          "gameDomainName": [
+            {
+              "value": "stardewvalley",
+              "op": "EQUALS"
+            }
+          ],
+          "author": [
+            {
+              "value": "Pathoschild",
+              "op": "MATCHES"
+            }
+          ],
+          "adultContent": [
+            {
+              "value": false,
+              "op": "EQUALS"
+            }
+          ]
+        },
+        "sort": [
+          {
+            "updatedAt": {
+              "direction": "DESC"
+            }
+          }
+        ],
+        "offset": 0,
+        "count": 5
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": {
+        "mods": {
+          "totalCount": 42,
+          "nodes": [
+            {
+              "modId": 53956,
+              "name": "The Neighborly Collection - Tractor Garage",
+              "summary": "Replaces the Tractor Mod garage with one matching the Neighborly Collection style of buildings.",
+              "author": "cajcbell Pathoschild redundantghost",
+              "version": "1.0",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/53956/53956-1792228022-1249869982.png",
+              "updatedAt": "2026-10-15T19:53:43Z",
+              "endorsements": 2,
+              "downloads": 98,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 44863,
+              "name": "Automate - Traditional Chinese (Taiwan) Translation",
+              "summary": "此模組為Automate(自動收集機器產品)的正體中文翻譯版。",
+              "author": "Pathoschild and JIAWANSHEN",
+              "version": "1.0.0",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/44863/44863-1787817328-1148339717.jpg",
+              "updatedAt": "2026-10-10T04:14:27Z",
+              "endorsements": 1,
+              "downloads": 197,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 43473,
+              "name": "NPC Map Locations - Taiwanese translation",
+              "summary": "此模組為NPC Map Locations的正體中文翻譯版。地圖上可以顯示NPC的位置。",
+              "author": "Bouhm and Pathoschild and JIAWANSHEN",
+              "version": "1.0.1",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/43473/43473-1773170378-201796188.jpg",
+              "updatedAt": "2026-07-01T02:54:45Z",
+              "endorsements": 6,
+              "downloads": 300,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 43914,
+              "name": "Cheaters Anonymous",
+              "summary": "Modification of CJB Cheats Menu to toggle categories and subcategories on/off in Title Screen, to allow/disallow usage of selected cheats in-game, giving you a built-in method for accountability in controlling your impulse to cheat.",
+              "author": "CJBok Pathoschild and tbonehunter",
+              "version": "1.1.0",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/43914/43914-1774008030-2086883776.png",
+              "updatedAt": "2026-06-12T16:45:46Z",
+              "endorsements": 29,
+              "downloads": 1488,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 239,
+              "name": "NPC Map Locations",
+              "summary": "See NPC and players on the map, with an optional minimap.",
+              "author": "Bouhm and Pathoschild",
+              "version": "3.5.2",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/239/239-1522469229-1390441983.png",
+              "updatedAt": "2026-04-25T18:03:45Z",
+              "endorsements": 344520,
+              "downloads": 14582023,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

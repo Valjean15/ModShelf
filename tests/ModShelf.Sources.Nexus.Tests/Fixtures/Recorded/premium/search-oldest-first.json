@@ -1,0 +1,130 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/v2/graphql",
+    "query": "",
+    "body": {
+      "operationName": "SearchMods",
+      "variables": {
+        "filter": {
+          "gameDomainName": [
+            {
+              "value": "stardewvalley",
+              "op": "EQUALS"
+            }
+          ],
+          "adultContent": [
+            {
+              "value": false,
+              "op": "EQUALS"
+            }
+          ]
+        },
+        "sort": [
+          {
+            "createdAt": {
+              "direction": "ASC"
+            }
+          }
+        ],
+        "offset": 0,
+        "count": 5
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": {
+        "mods": {
+          "totalCount": 33710,
+          "nodes": [
+            {
+              "modId": 3,
+              "name": "Rise and Shine - Configurable wake-up time",
+              "summary": "Rise and Shine changes the time you wake up in the morning, it's fully configurable with an easy to read config file.",
+              "author": "Yoshify",
+              "version": "1.1",
+              "pictureUrl": null,
+              "updatedAt": "2016-03-07T21:52:07Z",
+              "endorsements": 78,
+              "downloads": 2337,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 1,
+              "name": "The Mane Event - Horse Customizer",
+              "summary": "Customization suite for your horse! Includes 19 premade skins from pop culture and real breeds. Thousands of combinations!",
+              "author": "Zhuria AKA Sep",
+              "version": "1.2.1",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/1/1-1713718115-1748737061.png",
+              "updatedAt": "2024-04-21T16:46:40Z",
+              "endorsements": 445,
+              "downloads": 11342,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 4,
+              "name": "CJB Cheats Menu",
+              "summary": "A simple in-game cheats menu with lots of cheats.",
+              "author": "CJBok and Pathoschild",
+              "version": "1.42.0",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/4-0-1457716661.gif",
+              "updatedAt": "2026-04-20T01:07:25Z",
+              "endorsements": 235153,
+              "downloads": 10410945,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 2,
+              "name": "Sprint - A faster and stamina draining run",
+              "summary": "Sprint is a faster version of run that will drain your stamina over time. It's fully configurable with an easy to read config file.",
+              "author": "Yoshify",
+              "version": "1.1.2",
+              "pictureUrl": null,
+              "updatedAt": "2016-03-09T07:13:47Z",
+              "endorsements": 297,
+              "downloads": 11776,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 6,
+              "name": "Epona (horse replacer)",
+              "summary": "Replaces the vanilla horse with Epona.",
+              "author": "Zhuria",
+              "version": "1",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/6-0-1457390864.png",
+              "updatedAt": "2016-04-11T21:24:30Z",
+              "endorsements": 400,
+              "downloads": 9097,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -116,6 +116,18 @@ public sealed class NexusSourceLinkTests : IDisposable
         Assert.DoesNotContain(_api.Logs.Entries, entry => entry.Contains(Key, StringComparison.Ordinal));
     }
 
+    [Fact]
+    public async Task AnNxmLinkAsTheWebsiteHandsItOverIsAHandoff()
+    {
+        _api.Serve(RecordedNexusApi.Premium, "file");
+
+        RecognizedLink? link = await Source.RecognizeAsync(new Uri(RecordedNexusApi.RecordedText(RecordedNexusApi.Free, "nxm-link.txt")), Cancellation);
+
+        Assert.NotNull(link);
+        Assert.Equal(Smapi, link.File);
+        Assert.True(link.IsHandoff);
+    }
+
     [Theory]
     [InlineData("SMAPI: 4.5.2?.zip", "SMAPI_ 4.5.2_.zip")]
     [InlineData("SMAPI/4.5.2.zip. ", "SMAPI_4.5.2.zip")]

@@ -1,0 +1,81 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/v1/games.json",
+    "query": ""
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8",
+      "x-rl-hourly-limit": "2000",
+      "x-rl-hourly-remaining": "1947",
+      "x-rl-hourly-reset": "2026-10-30 19:00:00 +0000",
+      "x-rl-daily-limit": "20000",
+      "x-rl-daily-remaining": "19501",
+      "x-rl-daily-reset": "2026-10-31 00:00:00 +0000"
+    },
+    "body": [
+      {
+        "id": 100,
+        "name": "Morrowind",
+        "forum_url": "https://forums.nexusmods.com/games/8-morrowind/",
+        "nexusmods_url": "https://www.nexusmods.com/morrowind",
+        "genre": "RPG",
+        "file_count": 71549,
+        "downloads": 142076566,
+        "domain_name": "morrowind",
+        "approved_date": 1,
+        "file_views": 130413740,
+        "authors": 4632,
+        "file_endorsements": 2316489,
+        "mods": 16493
+      },
+      {
+        "id": 101,
+        "name": "Oblivion",
+        "forum_url": "https://forums.nexusmods.com/games/10-oblivion/",
+        "nexusmods_url": "https://www.nexusmods.com/oblivion",
+        "genre": "RPG",
+        "file_count": 76839,
+        "downloads": 342390895,
+        "domain_name": "oblivion",
+        "approved_date": 1,
+        "file_views": 925598975,
+        "authors": 12227,
+        "file_endorsements": 6026064,
+        "mods": 33629
+      },
+      {
+        "id": 102,
+        "name": "Shadowrun Returns",
+        "forum_url": "https://forums.nexusmods.com/",
+        "nexusmods_url": "https://www.nexusmods.com/shadowrunreturns",
+        "genre": "RPG",
+        "file_count": 312,
+        "downloads": 215260,
+        "domain_name": "shadowrunreturns",
+        "approved_date": 1,
+        "file_views": 1644433,
+        "authors": 99,
+        "file_endorsements": 12423,
+        "mods": 118
+      },
+      {
+        "id": 1303,
+        "name": "Stardew Valley",
+        "forum_url": "https://forums.nexusmods.com/games/19-stardew-valley/",
+        "nexusmods_url": "https://www.nexusmods.com/stardewvalley",
+        "genre": "Simulation",
+        "file_count": 186189,
+        "downloads": 857957906,
+        "domain_name": "stardewvalley",
+        "approved_date": 1457432329,
+        "file_views": 276413110,
+        "authors": 13448,
+        "file_endorsements": 16216439,
+        "mods": 35060
+      }
+    ]
+  }
+}

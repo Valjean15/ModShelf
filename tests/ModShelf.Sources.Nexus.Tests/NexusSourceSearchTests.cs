@@ -13,8 +13,8 @@ using WireMock.ResponseBuilders;
 namespace ModShelf.Sources.Nexus.Tests;
 
 /// <summary>
-/// Searching a game's mods through the v2 GraphQL API. The answers here are written by hand from the shape other
-/// mod managers use; the recording run replaces them with real ones.
+/// Searching a game's mods through the v2 GraphQL API: seven searches recorded from Nexus Mods, each answered only when
+/// the source asks what was recorded, and answers written by hand for what the recordings don't show.
 /// </summary>
 public sealed class NexusSourceSearchTests : IDisposable
 {
@@ -38,6 +38,68 @@ public sealed class NexusSourceSearchTests : IDisposable
     {
         _services.Dispose();
         _api.Dispose();
+    }
+
+    [Theory]
+    [InlineData("search-words", "SMAPI", SearchSort.Relevance, 0, null, false, SearchDirection.Descending, 33, "2367", "SMAPI Templates")]
+    [InlineData("search-downloads", "SMAPI", SearchSort.Downloads, 0, null, false, SearchDirection.Descending, 33, "2400", "SMAPI - Stardew Modding API")]
+    [InlineData("search-endorsed-page-2", null, SearchSort.Endorsements, 5, null, false, SearchDirection.Descending, 33710, "4", "CJB Cheats Menu")]
+    [InlineData("search-author-updated", null, SearchSort.Updated, 0, "Pathoschild", false, SearchDirection.Descending, 42, "53956", "The Neighborly Collection - Tractor Garage")]
+    [InlineData("search-newest-with-adult", null, SearchSort.Newest, 0, null, true, SearchDirection.Descending, 35063, "54840", "SoulCovenant")]
+    [InlineData("search-oldest-first", null, SearchSort.Newest, 0, null, false, SearchDirection.Ascending, 33710, "3", "Rise and Shine - Configurable wake-up time")]
+    public async Task SearchesAsNexusModsAnsweredThem(
+        string recording,
+        string? text,
+        SearchSort sort,
+        int offset,
+        string? author,
+        bool includeAdultContent,
+        SearchDirection direction,
+        int total,
+        string firstId,
+        string firstName)
+    {
+        _api.Serve(RecordedNexusApi.Premium, recording);
+
+        SearchPage page = await Source.SearchAsync(
+            StardewValley, new SearchQuery(text, sort, offset, count: 5, author, includeAdultContent, direction), Cancellation);
+
+        // Answered only when asked for what was recorded; and nothing more was asked.
+        JsonNode recorded = RecordedNexusApi.Recording(RecordedNexusApi.Premium, recording)["request"]!["body"]!["variables"]!;
+        Assert.True(JsonNode.DeepEquals(recorded, SentBody()["variables"]), SentBody()["variables"]!.ToJsonString());
+        Assert.Equal((total, offset), (page.TotalCount, page.Offset));
+        Assert.Equal(5, page.Mods.Count);
+        Assert.Equal((firstId, firstName), (page.Mods[0].Mod.Id, page.Mods[0].Name));
+        Assert.All(page.Mods, mod => Assert.Same(StardewValley, mod.Mod.Game));
+    }
+
+    [Fact]
+    public async Task ASearchNexusModsFindsNothingForHasNoMods()
+    {
+        _api.Serve(RecordedNexusApi.Premium, "search-no-results");
+
+        SearchPage page = await Source.SearchAsync(StardewValley, new SearchQuery("zqxj no such mod zqxj", count: 5), Cancellation);
+
+        Assert.Equal((0, false), (page.TotalCount, page.HasMore));
+        Assert.Empty(page.Mods);
+    }
+
+    [Fact]
+    public async Task ARecordedModReadsInFull()
+    {
+        _api.Serve(RecordedNexusApi.Premium, "search-words");
+
+        ModInfo templates = (await Source.SearchAsync(StardewValley, new SearchQuery("SMAPI", count: 5), Cancellation)).Mods[0];
+
+        Assert.Equal(
+            ("A collection of SMAPI Templates for Visual Studio", "Platonymous", "1.4.3"),
+            (templates.Summary, templates.Author, templates.Version));
+        Assert.Equal(new Uri("https://www.nexusmods.com/stardewvalley/mods/2367"), templates.PageUrl);
+        Assert.Equal(new Uri("https://staticdelivery.nexusmods.com/mods/1303/images/2367/2367-1528675903-1038100234.jpeg"), templates.PictureUrl);
+        Assert.Equal(new DateTimeOffset(2020, 3, 2, 15, 12, 3, TimeSpan.Zero), templates.UpdatedAt);
+        Assert.Equal((1613L, 71L), (templates.Downloads!.Value, templates.Endorsements!.Value));
+        Assert.True(templates.IsAvailable);
+        Assert.False(templates.HasAdultContent);
     }
 
     [Fact]

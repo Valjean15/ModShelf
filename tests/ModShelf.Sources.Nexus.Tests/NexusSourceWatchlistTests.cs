@@ -106,6 +106,69 @@ public sealed class NexusSourceWatchlistTests : IDisposable
     }
 
     [Fact]
+    public async Task TracksAModAsNexusModsAnswered()
+    {
+        _api.Serve(RecordedNexusApi.Premium, "track");
+
+        await Source.WatchAsync(Smapi, Cancellation);
+
+        Assert.Equal("POST", Assert.Single(_api.Requests).RequestMessage!.Method);
+    }
+
+    [Fact]
+    public async Task TrackingAModAgainIsAnsweredAsTheFirstTime()
+    {
+        // Nexus Mods answers 201 again, as for a mod not tracked yet.
+        _api.Serve(RecordedNexusApi.Premium, "track-tracked");
+
+        await Source.WatchAsync(Smapi, Cancellation);
+
+        Assert.Single(_api.Requests);
+    }
+
+    [Fact]
+    public async Task UntracksAModAsNexusModsAnswered()
+    {
+        _api.Serve(RecordedNexusApi.Premium, "untrack");
+
+        await Source.UnwatchAsync(Smapi, Cancellation);
+
+        Assert.Equal("DELETE", Assert.Single(_api.Requests).RequestMessage!.Method);
+    }
+
+    [Fact]
+    public async Task UntrackingAModNotTrackedIsAnsweredNotFoundButIsntAnError()
+    {
+        _api.Serve(RecordedNexusApi.Premium, "untrack-not-tracked");
+        _api.Serve(RecordedNexusApi.Premium, "tracked-mods");
+
+        await Source.UnwatchAsync(Smapi, Cancellation);
+
+        Assert.Equal(["DELETE", "GET"], _api.Requests.Select(request => request.RequestMessage!.Method));
+    }
+
+    [Fact]
+    public async Task TrackingAModNexusModsDoesntHaveSaysSo()
+    {
+        _api.Serve(RecordedNexusApi.Premium, "track-unknown-mod");
+        _api.Serve(RecordedNexusApi.Premium, "tracked-mods");
+
+        HttpRequestException refused = await Assert.ThrowsAsync<HttpRequestException>(
+            () => Source.WatchAsync(new ModRef(Smapi.Game, "999999999"), Cancellation));
+
+        Assert.Equal(HttpStatusCode.NotFound, refused.StatusCode);
+        Assert.Contains("Mod: 999999999 not found", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ListsAModTrackedAsNexusModsListedIt()
+    {
+        _api.Serve(RecordedNexusApi.Premium, "tracked-mods-with-mod");
+
+        Assert.Equal([Smapi], await Source.GetWatchedAsync(Cancellation));
+    }
+
+    [Fact]
     public async Task TracksAModItsGameNamedInAnyCase()
     {
         _api.AnswerPost(TrackedPath, Says(HttpStatusCode.Created, "Tracking"));

@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/v1/games/stardewvalley/mods/2400/files/160380/download_link.json",
+    "query": "key=not-a-real-nxm-key&expires=1793560033"
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8",
+      "x-rl-hourly-limit": "2000",
+      "x-rl-hourly-remaining": "1997",
+      "x-rl-hourly-reset": "2026-10-30 20:00:00 +0000",
+      "x-rl-daily-limit": "20000",
+      "x-rl-daily-remaining": "19949",
+      "x-rl-daily-reset": "2026-10-31 00:00:00 +0000"
+    },
+    "body": {
+      "code": 400,
+      "message": "Provided key and expire time isn't correct for this user/file."
+    }
+  }
+}

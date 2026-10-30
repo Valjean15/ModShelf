@@ -1,0 +1,136 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/v2/graphql",
+    "query": "",
+    "body": {
+      "operationName": "SearchMods",
+      "variables": {
+        "filter": {
+          "gameDomainName": [
+            {
+              "value": "stardewvalley",
+              "op": "EQUALS"
+            }
+          ],
+          "nameStemmed": [
+            {
+              "value": "SMAPI",
+              "op": "MATCHES"
+            }
+          ],
+          "adultContent": [
+            {
+              "value": false,
+              "op": "EQUALS"
+            }
+          ]
+        },
+        "sort": [
+          {
+            "downloads": {
+              "direction": "DESC"
+            }
+          }
+        ],
+        "offset": 0,
+        "count": 5
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": {
+        "mods": {
+          "totalCount": 33,
+          "nodes": [
+            {
+              "modId": 2400,
+              "name": "SMAPI - Stardew Modding API",
+              "summary": "The mod loader for Stardew Valley.",
+              "author": "Pathoschild",
+              "version": "4.5.2",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/2400/2400-1739896414-1995424095.png",
+              "updatedAt": "2026-03-14T19:07:23Z",
+              "endorsements": 388115,
+              "downloads": 30370787,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 193,
+              "name": "Enemy Health Bars (SMAPI)",
+              "summary": "This is a health bars mod for SMAPI",
+              "author": "Speeder",
+              "version": "1.9",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/193-0-1459001614.png",
+              "updatedAt": "2019-12-03T16:57:24Z",
+              "endorsements": 13887,
+              "downloads": 439562,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 44436,
+              "name": "SMAPI for Android",
+              "summary": "The mod loader for Stardew Valley Android.",
+              "author": "NRTnarathip",
+              "version": "4.3.2",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/44436/44436-1775030064-250199707.jpg",
+              "updatedAt": "2026-04-03T14:37:41Z",
+              "endorsements": 2083,
+              "downloads": 213742,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 7365,
+              "name": "Stardew Valley SMAPI Mod Manager",
+              "summary": "A simple SMAPI mod manager for Stardew Valley written now in Python (was C#)",
+              "author": "Akago",
+              "version": "1.4",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/7365/7365-1609010848-945684779.png",
+              "updatedAt": "2021-01-12T05:24:04Z",
+              "endorsements": 2604,
+              "downloads": 52480,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 485,
+              "name": "Extended Fridge SMAPI",
+              "summary": "Extended fridge with 144 slots for SMAPI 0.39.x and 0.40.x",
+              "author": "Crystalmir",
+              "version": "0.94",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/485-0-1468040927.jpg",
+              "updatedAt": "2016-10-05T22:40:49Z",
+              "endorsements": 1941,
+              "downloads": 49339,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

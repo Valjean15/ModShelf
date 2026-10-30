@@ -1,0 +1,124 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/v2/graphql",
+    "query": "",
+    "body": {
+      "operationName": "SearchMods",
+      "variables": {
+        "filter": {
+          "gameDomainName": [
+            {
+              "value": "stardewvalley",
+              "op": "EQUALS"
+            }
+          ]
+        },
+        "sort": [
+          {
+            "createdAt": {
+              "direction": "DESC"
+            }
+          }
+        ],
+        "offset": 0,
+        "count": 5
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": {
+        "mods": {
+          "totalCount": 35063,
+          "nodes": [
+            {
+              "modId": 54840,
+              "name": "SoulCovenant",
+              "summary": "致敬七咒之戒",
+              "author": "936261827",
+              "version": "1",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/54840/54840-1793386292-1747103201.jpg",
+              "updatedAt": "2026-10-30T18:54:49Z",
+              "endorsements": 0,
+              "downloads": 0,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 54839,
+              "name": "Launchable Items",
+              "summary": "Throw bombs, daggers, torches, seeds, and gifts! Add new ways to fish, interact with villagers, use machines, and more.",
+              "author": "AqueleCass",
+              "version": "1",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/54839/54839-1793384556-512577801.png",
+              "updatedAt": "2026-10-30T18:43:02Z",
+              "endorsements": 0,
+              "downloads": 0,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 54838,
+              "name": "AccessorySlots",
+              "summary": "添加了一套可扩展饰品槽系统，内含多个部位的插槽，可在通用配置菜单中进行增减通用饰品槽位，需要 SMAPI。 AI 声明：本模组由人主导设计。AI 仅用于辅助编码、排错和文本润色；所有核心设计、架构与逻辑均由本人实现并审核。",
+              "author": "936261827",
+              "version": "1",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/54838/54838-1793385005-2104432616.jpg",
+              "updatedAt": "2026-10-30T18:40:28Z",
+              "endorsements": 0,
+              "downloads": 0,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 54837,
+              "name": "JerryBB's Pelican Morning Walk",
+              "summary": "Join Pelican Town's villagers for a cozy morning walk on the days you choose, chat along the way, and share a drink at the finish.",
+              "author": "JerryBB",
+              "version": "1.0.0",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/54837/54837-1793382283-2003447301.png",
+              "updatedAt": "2026-10-30T18:08:58Z",
+              "endorsements": 0,
+              "downloads": 2,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 54836,
+              "name": "Mouse Move Mode (Chinese translation)",
+              "summary": "- Moving by mouse via clicking or holding - Enhance mouse function to let playerCtrl + wheel to zoom - Alt + Enter to Fullscreen - Chinese translation version",
+              "author": "ZengGod",
+              "version": "1.4.4",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/54836/54836-1793383111-2144952974.jpg",
+              "updatedAt": "2026-10-30T18:03:23Z",
+              "endorsements": 0,
+              "downloads": 3,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -60,13 +60,9 @@ public sealed class NexusSourceTests : SourceContractTests<NexusSource>, IDispos
     protected override NexusSource CreateSource() => _services.GetServices<IModSource>().OfType<NexusSource>().Single();
 
     /// <summary>
-    /// The list of games, as the recorded game in a list, until the list itself is recorded.
+    /// The recorded list of games, four of them, Stardew Valley among them.
     /// </summary>
-    private void ServeGames()
-    {
-        JsonNode game = RecordedNexusApi.Recording(RecordedNexusApi.Premium, "game")["response"]!["body"]!;
-        _api.Answer("/v1/games.json", response => response.WithStatusCode(HttpStatusCode.OK).WithBody(new JsonArray(game.DeepClone()).ToJsonString()));
-    }
+    private void ServeGames() => _api.Serve(RecordedNexusApi.Premium, "games");
 
     /// <summary>
     /// Tracked mods as the site keeps them: SMAPI, once tracked, until untracked. Tracking it again, or untracking it

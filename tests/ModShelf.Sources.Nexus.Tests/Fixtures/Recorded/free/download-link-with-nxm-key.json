@@ -1,0 +1,26 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/v1/games/stardewvalley/mods/2400/files/160380/download_link.json",
+    "query": "key=REDACTED-NXM-KEY&expires=1793560033"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8",
+      "x-rl-hourly-limit": "2000",
+      "x-rl-hourly-remaining": "1998",
+      "x-rl-hourly-reset": "2026-10-30 20:00:00 +0000",
+      "x-rl-daily-limit": "20000",
+      "x-rl-daily-remaining": "19950",
+      "x-rl-daily-reset": "2026-10-31 00:00:00 +0000"
+    },
+    "body": [
+      {
+        "name": "Nexus Global Content Delivery Network",
+        "short_name": "Nexus CDN",
+        "URI": "https://files.nexus-cdn.com/1303/2400/SMAPI%204.5.2-2400-4-5-2-1773515243.zip?expires=1793401693&md5=REDACTED&user_id=1000002"
+      }
+    ]
+  }
+}

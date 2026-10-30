@@ -1,0 +1,25 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/v1/user/tracked_mods.json",
+    "query": ""
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8",
+      "x-rl-hourly-limit": "2000",
+      "x-rl-hourly-remaining": "1934",
+      "x-rl-hourly-reset": "2026-10-30 19:00:00 +0000",
+      "x-rl-daily-limit": "20000",
+      "x-rl-daily-remaining": "19488",
+      "x-rl-daily-reset": "2026-10-31 00:00:00 +0000"
+    },
+    "body": [
+      {
+        "mod_id": 2400,
+        "domain_name": "stardewvalley"
+      }
+    ]
+  }
+}
