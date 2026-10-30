@@ -177,43 +177,33 @@ public sealed partial class AccountViewModel : ObservableObject
     private async Task CheckAsync(CancellationToken cancellationToken)
     {
         Begin();
-        try
-        {
-            LinkedAccount account = await _services.Accounts.CheckAsync(Source, cancellationToken);
-            await ShowLatestAsync(account);
-            Say(Text.Format(Strings.AccountChecked, Dates.Time(_services.TimeProvider.GetUtcNow(), _services.TimeProvider)), false);
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            // The app is closing.
-        }
-        catch (KeyNotFoundException)
-        {
-            // Unlinked elsewhere, such as from the command line.
-            await ShowLatestAsync(null);
-            Say(Text.Format(Strings.AccountNoLongerLinked, SiteName), true);
-        }
-        catch (AuthenticationFailedException)
-        {
-            Say(Text.Format(Strings.AccountCheckRefused, SiteName), true);
-        }
-        catch (Exception exception) when (DescribeSiteProblem(exception) is { } problem)
-        {
-            Say(problem, true);
-        }
-        catch (Exception exception) when (IsFailureWithReason(exception))
-        {
-            Say(exception.Message, true);
-        }
-        catch (Exception exception)
-        {
-            LogCheckFailed(_services.Logger, Source, exception);
-            Say(Strings.SomethingWentWrong, true);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+        await UserCommands.RunInPlaceAsync(
+            async () =>
+            {
+                try
+                {
+                    LinkedAccount account = await _services.Accounts.CheckAsync(Source, cancellationToken);
+                    await ShowLatestAsync(account);
+                    Say(Text.Format(Strings.AccountChecked, Dates.Time(_services.TimeProvider.GetUtcNow(), _services.TimeProvider)), false);
+                }
+                catch (KeyNotFoundException)
+                {
+                    // Unlinked elsewhere, such as from the command line.
+                    await ShowLatestAsync(null);
+                    Say(Text.Format(Strings.AccountNoLongerLinked, SiteName), true);
+                }
+            },
+            exception => exception switch
+            {
+                AuthenticationFailedException => Text.Format(Strings.AccountCheckRefused, SiteName),
+                _ when DescribeSiteProblem(exception) is { } problem => problem,
+                _ when IsFailureWithReason(exception) => exception.Message,
+                _ => null,
+            },
+            problem => Say(problem, true),
+            exception => LogCheckFailed(_services.Logger, Source, exception),
+            cancellationToken);
+        IsBusy = false;
     }
 
     /// <summary>
@@ -333,29 +323,18 @@ public sealed partial class AccountViewModel : ObservableObject
         }
 
         Begin();
-        try
-        {
-            await _services.Accounts.UnlinkAsync(Source, cancellationToken);
-            await ShowLatestAsync(null);
-            Say(Strings.AccountUnlinked, false);
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            // The app is closing.
-        }
-        catch (Exception exception) when (IsFailureWithReason(exception))
-        {
-            Say(Text.Format(Strings.AccountUnlinkProblem, exception.Message), true);
-        }
-        catch (Exception exception)
-        {
-            LogUnlinkFailed(_services.Logger, Source, exception);
-            Say(Strings.SomethingWentWrong, true);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+        await UserCommands.RunInPlaceAsync(
+            async () =>
+            {
+                await _services.Accounts.UnlinkAsync(Source, cancellationToken);
+                await ShowLatestAsync(null);
+                Say(Strings.AccountUnlinked, false);
+            },
+            exception => IsFailureWithReason(exception) ? Text.Format(Strings.AccountUnlinkProblem, exception.Message) : null,
+            problem => Say(problem, true),
+            exception => LogUnlinkFailed(_services.Logger, Source, exception),
+            cancellationToken);
+        IsBusy = false;
     }
 
     private void Begin()

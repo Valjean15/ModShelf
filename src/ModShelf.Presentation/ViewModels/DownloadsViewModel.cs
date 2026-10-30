@@ -206,35 +206,29 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
     /// Removes the finished and cancelled downloads from the queue and the list. Their files stay.
     /// </summary>
     [RelayCommand(CanExecute = nameof(HasFinished))]
-    private async Task ClearFinishedAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            await _downloads.ClearFinishedAsync(cancellationToken);
-            HashSet<DownloadJobId> left = [.. (await _downloads.ListAsync(cancellationToken)).Select(job => job.Id)];
-
-            // Only finished ones, so a download added meanwhile, and not listed yet, stays.
-            _uiThread.Post(() =>
+    private Task ClearFinishedAsync(CancellationToken cancellationToken)
+        => UserCommands.RunInPlaceAsync(
+            async () =>
             {
-                foreach (DownloadJobViewModel job in Jobs.Where(job => job.IsFinished && !left.Contains(job.Id)).ToList())
-                {
-                    Jobs.Remove(job);
-                    _shown.Remove(job.Id);
-                }
+                await _downloads.ClearFinishedAsync(cancellationToken);
+                HashSet<DownloadJobId> left = [.. (await _downloads.ListAsync(cancellationToken)).Select(job => job.Id)];
 
-                Count();
-            });
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            // The app is closing.
-        }
-        catch (Exception exception)
-        {
-            LogClearFailed(_logger, exception);
-            SayProblem(Strings.SomethingWentWrong);
-        }
-    }
+                // Only finished ones, so a download added meanwhile, and not listed yet, stays.
+                _uiThread.Post(() =>
+                {
+                    foreach (DownloadJobViewModel job in Jobs.Where(job => job.IsFinished && !left.Contains(job.Id)).ToList())
+                    {
+                        Jobs.Remove(job);
+                        _shown.Remove(job.Id);
+                    }
+
+                    Count();
+                });
+            },
+            _ => null,
+            SayProblem,
+            exception => LogClearFailed(_logger, exception),
+            cancellationToken);
 
     /// <summary>
     /// Adds the link in the box, and says what became of it.
@@ -251,35 +245,24 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         }
 
         IsAdding = true;
-        try
-        {
-            if (await add(link) is { } added)
+        await UserCommands.RunInPlaceAsync(
+            async () =>
             {
-                Follow(added);
-            }
-            else if (Message is not null)
-            {
-                // In the library already, so the link is done with. Without a folder or a name picked, it stays for another go.
-                Link = string.Empty;
-            }
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            // The app is closing.
-        }
-        catch (Exception exception) when (LinkProblems.Describe(exception, library) is { } problem)
-        {
-            SayProblem(problem);
-        }
-        catch (Exception exception)
-        {
-            LogAddFailed(_logger, exception);
-            SayProblem(Strings.SomethingWentWrong);
-        }
-        finally
-        {
-            IsAdding = false;
-        }
+                if (await add(link) is { } added)
+                {
+                    Follow(added);
+                }
+                else if (Message is not null)
+                {
+                    // In the library already, so the link is done with. Without a folder or a name picked, it stays for another go.
+                    Link = string.Empty;
+                }
+            },
+            exception => LinkProblems.Describe(exception, library),
+            SayProblem,
+            exception => LogAddFailed(_logger, exception),
+            cancellationToken);
+        IsAdding = false;
     }
 
     /// <summary>

@@ -148,35 +148,26 @@ public sealed partial class UpdatesViewModel : ScreenViewModel
         CheckResult = Strings.UpdatesChecking;
         IsCheckResultAProblem = false;
         CheckFailures.Clear();
-        try
-        {
-            UpdateCheck check = await _checker.CheckAsync(cancellationToken);
-            string found = Counts.Of(check.Found.Count, Strings.CheckNoNewUpdates, Strings.CheckOneNewUpdate, Strings.CheckNewUpdates);
-            CheckResult = $"{Text.Format(Strings.CheckSummary, Counts.Of(check.Checked, Strings.CheckOneMod, Strings.CheckMods), Counts.Of(check.Requests, Strings.CheckOneRequest, Strings.CheckRequests))} {found}";
-            foreach (UpdateCheckFailure failure in check.Failures)
+        await UserCommands.RunInPlaceAsync(
+            async () =>
             {
-                CheckFailures.Add(Describe(failure));
-            }
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            // The app is closing.
-        }
-        catch (InvalidDataException exception)
-        {
-            CheckResult = exception.Message;
-            IsCheckResultAProblem = true;
-        }
-        catch (Exception exception)
-        {
-            LogCheckFailed(_logger, exception);
-            CheckResult = Strings.SomethingWentWrong;
-            IsCheckResultAProblem = true;
-        }
-        finally
-        {
-            IsChecking = false;
-        }
+                UpdateCheck check = await _checker.CheckAsync(cancellationToken);
+                string found = Counts.Of(check.Found.Count, Strings.CheckNoNewUpdates, Strings.CheckOneNewUpdate, Strings.CheckNewUpdates);
+                CheckResult = $"{Text.Format(Strings.CheckSummary, Counts.Of(check.Checked, Strings.CheckOneMod, Strings.CheckMods), Counts.Of(check.Requests, Strings.CheckOneRequest, Strings.CheckRequests))} {found}";
+                foreach (UpdateCheckFailure failure in check.Failures)
+                {
+                    CheckFailures.Add(Describe(failure));
+                }
+            },
+            exception => exception is InvalidDataException ? exception.Message : null,
+            problem =>
+            {
+                CheckResult = problem;
+                IsCheckResultAProblem = true;
+            },
+            exception => LogCheckFailed(_logger, exception),
+            cancellationToken);
+        IsChecking = false;
     }
 
     /// <summary>

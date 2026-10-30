@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Accounts;
 using ModShelf.Application.Accounts.Ports;
+using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
 
@@ -77,35 +78,29 @@ public sealed partial class AccountsViewModel : ScreenViewModel
     /// <summary>
     /// Lists the sites that can link an account, with the account linked on each. The sites aren't asked anything.
     /// </summary>
-    public override async Task StartAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            IReadOnlyList<SourceAccountStatus> statuses = await _accounts.ListAsync(cancellationToken);
-            _uiThread.Post(() =>
+    public override Task StartAsync(CancellationToken cancellationToken)
+        => UserCommands.RunInPlaceAsync(
+            async () =>
             {
-                foreach (SourceAccountStatus status in statuses)
+                IReadOnlyList<SourceAccountStatus> statuses = await _accounts.ListAsync(cancellationToken);
+                _uiThread.Post(() =>
                 {
-                    Sources.Add(new AccountViewModel(status, _services));
-                }
+                    foreach (SourceAccountStatus status in statuses)
+                    {
+                        Sources.Add(new AccountViewModel(status, _services));
+                    }
 
-                EmptyText = statuses.Count == 0 ? Strings.AccountsNone : null;
-                IsLoading = false;
-            });
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            // The app is closing.
-        }
-        catch (Exception exception)
-        {
-            LogListFailed(_logger, exception);
-            _uiThread.Post(() =>
+                    EmptyText = statuses.Count == 0 ? Strings.AccountsNone : null;
+                    IsLoading = false;
+                });
+            },
+            _ => null,
+            problem => _uiThread.Post(() =>
             {
-                EmptyText = Strings.SomethingWentWrong;
+                EmptyText = problem;
                 IsEmptyTextAProblem = true;
                 IsLoading = false;
-            });
-        }
-    }
+            }),
+            exception => LogListFailed(_logger, exception),
+            cancellationToken);
 }
