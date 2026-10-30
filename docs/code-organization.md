@@ -61,6 +61,7 @@ Other projects see a project only through what it makes public, so keep that to 
 - A helper only one class needs stays a **private method** of that class.
 - Shared by several classes in one feature, or naming a concept of the feature (such as the `.part` file of a download): an **internal class in that feature's folder** (`SecretNames`, `PartialFiles`).
 - Shared by several features of a project: that project's **`Common/`** folder (`FileNames`, `WebUrls`).
+- Shared by the two hosts, the CLI and the desktop app, which reference the same libraries: **`src/Shared/Hosting`**, in the namespace `ModShelf.Hosting`, linked into both (`HostServices`, the services and configuration keys they have alike). Only composition goes there; everything else belongs to a library.
 - No `Helpers/`, `Utils/` or `Extensions/` folders.
 - Extension methods follow the same rule, in a class named `<ExtendedType>Extensions`. DI registration is the exception: it sits at the project root (section 2).
 

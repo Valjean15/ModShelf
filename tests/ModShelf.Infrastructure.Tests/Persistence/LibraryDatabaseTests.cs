@@ -284,10 +284,26 @@ public sealed class LibraryDatabaseTests
     {
         ServiceCollection services = new();
 
-        services.AddLibraryDatabase();
+        string folder = services.AddLibraryFiles(null, "app");
 
         ServiceDescriptor options = Assert.Single(services, descriptor => descriptor.ServiceType == typeof(LibraryDatabaseOptions));
         Assert.Equal(LibraryDatabaseLocation.GetDefaultPath(), Assert.IsType<LibraryDatabaseOptions>(options.ImplementationInstance).DatabasePath);
+        Assert.Equal(Path.GetDirectoryName(LibraryDatabaseLocation.GetDefaultPath()), folder);
+    }
+
+    [Fact]
+    public void TheSettingsAndTheLogsGoBesideTheDatabase()
+    {
+        ServiceCollection services = new();
+        string database = Path.Combine(Path.GetTempPath(), "ModShelf.Tests", "Moved", "test.db");
+
+        string folder = services.AddLibraryFiles(database, "app");
+
+        ServiceDescriptor options = Assert.Single(services, descriptor => descriptor.ServiceType == typeof(LibraryDatabaseOptions));
+        Assert.Equal(database, Assert.IsType<LibraryDatabaseOptions>(options.ImplementationInstance).DatabasePath);
+        Assert.Equal(Path.GetDirectoryName(database), folder);
+        using ServiceProvider provider = services.BuildServiceProvider();
+        Assert.Equal(Path.Combine(folder, "logs"), provider.GetRequiredService<ModShelf.Infrastructure.Logging.LogFolder>().Path);
     }
 
     [Fact]

@@ -46,18 +46,17 @@ public static class PlatformServiceCollectionExtensions
 
     /// <summary>
     /// Registers the desktop app's <see cref="ISingleInstance"/>: one app at a time for the library in
-    /// <paramref name="folder"/>, which defaults to ModShelf's folder in the user's local application data, where the
-    /// library database is unless it's moved. A second launch waits up to 5 seconds for the running app to answer.
+    /// <paramref name="folder"/>, the library database's. A second launch waits up to 5 seconds for the running app to
+    /// answer.
     /// </summary>
     /// <param name="folder">The folder of the library database, an absolute path.</param>
-    /// <exception cref="InvalidOperationException">No folder is given, and the system has none for this user's local application data.</exception>
-    public static IServiceCollection AddSingleInstance(this IServiceCollection services, string? folder = null)
+    public static IServiceCollection AddSingleInstance(this IServiceCollection services, string folder)
     {
         ArgumentNullException.ThrowIfNull(services);
+        ArgumentException.ThrowIfNullOrWhiteSpace(folder);
 
-        string libraryFolder = folder ?? DefaultFolder();
         services.AddSingleton<ISingleInstance>(provider => new PipeSingleInstance(
-            libraryFolder,
+            folder,
             TimeSpan.FromSeconds(5),
             provider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(PipeSingleInstance).FullName!)));
 
@@ -75,13 +74,5 @@ public static class PlatformServiceCollectionExtensions
             provider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(SystemTrayHost).FullName!)));
 
         return services;
-    }
-
-    private static string DefaultFolder()
-    {
-        string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        return string.IsNullOrEmpty(appData)
-            ? throw new InvalidOperationException("This user has no local application data folder for ModShelf.")
-            : Path.Combine(appData, "ModShelf");
     }
 }

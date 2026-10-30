@@ -87,15 +87,26 @@ public static class InfrastructureServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Keeps the settings in <c>settings.json</c> next to the library database's default location, such as
-    /// <c>%LOCALAPPDATA%\ModShelf\settings.json</c> on Windows.
+    /// Registers ModShelf's files: the library database at <paramref name="databasePath"/>, or by default
+    /// <c>library.db</c> in a ModShelf folder under the user's local application data (<c>%LOCALAPPDATA%\ModShelf</c>
+    /// on Windows, <c>~/Library/Application Support/ModShelf</c> on macOS, <c>~/.local/share/ModShelf</c> on Linux);
+    /// and beside it the settings, <c>settings.json</c>, and the log files, in a <c>logs</c> folder. A database moved
+    /// elsewhere, such as for tests, takes them along.
     /// </summary>
-    /// <exception cref="InvalidOperationException">The system has no local application data folder for this user.</exception>
-    public static IServiceCollection AddSettingsFile(this IServiceCollection services)
+    /// <param name="databasePath">The database's absolute path, or null for its default one.</param>
+    /// <param name="app">What the host's log files' names start with, such as <c>desktop</c>.</param>
+    /// <returns>The folder they're all in.</returns>
+    /// <exception cref="InvalidOperationException">No path is given, and the system has no local application data folder for this user.</exception>
+    public static string AddLibraryFiles(this IServiceCollection services, string? databasePath, string app)
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        return services.AddSettingsFile(Path.Combine(Path.GetDirectoryName(LibraryDatabaseLocation.GetDefaultPath())!, "settings.json"));
+        string database = databasePath ?? LibraryDatabaseLocation.GetDefaultPath();
+        string folder = Path.GetDirectoryName(Path.GetFullPath(database))!;
+        services.AddLibraryDatabase(database);
+        services.AddSettingsFile(Path.Combine(folder, "settings.json"));
+        services.AddLogFiles(Path.Combine(folder, "logs"), app);
+        return folder;
     }
 
     /// <summary>
@@ -130,19 +141,6 @@ public static class InfrastructureServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers the library database at its default location: <c>library.db</c> in a ModShelf folder under the
-    /// user's local application data (<c>%LOCALAPPDATA%\ModShelf</c> on Windows,
-    /// <c>~/Library/Application Support/ModShelf</c> on macOS, <c>~/.local/share/ModShelf</c> on Linux).
-    /// </summary>
-    /// <exception cref="InvalidOperationException">The system has no local application data folder for this user.</exception>
-    public static IServiceCollection AddLibraryDatabase(this IServiceCollection services)
-    {
-        ArgumentNullException.ThrowIfNull(services);
-
-        return services.AddLibraryDatabase(LibraryDatabaseLocation.GetDefaultPath());
-    }
-
-    /// <summary>
     /// Registers the library database at <paramref name="databasePath"/>: the <see cref="ModShelfDbContext"/>
     /// factory, the repositories (<see cref="IDownloadJobRepository"/>, <see cref="ILinkedAccountRepository"/>,
     /// <see cref="ILibraryRepository"/>), the <see cref="IDownloadQueueLock"/> beside the database, and
@@ -174,18 +172,6 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddHostedService<LibraryDatabaseMigrator>();
 
         return services;
-    }
-
-    /// <summary>
-    /// Writes the logs to files in a <c>logs</c> folder beside the library database at its default location, as
-    /// <see cref="AddLogFiles(IServiceCollection, string, string)"/> says.
-    /// </summary>
-    /// <param name="app">What the files' names start with, such as <c>desktop</c>.</param>
-    public static IServiceCollection AddLogFiles(this IServiceCollection services, string app)
-    {
-        ArgumentNullException.ThrowIfNull(services);
-
-        return services.AddLogFiles(Path.Combine(Path.GetDirectoryName(LibraryDatabaseLocation.GetDefaultPath())!, "logs"), app);
     }
 
     /// <summary>

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 
 using ModShelf.Cli.Hosting;
 using ModShelf.Testing;
+using ModShelf.Hosting;
 
 namespace ModShelf.Cli.Tests.Hosting;
 
@@ -48,7 +49,7 @@ public sealed class CliConsoleFormatterTests
         using TempFolder folder = new();
         using IHost host = CliHost.Build(
             runDownloads: false,
-            new Dictionary<string, string?> { [CliHost.DatabasePathKey] = Path.Combine(folder.Path, "library.db") });
+            new Dictionary<string, string?> { [HostServices.DatabasePathKey] = Path.Combine(folder.Path, "library.db") });
 
         Assert.Equal(
             CliConsoleFormatter.FormatterName,

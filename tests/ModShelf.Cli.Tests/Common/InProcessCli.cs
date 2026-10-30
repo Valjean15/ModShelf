@@ -14,6 +14,7 @@ using ModShelf.Cli.Tests.Fakes;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Testing;
+using ModShelf.Hosting;
 
 namespace ModShelf.Cli.Tests.Common;
 
@@ -48,9 +49,9 @@ internal sealed class InProcessCli : IAsyncDisposable
         _configureServices = configureServices;
         _settings = new Dictionary<string, string?>
         {
-            [CliHost.DatabasePathKey] = Path.Combine(_folder.Path, "library.db"),
-            [CliHost.SecretsFolderKey] = Path.Combine(_folder.Path, "Secrets"),
-            [CliHost.SecretScopeKey] = string.Create(CultureInfo.InvariantCulture, $"ModShelf.Tests.{Guid.NewGuid():N}"),
+            [HostServices.DatabasePathKey] = Path.Combine(_folder.Path, "library.db"),
+            [HostServices.SecretsFolderKey] = Path.Combine(_folder.Path, "Secrets"),
+            [HostServices.SecretScopeKey] = string.Create(CultureInfo.InvariantCulture, $"ModShelf.Tests.{Guid.NewGuid():N}"),
 
             // Everything is logged, so the tests can check that no credential is.
             ["Logging:LogLevel:Default"] = "Trace",

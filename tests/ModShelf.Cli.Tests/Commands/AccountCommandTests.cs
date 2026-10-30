@@ -9,6 +9,7 @@ using ModShelf.Cli.Hosting;
 using ModShelf.Cli.Tests.Common;
 using ModShelf.Cli.Tests.Fakes;
 using ModShelf.Platform;
+using ModShelf.Hosting;
 
 namespace ModShelf.Cli.Tests.Commands;
 
@@ -68,7 +69,7 @@ public sealed partial class AccountCommandTests : IAsyncDisposable
     [InlineData("client-from-nexus", "browser, api-key")]
     public async Task NexusOffersTheBrowserOnceItsClientIdIsSet(string? clientId, string linkWith)
     {
-        await using InProcessCli cli = new(_site, _browser, new Dictionary<string, string?> { [CliHost.NexusClientIdKey] = clientId });
+        await using InProcessCli cli = new(_site, _browser, new Dictionary<string, string?> { [HostServices.NexusClientIdKey] = clientId });
 
         CliResult listed = Log(await cli.RunAsync(["account", "list"], Cancellation));
 

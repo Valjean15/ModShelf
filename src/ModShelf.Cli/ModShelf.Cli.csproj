@@ -21,6 +21,11 @@
     <ProjectReference Include="..\ModShelf.Sources.Nexus\ModShelf.Sources.Nexus.csproj" />
   </ItemGroup>
 
+  <!-- What both hosts build alike (src/Shared/Hosting). -->
+  <ItemGroup>
+    <Compile Include="..\Shared\Hosting\*.cs" Link="Hosting\Shared\%(Filename)%(Extension)" />
+  </ItemGroup>
+
   <ItemGroup>
     <Content Include="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
