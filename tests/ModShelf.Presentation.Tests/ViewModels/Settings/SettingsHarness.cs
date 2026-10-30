@@ -1,3 +1,4 @@
+using ModShelf.Application.Diagnostics;
 using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.ViewModels.Settings;
 using ModShelf.Testing;
@@ -5,14 +6,15 @@ using ModShelf.Testing;
 namespace ModShelf.Presentation.Tests.ViewModels.Settings;
 
 /// <summary>
-/// The Settings screen over fakes: settings in memory, a library, a mover, and dialogs the test answers.
+/// The Settings screen over fakes: settings in memory, a library, a mover, dialogs the test answers, and the About part.
 /// </summary>
 internal sealed class SettingsHarness
 {
     public SettingsHarness(bool protectedByOs = true)
     {
         Mover = new ScriptedLibraryMover(Settings);
-        Screen = new SettingsViewModel(Settings, Library, Mover, new FixedSecretStore(protectedByOs), Themes, Tray, Dialogs, Logger);
+        About = new AboutViewModel(new AppInfo("0.9.0", "a60d76b"), Diagnostics, Diagnostics, new RecordingClipboard(), new ScriptedFolders(), new RecordingLogger<AboutViewModel>());
+        Screen = new SettingsViewModel(Settings, Library, Mover, new FixedSecretStore(protectedByOs), Themes, Tray, Dialogs, About, Logger);
     }
 
     public InMemorySettingsService Settings { get; } = new();
@@ -26,6 +28,10 @@ internal sealed class SettingsHarness
     public ScriptedTrayHost Tray { get; } = new();
 
     public ScriptedDialogs Dialogs { get; } = new();
+
+    public FixedDiagnostics Diagnostics { get; } = new();
+
+    public AboutViewModel About { get; }
 
     public RecordingLogger<SettingsViewModel> Logger { get; } = new();
 

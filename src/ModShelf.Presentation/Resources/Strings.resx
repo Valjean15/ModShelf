@@ -1334,4 +1334,32 @@
     <value>This desktop shows no tray icons, so closing the window quits ModShelf. On GNOME, the AppIndicator extension adds them.</value>
     <comment>Settings, when no tray host runs.</comment>
   </data>
+  <data name="AboutHeading" xml:space="preserve">
+    <value>About ModShelf</value>
+    <comment>Settings: the heading of the part about this ModShelf, its version and what a bug report needs.</comment>
+  </data>
+  <data name="AboutVersion" xml:space="preserve">
+    <value>ModShelf {0}</value>
+    <comment>{0} is the version, such as 0.9.0 (a60d76b).</comment>
+  </data>
+  <data name="AboutBugReport" xml:space="preserve">
+    <value>For a bug report, copy the diagnostics and attach the latest log file. Neither holds keys, account names or links.</value>
+    <comment>Settings: under the version.</comment>
+  </data>
+  <data name="AboutOpenLogFolder" xml:space="preserve">
+    <value>Open log folder</value>
+    <comment>Button: opens the folder of the log files.</comment>
+  </data>
+  <data name="AboutCopyDiagnostics" xml:space="preserve">
+    <value>Copy diagnostics</value>
+    <comment>Button: puts the diagnostics report on the clipboard.</comment>
+  </data>
+  <data name="AboutLogFolderByHand" xml:space="preserve">
+    <value>The log folder didn't open. It's {0}.</value>
+    <comment>{0} is the log folder's path.</comment>
+  </data>
+  <data name="AboutDiagnosticsCopied" xml:space="preserve">
+    <value>The diagnostics are on the clipboard. Paste them into your bug report.</value>
+    <comment>After Copy diagnostics.</comment>
+  </data>
 </root>

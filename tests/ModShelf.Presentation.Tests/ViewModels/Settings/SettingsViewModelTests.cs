@@ -25,6 +25,14 @@ public sealed class SettingsViewModelTests
     private SettingsViewModel Screen => _harness.Screen;
 
     [Fact]
+    public void EndsWithAboutThisModShelf()
+    {
+        SettingsHarness harness = new();
+
+        Assert.Same(harness.About, harness.Screen.About);
+    }
+
+    [Fact]
     public async Task ShowsTheDefaultsWithoutSavingThem()
     {
         await _harness.StartAsync();

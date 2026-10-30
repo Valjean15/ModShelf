@@ -170,6 +170,12 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
   "Move the library?" says how many files move, from where to where. **Move**: "The library is in … now." The files are in the new folder, in the same folders, and gone from the old one. **Open folder** on the Library screen opens the new place.
 - [ ] **10.7 Where they're kept.** The bottom of the Settings screen.
   "Settings are kept in …\settings.json." in the test folder. The file holds what you chose.
+- [ ] **10.8 The version.** "About ModShelf", the last card of the Settings screen.
+  "ModShelf 0.9.0-alpha.0.N (…)", where the part in brackets is the commit you built, as `git rev-parse --short=7 HEAD` shows it. Once a version is tagged, such as `v0.9.0`, a build of that commit shows "ModShelf 0.9.0 (…)".
+- [ ] **10.9 Copy diagnostics.** **Copy diagnostics**, then paste into a text editor.
+  "The diagnostics are on the clipboard. Paste them into your bug report." The report's first line is the version from 10.8. Then the system, the folders with your home folder as `~`, the settings from 10.1 to 10.5, the library's counts, the downloads by what they're doing, and "nexus linked (ApiKey, Premium)" (Free for the free account). Nowhere does it hold your account's name, a mod's or file's name, a key or an `nxm://` link.
+- [ ] **10.10 Open log folder.** **Open log folder**.
+  The system's file manager opens the test folder's `logs` folder, with today's `desktop-….log` in it.
 
 ## 11. The tray and closing the window
 
@@ -273,6 +279,9 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 10.5 Theme | | | |
 | 10.6 Move the library | | – | |
 | 10.7 Where they're kept | | | |
+| 10.8 Version | | | |
+| 10.9 Copy diagnostics | | | |
+| 10.10 Open log folder | | | |
 | 11.1 First close asks | | | |
 | 11.2 Keep running | | | |
 | 11.3 Back from the tray | | | |

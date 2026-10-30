@@ -20,7 +20,7 @@ namespace ModShelf.Presentation.ViewModels.Settings;
 /// <summary>
 /// The settings: where the library is, moving its files when it has some; how its folders are named, for every game and
 /// for single games; what happens to old versions; how often to check for updates and whether to say so; whether the
-/// app is light or dark; and what closing its window does. Choices are saved as they're made, folder patterns when the
+/// app is light or dark; what closing its window does; and, at its end, about this ModShelf. Choices are saved as they're made, folder patterns when the
 /// user saves them, and each change shows the settings as stored after it. The theme is applied at start and as it's
 /// chosen.
 /// </summary>
@@ -60,6 +60,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         IThemeSwitcher themes,
         ITrayHost tray,
         IDialogService dialogs,
+        AboutViewModel about,
         ILogger<SettingsViewModel> logger)
     {
         ArgumentNullException.ThrowIfNull(settings);
@@ -69,6 +70,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(themes);
         ArgumentNullException.ThrowIfNull(tray);
         ArgumentNullException.ThrowIfNull(dialogs);
+        ArgumentNullException.ThrowIfNull(about);
         ArgumentNullException.ThrowIfNull(logger);
 
         _settings = settings;
@@ -78,6 +80,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         _tray = tray;
         _dialogs = dialogs;
         _logger = logger;
+        About = about;
         KeptInText = Text.Format(Strings.SettingsKeptIn, settings.Location);
         IsStoreUnprotected = !secrets.IsProtectedByOs;
         LibraryRoot = settings.DefaultLibraryRoot;
@@ -87,6 +90,11 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     public override Screen Screen => Screen.Settings;
 
     public override string Title => Strings.SettingsTitle;
+
+    /// <summary>
+    /// About this ModShelf: its version, its log folder and its diagnostics report.
+    /// </summary>
+    public AboutViewModel About { get; }
 
     /// <summary>
     /// Such as "Settings are kept in /home/jean/.local/share/ModShelf/settings.json."
