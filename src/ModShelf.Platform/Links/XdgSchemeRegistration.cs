@@ -1,5 +1,6 @@
 using ModShelf.Application.Links;
 using ModShelf.Application.Links.Ports;
+using ModShelf.Platform.Resources;
 
 namespace ModShelf.Platform.Links;
 
@@ -28,7 +29,9 @@ internal sealed class XdgSchemeRegistration(XdgDirectories directories, SchemeHa
         string ours = OurId(scheme);
         string? current = DefaultFor(Mime(scheme), userValue: null, excluded: null);
         SchemeState state = current == ours
-            ? new SchemeState(SchemeHandlerKind.ModShelf, PreviousApp: NameOf(DefaultFor(Mime(scheme), Stored(scheme) ?? string.Empty, excluded: ours)))
+            ? MimeAppsList.Read(OurFile(scheme), Entry, "Exec") == Exec()
+                ? new SchemeState(SchemeHandlerKind.ModShelf, PreviousApp: NameOf(DefaultFor(Mime(scheme), Stored(scheme) ?? string.Empty, excluded: ours)))
+                : new SchemeState(SchemeHandlerKind.OtherApp, Strings.AnotherModShelf)
             : !File.Exists(options.DesktopApp) ? SchemeState.Unavailable
             : current is null ? SchemeState.None
             : new SchemeState(SchemeHandlerKind.OtherApp, NameOf(current));
@@ -61,7 +64,7 @@ internal sealed class XdgSchemeRegistration(XdgDirectories directories, SchemeHa
                 "Type=Application",
                 "Name=ModShelf",
                 $"Comment=Opens {scheme}:// links in ModShelf",
-                $"Exec={DesktopEntryExec.ForLink(options.DesktopApp, options.Arguments)}",
+                $"Exec={Exec()}",
                 "Terminal=false",
                 "NoDisplay=true",
                 $"MimeType={Mime(scheme)};",
@@ -92,6 +95,12 @@ internal sealed class XdgSchemeRegistration(XdgDirectories directories, SchemeHa
     }
 
     private static string Mime(string scheme) => $"x-scheme-handler/{scheme}";
+
+    /// <summary>
+    /// What ModShelf's entry starts: this desktop app, on this library. Another ModShelf, such as another build or one
+    /// on another library, wrote another.
+    /// </summary>
+    private string Exec() => DesktopEntryExec.ForLink(options.DesktopApp, options.Arguments);
 
     private static string OurId(string scheme) => $"modshelf-{scheme}.desktop";
 

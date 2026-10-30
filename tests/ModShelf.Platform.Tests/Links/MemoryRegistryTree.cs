@@ -32,6 +32,14 @@ internal sealed class MemoryRegistryTree : IRegistryTree
 
     public void SetString(string path, string? name, string value) => Set(path, name, value);
 
+    public void DeleteValue(string path, string name)
+    {
+        if (_keys.TryGetValue(path, out Dictionary<string, object>? values))
+        {
+            values.Remove(name);
+        }
+    }
+
     public void CopyTree(string from, string to)
     {
         if (!Exists(from))

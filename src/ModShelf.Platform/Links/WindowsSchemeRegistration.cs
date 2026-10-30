@@ -1,5 +1,6 @@
 using ModShelf.Application.Links;
 using ModShelf.Application.Links.Ports;
+using ModShelf.Platform.Resources;
 
 namespace ModShelf.Platform.Links;
 
@@ -9,8 +10,19 @@ namespace ModShelf.Platform.Links;
 /// <c>Software\ModShelf\Previous</c> first, and copied back when ModShelf gives the links back.
 /// </summary>
 /// <remarks>
-/// An app the user chose in Windows' own "open with" prompt (<c>UrlAssociations\…\UserChoice</c>) wins over the class.
-/// ModShelf can't change that choice, so it only names that app.
+/// <para>
+/// A class is ModShelf's when its <c>ModShelf</c> value names the program its command starts. Vortex and Mod Organizer
+/// 2 write their command over the class without removing other values, so a class they took back keeps the value but
+/// no longer starts that program, and is theirs.
+/// </para>
+/// <para>
+/// The command is written last, so a registration that stopped halfway leaves a class without one. What was put aside
+/// is replaced only by a class that has a command, and a class without one gets what was put aside back.
+/// </para>
+/// <para>
+/// An app the user chose in Windows' own "open with" prompt (<c>UrlAssociations\…\UserChoiceLatest</c> or
+/// <c>UserChoice</c>) wins over the class. ModShelf can't change that choice, so it only names that app.
+/// </para>
 /// </remarks>
 internal sealed class WindowsSchemeRegistration(IRegistryTree user, IRegistryTree machine, SchemeHandlerOptions options)
     : ISchemeRegistration
@@ -27,8 +39,10 @@ internal sealed class WindowsSchemeRegistration(IRegistryTree user, IRegistryTre
         ArgumentException.ThrowIfNullOrWhiteSpace(scheme);
 
         string? chosen = ChosenApp(scheme);
-        SchemeState state = IsOurs(scheme)
-            ? chosen is null ? new SchemeState(SchemeHandlerKind.ModShelf, PreviousApp: PreviousApp(scheme)) : new SchemeState(SchemeHandlerKind.OtherApp, chosen)
+        SchemeState state = IsModShelfs(scheme)
+            ? chosen is not null ? new SchemeState(SchemeHandlerKind.OtherApp, chosen)
+            : IsThisModShelfs(scheme) ? new SchemeState(SchemeHandlerKind.ModShelf, PreviousApp: PreviousApp(scheme))
+            : new SchemeState(SchemeHandlerKind.OtherApp, Strings.AnotherModShelf)
             : !File.Exists(options.DesktopApp) ? SchemeState.Unavailable
             : (chosen ?? AppOf(user, Class(scheme)) ?? AppOf(machine, Class(scheme))) is { } other ? new SchemeState(SchemeHandlerKind.OtherApp, other)
             : SchemeState.None;
@@ -44,13 +58,15 @@ internal sealed class WindowsSchemeRegistration(IRegistryTree user, IRegistryTre
         }
 
         string key = Class(scheme);
-        if (!IsOurs(scheme))
+        if (!IsModShelfs(scheme))
         {
-            // What was there goes aside, as it was, for giving the links back; another app's class goes entirely.
-            user.DeleteTree(Previous(scheme));
-            if (user.Exists(key))
+            // Another app's class goes aside as it is, without a value another ModShelf left in it. A class without a
+            // command, such as one a registration that stopped halfway left, keeps what was put aside before.
+            if (HasCommand(user, key))
             {
+                user.DeleteTree(Previous(scheme));
                 user.CopyTree(key, Previous(scheme));
+                user.DeleteValue(Previous(scheme), Marker);
             }
 
             user.DeleteTree(key);
@@ -60,7 +76,7 @@ internal sealed class WindowsSchemeRegistration(IRegistryTree user, IRegistryTre
         user.SetString(key, "URL Protocol", string.Empty);
         user.SetString(key, Marker, options.DesktopApp);
         user.SetString($@"{key}\DefaultIcon", null, $"{WindowsCommandLine.Quote(options.DesktopApp)},0");
-        user.SetString($@"{key}\shell\open\command", null, Command());
+        user.SetString(Command(key), null, CommandLine());
         return Task.CompletedTask;
     }
 
@@ -68,14 +84,24 @@ internal sealed class WindowsSchemeRegistration(IRegistryTree user, IRegistryTre
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(scheme);
 
-        // Another app that took the links since keeps them; only what was put aside goes.
-        if (IsOurs(scheme))
+        string key = Class(scheme);
+        bool modShelfs = IsModShelfs(scheme);
+
+        // A registration or a giving back that stopped halfway left a class of ModShelf's without a command, or none.
+        bool unfinished = !HasCommand(user, key) && (user.GetString(key, Marker) is not null || !user.Exists(key));
+        if ((modShelfs || unfinished) && user.Exists(Previous(scheme)))
         {
-            user.DeleteTree(Class(scheme));
-            if (user.Exists(Previous(scheme)))
-            {
-                user.CopyTree(Previous(scheme), Class(scheme));
-            }
+            user.DeleteTree(key);
+            user.CopyTree(Previous(scheme), key);
+        }
+        else if (modShelfs || (unfinished && user.Exists(key)))
+        {
+            user.DeleteTree(key);
+        }
+        else
+        {
+            // Another app took the links since: it keeps them, without the value ModShelf left in its class.
+            user.DeleteValue(key, Marker);
         }
 
         user.DeleteTree(Previous(scheme));
@@ -88,26 +114,43 @@ internal sealed class WindowsSchemeRegistration(IRegistryTree user, IRegistryTre
 
     private static string Previous(string scheme) => $@"{PreviousRoot}\{scheme}";
 
+    private static string Command(string key) => $@"{key}\shell\open\command";
+
+    private static bool HasCommand(IRegistryTree tree, string key) => WindowsCommandLine.Program(tree.GetString(Command(key), null)) is not null;
+
     /// <summary>
     /// The name of the app a class opens links with, from its command; null when it has none.
     /// </summary>
-    private static string? AppOf(IRegistryTree tree, string key) => WindowsCommandLine.AppName(tree.GetString($@"{key}\shell\open\command", null));
+    private static string? AppOf(IRegistryTree tree, string key) => WindowsCommandLine.AppName(tree.GetString(Command(key), null));
 
-    private bool IsOurs(string scheme) => user.GetString(Class(scheme), Marker) is not null;
+    /// <summary>
+    /// Whether the scheme's class is a ModShelf's: its marker names the program its command starts.
+    /// </summary>
+    private bool IsModShelfs(string scheme)
+        => user.GetString(Class(scheme), Marker) is { } marked
+            && string.Equals(WindowsCommandLine.Program(user.GetString(Command(Class(scheme)), null)), marked, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Whether the scheme's class starts this ModShelf, on this library: the command this registration writes.
+    /// </summary>
+    private bool IsThisModShelfs(string scheme)
+        => string.Equals(user.GetString(Command(Class(scheme)), null), CommandLine(), StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// The app put aside for the links, or else the one the whole machine has for them, which opens them again once the
     /// current user's class is gone.
     /// </summary>
     private string? PreviousApp(string scheme)
-        => user.Exists(Previous(scheme)) ? AppOf(user, Previous(scheme)) : AppOf(machine, Class(scheme));
+        => (user.Exists(Previous(scheme)) ? AppOf(user, Previous(scheme)) : null) ?? AppOf(machine, Class(scheme));
 
     /// <summary>
     /// The app the user chose for the scheme in Windows' "open with" prompt, when it isn't the scheme's own class.
+    /// Windows 11 keeps the choice in <c>UserChoiceLatest</c> once it has moved it there, and in <c>UserChoice</c> before.
     /// </summary>
     private string? ChosenApp(string scheme)
     {
-        string? progId = user.GetString($@"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\{scheme}\UserChoice", "ProgId");
+        string associations = $@"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\{scheme}";
+        string? progId = user.GetString($@"{associations}\UserChoiceLatest\ProgId", "ProgId") ?? user.GetString($@"{associations}\UserChoice", "ProgId");
         if (string.IsNullOrWhiteSpace(progId) || string.Equals(progId, scheme, StringComparison.OrdinalIgnoreCase))
         {
             return null;
@@ -121,6 +164,6 @@ internal sealed class WindowsSchemeRegistration(IRegistryTree user, IRegistryTre
     /// <summary>
     /// Such as <c>"C:\…\ModShelf.Desktop.exe" "--ModShelf:DatabasePath=…" "%1"</c>.
     /// </summary>
-    private string Command()
+    private string CommandLine()
         => string.Join(' ', [WindowsCommandLine.Quote(options.DesktopApp), .. options.Arguments.Select(WindowsCommandLine.Quote), "\"%1\""]);
 }

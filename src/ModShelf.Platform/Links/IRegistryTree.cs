@@ -20,6 +20,11 @@ internal interface IRegistryTree
     void SetString(string path, string? name, string value);
 
     /// <summary>
+    /// Deletes a value; nothing when the key or the value is missing.
+    /// </summary>
+    void DeleteValue(string path, string name);
+
+    /// <summary>
     /// Copies the key at <paramref name="from"/>, its values and its subkeys, to <paramref name="to"/>, which must not
     /// exist yet.
     /// </summary>

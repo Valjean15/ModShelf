@@ -30,9 +30,17 @@ being wired now and checked once the installer makes an app bundle (step 4).
 - **Platform/Links** registers the desktop app, and keeps what it replaced beside the registration, so that whatever
   ModShelf runs the giving back, such as the uninstaller, puts back the same app:
   - Windows: the scheme's class under the current user's `Software\Classes`, as Vortex and MO2 write it. The class it
-    replaces is copied to `Software\ModShelf\Previous\nxm` first, and copied back. A `ModShelf` value marks the class as
-    ModShelf's. An app the user chose in Windows' own "open with" prompt (`UserChoice`) wins over any class, and
-    ModShelf can't change that choice; it names that app instead.
+    replaces is copied to `Software\ModShelf\Previous\nxm` first, and copied back.
+    - A class is ModShelf's when its `ModShelf` value names the program its command starts. Vortex and MO2 write their
+      command over the class and leave other values, so a class they took back is theirs: giving back then leaves it,
+      and only removes ModShelf's value.
+    - The command is written last. A class without one, as a registration or a giving back that stopped halfway leaves
+      it, never replaces what was put aside, and gets it back on giving back.
+    - A class that starts another ModShelf, such as another build or one on another library, shows as "Another
+      ModShelf", and taking the links from it keeps what it put aside. Linux does the same with ModShelf's entry.
+    - An app the user chose in Windows' own "open with" prompt (`UserChoiceLatest`, which Windows 11 moves the choice
+      to, or `UserChoice`) wins over any class, and ModShelf can't change that choice; it names that app instead.
+    - A key the user may not open is reported as `UnauthorizedAccessException`, as one they may not change is.
   - Linux and other freedesktop systems: `modshelf-nxm.desktop` in `~/.local/share/applications`, made the default for
     `x-scheme-handler/nxm` in `~/.config/mimeapps.list`. The previous user default is kept in the entry as
     `X-ModShelf-Previous`. Which app opens the links follows the specification's order of `mimeapps.list` files, so a
@@ -58,7 +66,9 @@ being wired now and checked once the installer makes an app bundle (step 4).
 
 - Registering changes only the current user's settings; no administrator rights are needed.
 - On Windows, when the user once chose another app in the "open with" prompt, ModShelf can't take the links, and says
-  where to choose it.
+  where to choose it. Its class stays registered meanwhile, and the card offers only to take them, so giving them back
+  takes `ms links give-back` or the uninstaller. `SchemeState` would need to say that ModShelf's class is there behind
+  the choice for the card to offer it.
 - On macOS, giving the links back when no other app had them leaves them with ModShelf: Launch Services has no way to
   say "none", and the bundle declares the scheme.
 - A test library's registration points at its folder. The checklists give the links back before deleting it.
@@ -71,11 +81,16 @@ being wired now and checked once the installer makes an app bundle (step 4).
   finished or is of another file, and otherwise goes into the library; the log never holds the link. The contract tests
   check that a source's scheme is a plain one it recognizes as a handoff.
 - Platform: the Windows registration over an in-memory registry (taking from Vortex, giving it back as it was, the
-  machine's class, an app that took them since, the user's choice), and on Windows over a test key of the real registry;
+  machine's class, an app that took them since, Vortex writing over the class in place, a registration or giving back
+  that stopped halfway, another ModShelf's class, the user's choice in either key), and on Windows over a test key of
+  the real registry;
   the Linux registration over test folders (each `mimeapps.list`, a desktop's own list, the first app that says it opens
   them, hidden entries, giving back to the user's default or the system's); the quoting of Windows command lines and
   desktop entries; Launch Services on macOS outside a bundle.
 - Presentation: the card's text per state, its buttons and notes, its failures, and reading again when shown; the
   Downloads screen's notes for an opened link; the main window opening only a launch's links.
 - CLI: `links` with an in-memory register; the hosts' arguments for the desktop app.
-- By hand: the checklists' new sections, and on Linux `xdg-mime` and `xdg-open` agreeing with the registration.
+- By hand: the checklists' new sections, and on Linux `xdg-mime` and `xdg-open` agreeing with the registration. A
+  review of the Windows registration against the code that writes the class for Vortex (Electron's
+  `SetAsDefaultProtocolClient`) and for MO2's nxm handler found the class written over in place, which the first version
+  took for ModShelf's still; the tests above cover it now.

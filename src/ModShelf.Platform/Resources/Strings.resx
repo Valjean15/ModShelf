@@ -66,4 +66,8 @@
     <value>You can close this tab and go back to ModShelf.</value>
     <comment>Shown in the browser after the user approves (or declines) ModShelf on a mod site's sign-in page.</comment>
   </data>
+  <data name="AnotherModShelf" xml:space="preserve">
+    <value>Another ModShelf</value>
+    <comment>The app that opens a site's links, when it's a ModShelf other than this one: another build, or the same one on another library. Starts a sentence such as "Another ModShelf opens nxm:// links from Nexus Mods."</comment>
+  </data>
 </root>

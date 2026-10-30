@@ -206,6 +206,22 @@ public sealed class XdgSchemeRegistrationTests : IDisposable
     }
 
     [Fact]
+    public async Task AnotherModShelfsEntryCanBeTakenKeepingWhatItPutAside()
+    {
+        AddApp(In("usr", "share"), "vortex.desktop", "Vortex");
+        WriteList(UserList, "vortex.desktop;");
+        await Create("--ModShelf:DatabasePath=/tmp/test/library.db").RegisterAsync("nxm", Cancellation);
+        XdgSchemeRegistration mine = Create();
+
+        Assert.Equal(new SchemeState(SchemeHandlerKind.OtherApp, "Another ModShelf"), await mine.GetAsync("nxm", Cancellation));
+
+        await mine.RegisterAsync("nxm", Cancellation);
+
+        Assert.Equal(new SchemeState(SchemeHandlerKind.ModShelf, PreviousApp: "Vortex"), await mine.GetAsync("nxm", Cancellation));
+        Assert.Equal(DesktopEntryExec.ForLink(_app, []), MimeAppsList.Read(OurEntry, "Desktop Entry", "Exec"));
+    }
+
+    [Fact]
     public async Task UnregisteringWhatWasNeverRegisteredChangesNothing()
     {
         WriteList(UserList, "vortex.desktop;");

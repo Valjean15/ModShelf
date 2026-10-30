@@ -142,6 +142,110 @@ public sealed class WindowsSchemeRegistrationTests : IDisposable
     }
 
     [Fact]
+    public async Task VortexWritingOverTheClassTakesThemBack()
+    {
+        // As Vortex and Mod Organizer 2 register: over the class's values, leaving the others, ModShelf's among them.
+        _machine.SetString($@"{Class}\shell\open\command", null, @"""C:\MO2\nxmhandler.exe"" ""%1""");
+        WindowsSchemeRegistration registration = Create();
+        await registration.RegisterAsync("nxm", Cancellation);
+        _user.SetString(Class, null, "URL:NXM Protocol");
+        _user.SetString($@"{Class}\shell\open\command", null, $"\"{Vortex}\" -d \"%1\"");
+
+        Assert.Equal(new SchemeState(SchemeHandlerKind.OtherApp, "Vortex"), await registration.GetAsync("nxm", Cancellation));
+
+        await registration.UnregisterAsync("nxm", Cancellation);
+
+        Assert.Equal(Vortex, VortexProgram());
+        Assert.Null(_user.GetString(Class, "ModShelf"));
+        Assert.False(_user.Exists(@"Software\ModShelf"));
+    }
+
+    [Fact]
+    public async Task TakingThemFromVortexAgainPutsVortexAside()
+    {
+        WindowsSchemeRegistration registration = Create();
+        await registration.RegisterAsync("nxm", Cancellation);
+        _user.SetString($@"{Class}\shell\open\command", null, $"\"{Vortex}\" -d \"%1\"");
+
+        await registration.RegisterAsync("nxm", Cancellation);
+
+        Assert.Equal(new SchemeState(SchemeHandlerKind.ModShelf, PreviousApp: "Vortex"), await registration.GetAsync("nxm", Cancellation));
+        Assert.Null(_user.GetString(@"Software\ModShelf\Previous\nxm", "ModShelf"));
+
+        await registration.UnregisterAsync("nxm", Cancellation);
+
+        Assert.Equal(Vortex, VortexProgram());
+        Assert.Null(_user.GetString(Class, "ModShelf"));
+    }
+
+    [Fact]
+    public async Task ARegistrationThatStoppedHalfwayKeepsWhatWasPutAside()
+    {
+        // Vortex was put aside, then the class was replaced, but its command never written.
+        AddVortex(_user);
+        _user.CopyTree(Class, @"Software\ModShelf\Previous\nxm");
+        _user.DeleteTree(Class);
+        _user.SetString(Class, null, "URL:nxm Protocol");
+        _user.SetString(Class, "ModShelf", _app);
+        WindowsSchemeRegistration registration = Create();
+
+        Assert.Equal(SchemeState.None, await registration.GetAsync("nxm", Cancellation));
+
+        await registration.RegisterAsync("nxm", Cancellation);
+
+        Assert.Equal(new SchemeState(SchemeHandlerKind.ModShelf, PreviousApp: "Vortex"), await registration.GetAsync("nxm", Cancellation));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task GivingBackWhatStoppedHalfwayPutsVortexBack(bool classLeft)
+    {
+        AddVortex(_user);
+        Dictionary<string, Dictionary<string, object>> before = Snapshot(_user);
+        _user.CopyTree(Class, @"Software\ModShelf\Previous\nxm");
+        _user.DeleteTree(Class);
+        if (classLeft)
+        {
+            _user.SetString(Class, "ModShelf", _app);
+        }
+
+        await Create().UnregisterAsync("nxm", Cancellation);
+
+        Assert.Equal(before, Snapshot(_user));
+        Assert.False(_user.Exists(@"Software\ModShelf"));
+    }
+
+    [Fact]
+    public async Task AnotherModShelfsRegistrationCanBeTakenKeepingWhatItPutAside()
+    {
+        AddVortex(_user);
+        await Create("--ModShelf:DatabasePath=C:\\Test\\library.db").RegisterAsync("nxm", Cancellation);
+        WindowsSchemeRegistration mine = Create();
+
+        Assert.Equal(new SchemeState(SchemeHandlerKind.OtherApp, "Another ModShelf"), await mine.GetAsync("nxm", Cancellation));
+
+        await mine.RegisterAsync("nxm", Cancellation);
+
+        Assert.Equal(new SchemeState(SchemeHandlerKind.ModShelf, PreviousApp: "Vortex"), await mine.GetAsync("nxm", Cancellation));
+        Assert.Equal($"\"{_app}\" \"%1\"", _user.GetString($@"{Class}\shell\open\command", null));
+    }
+
+    [Fact]
+    public async Task TheChoiceWindowsMovedToUserChoiceLatestWins()
+    {
+        string associations = @"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\nxm";
+        _user.SetString($@"{associations}\UserChoice", "ProgId", "nxm");
+        _user.SetString($@"{associations}\UserChoiceLatest\ProgId", "ProgId", "Vortex.NXM");
+        _user.SetString(@"Software\Classes\Vortex.NXM\shell\open\command", null, $"\"{Vortex}\" -d \"%1\"");
+        WindowsSchemeRegistration registration = Create();
+
+        await registration.RegisterAsync("nxm", Cancellation);
+
+        Assert.Equal(new SchemeState(SchemeHandlerKind.OtherApp, "Vortex"), await registration.GetAsync("nxm", Cancellation));
+    }
+
+    [Fact]
     public async Task UnregisteringWhatWasNeverRegisteredChangesNothing()
     {
         AddVortex(_user);
