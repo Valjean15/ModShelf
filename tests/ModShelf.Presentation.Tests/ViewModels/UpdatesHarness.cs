@@ -22,11 +22,13 @@ internal sealed class UpdatesHarness : IDisposable
     public UpdatesHarness()
     {
         Time.SetLocalTimeZone(TimeZoneInfo.Utc);
+        FakeSourceRegistry sources = new(Catalog, new FakeSource(Plain, "Plain Site"));
         Screen = new UpdatesViewModel(
             Library,
             Checker,
             Downloads,
-            new FakeSourceRegistry(Catalog, new FakeSource(Plain, "Plain Site")),
+            sources,
+            AppLookup.Over(sources),
             Dialogs,
             UiThread,
             Time,

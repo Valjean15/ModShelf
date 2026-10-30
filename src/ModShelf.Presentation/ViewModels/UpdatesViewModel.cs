@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 
 using Microsoft.Extensions.Logging;
 
+using ModShelf.Application.Catalog;
 using ModShelf.Application.Library;
 using ModShelf.Application.Sources;
 using ModShelf.Application.Updates;
@@ -40,6 +41,7 @@ public sealed partial class UpdatesViewModel : ScreenViewModel
         IUpdateChecker checker,
         ILibraryDownloads downloads,
         ISourceRegistry sources,
+        IModLookup lookup,
         IDialogService dialogs,
         IUiThread uiThread,
         TimeProvider timeProvider,
@@ -58,7 +60,7 @@ public sealed partial class UpdatesViewModel : ScreenViewModel
         _uiThread = uiThread;
         _timeProvider = timeProvider;
         _logger = logger;
-        _services = new UpdatesServices(downloads, sources, new Changelogs(sources), dialogs, timeProvider, logger);
+        _services = new UpdatesServices(downloads, sources, lookup, dialogs, timeProvider, logger);
     }
 
     public override Screen Screen => Screen.Updates;

@@ -11,7 +11,6 @@ using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Accounts;
-using ModShelf.Sources.Abstractions.Catalog;
 
 namespace ModShelf.Presentation.ViewModels;
 
@@ -196,18 +195,11 @@ public sealed partial class UpdateViewModel : ObservableObject
                     return;
                 }
 
-                if (_services.Changelogs.ReadAsync(File.Mod, cancellationToken) is not { } reading)
-                {
-                    string site = _services.Sources.Find<IModSource>(File.Mod.Game.Source)?.DisplayName ?? File.Mod.Game.Source.Value;
-                    ChangesNote = Text.Format(Strings.ChangelogNone, site);
-                    return;
-                }
-
                 ChangesNote = Strings.ChangelogReading;
-                IReadOnlyList<ModChangelog> changelog;
+                IReadOnlyList<string>? changes;
                 try
                 {
-                    changelog = await reading;
+                    changes = await _services.Lookup.GetChangesAsync(File.Mod, version, cancellationToken);
                 }
                 catch (AuthenticationFailedException)
                 {
@@ -220,7 +212,14 @@ public sealed partial class UpdateViewModel : ObservableObject
                     return;
                 }
 
-                Changes = changelog.FirstOrDefault(entry => string.Equals(entry.Version, version, StringComparison.Ordinal))?.Changes ?? [];
+                if (changes is null)
+                {
+                    string site = _services.Sources.Find<IModSource>(File.Mod.Game.Source)?.DisplayName ?? File.Mod.Game.Source.Value;
+                    ChangesNote = Text.Format(Strings.ChangelogNone, site);
+                    return;
+                }
+
+                Changes = changes;
                 ChangesNote = Changes.Count == 0 ? Strings.ChangelogNothing : string.Empty;
             },
             cancellationToken);

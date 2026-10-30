@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 
+using ModShelf.Application.Catalog;
 using ModShelf.Application.Library;
 using ModShelf.Application.Sources;
 using ModShelf.Presentation.Services;
@@ -12,7 +13,7 @@ namespace ModShelf.Presentation.ViewModels;
 internal sealed class UpdatesServices(
     ILibraryDownloads downloads,
     ISourceRegistry sources,
-    Changelogs changelogs,
+    IModLookup lookup,
     IDialogService dialogs,
     TimeProvider timeProvider,
     ILogger logger)
@@ -21,7 +22,7 @@ internal sealed class UpdatesServices(
 
     public ISourceRegistry Sources { get; } = sources ?? throw new ArgumentNullException(nameof(sources));
 
-    public Changelogs Changelogs { get; } = changelogs ?? throw new ArgumentNullException(nameof(changelogs));
+    public IModLookup Lookup { get; } = lookup ?? throw new ArgumentNullException(nameof(lookup));
 
     public IDialogService Dialogs { get; } = dialogs ?? throw new ArgumentNullException(nameof(dialogs));
 
