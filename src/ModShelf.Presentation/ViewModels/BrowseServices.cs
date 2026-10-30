@@ -3,9 +3,7 @@ using Microsoft.Extensions.Logging;
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Library;
 using ModShelf.Application.Sources;
-using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Services;
-using ModShelf.Sources.Abstractions;
 
 namespace ModShelf.Presentation.ViewModels;
 
@@ -40,9 +38,4 @@ internal sealed class BrowseServices(
     public TimeProvider TimeProvider { get; } = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
 
     public ILogger Logger { get; } = logger ?? throw new ArgumentNullException(nameof(logger));
-
-    /// <summary>
-    /// The site's name, such as "Nexus Mods"; its ID when it isn't registered.
-    /// </summary>
-    public string SiteName(SourceId source) => Sources.Find<IModSource>(source)?.DisplayName ?? source.Value;
 }

@@ -183,7 +183,7 @@ public sealed partial class AccountViewModel : ObservableObject
         {
             LinkedAccount account = await _services.Accounts.CheckAsync(Source, cancellationToken);
             await ShowLatestAsync(account);
-            Say(Text.Format(Strings.AccountChecked, Local(_services.TimeProvider.GetUtcNow()).ToString("t", CultureInfo.CurrentCulture)), false);
+            Say(Text.Format(Strings.AccountChecked, Dates.Time(_services.TimeProvider.GetUtcNow(), _services.TimeProvider)), false);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -373,8 +373,6 @@ public sealed partial class AccountViewModel : ObservableObject
         IsNoteAProblem = isProblem;
     }
 
-    private DateTimeOffset Local(DateTimeOffset time) => TimeZoneInfo.ConvertTime(time, _services.TimeProvider.LocalTimeZone);
-
     /// <summary>
     /// What to say when the site couldn't be asked, or couldn't answer; null for another problem.
     /// </summary>
@@ -401,7 +399,7 @@ public sealed partial class AccountViewModel : ObservableObject
         Tier = account?.Profile.Tier;
         LinkedText = account is null
             ? Strings.AccountNotLinked
-            : Text.Format(Strings.AccountLinkedOn, Local(account.LinkedAt).ToString("d", CultureInfo.CurrentCulture));
+            : Text.Format(Strings.AccountLinkedOn, Dates.Day(account.LinkedAt, _services.TimeProvider));
 
         Quota.Clear();
         foreach (QuotaAllowance allowance in account is null ? [] : quota?.Allowances ?? [])
@@ -411,7 +409,7 @@ public sealed partial class AccountViewModel : ObservableObject
                 PeriodName(allowance.Period),
                 allowance.Remaining,
                 allowance.Limit,
-                Local(allowance.ResetsAt).ToString("g", CultureInfo.CurrentCulture)));
+                Dates.DayAndTime(allowance.ResetsAt, _services.TimeProvider)));
         }
 
         HasQuota = Quota.Count > 0;

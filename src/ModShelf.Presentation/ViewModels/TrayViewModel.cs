@@ -115,12 +115,8 @@ public sealed partial class TrayViewModel : ObservableObject, IDisposable
 
     public void Dispose() => _updates.PropertyChanged -= OnUpdatesChanged;
 
-    private static string ToolTipFor(int updates) => updates switch
-    {
-        0 => Strings.AppTitle,
-        1 => Strings.TrayToolTipOneUpdate,
-        _ => Text.Format(Strings.TrayToolTipUpdates, updates),
-    };
+    private static string ToolTipFor(int updates)
+        => Counts.Of(updates, Strings.AppTitle, Strings.TrayToolTipOneUpdate, Strings.TrayToolTipUpdates);
 
     /// <summary>
     /// Checks the watched mods now, as the Updates screen's Check now does, and says in a notice what the check found:

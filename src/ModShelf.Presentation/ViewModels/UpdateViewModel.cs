@@ -1,5 +1,3 @@
-using System.Globalization;
-
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -9,7 +7,6 @@ using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
-using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Accounts;
 
 namespace ModShelf.Presentation.ViewModels;
@@ -128,8 +125,7 @@ public sealed partial class UpdateViewModel : ObservableObject
         Name = update.Name;
         FileName = update.FileName;
         VersionText = update.VersionLabel is { } version ? Text.Format(Strings.LibraryFileVersion, version) : string.Empty;
-        DateTimeOffset uploaded = TimeZoneInfo.ConvertTime(update.UploadedAt, _services.TimeProvider.LocalTimeZone);
-        UploadedText = Text.Format(Strings.UpdateUploaded, uploaded.ToString("d", CultureInfo.CurrentCulture));
+        UploadedText = Text.Format(Strings.UpdateUploaded, Dates.Day(update.UploadedAt, _services.TimeProvider));
         ReplacesText = mod.Files.FirstOrDefault(file => file.File == update.Replaces) is { } replaced
             ? Text.Format(Strings.UpdateReplaces, replaced.FileName)
             : string.Empty;
@@ -214,8 +210,7 @@ public sealed partial class UpdateViewModel : ObservableObject
 
                 if (changes is null)
                 {
-                    string site = _services.Sources.Find<IModSource>(File.Mod.Game.Source)?.DisplayName ?? File.Mod.Game.Source.Value;
-                    ChangesNote = Text.Format(Strings.ChangelogNone, site);
+                    ChangesNote = Text.Format(Strings.ChangelogNone, _services.Sources.SiteName(File.Mod.Game.Source));
                     return;
                 }
 

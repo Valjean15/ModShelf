@@ -170,7 +170,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         {
             LibraryGameViewModel heading = _games[game.Key];
             LibraryModViewModel[] mods = [.. game.OrderBy(mod => mod.Name, byName)];
-            heading.ModsText = mods.Length == 1 ? Strings.LibraryOneMod : Text.Format(Strings.LibraryMods, mods.Length);
+            heading.ModsText = Counts.Of(mods.Length, Strings.LibraryOneMod, Strings.LibraryMods);
             rows.Add(heading);
             rows.AddRange(mods);
         }

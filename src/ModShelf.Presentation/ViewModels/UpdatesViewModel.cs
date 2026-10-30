@@ -15,7 +15,6 @@ using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
-using ModShelf.Sources.Abstractions;
 
 namespace ModShelf.Presentation.ViewModels;
 
@@ -137,8 +136,6 @@ public sealed partial class UpdatesViewModel : ScreenViewModel
         }
     }
 
-    private static string Count(int count, string one, string many) => count == 1 ? one : Text.Format(many, count);
-
     private bool CanCheckNow() => HasWatched && !IsChecking;
 
     /// <summary>
@@ -154,13 +151,8 @@ public sealed partial class UpdatesViewModel : ScreenViewModel
         try
         {
             UpdateCheck check = await _checker.CheckAsync(cancellationToken);
-            string found = check.Found.Count switch
-            {
-                0 => Strings.CheckNoNewUpdates,
-                1 => Strings.CheckOneNewUpdate,
-                int count => Text.Format(Strings.CheckNewUpdates, count),
-            };
-            CheckResult = $"{Text.Format(Strings.CheckSummary, Count(check.Checked, Strings.CheckOneMod, Strings.CheckMods), Count(check.Requests, Strings.CheckOneRequest, Strings.CheckRequests))} {found}";
+            string found = Counts.Of(check.Found.Count, Strings.CheckNoNewUpdates, Strings.CheckOneNewUpdate, Strings.CheckNewUpdates);
+            CheckResult = $"{Text.Format(Strings.CheckSummary, Counts.Of(check.Checked, Strings.CheckOneMod, Strings.CheckMods), Counts.Of(check.Requests, Strings.CheckOneRequest, Strings.CheckRequests))} {found}";
             foreach (UpdateCheckFailure failure in check.Failures)
             {
                 CheckFailures.Add(Describe(failure));
@@ -197,8 +189,7 @@ public sealed partial class UpdatesViewModel : ScreenViewModel
             return Text.Format(Strings.CheckModFailed, _mods.GetValueOrDefault(mod)?.Name ?? mod.Id, failure.Reason);
         }
 
-        string site = _sources.Find<IModSource>(failure.Game.Source)?.DisplayName ?? failure.Game.Source.Value;
-        return Text.Format(Strings.CheckGameFailed, failure.Game.Key, site, failure.Reason);
+        return Text.Format(Strings.CheckGameFailed, failure.Game.Key, _sources.SiteName(failure.Game.Source), failure.Reason);
     }
 
     /// <summary>
@@ -262,6 +253,6 @@ public sealed partial class UpdatesViewModel : ScreenViewModel
                 ? Strings.UpdatesNotAllChecked
                 : Text.Format(
                     Strings.UpdatesCheckedSince,
-                    TimeZoneInfo.ConvertTime(watched.Min(mod => mod.CheckedAt!.Value), _timeProvider.LocalTimeZone).ToString("g", CultureInfo.CurrentCulture));
+                    Dates.DayAndTime(watched.Min(mod => mod.CheckedAt!.Value), _timeProvider));
     }
 }

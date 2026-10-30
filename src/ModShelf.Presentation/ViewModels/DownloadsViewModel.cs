@@ -14,7 +14,6 @@ using ModShelf.Domain.Downloads;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
-using ModShelf.Sources.Abstractions;
 
 namespace ModShelf.Presentation.ViewModels;
 
@@ -339,8 +338,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
 
     private void Add(DownloadJobSnapshot job)
     {
-        string site = _sources.Find<IModSource>(job.File.Mod.Game.Source)?.DisplayName ?? job.File.Mod.Game.Source.Value;
-        DownloadJobViewModel added = new(job, site, _jobServices);
+        DownloadJobViewModel added = new(job, _sources.SiteName(job.File.Mod.Game.Source), _jobServices);
         _shown.Add(job.Id, added);
 
         // Newest first: before the first job added no later than this one.

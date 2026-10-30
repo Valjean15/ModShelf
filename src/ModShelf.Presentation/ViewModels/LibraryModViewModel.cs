@@ -113,19 +113,9 @@ public sealed partial class LibraryModViewModel : ObservableObject
         AuthorText = mod.Author is { } author ? Text.Format(Strings.LibraryByAuthor, author) : string.Empty;
         IsWatched = mod.IsWatched;
         WatchedText = mod.IsWatched ? Strings.LibraryWatched : Strings.LibraryNotWatched;
-        FilesText = mod.Files.Count switch
-        {
-            0 => Strings.LibraryNoFiles,
-            1 => Strings.LibraryOneFile,
-            int count => Text.Format(Strings.LibraryFiles, count),
-        };
+        FilesText = Counts.Of(mod.Files.Count, Strings.LibraryNoFiles, Strings.LibraryOneFile, Strings.LibraryFiles);
         HasFiles = mod.Files.Count > 0;
-        UpdatesText = mod.Updates.Count switch
-        {
-            0 => string.Empty,
-            1 => Strings.LibraryOneUpdate,
-            int count => Text.Format(Strings.LibraryUpdates, count),
-        };
+        UpdatesText = Counts.Of(mod.Updates.Count, string.Empty, Strings.LibraryOneUpdate, Strings.LibraryUpdates);
         HasUpdates = mod.Updates.Count > 0;
         HasPage = mod.PageUrl is not null;
 

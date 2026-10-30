@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.Input;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
-using ModShelf.Presentation.Resources;
 using ModShelf.Sources.Abstractions.Catalog;
 
 namespace ModShelf.Presentation.ViewModels;
@@ -28,12 +27,13 @@ public sealed partial class BrowseModViewModel : ObservableObject
         _open = open;
         Mod = mod.Mod;
         Name = mod.Name;
-        AuthorText = mod.Author is { } author ? Text.Format(Strings.LibraryByAuthor, author) : string.Empty;
-        Summary = mod.Summary ?? string.Empty;
-        VersionText = mod.Version is { } version ? Text.Format(Strings.LibraryFileVersion, version) : string.Empty;
-        UpdatedText = mod.UpdatedAt is { } updated ? Text.Format(Strings.BrowseUpdated, ModText.LocalDate(updated, timeProvider)) : string.Empty;
-        DownloadsText = ModText.Count(mod.Downloads, Strings.BrowseOneDownload, Strings.BrowseDownloads);
-        EndorsementsText = ModText.Count(mod.Endorsements, Strings.BrowseOneEndorsement, Strings.BrowseEndorsements);
+        ModInfoText text = ModInfoText.Of(mod, timeProvider);
+        AuthorText = text.Author;
+        Summary = text.Summary;
+        VersionText = text.Version;
+        UpdatedText = text.Updated;
+        DownloadsText = text.Downloads;
+        EndorsementsText = text.Endorsements;
         HasAdultContent = mod.HasAdultContent;
         IsHidden = !mod.IsAvailable;
         Problem = problem;

@@ -42,21 +42,20 @@ public sealed partial class ModPageViewModel : ObservableObject
         _linkedFile = page.LinkedFile;
         Mod = page.Mod.Mod;
         Name = page.Mod.Name;
-        AuthorText = page.Mod.Author is { } author ? Text.Format(Strings.LibraryByAuthor, author) : string.Empty;
         GameName = page.Game.Name;
-        Summary = page.Mod.Summary ?? string.Empty;
-        VersionText = page.Mod.Version is { } version ? Text.Format(Strings.LibraryFileVersion, version) : string.Empty;
-        UpdatedText = page.Mod.UpdatedAt is { } updated
-            ? Text.Format(Strings.BrowseUpdated, ModText.LocalDate(updated, services.TimeProvider))
-            : string.Empty;
-        DownloadsText = ModText.Count(page.Mod.Downloads, Strings.BrowseOneDownload, Strings.BrowseDownloads);
-        EndorsementsText = ModText.Count(page.Mod.Endorsements, Strings.BrowseOneEndorsement, Strings.BrowseEndorsements);
+        ModInfoText text = ModInfoText.Of(page.Mod, services.TimeProvider);
+        AuthorText = text.Author;
+        Summary = text.Summary;
+        VersionText = text.Version;
+        UpdatedText = text.Updated;
+        DownloadsText = text.Downloads;
+        EndorsementsText = text.Endorsements;
         HasAdultContent = page.Mod.HasAdultContent;
         IsUnavailable = !page.Mod.IsAvailable;
         HasPage = page.Mod.PageUrl is not null;
         Changelog = page.Changelogs;
         CanTrack = services.Tracked.CanTrack(Mod.Game.Source);
-        string site = services.SiteName(Mod.Game.Source);
+        string site = services.Sources.SiteName(Mod.Game.Source);
         TrackText = Text.Format(Strings.BrowseTrack, site);
         UntrackText = Text.Format(Strings.BrowseUntrack, site);
 
@@ -320,12 +319,12 @@ public sealed partial class ModPageViewModel : ObservableObject
                 }
                 catch (AuthenticationFailedException)
                 {
-                    Tell(Text.Format(Strings.BrowseAccountNeeded, _services.SiteName(Mod.Game.Source)), isProblem: true);
+                    Tell(Text.Format(Strings.BrowseAccountNeeded, _services.Sources.SiteName(Mod.Game.Source)), isProblem: true);
                     return;
                 }
                 catch (HttpRequestException exception)
                 {
-                    Tell(Text.Format(Strings.BrowseWatchFailed, _services.SiteName(Mod.Game.Source), exception.Message), isProblem: true);
+                    Tell(Text.Format(Strings.BrowseWatchFailed, _services.Sources.SiteName(Mod.Game.Source), exception.Message), isProblem: true);
                     return;
                 }
 
@@ -342,7 +341,7 @@ public sealed partial class ModPageViewModel : ObservableObject
     private Task ToggleTrackAsync(CancellationToken cancellationToken)
     {
         bool track = !IsTracked;
-        string site = _services.SiteName(Mod.Game.Source);
+        string site = _services.Sources.SiteName(Mod.Game.Source);
         return RunAsync(
             track ? PageAction.Track : PageAction.Untrack,
             async () =>
@@ -397,7 +396,7 @@ public sealed partial class ModPageViewModel : ObservableObject
         HasMoreFiles = more > 0;
         MoreFilesText = AreMoreFilesShown
             ? Strings.BrowseHideMoreFiles
-            : more == 1 ? Strings.BrowseShowOneMoreFile : Text.Format(Strings.BrowseShowMoreFiles, more);
+            : Counts.Of(more, Strings.BrowseShowOneMoreFile, Strings.BrowseShowMoreFiles);
     }
 
     private void Tell(string note, bool isProblem)

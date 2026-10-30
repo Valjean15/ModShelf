@@ -376,7 +376,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
                 Mod = null;
                 Results.Clear();
                 IsShowingTracked = true;
-                string site = _services.SiteName(source);
+                string site = _services.Sources.SiteName(source);
                 ResultsText = _trackedToShow.Count switch
                 {
                     0 => Text.Format(Strings.BrowseTrackedNone, game.Name, site),
@@ -436,7 +436,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         {
             foreach (SourceId source in sources)
             {
-                string site = _services.SiteName(source);
+                string site = _services.Sources.SiteName(source);
                 try
                 {
                     IReadOnlyList<GameInfo> read = await _lookup.GetGamesAsync(source, _stopping);
@@ -542,12 +542,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
 
         _nextOffset = page.Offset + page.Mods.Count;
         HasMore = page.HasMore;
-        ResultsText = page.TotalCount switch
-        {
-            0 => Strings.BrowseNoMatches,
-            1 => Strings.BrowseOneMatch,
-            int count => Text.Format(Strings.BrowseMatches, count),
-        };
+        ResultsText = Counts.Of(page.TotalCount, Strings.BrowseNoMatches, Strings.BrowseOneMatch, Strings.BrowseMatches);
     }
 
     /// <summary>
@@ -678,7 +673,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
             return notFound;
         }
 
-        return Describe(exception, _services.SiteName(site), failed);
+        return Describe(exception, _services.Sources.SiteName(site), failed);
     }
 
     /// <param name="problem">What went wrong; null for nothing.</param>

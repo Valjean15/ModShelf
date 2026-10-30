@@ -1,5 +1,3 @@
-using System.Globalization;
-
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -64,8 +62,7 @@ public sealed partial class LibraryFileViewModel : ObservableObject
         Name = file.Name;
         VersionText = file.VersionLabel is { } version ? Text.Format(Strings.LibraryFileVersion, version) : string.Empty;
         SizeText = Sizes.Format(file.SizeInBytes);
-        DateTimeOffset downloaded = TimeZoneInfo.ConvertTime(file.DownloadedAt, _services.TimeProvider.LocalTimeZone);
-        DownloadedText = Text.Format(Strings.LibraryFileDownloaded, downloaded.ToString("d", CultureInfo.CurrentCulture));
+        DownloadedText = Text.Format(Strings.LibraryFileDownloaded, Dates.Day(file.DownloadedAt, _services.TimeProvider));
     }
 
     /// <summary>
