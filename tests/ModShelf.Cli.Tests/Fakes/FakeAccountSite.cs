@@ -73,6 +73,11 @@ internal sealed partial class FakeAccountSite : IAsyncDisposable
     public HttpStatusCode? ProfileRefusal { get; set; }
 
     /// <summary>
+    /// Whether asking who the account is gets no answer, until the site stops.
+    /// </summary>
+    public bool ProfileStalls { get; set; }
+
+    /// <summary>
     /// How many times a refresh token was swapped for new tokens.
     /// </summary>
     public int TokenRefreshes

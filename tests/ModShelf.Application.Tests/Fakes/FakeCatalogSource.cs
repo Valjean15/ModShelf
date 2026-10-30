@@ -30,7 +30,13 @@ internal sealed class FakeCatalogSource(SourceId id) : ILinkRecognizer, IModCata
         new(LinkedFile, "SkyUI 5.2", "SkyUI_5_2_SE.7z", "5.2", ModFileCategory.Main, 100, TestData.Now, []),
     ];
 
-    public IReadOnlyList<ModChangelog> Changelogs { get; } = [new("5.2", ["Fixed the menus."])];
+    public IReadOnlyList<ModChangelog> Changelogs { get; init; } = [new("5.2", ["Fixed the menus."])];
+
+    /// <summary>
+    /// Holds each changelog read until set, as a slow site does; a read whose caller gives up ends then. Null to answer at
+    /// once.
+    /// </summary>
+    public TaskCompletionSource? ChangelogsHeld { get; init; }
 
     /// <summary>
     /// What the next answer of each kind throws instead, keyed by the method's name.
@@ -57,8 +63,15 @@ internal sealed class FakeCatalogSource(SourceId id) : ILinkRecognizer, IModCata
     public Task<IReadOnlyList<ModFile>> GetFilesAsync(ModRef modRef, CancellationToken cancellationToken)
         => Answer(nameof(GetFilesAsync), () => Files);
 
-    public Task<IReadOnlyList<ModChangelog>> GetChangelogsAsync(ModRef modRef, CancellationToken cancellationToken)
-        => Answer(nameof(GetChangelogsAsync), () => Changelogs);
+    public async Task<IReadOnlyList<ModChangelog>> GetChangelogsAsync(ModRef modRef, CancellationToken cancellationToken)
+    {
+        if (ChangelogsHeld is { } held)
+        {
+            await held.Task.WaitAsync(cancellationToken);
+        }
+
+        return await Answer(nameof(GetChangelogsAsync), () => Changelogs);
+    }
 
     /// <summary>
     /// The game and query of the last search.

@@ -122,6 +122,23 @@ public sealed partial class AccountCommandTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task ACheckThatGetsNoAnswerInTimeSaysTheSiteCouldntBeReached()
+    {
+        await using InProcessCli cli = new(
+            _site,
+            _browser,
+            configureServices: services => services.ConfigureHttpClientDefaults(
+                client => client.ConfigureHttpClient(http => http.Timeout = TimeSpan.FromSeconds(1))));
+        Assert.Equal(Done, Log(await cli.RunAsync(["account", "link", KeySource], Cancellation, _site.ApiKey + "\n")).ExitCode);
+        _site.ProfileStalls = true;
+
+        CliResult check = Log(await cli.RunAsync(["account", "check", KeySource], Cancellation));
+
+        Assert.Equal(Failed, check.ExitCode);
+        Assert.Equal($"Couldn't reach {KeySource}. Check your connection, then try again.", check.Errors.Trim());
+    }
+
+    [Fact]
     public async Task ABlankKeyIsRefusedWithoutAskingTheSite()
     {
         CliResult refused = await RunAsync(["account", "link", KeySource], "   \n");

@@ -119,6 +119,11 @@ internal sealed partial class FakeAccountSite
                     return;
                 }
 
+                if (ProfileStalls && request.Path == "/api/me")
+                {
+                    await Task.Delay(Timeout.Infinite, cancellationToken).ConfigureAwait(false);
+                }
+
                 Response response;
                 lock (_gate)
                 {

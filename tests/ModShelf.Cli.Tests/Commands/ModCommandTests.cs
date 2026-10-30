@@ -1,3 +1,5 @@
+using System.Globalization;
+
 using ModShelf.Cli.Tests.Common;
 using ModShelf.Cli.Tests.Fakes;
 
@@ -60,6 +62,15 @@ public sealed class ModCommandTests : IAsyncDisposable
         Assert.DoesNotContain("Changelog", shown.Output, StringComparison.Ordinal);
         Assert.StartsWith("*", Row(shown, FileLink("1", NewestMainFile)), StringComparison.Ordinal);
         Assert.StartsWith(" ", Row(shown, FileLink("1", "11")), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task WritesTheSitesCountsWithTheirThousandsSeparated()
+    {
+        CliResult shown = await RunAsync(["mod", "show", ModLink("1").AbsoluteUri]);
+
+        Assert.Contains(1_234_567.ToString("N0", CultureInfo.CurrentCulture), shown.Output, StringComparison.Ordinal);
+        Assert.Contains(8_910.ToString("N0", CultureInfo.CurrentCulture), shown.Output, StringComparison.Ordinal);
     }
 
     [Fact]

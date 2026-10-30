@@ -53,6 +53,35 @@ public sealed class ModLookupTests
     }
 
     [Fact]
+    public async Task AVersionIsMatchedExactlyAsTheChangelogWritesIt()
+    {
+        FakeCatalogSource site = new(TestData.Nexus) { Changelogs = [new("1.0b", ["Fixed the menus."])] };
+        ModLookup lookup = new(new SourceRegistry([site]));
+        ModRef mod = site.LinkedFile.Mod;
+
+        Assert.Empty((await lookup.GetChangesAsync(mod, "1.0B", Cancellation))!);
+        Assert.Equal(["Fixed the menus."], await lookup.GetChangesAsync(mod, "1.0b", Cancellation));
+    }
+
+    [Fact]
+    public async Task OneCallerGivingUpDoesntStopTheReadForTheOthers()
+    {
+        FakeCatalogSource site = new(TestData.Nexus) { ChangelogsHeld = new(TaskCreationOptions.RunContinuationsAsynchronously) };
+        ModLookup lookup = new(new SourceRegistry([site]));
+        ModRef mod = site.LinkedFile.Mod;
+        using CancellationTokenSource givingUp = new();
+
+        Task<IReadOnlyList<string>?> first = lookup.GetChangesAsync(mod, "5.2", givingUp.Token);
+        Task<IReadOnlyList<string>?> second = lookup.GetChangesAsync(mod, "5.2", Cancellation);
+        await givingUp.CancelAsync();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => first);
+        site.ChangelogsHeld.SetResult();
+
+        Assert.Equal(["Fixed the menus."], await second.WaitAsync(TimeSpan.FromSeconds(10), Cancellation));
+        Assert.Equal(["GetChangelogsAsync"], site.Asked);
+    }
+
+    [Fact]
     public async Task AChangelogThatCouldntBeReadIsReadAgain()
     {
         FakeCatalogSource site = new(TestData.Nexus);
@@ -256,6 +285,17 @@ public sealed class ModLookupTests
             ]));
 
         Assert.Equal([TestData.Nexus, TestData.ModIo], lookup.SearchableSources);
+    }
+
+    [Fact]
+    public async Task SaysWhatTheModsSourceCantDo()
+    {
+        ModLookup lookup = new(new SourceRegistry([ScriptedLinkRecognizer.Never(TestData.Nexus)]));
+
+        ArgumentException refused = await Assert.ThrowsAsync<ArgumentException>(
+            () => lookup.LookUpAsync(TestData.File(TestData.Nexus, "35407").Mod, TestContext.Current.CancellationToken));
+
+        Assert.Equal($"Source '{TestData.Nexus}' isn't registered, or can't describe its mods. (Parameter 'modRef')", refused.Message);
     }
 
     [Fact]
