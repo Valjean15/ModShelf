@@ -5,17 +5,10 @@
         x:DataType="dialogs:MessageDialogContent"
         Title="{Binding Title}"
         Width="420"
-        SizeToContent="Height"
-        CanResize="False"
-        ShowInTaskbar="False"
-        WindowStartupLocation="CenterOwner">
+        Classes="dialog">
 
-    <DockPanel Margin="24">
-        <StackPanel DockPanel.Dock="Bottom"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Spacing="8"
-                    Margin="0,24,0,0">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Bottom" Classes="dialogButtons">
             <Button Name="ConfirmButton"
                     Classes="accent"
                     IsDefault="True"

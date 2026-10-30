@@ -5,10 +5,7 @@
         x:DataType="vm:TextQuestionViewModel"
         Title="{Binding Title}"
         Width="480"
-        SizeToContent="Height"
-        CanResize="False"
-        ShowInTaskbar="False"
-        WindowStartupLocation="CenterOwner">
+        Classes="dialog">
 
     <Window.Styles>
         <!-- A secret, such as an API key, isn't shown as it's typed. -->
@@ -17,12 +14,8 @@
         </Style>
     </Window.Styles>
 
-    <DockPanel Margin="24">
-        <StackPanel DockPanel.Dock="Bottom"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Spacing="8"
-                    Margin="0,24,0,0">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Bottom" Classes="dialogButtons">
             <Button Classes="accent"
                     IsDefault="True"
                     Content="{Binding ConfirmLabel}"

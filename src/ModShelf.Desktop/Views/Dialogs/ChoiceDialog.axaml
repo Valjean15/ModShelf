@@ -5,13 +5,10 @@
         x:DataType="dialogs:ChoiceDialogContent"
         Title="{Binding Title}"
         Width="460"
-        SizeToContent="Height"
-        CanResize="False"
-        ShowInTaskbar="False"
-        WindowStartupLocation="CenterOwner">
+        Classes="dialog">
 
-    <DockPanel Margin="24">
-        <ItemsControl DockPanel.Dock="Bottom" Margin="0,24,0,0" HorizontalAlignment="Right" ItemsSource="{Binding Choices}">
+    <DockPanel>
+        <ItemsControl DockPanel.Dock="Bottom" Classes="dialogButtons" ItemsSource="{Binding Choices}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <StackPanel Orientation="Horizontal" Spacing="8" />

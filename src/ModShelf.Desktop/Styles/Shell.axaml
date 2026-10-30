@@ -117,6 +117,29 @@
         <Setter Property="BorderThickness" Value="0,0,0,1" />
     </Style>
 
+    <!-- A dialog: as tall as what it says and no more, over the main window, and not in the taskbar. -->
+    <Style Selector="Window.dialog">
+        <Setter Property="SizeToContent" Value="Height" />
+        <Setter Property="CanResize" Value="False" />
+        <Setter Property="ShowInTaskbar" Value="False" />
+        <Setter Property="WindowStartupLocation" Value="CenterOwner" />
+    </Style>
+
+    <Style Selector="Window.dialog > DockPanel">
+        <Setter Property="Margin" Value="24" />
+    </Style>
+
+    <!-- A dialog's buttons, below what it says, on the right. -->
+    <Style Selector="StackPanel.dialogButtons, ItemsControl.dialogButtons">
+        <Setter Property="HorizontalAlignment" Value="Right" />
+        <Setter Property="Margin" Value="0,24,0,0" />
+    </Style>
+
+    <Style Selector="StackPanel.dialogButtons">
+        <Setter Property="Orientation" Value="Horizontal" />
+        <Setter Property="Spacing" Value="8" />
+    </Style>
+
     <Style Selector="Button.sidebarToggle">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Width" Value="40" />
