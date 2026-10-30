@@ -38,14 +38,26 @@ internal static class MimeAppsList
 
     /// <summary>
     /// Sets the key to <paramref name="value"/>, or removes it for null. The file and the section are added when
-    /// missing.
+    /// missing. The file keeps its line endings: a new one ends its lines with <c>\n</c>.
     /// </summary>
     public static void Write(string file, string section, string key, string? value)
     {
         List<string> lines;
+        string newLine = "\n";
         try
         {
-            lines = [.. File.ReadAllLines(file)];
+            string text = File.ReadAllText(file);
+            if (text.Contains("\r\n", StringComparison.Ordinal))
+            {
+                newLine = "\r\n";
+            }
+
+            lines = [.. text.ReplaceLineEndings("\n").Split('\n')];
+            if (lines[^1].Length == 0)
+            {
+                // The end of the last line, not a line of its own.
+                lines.RemoveAt(lines.Count - 1);
+            }
         }
         catch (Exception exception) when (exception is FileNotFoundException or DirectoryNotFoundException)
         {
@@ -96,7 +108,7 @@ internal static class MimeAppsList
 
         Directory.CreateDirectory(Path.GetDirectoryName(file)!);
         string temporary = file + ".modshelf-new";
-        File.WriteAllText(temporary, string.Join('\n', lines) + "\n");
+        File.WriteAllText(temporary, string.Join(newLine, lines) + newLine);
         File.Move(temporary, file, overwrite: true);
     }
 

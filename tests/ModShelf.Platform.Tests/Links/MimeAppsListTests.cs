@@ -84,6 +84,32 @@ public sealed class MimeAppsListTests : IDisposable
         Assert.False(Directory.Exists(Path.Combine(_folder.Path, "missing")));
     }
 
+    [Theory]
+    [InlineData("\r\n")]
+    [InlineData("\n")]
+    public void KeepsTheFilesLineEndings(string newLine)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(File)!);
+        System.IO.File.WriteAllText(File, string.Join(newLine, "# Mine", "[Default Applications]", $"{Key}=vortex.desktop;", "text/plain=gedit.desktop") + newLine);
+
+        MimeAppsList.Write(File, MimeAppsList.DefaultApplications, Key, "modshelf-nxm.desktop;");
+
+        Assert.Equal(
+            string.Join(newLine, "# Mine", "[Default Applications]", $"{Key}=modshelf-nxm.desktop;", "text/plain=gedit.desktop") + newLine,
+            System.IO.File.ReadAllText(File));
+    }
+
+    [Fact]
+    public void AnEmptyFileGetsTheSection()
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(File)!);
+        System.IO.File.WriteAllText(File, string.Empty);
+
+        MimeAppsList.Write(File, MimeAppsList.DefaultApplications, Key, "modshelf-nxm.desktop;");
+
+        Assert.Equal(["[Default Applications]", $"{Key}=modshelf-nxm.desktop;"], Lines());
+    }
+
     private void Write(params string[] lines)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(File)!);
