@@ -6,6 +6,7 @@ using ModShelf.Application.Catalog;
 using ModShelf.Application.Diagnostics;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Library;
+using ModShelf.Application.Links;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
 using ModShelf.Application.Updates;
@@ -206,6 +207,22 @@ public static class ApplicationServiceCollectionExtensions
         services.TryAddSingleton(app);
         services.TryAddSingleton(TimeProvider.System);
         services.TryAddSingleton<IDiagnostics, DiagnosticsReport>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers <see cref="ILinkHandlers"/>, which makes the system open the links the sites hand their downloads over
+    /// with in ModShelf, and <see cref="IOpenedLinks"/>, which downloads the links it's handed. Needs Platform's
+    /// <see cref="Links.Ports.ISchemeRegistration"/>, the download engine, the library downloads and the settings.
+    /// </summary>
+    public static IServiceCollection AddLinks(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
+        services.TryAddSingleton<ILinkHandlers, LinkHandlers>();
+        services.TryAddSingleton<IOpenedLinks, OpenedLinks>();
 
         return services;
     }

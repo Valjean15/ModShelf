@@ -11,9 +11,10 @@ namespace ModShelf.Application.Tests.Fakes;
 /// <summary>
 /// A site whose mods the test adds, all of one game. It recognizes <c>https://mods.example/{mod}/{file}</c>, and
 /// <c>fakemods://{mod}/{file}</c> as a link that completes a handoff, and suggests no file name, so what its catalog
-/// says counts. The test can make any answer fail, or hold the answers back. It records what it was asked.
+/// says counts. The test can make any answer fail, or hold the answers back. It records what it was asked. Its
+/// website hands downloads over with <c>fakemods://</c> links.
 /// </summary>
-internal sealed class FakeModSite : ILinkRecognizer, IModCatalog
+internal sealed class FakeModSite : ILinkRecognizer, IModCatalog, IHandoffScheme
 {
     private readonly ConcurrentDictionary<string, string> _mods = new();
     private readonly ConcurrentDictionary<string, List<ModFile>> _files = new();
@@ -27,6 +28,8 @@ internal sealed class FakeModSite : ILinkRecognizer, IModCatalog
     public SourceId Id => SourceId;
 
     public string DisplayName => "Fake mod site";
+
+    public string Scheme => "fakemods";
 
     /// <summary>
     /// What the next answer of each kind throws instead, keyed by the method's name.
