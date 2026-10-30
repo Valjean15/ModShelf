@@ -40,16 +40,17 @@
                         <Expander HorizontalAlignment="Stretch" IsExpanded="{Binding IsExpanded}">
                             <Expander.Header>
                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                    <!-- Wrapping, so long names go to the next line rather than under the buttons. -->
                                     <StackPanel Spacing="2">
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <TextBlock FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
+                                        <WrapPanel ItemSpacing="8">
+                                            <TextBlock FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding Name}" />
                                             <TextBlock Classes="note" Text="{Binding AuthorText}" />
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Spacing="16">
+                                        </WrapPanel>
+                                        <WrapPanel ItemSpacing="16">
                                             <TextBlock Classes="note" Text="{Binding WatchedText}" />
                                             <TextBlock Classes="note" Text="{Binding FilesText}" />
                                             <TextBlock Classes="attention" Text="{Binding UpdatesText}" IsVisible="{Binding HasUpdates}" />
-                                        </StackPanel>
+                                        </WrapPanel>
                                     </StackPanel>
                                     <Grid Grid.Column="1" ColumnSpacing="8" VerticalAlignment="Center">
                                         <Grid.ColumnDefinitions>
@@ -81,12 +82,12 @@
                                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16" Margin="0,4">
                                             <StackPanel Spacing="2">
                                                 <TextBlock TextTrimming="CharacterEllipsis" Text="{Binding FileName}" />
-                                                <StackPanel Orientation="Horizontal" Spacing="16">
-                                                    <TextBlock Classes="note" Text="{Binding Name}" />
+                                                <WrapPanel ItemSpacing="16">
+                                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding Name}" />
                                                     <TextBlock Classes="note" Text="{Binding VersionText}" />
                                                     <TextBlock Classes="note" Text="{Binding SizeText}" />
                                                     <TextBlock Classes="note" Text="{Binding DownloadedText}" />
-                                                </StackPanel>
+                                                </WrapPanel>
                                             </StackPanel>
                                             <Button Grid.Column="1"
                                                     VerticalAlignment="Center"
