@@ -222,15 +222,22 @@ internal sealed class JsonSettingsStore : ISettingsStore
     }
 
     /// <summary>
-    /// Writes <paramref name="text"/> to a temporary file of its own beside <paramref name="path"/>, then puts it in
-    /// place in one step. When that fails, the temporary file goes too.
+    /// Writes <paramref name="text"/> to a temporary file of its own beside <paramref name="path"/>, on to the disk,
+    /// then puts it in place in one step, so a crash or a power cut leaves the old settings or the new ones, never an
+    /// empty file. When that fails, the temporary file goes too.
     /// </summary>
     internal static async Task ReplaceAsync(string path, string text, CancellationToken cancellationToken)
     {
         string temporary = $"{path}.{Guid.NewGuid():N}.tmp";
         try
         {
-            await File.WriteAllTextAsync(temporary, text, new UTF8Encoding(false), cancellationToken).ConfigureAwait(false);
+            FileStream file = new(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+            await using (file.ConfigureAwait(false))
+            {
+                await file.WriteAsync(new UTF8Encoding(false).GetBytes(text), cancellationToken).ConfigureAwait(false);
+                file.Flush(flushToDisk: true);
+            }
+
             File.Move(temporary, path, overwrite: true);
         }
         catch

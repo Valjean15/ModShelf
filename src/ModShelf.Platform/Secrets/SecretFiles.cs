@@ -2,7 +2,7 @@ namespace ModShelf.Platform.Secrets;
 
 /// <summary>
 /// File handling for the stores that keep one file per secret: owner-only permissions on Unix, and writes that
-/// never leave a half-written file behind.
+/// never leave a half-written file behind, even after a power cut.
 /// </summary>
 internal static class SecretFiles
 {
@@ -25,35 +25,11 @@ internal static class SecretFiles
     }
 
     /// <summary>
-    /// Writes the file under a temporary name, then renames it into place in one step, so a crash leaves either
-    /// the old secret or the new one. On Unix the file is readable only by the current user.
+    /// Writes the file under a temporary name, on to the disk, then renames it into place in one step, so a crash or a
+    /// power cut leaves either the old secret or the new one. On Unix the file is readable only by the current user.
     /// </summary>
-    public static async Task WriteAsync(string path, byte[] contents, CancellationToken cancellationToken)
-    {
-        string temporary = $"{path}.{Guid.NewGuid():N}.tmp";
-        FileStreamOptions options = new() { Mode = FileMode.CreateNew, Access = FileAccess.Write, Share = FileShare.None };
-        if (!OperatingSystem.IsWindows())
-        {
-            options.UnixCreateMode = OwnerOnlyFile;
-        }
-
-        try
-        {
-            FileStream file = new(temporary, options);
-            await using (file.ConfigureAwait(false))
-            {
-                await file.WriteAsync(contents, cancellationToken).ConfigureAwait(false);
-                await file.FlushAsync(cancellationToken).ConfigureAwait(false);
-            }
-
-            File.Move(temporary, path, overwrite: true);
-        }
-        catch
-        {
-            File.Delete(temporary);
-            throw;
-        }
-    }
+    public static Task WriteAsync(string path, byte[] contents, CancellationToken cancellationToken)
+        => WriteAsync(path, contents, overwrite: true, cancellationToken);
 
     /// <summary>
     /// Deletes the file. Does nothing when the file or its folder doesn't exist.
@@ -84,6 +60,43 @@ internal static class SecretFiles
         catch (DirectoryNotFoundException)
         {
             return null;
+        }
+    }
+
+    private static async Task WriteAsync(string path, byte[] contents, bool overwrite, CancellationToken cancellationToken)
+    {
+        string temporary = $"{path}.{Guid.NewGuid():N}.tmp";
+        FileStreamOptions options = new() { Mode = FileMode.CreateNew, Access = FileAccess.Write, Share = FileShare.None };
+        if (!OperatingSystem.IsWindows())
+        {
+            options.UnixCreateMode = OwnerOnlyFile;
+        }
+
+        try
+        {
+            FileStream file = new(temporary, options);
+            await using (file.ConfigureAwait(false))
+            {
+                await file.WriteAsync(contents, cancellationToken).ConfigureAwait(false);
+
+                // On the disk before it replaces the old file, which a power cut could otherwise leave empty.
+                file.Flush(flushToDisk: true);
+            }
+
+            File.Move(temporary, path, overwrite);
+        }
+        catch
+        {
+            try
+            {
+                File.Delete(temporary);
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                // What went wrong first says more.
+            }
+
+            throw;
         }
     }
 }
