@@ -39,6 +39,8 @@ public sealed partial class LinkHandlerViewModel : ObservableObject
     public string StateText => Handler.State switch
     {
         { Kind: SchemeHandlerKind.ModShelf } => Text.Format(Strings.LinksOpenedByModShelf, Handler.Scheme, Handler.SiteName),
+        { Kind: SchemeHandlerKind.OtherApp, IsModShelfBehind: true } => Text.Format(
+            Strings.LinksOpenedByChosenApp, Handler.Scheme, Handler.SiteName, Handler.State.OtherApp ?? Strings.LinksAnotherApp),
         { Kind: SchemeHandlerKind.OtherApp, OtherApp: { } app } => Text.Format(Strings.LinksOpenedByApp, Handler.Scheme, Handler.SiteName, app),
         { Kind: SchemeHandlerKind.OtherApp } => Text.Format(Strings.LinksOpenedByAnotherApp, Handler.Scheme, Handler.SiteName),
         { Kind: SchemeHandlerKind.Unavailable } => Text.Format(Strings.LinksUnavailable, Handler.Scheme, Handler.SiteName),
@@ -46,14 +48,16 @@ public sealed partial class LinkHandlerViewModel : ObservableObject
     };
 
     /// <summary>
-    /// Whether to offer taking the links: another app opens them, or none does.
+    /// Whether to offer taking the links: another app opens them, or none does. Not when ModShelf is registered behind
+    /// an app chosen in the system's own settings, which only the user can change there.
     /// </summary>
-    public bool OffersTake => Handler.State.Kind is SchemeHandlerKind.None or SchemeHandlerKind.OtherApp;
+    public bool OffersTake => Handler.State is { Kind: SchemeHandlerKind.None or SchemeHandlerKind.OtherApp, IsModShelfBehind: false };
 
     /// <summary>
-    /// Whether to offer giving the links back: ModShelf opens them.
+    /// Whether to offer giving the links back: ModShelf opens them, or is registered behind an app chosen in the
+    /// system's own settings.
     /// </summary>
-    public bool OffersGiveBack => Handler.State.Kind == SchemeHandlerKind.ModShelf;
+    public bool OffersGiveBack => Handler.State.Kind == SchemeHandlerKind.ModShelf || Handler.State.IsModShelfBehind;
 
     /// <summary>
     /// Whether ModShelf can take the links now: another app opens them, or none does, and no command is running.

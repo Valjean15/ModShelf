@@ -40,7 +40,7 @@ internal sealed class WindowsSchemeRegistration(IRegistryTree user, IRegistryTre
 
         string? chosen = ChosenApp(scheme);
         SchemeState state = IsModShelfs(scheme)
-            ? chosen is not null ? new SchemeState(SchemeHandlerKind.OtherApp, chosen)
+            ? chosen is not null ? new SchemeState(SchemeHandlerKind.OtherApp, chosen, PreviousApp(scheme), IsModShelfBehind: true)
             : IsThisModShelfs(scheme) ? new SchemeState(SchemeHandlerKind.ModShelf, PreviousApp: PreviousApp(scheme))
             : new SchemeState(SchemeHandlerKind.OtherApp, Strings.AnotherModShelf)
             : !File.Exists(options.DesktopApp) ? SchemeState.Unavailable

@@ -102,6 +102,26 @@ public sealed class LinksViewModelTests
     }
 
     [Fact]
+    public async Task BehindAnAppChosenInTheSystemsSettingsItOffersOnlyToGiveThemBack()
+    {
+        Show(new SchemeState(SchemeHandlerKind.OtherApp, "Vortex", PreviousApp: "Mod Organizer 2", IsModShelfBehind: true));
+        _harness.LinkHandlers.AfterGiveBack = _ => new SchemeState(SchemeHandlerKind.OtherApp, "Vortex");
+        await _harness.StartAsync();
+        LinkHandlerViewModel site = Links.Sites[0];
+
+        Assert.Equal(
+            "Vortex opens nxm:// links from Nexus Mods: it was chosen in the system's own settings, over ModShelf. Choose ModShelf there, or give the links back.",
+            site.StateText);
+        Assert.Equal((false, true), (site.OffersTake, site.OffersGiveBack));
+        Assert.Equal("Give them back to Mod Organizer 2", site.GiveBackText);
+
+        await site.GiveBackCommand.ExecuteAsync(null);
+
+        Assert.Equal("Vortex opens nxm:// links from Nexus Mods.", site.StateText);
+        Assert.Equal((true, false), (site.OffersTake, site.OffersGiveBack));
+    }
+
+    [Fact]
     public async Task ASystemThatCantRegisterSaysSo()
     {
         Show(new SchemeState(SchemeHandlerKind.None));

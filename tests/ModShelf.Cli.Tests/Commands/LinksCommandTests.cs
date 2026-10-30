@@ -68,6 +68,16 @@ public sealed class LinksCommandTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task StatusSaysWhenAnAppChosenInTheSystemsSettingsWins()
+    {
+        _registration.States["nxm"] = new SchemeState(SchemeHandlerKind.OtherApp, "Vortex", IsModShelfBehind: true);
+
+        CliResult status = await _cli.RunAsync(["links", "status"], Cancellation);
+
+        Assert.Matches(@"nexus\s+nxm://\s+Vortex \(chosen over ModShelf\)", status.Output);
+    }
+
+    [Fact]
     public async Task TakeMakesTheDesktopAppOpenThem()
     {
         _registration.States["nxm"] = new SchemeState(SchemeHandlerKind.OtherApp, "Vortex");

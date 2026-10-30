@@ -202,7 +202,12 @@ public sealed class XdgSchemeRegistrationTests : IDisposable
 
         await registration.RegisterAsync("nxm", Cancellation);
 
+        Assert.Equal(new SchemeState(SchemeHandlerKind.OtherApp, "Vortex", "Vortex", IsModShelfBehind: true), await registration.GetAsync("nxm", Cancellation));
+
+        await registration.UnregisterAsync("nxm", Cancellation);
+
         Assert.Equal(new SchemeState(SchemeHandlerKind.OtherApp, "Vortex"), await registration.GetAsync("nxm", Cancellation));
+        Assert.Null(MimeAppsList.Read(UserList, MimeAppsList.DefaultApplications, Mime));
     }
 
     [Fact]

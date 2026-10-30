@@ -66,9 +66,9 @@ being wired now and checked once the installer makes an app bundle (step 4).
 
 - Registering changes only the current user's settings; no administrator rights are needed.
 - On Windows, when the user once chose another app in the "open with" prompt, ModShelf can't take the links, and says
-  where to choose it. Its class stays registered meanwhile, and the card offers only to take them, so giving them back
-  takes `ms links give-back` or the uninstaller. `SchemeState` would need to say that ModShelf's class is there behind
-  the choice for the card to offer it.
+  where to choose it. Its class stays registered meanwhile: `SchemeState.IsModShelfBehind` says so (added once the
+  human approved it, after the first version could only take them), and the card offers to give them back. Linux does
+  the same when a desktop's own list wins over the user's default.
 - On macOS, giving the links back when no other app had them leaves them with ModShelf: Launch Services has no way to
   say "none", and the bundle declares the scheme.
 - A test library's registration points at its folder. The checklists give the links back before deleting it.

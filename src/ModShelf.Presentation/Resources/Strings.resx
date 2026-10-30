@@ -1422,4 +1422,12 @@
     <value>Which app opens links couldn't be read: {0}</value>
     <comment>{0} is the system's reason.</comment>
   </data>
+  <data name="LinksOpenedByChosenApp" xml:space="preserve">
+    <value>{2} opens {0}:// links from {1}: it was chosen in the system's own settings, over ModShelf. Choose ModShelf there, or give the links back.</value>
+    <comment>{0} is the scheme, such as nxm; {1} the site; {2} the app the user chose, such as Vortex.</comment>
+  </data>
+  <data name="LinksAnotherApp" xml:space="preserve">
+    <value>Another app</value>
+    <comment>Names an app the system doesn't name, as in "Another app opens nxm:// links from Nexus Mods: …".</comment>
+  </data>
 </root>

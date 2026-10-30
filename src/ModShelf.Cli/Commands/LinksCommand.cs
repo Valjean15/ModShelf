@@ -160,6 +160,7 @@ internal static class LinksCommand
     {
         ({ Kind: SchemeHandlerKind.ModShelf, PreviousApp: { } previous }, _) => $"ModShelf (before it, {previous})",
         ({ Kind: SchemeHandlerKind.ModShelf }, _) => "ModShelf",
+        ({ Kind: SchemeHandlerKind.OtherApp, IsModShelfBehind: true }, false) => $"{state.OtherApp ?? "another app"} (chosen over ModShelf)",
         ({ Kind: SchemeHandlerKind.OtherApp }, true) => $"{state.OtherApp ?? "Another app"} opens them now.",
         ({ Kind: SchemeHandlerKind.OtherApp }, false) => state.OtherApp ?? "another app",
         ({ Kind: SchemeHandlerKind.Unavailable }, _) => "unavailable",

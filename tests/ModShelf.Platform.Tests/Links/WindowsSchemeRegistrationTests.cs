@@ -242,7 +242,25 @@ public sealed class WindowsSchemeRegistrationTests : IDisposable
 
         await registration.RegisterAsync("nxm", Cancellation);
 
-        Assert.Equal(new SchemeState(SchemeHandlerKind.OtherApp, "Vortex"), await registration.GetAsync("nxm", Cancellation));
+        Assert.Equal(new SchemeState(SchemeHandlerKind.OtherApp, "Vortex", IsModShelfBehind: true), await registration.GetAsync("nxm", Cancellation));
+    }
+
+    [Fact]
+    public async Task BehindAChosenAppGivingBackStillPutsThePreviousAppBack()
+    {
+        _machine.SetString($@"{Class}\shell\open\command", null, @"""C:\MO2\nxmhandler.exe"" ""%1""");
+        AddVortex(_user);
+        _user.SetString(@"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\nxm\UserChoice", "ProgId", "Other.NXM");
+        _user.SetString(@"Software\Classes\Other.NXM\shell\open\command", null, @"""C:\Other\Other.exe"" ""%1""");
+        WindowsSchemeRegistration registration = Create();
+        await registration.RegisterAsync("nxm", Cancellation);
+
+        Assert.Equal(new SchemeState(SchemeHandlerKind.OtherApp, "Other", "Vortex", IsModShelfBehind: true), await registration.GetAsync("nxm", Cancellation));
+
+        await registration.UnregisterAsync("nxm", Cancellation);
+
+        Assert.Equal(new SchemeState(SchemeHandlerKind.OtherApp, "Other"), await registration.GetAsync("nxm", Cancellation));
+        Assert.Equal(Vortex, VortexProgram());
     }
 
     [Fact]
@@ -265,7 +283,7 @@ public sealed class WindowsSchemeRegistrationTests : IDisposable
 
         await registration.RegisterAsync("nxm", Cancellation);
 
-        Assert.Equal(new SchemeState(SchemeHandlerKind.OtherApp, "Vortex Mod Manager"), await registration.GetAsync("nxm", Cancellation));
+        Assert.Equal(new SchemeState(SchemeHandlerKind.OtherApp, "Vortex Mod Manager", IsModShelfBehind: true), await registration.GetAsync("nxm", Cancellation));
     }
 
     [Theory]

@@ -8,10 +8,14 @@ namespace ModShelf.Application.Links;
 /// For <see cref="SchemeHandlerKind.OtherApp"/>, that app's name, such as <c>Vortex</c>, when the system tells.
 /// </param>
 /// <param name="PreviousApp">
-/// For <see cref="SchemeHandlerKind.ModShelf"/>, the name of the app that opens them again once ModShelf gives them
-/// back; null when none would, or the system doesn't tell.
+/// For <see cref="SchemeHandlerKind.ModShelf"/>, or with <paramref name="IsModShelfBehind"/>, the name of the app that
+/// opens them again once ModShelf gives them back; null when none would, or the system doesn't tell.
 /// </param>
-public sealed record SchemeState(SchemeHandlerKind Kind, string? OtherApp = null, string? PreviousApp = null)
+/// <param name="IsModShelfBehind">
+/// For <see cref="SchemeHandlerKind.OtherApp"/>: ModShelf is registered for them, but the system prefers that app, one
+/// the user chose in its own settings. Giving the links back still removes ModShelf's registration.
+/// </param>
+public sealed record SchemeState(SchemeHandlerKind Kind, string? OtherApp = null, string? PreviousApp = null, bool IsModShelfBehind = false)
 {
     /// <summary>
     /// No app opens them.

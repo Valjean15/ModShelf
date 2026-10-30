@@ -32,6 +32,8 @@ internal sealed class XdgSchemeRegistration(XdgDirectories directories, SchemeHa
             ? MimeAppsList.Read(OurFile(scheme), Entry, "Exec") == Exec()
                 ? new SchemeState(SchemeHandlerKind.ModShelf, PreviousApp: NameOf(DefaultFor(Mime(scheme), Stored(scheme) ?? string.Empty, excluded: ours)))
                 : new SchemeState(SchemeHandlerKind.OtherApp, Strings.AnotherModShelf)
+            : IsUserDefault(scheme) && current is not null
+                ? new SchemeState(SchemeHandlerKind.OtherApp, NameOf(current), NameOf(DefaultFor(Mime(scheme), Stored(scheme) ?? string.Empty, excluded: ours)), IsModShelfBehind: true)
             : !File.Exists(options.DesktopApp) ? SchemeState.Unavailable
             : current is null ? SchemeState.None
             : new SchemeState(SchemeHandlerKind.OtherApp, NameOf(current));
@@ -95,6 +97,12 @@ internal sealed class XdgSchemeRegistration(XdgDirectories directories, SchemeHa
     }
 
     private static string Mime(string scheme) => $"x-scheme-handler/{scheme}";
+
+    /// <summary>
+    /// Whether ModShelf's entry is the user's own default, whatever a desktop's own list says.
+    /// </summary>
+    private bool IsUserDefault(string scheme)
+        => File.Exists(OurFile(scheme)) && FirstId(MimeAppsList.Read(UserList, MimeAppsList.DefaultApplications, Mime(scheme))) == OurId(scheme);
 
     /// <summary>
     /// What ModShelf's entry starts: this desktop app, on this library. Another ModShelf, such as another build or one
