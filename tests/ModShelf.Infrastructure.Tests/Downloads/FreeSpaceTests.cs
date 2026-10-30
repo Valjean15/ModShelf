@@ -46,6 +46,27 @@ public sealed class FreeSpaceTests : IDisposable
     }
 
     [Fact]
+    public void ALinksTargetReachedThroughAnotherLinkIsFollowedToo()
+    {
+        // As on macOS, where the temporary folder is in /var, a link to /private/var.
+        string real = Path.Combine(_folder.Path, "Real");
+        Directory.CreateDirectory(Path.Combine(real, "Elsewhere"));
+        string alias = Path.Combine(_folder.Path, "Alias");
+        string link = Path.Combine(_folder.Path, "Downloads");
+        try
+        {
+            Directory.CreateSymbolicLink(alias, real);
+            Directory.CreateSymbolicLink(link, Path.Combine(alias, "Elsewhere"));
+        }
+        catch (Exception exception) when (exception is UnauthorizedAccessException or IOException)
+        {
+            Assert.Skip("This system doesn't let the tests make links.");
+        }
+
+        Assert.Equal(Path.Combine(FreeSpace.RealPath(real), "Elsewhere", "Mods"), FreeSpace.RealPath(Path.Combine(link, "Mods")));
+    }
+
+    [Fact]
     public void APathWithoutLinksIsItself()
     {
         string folder = Path.Combine(_folder.Path, "Mods");

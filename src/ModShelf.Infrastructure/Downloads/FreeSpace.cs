@@ -9,6 +9,9 @@ namespace ModShelf.Infrastructure.Downloads;
 /// </summary>
 internal static class FreeSpace
 {
+    // As deep as Linux follows links (MAXSYMLINKS), so a path the system can open is always followed to its end.
+    private const int MaxLinkDepth = 40;
+
     /// <summary>
     /// The bytes this user may still write on the volume that holds <paramref name="folder"/>; or null when the system
     /// can't tell, such as for a network share on Windows.
@@ -36,7 +39,20 @@ internal static class FreeSpace
     /// <paramref name="path"/> as a full path with every link in it followed, symbolic links and junctions alike, as far
     /// as its folders exist; the rest, still to be made, as it is.
     /// </summary>
-    internal static string RealPath(string path)
+    internal static string RealPath(string path) => RealPath(path, MaxLinkDepth);
+
+    /// <summary>
+    /// Whether <paramref name="path"/> is at or under the mount point <paramref name="root"/>, on Linux or macOS. The
+    /// mount point that holds a path is the longest one it's under.
+    /// </summary>
+    internal static bool Holds(string root, string path)
+    {
+        string under = Path.EndsInDirectorySeparator(root) ? root : root + Path.DirectorySeparatorChar;
+        return path.Equals(Path.TrimEndingDirectorySeparator(root), FilePaths.Comparison) || path.StartsWith(under, FilePaths.Comparison);
+    }
+
+    /// <param name="linksLeft">How many links deep a link's target is still followed; the system stops sooner.</param>
+    private static string RealPath(string path, int linksLeft)
     {
         string full = Path.TrimEndingDirectorySeparator(Path.GetFullPath(path));
         string root = Path.GetPathRoot(full)!;
@@ -50,19 +66,12 @@ internal static class FreeSpace
                 return Path.Combine([current, .. parts[index..]]);
             }
 
-            current = new DirectoryInfo(next).ResolveLinkTarget(returnFinalTarget: true)?.FullName ?? next;
+            // A link's target may be reached through links of its own, as on macOS, whose /var is a link to /private/var.
+            current = linksLeft > 0 && new DirectoryInfo(next).ResolveLinkTarget(returnFinalTarget: true) is { } target
+                ? RealPath(target.FullName, linksLeft - 1)
+                : next;
         }
 
         return current;
-    }
-
-    /// <summary>
-    /// Whether <paramref name="path"/> is at or under the mount point <paramref name="root"/>, on Linux or macOS. The
-    /// mount point that holds a path is the longest one it's under.
-    /// </summary>
-    internal static bool Holds(string root, string path)
-    {
-        string under = Path.EndsInDirectorySeparator(root) ? root : root + Path.DirectorySeparatorChar;
-        return path.Equals(Path.TrimEndingDirectorySeparator(root), FilePaths.Comparison) || path.StartsWith(under, FilePaths.Comparison);
     }
 }
