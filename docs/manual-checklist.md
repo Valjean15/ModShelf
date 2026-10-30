@@ -166,6 +166,13 @@ This section changes your account. If SMAPI is tracked when you start, track it 
   ```
 
   The same: only `apikey: *` lines, and no `key=` anywhere. Addresses with a query show `?*` in its place.
+- [ ] **10.3 The diagnostics report.** Write the report a bug report needs:
+
+  ```powershell
+  ms diagnostics
+  ```
+
+  The first line is "ModShelf 0.9.0-alpha.0.N (…)", where the part in brackets is the commit you built, as `git rev-parse --short=7 HEAD` shows it. Then the system, the folders with your home folder as `~`, the settings, the library's counts, the downloads by what they're doing, and "nexus linked (ApiKey, Premium)" (Free for the free account). Nowhere does it hold your account's name, a mod's or file's name, a key or an `nxm://` link. Exit code 0.
 
 ## 11. Unlink the account
 
@@ -235,6 +242,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 9.4 File servers' link | | | |
 | 10.1 Trace logs | | | |
 | 10.2 Handed-over link in logs | – | | |
+| 10.3 Diagnostics report | | | |
 | 11.1 Unlink | | | |
 | 11.2 Listed as not linked | | | |
 | 11.3 Needs an account | | | |
