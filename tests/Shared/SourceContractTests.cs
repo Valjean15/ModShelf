@@ -84,6 +84,26 @@ public abstract class SourceContractTests<TSource>
     }
 
     [Fact]
+    public async Task HandsDownloadsOverWithASchemeOfItsOwnThatItRecognizes()
+    {
+        IHandoffScheme handoff = Capability<IHandoffScheme>();
+        ILinkRecognizer recognizer = Capability<ILinkRecognizer>();
+
+        // A plain scheme the system can register, never one every browser opens itself.
+        Assert.Matches("^[a-z][a-z0-9+.-]*$", handoff.Scheme);
+        Assert.DoesNotContain(handoff.Scheme, new[] { Uri.UriSchemeHttp, Uri.UriSchemeHttps, Uri.UriSchemeFile, Uri.UriSchemeMailto });
+
+        Uri[] own = [.. OwnLinks.Where(link => link.Scheme == handoff.Scheme)];
+        Assert.NotEmpty(own);
+        foreach (Uri link in own)
+        {
+            RecognizedLink? match = await recognizer.RecognizeAsync(link, TestContext.Current.CancellationToken);
+
+            Assert.True(match?.IsHandoff);
+        }
+    }
+
+    [Fact]
     public async Task ResolvesTheFilesItRecognizes()
     {
         ILinkRecognizer recognizer = Capability<ILinkRecognizer>();

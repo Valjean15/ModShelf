@@ -9,10 +9,16 @@ using ModShelf.Sources.Nexus.Links;
 namespace ModShelf.Sources.Nexus;
 
 /// <summary>
-/// The <see cref="ILinkRecognizer"/> half: which file a link the user gives points to, and what the file is called.
+/// The <see cref="ILinkRecognizer"/> half: which file a link the user gives points to, and what the file is called;
+/// and the <see cref="IHandoffScheme"/>, <c>nxm</c>, its website's "mod manager download" buttons hand downloads over with.
 /// </summary>
-public sealed partial class NexusSource : ILinkRecognizer
+public sealed partial class NexusSource : ILinkRecognizer, IHandoffScheme
 {
+    /// <summary>
+    /// <c>nxm</c>.
+    /// </summary>
+    public string Scheme => NexusLink.HandoffScheme;
+
     /// <summary>
     /// Recognizes links to a mod's page and to its files, on the website or as <c>nxm://</c> links, and asks the API
     /// for the file's name. A link to the mod as a whole means its newest main file.
