@@ -253,6 +253,12 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
     private static bool IsRecorded(LibraryFile kept, DownloadJobSnapshot job) => kept.DownloadedAt >= job.CreatedAt;
 
     /// <summary>
+    /// The name a file gets when its own is taken: with the file's ID before its extension, as <c>SkyUI (35407).7z</c>.
+    /// </summary>
+    private static string WithId(string name, string fileId)
+        => LibraryNames.File($"{Path.GetFileNameWithoutExtension(name)} ({fileId}){Path.GetExtension(name)}");
+
+    /// <summary>
     /// The folder part of a library path, with no ending separator; empty for a file at the root.
     /// </summary>
     private static string FolderOf(string relativePath)
@@ -288,7 +294,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
         string name,
         ModFileRef file)
     {
-        string withId = LibraryNames.File($"{Path.GetFileNameWithoutExtension(name)} ({file.Id}){Path.GetExtension(name)}");
+        string withId = WithId(name, file.Id);
         foreach (string candidate in new[] { name, withId })
         {
             string relativePath = folder.Length == 0 ? candidate : $"{folder}{LibraryPaths.Separator}{candidate}";
@@ -495,7 +501,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
         foreach (LibraryFile file in files)
         {
             string from = LibraryPaths.Resolve(root, file.RelativePath);
-            string withId = LibraryNames.File($"{Path.GetFileNameWithoutExtension(file.FileName)} ({file.File.Id}){Path.GetExtension(file.FileName)}");
+            string withId = WithId(file.FileName, file.File.Id);
             string[] candidates = [.. new[] { file.FileName, withId }
                 .Select(name => OldVersions.ArchivePath(file.RelativePath, name))
                 .Where(candidate => !taken.Contains(candidate))];

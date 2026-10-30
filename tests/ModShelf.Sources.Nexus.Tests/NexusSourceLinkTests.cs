@@ -119,6 +119,7 @@ public sealed class NexusSourceLinkTests : IDisposable
     [Theory]
     [InlineData("SMAPI: 4.5.2?.zip", "SMAPI_ 4.5.2_.zip")]
     [InlineData("SMAPI/4.5.2.zip. ", "SMAPI_4.5.2.zip")]
+    [InlineData("nul.zip", "_nul.zip")]
     [InlineData("  ", null)]
     [InlineData("..", null)]
     [InlineData(null, null)]

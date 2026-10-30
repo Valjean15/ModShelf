@@ -1,6 +1,6 @@
-using System.Buffers;
 using System.Globalization;
 
+using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Links;
 using ModShelf.Sources.Nexus.Api;
@@ -13,10 +13,6 @@ namespace ModShelf.Sources.Nexus;
 /// </summary>
 public sealed partial class NexusSource : ILinkRecognizer
 {
-    // The characters any of the supported systems forbid in file names, so a downloaded file can move between them.
-    private static readonly SearchValues<char> ForbiddenInFileNames = SearchValues.Create(
-        [.. Path.GetInvalidFileNameChars(), .. "<>:\"/\\|?*", .. Enumerable.Range(0, 32).Select(code => (char)code)]);
-
     /// <summary>
     /// Recognizes links to a mod's page and to its files, on the website or as <c>nxm://</c> links, and asks the API
     /// for the file's name. A link to the mod as a whole means its newest main file.
@@ -62,25 +58,9 @@ public sealed partial class NexusSource : ILinkRecognizer
             nameof(files));
 
     /// <summary>
-    /// The name Nexus Mods gives the file, with characters some system forbids replaced by '_'. Null when it gives
-    /// none that's usable.
+    /// The name Nexus Mods gives the file, made to work on every system as the library's names are. Null when it gives
+    /// none, or only dots and spaces.
     /// </summary>
     private static string? SuggestFileName(string? fileName)
-    {
-        if (string.IsNullOrWhiteSpace(fileName))
-        {
-            return null;
-        }
-
-        Span<char> name = fileName.ToCharArray();
-        int forbidden;
-        while ((forbidden = name.IndexOfAny(ForbiddenInFileNames)) >= 0)
-        {
-            name[forbidden] = '_';
-        }
-
-        // Windows drops trailing dots and spaces, so a name ending in them wouldn't stay the same name.
-        string suggestion = new string(name).Trim().TrimEnd('.', ' ');
-        return suggestion is "" or "." or ".." ? null : suggestion;
-    }
+        => string.IsNullOrWhiteSpace(fileName?.Replace('.', ' ')) ? null : LibraryNames.File(fileName.Trim());
 }

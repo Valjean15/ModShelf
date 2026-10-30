@@ -1,5 +1,4 @@
-using System.Buffers;
-
+using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Downloads;
@@ -29,10 +28,6 @@ public sealed class DirectUrlSource : IDownloadResolver, ILinkRecognizer
     private const string GameKey = "web";
 
     private static readonly SourceId DirectId = new("direct");
-
-    // The characters any of the supported systems forbid in file names, so a downloaded file can move between them.
-    private static readonly SearchValues<char> ForbiddenInFileNames = SearchValues.Create(
-        [.. Path.GetInvalidFileNameChars(), .. "<>:\"/\\|?*", .. Enumerable.Range(0, 32).Select(code => (char)code)]);
 
     public SourceId Id => DirectId;
 
@@ -116,26 +111,13 @@ public sealed class DirectUrlSource : IDownloadResolver, ILinkRecognizer
     };
 
     /// <summary>
-    /// The link's last path segment, unescaped, with forbidden characters replaced by '_'. Null for a link
-    /// to a folder or a site, which names no file.
+    /// The link's last path segment, unescaped, made to work on every system as the library's names are. Null for a link
+    /// to a folder or a site, which names no file, or one whose name is only dots and spaces.
     /// </summary>
     private static string? SuggestFileName(Uri link)
     {
         string segment = link.Segments[^1];
-        if (segment.EndsWith('/'))
-        {
-            return null;
-        }
-
-        Span<char> name = Uri.UnescapeDataString(segment).ToCharArray();
-        int forbidden;
-        while ((forbidden = name.IndexOfAny(ForbiddenInFileNames)) >= 0)
-        {
-            name[forbidden] = '_';
-        }
-
-        // Windows drops trailing dots and spaces, so a name ending in them wouldn't stay the same name.
-        string suggestion = new string(name).Trim().TrimEnd('.', ' ');
-        return suggestion is "" or "." or ".." ? null : suggestion;
+        string name = Uri.UnescapeDataString(segment);
+        return segment.EndsWith('/') || string.IsNullOrWhiteSpace(name.Replace('.', ' ')) ? null : LibraryNames.File(name.Trim());
     }
 }

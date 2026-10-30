@@ -1,3 +1,4 @@
+using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Downloads;
 using ModShelf.Sources.Abstractions.Links;
@@ -47,9 +48,19 @@ public sealed class DirectUrlSourceTests : SourceContractTests<DirectUrlSource>
     [InlineData("https://example.com/files/..%2F..%2Fevil.exe", ".._.._evil.exe")]
     [InlineData("https://example.com/files/notes.txt.", "notes.txt")]
     [InlineData("https://example.com/files/SkyUI.7z#sha256=" + Sha256OfAbc, "SkyUI.7z")]
+    [InlineData("https://example.com/files/aux.zip", "_aux.zip")]
     public async Task SuggestsASafeNameFromTheLastPathSegment(string link, string expected)
     {
         Assert.Equal(expected, (await RecognizeAsync(link)).SuggestedFileName);
+    }
+
+    [Fact]
+    public async Task ShortensALongNameKeepingItsExtension()
+    {
+        string name = (await RecognizeAsync($"https://example.com/files/{new string('m', 300)}.zip")).SuggestedFileName!;
+
+        Assert.Equal(LibraryNames.MaxFileBytes, name.Length);
+        Assert.EndsWith("m.zip", name, StringComparison.Ordinal);
     }
 
     [Theory]
