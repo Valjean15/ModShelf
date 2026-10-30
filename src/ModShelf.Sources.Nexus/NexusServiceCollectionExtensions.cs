@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Headers;
+using System.Reflection;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -23,7 +24,9 @@ public static class NexusServiceCollectionExtensions
 {
     private const string ApplicationName = "ModShelf";
 
-    private static readonly string ApplicationVersion = typeof(NexusSource).Assembly.GetName().Version?.ToString(3) ?? "0.0.0";
+    // The version the build was tagged with, such as 0.9.0, without the commit after its "+".
+    private static readonly string ApplicationVersion =
+        (typeof(NexusSource).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "0.0.0").Split('+')[0];
 
     /// <summary>
     /// Adds <see cref="NexusSource"/> as an <see cref="IModSource"/>. It links accounts with a personal API key, and

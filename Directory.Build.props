@@ -15,5 +15,17 @@
       indirect dependency doesn't stop every build until its fix ships. Update the package anyway.
     -->
     <WarningsNotAsErrors>$(WarningsNotAsErrors);NU1901;NU1902</WarningsNotAsErrors>
+
+    <!--
+      The version comes from the git tag the commit is at or after (MinVer): v0.9.0 gives 0.9.0, and the commits after it
+      0.9.1-alpha.0.1, 0.9.1-alpha.0.2 and so on. Before the first tag, 0.9.0-alpha.0.N. Without git, such as in a
+      source archive, 0.9.0-alpha.0, with a warning.
+    -->
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+    <MinVerMinimumMajorMinor>0.9</MinVerMinimumMajorMinor>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinVer" PrivateAssets="all" />
+  </ItemGroup>
 </Project>

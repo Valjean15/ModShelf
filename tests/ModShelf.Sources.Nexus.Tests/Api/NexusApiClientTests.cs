@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
@@ -39,7 +40,12 @@ public sealed partial class NexusApiClientTests : IDisposable
 
         IDictionary<string, WireMock.Types.WireMockList<string>> headers = Assert.Single(_api.Requests).RequestMessage!.Headers!;
         Assert.Equal("ModShelf", Assert.Single(headers["Application-Name"]));
-        Assert.Matches(Version(), Assert.Single(headers["Application-Version"]));
+        // The version the build was tagged with, without the commit.
+        string version = Assert.Single(headers["Application-Version"]);
+        Assert.Matches(Version(), version);
+        Assert.Equal(
+            typeof(NexusSource).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0],
+            version);
         Assert.StartsWith("ModShelf/", headers["User-Agent"].ToString(), StringComparison.Ordinal);
     }
 
@@ -316,7 +322,7 @@ public sealed partial class NexusApiClientTests : IDisposable
         await Assert.ThrowsAsync<AuthenticationFailedException>(() => SendAsync(HttpMethod.Post, TrackedPath));
     }
 
-    [GeneratedRegex(@"^\d+\.\d+\.\d+$")]
+    [GeneratedRegex(@"^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$")]
     private static partial Regex Version();
 
     /// <summary>
