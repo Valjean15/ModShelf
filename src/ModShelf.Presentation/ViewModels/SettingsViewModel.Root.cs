@@ -13,7 +13,7 @@ namespace ModShelf.Presentation.ViewModels;
 public sealed partial class SettingsViewModel
 {
     private static string MessageOf(Exception exception)
-        => exception is ArgumentException refused ? LinkProblems.MessageForUser(refused) : exception.Message;
+        => exception is ArgumentException refused ? refused.MessageForUser() : exception.Message;
 
     private bool CanChangeRoot() => IsLoaded && !IsMoving;
 

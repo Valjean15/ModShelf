@@ -22,18 +22,10 @@ internal static class LinkProblems
         UnsupportedLinkException => Strings.DownloadsNoSource,
         IOException when library => Text.Format(Strings.DownloadsLibraryPlaceProblem, exception.Message),
         InvalidDataException => exception.Message,
-        ArgumentException refused => MessageForUser(refused),
+        ArgumentException refused => refused.MessageForUser(),
         AuthenticationFailedException => Strings.LinkNeedsAccount,
         HttpRequestException { StatusCode: HttpStatusCode.NotFound or HttpStatusCode.Gone } => Strings.LinkNotFound,
         HttpRequestException failed => Text.Format(Strings.LinkLookUpFailed, failed.Message),
         _ => null,
     };
-
-    /// <summary>
-    /// The exception's message without the "(Parameter 'name')" .NET appends, which means nothing to the user.
-    /// </summary>
-    internal static string MessageForUser(ArgumentException exception)
-        => exception.ParamName is null
-            ? exception.Message
-            : exception.Message.Replace($" (Parameter '{exception.ParamName}')", string.Empty, StringComparison.Ordinal);
 }

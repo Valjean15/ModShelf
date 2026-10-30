@@ -139,7 +139,7 @@ public sealed partial class FolderPatternViewModel : ObservableObject
         catch (ArgumentException exception)
         {
             Preview = null;
-            Problem = LinkProblems.MessageForUser(exception);
+            Problem = exception.MessageForUser();
         }
     }
 

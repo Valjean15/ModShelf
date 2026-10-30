@@ -66,7 +66,7 @@ public sealed partial class AccountViewModel
         catch (ArgumentException exception)
         {
             // Such as a blank API key.
-            Say(Text.Format(Strings.AccountNothingLinked, LinkProblems.MessageForUser(exception)), true);
+            Say(Text.Format(Strings.AccountNothingLinked, exception.MessageForUser()), true);
         }
         catch (Exception exception) when (IsFailureWithReason(exception))
         {

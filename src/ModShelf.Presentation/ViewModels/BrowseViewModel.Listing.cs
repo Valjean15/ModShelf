@@ -29,7 +29,7 @@ public sealed partial class BrowseViewModel
 
     /// <param name="failed">What to say of a refusal other than the account's, such as "{0} couldn't search: {1}".</param>
     private static string? Describe(Exception exception, string site, string failed)
-        => exception is ArgumentException refused ? LinkProblems.MessageForUser(refused) : SiteProblems.Describe(exception, site, failed);
+        => exception is ArgumentException refused ? refused.MessageForUser() : SiteProblems.Describe(exception, site, failed);
 
     /// <summary>
     /// Searches the chosen game's mods for the words in the box, from the first page; or opens the mod the box's link is
