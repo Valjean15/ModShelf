@@ -9,6 +9,7 @@ using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Desktop.Ports;
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
+using ModShelf.Domain.Common;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Updates;
 using ModShelf.Presentation.Common;
@@ -284,15 +285,6 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         IsTrayAvailable = await _tray.IsAvailableAsync(cancellationToken);
     }
 
-    /// <summary>
-    /// Whether two paths name the same folder: ignoring case on Windows and macOS, whose usual file systems do.
-    /// </summary>
-    private static bool SamePath(string first, string second)
-        => string.Equals(
-            Path.TrimEndingDirectorySeparator(first),
-            Path.TrimEndingDirectorySeparator(second),
-            OperatingSystem.IsWindows() || OperatingSystem.IsMacOS() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
-
     private static string MessageOf(Exception exception)
         => exception is ArgumentException refused ? LinkProblems.MessageForUser(refused) : exception.Message;
 
@@ -377,7 +369,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     private async Task ChangeRootAsync(string? folder, CancellationToken cancellationToken)
     {
         string target = folder ?? _settings.DefaultLibraryRoot;
-        if (SamePath(target, LibraryRoot))
+        if (FilePaths.Same(target, LibraryRoot))
         {
             return;
         }
@@ -575,7 +567,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         {
             _shown = settings;
             LibraryRoot = settings.LibraryRoot ?? _settings.DefaultLibraryRoot;
-            IsDefaultRoot = SamePath(LibraryRoot, _settings.DefaultLibraryRoot);
+            IsDefaultRoot = FilePaths.Same(LibraryRoot, _settings.DefaultLibraryRoot);
 
             Folders.Show(settings.LibraryFolders ?? FolderPattern.Default, LibraryRoot);
             List<FolderPatternViewModel> games = [];
