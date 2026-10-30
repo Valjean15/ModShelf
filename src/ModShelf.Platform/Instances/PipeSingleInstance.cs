@@ -197,7 +197,9 @@ internal sealed partial class PipeSingleInstance : ISingleInstance, IDisposable
     {
         try
         {
-            using NamedPipeClientStream pipe = new(".", _pipeName, PipeDirection.InOut, PipeOptions.CurrentUserOnly);
+            // Asynchronous, so that closing the pipe ends a read or a write waiting on it: on Windows, a synchronous one keeps
+            // the pipe open until it's done, which a running app that never answers never lets it be.
+            using NamedPipeClientStream pipe = new(".", _pipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
             pipe.Connect(_patience);
 
             // Pipes have no timeouts of their own, so a timer closes the pipe under a reply that doesn't come.
@@ -210,7 +212,8 @@ internal sealed partial class PipeSingleInstance : ISingleInstance, IDisposable
                 throw new TimeoutException("ModShelf is running already, but didn't answer.");
             }
         }
-        catch (Exception exception) when (exception is TimeoutException or IOException or ObjectDisposedException or UnauthorizedAccessException)
+        // On Windows, a read or a write the timer ended throws OperationCanceledException.
+        catch (Exception exception) when (exception is TimeoutException or IOException or ObjectDisposedException or OperationCanceledException or UnauthorizedAccessException)
         {
             throw new TimeoutException("ModShelf is running already, but didn't answer.", exception);
         }
