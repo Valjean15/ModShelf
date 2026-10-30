@@ -3,6 +3,9 @@
     <OutputType>WinExe</OutputType>
     <ApplicationManifest>app.manifest</ApplicationManifest>
 
+    <!-- The executable's icon on Windows, which its shortcuts and notices show too (build/render-icons.py). -->
+    <ApplicationIcon>Assets\modshelf.ico</ApplicationIcon>
+
     <!-- Every binding is compiled against its view's x:DataType, so a binding that doesn't fit fails the build. -->
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
@@ -28,6 +31,7 @@
   <ItemGroup>
     <AvaloniaResource Include="Assets\*.png" />
     <None Include="Assets\modshelf.svg" />
+    <None Include="Assets\modshelf.ico" />
   </ItemGroup>
 
   <!-- Composition root: references every library, for DI registration only. -->

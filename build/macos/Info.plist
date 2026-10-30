@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  ModShelf.app's Info.plist. vpk uses it as it is, so it says everything the bundle needs. The pack scripts put the
+  version in place of @VERSION@ (such as 0.9.1-alpha.0.3) and @SHORT_VERSION@ (such as 0.9.1).
+-->
+<plist version="1.0">
+  <dict>
+    <key>CFBundleName</key>
+    <string>ModShelf</string>
+    <key>CFBundleDisplayName</key>
+    <string>ModShelf</string>
+    <key>CFBundleIdentifier</key>
+    <string>io.github.valjean15.modshelf</string>
+    <key>CFBundleVersion</key>
+    <string>@VERSION@</string>
+    <key>CFBundleShortVersionString</key>
+    <string>@SHORT_VERSION@</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleSignature</key>
+    <string>????</string>
+    <key>CFBundleExecutable</key>
+    <string>ModShelf.Desktop</string>
+    <key>CFBundleIconFile</key>
+    <string>modshelf.icns</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.utilities</string>
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+    <key>NSHighResolutionCapable</key>
+    <true />
+    <!-- The links Nexus Mods' "mod manager download" buttons hand over: ModShelf opens them once the user says so. -->
+    <key>CFBundleURLTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleURLName</key>
+        <string>Nexus Mods download links</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>nxm</string>
+        </array>
+      </dict>
+    </array>
+  </dict>
+</plist>
