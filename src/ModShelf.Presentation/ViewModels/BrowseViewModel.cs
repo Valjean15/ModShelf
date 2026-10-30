@@ -278,13 +278,8 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     }
 
     /// <param name="failed">What to say of a refusal other than the account's, such as "{0} couldn't search: {1}".</param>
-    private static string? Describe(Exception exception, string site, string failed) => exception switch
-    {
-        AuthenticationFailedException => Text.Format(Strings.BrowseAccountNeeded, site),
-        HttpRequestException refused => Text.Format(failed, site, refused.Message),
-        ArgumentException refused => LinkProblems.MessageForUser(refused),
-        _ => null,
-    };
+    private static string? Describe(Exception exception, string site, string failed)
+        => exception is ArgumentException refused ? LinkProblems.MessageForUser(refused) : SiteProblems.Describe(exception, site, failed);
 
     partial void OnGameChanged(GameChoice? value)
     {
@@ -565,7 +560,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
                 {
                     read[index] = catalog is null ? (byId, null) : (await catalog.GetModAsync(mod, token), null);
                 }
-                catch (HttpRequestException exception)
+                catch (Exception exception) when (SiteProblems.IsSiteProblem(exception))
                 {
                     read[index] = (byId, Text.Format(Strings.BrowseModUnreadable, exception.Message));
                 }

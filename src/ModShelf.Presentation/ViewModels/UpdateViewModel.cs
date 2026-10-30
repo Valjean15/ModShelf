@@ -202,7 +202,7 @@ public sealed partial class UpdateViewModel : ObservableObject
                     ChangesNote = Strings.ChangelogNeedsAccount;
                     return;
                 }
-                catch (HttpRequestException exception)
+                catch (Exception exception) when (SiteProblems.IsSiteProblem(exception))
                 {
                     ChangesNote = Text.Format(Strings.ChangelogFailed, exception.Message);
                     return;

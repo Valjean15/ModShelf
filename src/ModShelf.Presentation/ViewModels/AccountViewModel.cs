@@ -158,8 +158,6 @@ public sealed partial class AccountViewModel : ObservableObject
     private static bool IsFailureWithReason(Exception exception)
         => exception is InvalidOperationException or IOException or UnauthorizedAccessException or CryptographicException;
 
-    private static bool IsTimeout(Exception exception) => exception is TaskCanceledException { InnerException: TimeoutException };
-
     private bool CanAct() => !IsBusy;
 
     private bool CanCheckOrUnlink() => IsLinked && !IsBusy;
@@ -244,7 +242,7 @@ public sealed partial class AccountViewModel : ObservableObject
             await ShowLatestAsync(account);
             Say(Text.Format(Strings.AccountLinked, account.Profile.DisplayName), false);
         }
-        catch (Exception exception) when (IsTimeout(exception))
+        catch (Exception exception) when (SiteProblems.IsTimeout(exception))
         {
             Say(Text.Format(Strings.AccountUnreachable, SiteName), true);
         }
@@ -383,7 +381,7 @@ public sealed partial class AccountViewModel : ObservableObject
         // It answered, so it was reached; it couldn't do what was asked.
         HttpRequestException { StatusCode: not null } failed => Text.Format(Strings.AccountSiteError, SiteName, failed.Message),
         HttpRequestException => Text.Format(Strings.AccountUnreachable, SiteName),
-        _ when IsTimeout(exception) => Text.Format(Strings.AccountUnreachable, SiteName),
+        _ when SiteProblems.IsTimeout(exception) => Text.Format(Strings.AccountUnreachable, SiteName),
         _ => null,
     };
 

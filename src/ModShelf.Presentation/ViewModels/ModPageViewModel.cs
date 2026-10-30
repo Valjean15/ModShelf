@@ -8,7 +8,6 @@ using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
-using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Catalog;
 
 namespace ModShelf.Presentation.ViewModels;
@@ -248,7 +247,7 @@ public sealed partial class ModPageViewModel : ObservableObject
             {
                 return;
             }
-            catch (Exception exception) when (exception is AuthenticationFailedException or HttpRequestException)
+            catch (Exception exception) when (SiteProblems.IsSiteProblem(exception))
             {
                 // Expected without a linked account, or offline: no stack trace for it.
                 LogTrackedUnknown(_services.Logger, Mod.Game.Source.Value, exception.Message);
@@ -317,14 +316,10 @@ public sealed partial class ModPageViewModel : ObservableObject
                     // It left the library meanwhile, so it isn't watched.
                     now = null;
                 }
-                catch (AuthenticationFailedException)
+                catch (Exception exception)
+                    when (SiteProblems.Describe(exception, _services.Sources.SiteName(Mod.Game.Source), Strings.BrowseWatchFailed) is { } problem)
                 {
-                    Tell(Text.Format(Strings.BrowseAccountNeeded, _services.Sources.SiteName(Mod.Game.Source)), isProblem: true);
-                    return;
-                }
-                catch (HttpRequestException exception)
-                {
-                    Tell(Text.Format(Strings.BrowseWatchFailed, _services.Sources.SiteName(Mod.Game.Source), exception.Message), isProblem: true);
+                    Tell(problem, isProblem: true);
                     return;
                 }
 
@@ -350,14 +345,9 @@ public sealed partial class ModPageViewModel : ObservableObject
                 {
                     await _services.Tracked.SetAsync(Mod, track, cancellationToken);
                 }
-                catch (AuthenticationFailedException)
+                catch (Exception exception) when (SiteProblems.Describe(exception, site, Strings.BrowseTrackFailed) is { } problem)
                 {
-                    Tell(Text.Format(Strings.BrowseAccountNeeded, site), isProblem: true);
-                    return;
-                }
-                catch (HttpRequestException exception)
-                {
-                    Tell(Text.Format(Strings.BrowseTrackFailed, site, exception.Message), isProblem: true);
+                    Tell(problem, isProblem: true);
                     return;
                 }
 

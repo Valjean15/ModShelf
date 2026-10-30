@@ -14,7 +14,6 @@ using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
-using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Catalog;
 
 namespace ModShelf.Presentation.ViewModels;
@@ -207,7 +206,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         {
             // The app is closing.
         }
-        catch (Exception exception) when (exception is AuthenticationFailedException or HttpRequestException)
+        catch (Exception exception) when (SiteProblems.IsSiteProblem(exception))
         {
             // Expected without a linked account, or offline: no stack trace for it.
             LogGameNameUnknown(_logger, game.Key, game.Source.Value, exception.Message);
