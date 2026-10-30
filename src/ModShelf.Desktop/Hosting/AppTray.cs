@@ -1,14 +1,12 @@
-using System.ComponentModel;
-
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Data;
 using Avalonia.Platform;
-using Avalonia.Threading;
 
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.ViewModels;
 
-namespace ModShelf.Desktop.Services;
+namespace ModShelf.Desktop.Hosting;
 
 /// <summary>
 /// The tray icon and its menu, and what closing the main window does: <see cref="TrayViewModel"/> decides, this carries
@@ -55,11 +53,12 @@ internal sealed class AppTray : IDisposable
         _icon = new TrayIcon
         {
             Icon = new WindowIcon(AssetLoader.Open(IconAsset)),
-            ToolTipText = _tray.ToolTip,
             Menu = [open, check, new NativeMenuItemSeparator(), quit],
         };
+
+        // The tooltip follows the Updates screen's badge, which changes on the UI thread.
+        _icon.Bind(TrayIcon.ToolTipTextProperty, new Binding(nameof(TrayViewModel.ToolTip)) { Source = _tray, Mode = BindingMode.OneWay });
         _icon.Clicked += (_, _) => ShowMainWindow();
-        _tray.PropertyChanged += OnTrayChanged;
         TrayIcon.SetIcons(_app, [_icon]);
     }
 
@@ -87,7 +86,6 @@ internal sealed class AppTray : IDisposable
     /// </summary>
     public void Dispose()
     {
-        _tray.PropertyChanged -= OnTrayChanged;
         _icon?.Dispose();
         _icon = null;
     }
@@ -148,20 +146,6 @@ internal sealed class AppTray : IDisposable
                 break;
             default:
                 break;
-        }
-    }
-
-    private void OnTrayChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(TrayViewModel.ToolTip))
-        {
-            Dispatcher.UIThread.Post(() =>
-            {
-                if (_icon is not null)
-                {
-                    _icon.ToolTipText = _tray.ToolTip;
-                }
-            });
         }
     }
 }

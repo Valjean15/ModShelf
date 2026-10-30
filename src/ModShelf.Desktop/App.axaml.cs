@@ -1,11 +1,10 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 
 using ModShelf.Application.Desktop.Ports;
-using ModShelf.Desktop.Services;
+using ModShelf.Desktop.Hosting;
 using ModShelf.Desktop.Views;
 using ModShelf.Desktop.Views.Dialogs;
 using ModShelf.Presentation.ViewModels;
