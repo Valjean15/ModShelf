@@ -84,6 +84,7 @@ internal static class HostServices
         services.AddSettings();
         services.AddDiagnostics(AppInfo.Of(typeof(HostServices).Assembly));
         services.AddLinks();
+        services.AddAppUninstall();
         services.AddDirectUrlSource();
         services.AddNexusSource(NexusOptionsFrom(configuration));
         return folder;

@@ -7,6 +7,7 @@ using ModShelf.Application.Diagnostics;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Library;
 using ModShelf.Application.Links;
+using ModShelf.Application.Releases;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
 using ModShelf.Application.Updates;
@@ -223,6 +224,19 @@ public static class ApplicationServiceCollectionExtensions
         services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
         services.TryAddSingleton<ILinkHandlers, LinkHandlers>();
         services.TryAddSingleton<IOpenedLinks, OpenedLinks>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers <see cref="IAppUninstall"/>, which gives the sites' links back and removes what ModShelf registered for
+    /// itself as it's uninstalled. Needs <see cref="AddLinks"/> and Platform's <see cref="Releases.Ports.IAppRegistrations"/>.
+    /// </summary>
+    public static IServiceCollection AddAppUninstall(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton<IAppUninstall, AppUninstall>();
 
         return services;
     }

@@ -8,13 +8,17 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Desktop.Ports;
+using ModShelf.Application.Releases;
 using ModShelf.Desktop.Hosting;
 using ModShelf.Desktop.Views.Dialogs;
 using ModShelf.Infrastructure.Logging;
 using ModShelf.Infrastructure.Persistence;
+using ModShelf.Platform;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.ViewModels;
 using ModShelf.Presentation.ViewModels.FirstRun;
+
+using Velopack;
 
 namespace ModShelf.Desktop;
 
@@ -26,6 +30,20 @@ internal static partial class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        // Velopack first, before anything else runs: the installer, an update and the uninstaller start the app with
+        // Velopack's own arguments, which it handles, then ends the process. An update downloaded but not yet applied
+        // waits for the user's restart, rather than a second launch, such as a link's, applying it under the app running.
+        VelopackApp velopack = VelopackApp.Build()
+            .SetAppUserModelId(PlatformServiceCollectionExtensions.WindowsAppId)
+            .SetAutoApplyOnStartup(false);
+        if (OperatingSystem.IsWindows())
+        {
+            // Only Windows has an uninstaller: the other systems' apps are removed as files.
+            velopack.OnBeforeUninstallFastCallback(_ => CleanUpBeforeUninstall());
+        }
+
+        velopack.Run();
+
         using IHost host = DesktopHost.Create(args);
         ILogger logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(Program).FullName!);
 
@@ -95,6 +113,19 @@ internal static partial class Program
                 () => services.GetRequiredService<FirstRunViewModel>(),
                 instance,
                 args)));
+
+    /// <summary>
+    /// As the Windows uninstaller starts: gives the sites' links back and removes what ModShelf registered for itself.
+    /// Velopack ends the process after this, or after 30 seconds.
+    /// </summary>
+    private static void CleanUpBeforeUninstall()
+    {
+        using IHost host = DesktopHost.Create([]);
+        using CancellationTokenSource timeout = new(TimeSpan.FromSeconds(20));
+
+        // Velopack's hooks are synchronous, and this runs before Avalonia, with no SynchronizationContext to block.
+        host.Services.GetRequiredService<IAppUninstall>().CleanUpAsync(timeout.Token).GetAwaiter().GetResult();
+    }
 
     /// <summary>
     /// Shows why ModShelf can't start, in a window of its own, until it's closed.

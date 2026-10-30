@@ -25,9 +25,14 @@ namespace ModShelf.Platform;
 public static class PlatformServiceCollectionExtensions
 {
     /// <summary>
+    /// The app ID Windows groups ModShelf's windows and notices by. The installer's Start-menu shortcut carries it too.
+    /// </summary>
+    public const string WindowsAppId = ToastAppId.Default;
+
+    /// <summary>
     /// Registers the secret store for this system, the OAuth loopback redirect listener, the browser launcher, the
-    /// user's folders as this system keeps them, the way this system shows notices, and its register of the apps that
-    /// open link schemes.
+    /// user's folders as this system keeps them, the way this system shows notices, its register of the apps that open
+    /// link schemes, and what ModShelf registers for itself.
     /// </summary>
     /// <param name="secrets">Where the secret store keeps its secrets; by default the user's own ModShelf secrets.</param>
     /// <param name="links">
@@ -56,6 +61,9 @@ public static class PlatformServiceCollectionExtensions
         services.AddSingleton(provider => NotificationServices.ForThisSystem(
             provider.GetRequiredService<ISchemeRegistration>(),
             provider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(NotificationServices).FullName!)));
+        services.AddSingleton(provider => AppRegistrations.ForThisSystem(
+            provider.GetRequiredService<ISchemeRegistration>(),
+            provider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(NoticeClicks).FullName!)));
 
         return services;
     }

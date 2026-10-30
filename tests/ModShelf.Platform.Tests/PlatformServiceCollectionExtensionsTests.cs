@@ -13,6 +13,7 @@ using ModShelf.Platform.Browser;
 using ModShelf.Platform.Instances;
 using ModShelf.Platform.Links;
 using ModShelf.Platform.OAuth;
+using ModShelf.Platform.Releases;
 using ModShelf.Platform.Secrets;
 using ModShelf.Platform.Tray;
 using ModShelf.Testing;
@@ -65,6 +66,17 @@ public sealed class PlatformServiceCollectionExtensionsTests : IDisposable
         object notices = Single<INotificationService>(services).ImplementationFactory!(new StubServiceProvider());
 
         Assert.IsAssignableFrom<INotificationService>(notices);
+    }
+
+    [Fact]
+    public void RegistersWhatModShelfRegistersForItself()
+    {
+        ServiceCollection services = new();
+        services.AddPlatformServices(new SecretStoreOptions { Folder = _folder.Path });
+
+        object registrations = Single<IAppRegistrations>(services).ImplementationFactory!(new StubServiceProvider());
+
+        Assert.IsType(OperatingSystem.IsWindows() ? typeof(WindowsAppRegistrations) : typeof(NoAppRegistrations), registrations);
     }
 
     [Fact]
