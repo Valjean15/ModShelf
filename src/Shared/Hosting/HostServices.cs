@@ -5,6 +5,7 @@ using ModShelf.Application;
 using ModShelf.Application.Diagnostics;
 using ModShelf.Infrastructure;
 using ModShelf.Platform;
+using ModShelf.Platform.Links;
 using ModShelf.Platform.Secrets;
 using ModShelf.Sources.DirectUrl;
 using ModShelf.Sources.Nexus;
@@ -44,6 +45,13 @@ internal static class HostServices
     public const string NexusClientIdKey = "ModShelf:Nexus:ClientId";
 
     /// <summary>
+    /// The configuration key, or <c>ModShelf__DesktopApp</c>, for the desktop app's executable, which the system starts
+    /// to open a link with ModShelf. By default it's beside this app, as it is in an installed ModShelf; the CLI of a
+    /// build from source needs it set.
+    /// </summary>
+    public const string DesktopAppKey = "ModShelf:DesktopApp";
+
+    /// <summary>
     /// Registers ModShelf's files, where the configuration says, and every service both hosts have.
     /// </summary>
     /// <param name="app">What the host's log files' names start with, such as <c>cli</c>.</param>
@@ -53,7 +61,7 @@ internal static class HostServices
         string? databasePath = configuration[DatabasePathKey];
         string folder = services.AddLibraryFiles(string.IsNullOrWhiteSpace(databasePath) ? null : Path.GetFullPath(databasePath), app);
 
-        services.AddPlatformServices(SecretStoreOptionsFrom(configuration));
+        services.AddPlatformServices(SecretStoreOptionsFrom(configuration), SchemeHandlerOptionsFrom(configuration));
         services.AddHttpFileTransfer();
         services.AddSourceHttpClients();
         services.AddDownloadEngine();
@@ -68,6 +76,7 @@ internal static class HostServices
         services.AddUpdateChecks();
         services.AddSettings();
         services.AddDiagnostics(AppInfo.Of(typeof(HostServices).Assembly));
+        services.AddLinks();
         services.AddDirectUrlSource();
         services.AddNexusSource(NexusOptionsFrom(configuration));
         return folder;
@@ -77,6 +86,25 @@ internal static class HostServices
     {
         string? clientId = configuration[NexusClientIdKey];
         return new NexusOptions { OAuthClientId = string.IsNullOrWhiteSpace(clientId) ? null : clientId.Trim() };
+    }
+
+    /// <summary>
+    /// The desktop app, started with what keeps it on this library and these secrets when they aren't in their default
+    /// places, such as <c>--ModShelf:DatabasePath=…</c>: the system starts it without this app's environment.
+    /// </summary>
+    internal static SchemeHandlerOptions SchemeHandlerOptionsFrom(IConfiguration configuration)
+    {
+        string? desktopApp = configuration[DesktopAppKey];
+        string[] arguments =
+        [
+            .. new[] { DatabasePathKey, SecretsFolderKey }
+                .Where(key => !string.IsNullOrWhiteSpace(configuration[key]))
+                .Select(key => $"--{key}={Path.GetFullPath(configuration[key]!)}"),
+            .. string.IsNullOrWhiteSpace(configuration[SecretScopeKey]) ? [] : new[] { $"--{SecretScopeKey}={configuration[SecretScopeKey]}" },
+        ];
+        return new SchemeHandlerOptions(
+            string.IsNullOrWhiteSpace(desktopApp) ? PlatformServiceCollectionExtensions.DefaultDesktopApp : Path.GetFullPath(desktopApp),
+            arguments);
     }
 
     private static SecretStoreOptions SecretStoreOptionsFrom(IConfiguration configuration)

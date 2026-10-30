@@ -4,10 +4,13 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Desktop.Ports;
+using ModShelf.Application.Links;
+using ModShelf.Application.Links.Ports;
 using ModShelf.Application.Notifications.Ports;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Platform.Browser;
 using ModShelf.Platform.Instances;
+using ModShelf.Platform.Links;
 using ModShelf.Platform.OAuth;
 using ModShelf.Platform.Secrets;
 using ModShelf.Platform.Tray;
@@ -61,6 +64,28 @@ public sealed class PlatformServiceCollectionExtensionsTests : IDisposable
         object notices = Single<INotificationService>(services).ImplementationFactory!(new StubServiceProvider());
 
         Assert.IsAssignableFrom<INotificationService>(notices);
+    }
+
+    [Fact]
+    public async Task RegistersTheSystemsRegisterOfLinkSchemes()
+    {
+        ServiceCollection services = new();
+        services.AddPlatformServices(
+            new SecretStoreOptions { Folder = _folder.Path },
+            new SchemeHandlerOptions(Path.Combine(_folder.Path, "ModShelf.Desktop"), []));
+
+        object registration = Single<ISchemeRegistration>(services).ImplementationFactory!(new StubServiceProvider());
+
+        // No desktop app there: on Windows and Linux the register can't take links; on macOS, a test isn't an app.
+        SchemeState state = await Assert.IsAssignableFrom<ISchemeRegistration>(registration).GetAsync("modshelf-test-none", TestContext.Current.CancellationToken);
+        Assert.Equal(SchemeHandlerKind.Unavailable, state.Kind);
+    }
+
+    [Fact]
+    public void TheDesktopAppIsBesideThisOneByDefault()
+    {
+        Assert.Equal(AppContext.BaseDirectory, Path.GetDirectoryName(PlatformServiceCollectionExtensions.DefaultDesktopApp) + Path.DirectorySeparatorChar);
+        Assert.StartsWith("ModShelf.Desktop", Path.GetFileName(PlatformServiceCollectionExtensions.DefaultDesktopApp), StringComparison.Ordinal);
     }
 
     [Fact]

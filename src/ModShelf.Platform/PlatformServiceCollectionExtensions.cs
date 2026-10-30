@@ -8,6 +8,7 @@ using ModShelf.Application.Settings.Ports;
 using ModShelf.Platform.Browser;
 using ModShelf.Platform.Folders;
 using ModShelf.Platform.Instances;
+using ModShelf.Platform.Links;
 using ModShelf.Platform.Notifications;
 using ModShelf.Platform.OAuth;
 using ModShelf.Platform.Secrets;
@@ -22,14 +23,24 @@ public static class PlatformServiceCollectionExtensions
 {
     /// <summary>
     /// Registers the secret store for this system, the OAuth loopback redirect listener, the browser launcher, the
-    /// user's folders as this system keeps them, and the way this system shows notices.
+    /// user's folders as this system keeps them, the way this system shows notices, and its register of the apps that
+    /// open link schemes.
     /// </summary>
     /// <param name="secrets">Where the secret store keeps its secrets; by default the user's own ModShelf secrets.</param>
-    public static IServiceCollection AddPlatformServices(this IServiceCollection services, SecretStoreOptions? secrets = null)
+    /// <param name="links">
+    /// What the system starts when it opens a link with ModShelf; by default the desktop app beside this one, with no
+    /// arguments before the link.
+    /// </param>
+    public static IServiceCollection AddPlatformServices(
+        this IServiceCollection services,
+        SecretStoreOptions? secrets = null,
+        SchemeHandlerOptions? links = null)
     {
         ArgumentNullException.ThrowIfNull(services);
         SecretStoreOptions settings = secrets ?? new SecretStoreOptions();
         ArgumentException.ThrowIfNullOrWhiteSpace(settings.Scope, nameof(secrets));
+        SchemeHandlerOptions handler = links ?? new SchemeHandlerOptions(DefaultDesktopApp, []);
+        ArgumentException.ThrowIfNullOrWhiteSpace(handler.DesktopApp, nameof(links));
 
         services.AddSingleton(provider => SecretStores.ForThisSystem(
             settings.Folder ?? SecretStores.GetDefaultFolder(),
@@ -40,9 +51,16 @@ public static class PlatformServiceCollectionExtensions
         services.AddSingleton(_ => UserFolders.ForThisSystem());
         services.AddSingleton(provider => NotificationServices.ForThisSystem(
             provider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(NotificationServices).FullName!)));
+        services.AddSingleton(_ => SchemeRegistrations.ForThisSystem(handler));
 
         return services;
     }
+
+    /// <summary>
+    /// The desktop app's executable in this app's folder, such as <c>ModShelf.Desktop.exe</c> on Windows.
+    /// </summary>
+    public static string DefaultDesktopApp
+        => Path.Combine(AppContext.BaseDirectory, OperatingSystem.IsWindows() ? "ModShelf.Desktop.exe" : "ModShelf.Desktop");
 
     /// <summary>
     /// Registers the desktop app's <see cref="ISingleInstance"/>: one app at a time for the library in
