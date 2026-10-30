@@ -55,6 +55,11 @@ internal sealed class AccountHarness
 
     public void Restart() => Service = Build();
 
+    /// <summary>
+    /// A service over the same stores, as another ModShelf process running at the same time has.
+    /// </summary>
+    public AccountService AnotherProcess() => Build();
+
     public Task<LinkedAccount> LinkAsync(SourceId source, AuthKind kind)
         => Service.LinkAsync(source, kind, Prompt, TestContext.Current.CancellationToken);
 

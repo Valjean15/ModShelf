@@ -5,8 +5,8 @@ using ModShelf.Application.Accounts.Ports;
 namespace ModShelf.Application.Tests.Fakes;
 
 /// <summary>
-/// Keeps secrets in memory. A name in <see cref="Damaged"/> reads as a file that can't be decrypted, and while
-/// <see cref="WriteFailure"/> is set nothing can be stored.
+/// Keeps secrets in memory. A name in <see cref="Damaged"/> reads as a file that can't be decrypted, while
+/// <see cref="ReadFailure"/> is set nothing can be read, and while <see cref="WriteFailure"/> is set nothing can be stored.
 /// </summary>
 internal sealed class MemorySecretStore : ISecretStore
 {
@@ -19,10 +19,16 @@ internal sealed class MemorySecretStore : ISecretStore
     /// </summary>
     public Exception? WriteFailure { get; set; }
 
+    /// <summary>
+    /// What reading throws, while set, as a keyring that's locked does.
+    /// </summary>
+    public Exception? ReadFailure { get; set; }
+
     public bool IsProtectedByOs => true;
 
     public Task<string?> ReadAsync(string name, CancellationToken cancellationToken)
-        => Damaged.Contains(name)
+        => ReadFailure is { } failure ? Task.FromException<string?>(failure)
+            : Damaged.Contains(name)
             ? throw new InvalidDataException($"The secret '{name}' can't be decrypted.")
             : Task.FromResult(Secrets.TryGetValue(name, out string? secret) ? secret : null);
 

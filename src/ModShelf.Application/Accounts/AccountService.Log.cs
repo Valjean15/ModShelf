@@ -37,4 +37,7 @@ internal sealed partial class AccountService
 
     [LoggerMessage(EventId = 409, Level = LogLevel.Information, Message = "Checked the account on {Source}")]
     private static partial void LogChecked(ILogger logger, SourceId source);
+
+    [LoggerMessage(EventId = 412, Level = LogLevel.Information, Message = "The account on {Source} was unlinked while its credentials were refreshed; the refreshed ones aren't kept")]
+    private static partial void LogUnlinkedWhileRefreshing(ILogger logger, SourceId source);
 }

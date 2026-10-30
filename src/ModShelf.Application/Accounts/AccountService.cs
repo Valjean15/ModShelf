@@ -22,6 +22,11 @@ namespace ModShelf.Application.Accounts;
 /// Credentials go to the <see cref="ISecretStore"/>; who the account belongs to goes to the
 /// <see cref="ILinkedAccountRepository"/>. Logs name sources and kinds only, never credentials or answers.
 /// </para>
+/// <para>
+/// Another ModShelf process can change the same account, so the stored credentials are read again before they're
+/// refreshed, when a request is refused, and once a minute (<see cref="CredentialVault"/>); and a check doesn't put back
+/// an account unlinked or linked again meanwhile.
+/// </para>
 /// </remarks>
 internal sealed partial class AccountService : IAccountService, ICredentialProvider
 {
@@ -56,7 +61,7 @@ internal sealed partial class AccountService : IAccountService, ICredentialProvi
         _browser = browser;
         _timeProvider = timeProvider;
         _logger = logger;
-        _vault = new CredentialVault(secrets, logger);
+        _vault = new CredentialVault(secrets, timeProvider, logger);
     }
 
     public async Task<IReadOnlyList<SourceAccountStatus>> ListAsync(CancellationToken cancellationToken)
@@ -96,10 +101,24 @@ internal sealed partial class AccountService : IAccountService, ICredentialProvi
                 source,
                 () => linker.GetProfileAsync(entry.Credentials, entry.Kind, cancellationToken))
             .ConfigureAwait(false);
-        LinkedAccount checkedAccount = new(source, entry.Kind, profile, account.LinkedAt);
-        await _accounts.SaveAsync(checkedAccount, CancellationToken.None).ConfigureAwait(false);
-        LogChecked(_logger, source);
-        return checkedAccount;
+
+        using (await _vault.LockAsync(source, cancellationToken).ConfigureAwait(false))
+        {
+            // Another process may have unlinked the account, or linked another, while the site was asked.
+            LinkedAccount listed = (await _accounts.ListAsync(cancellationToken).ConfigureAwait(false))
+                    .FirstOrDefault(linked => linked.Source == source)
+                ?? throw new KeyNotFoundException($"No account is linked on {source}.");
+            VaultEntry? stored = await _vault.ReloadAsync(source, cancellationToken).ConfigureAwait(false);
+            if (stored is null || stored.Kind != entry.Kind || stored.Credentials != entry.Credentials)
+            {
+                return listed;
+            }
+
+            LinkedAccount checkedAccount = new(source, entry.Kind, profile, listed.LinkedAt);
+            await _accounts.SaveAsync(checkedAccount, CancellationToken.None).ConfigureAwait(false);
+            LogChecked(_logger, source);
+            return checkedAccount;
+        }
     }
 
     public async Task<LinkedAccount> LinkAsync(SourceId source, AuthKind kind, IAuthPrompt prompt, CancellationToken cancellationToken)

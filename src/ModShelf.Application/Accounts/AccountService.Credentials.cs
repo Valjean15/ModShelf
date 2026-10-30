@@ -49,7 +49,8 @@ internal sealed partial class AccountService
 
         using (await _vault.LockAsync(source, cancellationToken).ConfigureAwait(false))
         {
-            VaultEntry? entry = await _vault.GetAsync(source, cancellationToken).ConfigureAwait(false);
+            // As the store has them: another process may have refreshed them, or linked the account again.
+            VaultEntry? entry = await _vault.ReloadAsync(source, cancellationToken).ConfigureAwait(false);
             if (Usable(entry) is not { } current)
             {
                 return null;
@@ -102,7 +103,18 @@ internal sealed partial class AccountService
                 return null;
             }
 
-            // Another request may have refreshed them while this one waited for the lock.
+            // Another request may have refreshed them while this one waited for the lock, or another process meanwhile.
+            if (!IsAboutToExpire(entry.Credentials))
+            {
+                return entry;
+            }
+
+            entry = await _vault.ReloadAsync(source, cancellationToken).ConfigureAwait(false);
+            if (entry is not { NeedsRelink: false })
+            {
+                return null;
+            }
+
             if (!IsAboutToExpire(entry.Credentials))
             {
                 return entry;
@@ -148,6 +160,13 @@ internal sealed partial class AccountService
         {
             _vault.MarkNeedsRelink(source);
             LogNeedsRelink(_logger, source);
+            return null;
+        }
+
+        // Saved, they'd put back an account another process unlinked while the site was asked.
+        if (await _vault.ReloadAsync(source, CancellationToken.None).ConfigureAwait(false) is null)
+        {
+            LogUnlinkedWhileRefreshing(_logger, source);
             return null;
         }
 
