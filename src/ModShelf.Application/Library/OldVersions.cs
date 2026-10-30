@@ -16,7 +16,8 @@ internal static class OldVersions
 
     /// <summary>
     /// The mod's library files that <paramref name="newer"/> replaced, directly or through versions between them, the
-    /// nearest first. A file the site no longer lists, or whose chain doesn't reach <paramref name="newer"/>, isn't one.
+    /// nearest first. A file the site no longer lists, or whose chain doesn't reach <paramref name="newer"/>, isn't one;
+    /// nor is one the site links to a file uploaded before it (see <see cref="Replacements"/>).
     /// </summary>
     /// <param name="siteFiles">The mod's files as its site lists them, with which replaced which.</param>
     public static IReadOnlyList<LibraryFile> ReplacedBy(LibraryMod mod, ModFileRef newer, IReadOnlyList<ModFile> siteFiles)
@@ -93,7 +94,7 @@ internal static class OldVersions
     {
         HashSet<ModFileRef> seen = [];
         ModFileRef current = file;
-        for (int steps = 1; seen.Add(current) && listed.TryGetValue(current, out ModFile? site) && site.ReplacedBy is { } next; steps++)
+        for (int steps = 1; seen.Add(current) && listed.TryGetValue(current, out ModFile? site) && Replacements.Next(site, listed) is { } next; steps++)
         {
             if (next == newer)
             {

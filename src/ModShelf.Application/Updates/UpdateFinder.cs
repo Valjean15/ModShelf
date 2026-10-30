@@ -10,8 +10,9 @@ namespace ModShelf.Application.Updates;
 /// <remarks>
 /// <list type="bullet">
 /// <item>
-/// A library file's update is the newest file of its update chain (<see cref="ModFile.ReplacedBy"/>), when the library
-/// doesn't have it. The update replaces the newest library file on the way.
+/// A library file's update is the newest file of its update chain (<see cref="ModFile.ReplacedBy"/>, as far as
+/// <see cref="Replacements"/> believes it), when the library doesn't have it. The update replaces the newest library file
+/// on the way. An archived file, one its author withdrew, is no update, though the chain may go on past it to one.
 /// </item>
 /// <item>
 /// A main file in no chain, since authors don't always link updates, has the newest main file in no chain that the site
@@ -42,7 +43,13 @@ internal static class UpdateFinder
         }
 
         HashSet<ModFileRef> have = [.. mod.Files.Select(file => file.File)];
-        HashSet<ModFileRef> chained = [.. siteFiles.Where(file => file.ReplacedBy is not null).SelectMany(file => new[] { file.Reference, file.ReplacedBy! })];
+        HashSet<ModFileRef> chained =
+        [
+            .. siteFiles
+                .Select(file => (file.Reference, Next: Replacements.Next(file, listed)))
+                .Where(link => link.Next is not null)
+                .SelectMany(link => new[] { link.Reference, link.Next! }),
+        ];
         LibraryFile[] current = [.. mod.Files.Where(file => !OldVersions.IsArchived(file.RelativePath))];
 
         // Each newer file and what it replaces. Library files are taken oldest first, so when two lead to the same newer
@@ -107,23 +114,30 @@ internal static class UpdateFinder
     }
 
     /// <summary>
-    /// The newest file of <paramref name="file"/>'s update chain, and the newest file on the way that the library has.
-    /// A chain that goes round ends where it would.
+    /// The newest file of <paramref name="file"/>'s update chain that isn't archived, or that the library has, and the
+    /// newest file on the way that the library has. A chain that goes round ends where it would.
     /// </summary>
     private static (ModFileRef Newest, ModFileRef NewestHad) EndOfChain(ModFileRef file, Dictionary<ModFileRef, ModFile> listed, HashSet<ModFileRef> have)
     {
         HashSet<ModFileRef> seen = [file];
         ModFileRef current = file;
+        ModFileRef newest = file;
         ModFileRef newestHad = file;
-        while (listed.TryGetValue(current, out ModFile? site) && site.ReplacedBy is { } next && seen.Add(next))
+        while (listed.TryGetValue(current, out ModFile? site) && Replacements.Next(site, listed) is { } next && seen.Add(next))
         {
             current = next;
             if (have.Contains(current))
             {
+                // Nothing before it is newer than what the library has.
+                newest = current;
                 newestHad = current;
+            }
+            else if (!listed.TryGetValue(current, out ModFile? reached) || reached.Category != ModFileCategory.Archived)
+            {
+                newest = current;
             }
         }
 
-        return (current, newestHad);
+        return (newest, newestHad);
     }
 }

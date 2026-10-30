@@ -155,6 +155,80 @@ public sealed class UpdateFinderTests
     }
 
     [Fact]
+    public void ALinkBackToAnOlderArchivedFileIsntFollowed()
+    {
+        // As Nexus Mods lists some mods: their newest file "replaced" by an older one, which is archived.
+        ModFile[] site =
+        [
+            Listed("79", days: -10, replacedBy: "80", category: ModFileCategory.OldVersion),
+            Listed("80", days: -5, replacedBy: "81"),
+            Listed("81", days: -35, category: ModFileCategory.Archived),
+        ];
+
+        Assert.Empty(Find(WithFiles("80"), site));
+    }
+
+    [Fact]
+    public void ALinkBackToAnOlderFileIsntFollowed()
+    {
+        ModFile[] site = [Listed("80", days: -5, replacedBy: "81"), Listed("81", days: -35, category: ModFileCategory.OldVersion)];
+
+        Assert.Empty(Find(WithFiles("80"), site));
+    }
+
+    [Fact]
+    public void AMainFileWhoseOnlyLinkGoesBackIsInNoChain()
+    {
+        ModFile[] site = [Listed("80", days: -5, replacedBy: "81"), Listed("81", days: -35, category: ModFileCategory.OldVersion), Listed("82", days: -1)];
+
+        LibraryUpdate update = Assert.Single(Find(WithFiles("80"), site));
+
+        Assert.Equal(("82", "80"), (update.File.Id, update.Replaces?.Id));
+    }
+
+    [Fact]
+    public void AnArchivedFileIsNoUpdate()
+    {
+        // As an author who withdrew a version: both its uploads archived, the one before it the main file again.
+        ModFile[] site =
+        [
+            Listed("90", days: -3, replacedBy: "91"),
+            Listed("91", days: -2, replacedBy: "92", category: ModFileCategory.Archived),
+            Listed("92", days: -1, category: ModFileCategory.Archived),
+        ];
+
+        Assert.Empty(Find(WithFiles("90"), site));
+    }
+
+    [Fact]
+    public void AChainGoesOnPastAnArchivedFile()
+    {
+        ModFile[] site =
+        [
+            Listed("90", days: -3, replacedBy: "91"),
+            Listed("91", days: -2, replacedBy: "92", category: ModFileCategory.Archived),
+            Listed("92", days: -1, category: ModFileCategory.OldVersion),
+        ];
+
+        LibraryUpdate update = Assert.Single(Find(WithFiles("90"), site));
+
+        Assert.Equal(("92", "90"), (update.File.Id, update.Replaces?.Id));
+    }
+
+    [Fact]
+    public void NoUpdateIsOlderThanAFileTheLibraryHasFurtherOnTheChain()
+    {
+        ModFile[] site =
+        [
+            Listed("90", days: -3, replacedBy: "91"),
+            Listed("91", days: -2, replacedBy: "92"),
+            Listed("92", days: -1, category: ModFileCategory.Archived),
+        ];
+
+        Assert.Empty(Find(WithFiles("90", "92"), site));
+    }
+
+    [Fact]
     public void AWatchedModGetsTheMainFilesSinceItsLastCheck()
     {
         IReadOnlyList<LibraryUpdate> updates = Find(Watched(), since: Now.AddDays(-12));

@@ -54,6 +54,16 @@ public sealed class OldVersionsTests
     }
 
     [Fact]
+    public void ANewerFileIsntAnOldVersionOfAnOlderOneTheSiteLinksBackTo()
+    {
+        // As Nexus Mods lists some mods: their newest file "replaced" by an older one, which is archived.
+        ModFile[] site = [Listed("79", replacedBy: "80", days: -10), Listed("80", replacedBy: "81", days: -5), Listed("81", days: -35)];
+
+        Assert.Empty(OldVersions.ReplacedBy(Mod("79", "80"), File("81"), site));
+        Assert.Empty(OldVersions.Plan(Mod("79", "80"), File("81"), site, OldVersionRule.KeepLatest(1)).Delete);
+    }
+
+    [Fact]
     public void KeepingAllDoesNothing()
     {
         Assert.Equal(OldVersionPlan.None, OldVersions.Plan(Mod("50", "51", "52"), File("53"), Site, OldVersionRule.KeepAll));
@@ -114,8 +124,8 @@ public sealed class OldVersionsTests
 
     private static ModFileRef File(string id) => new(SkyUi, id);
 
-    private static ModFile Listed(string id, string? replacedBy = null)
-        => new(File(id), $"SkyUI {id}", $"{id}.7z", null, ModFileCategory.Main, null, TestData.Now, [], replacedBy: replacedBy is null ? null : File(replacedBy));
+    private static ModFile Listed(string id, string? replacedBy = null, int days = 0)
+        => new(File(id), $"SkyUI {id}", $"{id}.7z", null, ModFileCategory.Main, null, TestData.Now.AddDays(days), [], replacedBy: replacedBy is null ? null : File(replacedBy));
 
     private static LibraryMod Mod(params string[] ids) => Mod([.. ids.Select(id => (id, $"mods/SkyUI/{id}.7z"))]);
 
