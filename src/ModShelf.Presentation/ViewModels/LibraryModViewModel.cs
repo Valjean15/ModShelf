@@ -150,13 +150,9 @@ public sealed partial class LibraryModViewModel : ObservableObject
     private Task OpenPageAsync(CancellationToken cancellationToken)
         => RunAsync(
             ModAction.OpenPage,
-            async () =>
-            {
-                if (_mod.PageUrl is { } page && !await _services.Browser.TryOpenAsync(page, cancellationToken))
-                {
-                    await _services.Dialogs.ShowMessageAsync(Strings.OpenPageFailedTitle, Text.Format(Strings.PageOpenFailed, page.AbsoluteUri), cancellationToken);
-                }
-            },
+            () => _mod.PageUrl is { } page
+                ? Pages.OpenAsync(page, _services.Browser, _services.Dialogs, Strings.PageOpenFailed, cancellationToken)
+                : Task.CompletedTask,
             cancellationToken);
 
     /// <summary>
