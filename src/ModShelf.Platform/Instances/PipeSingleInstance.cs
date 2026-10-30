@@ -18,7 +18,9 @@ namespace ModShelf.Platform.Instances;
 /// <remarks>
 /// <para>
 /// The system lets go of the lock when the process ends, however it ends, as with the download queue's lock (ADR 0027).
-/// The pipe takes only the same user's connections. On Linux and macOS, .NET makes it a socket in the temporary folder.
+/// The pipe takes only the same user's connections. On Linux and macOS, .NET makes it a socket: on Linux, in the user's
+/// own runtime folder (<c>$XDG_RUNTIME_DIR</c>) where there's one, since another user could take its name first in the
+/// shared temporary folder; otherwise, and on macOS, whose temporary folder is the user's own, in the temporary folder.
 /// </para>
 /// <para>The arguments are never logged: from Phase 6, they can hold <c>nxm://</c> links and their keys.</para>
 /// </remarks>
@@ -29,6 +31,9 @@ internal sealed partial class PipeSingleInstance : ISingleInstance, IDisposable
 
     // A launch's arguments are a few links at most.
     private const int MaxMessageLength = 64 * 1024;
+
+    // The longest socket path Linux and macOS take is 107 and 103 bytes; a longer one goes in the temporary folder.
+    private const int MaxSocketPathLength = 100;
 
     private static readonly UTF8Encoding Utf8 = new(false);
 
@@ -45,6 +50,14 @@ internal sealed partial class PipeSingleInstance : ISingleInstance, IDisposable
     /// <param name="folder">The folder of the library the desktop app runs for, an absolute path.</param>
     /// <param name="patience">How long a second launch waits for the running app to answer.</param>
     public PipeSingleInstance(string folder, TimeSpan patience, ILogger logger)
+        : this(folder, patience, logger, OperatingSystem.IsLinux() ? Environment.GetEnvironmentVariable("XDG_RUNTIME_DIR") : null)
+    {
+    }
+
+    /// <param name="folder">The folder of the library the desktop app runs for, an absolute path.</param>
+    /// <param name="patience">How long a second launch waits for the running app to answer.</param>
+    /// <param name="runtimeFolder">The user's own folder for the pipe's socket, if any.</param>
+    internal PipeSingleInstance(string folder, TimeSpan patience, ILogger logger, string? runtimeFolder)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(folder);
         ArgumentNullException.ThrowIfNull(logger);
@@ -56,12 +69,17 @@ internal sealed partial class PipeSingleInstance : ISingleInstance, IDisposable
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(patience, TimeSpan.Zero);
 
         _folder = Path.GetFullPath(folder);
-        _pipeName = PipeNameFor(_folder);
+        _pipeName = PipeNameFor(_folder, runtimeFolder);
         _patience = patience;
         _logger = logger;
     }
 
     public event EventHandler<Launch>? LaunchedAgain;
+
+    /// <summary>
+    /// The pipe's name, or its socket's full path.
+    /// </summary>
+    internal string PipeName => _pipeName;
 
     /// <exception cref="UnauthorizedAccessException">The lock file can't be created, as in a folder this user can't write to.</exception>
     public bool TryClaim(IReadOnlyList<string> arguments)
@@ -122,9 +140,11 @@ internal sealed partial class PipeSingleInstance : ISingleInstance, IDisposable
 
     /// <summary>
     /// The pipe's name: ModShelf's, and a hash of the folder's path, in upper case where paths ignore case, so each
-    /// library's app has its own and the name holds no character a pipe's can't.
+    /// library's app has its own and the name holds no character a pipe's can't. With a runtime folder that's there, and
+    /// leaves room, it's a full path in that folder, which .NET takes as the socket's path.
     /// </summary>
-    internal static string PipeNameFor(string folder)
+    /// <param name="runtimeFolder">The user's own folder for the socket, as on Linux; null for none.</param>
+    internal static string PipeNameFor(string folder, string? runtimeFolder = null)
     {
         string path = Path.TrimEndingDirectorySeparator(Path.GetFullPath(folder));
         if (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS())
@@ -132,7 +152,14 @@ internal sealed partial class PipeSingleInstance : ISingleInstance, IDisposable
             path = path.ToUpperInvariant();
         }
 
-        return "ModShelf-" + Convert.ToHexString(SHA256.HashData(Utf8.GetBytes(path)))[..24];
+        string name = "ModShelf-" + Convert.ToHexString(SHA256.HashData(Utf8.GetBytes(path)))[..24];
+        if (string.IsNullOrEmpty(runtimeFolder) || !Path.IsPathFullyQualified(runtimeFolder) || !Directory.Exists(runtimeFolder))
+        {
+            return name;
+        }
+
+        string socket = Path.Combine(runtimeFolder, name);
+        return Utf8.GetByteCount(socket) <= MaxSocketPathLength ? socket : name;
     }
 
     /// <summary>

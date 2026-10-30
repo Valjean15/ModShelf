@@ -273,15 +273,67 @@ public sealed class PipeSingleInstanceTests : IDisposable
     }
 
     [Fact]
+    public void OnLinuxAndMacOSTheSocketCanBeInTheUsersOwnFolder()
+    {
+        Assert.SkipWhen(OperatingSystem.IsWindows(), "Windows' pipes aren't files.");
+
+        // Short, as $XDG_RUNTIME_DIR is: macOS's temporary folder leaves no room for a socket's path.
+        string runtime = Directory.CreateDirectory($"/tmp/ModShelf.Tests.{Guid.NewGuid():N}"[..34]).FullName;
+        try
+        {
+            Listening(Instance(runtimeFolder: runtime));
+            bool claimed = Instance(runtimeFolder: runtime).TryClaim(["one"]);
+
+            Assert.False(claimed);
+            Assert.Equal(["one"], NextLaunch().Arguments);
+            Assert.Equal(PipeSingleInstance.PipeNameFor(_folder.Path), Path.GetFileName(Assert.Single(Directory.EnumerateFileSystemEntries(runtime))));
+        }
+        finally
+        {
+            foreach (PipeSingleInstance instance in _instances)
+            {
+                instance.Dispose();
+            }
+
+            Directory.Delete(runtime, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void TheSocketGoesInTheUsersOwnFolderOnlyWhenItsThereAndLeavesRoom()
+    {
+        Assert.SkipWhen(OperatingSystem.IsWindows(), "Windows' pipes aren't files.");
+        string name = PipeSingleInstance.PipeNameFor(_folder.Path);
+
+        Assert.Equal(Path.Combine("/tmp", name), PipeSingleInstance.PipeNameFor(_folder.Path, "/tmp"));
+        Assert.Equal(name, PipeSingleInstance.PipeNameFor(_folder.Path, null));
+        Assert.Equal(name, PipeSingleInstance.PipeNameFor(_folder.Path, Path.Combine(_folder.Path, "missing")));
+        Assert.Equal(name, PipeSingleInstance.PipeNameFor(_folder.Path, "run/user/1000"));
+
+        string deep = Path.Combine(_folder.Path, new string('r', 100));
+        Directory.CreateDirectory(deep);
+        Assert.Equal(name, PipeSingleInstance.PipeNameFor(_folder.Path, deep));
+    }
+
+    [Fact]
+    public void OnLinuxTheUsersRuntimeFolderHoldsTheSocket()
+    {
+        string? runtime = OperatingSystem.IsLinux() ? Environment.GetEnvironmentVariable("XDG_RUNTIME_DIR") : null;
+
+        Assert.Equal(PipeSingleInstance.PipeNameFor(_folder.Path, runtime), new PipeSingleInstance(_folder.Path, Patience, _logger).PipeName);
+    }
+
+    [Fact]
     public void AFolderThatIsntAFullPathIsRefused()
     {
         Assert.Throws<ArgumentException>(() => new PipeSingleInstance("Library", Patience, _logger));
         Assert.Throws<ArgumentOutOfRangeException>(() => new PipeSingleInstance(_folder.Path, TimeSpan.Zero, _logger));
     }
 
-    private PipeSingleInstance Instance(string? folder = null, TimeSpan? patience = null)
+    /// <param name="runtimeFolder">The user's own folder for the socket; by default none, as on Windows and macOS.</param>
+    private PipeSingleInstance Instance(string? folder = null, TimeSpan? patience = null, string? runtimeFolder = null)
     {
-        PipeSingleInstance instance = new(folder ?? _folder.Path, patience ?? Patience, _logger);
+        PipeSingleInstance instance = new(folder ?? _folder.Path, patience ?? Patience, _logger, runtimeFolder);
         _instances.Add(instance);
         return instance;
     }
