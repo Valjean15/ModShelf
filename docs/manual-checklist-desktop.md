@@ -40,14 +40,18 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
 
 ## 1. Start
 
-- [ ] **1.1 The window.** `app`.
-  The main window opens on the Library screen: "The library is empty. Mods you download into it show here, watched for updates." Its title bar and the taskbar show ModShelf's icon, three books on a shelf.
-- [ ] **1.2 The tray icon.** Look in the notification area (on Windows, it may be under the arrow that shows hidden icons).
+- [ ] **1.1 The window and the setup.** `app`.
+  The main window opens on the Library screen, "The library is empty. Mods you download into it show here, watched for updates.", and over it "Welcome to ModShelf", "Step 1 of 3", "Where your mods go", with the default folder. Its title bar and the taskbar show ModShelf's icon, three books on a shelf.
+- [ ] **1.2 Closing the setup.** Close the setup with its window's close button, **Quit ModShelf** from the tray menu, and `app` again.
+  The setup is back, at "Step 1 of 3".
+- [ ] **1.3 Its pages.** **Choose another folder…**, and pick a new, empty folder named `Library` in the test folder (`$test`). Then **Next**, and **Next** again, and **Back**.
+  The folder shown is the one picked, with "The library is in … now." under it. Step 2, "Link your account", has the Nexus Mods card as on the Accounts screen; don't link the account here, section 2 does. Step 3, "Links from websites", says which app opens `nxm://` links, with **Open them with ModShelf**; don't take them here, section 12 does. **Back** returns to step 2.
+- [ ] **1.4 Done.** With the Premium account, **Next**, then **Finish**. With the free account, **Skip setup** instead, on any step.
+  The setup closes. The Settings screen shows the `Library` folder from 1.3, with **Use the default folder** enabled. `settings.json` in the test folder holds `"setup": { "done": true }`. **Quit ModShelf** from the tray menu and `app` again: the main window opens without the setup.
+- [ ] **1.5 The tray icon.** Look in the notification area (on Windows, it may be under the arrow that shows hidden icons).
   ModShelf's icon is there. Hovering over it says "ModShelf". Right-clicking it shows **Open ModShelf**, **Check for updates now** and **Quit ModShelf**.
-- [ ] **1.3 One app at a time.** Minimize the window, then run `app` again.
+- [ ] **1.6 One app at a time.** Minimize the window, then run `app` again.
   No second window opens: the first one comes back. The log (section 13) has "ModShelf was launched again, and the launch was handed over to this app".
-- [ ] **1.4 The library's folder.** On the Settings screen, **Choose another folder…**, and pick a new, empty folder named `Library` in the test folder (`$test`).
-  The folder shown is the one picked, with "The library is in … now." under it, and **Use the default folder** is enabled. Nothing is asked, since the library has no files yet.
 
 ## 2. Link the account
 
@@ -252,10 +256,12 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 
 | Check | Premium | Free | Notes |
 |---|---|---|---|
-| 1.1 Window | | | |
-| 1.2 Tray icon | | | |
-| 1.3 One app at a time | | | |
-| 1.4 Library's folder | | | |
+| 1.1 Window and setup | | | |
+| 1.2 Closing the setup | | | |
+| 1.3 Its pages | | | |
+| 1.4 Done | | | |
+| 1.5 Tray icon | | | |
+| 1.6 One app at a time | | | |
 | 2.1 Card | | | |
 | 2.2 Wrong key refused | | | |
 | 2.3 API key page | | | |
