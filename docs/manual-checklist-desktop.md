@@ -105,6 +105,8 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
   "That link is to another file, *…*. Paste the link for *…*."
 - [ ] **5.6 The link in the box.** Paste the right file's `nxm://` link into the Downloads screen's own link box, and **Download**.
   The waiting download goes on, and ends "Done".
+- [ ] **5.7 The file's page isn't the link handed over.** Start another old version of SMAPI's download from its page in Browse. On the Downloads screen, **Open on Nexus Mods**, copy the page's address from the browser's address bar, then **Paste link…**, paste it, and **Continue**.
+  "That's a link to *the file's name*, but not the one Nexus Mods hands over. Start the download on its page, then paste the link its download button holds." **Cancel** the download.
 
 ## 6. Save to a folder
 
@@ -247,6 +249,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 5.4 The link | – | | |
 | 5.5 Another file's link | – | | |
 | 5.6 The link in the box | – | | |
+| 5.7 The file's page | – | | |
 | 6.1 A folder of your own | | | |
 | 6.2 Again | | | |
 | 7.1 Pause | | | |

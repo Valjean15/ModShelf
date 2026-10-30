@@ -90,6 +90,10 @@ A new terminal needs all these lines again, with the same folders. Never paste a
   "Continuing the download of … added earlier.", then "Saved …", without asking for anything.
 - [ ] **5.7 A link to another file.** Run 5.1 with another new folder, `--to (Join-Path $downloads other)`. On the website, start the download of a *different* file of SMAPI, and paste its `nxm://` link.
   "That link is to another file, *its name*. Paste the link for *the first file*, or press Ctrl+C to stop." Press Ctrl+C.
+- [ ] **5.8 The file's page isn't the link handed over.** Run 5.1 with another new folder, `--to (Join-Path $downloads page)`. At "Link: ", paste the file's page address printed above it, and press Enter.
+  "That's a link to *the file's name*, but not the one the site hands over: start the download on the page above, then paste the link its download button holds, or press Ctrl+C to stop." Press Ctrl+C.
+- [ ] **5.9 Prompts with the output in a file.** `ms download "https://www.nexusmods.com/stardewvalley/mods/2400" --to (Join-Path $downloads page) > (Join-Path $test output.txt)`.
+  The page's address and "Link: " still show in the terminal. Press Ctrl+C; `output.txt` holds no "Link: ".
 
 ## 6. Stop and continue
 
@@ -136,6 +140,8 @@ This section changes your account. If SMAPI is tracked when you start, track it 
   "ModShelf downloads single files, not collections." Exit code 2.
 - [ ] **9.3 A Nexus Mods page that isn't a mod.** `ms download "https://www.nexusmods.com/stardewvalley/news" --to $downloads`.
   "That Nexus Mods link isn't to a mod. Copy the link of the mod's page, or of a file on its Files tab." Exit code 2.
+- [ ] **9.4 A link to Nexus Mods' file servers.** `ms download "https://cf-files.nexusmods.com/cdn/1704/2400/SMAPI.zip" --to $downloads`.
+  "That's a link to Nexus Mods' servers, not to a page: a download link from them stops working after a while. Copy the mod's page link, or the file's link on its Files tab, instead." Exit code 2.
 
 ## 10. Nothing secret in the logs
 
@@ -209,6 +215,8 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 5.5 Handed-over link | – | | |
 | 5.6 The link alone | – | | |
 | 5.7 Link to another file | – | | |
+| 5.8 The file's page at Link: | – | | |
+| 5.9 Prompts with the output in a file | – | | |
 | 6.1 Ctrl+C keeps the part | | | |
 | 6.2 Continues where it stopped | | | |
 | 6.3 Survives a crash | | – | |
@@ -224,6 +232,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 9.1 Unknown mod | | | |
 | 9.2 Collection | | | |
 | 9.3 Not a mod's page | | | |
+| 9.4 File servers' link | | | |
 | 10.1 Trace logs | | | |
 | 10.2 Handed-over link in logs | – | | |
 | 11.1 Unlink | | | |
