@@ -14,6 +14,11 @@ namespace ModShelf.Platform.Secrets;
 /// <remarks>
 /// Items use the schema <c>app.modshelf.Secret</c> with the attributes <c>scope</c> and <c>name</c>, and show up in
 /// keyring tools labelled "ModShelf: name". libsecret's calls block, so they run on the thread pool, one at a time.
+/// <para>
+/// A keyring that's locked, whose unlock prompt was dismissed or can't be shown, answers a lookup with nothing, as if no
+/// secret were stored. Reading tells the two apart, and says the keyring is locked, so ModShelf doesn't take the
+/// account for unlinked.
+/// </para>
 /// </remarks>
 [SupportedOSPlatform("linux")]
 internal sealed class LibSecretSecretStore : ISecretStore
@@ -171,7 +176,10 @@ internal sealed class LibSecretSecretStore : ISecretStore
                 ThrowIfError(error, "read a secret");
                 if (password == IntPtr.Zero)
                 {
-                    return null;
+                    return IsStored(attributes)
+                        ? throw new InvalidOperationException(
+                            "The keyring that holds ModShelf's secrets is locked. Unlock it, such as by signing in to your desktop again, then try again.")
+                        : null;
                 }
 
                 try
@@ -184,6 +192,32 @@ internal sealed class LibSecretSecretStore : ISecretStore
                 }
             });
         }
+    }
+
+    /// <summary>
+    /// Whether an item with these attributes is stored, locked or not. Without libsecret 0.19, which can tell, it's
+    /// taken as not.
+    /// </summary>
+    private static bool IsStored(IntPtr attributes)
+    {
+        IntPtr items;
+        try
+        {
+            items = PasswordSearch(Schema.Value, attributes, SearchFlagsNone, IntPtr.Zero, out IntPtr error);
+            ThrowIfError(error, "read a secret");
+        }
+        catch (EntryPointNotFoundException)
+        {
+            return false;
+        }
+
+        if (items == IntPtr.Zero)
+        {
+            return false;
+        }
+
+        FreeObjectList(items);
+        return true;
     }
 
     private (string Key, string? Value)[] AttributesFor(string name) => [("scope", _scope), ("name", name)];

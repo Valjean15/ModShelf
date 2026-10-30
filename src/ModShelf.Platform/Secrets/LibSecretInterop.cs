@@ -13,8 +13,12 @@ internal static partial class LibSecretInterop
     /// <summary>SECRET_SCHEMA_NONE: items must match the schema name too.</summary>
     public const int SchemaFlagsNone = 0;
 
+    /// <summary>SECRET_SEARCH_NONE: the first match, locked or not, without unlocking it or loading its secret.</summary>
+    public const int SearchFlagsNone = 0;
+
     private const string LibSecret = "libsecret-1.so.0";
     private const string GLib = "libglib-2.0.so.0";
+    private const string GObject = "libgobject-2.0.so.0";
 
     /// <summary>SECRET_SCHEMA_ATTRIBUTE_STRING, as the pointer-sized value GLib hash tables hold.</summary>
     public static readonly IntPtr AttributeTypeString = IntPtr.Zero;
@@ -48,6 +52,18 @@ internal static partial class LibSecretInterop
 
     [LibraryImport(LibSecret, EntryPoint = "secret_password_clearv_sync")]
     public static partial int PasswordClear(IntPtr schema, IntPtr attributes, IntPtr cancellable, out IntPtr error);
+
+    /// <returns>
+    /// A GList of the matching items, locked or not, to free with <see cref="FreeObjectList"/>; zero when none match or
+    /// on error. Needs libsecret 0.19 or later.
+    /// </returns>
+    [LibraryImport(LibSecret, EntryPoint = "secret_password_searchv_sync")]
+    public static partial IntPtr PasswordSearch(IntPtr schema, IntPtr attributes, int flags, IntPtr cancellable, out IntPtr error);
+
+    /// <summary>
+    /// Frees a GList and the GObjects it holds.
+    /// </summary>
+    public static void FreeObjectList(IntPtr list) => ListFreeFull(list, ObjectUnref.Value);
 
     /// <summary>
     /// Calls <paramref name="use"/> with a GLib string hash table holding <paramref name="entries"/>, then frees the
@@ -110,6 +126,11 @@ internal static partial class LibSecretInterop
         ErrorFree(error);
         return (domain, code, message);
     }
+
+    private static readonly Lazy<IntPtr> ObjectUnref = new(() => NativeLibrary.GetExport(NativeLibrary.Load(GObject), "g_object_unref"));
+
+    [LibraryImport(GLib, EntryPoint = "g_list_free_full")]
+    private static partial void ListFreeFull(IntPtr list, IntPtr freeFunction);
 
     [LibraryImport(GLib, EntryPoint = "g_hash_table_new")]
     private static partial IntPtr HashTableNew(IntPtr hashFunction, IntPtr equalFunction);
