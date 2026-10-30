@@ -23,7 +23,8 @@ namespace ModShelf.Infrastructure.Settings;
 ///   },
 ///   "updates": { "interval": "6h" },
 ///   "appearance": { "theme": "dark" },
-///   "window": { "closeToTray": true }
+///   "window": { "closeToTray": true },
+///   "setup": { "done": true }
 /// }
 /// </code>
 /// </summary>
@@ -45,6 +46,8 @@ internal sealed class JsonSettingsStore : ISettingsStore
     private const string Theme = "theme";
     private const string Window = "window";
     private const string CloseToTray = "closeToTray";
+    private const string Setup = "setup";
+    private const string Done = "done";
 
     private static readonly JsonDocumentOptions Reading = new() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
     private static readonly JsonSerializerOptions Writing = new() { WriteIndented = true };
@@ -75,6 +78,7 @@ internal sealed class JsonSettingsStore : ISettingsStore
         JsonObject updates = file?[Updates] as JsonObject ?? [];
         JsonObject appearance = file?[Appearance] as JsonObject ?? [];
         JsonObject window = file?[Window] as JsonObject ?? [];
+        JsonObject setup = file?[Setup] as JsonObject ?? [];
         try
         {
             string? root = Text(library, Root);
@@ -102,6 +106,7 @@ internal sealed class JsonSettingsStore : ISettingsStore
                 UpdateInterval = Text(updates, Interval, Updates) is { } interval ? UpdateInterval.Parse(interval) : null,
                 NotifyOfUpdates = Flag(updates, Notify, Updates),
                 CloseToTray = Flag(window, CloseToTray, Window),
+                SetupDone = Flag(setup, Done, Setup),
                 Theme = Text(appearance, Theme, Appearance) is { } theme
                     ? ThemeNamed(theme) ?? throw new InvalidDataException($"{Appearance}.{Theme} must be system, light or dark.")
                     : null,
@@ -197,6 +202,25 @@ internal sealed class JsonSettingsStore : ISettingsStore
         else
         {
             file[Window] = windowSection;
+        }
+
+        JsonObject setupSection = file[Setup] as JsonObject ?? [];
+        if (settings.SetupDone is { } done)
+        {
+            setupSection[Done] = done;
+        }
+        else
+        {
+            setupSection.Remove(Done);
+        }
+
+        if (setupSection.Count == 0)
+        {
+            file.Remove(Setup);
+        }
+        else
+        {
+            file[Setup] = setupSection;
         }
 
         JsonObject appearanceSection = file[Appearance] as JsonObject ?? [];

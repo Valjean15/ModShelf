@@ -198,6 +198,20 @@ public sealed class SettingsServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task SetsWhetherTheFirstRunSetupIsDoneAndBackToNotYet()
+    {
+        Assert.Null((await _settings.GetAsync(Cancellation)).SetupDone);
+
+        await _settings.SetSetupDoneAsync(true, Cancellation);
+        bool? set = (await _settings.GetAsync(Cancellation)).SetupDone;
+
+        await _settings.SetSetupDoneAsync(null, Cancellation);
+
+        Assert.True(set);
+        Assert.Null((await _settings.GetAsync(Cancellation)).SetupDone);
+    }
+
+    [Fact]
     public async Task SetsWhetherClosingKeepsModShelfInTheTrayAndBackToAsking()
     {
         await _settings.SetCloseToTrayAsync(false, Cancellation);

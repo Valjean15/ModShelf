@@ -58,6 +58,7 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         Assert.Equal("true (default)", Value(shown, "updates.notify"));
         Assert.Equal("system (default)", Value(shown, "appearance.theme"));
         Assert.Equal("ask (default)", Value(shown, "window.closeToTray"));
+        Assert.Equal("false (default)", Value(shown, "setup.done"));
         Assert.Contains("To change a setting: settings set <setting> <value>", shown.Output, StringComparison.Ordinal);
     }
 
@@ -135,7 +136,7 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     [InlineData("set", "library.root", "Mods", "isn't a full path")]
     [InlineData("set", "library.folders", "{mod}", "The last part must be exactly {file}.")]
     [InlineData("set", "library.folders.skyrimspecialedition", "{name}/{file}", "{name} isn't a folder's part.")]
-    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<game>, library.oldVersions, updates.interval, updates.notify, appearance.theme, window.closeToTray.")]
+    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<game>, library.oldVersions, updates.interval, updates.notify, appearance.theme, window.closeToTray, setup.done.")]
     [InlineData("reset", "library.folders.", null, "There's no setting called library.folders.")]
     [InlineData("set", "library.oldVersions", "0", "'0' isn't a rule for old versions. Use all, archive, or how many versions to keep, from 1 to 99, such as 2.")]
     [InlineData("set", "appearance.theme", "blue", "'blue' isn't system, light or dark.")]
@@ -183,6 +184,22 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         Assert.Equal("false", shown);
         Assert.Equal("window.closeToTray is back to its default: the desktop app asks the first time its window closes.", reset.Output.Trim());
         Assert.Equal("ask (default)", Value(await RunAsync("show"), "window.closeToTray"));
+    }
+
+    [Fact]
+    public async Task SetsWhetherTheFirstRunSetupIsDoneAndResetsIt()
+    {
+        CliResult done = await RunAsync("set", "setup.done", "true");
+        string file = await File.ReadAllTextAsync(SettingsFile, Cancellation);
+        string shown = Value(await RunAsync("show"), "setup.done");
+        CliResult reset = await RunAsync("reset", "Setup.Done");
+
+        Assert.Equal(Done, done.ExitCode);
+        Assert.Equal("setup.done is now true: the desktop app doesn't show its first-run setup.", done.Output.Trim());
+        Assert.Contains("\"setup\": {", file, StringComparison.Ordinal);
+        Assert.Equal("true", shown);
+        Assert.Equal("setup.done is back to its default, false: a new library shows the desktop app's first-run setup at its next start.", reset.Output.Trim());
+        Assert.Equal("false (default)", Value(await RunAsync("show"), "setup.done"));
     }
 
     [Fact]

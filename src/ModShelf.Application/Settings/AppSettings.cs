@@ -55,6 +55,12 @@ public sealed record AppSettings
     public bool? CloseToTray { get; init; }
 
     /// <summary>
+    /// Whether the desktop app's first-run setup is done, finished or skipped; null for not yet, which shows it at the
+    /// next start of a new library.
+    /// </summary>
+    public bool? SetupDone { get; init; }
+
+    /// <summary>
     /// The pattern files of <paramref name="game"/> go by.
     /// </summary>
     public FolderPattern FoldersFor(string game)

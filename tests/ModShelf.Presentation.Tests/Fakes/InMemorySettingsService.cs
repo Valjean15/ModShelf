@@ -96,6 +96,9 @@ internal sealed class InMemorySettingsService : ISettingsService
     public Task SetCloseToTrayAsync(bool? closeToTray, CancellationToken cancellationToken)
         => ChangeAsync($"closeToTray {closeToTray?.ToString() ?? "null"}", settings => settings with { CloseToTray = closeToTray });
 
+    public Task SetSetupDoneAsync(bool? done, CancellationToken cancellationToken)
+        => ChangeAsync($"setupDone {done?.ToString() ?? "null"}", settings => settings with { SetupDone = done });
+
     private async Task ChangeAsync(string change, Func<AppSettings, AppSettings> apply)
     {
         lock (_gate)

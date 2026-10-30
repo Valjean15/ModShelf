@@ -123,6 +123,9 @@ internal sealed class SettingsService : ISettingsService, IDisposable
     public Task SetCloseToTrayAsync(bool? closeToTray, CancellationToken cancellationToken)
         => ChangeAsync((settings, _) => Task.FromResult(settings with { CloseToTray = closeToTray }), cancellationToken);
 
+    public Task SetSetupDoneAsync(bool? done, CancellationToken cancellationToken)
+        => ChangeAsync((settings, _) => Task.FromResult(settings with { SetupDone = done }), cancellationToken);
+
     public void Dispose() => _changing.Dispose();
 
     /// <summary>

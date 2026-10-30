@@ -378,6 +378,43 @@ public sealed class JsonSettingsStoreTests : IDisposable
         Assert.Equal("{}", (await File.ReadAllTextAsync(FilePath, Cancellation)).Trim());
     }
 
+    [Fact]
+    public async Task KeepsWhetherTheFirstRunSetupIsDone()
+    {
+        await Store().SaveAsync(new AppSettings { SetupDone = true }, Cancellation);
+
+        Assert.True((await Store().LoadAsync(Cancellation)).SetupDone);
+        Assert.Contains("\"setup\": {", await File.ReadAllTextAsync(FilePath, Cancellation), StringComparison.Ordinal);
+
+        await Store().SaveAsync(new AppSettings(), Cancellation);
+
+        Assert.Null((await Store().LoadAsync(Cancellation)).SetupDone);
+        Assert.Equal("{}", (await File.ReadAllTextAsync(FilePath, Cancellation)).Trim());
+    }
+
+    [Fact]
+    public async Task KeepsWhatElseTheSetupSectionHolds()
+    {
+        await WriteAsync("""{ "setup": { "doneIn": "0.9.0" } }""");
+
+        await Store().SaveAsync(new AppSettings { SetupDone = true }, Cancellation);
+        await Store().SaveAsync(new AppSettings(), Cancellation);
+
+        string file = await File.ReadAllTextAsync(FilePath, Cancellation);
+        Assert.Contains("\"doneIn\": \"0.9.0\"", file, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"done\":", file, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SaysWhenSetupDoneIsntTrueOrFalse()
+    {
+        await WriteAsync("""{ "setup": { "done": "yes" } }""");
+
+        InvalidDataException refused = await Assert.ThrowsAsync<InvalidDataException>(() => Store().LoadAsync(Cancellation));
+
+        Assert.StartsWith($"The settings in {FilePath} can't be read: setup.done must be true or false.", refused.Message, StringComparison.Ordinal);
+    }
+
     [Theory]
     [InlineData("""{ "window": { "closeToTray": "yes" } }""")]
     [InlineData("""{ "window": { "closeToTray": 1 } }""")]

@@ -79,4 +79,10 @@ public interface ISettingsService
     /// asking the next time with null.
     /// </summary>
     Task SetCloseToTrayAsync(bool? closeToTray, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets whether the desktop app's first-run setup is done, or sets it back to not yet with null, so that a new library
+    /// shows it again at the next start.
+    /// </summary>
+    Task SetSetupDoneAsync(bool? done, CancellationToken cancellationToken);
 }
