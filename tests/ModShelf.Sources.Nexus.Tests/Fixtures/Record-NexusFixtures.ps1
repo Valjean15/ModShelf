@@ -498,10 +498,14 @@ function Hide-LinkTokens($Body) {
 
 # An nxm:// file link's parts. Its key joins the secrets, so it's replaced wherever it shows up.
 function Read-NxmLink([string] $Text, [string] $Parameter) {
-    $nxm = [uri]$Text.Trim()
-    $segments = $nxm.AbsolutePath.Trim('/').Split('/')
-    if ($nxm.Scheme -ne 'nxm' -or $segments.Count -ne 4 -or $segments[0] -ne 'mods' -or $segments[2] -ne 'files') {
-        throw "-$Parameter is not an nxm:// file link. It should look like nxm://<game>/mods/<mod>/files/<file>?key=...&expires=...&user_id=..."
+    # As copied, perhaps with quotes around it. What it is otherwise is named, not shown: it could be a key pasted there.
+    $plain = $Text.Trim().Trim('"', "'")
+    $nxm = $null
+    $isLink = [uri]::TryCreate($plain, [UriKind]::Absolute, [ref]$nxm)
+    $segments = if ($isLink) { $nxm.AbsolutePath.Trim('/').Split('/') } else { @() }
+    if (-not $isLink -or $nxm.Scheme -ne 'nxm' -or $segments.Count -ne 4 -or $segments[0] -ne 'mods' -or $segments[2] -ne 'files') {
+        $got = if (-not $plain) { 'it is empty' } elseif (-not $isLink) { 'it is not a link' } else { "it is a $($nxm.Scheme) link" }
+        throw "-$Parameter is not an nxm:// file link: $got. It should look like nxm://<game>/mods/<mod>/files/<file>?key=...&expires=...&user_id=..."
     }
 
     $query = [System.Web.HttpUtility]::ParseQueryString($nxm.Query)
