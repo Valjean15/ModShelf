@@ -200,6 +200,26 @@ public sealed class UpdateViewModelTests : IDisposable
         Assert.Equal(2, _harness.Catalog.Asked.Count);
     }
 
+    [Fact]
+    public async Task AChangelogThatFailsUnexpectedlyIsHiddenAndAskedForAgainNextTime()
+    {
+        _harness.Catalog.Changelogs["12604"] = [new ModChangelog("53", ["Fixed the map."])];
+        UpdateViewModel row = await ShowAsync("53");
+        _harness.Catalog.Refusal = new InvalidOperationException("Something broke.");
+        await row.ToggleChangesCommand.ExecuteAsync(null);
+        (bool Shown, string Note) failed = (row.AreChangesShown, row.ChangesNote);
+        _harness.Catalog.Refusal = null;
+
+        await row.ToggleChangesCommand.ExecuteAsync(null);
+
+        Assert.Equal((false, string.Empty), failed);
+        Assert.Equal([("That didn't work", "Something went wrong. The log has the details.")], _harness.Dialogs.Messages);
+        Assert.Single(_harness.Logger.Entries);
+        Assert.Equal((true, string.Empty), (row.AreChangesShown, row.ChangesNote));
+        Assert.Equal(["Fixed the map."], row.Changes);
+        Assert.Equal(2, _harness.Catalog.Asked.Count);
+    }
+
     private async Task<UpdateViewModel> ShowAsync(string update)
     {
         await _harness.StartAsync(UpdatesHarness.ModWithUpdates(SkyUi, "SkyUI", TestData.Now, update));

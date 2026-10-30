@@ -186,6 +186,14 @@ public sealed partial class UpdateViewModel : ObservableObject
                     ChangesNote = Text.Format(Strings.ChangelogFailed, exception.Message);
                     return;
                 }
+                catch (Exception)
+                {
+                    // The command tells what went wrong. The changes hide, so they don't say they're being read any more,
+                    // and showing them again asks once more.
+                    ChangesNote = string.Empty;
+                    AreChangesShown = false;
+                    throw;
+                }
 
                 if (changes is null)
                 {
