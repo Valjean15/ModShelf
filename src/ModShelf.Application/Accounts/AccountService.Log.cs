@@ -38,6 +38,9 @@ internal sealed partial class AccountService
     [LoggerMessage(EventId = 409, Level = LogLevel.Information, Message = "Checked the account on {Source}")]
     private static partial void LogChecked(ILogger logger, SourceId source);
 
+    [LoggerMessage(EventId = 411, Level = LogLevel.Error, Message = "Couldn't put back the credentials {Source} had after its new account couldn't be saved")]
+    private static partial void LogCantPutBack(ILogger logger, Exception exception, SourceId source);
+
     [LoggerMessage(EventId = 412, Level = LogLevel.Information, Message = "The account on {Source} was unlinked while its credentials were refreshed; the refreshed ones aren't kept")]
     private static partial void LogUnlinkedWhileRefreshing(ILogger logger, SourceId source);
 }

@@ -139,9 +139,19 @@ internal sealed partial class AccountService : IAccountService, ICredentialProvi
 
         using (await _vault.LockAsync(source, cancellationToken).ConfigureAwait(false))
         {
-            // Past this point the account is linked: finishing both writes matters more than cancelling.
+            // Past this point the account is linked: finishing both writes matters more than cancelling. When the
+            // account can't be saved, the credentials it had go back, so the new ones aren't used unlisted.
+            VaultEntry? previous = await _vault.GetAsync(source, cancellationToken).ConfigureAwait(false);
             await _vault.SaveAsync(source, new VaultEntry(kind, credentials), CancellationToken.None).ConfigureAwait(false);
-            await _accounts.SaveAsync(account, CancellationToken.None).ConfigureAwait(false);
+            try
+            {
+                await _accounts.SaveAsync(account, CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                await PutBackAsync(source, previous).ConfigureAwait(false);
+                throw;
+            }
         }
 
         LogLinked(_logger, source, kind);
@@ -160,6 +170,29 @@ internal sealed partial class AccountService : IAccountService, ICredentialProvi
         }
 
         LogUnlinked(_logger, source);
+    }
+
+    /// <summary>
+    /// Stores the credentials the source had before a link that failed, or none. A failure is logged. Call while
+    /// holding the source's lock.
+    /// </summary>
+    private async Task PutBackAsync(SourceId source, VaultEntry? previous)
+    {
+        try
+        {
+            if (previous is null)
+            {
+                await _vault.DeleteAsync(source, CancellationToken.None).ConfigureAwait(false);
+            }
+            else
+            {
+                await _vault.SaveAsync(source, previous, CancellationToken.None).ConfigureAwait(false);
+            }
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            LogCantPutBack(_logger, exception, source);
+        }
     }
 
     private static async Task<AccountCredentials> LinkWithApiKeyAsync(

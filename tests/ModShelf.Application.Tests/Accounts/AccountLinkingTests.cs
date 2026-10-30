@@ -164,6 +164,30 @@ public sealed class AccountLinkingTests
     }
 
     [Fact]
+    public async Task ALinkWhoseAccountCantBeSavedPutsBackTheCredentialsItHad()
+    {
+        await _harness.LinkAsync(TestData.Nexus, AuthKind.ApiKey);
+        _harness.Accounts.SaveFailure = new InvalidOperationException("The library database is locked.");
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _harness.LinkAsync(TestData.Nexus, AuthKind.OAuthPkce));
+
+        Assert.Equal("token-for-good-key", (await AuthorizeAsync())?.AccessToken);
+        _harness.Restart();
+        Assert.Equal("token-for-good-key", (await AuthorizeAsync())?.AccessToken);
+    }
+
+    [Fact]
+    public async Task AFirstLinkWhoseAccountCantBeSavedLeavesNoCredentials()
+    {
+        _harness.Accounts.SaveFailure = new InvalidOperationException("The library database is locked.");
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _harness.LinkAsync(TestData.Nexus, AuthKind.ApiKey));
+
+        Assert.Empty(_harness.Secrets.Secrets);
+        Assert.Null(await AuthorizeAsync());
+    }
+
+    [Fact]
     public async Task UnlinkingRemovesTheAccountAndItsCredentials()
     {
         await _harness.LinkAsync(TestData.Nexus, AuthKind.ApiKey);
@@ -223,5 +247,14 @@ public sealed class AccountLinkingTests
     {
         using HttpRequestMessage request = new(HttpMethod.Get, "https://api.example.com/v1/users/validate.json");
         return await _harness.Service.AuthorizeAsync(source, request, TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>
+    /// The credentials the service adds to a request to Nexus.
+    /// </summary>
+    private async Task<AccountCredentials?> AuthorizeAsync()
+    {
+        using HttpRequestMessage request = new(HttpMethod.Get, "https://api.example.com/v1/users/validate.json");
+        return await _harness.Service.AuthorizeAsync(TestData.Nexus, request, TestContext.Current.CancellationToken);
     }
 }
