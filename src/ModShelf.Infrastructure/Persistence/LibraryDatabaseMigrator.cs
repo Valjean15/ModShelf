@@ -167,6 +167,20 @@ internal sealed partial class LibraryDatabaseMigrator(
     private LibraryDatabaseUnavailableException Unavailable(string problem, Exception exception)
     {
         LogUnavailable(logger, exception, options.DatabasePath);
+        LetGoOfTheFile();
         return new LibraryDatabaseUnavailableException($"The library database {options.DatabasePath} can't be opened: {problem}", exception);
+    }
+
+    /// <summary>
+    /// Closes the connections kept open to the database for later use, so that the user can move or restore the file while
+    /// ModShelf says what's wrong with it: Windows won't let them while a program has it open.
+    /// </summary>
+    private void LetGoOfTheFile()
+    {
+        using ModShelfDbContext context = contextFactory.CreateDbContext();
+        if (context.Database.GetDbConnection() is SqliteConnection connection)
+        {
+            SqliteConnection.ClearPool(connection);
+        }
     }
 }

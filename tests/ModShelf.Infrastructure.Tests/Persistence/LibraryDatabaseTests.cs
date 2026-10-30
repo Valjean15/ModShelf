@@ -60,6 +60,36 @@ public sealed class LibraryDatabaseTests
     }
 
     [Fact]
+    public async Task ADatabaseThatCantBeOpenedIsntKeptOpen()
+    {
+        // On Windows, reading the file back, as the test above does, finds it open; Linux lets it be read, and lists it.
+        Assert.SkipUnless(OperatingSystem.IsLinux(), "Only Linux lists the files a process has open, in /proc/self/fd.");
+        await using TestLibraryDatabase database = new();
+        await File.WriteAllBytesAsync(database.DatabasePath, [.. Enumerable.Repeat((byte)'x', 4096)], TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAsync<LibraryDatabaseUnavailableException>(database.StartAsync);
+
+        Assert.Empty(OpenHandlesTo(database.DatabasePath));
+    }
+
+    [Fact]
+    public async Task ADatabaseAnotherModShelfKeepsUpdatingIsntKeptOpen()
+    {
+        Assert.SkipUnless(OperatingSystem.IsLinux(), "Only Linux lists the files a process has open, in /proc/self/fd.");
+        await using TestLibraryDatabase database = new();
+        Directory.CreateDirectory(Path.GetDirectoryName(database.DatabasePath)!);
+
+        // A database that's there, with every migration still to apply, so that the start opens it before it waits.
+        await database.QueryAsync("PRAGMA user_version = 1");
+        await using FileStream held = new(database.DatabasePath + ".update.lock", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+
+        await Assert.ThrowsAsync<LibraryDatabaseUnavailableException>(
+            () => Migrator(database, TimeSpan.FromMilliseconds(300)).StartingAsync(TestContext.Current.CancellationToken));
+
+        Assert.Empty(OpenHandlesTo(database.DatabasePath));
+    }
+
+    [Fact]
     public async Task AFolderThatCantBeCreatedStopsTheStart()
     {
         await using TestLibraryDatabase database = new("App Data", "library.db");
@@ -328,6 +358,25 @@ public sealed class LibraryDatabaseTests
     public void RejectsARelativePath(string databasePath)
     {
         Assert.Throws<ArgumentException>(() => new ServiceCollection().AddLibraryDatabase(databasePath));
+    }
+
+    /// <summary>
+    /// This process's handles open to <paramref name="path"/>, on Linux.
+    /// </summary>
+    private static List<string> OpenHandlesTo(string path)
+        => [.. Directory.EnumerateFileSystemEntries("/proc/self/fd").Where(handle => LinkTarget(handle) == path)];
+
+    // A handle closed while the folder is read has no target.
+    private static string? LinkTarget(string handle)
+    {
+        try
+        {
+            return new FileInfo(handle).LinkTarget;
+        }
+        catch (IOException)
+        {
+            return null;
+        }
     }
 
     private static LibraryDatabaseMigrator Migrator(TestLibraryDatabase database, TimeSpan patience)
