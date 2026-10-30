@@ -1,7 +1,6 @@
 using System.CommandLine;
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Cli.Hosting;
@@ -24,39 +23,36 @@ internal static class QueueCommand
 
     private static async Task<int> ListAsync(CliEnvironment environment, CancellationToken cancellationToken)
     {
-        // Without background downloads, starting the host only creates or migrates the database.
-        using IHost host = environment.BuildHost(false);
-        await host.StartAsync(cancellationToken).ConfigureAwait(false);
-        try
-        {
-            IReadOnlyList<DownloadJob> jobs = await host.Services.GetRequiredService<IDownloadJobRepository>()
-                .ListAsync(cancellationToken)
-                .ConfigureAwait(false);
-            if (jobs.Count == 0)
-            {
-                environment.Output.WriteLine("The queue is empty.");
-                return ExitCodes.Done;
-            }
-
-            string[][] rows =
-            [
-                ["ID", "Status", "Progress", "File", "Folder"],
-                .. jobs.Select(job => new[]
+        return await CommandHost.RunAsync(
+                environment,
+                async services =>
                 {
-                    job.Id.ToString()[..8],
-                    job.Status.ToString(),
-                    job.Status == DownloadJobStatus.Completed ? "-" : Sizes.Progress(job.BytesDownloaded, job.TotalBytes),
-                    job.FileName,
-                    job.TargetDirectory,
-                }),
-            ];
-            TextTable.Write(environment.Output, rows);
+                    IReadOnlyList<DownloadJob> jobs = await services.GetRequiredService<IDownloadJobRepository>()
+                        .ListAsync(cancellationToken)
+                        .ConfigureAwait(false);
+                    if (jobs.Count == 0)
+                    {
+                        environment.Output.WriteLine("The queue is empty.");
+                        return ExitCodes.Done;
+                    }
 
-            return ExitCodes.Done;
-        }
-        finally
-        {
-            await host.StopAsync(CancellationToken.None).ConfigureAwait(false);
-        }
+                    string[][] rows =
+                    [
+                        ["ID", "Status", "Progress", "File", "Folder"],
+                        .. jobs.Select(job => new[]
+                        {
+                            job.Id.ToString()[..8],
+                            job.Status.ToString(),
+                            job.Status == DownloadJobStatus.Completed ? "-" : Sizes.Progress(job.BytesDownloaded, job.TotalBytes),
+                            job.FileName,
+                            job.TargetDirectory,
+                        }),
+                    ];
+                    TextTable.Write(environment.Output, rows);
+
+                    return ExitCodes.Done;
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 }

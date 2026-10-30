@@ -2,7 +2,6 @@ using System.CommandLine;
 using System.Globalization;
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 using ModShelf.Application.Library;
 using ModShelf.Cli.Hosting;
@@ -60,38 +59,43 @@ internal static partial class LibraryCommand
 
     private static async Task<int> MoveAsync(CliEnvironment environment, DirectoryInfo folder, CancellationToken cancellationToken)
     {
-        using IHost host = environment.BuildHost(false);
-        await host.StartAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            LibraryMove move = await host.Services.GetRequiredService<ILibraryMover>()
-                .MoveAsync(folder.FullName, cancellationToken)
+            return await CommandHost.RunAsync(
+                    environment,
+                    async services =>
+                    {
+                        LibraryMove move = await services.GetRequiredService<ILibraryMover>()
+                            .MoveAsync(folder.FullName, cancellationToken)
+                            .ConfigureAwait(false);
+                        if (string.Equals(move.From, move.To, StringComparison.Ordinal))
+                        {
+                            environment.Output.WriteLine($"The library is in {move.To} already.");
+                            return ExitCodes.Done;
+                        }
+
+                        environment.Output.WriteLine(move.Moved == 1
+                            ? $"Moved 1 file from {move.From} to {move.To}."
+                            : string.Create(CultureInfo.CurrentCulture, $"Moved {move.Moved:N0} files from {move.From} to {move.To}."));
+                        if (move.AlreadyThere > 0)
+                        {
+                            environment.Output.WriteLine(move.AlreadyThere == 1
+                                ? "1 file was there already, from a move that stopped part-way."
+                                : string.Create(CultureInfo.CurrentCulture, $"{move.AlreadyThere:N0} files were there already, from a move that stopped part-way."));
+                        }
+
+                        if (move.Missing > 0)
+                        {
+                            environment.Output.WriteLine(move.Missing == 1
+                                ? "1 file wasn't on disk. The library still has it, to download again."
+                                : string.Create(CultureInfo.CurrentCulture, $"{move.Missing:N0} files weren't on disk. The library still has them, to download again."));
+                        }
+
+                        environment.Output.WriteLine($"The library is in {move.To} now.");
+                        return ExitCodes.Done;
+                    },
+                    cancellationToken)
                 .ConfigureAwait(false);
-            if (string.Equals(move.From, move.To, StringComparison.Ordinal))
-            {
-                environment.Output.WriteLine($"The library is in {move.To} already.");
-                return ExitCodes.Done;
-            }
-
-            environment.Output.WriteLine(move.Moved == 1
-                ? $"Moved 1 file from {move.From} to {move.To}."
-                : string.Create(CultureInfo.CurrentCulture, $"Moved {move.Moved:N0} files from {move.From} to {move.To}."));
-            if (move.AlreadyThere > 0)
-            {
-                environment.Output.WriteLine(move.AlreadyThere == 1
-                    ? "1 file was there already, from a move that stopped part-way."
-                    : string.Create(CultureInfo.CurrentCulture, $"{move.AlreadyThere:N0} files were there already, from a move that stopped part-way."));
-            }
-
-            if (move.Missing > 0)
-            {
-                environment.Output.WriteLine(move.Missing == 1
-                    ? "1 file wasn't on disk. The library still has it, to download again."
-                    : string.Create(CultureInfo.CurrentCulture, $"{move.Missing:N0} files weren't on disk. The library still has them, to download again."));
-            }
-
-            environment.Output.WriteLine($"The library is in {move.To} now.");
-            return ExitCodes.Done;
         }
         catch (ArgumentException exception)
         {
@@ -110,101 +114,85 @@ internal static partial class LibraryCommand
                 .ConfigureAwait(false);
             return ExitCodes.Interrupted;
         }
-        finally
-        {
-            await host.StopAsync(CancellationToken.None).ConfigureAwait(false);
-        }
     }
 
     private static async Task<int> ListAsync(CliEnvironment environment, CancellationToken cancellationToken)
     {
-        // Without background downloads, starting the host only creates or migrates the database.
-        using IHost host = environment.BuildHost(false);
-        await host.StartAsync(cancellationToken).ConfigureAwait(false);
-        try
-        {
-            IReadOnlyList<LibraryMod> mods = await host.Services.GetRequiredService<IModLibrary>()
-                .ListAsync(cancellationToken)
-                .ConfigureAwait(false);
-            if (mods.Count == 0)
-            {
-                environment.Output.WriteLine("The library is empty. To watch a mod for updates: library watch \"<its link>\"");
-                return ExitCodes.Done;
-            }
-
-            environment.Output.WriteLine(mods.Count == 1
-                ? "The library has 1 mod."
-                : string.Create(CultureInfo.CurrentCulture, $"The library has {mods.Count:N0} mods."));
-            string[][] rows =
-            [
-                ["Game", "ID", "Name", "Watched", "Files", "Link"],
-                .. mods
-                    .OrderBy(mod => mod.Mod.Game.Source.Value, StringComparer.Ordinal)
-                    .ThenBy(mod => mod.Mod.Game.Key, StringComparer.Ordinal)
-                    .ThenBy(mod => mod.Name, StringComparer.CurrentCultureIgnoreCase)
-                    .Select(mod => new[]
+        return await CommandHost.RunAsync(
+                environment,
+                async services =>
+                {
+                    IReadOnlyList<LibraryMod> mods = await services.GetRequiredService<IModLibrary>()
+                        .ListAsync(cancellationToken)
+                        .ConfigureAwait(false);
+                    if (mods.Count == 0)
                     {
-                        mod.Mod.Game.Key,
-                        mod.Mod.Id,
-                        mod.Name,
-                        mod.IsWatched ? "yes" : "no",
-                        mod.Files.Count.ToString(CultureInfo.CurrentCulture),
-                        mod.PageUrl?.AbsoluteUri ?? "-",
-                    }),
-            ];
-            TextTable.Write(environment.Output, rows);
-            return ExitCodes.Done;
-        }
-        finally
-        {
-            await host.StopAsync(CancellationToken.None).ConfigureAwait(false);
-        }
+                        environment.Output.WriteLine("The library is empty. To watch a mod for updates: library watch \"<its link>\"");
+                        return ExitCodes.Done;
+                    }
+
+                    environment.Output.WriteLine(mods.Count == 1
+                        ? "The library has 1 mod."
+                        : string.Create(CultureInfo.CurrentCulture, $"The library has {mods.Count:N0} mods."));
+                    string[][] rows =
+                    [
+                        ["Game", "ID", "Name", "Watched", "Files", "Link"],
+                        .. mods
+                            .OrderBy(mod => mod.Mod.Game.Source.Value, StringComparer.Ordinal)
+                            .ThenBy(mod => mod.Mod.Game.Key, StringComparer.Ordinal)
+                            .ThenBy(mod => mod.Name, StringComparer.CurrentCultureIgnoreCase)
+                            .Select(mod => new[]
+                            {
+                                mod.Mod.Game.Key,
+                                mod.Mod.Id,
+                                mod.Name,
+                                mod.IsWatched ? "yes" : "no",
+                                mod.Files.Count.ToString(CultureInfo.CurrentCulture),
+                                mod.PageUrl?.AbsoluteUri ?? "-",
+                            }),
+                    ];
+                    TextTable.Write(environment.Output, rows);
+                    return ExitCodes.Done;
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     private static async Task<int> WatchAsync(CliEnvironment environment, string linkText, bool watch, CancellationToken cancellationToken)
     {
-        if (!Uri.TryCreate(linkText, UriKind.Absolute, out Uri? link))
+        if (!ModLinkArgument.TryRead(environment, linkText, out Uri? link))
         {
-            await environment.Error.WriteLineAsync("That isn't a complete link, such as https://www.nexusmods.com/stardewvalley/mods/2400.")
-                .ConfigureAwait(false);
             return ExitCodes.BadInput;
         }
 
-        using IHost host = environment.BuildHost(false);
-        try
-        {
-            await host.StartAsync(cancellationToken).ConfigureAwait(false);
-            IModLibrary library = host.Services.GetRequiredService<IModLibrary>();
-            try
-            {
-                if (watch)
+        return await CommandHost.RunAsync(
+                environment,
+                async services =>
                 {
-                    LibraryMod watched = await library.WatchAsync(link, cancellationToken).ConfigureAwait(false);
-                    await environment.Output.WriteLineAsync($"Watching {watched.Name} ({Describe(watched.Mod)}).").ConfigureAwait(false);
-                }
-                else
-                {
-                    LibraryChange change = await library.UnwatchAsync(link, cancellationToken).ConfigureAwait(false);
-                    await environment.Output.WriteLineAsync(Unwatched(change)).ConfigureAwait(false);
-                }
-            }
-            catch (Exception exception) when (LinkProblems.Describe(exception) is { } problem)
-            {
-                await environment.Error.WriteLineAsync(problem.Message).ConfigureAwait(false);
-                return problem.ExitCode;
-            }
+                    IModLibrary library = services.GetRequiredService<IModLibrary>();
+                    try
+                    {
+                        if (watch)
+                        {
+                            LibraryMod watched = await library.WatchAsync(link, cancellationToken).ConfigureAwait(false);
+                            await environment.Output.WriteLineAsync($"Watching {watched.Name} ({Describe(watched.Mod)}).").ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            LibraryChange change = await library.UnwatchAsync(link, cancellationToken).ConfigureAwait(false);
+                            await environment.Output.WriteLineAsync(Unwatched(change)).ConfigureAwait(false);
+                        }
+                    }
+                    catch (Exception exception) when (LinkProblems.Describe(exception) is { } problem)
+                    {
+                        await environment.Error.WriteLineAsync(problem.Message).ConfigureAwait(false);
+                        return problem.ExitCode;
+                    }
 
-            return ExitCodes.Done;
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            await environment.Error.WriteLineAsync("Stopped.").ConfigureAwait(false);
-            return ExitCodes.Interrupted;
-        }
-        finally
-        {
-            await host.StopAsync(CancellationToken.None).ConfigureAwait(false);
-        }
+                    return ExitCodes.Done;
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     private static string Unwatched(LibraryChange change) => change switch

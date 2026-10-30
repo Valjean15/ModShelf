@@ -1,8 +1,6 @@
 using System.CommandLine;
-using System.Globalization;
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 using ModShelf.Application.Catalog;
 using ModShelf.Cli.Hosting;
@@ -69,41 +67,31 @@ internal static partial class ModCommand
         bool changelog,
         CancellationToken cancellationToken)
     {
-        if (!Uri.TryCreate(linkText, UriKind.Absolute, out Uri? link))
+        if (!ModLinkArgument.TryRead(environment, linkText, out Uri? link))
         {
-            await environment.Error.WriteLineAsync("That isn't a complete link, such as https://www.nexusmods.com/stardewvalley/mods/2400.")
-                .ConfigureAwait(false);
             return ExitCodes.BadInput;
         }
 
-        // Without background downloads, starting the host only creates or migrates the database.
-        using IHost host = environment.BuildHost(false);
-        try
-        {
-            await host.StartAsync(cancellationToken).ConfigureAwait(false);
-            ModPage page;
-            try
-            {
-                page = await host.Services.GetRequiredService<IModLookup>().LookUpAsync(link, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception exception) when (LinkProblems.Describe(exception) is { } problem)
-            {
-                await environment.Error.WriteLineAsync(problem.Message).ConfigureAwait(false);
-                return problem.ExitCode;
-            }
+        return await CommandHost.RunAsync(
+                environment,
+                async services =>
+                {
+                    ModPage page;
+                    try
+                    {
+                        page = await services.GetRequiredService<IModLookup>().LookUpAsync(link, cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (Exception exception) when (LinkProblems.Describe(exception) is { } problem)
+                    {
+                        await environment.Error.WriteLineAsync(problem.Message).ConfigureAwait(false);
+                        return problem.ExitCode;
+                    }
 
-            Write(environment.Output, page, all, changelog);
-            return ExitCodes.Done;
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            await environment.Error.WriteLineAsync("Stopped.").ConfigureAwait(false);
-            return ExitCodes.Interrupted;
-        }
-        finally
-        {
-            await host.StopAsync(CancellationToken.None).ConfigureAwait(false);
-        }
+                    Write(environment.Output, page, all, changelog);
+                    return ExitCodes.Done;
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     private static void Write(TextWriter output, ModPage page, bool all, bool changelog)
@@ -125,9 +113,9 @@ internal static partial class ModCommand
             ["Game:", page.Game.Name],
             .. mod.Author is { } author ? new[] { new[] { "Author:", author } } : [],
             .. mod.Version is { } version ? new[] { new[] { "Version:", version } } : [],
-            .. mod.UpdatedAt is { } updated ? new[] { new[] { "Updated:", Date(updated) } } : [],
-            .. mod.Endorsements is { } endorsements ? new[] { new[] { "Endorsements:", Count(endorsements) } } : [],
-            .. mod.Downloads is { } downloads ? new[] { new[] { "Downloads:", Count(downloads) } } : [],
+            .. mod.UpdatedAt is { } updated ? new[] { new[] { "Updated:", CliText.Date(updated) } } : [],
+            .. mod.Endorsements is { } endorsements ? new[] { new[] { "Endorsements:", CliText.Count(endorsements) } } : [],
+            .. mod.Downloads is { } downloads ? new[] { new[] { "Downloads:", CliText.Count(downloads) } } : [],
             .. mod.PageUrl is { } pageUrl ? new[] { new[] { "Page:", pageUrl.AbsoluteUri } } : [],
         ];
         TextTable.Write(output, details);
@@ -193,7 +181,7 @@ internal static partial class ModCommand
                     file.Name,
                     file.VersionLabel ?? "-",
                     file.SizeInBytes is { } size ? Sizes.Format(size) : "-",
-                    Date(file.UploadedAt),
+                    CliText.Date(file.UploadedAt),
                     file.PageUrl?.AbsoluteUri ?? "-",
                 }),
             ];
@@ -248,8 +236,4 @@ internal static partial class ModCommand
         _ => "Files in no section",
     };
 
-    private static string Date(DateTimeOffset moment)
-        => moment.ToLocalTime().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-
-    private static string Count(long count) => count.ToString("N0", CultureInfo.CurrentCulture);
 }

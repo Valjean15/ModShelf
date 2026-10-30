@@ -1,8 +1,6 @@
 using System.CommandLine;
-using System.Globalization;
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 using ModShelf.Application.Catalog;
 using ModShelf.Cli.Hosting;
@@ -132,42 +130,35 @@ internal static partial class ModCommand
         SearchQuery query,
         CancellationToken cancellationToken)
     {
-        using IHost host = environment.BuildHost(false);
-        try
-        {
-            await host.StartAsync(cancellationToken).ConfigureAwait(false);
-            IModLookup lookup = host.Services.GetRequiredService<IModLookup>();
+        return await CommandHost.RunAsync(
+                environment,
+                async services =>
+                {
+                    IModLookup lookup = services.GetRequiredService<IModLookup>();
 
-            if (ChooseSource(lookup.SearchableSources, sourceText) is not { } source)
-            {
-                await environment.Error.WriteLineAsync(SourceProblem(lookup.SearchableSources, sourceText, "search")).ConfigureAwait(false);
-                return ExitCodes.BadInput;
-            }
+                    if (ChooseSource(lookup.SearchableSources, sourceText) is not { } source)
+                    {
+                        await environment.Error.WriteLineAsync(SourceProblem(lookup.SearchableSources, sourceText, "search")).ConfigureAwait(false);
+                        return ExitCodes.BadInput;
+                    }
 
-            SearchPage found;
-            try
-            {
-                // Inside, so a blank game is refused as the source refuses an unknown one.
-                found = await lookup.SearchAsync(new GameRef(source, gameKey.Trim()), query, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception exception) when (SearchProblem(exception) is { } problem)
-            {
-                await environment.Error.WriteLineAsync(problem.Message).ConfigureAwait(false);
-                return problem.ExitCode;
-            }
+                    SearchPage found;
+                    try
+                    {
+                        // Inside, so a blank game is refused as the source refuses an unknown one.
+                        found = await lookup.SearchAsync(new GameRef(source, gameKey.Trim()), query, cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (Exception exception) when (SearchProblem(exception) is { } problem)
+                    {
+                        await environment.Error.WriteLineAsync(problem.Message).ConfigureAwait(false);
+                        return problem.ExitCode;
+                    }
 
-            WriteResults(environment.Output, found, query);
-            return ExitCodes.Done;
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            await environment.Error.WriteLineAsync("Stopped.").ConfigureAwait(false);
-            return ExitCodes.Interrupted;
-        }
-        finally
-        {
-            await host.StopAsync(CancellationToken.None).ConfigureAwait(false);
-        }
+                    WriteResults(environment.Output, found, query);
+                    return ExitCodes.Done;
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     /// <summary>
@@ -208,16 +199,16 @@ internal static partial class ModCommand
         {
             output.WriteLine(found.TotalCount == 0
                 ? "No mods match."
-                : $"No mods on that page: {Count(found.TotalCount)} match, {Count(query.Count)} to a page.");
+                : $"No mods on that page: {CliText.Count(found.TotalCount)} match, {CliText.Count(query.Count)} to a page.");
             return;
         }
 
         int first = found.Offset + 1;
         int last = found.Offset + found.Mods.Count;
-        string matches = found.TotalCount == 1 ? "1 mod matches" : $"{Count(found.TotalCount)} mods match";
+        string matches = found.TotalCount == 1 ? "1 mod matches" : $"{CliText.Count(found.TotalCount)} mods match";
         output.WriteLine(found.Mods.Count == 1 && first == found.TotalCount
             ? $"{matches}{SortedBy(query)}."
-            : $"{matches}{SortedBy(query)}. These are {Count(first)} to {Count(last)}.");
+            : $"{matches}{SortedBy(query)}. These are {CliText.Count(first)} to {CliText.Count(last)}.");
 
         string[][] rows =
         [
@@ -227,9 +218,9 @@ internal static partial class ModCommand
                 mod.Mod.Id,
                 Label(mod),
                 mod.Author ?? "-",
-                mod.Endorsements is { } endorsements ? Count(endorsements) : "-",
-                mod.Downloads is { } downloads ? Count(downloads) : "-",
-                mod.UpdatedAt is { } updated ? Date(updated) : "-",
+                mod.Endorsements is { } endorsements ? CliText.Count(endorsements) : "-",
+                mod.Downloads is { } downloads ? CliText.Count(downloads) : "-",
+                mod.UpdatedAt is { } updated ? CliText.Date(updated) : "-",
                 mod.PageUrl?.AbsoluteUri ?? "-",
             }),
         ];
@@ -264,5 +255,4 @@ internal static partial class ModCommand
     private static string Label(ModInfo mod)
         => mod.Name + (mod.HasAdultContent ? " (adult)" : string.Empty) + (mod.IsAvailable ? string.Empty : " (hidden)");
 
-    private static string Count(int count) => count.ToString("N0", CultureInfo.CurrentCulture);
 }

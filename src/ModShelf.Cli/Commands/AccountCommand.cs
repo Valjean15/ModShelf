@@ -5,7 +5,6 @@ using System.Net;
 using System.Security.Cryptography;
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 using ModShelf.Application.Accounts;
 using ModShelf.Application.Accounts.Ports;
@@ -92,40 +91,37 @@ internal static class AccountCommand
 
     private static async Task<int> ListAsync(CliEnvironment environment, CancellationToken cancellationToken)
     {
-        // Without background downloads, starting the host only creates or migrates the database.
-        using IHost host = environment.BuildHost(false);
-        await host.StartAsync(cancellationToken).ConfigureAwait(false);
-        try
-        {
-            IReadOnlyList<SourceAccountStatus> sources = await host.Services.GetRequiredService<IAccountService>()
-                .ListAsync(cancellationToken)
-                .ConfigureAwait(false);
-            if (sources.Count == 0)
-            {
-                environment.Output.WriteLine("No source here supports accounts.");
-                return ExitCodes.Done;
-            }
-
-            string[][] rows =
-            [
-                ["Source", "Account", "Level", "Linked on", "Link with"],
-                .. sources.Select(source => new[]
+        return await CommandHost.RunAsync(
+                environment,
+                async services =>
                 {
-                    source.Source.Value,
-                    source.Account?.Profile.DisplayName ?? (source.WorksWithoutAccount ? "- (optional)" : "-"),
-                    source.Account?.Profile.Tier ?? "-",
-                    source.Account?.LinkedAt.ToLocalTime().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? "-",
-                    string.Join(", ", source.AuthKinds.Select(MethodName)),
-                }),
-            ];
-            TextTable.Write(environment.Output, rows);
-            WarnWhenNotProtected(environment, host.Services);
-            return ExitCodes.Done;
-        }
-        finally
-        {
-            await host.StopAsync(CancellationToken.None).ConfigureAwait(false);
-        }
+                    IReadOnlyList<SourceAccountStatus> sources = await services.GetRequiredService<IAccountService>()
+                        .ListAsync(cancellationToken)
+                        .ConfigureAwait(false);
+                    if (sources.Count == 0)
+                    {
+                        environment.Output.WriteLine("No source here supports accounts.");
+                        return ExitCodes.Done;
+                    }
+
+                    string[][] rows =
+                    [
+                        ["Source", "Account", "Level", "Linked on", "Link with"],
+                        .. sources.Select(source => new[]
+                        {
+                            source.Source.Value,
+                            source.Account?.Profile.DisplayName ?? (source.WorksWithoutAccount ? "- (optional)" : "-"),
+                            source.Account?.Profile.Tier ?? "-",
+                            (source.Account is { } account ? CliText.Date(account.LinkedAt) : "-"),
+                            string.Join(", ", source.AuthKinds.Select(MethodName)),
+                        }),
+                    ];
+                    TextTable.Write(environment.Output, rows);
+                    WarnWhenNotProtected(environment, services);
+                    return ExitCodes.Done;
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     private static async Task<int> LinkAsync(CliEnvironment environment, string sourceText, string? method, CancellationToken cancellationToken)
@@ -143,58 +139,45 @@ internal static class AccountCommand
         }
 
         AuthKind kind = default;
-        using IHost host = environment.BuildHost(false);
         try
         {
-            await host.StartAsync(cancellationToken).ConfigureAwait(false);
-            IAccountService accounts = host.Services.GetRequiredService<IAccountService>();
-            SourceAccountStatus? status = (await accounts.ListAsync(cancellationToken).ConfigureAwait(false))
-                .FirstOrDefault(offered => offered.Source == source);
-            if (status is null)
-            {
-                await environment.Error.WriteLineAsync($"No source called {source} supports accounts. Run account list to see the ones that do.")
-                    .ConfigureAwait(false);
-                return ExitCodes.BadInput;
-            }
+            return await CommandHost.RunAsync(
+                    environment,
+                    async services =>
+                    {
+                        IAccountService accounts = services.GetRequiredService<IAccountService>();
+                        if (await StatusAsync(environment, accounts, source, cancellationToken).ConfigureAwait(false) is not { } status)
+                        {
+                            return ExitCodes.BadInput;
+                        }
 
-            kind = requested ?? status.AuthKinds[0];
-            if (!status.AuthKinds.Contains(kind))
-            {
-                await environment.Error.WriteLineAsync(
-                        $"{source} can't be linked with --with {MethodName(kind)}. It offers: {string.Join(", ", status.AuthKinds.Select(MethodName))}.")
-                    .ConfigureAwait(false);
-                return ExitCodes.BadInput;
-            }
+                        kind = requested ?? status.AuthKinds[0];
+                        if (!status.AuthKinds.Contains(kind))
+                        {
+                            await environment.Error.WriteLineAsync(
+                                    $"{source} can't be linked with --with {MethodName(kind)}. It offers: {string.Join(", ", status.AuthKinds.Select(MethodName))}.")
+                                .ConfigureAwait(false);
+                            return ExitCodes.BadInput;
+                        }
 
-            WarnWhenNotProtected(environment, host.Services);
-            LinkedAccount account = await accounts.LinkAsync(source, kind, new TerminalAuthPrompt(environment), cancellationToken)
+                        WarnWhenNotProtected(environment, services);
+                        LinkedAccount account = await accounts.LinkAsync(source, kind, new TerminalAuthPrompt(environment), cancellationToken)
+                            .ConfigureAwait(false);
+                        string tier = account.Profile.Tier is { } level ? $" ({level})" : string.Empty;
+                        environment.Output.WriteLine($"Linked {source} as {account.Profile.DisplayName}{tier}.");
+                        return ExitCodes.Done;
+                    },
+                    cancellationToken)
                 .ConfigureAwait(false);
-            string tier = account.Profile.Tier is { } level ? $" ({level})" : string.Empty;
-            environment.Output.WriteLine($"Linked {source} as {account.Profile.DisplayName}{tier}.");
-            return ExitCodes.Done;
         }
         catch (AuthenticationFailedException)
         {
             await environment.Error.WriteLineAsync($"{RefusalMessage(source, kind)} Nothing was linked.").ConfigureAwait(false);
             return ExitCodes.Failed;
         }
-        catch (HttpRequestException exception) when (exception.StatusCode is HttpStatusCode.TooManyRequests)
+        catch (Exception exception) when (SiteProblem(source, exception) is { } problem)
         {
-            await environment.Error.WriteLineAsync($"{source} asked ModShelf to slow down. Try again in a while. Nothing was linked.")
-                .ConfigureAwait(false);
-            return ExitCodes.Failed;
-        }
-        catch (HttpRequestException exception) when (exception.StatusCode is not null)
-        {
-            // It answered, so it was reached; it couldn't do what was asked.
-            await environment.Error.WriteLineAsync($"{source} answered with an error: {exception.Message} Try again later. Nothing was linked.")
-                .ConfigureAwait(false);
-            return ExitCodes.Failed;
-        }
-        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException { InnerException: TimeoutException })
-        {
-            await environment.Error.WriteLineAsync($"Couldn't reach {source}. Check your connection, then try again. Nothing was linked.")
-                .ConfigureAwait(false);
+            await environment.Error.WriteLineAsync($"{problem} Nothing was linked.").ConfigureAwait(false);
             return ExitCodes.Failed;
         }
         catch (ArgumentException exception)
@@ -214,10 +197,6 @@ internal static class AccountCommand
             await environment.Error.WriteLineAsync("Stopped. Nothing was linked.").ConfigureAwait(false);
             return ExitCodes.Interrupted;
         }
-        finally
-        {
-            await host.StopAsync(CancellationToken.None).ConfigureAwait(false);
-        }
     }
 
     private static async Task<int> CheckAsync(CliEnvironment environment, string sourceText, CancellationToken cancellationToken)
@@ -227,51 +206,52 @@ internal static class AccountCommand
             return ExitCodes.BadInput;
         }
 
-        using IHost host = environment.BuildHost(false);
         try
         {
-            await host.StartAsync(cancellationToken).ConfigureAwait(false);
-            IAccountService accounts = host.Services.GetRequiredService<IAccountService>();
-            SourceAccountStatus? status = (await accounts.ListAsync(cancellationToken).ConfigureAwait(false))
-                .FirstOrDefault(offered => offered.Source == source);
-            if (status is null)
-            {
-                await environment.Error.WriteLineAsync($"No source called {source} supports accounts. Run account list to see the ones that do.")
-                    .ConfigureAwait(false);
-                return ExitCodes.BadInput;
-            }
+            return await CommandHost.RunAsync(
+                    environment,
+                    async services =>
+                    {
+                        IAccountService accounts = services.GetRequiredService<IAccountService>();
+                        if (await StatusAsync(environment, accounts, source, cancellationToken).ConfigureAwait(false) is not { } status)
+                        {
+                            return ExitCodes.BadInput;
+                        }
 
-            if (status.Account is null)
-            {
-                return await NothingLinkedAsync(environment, source).ConfigureAwait(false);
-            }
+                        if (status.Account is null)
+                        {
+                            return await NothingLinkedAsync(environment, source).ConfigureAwait(false);
+                        }
 
-            LinkedAccount account = await accounts.CheckAsync(source, cancellationToken).ConfigureAwait(false);
-            string tier = account.Profile.Tier is { } level ? $" ({level})" : string.Empty;
-            environment.Output.WriteLine($"Checked {source}: {account.Profile.DisplayName}{tier}.");
+                        LinkedAccount account = await accounts.CheckAsync(source, cancellationToken).ConfigureAwait(false);
+                        string tier = account.Profile.Tier is { } level ? $" ({level})" : string.Empty;
+                        environment.Output.WriteLine($"Checked {source}: {account.Profile.DisplayName}{tier}.");
 
-            // The quota is what the site said with the answer just given.
-            ApiQuota? quota = (await accounts.ListAsync(cancellationToken).ConfigureAwait(false))
-                .FirstOrDefault(offered => offered.Source == source)?.Quota;
-            if (quota is null)
-            {
-                environment.Output.WriteLine($"{source} doesn't say how much of its API is left.");
-                return ExitCodes.Done;
-            }
+                        // The quota is what the site said with the answer just given.
+                        ApiQuota? quota = (await accounts.ListAsync(cancellationToken).ConfigureAwait(false))
+                            .FirstOrDefault(offered => offered.Source == source)?.Quota;
+                        if (quota is null)
+                        {
+                            environment.Output.WriteLine($"{source} doesn't say how much of its API is left.");
+                            return ExitCodes.Done;
+                        }
 
-            string[][] rows =
-            [
-                ["Allowance", "Left", "Of", "Starts over"],
-                .. quota.Allowances.Select(allowance => new[]
-                {
-                    PeriodName(allowance.Period),
-                    allowance.Remaining.ToString(CultureInfo.InvariantCulture),
-                    allowance.Limit.ToString(CultureInfo.InvariantCulture),
-                    allowance.ResetsAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
-                }),
-            ];
-            TextTable.Write(environment.Output, rows);
-            return ExitCodes.Done;
+                        string[][] rows =
+                        [
+                            ["Allowance", "Left", "Of", "Starts over"],
+                            .. quota.Allowances.Select(allowance => new[]
+                            {
+                                PeriodName(allowance.Period),
+                                allowance.Remaining.ToString(CultureInfo.InvariantCulture),
+                                allowance.Limit.ToString(CultureInfo.InvariantCulture),
+                                CliText.Time(allowance.ResetsAt),
+                            }),
+                        ];
+                        TextTable.Write(environment.Output, rows);
+                        return ExitCodes.Done;
+                    },
+                    cancellationToken)
+                .ConfigureAwait(false);
         }
         catch (KeyNotFoundException)
         {
@@ -285,19 +265,9 @@ internal static class AccountCommand
                 .ConfigureAwait(false);
             return ExitCodes.Failed;
         }
-        catch (HttpRequestException exception) when (exception.StatusCode is HttpStatusCode.TooManyRequests)
+        catch (Exception exception) when (SiteProblem(source, exception) is { } problem)
         {
-            await environment.Error.WriteLineAsync($"{source} asked ModShelf to slow down. Try again in a while.").ConfigureAwait(false);
-            return ExitCodes.Failed;
-        }
-        catch (HttpRequestException exception) when (exception.StatusCode is not null)
-        {
-            await environment.Error.WriteLineAsync($"{source} answered with an error: {exception.Message} Try again later.").ConfigureAwait(false);
-            return ExitCodes.Failed;
-        }
-        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException { InnerException: TimeoutException })
-        {
-            await environment.Error.WriteLineAsync($"Couldn't reach {source}. Check your connection, then try again.").ConfigureAwait(false);
+            await environment.Error.WriteLineAsync(problem).ConfigureAwait(false);
             return ExitCodes.Failed;
         }
         catch (Exception exception) when (IsFailureWithReason(exception))
@@ -305,15 +275,6 @@ internal static class AccountCommand
             // Such as a keyring that's locked or doesn't answer.
             await environment.Error.WriteLineAsync(exception.Message).ConfigureAwait(false);
             return ExitCodes.Failed;
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            await environment.Error.WriteLineAsync("Stopped.").ConfigureAwait(false);
-            return ExitCodes.Interrupted;
-        }
-        finally
-        {
-            await host.StopAsync(CancellationToken.None).ConfigureAwait(false);
         }
     }
 
@@ -324,44 +285,77 @@ internal static class AccountCommand
             return ExitCodes.BadInput;
         }
 
-        using IHost host = environment.BuildHost(false);
-        await host.StartAsync(cancellationToken).ConfigureAwait(false);
-        try
-        {
-            IAccountService accounts = host.Services.GetRequiredService<IAccountService>();
-            SourceAccountStatus? status = (await accounts.ListAsync(cancellationToken).ConfigureAwait(false))
-                .FirstOrDefault(offered => offered.Source == source);
+        return await CommandHost.RunAsync(
+                environment,
+                async services =>
+                {
+                    IAccountService accounts = services.GetRequiredService<IAccountService>();
+                    SourceAccountStatus? status = (await accounts.ListAsync(cancellationToken).ConfigureAwait(false))
+                        .FirstOrDefault(offered => offered.Source == source);
 
-            // A source that's no longer here can still have an account stored, so unlinking it cleans that up.
-            try
-            {
-                await accounts.UnlinkAsync(source, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception exception) when (IsFailureWithReason(exception))
-            {
-                await environment.Error.WriteLineAsync($"{exception.Message} The account stays linked; unlink it again once that's fixed.")
-                    .ConfigureAwait(false);
-                return ExitCodes.Failed;
-            }
+                    // A source that's no longer here can still have an account stored, so unlinking it cleans that up.
+                    try
+                    {
+                        await accounts.UnlinkAsync(source, cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (Exception exception) when (IsFailureWithReason(exception))
+                    {
+                        await environment.Error.WriteLineAsync($"{exception.Message} The account stays linked; unlink it again once that's fixed.")
+                            .ConfigureAwait(false);
+                        return ExitCodes.Failed;
+                    }
 
-            environment.Output.WriteLine(status switch
-            {
-                null => $"{source} isn't a source here. Any account stored for it is removed.",
-                { Account: null } => $"No account is linked on {source}.",
-                _ => $"Unlinked {source}. Its stored credentials are deleted.",
-            });
-            return ExitCodes.Done;
-        }
-        finally
-        {
-            await host.StopAsync(CancellationToken.None).ConfigureAwait(false);
-        }
+                    environment.Output.WriteLine(status switch
+                    {
+                        null => $"{source} isn't a source here. Any account stored for it is removed.",
+                        { Account: null } => $"No account is linked on {source}.",
+                        _ => $"Unlinked {source}. Its stored credentials are deleted.",
+                    });
+                    return ExitCodes.Done;
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     /// <summary>
     /// Whether keeping or removing credentials failed: the keyring, Keychain or protected files refused, or a step of
     /// linking went wrong. The message says which, in words the user can act on.
     /// </summary>
+    /// <summary>
+    /// What to say when a site couldn't answer about an account: it asked to slow down, answered with an error, or
+    /// couldn't be reached. Null for anything else.
+    /// </summary>
+    private static string? SiteProblem(SourceId source, Exception exception) => exception switch
+    {
+        HttpRequestException { StatusCode: HttpStatusCode.TooManyRequests } => $"{source} asked ModShelf to slow down. Try again in a while.",
+
+        // It answered, so it was reached; it couldn't do what was asked.
+        HttpRequestException { StatusCode: not null } answered => $"{source} answered with an error: {answered.Message} Try again later.",
+        HttpRequestException or TaskCanceledException { InnerException: TimeoutException }
+            => $"Couldn't reach {source}. Check your connection, then try again.",
+        _ => null,
+    };
+
+    /// <summary>
+    /// The source's accounts, or null after saying no source of that name supports them.
+    /// </summary>
+    private static async Task<SourceAccountStatus?> StatusAsync(
+        CliEnvironment environment,
+        IAccountService accounts,
+        SourceId source,
+        CancellationToken cancellationToken)
+    {
+        SourceAccountStatus? status = (await accounts.ListAsync(cancellationToken).ConfigureAwait(false))
+            .FirstOrDefault(offered => offered.Source == source);
+        if (status is null)
+        {
+            await environment.Error.WriteLineAsync($"No source called {source} supports accounts. Run account list to see the ones that do.")
+                .ConfigureAwait(false);
+        }
+
+        return status;
+    }
+
     private static bool IsFailureWithReason(Exception exception)
         => exception is InvalidOperationException or IOException or UnauthorizedAccessException or CryptographicException;
 

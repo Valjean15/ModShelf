@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Net;
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 using ModShelf.Application.Updates;
 using ModShelf.Cli.Hosting;
@@ -80,56 +79,49 @@ internal static partial class ModCommand
         string? sourceText,
         CancellationToken cancellationToken)
     {
-        using IHost host = environment.BuildHost(false);
-        try
-        {
-            await host.StartAsync(cancellationToken).ConfigureAwait(false);
-            IModUpdates feeds = host.Services.GetRequiredService<IModUpdates>();
+        return await CommandHost.RunAsync(
+                environment,
+                async services =>
+                {
+                    IModUpdates feeds = services.GetRequiredService<IModUpdates>();
 
-            DateTimeOffset now = host.Services.GetRequiredService<TimeProvider>().GetUtcNow();
-            if (ReadSince(sinceText, now) is not { } since)
-            {
-                await environment.Error.WriteLineAsync(
-                    "--since takes 1d, 7d or 28d, or a date or time, such as 2026-10-20 or 2026-10-20T18:00.").ConfigureAwait(false);
-                return ExitCodes.BadInput;
-            }
+                    DateTimeOffset now = services.GetRequiredService<TimeProvider>().GetUtcNow();
+                    if (ReadSince(sinceText, now) is not { } since)
+                    {
+                        await environment.Error.WriteLineAsync(
+                            "--since takes 1d, 7d or 28d, or a date or time, such as 2026-10-20 or 2026-10-20T18:00.").ConfigureAwait(false);
+                        return ExitCodes.BadInput;
+                    }
 
-            if (since > now)
-            {
-                await environment.Error.WriteLineAsync("--since must be in the past.").ConfigureAwait(false);
-                return ExitCodes.BadInput;
-            }
+                    if (since > now)
+                    {
+                        await environment.Error.WriteLineAsync("--since must be in the past.").ConfigureAwait(false);
+                        return ExitCodes.BadInput;
+                    }
 
-            if (ChooseSource(feeds.Sources, sourceText) is not { } chosen)
-            {
-                await environment.Error.WriteLineAsync(SourceProblem(feeds.Sources, sourceText, "list updates")).ConfigureAwait(false);
-                return ExitCodes.BadInput;
-            }
+                    if (ChooseSource(feeds.Sources, sourceText) is not { } chosen)
+                    {
+                        await environment.Error.WriteLineAsync(SourceProblem(feeds.Sources, sourceText, "list updates")).ConfigureAwait(false);
+                        return ExitCodes.BadInput;
+                    }
 
-            string key = gameKey.Trim();
-            IReadOnlyList<ModUpdate> found;
-            try
-            {
-                found = await feeds.GetUpdatesAsync(new GameRef(chosen, key), since, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception exception) when (UpdatesProblem(exception, key) is { } problem)
-            {
-                await environment.Error.WriteLineAsync(problem.Message).ConfigureAwait(false);
-                return problem.ExitCode;
-            }
+                    string key = gameKey.Trim();
+                    IReadOnlyList<ModUpdate> found;
+                    try
+                    {
+                        found = await feeds.GetUpdatesAsync(new GameRef(chosen, key), since, cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (Exception exception) when (UpdatesProblem(exception, key) is { } problem)
+                    {
+                        await environment.Error.WriteLineAsync(problem.Message).ConfigureAwait(false);
+                        return problem.ExitCode;
+                    }
 
-            WriteUpdates(environment.Output, found, key, since);
-            return ExitCodes.Done;
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            await environment.Error.WriteLineAsync("Stopped.").ConfigureAwait(false);
-            return ExitCodes.Interrupted;
-        }
-        finally
-        {
-            await host.StopAsync(CancellationToken.None).ConfigureAwait(false);
-        }
+                    WriteUpdates(environment.Output, found, key, since);
+                    return ExitCodes.Done;
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     /// <summary>
@@ -163,7 +155,7 @@ internal static partial class ModCommand
 
     private static void WriteUpdates(TextWriter output, IReadOnlyList<ModUpdate> found, string game, DateTimeOffset since)
     {
-        string from = Time(since);
+        string from = CliText.Time(since);
         if (found.Count == 0)
         {
             output.WriteLine($"No mods of {game} changed since {from}.");
@@ -173,7 +165,7 @@ internal static partial class ModCommand
         int withFiles = found.Count(update => update.FilesUpdatedAt >= since);
         output.WriteLine(found.Count == 1
             ? $"1 mod of {game} changed since {from}."
-            : $"{Count(found.Count)} mods of {game} changed since {from}, the most recently active first.");
+            : $"{CliText.Count(found.Count)} mods of {game} changed since {from}, the most recently active first.");
 
         string[][] rows =
         [
@@ -182,8 +174,8 @@ internal static partial class ModCommand
             {
                 update.FilesUpdatedAt >= since ? "*" : "",
                 update.Mod.Id,
-                update.FilesUpdatedAt is { } files ? Time(files) : "-",
-                Time(update.LastActivityAt),
+                update.FilesUpdatedAt is { } files ? CliText.Time(files) : "-",
+                CliText.Time(update.LastActivityAt),
                 update.PageUrl?.AbsoluteUri ?? "-",
             }),
         ];
@@ -199,6 +191,4 @@ internal static partial class ModCommand
         output.WriteLine("To see a mod's files: mod show \"<its link>\"");
     }
 
-    private static string Time(DateTimeOffset moment)
-        => moment.ToLocalTime().ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
 }

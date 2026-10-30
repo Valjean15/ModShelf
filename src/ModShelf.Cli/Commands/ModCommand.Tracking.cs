@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Net;
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 using ModShelf.Application.Watchlist;
 using ModShelf.Cli.Hosting;
@@ -51,82 +50,66 @@ internal static partial class ModCommand
 
     private static async Task<int> TrackedAsync(CliEnvironment environment, string? sourceText, CancellationToken cancellationToken)
     {
-        using IHost host = environment.BuildHost(false);
-        try
-        {
-            await host.StartAsync(cancellationToken).ConfigureAwait(false);
-            IWatchlists watchlists = host.Services.GetRequiredService<IWatchlists>();
-            if (ChooseSource(watchlists.Sources, sourceText) is not { } source)
-            {
-                await environment.Error.WriteLineAsync(SourceProblem(watchlists.Sources, sourceText, "track mods")).ConfigureAwait(false);
-                return ExitCodes.BadInput;
-            }
+        return await CommandHost.RunAsync(
+                environment,
+                async services =>
+                {
+                    IWatchlists watchlists = services.GetRequiredService<IWatchlists>();
+                    if (ChooseSource(watchlists.Sources, sourceText) is not { } source)
+                    {
+                        await environment.Error.WriteLineAsync(SourceProblem(watchlists.Sources, sourceText, "track mods")).ConfigureAwait(false);
+                        return ExitCodes.BadInput;
+                    }
 
-            IReadOnlyList<ModRef> tracked;
-            try
-            {
-                tracked = await watchlists.GetWatchedAsync(source, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception exception) when (ListingProblem(exception) is { } problem)
-            {
-                await environment.Error.WriteLineAsync(problem.Message).ConfigureAwait(false);
-                return problem.ExitCode;
-            }
+                    IReadOnlyList<ModRef> tracked;
+                    try
+                    {
+                        tracked = await watchlists.GetWatchedAsync(source, cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (Exception exception) when (ListingProblem(exception) is { } problem)
+                    {
+                        await environment.Error.WriteLineAsync(problem.Message).ConfigureAwait(false);
+                        return problem.ExitCode;
+                    }
 
-            WriteTracked(environment.Output, tracked, source);
-            return ExitCodes.Done;
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            await environment.Error.WriteLineAsync("Stopped.").ConfigureAwait(false);
-            return ExitCodes.Interrupted;
-        }
-        finally
-        {
-            await host.StopAsync(CancellationToken.None).ConfigureAwait(false);
-        }
+                    WriteTracked(environment.Output, tracked, source);
+                    return ExitCodes.Done;
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     private static async Task<int> TrackAsync(CliEnvironment environment, string linkText, bool track, CancellationToken cancellationToken)
     {
-        if (!Uri.TryCreate(linkText, UriKind.Absolute, out Uri? link))
+        if (!ModLinkArgument.TryRead(environment, linkText, out Uri? link))
         {
-            await environment.Error.WriteLineAsync("That isn't a complete link, such as https://www.nexusmods.com/stardewvalley/mods/2400.")
-                .ConfigureAwait(false);
             return ExitCodes.BadInput;
         }
 
-        using IHost host = environment.BuildHost(false);
-        try
-        {
-            await host.StartAsync(cancellationToken).ConfigureAwait(false);
-            IWatchlists watchlists = host.Services.GetRequiredService<IWatchlists>();
-            ModRef mod;
-            try
-            {
-                mod = track
-                    ? await watchlists.WatchAsync(link, cancellationToken).ConfigureAwait(false)
-                    : await watchlists.UnwatchAsync(link, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception exception) when (TrackingProblem(exception, track ? "track the mod" : "stop tracking the mod") is { } problem)
-            {
-                await environment.Error.WriteLineAsync(problem.Message).ConfigureAwait(false);
-                return problem.ExitCode;
-            }
+        return await CommandHost.RunAsync(
+                environment,
+                async services =>
+                {
+                    IWatchlists watchlists = services.GetRequiredService<IWatchlists>();
+                    ModRef mod;
+                    try
+                    {
+                        mod = track
+                            ? await watchlists.WatchAsync(link, cancellationToken).ConfigureAwait(false)
+                            : await watchlists.UnwatchAsync(link, cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (Exception exception) when (TrackingProblem(exception, track ? "track the mod" : "stop tracking the mod") is { } problem)
+                    {
+                        await environment.Error.WriteLineAsync(problem.Message).ConfigureAwait(false);
+                        return problem.ExitCode;
+                    }
 
-            string which = $"mod {mod.Id} of {mod.Game.Key} on {mod.Game.Source}";
-            await environment.Output.WriteLineAsync(track ? $"Tracking {which}." : $"No longer tracking {which}.").ConfigureAwait(false);
-            return ExitCodes.Done;
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            await environment.Error.WriteLineAsync("Stopped.").ConfigureAwait(false);
-            return ExitCodes.Interrupted;
-        }
-        finally
-        {
-            await host.StopAsync(CancellationToken.None).ConfigureAwait(false);
-        }
+                    string which = $"mod {mod.Id} of {mod.Game.Key} on {mod.Game.Source}";
+                    await environment.Output.WriteLineAsync(track ? $"Tracking {which}." : $"No longer tracking {which}.").ConfigureAwait(false);
+                    return ExitCodes.Done;
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     /// <summary>
@@ -160,7 +143,7 @@ internal static partial class ModCommand
             return;
         }
 
-        output.WriteLine(tracked.Count == 1 ? $"The account tracks 1 mod on {source}." : $"The account tracks {Count(tracked.Count)} mods on {source}.");
+        output.WriteLine(tracked.Count == 1 ? $"The account tracks 1 mod on {source}." : $"The account tracks {CliText.Count(tracked.Count)} mods on {source}.");
         string[][] rows =
         [
             ["Game", "ID"],
