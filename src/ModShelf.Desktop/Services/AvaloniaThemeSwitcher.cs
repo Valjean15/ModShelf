@@ -1,5 +1,4 @@
 using Avalonia.Styling;
-using Avalonia.Threading;
 
 using ModShelf.Application.Settings;
 using ModShelf.Presentation.Services;
@@ -9,8 +8,10 @@ namespace ModShelf.Desktop.Services;
 /// <summary>
 /// Makes the app light or dark through Avalonia's theme variant; the system's own follows its light or dark mode.
 /// </summary>
-internal sealed class AvaloniaThemeSwitcher : IThemeSwitcher
+internal sealed class AvaloniaThemeSwitcher(IUiThread uiThread) : IThemeSwitcher
 {
+    private readonly IUiThread _uiThread = uiThread ?? throw new ArgumentNullException(nameof(uiThread));
+
     public void Apply(AppTheme theme)
     {
         ThemeVariant variant = theme switch
@@ -21,21 +22,12 @@ internal sealed class AvaloniaThemeSwitcher : IThemeSwitcher
         };
 
         // At once on the UI thread, such as at start, before the window shows.
-        if (Dispatcher.UIThread.CheckAccess())
+        _uiThread.Post(() =>
         {
-            Set(variant);
-        }
-        else
-        {
-            Dispatcher.UIThread.Post(() => Set(variant));
-        }
-    }
-
-    private static void Set(ThemeVariant variant)
-    {
-        if (Avalonia.Application.Current is { } app)
-        {
-            app.RequestedThemeVariant = variant;
-        }
+            if (Avalonia.Application.Current is { } app)
+            {
+                app.RequestedThemeVariant = variant;
+            }
+        });
     }
 }
