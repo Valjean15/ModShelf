@@ -115,26 +115,21 @@ public sealed partial class UpdatesViewModel : ScreenViewModel
     /// <summary>
     /// Lists the library's updates, then follows its changes while the app runs.
     /// </summary>
-    public override async Task StartAsync(CancellationToken cancellationToken)
-    {
-        // Watching first and listing after, so no change from here on is missed.
-        IAsyncEnumerable<LibraryChange> changes = _library.ChangesAsync(cancellationToken);
-        IReadOnlyList<LibraryMod> mods = await _library.ListAsync(cancellationToken);
-        _uiThread.Post(() =>
-        {
-            foreach (LibraryMod mod in mods)
+    public override Task StartAsync(CancellationToken cancellationToken)
+        => LibraryFeed.FollowAsync(
+            _library,
+            _uiThread,
+            mods =>
             {
-                _mods[mod.Mod] = mod;
-            }
-
-            Arrange();
-        });
-
-        await foreach (LibraryChange change in changes)
-        {
-            _uiThread.Post(() => Apply(change));
-        }
-    }
+                _mods.Keep(mods);
+                Arrange();
+            },
+            change =>
+            {
+                _mods.Apply(change);
+                Arrange();
+            },
+            cancellationToken);
 
     private bool CanCheckNow() => HasWatched && !IsChecking;
 
@@ -181,23 +176,6 @@ public sealed partial class UpdatesViewModel : ScreenViewModel
         }
 
         return Text.Format(Strings.CheckGameFailed, failure.Game.Key, _sources.SiteName(failure.Game.Source), failure.Reason);
-    }
-
-    /// <summary>
-    /// Shows what a change did. Runs on the UI thread.
-    /// </summary>
-    private void Apply(LibraryChange change)
-    {
-        if (change.After is { } after)
-        {
-            _mods[change.Mod] = after;
-        }
-        else
-        {
-            _mods.Remove(change.Mod);
-        }
-
-        Arrange();
     }
 
     /// <summary>

@@ -241,26 +241,19 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         _navigation.Navigated += OnNavigated;
         try
         {
-            // Watching first and listing after, so no change from here on is missed.
-            IAsyncEnumerable<LibraryChange> changes = _library.ChangesAsync(cancellationToken);
-            IReadOnlyList<LibraryMod> mods = await _library.ListAsync(cancellationToken);
-            _uiThread.Post(() =>
-            {
-                foreach (LibraryMod mod in mods)
+            await LibraryFeed.FollowAsync(
+                _library,
+                _uiThread,
+                mods =>
                 {
-                    _inLibrary[mod.Mod] = mod;
-                }
-
-                if (_navigation.Current == Screen.Browse)
-                {
-                    GamesWork = ReadingGamesAsync();
-                }
-            });
-
-            await foreach (LibraryChange change in changes)
-            {
-                _uiThread.Post(() => ShowLibrary(change));
-            }
+                    _inLibrary.Keep(mods);
+                    if (_navigation.Current == Screen.Browse)
+                    {
+                        GamesWork = ReadingGamesAsync();
+                    }
+                },
+                ShowLibrary,
+                cancellationToken);
         }
         finally
         {
@@ -685,15 +678,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     /// </summary>
     private void ShowLibrary(LibraryChange change)
     {
-        if (change.After is { } after)
-        {
-            _inLibrary[change.Mod] = after;
-        }
-        else
-        {
-            _inLibrary.Remove(change.Mod);
-        }
-
+        _inLibrary.Apply(change);
         foreach (BrowseModViewModel row in Results.Where(row => row.Mod == change.Mod))
         {
             row.ShowLibrary(change.After);

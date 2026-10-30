@@ -89,27 +89,23 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     /// <summary>
     /// Lists the library, then follows its changes while the app runs, and asks the games' sites for their names.
     /// </summary>
-    public override async Task StartAsync(CancellationToken cancellationToken)
+    public override Task StartAsync(CancellationToken cancellationToken)
     {
         _stopping = cancellationToken;
-
-        // Watching first and listing after, so no change from here on is missed.
-        IAsyncEnumerable<LibraryChange> changes = _library.ChangesAsync(cancellationToken);
-        IReadOnlyList<LibraryMod> mods = await _library.ListAsync(cancellationToken);
-        _uiThread.Post(() =>
-        {
-            foreach (LibraryMod mod in mods)
+        return LibraryFeed.FollowAsync(
+            _library,
+            _uiThread,
+            mods =>
             {
-                Show(mod);
-            }
+                foreach (LibraryMod mod in mods)
+                {
+                    Show(mod);
+                }
 
-            Arrange();
-        });
-
-        await foreach (LibraryChange change in changes)
-        {
-            _uiThread.Post(() => Apply(change));
-        }
+                Arrange();
+            },
+            Apply,
+            cancellationToken);
     }
 
     partial void OnFilterChanged(string value) => Arrange();
