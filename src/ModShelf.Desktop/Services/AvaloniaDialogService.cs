@@ -7,6 +7,7 @@ using ModShelf.Application.Accounts.Ports;
 using ModShelf.Desktop.Views.Dialogs;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
+using ModShelf.Presentation.ViewModels;
 
 namespace ModShelf.Desktop.Services;
 
@@ -60,19 +61,12 @@ internal sealed class AvaloniaDialogService : IDialogService
         ArgumentException.ThrowIfNullOrWhiteSpace(question.ConfirmLabel);
         cancellationToken.ThrowIfCancellationRequested();
 
-        TextDialogContent content = new(question.Title, question.Message, question.Hint, question.ConfirmLabel, Strings.DialogCancel)
+        return await Dispatcher.UIThread.InvokeAsync(async () =>
         {
-            PasswordChar = question.IsSecret ? '•' : '\0',
-            HelpPage = question.HelpPage,
-            HelpPageLabel = question.HelpPageLabel,
-            OpenPage = page => _browser.TryOpenAsync(page, cancellationToken),
-        };
-        bool confirmed = await Dispatcher.UIThread.InvokeAsync(async () =>
-        {
+            TextQuestionViewModel content = new(question, _browser);
             TextDialog dialog = new() { DataContext = content };
-            return await ShowAsync(dialog, () => dialog.Confirmed, cancellationToken);
+            return await ShowAsync(dialog, () => dialog.Confirmed, cancellationToken) ? content.Text : null;
         });
-        return confirmed ? content.Text : null;
     }
 
     public Task<string?> PickFolderAsync(string title, CancellationToken cancellationToken)

@@ -1,14 +1,21 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:dialogs="using:ModShelf.Desktop.Views.Dialogs"
+        xmlns:vm="using:ModShelf.Presentation.ViewModels"
         x:Class="ModShelf.Desktop.Views.Dialogs.TextDialog"
-        x:DataType="dialogs:TextDialogContent"
+        x:DataType="vm:TextQuestionViewModel"
         Title="{Binding Title}"
         Width="480"
         SizeToContent="Height"
         CanResize="False"
         ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner">
+
+    <Window.Styles>
+        <!-- A secret, such as an API key, isn't shown as it's typed. -->
+        <Style Selector="TextBox.secret">
+            <Setter Property="PasswordChar" Value="•" />
+        </Style>
+    </Window.Styles>
 
     <DockPanel Margin="24">
         <StackPanel DockPanel.Dock="Bottom"
@@ -28,12 +35,14 @@
             <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
 
             <!-- A page that helps answer, such as where to find an API key. -->
-            <Button Content="{Binding HelpPageLabel}" IsVisible="{Binding HasHelpPage}" Click="OnOpenHelpPage" />
-            <SelectableTextBlock Name="HelpPageProblem" TextWrapping="Wrap" IsVisible="False" />
+            <Button Content="{Binding HelpPageLabel}" IsVisible="{Binding HasHelpPage}" Command="{Binding OpenHelpPageCommand}" />
+            <SelectableTextBlock Text="{Binding HelpPageProblem}"
+                                 TextWrapping="Wrap"
+                                 IsVisible="{Binding HelpPageProblem, Converter={x:Static ObjectConverters.IsNotNull}}" />
 
             <TextBox Name="Answer"
                      Text="{Binding Text}"
-                     PasswordChar="{Binding PasswordChar}"
+                     Classes.secret="{Binding IsSecret}"
                      PlaceholderText="{Binding Hint}" />
         </StackPanel>
     </DockPanel>

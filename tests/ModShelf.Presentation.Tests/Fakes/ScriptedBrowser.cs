@@ -11,9 +11,14 @@ internal sealed class ScriptedBrowser : IBrowserLauncher
 
     public bool CanOpen { get; set; } = true;
 
+    /// <summary>
+    /// What opening a page throws, such as the launcher refusing its address; null to open or not as told.
+    /// </summary>
+    public Exception? Failure { get; set; }
+
     public Task<bool> TryOpenAsync(Uri url, CancellationToken cancellationToken)
     {
         Opened.Add(url);
-        return Task.FromResult(CanOpen);
+        return Failure is { } failure ? Task.FromException<bool>(failure) : Task.FromResult(CanOpen);
     }
 }
