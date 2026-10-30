@@ -14,6 +14,7 @@ using ModShelf.Infrastructure.Logging;
 using ModShelf.Infrastructure.Persistence;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.ViewModels;
+using ModShelf.Presentation.ViewModels.FirstRun;
 
 namespace ModShelf.Desktop;
 
@@ -91,6 +92,7 @@ internal static partial class Program
             () => new App(
                 () => services.GetRequiredService<MainWindowViewModel>(),
                 () => services.GetRequiredService<TrayViewModel>(),
+                () => services.GetRequiredService<FirstRunViewModel>(),
                 instance,
                 args)));
 

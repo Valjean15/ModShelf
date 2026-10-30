@@ -6,6 +6,7 @@ using ModShelf.Presentation.ViewModels;
 using ModShelf.Presentation.ViewModels.Accounts;
 using ModShelf.Presentation.ViewModels.Browse;
 using ModShelf.Presentation.ViewModels.Downloads;
+using ModShelf.Presentation.ViewModels.FirstRun;
 using ModShelf.Presentation.ViewModels.Library;
 using ModShelf.Presentation.ViewModels.Settings;
 using ModShelf.Presentation.ViewModels.Updates;
@@ -38,6 +39,7 @@ public static class PresentationServiceCollectionExtensions
             ServiceDescriptor.Singleton<ScreenViewModel, SettingsViewModel>(),
         ]);
         services.TryAddSingleton<LinksViewModel>();
+        services.TryAddSingleton<FirstRunViewModel>();
         services.TryAddSingleton<AboutViewModel>();
         services.TryAddSingleton<MainWindowViewModel>();
         services.TryAddSingleton<TrayViewModel>();

@@ -8,6 +8,7 @@ using ModShelf.Desktop.Hosting;
 using ModShelf.Desktop.Views;
 using ModShelf.Desktop.Views.Dialogs;
 using ModShelf.Presentation.ViewModels;
+using ModShelf.Presentation.ViewModels.FirstRun;
 
 namespace ModShelf.Desktop;
 
@@ -16,6 +17,7 @@ public sealed partial class App : Avalonia.Application
 {
     private readonly Func<MainWindowViewModel>? _createMainWindowViewModel;
     private readonly Func<TrayViewModel>? _createTrayViewModel;
+    private readonly Func<FirstRunViewModel>? _createFirstRunViewModel;
     private readonly ISingleInstance? _instance;
     private readonly IReadOnlyList<string> _arguments = [];
     private readonly MessageDialogContent? _startupProblem;
@@ -25,16 +27,19 @@ public sealed partial class App : Avalonia.Application
     {
     }
 
+    /// <param name="createFirstRunViewModel">The first-run setup, shown over the main window for a new library.</param>
     /// <param name="instance">The app's claim to the library, which tells it of each launch after it.</param>
     /// <param name="arguments">The app's command-line arguments, such as a link the system started it with.</param>
     internal App(
         Func<MainWindowViewModel> createMainWindowViewModel,
         Func<TrayViewModel> createTrayViewModel,
+        Func<FirstRunViewModel> createFirstRunViewModel,
         ISingleInstance instance,
         IReadOnlyList<string> arguments)
     {
         _createMainWindowViewModel = createMainWindowViewModel;
         _createTrayViewModel = createTrayViewModel;
+        _createFirstRunViewModel = createFirstRunViewModel;
         _instance = instance;
         _arguments = arguments;
     }
@@ -66,6 +71,7 @@ public sealed partial class App : Avalonia.Application
         else if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
             && _createMainWindowViewModel is not null
             && _createTrayViewModel is not null
+            && _createFirstRunViewModel is not null
             && _instance is not null)
         {
             MainWindowViewModel viewModel = _createMainWindowViewModel();
@@ -92,8 +98,16 @@ public sealed partial class App : Avalonia.Application
                 };
             }
 
-            // The links the system started it with.
-            _ = viewModel.OpenLinksAsync(_arguments);
+            // Once the window is up: a new library's first-run setup over it, then the links the system started it with.
+            FirstRunViewModel firstRun = _createFirstRunViewModel();
+            window.Opened += OnOpened;
+
+            async void OnOpened(object? sender, EventArgs e)
+            {
+                window.Opened -= OnOpened;
+                await firstRun.ShowIfNeededAsync(CancellationToken.None);
+                await viewModel.OpenLinksAsync(_arguments);
+            }
 
             void Open(IReadOnlyList<string> arguments)
             {

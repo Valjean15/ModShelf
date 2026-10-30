@@ -1,4 +1,5 @@
 using ModShelf.Presentation.Services;
+using ModShelf.Presentation.ViewModels.FirstRun;
 
 namespace ModShelf.Presentation.Tests.Fakes;
 
@@ -56,5 +57,32 @@ internal sealed class ScriptedDialogs : IDialogService
     {
         FolderPickers.Add(title);
         return Task.FromResult(Folders.TryDequeue(out string? folder) ? folder : null);
+    }
+
+    /// <summary>
+    /// Each first-run setup shown.
+    /// </summary>
+    public List<FirstRunViewModel> FirstRuns { get; } = [];
+
+    /// <summary>
+    /// What the user does while the first-run setup is open; by default they close it. The dialog closes once this is
+    /// done, or as soon as the setup asks to close.
+    /// </summary>
+    public Func<FirstRunViewModel, Task> InFirstRun { get; set; } = _ => Task.CompletedTask;
+
+    public async Task ShowFirstRunAsync(FirstRunViewModel setup, CancellationToken cancellationToken)
+    {
+        FirstRuns.Add(setup);
+        TaskCompletionSource closed = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        void Close(object? sender, EventArgs e) => closed.TrySetResult();
+        setup.CloseRequested += Close;
+        try
+        {
+            await Task.WhenAny(InFirstRun(setup), closed.Task);
+        }
+        finally
+        {
+            setup.CloseRequested -= Close;
+        }
     }
 }

@@ -5,9 +5,11 @@ using Avalonia.Threading;
 
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Desktop.Views.Dialogs;
+using ModShelf.Desktop.Views.FirstRun;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.Dialogs;
+using ModShelf.Presentation.ViewModels.FirstRun;
 
 namespace ModShelf.Desktop.Services;
 
@@ -77,7 +79,7 @@ internal sealed class AvaloniaDialogService : IDialogService
         return Dispatcher.UIThread.InvokeAsync(async () =>
         {
             // The system's folder picker needs a window to belong to.
-            if (AppWindows.Main is not { } owner)
+            if (AppWindows.Top is not { } owner)
             {
                 return null;
             }
@@ -86,6 +88,14 @@ internal sealed class AvaloniaDialogService : IDialogService
                 new FolderPickerOpenOptions { Title = title, AllowMultiple = false });
             return folders.Count > 0 ? folders[0].TryGetLocalPath() : null;
         });
+    }
+
+    public Task ShowFirstRunAsync(FirstRunViewModel setup, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(setup);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Dispatcher.UIThread.InvokeAsync(() => ShowAsync(new FirstRunWindow { DataContext = setup }, () => true, cancellationToken));
     }
 
     private static Task<bool> ShowAsync(MessageDialogContent content, CancellationToken cancellationToken)
@@ -103,14 +113,14 @@ internal sealed class AvaloniaDialogService : IDialogService
     }
 
     /// <summary>
-    /// Shows <paramref name="dialog"/> over the main window until it closes, or until
+    /// Shows <paramref name="dialog"/> over the newest window, such as the main window, until it closes, or until
     /// <paramref name="cancellationToken"/> closes it. Runs on the UI thread.
     /// </summary>
     /// <param name="confirmed">Whether the user confirmed, once the dialog has closed.</param>
     private static async Task<bool> ShowAsync(Window dialog, Func<bool> confirmed, CancellationToken cancellationToken)
     {
         await using CancellationTokenRegistration closing = cancellationToken.Register(() => Dispatcher.UIThread.Post(() => dialog.Close(false)));
-        if (AppWindows.Main is { } owner)
+        if (AppWindows.Top is { } owner)
         {
             await dialog.ShowDialog<bool>(owner);
             return confirmed();

@@ -1,0 +1,81 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ModShelf.Presentation.ViewModels.FirstRun"
+        xmlns:accounts="using:ModShelf.Presentation.ViewModels.Accounts"
+        xmlns:views="using:ModShelf.Desktop.Views"
+        xmlns:res="using:ModShelf.Presentation.Resources"
+        x:Class="ModShelf.Desktop.Views.FirstRun.FirstRunWindow"
+        x:DataType="vm:FirstRunViewModel"
+        Title="{x:Static res:Strings.FirstRunTitle}"
+        Width="640"
+        Height="600"
+        MinWidth="480"
+        MinHeight="440"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+    <DockPanel Margin="24">
+        <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
+            <TextBlock Classes="heading" Text="{x:Static res:Strings.FirstRunTitle}" />
+            <TextBlock Classes="note" Text="{Binding StepText}" />
+        </StackPanel>
+
+        <!-- Skipping on the left, going through the pages on the right. -->
+        <DockPanel DockPanel.Dock="Bottom" Margin="0,16,0,0">
+            <Button DockPanel.Dock="Left" Content="{x:Static res:Strings.FirstRunSkip}" Command="{Binding SkipCommand}" />
+            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                <Button Content="{x:Static res:Strings.FirstRunBack}" Command="{Binding BackCommand}" />
+                <Button Classes="accent"
+                        IsDefault="True"
+                        Content="{x:Static res:Strings.FirstRunNext}"
+                        Command="{Binding NextCommand}"
+                        IsVisible="{Binding !IsLastPage}" />
+                <Button Classes="accent"
+                        Content="{x:Static res:Strings.FirstRunFinish}"
+                        Command="{Binding FinishCommand}"
+                        IsVisible="{Binding IsLastPage}" />
+            </StackPanel>
+        </DockPanel>
+
+        <TextBlock DockPanel.Dock="Bottom"
+                   Margin="0,12,0,0"
+                   Classes="problem"
+                   TextWrapping="Wrap"
+                   Text="{Binding Problem}"
+                   IsVisible="{Binding Problem, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+        <ScrollViewer>
+            <Panel Margin="0,0,16,0">
+                <StackPanel Spacing="12" IsVisible="{Binding IsLibraryPage}">
+                    <TextBlock Classes="subheading" Text="{x:Static res:Strings.FirstRunLibraryHeading}" />
+                    <TextBlock TextWrapping="Wrap" Text="{x:Static res:Strings.FirstRunLibraryText}" />
+                    <views:LibraryFolderView DataContext="{Binding Settings}" />
+                </StackPanel>
+
+                <StackPanel Spacing="12" IsVisible="{Binding IsAccountPage}">
+                    <TextBlock Classes="subheading" Text="{x:Static res:Strings.FirstRunAccountHeading}" />
+                    <TextBlock TextWrapping="Wrap" Text="{x:Static res:Strings.FirstRunAccountText}" />
+                    <ItemsControl ItemsSource="{Binding Accounts.Sources}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="12" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="accounts:AccountViewModel">
+                                <views:AccountCard />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <StackPanel Spacing="12" IsVisible="{Binding IsLinksPage}">
+                    <TextBlock Classes="subheading" Text="{x:Static res:Strings.FirstRunLinksHeading}" />
+                    <TextBlock TextWrapping="Wrap" Text="{x:Static res:Strings.LinksExplain}" />
+                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.FirstRunLinksText}" />
+                    <views:LinkSitesView DataContext="{Binding Settings.Links}" />
+                </StackPanel>
+            </Panel>
+        </ScrollViewer>
+    </DockPanel>
+</Window>

@@ -1430,4 +1430,56 @@
     <value>Another app</value>
     <comment>Names an app the system doesn't name, as in "Another app opens nxm:// links from Nexus Mods: …".</comment>
   </data>
+  <data name="FirstRunTitle" xml:space="preserve">
+    <value>Welcome to ModShelf</value>
+    <comment>The first-run setup's window title and heading.</comment>
+  </data>
+  <data name="FirstRunStep" xml:space="preserve">
+    <value>Step {0} of {1}</value>
+    <comment>{0} is the page's number, {1} how many there are.</comment>
+  </data>
+  <data name="FirstRunLibraryHeading" xml:space="preserve">
+    <value>Where your mods go</value>
+    <comment>Heading of the setup's first page.</comment>
+  </data>
+  <data name="FirstRunLibraryText" xml:space="preserve">
+    <value>ModShelf downloads mods into a library: a folder with a folder for each game and mod. Keep the one below, or choose another. You can move it later on the Settings screen.</value>
+    <comment>Under the first page's heading.</comment>
+  </data>
+  <data name="FirstRunAccountHeading" xml:space="preserve">
+    <value>Link your account</value>
+    <comment>Heading of the setup's second page.</comment>
+  </data>
+  <data name="FirstRunAccountText" xml:space="preserve">
+    <value>Browsing, downloading and checking for updates on a mod site need your account there. Link it now, or later on the Accounts screen.</value>
+    <comment>Under the second page's heading.</comment>
+  </data>
+  <data name="FirstRunLinksHeading" xml:space="preserve">
+    <value>Links from websites</value>
+    <comment>Heading of the setup's third page.</comment>
+  </data>
+  <data name="FirstRunLinksText" xml:space="preserve">
+    <value>Nothing changes here unless you choose it. You can change it later on the Settings screen.</value>
+    <comment>Under the third page's heading, before the sites' links.</comment>
+  </data>
+  <data name="FirstRunBack" xml:space="preserve">
+    <value>Back</value>
+    <comment>Button: the setup's previous page.</comment>
+  </data>
+  <data name="FirstRunNext" xml:space="preserve">
+    <value>Next</value>
+    <comment>Button: the setup's next page.</comment>
+  </data>
+  <data name="FirstRunFinish" xml:space="preserve">
+    <value>Finish</value>
+    <comment>Button: ends the setup with what was chosen.</comment>
+  </data>
+  <data name="FirstRunSkip" xml:space="preserve">
+    <value>Skip setup</value>
+    <comment>Button: ends the setup without the pages left; it doesn't come back.</comment>
+  </data>
+  <data name="FirstRunCantSave" xml:space="preserve">
+    <value>The setup couldn't be marked done: {0}</value>
+    <comment>{0} is the reason.</comment>
+  </data>
 </root>

@@ -1,3 +1,5 @@
+using ModShelf.Presentation.ViewModels.FirstRun;
+
 namespace ModShelf.Presentation.Services;
 
 /// <summary>
@@ -35,4 +37,10 @@ public interface IDialogService
     /// </summary>
     /// <returns>The folder's full path; null when they cancelled, or picked a place that isn't a folder on this computer.</returns>
     Task<string?> PickFolderAsync(string title, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Shows the first-run setup over the main window, until it asks to close (<see cref="FirstRunViewModel.CloseRequested"/>)
+    /// or the user closes it.
+    /// </summary>
+    Task ShowFirstRunAsync(FirstRunViewModel setup, CancellationToken cancellationToken);
 }

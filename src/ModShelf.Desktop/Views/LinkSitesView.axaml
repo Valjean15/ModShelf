@@ -1,0 +1,32 @@
+<!-- Each site's links and who opens them: on the Settings screen, and in the first-run setup. -->
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ModShelf.Presentation.ViewModels.Settings"
+             xmlns:res="using:ModShelf.Presentation.Resources"
+             x:Class="ModShelf.Desktop.Views.LinkSitesView"
+             x:DataType="vm:LinksViewModel">
+
+    <StackPanel Spacing="8">
+        <ItemsControl ItemsSource="{Binding Sites}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:LinkHandlerViewModel">
+                    <StackPanel Spacing="8" Margin="0,4,0,0">
+                        <TextBlock TextWrapping="Wrap" Text="{Binding StateText}" />
+                        <WrapPanel>
+                            <Button Content="{x:Static res:Strings.LinksTake}" Command="{Binding TakeCommand}" IsVisible="{Binding OffersTake}" />
+                            <Button Content="{Binding GiveBackText}" Command="{Binding GiveBackCommand}" IsVisible="{Binding OffersGiveBack}" />
+                        </WrapPanel>
+                        <TextBlock Classes="note message"
+                                   Classes.problem="{Binding IsNoteAProblem}"
+                                   TextWrapping="Wrap"
+                                   Text="{Binding Note}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <TextBlock Classes="problem"
+                   TextWrapping="Wrap"
+                   Text="{Binding Problem}"
+                   IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,24 @@
+<!-- The library's folder, with choosing another: on the Settings screen, and in the first-run setup. -->
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ModShelf.Presentation.ViewModels.Settings"
+             xmlns:res="using:ModShelf.Presentation.Resources"
+             x:Class="ModShelf.Desktop.Views.LibraryFolderView"
+             x:DataType="vm:SettingsViewModel">
+
+    <StackPanel Spacing="8">
+        <SelectableTextBlock FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding LibraryRoot}" />
+        <TextBlock Classes="note" Text="{x:Static res:Strings.SettingsDefaultFolder}" IsVisible="{Binding IsDefaultRoot}" />
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="{x:Static res:Strings.SettingsChooseFolder}" Command="{Binding ChooseRootCommand}" />
+            <Button Content="{x:Static res:Strings.SettingsUseDefaultFolder}" Command="{Binding UseDefaultRootCommand}" />
+        </StackPanel>
+        <StackPanel Spacing="4" IsVisible="{Binding IsMoving}">
+            <TextBlock Classes="note" Text="{x:Static res:Strings.SettingsMoving}" />
+            <ProgressBar IsIndeterminate="True" />
+        </StackPanel>
+        <TextBlock Classes="note message"
+                   Classes.problem="{Binding IsRootNoteAProblem}"
+                   Text="{Binding RootNote}" />
+    </StackPanel>
+</UserControl>
