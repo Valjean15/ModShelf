@@ -402,27 +402,6 @@ public sealed partial class DownloadJobViewModel : ObservableObject
     /// Runs what the user asked for. Anything that goes wrong in it is logged, and the user told it didn't work, so a
     /// command never throws into the UI.
     /// </summary>
-    private async Task RunAsync(JobAction action, Func<Task> work, CancellationToken cancellationToken)
-    {
-        try
-        {
-            await work();
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            // The app is closing.
-        }
-        catch (Exception exception)
-        {
-            LogActionFailed(_services.Logger, exception, action, Id);
-            try
-            {
-                await _services.Dialogs.ShowMessageAsync(Strings.ActionFailedTitle, Strings.SomethingWentWrong, CancellationToken.None);
-            }
-            catch (Exception shown)
-            {
-                LogActionFailed(_services.Logger, shown, action, Id);
-            }
-        }
-    }
+    private Task RunAsync(JobAction action, Func<Task> work, CancellationToken cancellationToken)
+        => UserCommands.RunAsync(work, _services.Dialogs, exception => LogActionFailed(_services.Logger, exception, action, Id), cancellationToken);
 }
