@@ -23,7 +23,7 @@ dotnet run --project src/ModShelf.Desktop    # opens the desktop app
 
 `dotnet test` runs on Microsoft.Testing.Platform, which `global.json` selects for the whole repository.
 
-The tests never call a live mod site. Before a release, someone runs the manual checklists against Nexus Mods with a Premium and a free account: [docs/manual-checklist.md](docs/manual-checklist.md) for the command line, and [docs/manual-checklist-desktop.md](docs/manual-checklist-desktop.md) for the desktop app.
+The tests never call a live mod site. Before a release, someone runs the manual checklists against Nexus Mods with a Premium and a free account: [docs/manual-checklist.md](docs/manual-checklist.md) for the command line, and [docs/manual-checklist-desktop.md](docs/manual-checklist-desktop.md) for the desktop app. [docs/manual-checklist-installer.md](docs/manual-checklist-installer.md) installs the app on each system and updates it from one version to the next.
 
 To see a real notice on this computer, as the desktop app will show for new updates, run this one test with `MODSHELF_TEST_NOTICES` set to 1. It fails if the notice couldn't be shown, and says why.
 
@@ -32,6 +32,17 @@ dotnet build
 $env:MODSHELF_TEST_NOTICES = "1"
 tests/ModShelf.Platform.Tests/bin/Debug/net10.0/ModShelf.Platform.Tests -method ModShelf.Platform.Tests.Notifications.NotificationServicesTests.ShowsARealNotice
 ```
+
+### Installers
+
+`build/pack.ps1` (PowerShell) and `build/pack.sh` (Bash) pack the desktop app's installers and update packages with [Velopack](https://velopack.io), whose `vpk` the scripts restore as a local tool, into `artifacts/releases`:
+
+```powershell
+./build/pack.ps1                                          # this system's, at the version MinVer gives
+./build/pack.ps1 -Version 0.9.1 -Notes notes.md win-x64   # a version and its notes, for one runtime
+```
+
+Each runtime packs a self-contained publish: `win-x64` a per-user `Setup.exe` with a Start-menu shortcut, `linux-x64` an AppImage (which needs `mksquashfs`, and `zstd` for a delta package), and `osx-arm64` or `osx-x64` an app in a `.pkg`, on a Mac only. The installers aren't signed yet. Windows installs into `%LOCALAPPDATA%\ModShelf.App`, apart from `%LOCALAPPDATA%\ModShelf`, where the library stays when ModShelf is uninstalled. [ADR 0038](docs/adr/0038-installers-and-self-update.md) has the details. `build/render-icons.py` renders the Windows and macOS icons from `modshelf.svg`.
 
 ### Desktop app
 
@@ -48,6 +59,8 @@ The Browse screen searches a game's mods on Nexus Mods, which needs a linked acc
 The Downloads screen takes a link to a mod or a file: **Download** puts it into the library, and **Save to a folder…** into a folder you pick. It lists every download, newest first, with its progress, speed and time left, and the buttons to pause, resume, retry or cancel it. Cancelling a download with bytes saved asks first. **Clear finished** removes the done and cancelled downloads from the list; their files stay. A download Nexus Mods wants started on its website shows **Open on Nexus Mods** and **Paste link…**: start it there with the download for mod managers, copy the `nxm://` link its button holds, and paste it; or, once ModShelf opens `nxm://` links (Settings), the download goes on by itself. The badge on Downloads counts the downloads waiting for you, to be started or because they failed.
 
 The Accounts screen has a card for each site that can link an account: the account's name, level and the day it was linked, and what's left of the site's API requests, as it last said. A button for each way the site offers links an account: an API key pasted into a box that hides it, with a button that opens the site's API keys page; a code the site emails; or approving ModShelf in the browser, with **Open page again** and **Cancel** while it waits. **Check** asks the site who the account is now, which also brings the API requests left up to date; ModShelf asks the site nothing on this screen otherwise. **Unlink** removes the account and its stored credentials, after asking.
+
+The installed app updates itself from ModShelf's GitHub releases, pre-releases included while it's 0.x. As it starts, it looks for a newer release, and when there is one, the Settings screen's badge and its "About ModShelf" card say so, with what's new. **Download** downloads it, and **Restart to update** quits and starts the new release in its place; nothing changes until then, however often ModShelf starts. **Check for updates** looks again, and "Look for a newer ModShelf when it starts" (`app.checkForUpdates`) turns the look at start off. A build from source doesn't update itself. To try updates against releases of your own, set `ModShelf__UpdateFeed` to a folder `build/pack.ps1` packed into. On Windows, a click on one of ModShelf's notices opens the Updates screen, and uninstalling gives the `nxm://` links back to the app that had them. On Linux and macOS, give them back on the Settings screen before deleting the app.
 
 The Settings screen changes what `settings set` does. **Choose another folder…** moves the library, with its files after asking, and **Use the default folder** moves it back. The folder patterns, for every game and for the games you add, show where a sample file would go as you type, and are saved with **Save**. What happens to old versions, how often to check for updates, whether to show a notice, and whether the app is light or dark are saved as you choose them; the theme changes at once. **Links from websites** says which app opens Nexus Mods' `nxm://` links, the ones its **Mod manager download** buttons hand over: **Open them with ModShelf** makes it ModShelf, remembering the app that had them, such as Vortex or Mod Organizer 2, and **Give them back** puts that app back. While ModShelf opens them, a click on the website brings the app forward on the Downloads screen: a download waiting for that file goes on, and otherwise the file goes into the library, whether the app was running or not. On macOS, only the installed app can open them. The screen also says where the settings are kept, and warns when no keyring protects the credentials.
 
@@ -106,6 +119,7 @@ dotnet run --project src/ModShelf.Cli -- account unlink <source>
   - `appearance.theme` is whether the desktop app is `light` or `dark`, or follows the system's mode: `system`, the default.
   - `window.closeToTray` is whether closing the desktop app's window keeps it running in the tray (`true`) or quits it (`false`). Until it's set, the app asks the first time.
   - `setup.done` is whether the desktop app's first-run setup was finished or skipped. `settings reset setup.done` shows it again at the next start of a library with no mods and no account linked.
+  - `app.checkForUpdates` is whether the installed desktop app looks for a newer ModShelf when it starts: `true`, the default, or `false`, when it looks only when asked, on its Settings screen.
 - `links status` lists the sites whose websites hand downloads over with links of their own, such as Nexus Mods' `nxm://` links, and which app opens them. `links take` makes the desktop app open them, remembering the app that did, and `links give-back` puts that app back; the site can be left out while Nexus Mods is the only one. From a build from source, set `ModShelf__DesktopApp` to the desktop app's executable first; an installed ModShelf finds it beside the command line.
 - `diagnostics` prints what a bug report needs: the version, the system, the folders, the settings, and counts of the library, the downloads and the accounts, with no keys, names or links.
 - `queue list` shows every saved job without starting any download.
@@ -123,6 +137,7 @@ dotnet run --project src/ModShelf.Cli -- account unlink <source>
 ## Solution layout
 
 ```
+build/                            packing the installers (pack.ps1, pack.sh), the macOS Info.plist, and the icons
 src/
   ModShelf.Domain                 entities and value objects, no dependencies
   ModShelf.Sources.Abstractions   IModSource and the capability interfaces a source implements
@@ -136,7 +151,7 @@ src/
   ModShelf.Cli                    headless composition root
 tests/
   ModShelf.<Library>.Tests        one test project per library
-  ModShelf.Architecture.Tests     enforces the dependency rules
+  ModShelf.Architecture.Tests     enforces the dependency rules, and keeps the installer out of ModShelf's data folder
   ModShelf.Cli.Tests              runs the CLI end to end: stop, kill and resume a download; finish one through a handoff; download into the library, move it and check it for updates; look up and search mods; link, check, refresh and unlink fake accounts
   Shared                          code several test projects compile in: SourceContractTests, TempFolder, the log recorders
 ```

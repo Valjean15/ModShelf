@@ -143,5 +143,6 @@ Event 705 joins the update checks' block: the notice of new updates couldn't be 
   - It should add a Start-menu shortcut with the app ID `ModShelf.App`, with an icon for the toasts.
   - It should remove the registry key on uninstall.
   - On macOS, the signed bundle can move notices to `UNUserNotificationCenter`, under ModShelf's own name.
+  - ADR 0038 does the first two, and opens the Updates screen from a click on a notice; the macOS notices wait for the signed bundle.
 - **CI never shows a real toast,** so a Windows notice is checked by a person, with `MODSHELF_TEST_NOTICES=1`.
 - **The CLI registers the notices but never shows one.** It never runs background checks, and a Windows toast's app ID is only registered before a toast.

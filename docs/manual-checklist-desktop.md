@@ -180,6 +180,8 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
   "The diagnostics are on the clipboard. Paste them into your bug report." The report's first line is the version from 10.8. Then the system, the folders with your home folder as `~`, the settings from 10.1 to 10.5, the library's counts, the downloads by what they're doing, and "nexus linked (ApiKey, Premium)" (Free for the free account). Nowhere does it hold your account's name, a mod's or file's name, a key or an `nxm://` link.
 - [ ] **10.10 Open log folder.** **Open log folder**.
   The system's file manager opens the test folder's `logs` folder, with today's `desktop-….log` in it.
+- [ ] **10.11 ModShelf's own updates.** Under the version in "About ModShelf".
+  "Updates come with the installed ModShelf. This one runs from where it was built, so it doesn't update itself." No **Check for updates** button, and no "Look for a newer ModShelf when it starts" box. The installed app's updates are checked by [the installer checklist](manual-checklist-installer.md).
 
 ## 11. The tray and closing the window
 
@@ -192,7 +194,7 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
 - [ ] **11.4 Remembered.** Close the window.
   It goes without asking. On the Settings screen, "Closing the window" shows **Keep running in the tray**.
 - [ ] **11.5 Check from the tray** (with a watched mod). With the window closed, **Check for updates now** in the tray menu.
-  A notice from ModShelf says what the check found, such as "Checked 2 mods with 1 request. No new updates."
+  A notice from ModShelf says what the check found, such as "Checked 2 mods with 1 request. No new updates." On Windows, click the notice: the window comes back on the Updates screen, and `(Get-ItemProperty 'HKCU:\Software\Classes\modshelf\shell\open\command').'(default)'` shows the desktop app's path, `--ModShelf:DatabasePath=` with the test folder's database, and `"%1"`.
 - [ ] **11.6 The tooltip.** With an update found, as in 8.2 before it's downloaded, hover over the tray icon.
   "ModShelf: 1 update". (On Linux, the tray shows it as the icon's title.)
 - [ ] **11.7 Quit closes.** On the Settings screen, choose **Quit ModShelf** under "Closing the window", then close the window.
@@ -246,6 +248,12 @@ If a run stopped before 12.7, give the links back on the Settings screen first: 
 ```powershell
 Remove-Item -Recurse -Force $test
 Remove-Item Env:ModShelf__DatabasePath, Env:ModShelf__SecretsFolder, Env:ModShelf__SecretScope
+```
+
+On Windows, the notices registered `modshelf://` links for this test folder's app (11.5). Remove them; an installed ModShelf registers them again before its next notice:
+
+```powershell
+Remove-Item -Recurse HKCU:\Software\Classes\modshelf -ErrorAction SilentlyContinue
 ```
 
 On macOS and Linux, unlinking already removed the keys from the Keychain or the keyring.
@@ -310,6 +318,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 10.8 Version | | | |
 | 10.9 Copy diagnostics | | | |
 | 10.10 Open log folder | | | |
+| 10.11 ModShelf's own updates | | | |
 | 11.1 First close asks | | | |
 | 11.2 Keep running | | | |
 | 11.3 Back from the tray | | | |
