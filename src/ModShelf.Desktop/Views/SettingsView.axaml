@@ -146,16 +146,48 @@
                     </StackPanel>
                 </Border>
 
-                <Border Classes="card" DataContext="{Binding About}">
-                    <StackPanel Spacing="8" x:DataType="vm:AboutViewModel">
+                <Border Classes="card">
+                    <StackPanel Spacing="8">
                         <TextBlock Classes="subheading" Text="{x:Static res:Strings.AboutHeading}" />
-                        <SelectableTextBlock Text="{Binding VersionText}" />
-                        <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.AboutBugReport}" />
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Button Content="{x:Static res:Strings.AboutCopyDiagnostics}" Command="{Binding CopyDiagnosticsCommand}" />
-                            <Button Content="{x:Static res:Strings.AboutOpenLogFolder}" Command="{Binding OpenLogFolderCommand}" />
+                        <SelectableTextBlock Text="{Binding About.VersionText}" />
+
+                        <!-- ModShelf's own updates: where they stand, what's new, and the next step. -->
+                        <StackPanel Spacing="8" DataContext="{Binding AppUpdate}" x:DataType="vm:AppUpdateViewModel">
+                            <TextBlock TextWrapping="Wrap"
+                                       Text="{Binding Status}"
+                                       IsVisible="{Binding Status, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                            <ScrollViewer MaxHeight="160" IsVisible="{Binding Notes, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                <SelectableTextBlock Classes="note" TextWrapping="Wrap" Text="{Binding Notes}" />
+                            </ScrollViewer>
+                            <ProgressBar Minimum="0" Maximum="100" Value="{Binding Progress}" IsVisible="{Binding IsDownloading}" />
+                            <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsInstalled}">
+                                <Button Content="{x:Static res:Strings.AppUpdateCheck}" Command="{Binding CheckCommand}" />
+                                <Button Classes="accent"
+                                        Content="{x:Static res:Strings.AppUpdateDownload}"
+                                        Command="{Binding DownloadCommand}"
+                                        IsVisible="{Binding Found, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                <Button Classes="accent"
+                                        Content="{x:Static res:Strings.AppUpdateRestart}"
+                                        Command="{Binding RestartCommand}"
+                                        IsVisible="{Binding Ready, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                            </StackPanel>
+                            <TextBlock Classes="problem"
+                                       TextWrapping="Wrap"
+                                       Text="{Binding Problem}"
+                                       IsVisible="{Binding Problem, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                         </StackPanel>
-                        <TextBlock Classes="note message" Classes.problem="{Binding IsNoteAProblem}" Text="{Binding Note}" />
+                        <CheckBox Content="{x:Static res:Strings.AppUpdateCheckAtStart}"
+                                  IsChecked="{Binding CheckForAppUpdates}"
+                                  IsVisible="{Binding AppUpdate.IsInstalled}" />
+
+                        <StackPanel Spacing="8" DataContext="{Binding About}" x:DataType="vm:AboutViewModel">
+                            <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.AboutBugReport}" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Content="{x:Static res:Strings.AboutCopyDiagnostics}" Command="{Binding CopyDiagnosticsCommand}" />
+                                <Button Content="{x:Static res:Strings.AboutOpenLogFolder}" Command="{Binding OpenLogFolderCommand}" />
+                            </StackPanel>
+                            <TextBlock Classes="note message" Classes.problem="{Binding IsNoteAProblem}" Text="{Binding Note}" />
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 

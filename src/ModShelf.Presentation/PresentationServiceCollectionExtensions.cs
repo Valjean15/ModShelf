@@ -21,8 +21,9 @@ public static class PresentationServiceCollectionExtensions
     /// <summary>
     /// Registers navigation, every screen's ViewModel, the main window's and the tray's, each once for the app's
     /// lifetime, so a screen keeps what it shows while another is shown. Needs an <see cref="IUiThread"/>, an
-    /// <see cref="IDialogService"/>, an <see cref="IFolderOpener"/> and an <see cref="IThemeSwitcher"/>, which Desktop
-    /// registers, and Platform's tray host and notices.
+    /// <see cref="IDialogService"/>, an <see cref="IFolderOpener"/>, an <see cref="IThemeSwitcher"/>, an
+    /// <see cref="IClipboard"/> and an <see cref="IAppExit"/>, which Desktop registers, and Platform's tray host, notices
+    /// and ModShelf's releases.
     /// </summary>
     public static IServiceCollection AddPresentation(this IServiceCollection services)
     {
@@ -41,6 +42,7 @@ public static class PresentationServiceCollectionExtensions
         services.TryAddSingleton<LinksViewModel>();
         services.TryAddSingleton<FirstRunViewModel>();
         services.TryAddSingleton<AboutViewModel>();
+        services.TryAddSingleton<AppUpdateViewModel>();
         services.TryAddSingleton<MainWindowViewModel>();
         services.TryAddSingleton<TrayViewModel>();
 

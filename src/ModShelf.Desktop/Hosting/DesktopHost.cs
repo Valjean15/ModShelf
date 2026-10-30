@@ -62,6 +62,7 @@ internal static class DesktopHost
         builder.Services.AddSingleton<IFolderOpener, AvaloniaFolderOpener>();
         builder.Services.AddSingleton<IClipboard, AvaloniaClipboard>();
         builder.Services.AddSingleton<IThemeSwitcher, AvaloniaThemeSwitcher>();
+        builder.Services.AddSingleton<IAppExit, AvaloniaAppExit>();
 
         return builder.Build();
     }

@@ -1,9 +1,11 @@
 using System.Collections.Immutable;
 
+using ModShelf.Application.Releases;
 using ModShelf.Application.Settings;
 using ModShelf.Domain.Library;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
+using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.ViewModels.Settings;
 
 namespace ModShelf.Presentation.Tests.ViewModels.Settings;
@@ -30,6 +32,82 @@ public sealed class SettingsViewModelTests
         SettingsHarness harness = new();
 
         Assert.Same(harness.About, harness.Screen.About);
+        Assert.Same(harness.AppUpdate, harness.Screen.AppUpdate);
+    }
+
+    [Fact]
+    public async Task LooksForANewerModShelfAtStartAndItsBadgeSaysSo()
+    {
+        _harness.Releases.Newer = new AppRelease("0.9.1", null);
+
+        await _harness.StartAsync();
+
+        Assert.Equal(1, _harness.Releases.Checks);
+        Assert.Equal(1, Screen.Badge);
+        Assert.True(Screen.HasBadge);
+        Assert.True(Screen.CheckForAppUpdates);
+    }
+
+    [Fact]
+    public async Task ADownloadedModShelfKeepsTheBadgeUntilTheRestart()
+    {
+        SettingsHarness harness = new(releases: new ScriptedAppReleases { Downloaded = new AppRelease("0.9.1", null) });
+
+        Assert.Equal(1, harness.Screen.Badge);
+        await harness.StartAsync();
+
+        Assert.Equal(0, harness.Releases.Checks);
+        Assert.Equal(1, harness.Screen.Badge);
+    }
+
+    [Fact]
+    public async Task TheBadgeGoesWithNothingNewer()
+    {
+        await _harness.StartAsync();
+
+        Assert.Equal(1, _harness.Releases.Checks);
+        Assert.Equal(0, Screen.Badge);
+    }
+
+    [Fact]
+    public async Task DoesntLookAtStartWhenTheSettingsSayNot()
+    {
+        _harness.Settings.Stored = new AppSettings { CheckForAppUpdates = false };
+        _harness.Releases.Newer = new AppRelease("0.9.1", null);
+
+        await _harness.StartAsync();
+
+        Assert.Equal(0, _harness.Releases.Checks);
+        Assert.Equal(0, Screen.Badge);
+        Assert.False(Screen.CheckForAppUpdates);
+        await Screen.Saving.WaitAsync(Patience, Cancellation);
+        Assert.Empty(_harness.Settings.Changes);
+    }
+
+    [Fact]
+    public async Task LooksAtStartWhenTheSettingsCantBeRead()
+    {
+        _harness.Settings.ReadRefusal = new InvalidDataException("settings.json isn't JSON.");
+
+        await _harness.StartAsync();
+
+        Assert.Equal(1, _harness.Releases.Checks);
+    }
+
+    [Fact]
+    public async Task LookingAtStartIsSavedAsItsChosen()
+    {
+        await _harness.StartAsync();
+
+        Screen.CheckForAppUpdates = false;
+        await Screen.Saving.WaitAsync(Patience, Cancellation);
+        bool? off = _harness.Settings.Stored.CheckForAppUpdates;
+        Screen.CheckForAppUpdates = true;
+        await Screen.Saving.WaitAsync(Patience, Cancellation);
+
+        Assert.False(off);
+        Assert.Null(_harness.Settings.Stored.CheckForAppUpdates);
+        Assert.Equal(["checkForAppUpdates False", "checkForAppUpdates null"], _harness.Settings.Changes);
     }
 
     [Fact]

@@ -8,16 +8,19 @@ namespace ModShelf.Presentation.Tests.ViewModels.Settings;
 
 /// <summary>
 /// The Settings screen over fakes: settings in memory, a library, a mover, dialogs the test answers, the sites' links
-/// as the test sets them, and the About part.
+/// as the test sets them, and the About part with ModShelf's own updates.
 /// </summary>
 internal sealed class SettingsHarness
 {
-    public SettingsHarness(bool protectedByOs = true)
+    /// <param name="releases">ModShelf's releases, as the test sets them up; by default, an installed ModShelf.</param>
+    public SettingsHarness(bool protectedByOs = true, ScriptedAppReleases? releases = null)
     {
+        Releases = releases ?? new ScriptedAppReleases();
         Mover = new ScriptedLibraryMover(Settings);
         About = new AboutViewModel(new AppInfo("0.9.0", "a60d76b"), Diagnostics, Diagnostics, new RecordingClipboard(), new ScriptedFolders(), new RecordingLogger<AboutViewModel>());
         Links = new LinksViewModel(LinkHandlers, Navigation, UiThread, LinksLogger);
-        Screen = new SettingsViewModel(Settings, Library, Mover, new FixedSecretStore(protectedByOs), Themes, Tray, Dialogs, Links, About, Logger);
+        AppUpdate = new AppUpdateViewModel(Releases, Exit, UiThread, AppUpdateLogger);
+        Screen = new SettingsViewModel(Settings, Library, Mover, new FixedSecretStore(protectedByOs), Themes, Tray, Dialogs, Links, About, AppUpdate, Logger);
     }
 
     public InMemorySettingsService Settings { get; } = new();
@@ -45,6 +48,14 @@ internal sealed class SettingsHarness
     public LinksViewModel Links { get; }
 
     public AboutViewModel About { get; }
+
+    public ScriptedAppReleases Releases { get; }
+
+    public RecordingAppExit Exit { get; } = new();
+
+    public RecordingLogger<AppUpdateViewModel> AppUpdateLogger { get; } = new();
+
+    public AppUpdateViewModel AppUpdate { get; }
 
     public RecordingLogger<SettingsViewModel> Logger { get; } = new();
 

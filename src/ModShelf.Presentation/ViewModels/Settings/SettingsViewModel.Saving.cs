@@ -133,6 +133,7 @@ public sealed partial class SettingsViewModel
             SelectedInterval = IntervalChoices.First(choice => choice.Interval == interval);
 
             NotifyOfUpdates = settings.NotifyOfUpdates ?? true;
+            CheckForAppUpdates = settings.CheckForAppUpdates ?? true;
             Theme = settings.Theme ?? AppTheme.System;
             CloseToTray = settings.CloseToTray;
             IsLoaded = true;

@@ -1362,6 +1362,58 @@
     <value>The diagnostics are on the clipboard. Paste them into your bug report.</value>
     <comment>After Copy diagnostics.</comment>
   </data>
+  <data name="AppUpdateNotInstalled" xml:space="preserve">
+    <value>Updates come with the installed ModShelf. This one runs from where it was built, so it doesn't update itself.</value>
+    <comment>In the About part, for a ModShelf run from a build rather than installed.</comment>
+  </data>
+  <data name="AppUpdateChecking" xml:space="preserve">
+    <value>Looking for a newer ModShelf…</value>
+    <comment>While looking for a newer release.</comment>
+  </data>
+  <data name="AppUpdateNewest" xml:space="preserve">
+    <value>This is the newest ModShelf.</value>
+    <comment>After a look found nothing newer.</comment>
+  </data>
+  <data name="AppUpdateAvailable" xml:space="preserve">
+    <value>ModShelf {0} is available.</value>
+    <comment>{0} is the newer version, such as 0.9.1.</comment>
+  </data>
+  <data name="AppUpdateDownloading" xml:space="preserve">
+    <value>Downloading ModShelf {0}…</value>
+    <comment>{0} is the version downloading.</comment>
+  </data>
+  <data name="AppUpdateReady" xml:space="preserve">
+    <value>ModShelf {0} is downloaded. Restart ModShelf to update to it; downloads in progress pause until it's back.</value>
+    <comment>{0} is the version downloaded.</comment>
+  </data>
+  <data name="AppUpdateCheck" xml:space="preserve">
+    <value>Check for updates</value>
+    <comment>Button: look for a newer ModShelf now.</comment>
+  </data>
+  <data name="AppUpdateDownload" xml:space="preserve">
+    <value>Download</value>
+    <comment>Button: download the newer ModShelf found.</comment>
+  </data>
+  <data name="AppUpdateRestart" xml:space="preserve">
+    <value>Restart to update</value>
+    <comment>Button: quit and update to the ModShelf downloaded.</comment>
+  </data>
+  <data name="AppUpdateCheckAtStart" xml:space="preserve">
+    <value>Look for a newer ModShelf when it starts</value>
+    <comment>Check box for the app.checkForUpdates setting.</comment>
+  </data>
+  <data name="AppUpdateCantCheck" xml:space="preserve">
+    <value>Couldn't look for a newer ModShelf: {0}</value>
+    <comment>{0} is why, such as no connection.</comment>
+  </data>
+  <data name="AppUpdateCantDownload" xml:space="preserve">
+    <value>ModShelf {0} couldn't be downloaded: {1}</value>
+    <comment>{0} is the version; {1} is why.</comment>
+  </data>
+  <data name="AppUpdateCantRestart" xml:space="preserve">
+    <value>ModShelf couldn't restart to update: {0}</value>
+    <comment>{0} is why.</comment>
+  </data>
   <data name="LinksHeading" xml:space="preserve">
     <value>Links from websites</value>
     <comment>Heading of the Settings card about which app opens the links sites hand downloads over with.</comment>

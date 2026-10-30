@@ -21,8 +21,9 @@ namespace ModShelf.Presentation.ViewModels.Settings;
 /// The settings: where the library is, moving its files when it has some; how its folders are named, for every game and
 /// for single games; what happens to old versions; how often to check for updates and whether to say so; whether the
 /// app is light or dark; what closing its window does; which apps open the links websites hand downloads over with;
-/// and, at its end, about this ModShelf. Choices are saved as they're made, folder patterns when the user saves them,
-/// and each change shows the settings as stored after it. The theme is applied at start and as it's chosen.
+/// and, at its end, about this ModShelf, with its own updates. Choices are saved as they're made, folder patterns when
+/// the user saves them, and each change shows the settings as stored after it. The theme is applied at start and as
+/// it's chosen. The screen's badge says a newer ModShelf waits for the user.
 /// </summary>
 public sealed partial class SettingsViewModel : ScreenViewModel
 {
@@ -62,6 +63,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         IDialogService dialogs,
         LinksViewModel links,
         AboutViewModel about,
+        AppUpdateViewModel appUpdate,
         ILogger<SettingsViewModel> logger)
     {
         ArgumentNullException.ThrowIfNull(settings);
@@ -73,6 +75,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(dialogs);
         ArgumentNullException.ThrowIfNull(links);
         ArgumentNullException.ThrowIfNull(about);
+        ArgumentNullException.ThrowIfNull(appUpdate);
         ArgumentNullException.ThrowIfNull(logger);
 
         _settings = settings;
@@ -84,6 +87,15 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         _logger = logger;
         Links = links;
         About = about;
+        AppUpdate = appUpdate;
+        appUpdate.PropertyChanged += (_, changed) =>
+        {
+            if (changed.PropertyName == nameof(AppUpdateViewModel.WantsUser))
+            {
+                ShowAppUpdateBadge();
+            }
+        };
+        ShowAppUpdateBadge();
         KeptInText = Text.Format(Strings.SettingsKeptIn, settings.Location);
         IsStoreUnprotected = !secrets.IsProtectedByOs;
         LibraryRoot = settings.DefaultLibraryRoot;
@@ -103,6 +115,11 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     /// About this ModShelf: its version, its log folder and its diagnostics report.
     /// </summary>
     public AboutViewModel About { get; }
+
+    /// <summary>
+    /// ModShelf's own updates, shown with <see cref="About"/>.
+    /// </summary>
+    public AppUpdateViewModel AppUpdate { get; }
 
     /// <summary>
     /// Such as "Settings are kept in /home/jean/.local/share/ModShelf/settings.json."
@@ -230,6 +247,12 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     public partial bool NotifyOfUpdates { get; set; } = true;
 
     /// <summary>
+    /// Whether the installed app looks for a newer ModShelf when it starts.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool CheckForAppUpdates { get; set; } = true;
+
+    /// <summary>
     /// Whether the app is light or dark.
     /// </summary>
     [ObservableProperty]
@@ -298,13 +321,19 @@ public sealed partial class SettingsViewModel : ScreenViewModel
 
     /// <summary>
     /// Reads the settings, shows them, and applies the theme; then asks whether the system shows tray icons, and which
-    /// apps open the sites' links.
+    /// apps open the sites' links; then, unless the settings say not to, looks for a newer ModShelf, only to say so.
     /// </summary>
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
         Problem = await ReloadAsync(cancellationToken);
         IsTrayAvailable = await _tray.IsAvailableAsync(cancellationToken);
         await Links.LoadAsync(cancellationToken);
+
+        // Settings that can't be read leave the default, which is to look.
+        if (_shown.CheckForAppUpdates ?? true)
+        {
+            await AppUpdate.CheckAtStartAsync(cancellationToken);
+        }
     }
 
     partial void OnOldVersionActionChanged(OldVersionAction value) => SaveOldVersions();
@@ -328,6 +357,8 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     partial void OnNotifyOfUpdatesChanged(bool value) => Save(token => _settings.SetNotifyOfUpdatesAsync(value ? null : false, token));
 
     partial void OnCloseToTrayChanged(bool? value) => Save(token => _settings.SetCloseToTrayAsync(value, token));
+
+    partial void OnCheckForAppUpdatesChanged(bool value) => Save(token => _settings.SetCheckForAppUpdatesAsync(value ? null : false, token));
 
     partial void OnThemeChanged(AppTheme value)
     {
@@ -385,6 +416,8 @@ public sealed partial class SettingsViewModel : ScreenViewModel
             CloseToTray = closeToTray;
         }
     }
+
+    private void ShowAppUpdateBadge() => Badge = AppUpdate.WantsUser ? 1 : 0;
 
     private void SaveOldVersions()
     {
