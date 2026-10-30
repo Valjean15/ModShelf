@@ -203,6 +203,34 @@ public sealed class LibraryDatabaseTests
     }
 
     [Fact]
+    public async Task AStartFindsTheUpdateTheModShelfItWaitedForMade()
+    {
+        await using TestLibraryDatabase database = new();
+        LibraryDatabaseMigrator migrator = Migrator(database, TimeSpan.FromSeconds(30));
+        Task starting;
+        await using (new FileStream(database.DatabasePath + ".update.lock", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
+        {
+            starting = migrator.StartingAsync(TestContext.Current.CancellationToken);
+            await using ModShelfDbContext context = await database.CreateContextAsync();
+            await context.Database.MigrateAsync(TestContext.Current.CancellationToken);
+        }
+
+        await starting.WaitAsync(TimeSpan.FromSeconds(30), TestContext.Current.CancellationToken);
+        Assert.Equal(1L, await database.QueryAsync("SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'LibraryMods'"));
+    }
+
+    [Fact]
+    public async Task TheUpdateLockKeepsEveryoneElseOut()
+    {
+        await using TestLibraryDatabase database = new();
+
+        await using FileStream held = await Migrator(database, TimeSpan.FromSeconds(30)).TakeUpdateLockAsync(TestContext.Current.CancellationToken);
+
+        Assert.ThrowsAny<IOException>(
+            () => new FileStream(database.DatabasePath + ".update.lock", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite));
+    }
+
+    [Fact]
     public async Task AStartStopsWhenAnotherModShelfKeepsUpdatingTheDatabase()
     {
         await using TestLibraryDatabase database = new();

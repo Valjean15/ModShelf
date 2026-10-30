@@ -68,6 +68,22 @@ public sealed class AnotherProcessTests
     }
 
     [Fact]
+    public async Task CredentialsAboutToExpireThatAnotherProcessRefreshedArentRefreshedAgain()
+    {
+        await _harness.LinkAsync(TestData.Nexus, AuthKind.OAuthPkce);
+        _harness.Time.Advance(TimeSpan.FromMinutes(58.95));
+        Assert.Equal("access-1", (await AuthorizeAsync())?.AccessToken);
+        _harness.Time.Advance(TimeSpan.FromMinutes(0.15));
+        using (HttpRequestMessage elsewhere = new(HttpMethod.Get, "https://api.example.com/v1/users/validate.json"))
+        {
+            Assert.Equal("access-2", (await _harness.AnotherProcess().AuthorizeAsync(TestData.Nexus, elsewhere, Cancellation))?.AccessToken);
+        }
+
+        Assert.Equal("access-2", (await AuthorizeAsync())?.AccessToken);
+        Assert.Equal(1, _harness.NexusOAuth.RefreshCalls);
+    }
+
+    [Fact]
     public async Task CredentialsThatCantBeReadAgainAreTheOnesReadBefore()
     {
         // Such as while the keyring is locked.

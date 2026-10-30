@@ -142,7 +142,7 @@ internal sealed partial class LibraryDatabaseMigrator(
     /// Takes the update lock, waiting up to <see cref="UpdatePatience"/> while another ModShelf holds it.
     /// </summary>
     /// <exception cref="LibraryDatabaseUnavailableException">Another ModShelf held it all that time.</exception>
-    private async Task<FileStream> TakeUpdateLockAsync(CancellationToken cancellationToken)
+    internal async Task<FileStream> TakeUpdateLockAsync(CancellationToken cancellationToken)
     {
         string path = options.DatabasePath + ".update.lock";
         long started = Stopwatch.GetTimestamp();

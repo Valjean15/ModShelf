@@ -207,6 +207,23 @@ public sealed partial class NexusApiClientTests : IDisposable
     }
 
     [Fact]
+    public async Task ARedirectIsntFollowedThroughAHandlerTheHostChose()
+    {
+        // A host's own HttpClientHandler, rather than the default SocketsHttpHandler, doesn't follow them either.
+        _api.Answer("/v1/moved.json", response => response.WithStatusCode(302).WithHeader("Location", $"{_api.BaseAddress}v1/elsewhere.json"));
+        _api.Answer("/v1/elsewhere.json", response => response.WithStatusCode(200).WithBody("""{"mod_id": 7, "name": "Elsewhere"}"""));
+        await using ServiceProvider services = _api.BuildServices(
+            before: host => host.AddHttpClient(NexusApiClient.ClientName).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()));
+        NexusApiClient client = services.GetRequiredService<NexusApiClient>();
+
+        HttpRequestException refused = await Assert.ThrowsAsync<HttpRequestException>(
+            () => client.GetAsync<ModSummary>("v1/moved.json", Cancellation));
+
+        Assert.Equal(HttpStatusCode.Found, refused.StatusCode);
+        Assert.Single(_api.Requests);
+    }
+
+    [Fact]
     public async Task ErrorMessagesNeverHoldTheRequestsAddress()
     {
         _api.Answer("/v1/secret.json", response => response.WithStatusCode(403).WithBody("""{"message": "No"}"""));

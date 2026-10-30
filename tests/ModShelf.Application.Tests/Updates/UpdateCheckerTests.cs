@@ -258,6 +258,7 @@ public sealed class UpdateCheckerTests : IDisposable
 
         Assert.Empty(check.Failures);
         Assert.Contains("GetFilesAsync 5", _site.AskedFor);
+        Assert.DoesNotContain(_logger.Entries, entry => entry.Contains("beyond its reach", StringComparison.Ordinal));
     }
 
     [Fact]

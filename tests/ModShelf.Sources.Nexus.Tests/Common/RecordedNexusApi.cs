@@ -130,10 +130,12 @@ internal sealed class RecordedNexusApi : IDisposable
     /// waits on the registered clock.
     /// </param>
     /// <param name="primaryHandler">What answers in place of the network, for answers a server can't be made to give.</param>
+    /// <param name="before">Registers what the host does before the source, such as a primary handler of its own.</param>
     public ServiceProvider BuildServices(
         Func<NexusOptions, NexusOptions>? configure = null,
         bool realClock = false,
-        Func<HttpMessageHandler>? primaryHandler = null)
+        Func<HttpMessageHandler>? primaryHandler = null,
+        Action<IServiceCollection>? before = null)
     {
         // The sign-in server answers here too, under /oauth/.
         NexusOptions options = new()
@@ -147,6 +149,7 @@ internal sealed class RecordedNexusApi : IDisposable
         ServiceCollection services = new();
         services.AddLogging(logging => logging.SetMinimumLevel(LogLevel.Trace).AddProvider(Logs));
         services.AddSingleton(realClock ? TimeProvider.System : Time);
+        before?.Invoke(services);
         services.AddNexusSource(configure?.Invoke(options) ?? options);
         if (primaryHandler is not null)
         {
