@@ -85,7 +85,8 @@ public sealed partial class App : Avalonia.Application
             tray.Attach(window);
 
             // Launching ModShelf again shows this app, and opens the links it was launched with, such as an nxm:// link
-            // the system opened with ModShelf while it ran. On macOS, the system hands a link to the app running instead.
+            // the system opened with ModShelf while it ran. On macOS, the system hands a link to the app running instead,
+            // and a click on its Dock icon asks to show it again.
             _instance.LaunchedAgain += (_, launch) => Dispatcher.UIThread.Post(() => Open(launch.Arguments));
             if (TryGetFeature(typeof(IActivatableLifetime)) is IActivatableLifetime activatable)
             {
@@ -94,6 +95,10 @@ public sealed partial class App : Avalonia.Application
                     if (activated is ProtocolActivatedEventArgs { Kind: ActivationKind.OpenUri } opened)
                     {
                         Dispatcher.UIThread.Post(() => Open([opened.Uri.OriginalString]));
+                    }
+                    else if (activated.Kind == ActivationKind.Reopen)
+                    {
+                        Dispatcher.UIThread.Post(tray.ShowMainWindow);
                     }
                 };
             }

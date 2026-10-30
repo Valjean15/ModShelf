@@ -69,10 +69,11 @@ public static class PlatformServiceCollectionExtensions
     }
 
     /// <summary>
-    /// The desktop app's executable in this app's folder, such as <c>ModShelf.Desktop.exe</c> on Windows.
+    /// The desktop app's executable in this app's folder, such as <c>ModShelf.Desktop.exe</c> on Windows; on Linux, the
+    /// AppImage this app runs from, if so.
     /// </summary>
     public static string DefaultDesktopApp
-        => Path.Combine(AppContext.BaseDirectory, OperatingSystem.IsWindows() ? "ModShelf.Desktop.exe" : "ModShelf.Desktop");
+        => DesktopAppPath.Of(AppContext.BaseDirectory, Environment.GetEnvironmentVariable("APPIMAGE"), Environment.GetEnvironmentVariable("APPDIR"));
 
     /// <summary>
     /// Registers <see cref="IAppReleases"/>: ModShelf's own releases, which an installed ModShelf updates itself from.
