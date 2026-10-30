@@ -60,6 +60,7 @@ The human chose, before anything was built:
 
 ### The library database
 
+- **A change waits for another connection's read.** Every connection sets SQLite's busy timeout to the commands' own 30 seconds (`SqliteBusyTimeout`). Microsoft.Data.Sqlite waits only while it steps a statement, and an insert that returns values, as EF Core's do, is committed when the statement ends: so adding a job while the queue, or another ModShelf, read the database failed at once with "database is locked". Checking each commit on its own found it, as a CLI test that failed now and then.
 - **Updating the database holds a lock of its own**, `<database>.update.lock`, as the download queue's lock is held. A start that finds it held waits up to 30 seconds, then says another ModShelf is updating the database. With it held, a row left in EF Core's own lock table (`__EFMigrationsLock`) is from an update that stopped part-way, and is cleared.
 
 ### Accounts and secrets
@@ -98,6 +99,7 @@ The human chose, before anything was built:
 ### Testing
 
 - **Each fix** has tests in its project, failing before the fix where the old behaviour could be shown: Nexus answers that stall, redirect or ask to retry after an hour (a handler in place of the network); two jobs for one path; resumes of a changed file and web pages; jobs in place at start; the needs-full-check flag through the database; slow checks and changed intervals on a fake clock; moves under another name, during downloads, and past the path limit; another process's account changes over the same stores; and the CLI's prompts, messages and exit codes.
+- **Changes during a read:** a job added, awaiting and not, a job changed and a library mod added while another connection holds a read; each waits for the read, then is saved. Adding the job failed both ways before the fix.
 - **The database's update lock:** a database one update behind, with EF Core's lock row left in it, starts and is updated; a held update lock is waited for, and then refused.
 - **Reading the library while another process changes it** was suspected of failing, since the split queries aren't in a transaction. It doesn't: the first query's reader stays open, and SQLite's read lock with it, so the change waits. Tests that change the library from another connection just before the second query pin that.
 - **By hand:** the locked keyring, in a private D-Bus session with GNOME Keyring locked over D-Bus and no prompter: the locked secret's read fails with the message, a missing one still reads as none, and the Secret Service tests pass. No test locks the keyring, which CI's job shares with every other test run.

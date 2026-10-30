@@ -166,7 +166,7 @@ public static class InfrastructureServiceCollectionExtensions
         }.ToString();
 
         services.AddSingleton(new LibraryDatabaseOptions(databasePath));
-        services.AddDbContextFactory<ModShelfDbContext>(options => options.UseSqlite(connectionString));
+        services.AddDbContextFactory<ModShelfDbContext>(options => options.UseSqlite(connectionString).AddInterceptors(new SqliteBusyTimeout()));
         services.AddSingleton<IDownloadJobRepository, DownloadJobRepository>();
         services.AddSingleton<ILinkedAccountRepository, LinkedAccountRepository>();
         services.AddSingleton<ILibraryRepository, LibraryRepository>();
