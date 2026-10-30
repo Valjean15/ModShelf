@@ -5,6 +5,7 @@ using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Tests.Fakes;
+using ModShelf.Presentation.Tests.ViewModels.Updates;
 using ModShelf.Presentation.ViewModels;
 using ModShelf.Testing;
 

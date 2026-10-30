@@ -7,7 +7,7 @@ using ModShelf.Application.Accounts.Ports;
 using ModShelf.Desktop.Views.Dialogs;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
-using ModShelf.Presentation.ViewModels;
+using ModShelf.Presentation.ViewModels.Dialogs;
 
 namespace ModShelf.Desktop.Services;
 

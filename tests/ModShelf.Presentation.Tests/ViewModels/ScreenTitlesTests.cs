@@ -1,4 +1,10 @@
 using ModShelf.Presentation.Services;
+using ModShelf.Presentation.Tests.ViewModels.Accounts;
+using ModShelf.Presentation.Tests.ViewModels.Browse;
+using ModShelf.Presentation.Tests.ViewModels.Downloads;
+using ModShelf.Presentation.Tests.ViewModels.Library;
+using ModShelf.Presentation.Tests.ViewModels.Settings;
+using ModShelf.Presentation.Tests.ViewModels.Updates;
 using ModShelf.Presentation.ViewModels;
 
 namespace ModShelf.Presentation.Tests.ViewModels;

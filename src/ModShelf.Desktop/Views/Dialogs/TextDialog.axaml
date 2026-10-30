@@ -1,6 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:ModShelf.Presentation.ViewModels"
+        xmlns:vm="using:ModShelf.Presentation.ViewModels.Dialogs"
         x:Class="ModShelf.Desktop.Views.Dialogs.TextDialog"
         x:DataType="vm:TextQuestionViewModel"
         Title="{Binding Title}"

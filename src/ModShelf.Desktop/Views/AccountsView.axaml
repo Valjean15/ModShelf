@@ -1,7 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:sys="using:System"
-             xmlns:vm="using:ModShelf.Presentation.ViewModels"
+             xmlns:vm="using:ModShelf.Presentation.ViewModels.Accounts"
              xmlns:res="using:ModShelf.Presentation.Resources"
              x:Class="ModShelf.Desktop.Views.AccountsView"
              x:DataType="vm:AccountsViewModel">

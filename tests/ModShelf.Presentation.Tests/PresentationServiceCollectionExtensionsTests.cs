@@ -2,6 +2,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels;
+using ModShelf.Presentation.ViewModels.Accounts;
+using ModShelf.Presentation.ViewModels.Browse;
+using ModShelf.Presentation.ViewModels.Downloads;
+using ModShelf.Presentation.ViewModels.Library;
+using ModShelf.Presentation.ViewModels.Settings;
+using ModShelf.Presentation.ViewModels.Updates;
 
 namespace ModShelf.Presentation.Tests;
 

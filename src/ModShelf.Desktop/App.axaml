@@ -1,6 +1,11 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:ModShelf.Presentation.ViewModels"
+             xmlns:accounts="using:ModShelf.Presentation.ViewModels.Accounts"
+             xmlns:browse="using:ModShelf.Presentation.ViewModels.Browse"
+             xmlns:downloads="using:ModShelf.Presentation.ViewModels.Downloads"
+             xmlns:library="using:ModShelf.Presentation.ViewModels.Library"
+             xmlns:settings="using:ModShelf.Presentation.ViewModels.Settings"
+             xmlns:updates="using:ModShelf.Presentation.ViewModels.Updates"
              xmlns:views="using:ModShelf.Desktop.Views"
              x:Class="ModShelf.Desktop.App"
              RequestedThemeVariant="Default">
@@ -16,12 +21,12 @@
 
     <!-- Each screen's view, by its ViewModel: listed, not found by name, so the bindings stay compiled. -->
     <Application.DataTemplates>
-        <DataTemplate DataType="vm:LibraryViewModel"><views:LibraryView /></DataTemplate>
-        <DataTemplate DataType="vm:UpdatesViewModel"><views:UpdatesView /></DataTemplate>
-        <DataTemplate DataType="vm:BrowseViewModel"><views:BrowseView /></DataTemplate>
-        <DataTemplate DataType="vm:DownloadsViewModel"><views:DownloadsView /></DataTemplate>
-        <DataTemplate DataType="vm:AccountsViewModel"><views:AccountsView /></DataTemplate>
-        <DataTemplate DataType="vm:SettingsViewModel"><views:SettingsView /></DataTemplate>
+        <DataTemplate DataType="library:LibraryViewModel"><views:LibraryView /></DataTemplate>
+        <DataTemplate DataType="updates:UpdatesViewModel"><views:UpdatesView /></DataTemplate>
+        <DataTemplate DataType="browse:BrowseViewModel"><views:BrowseView /></DataTemplate>
+        <DataTemplate DataType="downloads:DownloadsViewModel"><views:DownloadsView /></DataTemplate>
+        <DataTemplate DataType="accounts:AccountsViewModel"><views:AccountsView /></DataTemplate>
+        <DataTemplate DataType="settings:SettingsViewModel"><views:SettingsView /></DataTemplate>
     </Application.DataTemplates>
 
     <Application.Styles>

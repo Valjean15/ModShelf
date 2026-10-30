@@ -11,6 +11,7 @@ using ModShelf.Application.Settings;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
+using ModShelf.Presentation.ViewModels.Updates;
 
 namespace ModShelf.Presentation.ViewModels;
 
