@@ -1,6 +1,7 @@
 <!-- The look of the main window's sidebar, and of what the screens share: headings, notes, problems, lists and tags. -->
 <Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="using:System">
 
     <!-- Every window has ModShelf's icon, in its title bar and the taskbar. -->
     <Style Selector="Window">
@@ -34,6 +35,31 @@
     <Style Selector="TextBlock.problem">
         <Setter Property="Opacity" Value="1" />
         <Setter Property="Foreground" Value="{DynamicResource SystemControlErrorTextForegroundBrush}" />
+    </Style>
+
+    <!-- What a command said, such as what became of a link: shown only while there's something to say. -->
+    <Style Selector="TextBlock.message">
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="IsVisible" Value="{Binding $self.Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+    </Style>
+
+    <!-- What a screen says while it has nothing to list, in the middle of where the list would be. -->
+    <Style Selector="TextBlock.empty">
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <!-- Lines of text, each after a bullet, such as a version's changes. -->
+    <Style Selector="ItemsControl.bullets">
+        <Setter Property="ItemTemplate">
+            <DataTemplate x:DataType="sys:String">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                    <TextBlock Text="•" />
+                    <TextBlock Grid.Column="1" TextWrapping="Wrap" Text="{Binding}" />
+                </Grid>
+            </DataTemplate>
+        </Setter>
     </Style>
 
     <!-- A list of things to act on, rather than to pick from: rows stretch, and aren't highlighted when clicked. -->

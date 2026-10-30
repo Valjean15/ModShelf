@@ -15,15 +15,10 @@
                  IsVisible="{Binding !IsEmpty}" />
 
         <Panel>
-            <TextBlock Classes="note"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       TextWrapping="Wrap"
+            <TextBlock Classes="note empty"
                        Text="{x:Static res:Strings.LibraryEmpty}"
                        IsVisible="{Binding IsEmpty}" />
-            <TextBlock Classes="note"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
+            <TextBlock Classes="note empty"
                        Text="{Binding NothingMatchesText}"
                        IsVisible="{Binding NothingMatches}" />
 

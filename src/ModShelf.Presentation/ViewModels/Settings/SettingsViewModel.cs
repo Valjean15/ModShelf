@@ -195,6 +195,11 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     public partial int KeepCount { get; set; } = OldVersionRule.Default.Count;
 
     /// <summary>
+    /// The most versions the rule can keep.
+    /// </summary>
+    public int MaxKeepCount { get; } = OldVersionRule.MaxCount;
+
+    /// <summary>
     /// How often the watched mods can be checked for updates, shortest first.
     /// </summary>
     public ObservableCollection<IntervalChoice> IntervalChoices { get; } = [];

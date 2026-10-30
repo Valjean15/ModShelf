@@ -35,12 +35,10 @@
                    IsVisible="{Binding IsQueueBusyElsewhere}" />
 
         <TextBlock DockPanel.Dock="Top"
-                   Classes="note"
+                   Classes="note message"
                    Classes.problem="{Binding IsMessageAProblem}"
                    Margin="0,8,0,0"
-                   TextWrapping="Wrap"
-                   Text="{Binding Message}"
-                   IsVisible="{Binding Message, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                   Text="{Binding Message}" />
 
         <Button DockPanel.Dock="Top"
                 HorizontalAlignment="Right"
@@ -49,9 +47,7 @@
                 Command="{Binding ClearFinishedCommand}" />
 
         <Panel>
-            <TextBlock Classes="note"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
+            <TextBlock Classes="note empty"
                        Text="{x:Static res:Strings.DownloadsEmpty}"
                        IsVisible="{Binding !HasJobs}" />
 

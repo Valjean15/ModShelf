@@ -22,11 +22,9 @@
 
         <TextBlock DockPanel.Dock="Top"
                    Margin="0,8,0,0"
-                   Classes="note"
+                   Classes="note message"
                    Classes.problem="{Binding IsCheckResultAProblem}"
-                   TextWrapping="Wrap"
-                   Text="{Binding CheckResult}"
-                   IsVisible="{Binding CheckResult, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                   Text="{Binding CheckResult}" />
 
         <!-- What the last check couldn't check, and why. -->
         <ItemsControl DockPanel.Dock="Top" Margin="0,4,0,0" ItemsSource="{Binding CheckFailures}">
@@ -38,10 +36,7 @@
         </ItemsControl>
 
         <Panel Margin="0,16,0,0">
-            <TextBlock Classes="note"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       TextWrapping="Wrap"
+            <TextBlock Classes="note empty"
                        Text="{Binding NoUpdatesText}"
                        IsVisible="{Binding !HasUpdates}" />
 
@@ -60,11 +55,9 @@
                                     <TextBlock Classes="note" Text="{Binding UploadedText}" />
                                     <TextBlock Classes="note" Text="{Binding ReplacesText}" />
                                 </StackPanel>
-                                <TextBlock Classes="note"
+                                <TextBlock Classes="note message"
                                            Classes.problem="{Binding IsNoteAProblem}"
-                                           TextWrapping="Wrap"
-                                           Text="{Binding Note}"
-                                           IsVisible="{Binding Note, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                           Text="{Binding Note}" />
                             </StackPanel>
 
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
@@ -78,16 +71,7 @@
                                            TextWrapping="Wrap"
                                            Text="{Binding ChangesNote}"
                                            IsVisible="{Binding ChangesNote, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                                <ItemsControl ItemsSource="{Binding Changes}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="sys:String">
-                                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                                                <TextBlock Text="•" />
-                                                <TextBlock Grid.Column="1" TextWrapping="Wrap" Text="{Binding}" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
+                                <ItemsControl Classes="bullets" ItemsSource="{Binding Changes}" />
                             </StackPanel>
                         </Grid>
                     </DataTemplate>

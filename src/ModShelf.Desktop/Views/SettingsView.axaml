@@ -60,11 +60,9 @@
                             <TextBlock Classes="note" Text="{x:Static res:Strings.SettingsMoving}" />
                             <ProgressBar IsIndeterminate="True" />
                         </StackPanel>
-                        <TextBlock Classes="note"
+                        <TextBlock Classes="note message"
                                    Classes.problem="{Binding IsRootNoteAProblem}"
-                                   TextWrapping="Wrap"
-                                   Text="{Binding RootNote}"
-                                   IsVisible="{Binding RootNote, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                   Text="{Binding RootNote}" />
                     </StackPanel>
                 </Border>
 
@@ -99,9 +97,8 @@
                         </RadioButton>
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <RadioButton GroupName="OldVersions" Content="{x:Static res:Strings.SettingsKeepLatest}" IsChecked="{Binding IsKeepLatest}" />
-                            <!-- From 1 to OldVersionRule.MaxCount. -->
                             <NumericUpDown Minimum="1"
-                                           Maximum="99"
+                                           Maximum="{Binding MaxKeepCount}"
                                            Increment="1"
                                            FormatString="0"
                                            Width="120"
