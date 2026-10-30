@@ -9,7 +9,6 @@ using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Desktop.Ports;
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
-using ModShelf.Domain.Common;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Updates;
 using ModShelf.Presentation.Common;
@@ -285,13 +284,6 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         IsTrayAvailable = await _tray.IsAvailableAsync(cancellationToken);
     }
 
-    private static string MessageOf(Exception exception)
-        => exception is ArgumentException refused ? LinkProblems.MessageForUser(refused) : exception.Message;
-
-    private bool CanChangeRoot() => IsLoaded && !IsMoving;
-
-    private bool CanUseDefaultRoot() => CanChangeRoot() && !IsDefaultRoot;
-
     partial void OnOldVersionActionChanged(OldVersionAction value) => SaveOldVersions();
 
     partial void OnKeepCountChanged(int value)
@@ -345,100 +337,6 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     }
 
     /// <summary>
-    /// Moves the library to a folder the user picks.
-    /// </summary>
-    [RelayCommand(CanExecute = nameof(CanChangeRoot))]
-    private async Task ChooseRootAsync(CancellationToken cancellationToken)
-    {
-        if (await _dialogs.PickFolderAsync(Strings.SettingsChooseFolderTitle, cancellationToken) is { } folder)
-        {
-            await ChangeRootAsync(folder, cancellationToken);
-        }
-    }
-
-    /// <summary>
-    /// Moves the library back to the default folder.
-    /// </summary>
-    [RelayCommand(CanExecute = nameof(CanUseDefaultRoot))]
-    private Task UseDefaultRootAsync(CancellationToken cancellationToken) => ChangeRootAsync(null, cancellationToken);
-
-    /// <summary>
-    /// Makes <paramref name="folder"/> the library's root, or the default with null. A library with files moves them
-    /// there, once the user confirms.
-    /// </summary>
-    private async Task ChangeRootAsync(string? folder, CancellationToken cancellationToken)
-    {
-        string target = folder ?? _settings.DefaultLibraryRoot;
-        if (FilePaths.Same(target, LibraryRoot))
-        {
-            return;
-        }
-
-        RootNote = null;
-        IsRootNoteAProblem = false;
-        string? missing = null;
-        try
-        {
-            int files = (await _library.ListAsync(cancellationToken)).Sum(mod => mod.Files.Count);
-            if (files == 0)
-            {
-                await _settings.SetLibraryRootAsync(folder, cancellationToken);
-            }
-            else
-            {
-                string message = files == 1
-                    ? Text.Format(Strings.SettingsMoveMessageOne, LibraryRoot, target)
-                    : Text.Format(Strings.SettingsMoveMessage, files, LibraryRoot, target);
-                if (!await _dialogs.ConfirmAsync(Strings.SettingsMoveTitle, message, Strings.SettingsMoveConfirm, cancellationToken))
-                {
-                    return;
-                }
-
-                IsMoving = true;
-                LibraryMove move = await _mover.MoveAsync(target, cancellationToken);
-                missing = move.Missing switch
-                {
-                    0 => null,
-                    1 => Strings.SettingsMissingOne,
-                    int count => Text.Format(Strings.SettingsMissing, count),
-                };
-            }
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            // The app is closing; a move that stopped part-way finishes when it's asked for again.
-            return;
-        }
-        catch (Exception exception) when (exception is InvalidOperationException or IOException or ArgumentException or InvalidDataException)
-        {
-            // Such as downloads into the library that aren't finished, or a file that couldn't be moved.
-            RootNote = MessageOf(exception);
-            IsRootNoteAProblem = true;
-        }
-        catch (Exception exception)
-        {
-            LogMoveFailed(_logger, exception);
-            RootNote = Strings.SomethingWentWrong;
-            IsRootNoteAProblem = true;
-        }
-        finally
-        {
-            IsMoving = false;
-        }
-
-        // Whatever happened, the root shown is the one stored.
-        string? readProblem = await ReloadAsync(CancellationToken.None);
-        if (!IsRootNoteAProblem)
-        {
-            RootNote = missing is null
-                ? Text.Format(Strings.SettingsLibraryIsIn, LibraryRoot)
-                : $"{Text.Format(Strings.SettingsLibraryIsIn, LibraryRoot)} {missing}";
-        }
-
-        Problem = readProblem;
-    }
-
-    /// <summary>
     /// Makes a choice, from one of the radio buttons that offer it; unchecking one does nothing.
     /// </summary>
     private void Choose(bool chosen, OldVersionAction action)
@@ -474,136 +372,5 @@ public sealed partial class SettingsViewModel : ScreenViewModel
             _ => OldVersionRule.KeepLatest(Math.Clamp(KeepCount, 1, OldVersionRule.MaxCount)),
         };
         Save(token => _settings.SetOldVersionsAsync(rule == OldVersionRule.Default ? null : rule, token));
-    }
-
-    /// <summary>
-    /// Saves a choice the user made, after the ones before it, then says what went wrong, if anything. Choices shown
-    /// from the settings aren't saved back.
-    /// </summary>
-    private void Save(Func<CancellationToken, Task> change)
-    {
-        if (!_showing)
-        {
-            _ = ChangeAsync(change, sayProblem: true);
-        }
-    }
-
-    /// <summary>
-    /// Saves a game's folder pattern, or every game's with a null game; a null pattern sets it back.
-    /// </summary>
-    /// <returns>What went wrong; null when it's saved.</returns>
-    private Task<string?> SaveFoldersAsync(string? game, FolderPattern? pattern)
-        => ChangeAsync(token => _settings.SetLibraryFoldersAsync(game, pattern, token), sayProblem: false);
-
-    /// <summary>
-    /// Makes a change once the changes before it are done, then shows the settings as stored.
-    /// </summary>
-    /// <param name="sayProblem">Whether to show what went wrong as <see cref="Problem"/>, rather than only return it.</param>
-    /// <returns>What went wrong, changing or reading the settings; null for nothing.</returns>
-    private Task<string?> ChangeAsync(Func<CancellationToken, Task> change, bool sayProblem)
-    {
-        Task<string?> changing = ChangeAfterAsync(_saving, change, sayProblem);
-        _saving = changing;
-        return changing;
-    }
-
-    private async Task<string?> ChangeAfterAsync(Task before, Func<CancellationToken, Task> change, bool sayProblem)
-    {
-        // An earlier change, which never throws.
-        await before;
-
-        string? problem = null;
-        try
-        {
-            await change(CancellationToken.None);
-        }
-        catch (Exception exception) when (exception is InvalidDataException or IOException or ArgumentException or InvalidOperationException)
-        {
-            // Such as settings that can't be read or saved.
-            problem = MessageOf(exception);
-        }
-        catch (Exception exception)
-        {
-            LogSaveFailed(_logger, exception);
-            problem = Strings.SomethingWentWrong;
-        }
-
-        // Whatever happened, what's shown is what's stored.
-        string? readProblem = await ReloadAsync(CancellationToken.None);
-        problem ??= readProblem;
-        if (sayProblem)
-        {
-            Problem = problem;
-        }
-
-        return problem;
-    }
-
-    /// <summary>
-    /// Reads the settings, and shows them.
-    /// </summary>
-    /// <returns>Why they couldn't be read; null when they're shown.</returns>
-    private async Task<string?> ReloadAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            Show(await _settings.GetAsync(cancellationToken));
-            return null;
-        }
-        catch (InvalidDataException exception)
-        {
-            IsLoaded = false;
-            return exception.Message;
-        }
-    }
-
-    /// <summary>
-    /// Shows the settings as stored, without saving them back, and applies their theme.
-    /// </summary>
-    private void Show(AppSettings settings)
-    {
-        _showing = true;
-        try
-        {
-            _shown = settings;
-            LibraryRoot = settings.LibraryRoot ?? _settings.DefaultLibraryRoot;
-            IsDefaultRoot = FilePaths.Same(LibraryRoot, _settings.DefaultLibraryRoot);
-
-            Folders.Show(settings.LibraryFolders ?? FolderPattern.Default, LibraryRoot);
-            List<FolderPatternViewModel> games = [];
-            foreach ((string game, FolderPattern pattern) in settings.GameFolders.OrderBy(entry => entry.Key, StringComparer.OrdinalIgnoreCase))
-            {
-                FolderPatternViewModel row = GameFolders.FirstOrDefault(shown => string.Equals(shown.Game, game, StringComparison.OrdinalIgnoreCase))
-                    ?? new FolderPatternViewModel(game, pattern, LibraryRoot, SaveFoldersAsync);
-                row.Show(pattern, LibraryRoot);
-                games.Add(row);
-            }
-
-            GameFolders.SyncWith(games);
-
-            OldVersionRule rule = settings.OldVersions ?? OldVersionRule.Default;
-            OldVersionAction = rule.Action;
-            if (rule.Action == OldVersionAction.KeepLatest)
-            {
-                KeepCount = rule.Count;
-            }
-
-            TimeSpan interval = settings.UpdateInterval ?? UpdateInterval.Default;
-            IntervalChoices.SyncWith(
-            [
-                .. OfferedIntervals.Append(interval).Distinct().Order()
-                    .Select(offered => IntervalChoices.FirstOrDefault(choice => choice.Interval == offered) ?? new IntervalChoice(offered)),
-            ]);
-            SelectedInterval = IntervalChoices.First(choice => choice.Interval == interval);
-
-            NotifyOfUpdates = settings.NotifyOfUpdates ?? true;
-            Theme = settings.Theme ?? AppTheme.System;
-            CloseToTray = settings.CloseToTray;
-            IsLoaded = true;
-        }
-        finally
-        {
-            _showing = false;
-        }
     }
 }
