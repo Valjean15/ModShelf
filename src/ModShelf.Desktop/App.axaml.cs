@@ -17,6 +17,7 @@ public sealed partial class App : Avalonia.Application
     private readonly Func<MainWindowViewModel>? _createMainWindowViewModel;
     private readonly Func<TrayViewModel>? _createTrayViewModel;
     private readonly ISingleInstance? _instance;
+    private readonly IReadOnlyList<string> _arguments = [];
     private readonly MessageDialogContent? _startupProblem;
 
     // Used by the XAML previewer, which runs without the host.
@@ -25,11 +26,17 @@ public sealed partial class App : Avalonia.Application
     }
 
     /// <param name="instance">The app's claim to the library, which tells it of each launch after it.</param>
-    internal App(Func<MainWindowViewModel> createMainWindowViewModel, Func<TrayViewModel> createTrayViewModel, ISingleInstance instance)
+    /// <param name="arguments">The app's command-line arguments, such as a link the system started it with.</param>
+    internal App(
+        Func<MainWindowViewModel> createMainWindowViewModel,
+        Func<TrayViewModel> createTrayViewModel,
+        ISingleInstance instance,
+        IReadOnlyList<string> arguments)
     {
         _createMainWindowViewModel = createMainWindowViewModel;
         _createTrayViewModel = createTrayViewModel;
         _instance = instance;
+        _arguments = arguments;
     }
 
     /// <summary>
@@ -71,8 +78,28 @@ public sealed partial class App : Avalonia.Application
             AppTray tray = new(this, desktop, _createTrayViewModel());
             tray.Attach(window);
 
-            // Launching ModShelf again shows this app.
-            _instance.LaunchedAgain += (_, _) => Dispatcher.UIThread.Post(tray.ShowMainWindow);
+            // Launching ModShelf again shows this app, and opens the links it was launched with, such as an nxm:// link
+            // the system opened with ModShelf while it ran. On macOS, the system hands a link to the app running instead.
+            _instance.LaunchedAgain += (_, launch) => Dispatcher.UIThread.Post(() => Open(launch.Arguments));
+            if (TryGetFeature(typeof(IActivatableLifetime)) is IActivatableLifetime activatable)
+            {
+                activatable.Activated += (_, activated) =>
+                {
+                    if (activated is ProtocolActivatedEventArgs { Kind: ActivationKind.OpenUri } opened)
+                    {
+                        Dispatcher.UIThread.Post(() => Open([opened.Uri.OriginalString]));
+                    }
+                };
+            }
+
+            // The links the system started it with.
+            _ = viewModel.OpenLinksAsync(_arguments);
+
+            void Open(IReadOnlyList<string> arguments)
+            {
+                tray.ShowMainWindow();
+                _ = viewModel.OpenLinksAsync(arguments);
+            }
         }
 
         base.OnFrameworkInitializationCompleted();

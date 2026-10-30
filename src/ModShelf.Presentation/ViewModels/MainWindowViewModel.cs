@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
+using ModShelf.Presentation.ViewModels.Downloads;
 
 namespace ModShelf.Presentation.ViewModels;
 
@@ -88,6 +89,29 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         }
     }
 
+    /// <summary>
+    /// Opens the links among a launch's arguments, such as the <c>nxm://</c> link the system started ModShelf with, or
+    /// handed a second launch: on the Downloads screen, which says what became of each. Other arguments, such as a
+    /// file's path or a setting, are passed over. Runs on the UI thread.
+    /// </summary>
+    public async Task OpenLinksAsync(IEnumerable<string> arguments)
+    {
+        ArgumentNullException.ThrowIfNull(arguments);
+
+        Uri[] links = [.. arguments.Select(LinkIn).OfType<Uri>()];
+        if (links.Length == 0)
+        {
+            return;
+        }
+
+        _navigation.NavigateTo(Screen.Downloads);
+        DownloadsViewModel downloads = Screens.OfType<DownloadsViewModel>().Single();
+        foreach (Uri link in links)
+        {
+            await downloads.OpenLinkAsync(link, _stopping.Token);
+        }
+    }
+
     public void Dispose()
     {
         _navigation.Navigated -= OnNavigated;
@@ -134,4 +158,8 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
     private void OnNavigated(object? sender, Screen screen) => _uiThread.Post(() => CurrentScreen = ScreenFor(_navigation.Current));
 
     private ScreenViewModel ScreenFor(Screen screen) => Screens[(int)screen];
+
+    // An absolute link, but not to a file: an argument like C:\Mods or /home/jean/mods reads as a file:// link.
+    private static Uri? LinkIn(string argument)
+        => Uri.TryCreate(argument, UriKind.Absolute, out Uri? link) && !link.IsFile && !link.IsUnc ? link : null;
 }

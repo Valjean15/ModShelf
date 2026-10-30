@@ -14,7 +14,7 @@ You need:
 - a browser signed in to Nexus Mods with the **free** account, for section 5;
 - PowerShell 7 (`pwsh`), from the repository root.
 
-ModShelf doesn't register itself for `nxm://` links until Phase 6, so section 5 copies the link from the website's button. If Vortex or Mod Organizer 2 handles `nxm://` links, that's fine: the button's link is copied, not opened.
+Section 5 copies the link from the website's button, so it doesn't matter there which app opens `nxm://` links. Section 12 makes ModShelf open them, then gives them back to the app that had them, such as Vortex or Mod Organizer 2.
 
 Set up a folder of its own for the checks, and build:
 
@@ -30,7 +30,7 @@ function app { Start-Process dotnet -ArgumentList "`"$app`"" }
 
 The quotes around the path matter: `Start-Process` passes it on as it is, so a path with a space, such as `D:\Repository backups\ModShelf`, would reach `dotnet` as two arguments, and its window would close at once.
 
-Run sections 1 to 13 with the Premium account first, then again with the free account, skipping the checks marked **Premium only** and running those marked **free only**. Before the second run, close the app (the tray menu's **Quit ModShelf**), and delete the test folder, so the free account starts afresh:
+Run sections 1 to 14 with the Premium account first, then again with the free account, skipping the checks marked **Premium only** and running those marked **free only**. Before the second run, close the app (the tray menu's **Quit ModShelf**), and delete the test folder, so the free account starts afresh:
 
 ```powershell
 Remove-Item -Recurse -Force $test
@@ -45,7 +45,7 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
 - [ ] **1.2 The tray icon.** Look in the notification area (on Windows, it may be under the arrow that shows hidden icons).
   ModShelf's icon is there. Hovering over it says "ModShelf". Right-clicking it shows **Open ModShelf**, **Check for updates now** and **Quit ModShelf**.
 - [ ] **1.3 One app at a time.** Minimize the window, then run `app` again.
-  No second window opens: the first one comes back. The log (section 12) has "ModShelf was launched again, and the launch was handed over to this app".
+  No second window opens: the first one comes back. The log (section 13) has "ModShelf was launched again, and the launch was handed over to this app".
 - [ ] **1.4 The library's folder.** On the Settings screen, **Choose another folder…**, and pick a new, empty folder named `Library` in the test folder (`$test`).
   The folder shown is the one picked, with "The library is in … now." under it, and **Use the default folder** is enabled. Nothing is asked, since the library has no files yet.
 
@@ -196,9 +196,31 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
 - [ ] **11.8 Quit from the tray.** **Quit ModShelf** in the tray menu.
   ModShelf ends, window and icon.
 
-## 12. Nothing secret in the logs
+## 12. Links from websites
 
-- [ ] **12.1 The log files.** Close the app, then search its log files:
+Nexus Mods' **Mod manager download** buttons hand a download over with an `nxm://` link, which the system opens with the app registered for them. These checks make ModShelf that app, then give the links back. Note which app opens them before you start: 12.7 gives them back to it. On macOS, the card says ModShelf can open them once it's installed: skip to section 13, since the installer's checklist checks the rest.
+
+- [ ] **12.1 Who opens them.** On the Settings screen, "Links from websites".
+  "Vortex opens nxm:// links from Nexus Mods." (or the app that opens them, or "No app opens …"), with **Open them with ModShelf**.
+- [ ] **12.2 Take them.** **Open them with ModShelf**.
+  "ModShelf opens nxm:// links from Nexus Mods.", and the button reads **Give them back to Vortex** (or **Stop opening them** when no app had them). On Windows, `(Get-ItemProperty 'HKCU:\Software\Classes\nxm\shell\open\command').'(default)'` shows the desktop app's path, `--ModShelf:DatabasePath=` with the test folder's database, and `"%1"`. On Linux, `xdg-mime query default x-scheme-handler/nxm` says `modshelf-nxm.desktop`.
+  If instead the card says another app still opens them, "chosen in the system's own settings": on Windows, choose ModShelf for NXM under Settings > Apps > Default apps > Choose defaults by link type, then open the Settings screen again.
+- [ ] **12.3 A link while it runs.** Go to the Library screen. On SMAPI's Files tab on the website, click **Mod manager download** on an older file (with the free account, then **Slow download** on the page it opens). Let the browser open ModShelf.
+  ModShelf comes forward on the Downloads screen: "Downloading … into …", then "Done". The Library lists the file.
+- [ ] **12.4 A waiting download** (free only). In Browse, **Download** another older SMAPI file: it waits, as in 5.1. On the website, start that file's download for mod managers.
+  The waiting download goes on without pasting anything, and ends "Done".
+- [ ] **12.5 From the tray.** Close the window to the tray (as in 11.2), then click **Mod manager download** on the website for the file of 12.3 again.
+  The window comes back on the Downloads screen: "… is in the library already."
+- [ ] **12.6 With the app closed.** **Quit ModShelf** from the tray menu, then click **Mod manager download** on SMAPI's main file.
+  ModShelf starts on the Downloads screen, with the test folder's library: the Library screen lists the files from earlier checks. The download ends "Done".
+- [ ] **12.7 Give them back.** On the Settings screen, **Give them back to Vortex** (or **Stop opening them**).
+  The card says what it did in 12.1. On Windows, the command from 12.2 shows the app's own command again (or the key is gone), and `Test-Path HKCU:\Software\ModShelf` says False. On Linux, `xdg-mime query default x-scheme-handler/nxm` names what it did in 12.1, and `~/.local/share/applications/modshelf-nxm.desktop` is gone.
+- [ ] **12.8 Clicked after.** Click **Mod manager download** on the website again.
+  The app from 12.1 gets the link, or the browser says nothing opens it. ModShelf doesn't.
+
+## 13. Nothing secret in the logs
+
+- [ ] **13.1 The log files.** Close the app, then search its log files:
 
   ```powershell
   Select-String -Path (Join-Path $test 'logs\desktop-*.log') -Pattern 'key=', 'nxm://', 'apikey'
@@ -206,16 +228,16 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
 
   Every line found reads `apikey: *`, if any: the log names the header but never shows its value. No line holds `key=` or `nxm://`.
 
-## 13. Unlink the account
+## 14. Unlink the account
 
-- [ ] **13.1 Unlink.** On the Accounts screen, **Unlink**.
+- [ ] **14.1 Unlink.** On the Accounts screen, **Unlink**.
   "Unlink Nexus Mods?" **Unlink**: "Unlinked. Its stored credentials are deleted." The card says "No account is linked." On Windows, `account_nexus.secret` is gone from the test folder's `Secrets` folder.
-- [ ] **13.2 Browse needs it.** Open the Browse screen, and **Try again** if it shows a message.
+- [ ] **14.2 Browse needs it.** Open the Browse screen, and **Try again** if it shows a message.
   "Nexus Mods needs your account linked, or refused the one linked. …", with **Go to Accounts**, which opens the Accounts screen.
 
 ## Clean up
 
-After both accounts, quit the app from the tray menu, then:
+If a run stopped before 12.7, give the links back on the Settings screen first: their registration starts ModShelf on the test folder. After both accounts, quit the app from the tray menu, then:
 
 ```powershell
 Remove-Item -Recurse -Force $test
@@ -290,6 +312,14 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 11.6 Tooltip | | | |
 | 11.7 Quit closes | | | |
 | 11.8 Quit from the tray | | | |
-| 12.1 Log files | | | |
-| 13.1 Unlink | | | |
-| 13.2 Browse needs it | | | |
+| 12.1 Who opens them | | | |
+| 12.2 Take them | | | |
+| 12.3 A link while it runs | | | |
+| 12.4 A waiting download | – | | |
+| 12.5 From the tray | | | |
+| 12.6 With the app closed | | | |
+| 12.7 Give them back | | | |
+| 12.8 Clicked after | | | |
+| 13.1 Log files | | | |
+| 14.1 Unlink | | | |
+| 14.2 Browse needs it | | | |

@@ -26,10 +26,11 @@ internal static class DesktopHost
     public static IHost Create(string[] args)
     {
         // Read configuration next to the executable: desktop shortcuts and nxm:// launches
-        // start the app with an arbitrary working directory.
+        // start the app with an arbitrary working directory. Only --key=value arguments are
+        // configuration: a link the app is started with, which can carry a key, is not.
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
         {
-            Args = args,
+            Args = [.. args.Where(arg => arg.StartsWith("--", StringComparison.Ordinal))],
             ContentRootPath = AppContext.BaseDirectory,
         });
 

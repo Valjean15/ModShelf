@@ -66,7 +66,7 @@ internal static partial class Program
 
         try
         {
-            return CreateAppBuilder(host.Services, instance).StartWithClassicDesktopLifetime(args);
+            return CreateAppBuilder(host.Services, instance, args).StartWithClassicDesktopLifetime(args);
         }
         finally
         {
@@ -86,12 +86,13 @@ internal static partial class Program
     public static AppBuilder BuildAvaloniaApp()
         => Configure(AppBuilder.Configure<App>());
 
-    private static AppBuilder CreateAppBuilder(IServiceProvider services, ISingleInstance instance)
+    private static AppBuilder CreateAppBuilder(IServiceProvider services, ISingleInstance instance, string[] args)
         => Configure(AppBuilder.Configure(
             () => new App(
                 () => services.GetRequiredService<MainWindowViewModel>(),
                 () => services.GetRequiredService<TrayViewModel>(),
-                instance)));
+                instance,
+                args)));
 
     /// <summary>
     /// Shows why ModShelf can't start, in a window of its own, until it's closed.

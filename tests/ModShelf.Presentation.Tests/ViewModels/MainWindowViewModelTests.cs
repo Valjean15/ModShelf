@@ -1,7 +1,10 @@
 using System.ComponentModel;
 
+using ModShelf.Application.Downloads;
+using ModShelf.Application.Links;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.Tests.Fakes;
+using ModShelf.Presentation.Tests.ViewModels.Downloads;
 using ModShelf.Presentation.ViewModels;
 using ModShelf.Testing;
 
@@ -159,6 +162,34 @@ public sealed class MainWindowViewModelTests : IDisposable
         string entry = Assert.Single(_logger.Entries);
         Assert.StartsWith("Error: The Browse screen's work stopped", entry, StringComparison.Ordinal);
         Assert.Contains("The site is down.", entry, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task OpensALaunchsLinksOnTheDownloadsScreen()
+    {
+        using DownloadsHarness downloads = new();
+        DownloadJobSnapshot job = TestData.Job();
+        downloads.Opened.Answer = _ => new OpenedLink(new LinkDownload(job, AlreadyQueued: false), Path.Combine(job.TargetDirectory, job.FileName));
+        using MainWindowViewModel window = Window([.. TestScreen.OneOfEach().Where(screen => screen.Screen != Screen.Downloads), downloads.Screen]);
+        string folder = Path.Combine(Path.GetTempPath(), "Mods");
+
+        await window.OpenLinksAsync(["--ModShelf:DatabasePath=C:\\Test\\library.db", folder, TestData.HandoffLink.OriginalString, "not a link"]);
+
+        Assert.Equal(Screen.Downloads, window.CurrentScreen.Screen);
+        Assert.Equal([TestData.HandoffLink], downloads.Opened.Opened);
+        Assert.NotNull(downloads.Screen.Message);
+    }
+
+    [Fact]
+    public async Task ALaunchWithoutLinksStaysWhereItIs()
+    {
+        using DownloadsHarness downloads = new();
+        using MainWindowViewModel window = Window([.. TestScreen.OneOfEach().Where(screen => screen.Screen != Screen.Downloads), downloads.Screen]);
+
+        await window.OpenLinksAsync(["--ModShelf:DatabasePath=/tmp/library.db", "file:///tmp/mod.zip"]);
+
+        Assert.Equal(Screen.Library, window.CurrentScreen.Screen);
+        Assert.Empty(downloads.Opened.Opened);
     }
 
     private MainWindowViewModel Window(IEnumerable<ScreenViewModel> screens) => new(_navigation, _uiThread, screens, _logger);

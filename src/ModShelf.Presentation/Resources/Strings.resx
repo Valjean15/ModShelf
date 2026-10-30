@@ -1362,4 +1362,64 @@
     <value>The diagnostics are on the clipboard. Paste them into your bug report.</value>
     <comment>After Copy diagnostics.</comment>
   </data>
+  <data name="LinksHeading" xml:space="preserve">
+    <value>Links from websites</value>
+    <comment>Heading of the Settings card about which app opens the links sites hand downloads over with.</comment>
+  </data>
+  <data name="LinksExplain" xml:space="preserve">
+    <value>A site's "mod manager download" button hands its download over with a link. When ModShelf opens those links, the download starts here: one waiting for it goes on, and otherwise the file goes into the library.</value>
+    <comment>Under the Links from websites heading.</comment>
+  </data>
+  <data name="LinksOpenedByModShelf" xml:space="preserve">
+    <value>ModShelf opens {0}:// links from {1}.</value>
+    <comment>{0} is the scheme, such as nxm; {1} the site, such as Nexus Mods.</comment>
+  </data>
+  <data name="LinksOpenedByApp" xml:space="preserve">
+    <value>{2} opens {0}:// links from {1}.</value>
+    <comment>{0} is the scheme, such as nxm; {1} the site, such as Nexus Mods; {2} the app, such as Vortex.</comment>
+  </data>
+  <data name="LinksOpenedByAnotherApp" xml:space="preserve">
+    <value>Another app opens {0}:// links from {1}.</value>
+    <comment>{0} is the scheme; {1} the site. The system doesn't name the app.</comment>
+  </data>
+  <data name="LinksOpenedByNone" xml:space="preserve">
+    <value>No app opens {0}:// links from {1}.</value>
+    <comment>{0} is the scheme; {1} the site.</comment>
+  </data>
+  <data name="LinksUnavailable" xml:space="preserve">
+    <value>ModShelf can open {0}:// links from {1} once it's installed.</value>
+    <comment>{0} is the scheme; {1} the site. Shown where this ModShelf can't register, such as on macOS outside an installed app.</comment>
+  </data>
+  <data name="LinksTake" xml:space="preserve">
+    <value>Open them with ModShelf</value>
+    <comment>Button: makes the system open the site's links with ModShelf.</comment>
+  </data>
+  <data name="LinksGiveBack" xml:space="preserve">
+    <value>Stop opening them</value>
+    <comment>Button: stops ModShelf opening the site's links, when no other app had them before.</comment>
+  </data>
+  <data name="LinksGiveBackTo" xml:space="preserve">
+    <value>Give them back to {0}</value>
+    <comment>Button: stops ModShelf opening the site's links, and gives them back to the app that had them. {0} is that app, such as Vortex.</comment>
+  </data>
+  <data name="LinksStillChosen" xml:space="preserve">
+    <value>{0} still opens them: it was chosen in the system's own settings. Choose ModShelf for {1}:// links there.</value>
+    <comment>After Open them with ModShelf, when the system still prefers another app. {0} is that app; {1} the scheme.</comment>
+  </data>
+  <data name="LinksStillModShelf" xml:space="preserve">
+    <value>No other app opens {0}:// links, so the system still opens them with ModShelf.</value>
+    <comment>After giving the links back, when the system has no other app for them, as on macOS. {0} is the scheme.</comment>
+  </data>
+  <data name="LinksCantChange" xml:space="preserve">
+    <value>The system's apps for links couldn't be changed: {0}</value>
+    <comment>{0} is the system's reason.</comment>
+  </data>
+  <data name="LinksCantRegisterHere" xml:space="preserve">
+    <value>ModShelf can't open links on this system.</value>
+    <comment>After Open them with ModShelf, when this ModShelf can't register.</comment>
+  </data>
+  <data name="LinksCantRead" xml:space="preserve">
+    <value>Which app opens links couldn't be read: {0}</value>
+    <comment>{0} is the system's reason.</comment>
+  </data>
 </root>

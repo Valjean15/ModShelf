@@ -20,9 +20,9 @@ namespace ModShelf.Presentation.ViewModels.Settings;
 /// <summary>
 /// The settings: where the library is, moving its files when it has some; how its folders are named, for every game and
 /// for single games; what happens to old versions; how often to check for updates and whether to say so; whether the
-/// app is light or dark; what closing its window does; and, at its end, about this ModShelf. Choices are saved as they're made, folder patterns when the
-/// user saves them, and each change shows the settings as stored after it. The theme is applied at start and as it's
-/// chosen.
+/// app is light or dark; what closing its window does; which apps open the links websites hand downloads over with;
+/// and, at its end, about this ModShelf. Choices are saved as they're made, folder patterns when the user saves them,
+/// and each change shows the settings as stored after it. The theme is applied at start and as it's chosen.
 /// </summary>
 public sealed partial class SettingsViewModel : ScreenViewModel
 {
@@ -60,6 +60,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         IThemeSwitcher themes,
         ITrayHost tray,
         IDialogService dialogs,
+        LinksViewModel links,
         AboutViewModel about,
         ILogger<SettingsViewModel> logger)
     {
@@ -70,6 +71,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(themes);
         ArgumentNullException.ThrowIfNull(tray);
         ArgumentNullException.ThrowIfNull(dialogs);
+        ArgumentNullException.ThrowIfNull(links);
         ArgumentNullException.ThrowIfNull(about);
         ArgumentNullException.ThrowIfNull(logger);
 
@@ -80,6 +82,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         _tray = tray;
         _dialogs = dialogs;
         _logger = logger;
+        Links = links;
         About = about;
         KeptInText = Text.Format(Strings.SettingsKeptIn, settings.Location);
         IsStoreUnprotected = !secrets.IsProtectedByOs;
@@ -90,6 +93,11 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     public override Screen Screen => Screen.Settings;
 
     public override string Title => Strings.SettingsTitle;
+
+    /// <summary>
+    /// Links from websites: which app opens the links each site hands its downloads over with.
+    /// </summary>
+    public LinksViewModel Links { get; }
 
     /// <summary>
     /// About this ModShelf: its version, its log folder and its diagnostics report.
@@ -289,12 +297,14 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     internal Task Saving => _saving;
 
     /// <summary>
-    /// Reads the settings, shows them, and applies the theme; then asks whether the system shows tray icons.
+    /// Reads the settings, shows them, and applies the theme; then asks whether the system shows tray icons, and which
+    /// apps open the sites' links.
     /// </summary>
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
         Problem = await ReloadAsync(cancellationToken);
         IsTrayAvailable = await _tray.IsAvailableAsync(cancellationToken);
+        await Links.LoadAsync(cancellationToken);
     }
 
     partial void OnOldVersionActionChanged(OldVersionAction value) => SaveOldVersions();

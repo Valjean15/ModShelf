@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Library;
+using ModShelf.Application.Links;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
 using ModShelf.Domain.Downloads;
@@ -19,12 +20,14 @@ namespace ModShelf.Presentation.ViewModels.Downloads;
 
 /// <summary>
 /// The download queue: a box to add a link, into the library or a folder the user picks, and every download, newest
-/// first, as it goes. The badge counts the downloads waiting for the user: to be started on their site, or failed.
+/// first, as it goes. The badge counts the downloads waiting for the user: to be started on their site, or failed. A
+/// link another app hands over, such as an <c>nxm://</c> link the system opens ModShelf with, is said here too.
 /// </summary>
 public sealed partial class DownloadsViewModel : ScreenViewModel
 {
     private readonly IDownloadService _downloads;
     private readonly ILibraryDownloads _library;
+    private readonly IOpenedLinks _opened;
     private readonly FolderDownloads _folders;
     private readonly ISourceRegistry _sources;
     private readonly IUiThread _uiThread;
@@ -36,6 +39,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         IDownloadService downloads,
         ILibraryDownloads library,
         ILinkDownloads links,
+        IOpenedLinks opened,
         ISettingsService settings,
         IBrowserLauncher browser,
         IDialogService dialogs,
@@ -47,6 +51,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(downloads);
         ArgumentNullException.ThrowIfNull(library);
         ArgumentNullException.ThrowIfNull(links);
+        ArgumentNullException.ThrowIfNull(opened);
         ArgumentNullException.ThrowIfNull(dialogs);
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(uiThread);
@@ -54,6 +59,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
 
         _downloads = downloads;
         _library = library;
+        _opened = opened;
         _folders = new FolderDownloads(links, dialogs);
         _sources = sources;
         _uiThread = uiThread;
@@ -201,6 +207,39 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
             library: false,
             link => _folders.AddAsync(link, cancellationToken),
             cancellationToken);
+
+    /// <summary>
+    /// Downloads the file of a link another app handed over, such as an <c>nxm://</c> link from a website's "mod
+    /// manager download" button, and says what became of it, as adding a link does: a download waiting for it goes on,
+    /// otherwise the file goes into the library. The link in the box stays as it was.
+    /// </summary>
+    public Task OpenLinkAsync(Uri link, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(link);
+
+        Message = null;
+        return UserCommands.RunInPlaceAsync(
+            async () =>
+            {
+                OpenedLink opened = await _opened.OpenAsync(link, cancellationToken);
+                if (opened.Download is not { } added)
+                {
+                    Say(Text.Format(Strings.AddedInLibraryAlready, opened.LibraryPath));
+                    return;
+                }
+
+                if (!added.AlreadySaved)
+                {
+                    _uiThread.Post(() => ShowNew(added.Job));
+                }
+
+                Say(DownloadNotes.Added(added, onDownloadsScreen: true));
+            },
+            exception => LinkProblems.Describe(exception, library: true),
+            SayProblem,
+            exception => LogOpenFailed(_logger, exception),
+            cancellationToken);
+    }
 
     /// <summary>
     /// Removes the finished and cancelled downloads from the queue and the list. Their files stay.

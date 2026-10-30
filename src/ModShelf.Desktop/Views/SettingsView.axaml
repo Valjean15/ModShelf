@@ -149,6 +149,34 @@
                     </StackPanel>
                 </Border>
 
+                <Border Classes="card" DataContext="{Binding Links}">
+                    <StackPanel Spacing="8" x:DataType="vm:LinksViewModel">
+                        <TextBlock Classes="subheading" Text="{x:Static res:Strings.LinksHeading}" />
+                        <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.LinksExplain}" />
+                        <ItemsControl ItemsSource="{Binding Sites}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:LinkHandlerViewModel">
+                                    <StackPanel Spacing="8" Margin="0,4,0,0">
+                                        <TextBlock TextWrapping="Wrap" Text="{Binding StateText}" />
+                                        <WrapPanel>
+                                            <Button Content="{x:Static res:Strings.LinksTake}" Command="{Binding TakeCommand}" IsVisible="{Binding OffersTake}" />
+                                            <Button Content="{Binding GiveBackText}" Command="{Binding GiveBackCommand}" IsVisible="{Binding OffersGiveBack}" />
+                                        </WrapPanel>
+                                        <TextBlock Classes="note message"
+                                                   Classes.problem="{Binding IsNoteAProblem}"
+                                                   TextWrapping="Wrap"
+                                                   Text="{Binding Note}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Classes="problem"
+                                   TextWrapping="Wrap"
+                                   Text="{Binding Problem}"
+                                   IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                    </StackPanel>
+                </Border>
+
                 <Border Classes="card" DataContext="{Binding About}">
                     <StackPanel Spacing="8" x:DataType="vm:AboutViewModel">
                         <TextBlock Classes="subheading" Text="{x:Static res:Strings.AboutHeading}" />

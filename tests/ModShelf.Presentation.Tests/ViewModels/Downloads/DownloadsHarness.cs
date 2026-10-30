@@ -22,6 +22,7 @@ internal sealed class DownloadsHarness : IDisposable
             Downloads,
             Library,
             Links,
+            Opened,
             Settings,
             Browser,
             Dialogs,
@@ -36,6 +37,8 @@ internal sealed class DownloadsHarness : IDisposable
     public ScriptedLibraryDownloads Library { get; } = new();
 
     public ScriptedLinkDownloads Links { get; } = new();
+
+    public ScriptedOpenedLinks Opened { get; } = new();
 
     public FakeSettingsService Settings { get; } = new();
 

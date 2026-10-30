@@ -12,4 +12,7 @@ public sealed partial class DownloadsViewModel
 
     [LoggerMessage(EventId = 903, Level = LogLevel.Error, Message = "Clearing the finished downloads failed")]
     private static partial void LogClearFailed(ILogger logger, Exception exception);
+
+    [LoggerMessage(EventId = 929, Level = LogLevel.Error, Message = "Opening a link another app handed over failed")]
+    private static partial void LogOpenFailed(ILogger logger, Exception exception);
 }
