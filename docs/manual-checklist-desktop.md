@@ -25,8 +25,10 @@ $env:ModShelf__SecretsFolder = Join-Path $test 'Secrets'
 $env:ModShelf__SecretScope = 'ModShelf.Checklist'
 dotnet build
 $app = Resolve-Path src/ModShelf.Desktop/bin/Debug/net10.0/ModShelf.Desktop.dll
-function app { Start-Process dotnet -ArgumentList $app }
+function app { Start-Process dotnet -ArgumentList "`"$app`"" }
 ```
+
+The quotes around the path matter: `Start-Process` passes it on as it is, so a path with a space, such as `D:\Repository backups\ModShelf`, would reach `dotnet` as two arguments, and its window would close at once.
 
 Run sections 1 to 13 with the Premium account first, then again with the free account, skipping the checks marked **Premium only** and running those marked **free only**. Before the second run, close the app (the tray menu's **Quit ModShelf**), and delete the test folder, so the free account starts afresh:
 
