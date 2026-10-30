@@ -13,7 +13,7 @@ internal static class CliCommands
 {
     public static RootCommand Create(CliEnvironment environment)
     {
-        RootCommand root = new("ModShelf from the command line: download files, look mods up, keep a library of mods, look at the download queue, link accounts, change settings and write a report for bug reports.")
+        RootCommand root = new("ModShelf from the command line: download files, look mods up, keep a library of mods, look at the download queue, link accounts, change settings, choose which app opens the links sites hand downloads over with, and write a report for bug reports.")
         {
             DownloadCommand.Create(environment),
             ModCommand.Create(environment),
@@ -21,6 +21,7 @@ internal static class CliCommands
             QueueCommand.Create(environment),
             AccountCommand.Create(environment),
             SettingsCommand.Create(environment),
+            LinksCommand.Create(environment),
             DiagnosticsCommand.Create(environment),
         };
         GuardedAction.GuardAll(root, environment);

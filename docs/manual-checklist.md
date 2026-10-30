@@ -28,7 +28,7 @@ $cli = Resolve-Path src/ModShelf.Cli/bin/Debug/net10.0/ModShelf.Cli.dll
 function ms { dotnet $cli @args }
 ```
 
-Run sections 1 to 11 with the Premium account first. Then run them again with the free account, skipping the checks marked **Premium only**. Each account downloads into a folder of its own, so the second run doesn't find the first one's files:
+Run sections 1 to 12 with the Premium account first. Then run them again with the free account, skipping the checks marked **Premium only**. Each account downloads into a folder of its own, so the second run doesn't find the first one's files:
 
 ```powershell
 $downloads = Join-Path $test 'Premium'   # 'Free' for the free account
@@ -174,15 +174,36 @@ This section changes your account. If SMAPI is tracked when you start, track it 
 
   The first line is "ModShelf 0.9.0-alpha.0.N (…)", where the part in brackets is the commit you built, as `git rev-parse --short=7 HEAD` shows it. Then the system, the folders with your home folder as `~`, the settings, the library's counts, the downloads by what they're doing, and "nexus linked (ApiKey, Premium)" (Free for the free account). Nowhere does it hold your account's name, a mod's or file's name, a key or an `nxm://` link. Exit code 0.
 
-## 11. Unlink the account
+## 11. Links from websites
 
-- [ ] **11.1 Unlink.** `ms account unlink nexus`.
+These checks make the desktop app open Nexus Mods' `nxm://` links, from the command line, then give them back. Skip them on macOS: only the installed app can take the links there.
+
+- [ ] **11.1 Who opens them.** Point the CLI at the desktop app it was built with, then ask:
+
+  ```powershell
+  $env:ModShelf__DesktopApp = Resolve-Path src/ModShelf.Desktop/bin/Debug/net10.0/ModShelf.Desktop.exe   # without .exe on Linux
+  ms links status
+  ```
+
+  A table with `nexus`, `nxm://` and the app that opens them, such as `Vortex`, or `no app`. Exit code 0.
+- [ ] **11.2 Take them.** `ms links take`.
+  "The desktop app opens nxm:// links from Nexus Mods now. Vortex opened them before; links give-back nexus gives them back to it." (or "… now. links give-back nexus stops it." when no app had them). `ms links status` shows `ModShelf (before it, Vortex)`.
+- [ ] **11.3 A click opens the desktop app.** On SMAPI's Files tab on the website, click **Mod manager download** on its main file (with the free account, then **Slow download**).
+  The desktop app starts on the Downloads screen, with the test folder's library, and the download ends "Done". Quit it from its tray menu.
+- [ ] **11.4 Give them back.** `ms links give-back`.
+  "ModShelf no longer opens nxm:// links from Nexus Mods. Vortex opens them now." (or "No app opens them now."). `ms links status` shows what 11.1 did.
+- [ ] **11.5 An unknown site.** `ms links take moddb`.
+  "No site 'moddb' hands its downloads over with links: links status lists them." Exit code 2.
+
+## 12. Unlink the account
+
+- [ ] **12.1 Unlink.** `ms account unlink nexus`.
   "Unlinked nexus. Its stored credentials are deleted." On Windows, `account_nexus.secret` is gone from the test folder's `Secrets` folder.
-- [ ] **11.2 Listed as not linked.** `ms account list`.
+- [ ] **12.2 Listed as not linked.** `ms account list`.
   The `nexus` row shows `-` for the account.
-- [ ] **11.3 The site now needs an account.** `ms mod show "https://www.nexusmods.com/stardewvalley/mods/2400"`.
+- [ ] **12.3 The site now needs an account.** `ms mod show "https://www.nexusmods.com/stardewvalley/mods/2400"`.
   "The site needs a linked account to look that link up, or refused the one linked. Link it with account link, then run the same command again." Exit code 1.
-- [ ] **11.4 Search without an account.** `ms mod search smapi --game stardewvalley`.
+- [ ] **12.4 Search without an account.** `ms mod search smapi --game stardewvalley`.
   Write down what happens: Nexus Mods doesn't say whether its search needs an account. Either results or "The site needs a linked account to search…" is fine.
 
 ## Clean up
@@ -191,10 +212,10 @@ After both accounts:
 
 ```powershell
 Remove-Item -Recurse -Force $test
-Remove-Item Env:ModShelf__DatabasePath, Env:ModShelf__SecretsFolder, Env:ModShelf__SecretScope
+Remove-Item Env:ModShelf__DatabasePath, Env:ModShelf__SecretsFolder, Env:ModShelf__SecretScope, Env:ModShelf__DesktopApp
 ```
 
-On macOS and Linux, unlinking already removed the keys from the Keychain or the keyring.
+On macOS and Linux, unlinking already removed the keys from the Keychain or the keyring. If a run stopped before 11.4, run `ms links give-back` before deleting the test folder: the links' registration starts the desktop app on it.
 
 ## Results
 
@@ -243,7 +264,12 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 10.1 Trace logs | | | |
 | 10.2 Handed-over link in logs | – | | |
 | 10.3 Diagnostics report | | | |
-| 11.1 Unlink | | | |
-| 11.2 Listed as not linked | | | |
-| 11.3 Needs an account | | | |
-| 11.4 Search without an account | | | |
+| 11.1 Who opens links | | | |
+| 11.2 Take them | | | |
+| 11.3 A click opens the app | | | |
+| 11.4 Give them back | | | |
+| 11.5 Unknown site | | | |
+| 12.1 Unlink | | | |
+| 12.2 Listed as not linked | | | |
+| 12.3 Needs an account | | | |
+| 12.4 Search without an account | | | |
