@@ -4,7 +4,7 @@ Where files, types and members go. The rules apply to every project under `src` 
 
 ## 1. Folders follow features
 
-- Each project is split into **feature folders named after the domain concept**: `Accounts`, `Catalog`, `Downloads`, `Library`, `Mods`, `Notifications`, `Search`, `Settings`, `Sources`, `Links`, `Updates` and `Watchlist`. Use the same names in every layer, so one feature can be followed from Domain to Desktop.
+- Each project is split into **feature folders named after the domain concept**: `Accounts`, `Catalog`, `Diagnostics`, `Downloads`, `Library`, `Mods`, `Notifications`, `Search`, `Settings`, `Sources`, `Links`, `Updates` and `Watchlist`. Use the same names in every layer, so one feature can be followed from Domain to Desktop.
 - Group by concept, not by kind. `DownloadJob`, its `DownloadJobId`, `DownloadJobStatus` and `DownloadFailureReason` sit together in `Downloads/`, not in `Entities/`, `ValueObjects/` and `Enums/`.
 - **The namespace always matches the folder.** The build fails otherwise (IDE0130).
 
@@ -86,7 +86,8 @@ Other projects see a project only through what it makes public, so keep that to 
 | 1000–1099 | Desktop: startup |
 | 1100–1199 | CLI: commands |
 | 1200–1299 | Platform: the desktop app's single instance and tray |
-| 1300 onward | Next free block |
+| 1300–1399 | The app itself: diagnostics, the `nxm://` handler and self-update |
+| 1400 onward | Next free block |
 
 ## 7. Files
 

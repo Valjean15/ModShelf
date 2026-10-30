@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 using ModShelf.Application.Accounts.Ports;
+using ModShelf.Application.Diagnostics.Ports;
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Domain.Downloads;
@@ -334,6 +335,19 @@ public sealed class LibraryDatabaseTests
         Assert.Equal(Path.GetDirectoryName(database), folder);
         using ServiceProvider provider = services.BuildServiceProvider();
         Assert.Equal(Path.Combine(folder, "logs"), provider.GetRequiredService<ModShelf.Infrastructure.Logging.LogFolder>().Path);
+    }
+
+    [Fact]
+    public void SaysWhereTheAppsOwnFilesAre()
+    {
+        ServiceCollection services = new();
+        string database = Path.Combine(Path.GetTempPath(), "ModShelf.Tests", "Moved", "test.db");
+
+        string folder = services.AddLibraryFiles(database, "app");
+
+        using ServiceProvider provider = services.BuildServiceProvider();
+        IAppFolders folders = provider.GetRequiredService<IAppFolders>();
+        Assert.Equal((folder, Path.Combine(folder, "logs")), (folders.DataFolder, folders.LogFolder));
     }
 
     [Fact]

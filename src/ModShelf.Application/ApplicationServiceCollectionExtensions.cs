@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 using ModShelf.Application.Accounts;
 using ModShelf.Application.Catalog;
+using ModShelf.Application.Diagnostics;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
@@ -188,6 +189,23 @@ public static class ApplicationServiceCollectionExtensions
 
         services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
         services.TryAddSingleton<IModUpdates, ModUpdates>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers this ModShelf's <see cref="AppInfo"/> and <see cref="IDiagnostics"/>, its report for bug reports. Needs
+    /// the accounts, the library, the download engine and the settings, and Infrastructure's
+    /// <see cref="Diagnostics.Ports.IAppFolders"/>.
+    /// </summary>
+    public static IServiceCollection AddDiagnostics(this IServiceCollection services, AppInfo app)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(app);
+
+        services.TryAddSingleton(app);
+        services.TryAddSingleton(TimeProvider.System);
+        services.TryAddSingleton<IDiagnostics, DiagnosticsReport>();
 
         return services;
     }

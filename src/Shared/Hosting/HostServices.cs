@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using ModShelf.Application;
+using ModShelf.Application.Diagnostics;
 using ModShelf.Infrastructure;
 using ModShelf.Platform;
 using ModShelf.Platform.Secrets;
@@ -66,6 +67,7 @@ internal static class HostServices
         services.AddLibraryMover();
         services.AddUpdateChecks();
         services.AddSettings();
+        services.AddDiagnostics(AppInfo.Of(typeof(HostServices).Assembly));
         services.AddDirectUrlSource();
         services.AddNexusSource(NexusOptionsFrom(configuration));
         return folder;

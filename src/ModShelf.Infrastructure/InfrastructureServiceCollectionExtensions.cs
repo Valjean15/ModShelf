@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Accounts;
 using ModShelf.Application.Accounts.Ports;
+using ModShelf.Application.Diagnostics.Ports;
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Settings.Ports;
@@ -91,7 +92,7 @@ public static class InfrastructureServiceCollectionExtensions
     /// <c>library.db</c> in a ModShelf folder under the user's local application data (<c>%LOCALAPPDATA%\ModShelf</c>
     /// on Windows, <c>~/Library/Application Support/ModShelf</c> on macOS, <c>~/.local/share/ModShelf</c> on Linux);
     /// and beside it the settings, <c>settings.json</c>, and the log files, in a <c>logs</c> folder. A database moved
-    /// elsewhere, such as for tests, takes them along.
+    /// elsewhere, such as for tests, takes them along. Where they are is registered as <see cref="IAppFolders"/>.
     /// </summary>
     /// <param name="databasePath">The database's absolute path, or null for its default one.</param>
     /// <param name="app">What the host's log files' names start with, such as <c>desktop</c>.</param>
@@ -103,9 +104,11 @@ public static class InfrastructureServiceCollectionExtensions
 
         string database = databasePath ?? LibraryDatabaseLocation.GetDefaultPath();
         string folder = Path.GetDirectoryName(Path.GetFullPath(database))!;
+        string logs = Path.Combine(folder, "logs");
         services.AddLibraryDatabase(database);
         services.AddSettingsFile(Path.Combine(folder, "settings.json"));
-        services.AddLogFiles(Path.Combine(folder, "logs"), app);
+        services.AddLogFiles(logs, app);
+        services.AddSingleton<IAppFolders>(new AppFolders(folder, logs));
         return folder;
     }
 

@@ -24,7 +24,7 @@ internal sealed class MemorySecretStore : ISecretStore
     /// </summary>
     public Exception? ReadFailure { get; set; }
 
-    public bool IsProtectedByOs => true;
+    public bool IsProtectedByOs { get; set; } = true;
 
     public Task<string?> ReadAsync(string name, CancellationToken cancellationToken)
         => ReadFailure is { } failure ? Task.FromException<string?>(failure)
