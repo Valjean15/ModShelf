@@ -25,7 +25,8 @@ internal static class SettingsCommand
     private const string Theme = "appearance.theme";
     private const string CloseToTray = "window.closeToTray";
     private const string SetupDone = "setup.done";
-    private const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<game>, {OldVersions}, {Interval}, {Notify}, {Theme}, {CloseToTray}, {SetupDone}";
+    private const string CheckForAppUpdates = "app.checkForUpdates";
+    private const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<game>, {OldVersions}, {Interval}, {Notify}, {Theme}, {CloseToTray}, {SetupDone}, {CheckForAppUpdates}";
 
     public static Command Create(CliEnvironment environment)
     {
@@ -37,7 +38,7 @@ internal static class SettingsCommand
         {
             Description = "Its new value: a full path for library.root; all, archive or how many versions to keep for "
                 + "library.oldVersions; minutes, hours or days, such as 30m, 6h or 1d, for updates.interval; true or false for "
-                + "updates.notify, window.closeToTray and setup.done; system, light or dark for appearance.theme; a folder pattern, "
+                + "updates.notify, window.closeToTray, setup.done and app.checkForUpdates; system, light or dark for appearance.theme; a folder pattern, "
                 + "such as \"{source}/{game}/{mod} ({modid})/{file}\", for the others.",
         };
         Command set = new("set", "Changes a setting.") { setName, value };
@@ -47,7 +48,7 @@ internal static class SettingsCommand
         Command reset = new("reset", "Sets a setting back to its default.") { resetName };
         reset.SetAction((parsed, cancellationToken) => ChangeAsync(environment, parsed.GetValue(resetName)!, null, cancellationToken));
 
-        return new Command("settings", "Shows and changes the settings: where the library is, how its folders are named, what happens to old versions, and how often to check for updates and whether to say so, whether the desktop app is light or dark, whether closing its window keeps it running in the tray, and whether its first-run setup is done.")
+        return new Command("settings", "Shows and changes the settings: where the library is, how its folders are named, what happens to old versions, and how often to check for updates and whether to say so, whether the desktop app is light or dark, whether closing its window keeps it running in the tray, whether its first-run setup is done, and whether it looks for a newer ModShelf when it starts.")
         {
             show,
             set,
@@ -88,6 +89,7 @@ internal static class SettingsCommand
                         [Theme, stored.Theme is { } theme ? ThemeName(theme) : $"{ThemeName(AppTheme.System)} (default)"],
                         [CloseToTray, stored.CloseToTray is { } closeToTray ? Text(closeToTray) : "ask (default)"],
                         [SetupDone, stored.SetupDone is { } done ? Text(done) : $"{Text(false)} (default)"],
+                        [CheckForAppUpdates, stored.CheckForAppUpdates is { } check ? Text(check) : $"{Text(true)} (default)"],
                     ];
                     TextTable.Write(environment.Output, rows);
                     environment.Output.WriteLine(
@@ -106,6 +108,8 @@ internal static class SettingsCommand
                     environment.Output.WriteLine(
                         $"The desktop app shows its first-run setup at the start of a new library until {SetupDone} is true; "
                         + $"settings reset {SetupDone} shows it again.");
+                    environment.Output.WriteLine(
+                        $"The installed desktop app looks for a newer ModShelf when it starts unless {CheckForAppUpdates} is false.");
                     environment.Output.WriteLine("To change a setting: settings set <setting> <value>");
                     return ExitCodes.Done;
                 },
@@ -159,7 +163,8 @@ internal static class SettingsCommand
         string? game = setting.StartsWith(GamePrefix, StringComparison.Ordinal) ? name.Trim()[GamePrefix.Length..] : null;
         bool oldVersions = setting.Equals(OldVersions, StringComparison.OrdinalIgnoreCase);
         bool closeToTray = setting.Equals(CloseToTray, StringComparison.OrdinalIgnoreCase);
-        if (setting is not (LibraryRoot or LibraryFolders or Interval or Notify or Theme or SetupDone) && !closeToTray && !oldVersions && string.IsNullOrWhiteSpace(game))
+        bool checkForAppUpdates = setting.Equals(CheckForAppUpdates, StringComparison.OrdinalIgnoreCase);
+        if (setting is not (LibraryRoot or LibraryFolders or Interval or Notify or Theme or SetupDone) && !closeToTray && !checkForAppUpdates && !oldVersions && string.IsNullOrWhiteSpace(game))
         {
             await environment.Error.WriteLineAsync($"There's no setting called {name}. Settings: {Names}.").ConfigureAwait(false);
             return ExitCodes.BadInput;
@@ -217,6 +222,14 @@ internal static class SettingsCommand
                                 false => $"{CloseToTray} is now false: closing the desktop app's window quits ModShelf.",
                                 null => $"{CloseToTray} is back to its default: the desktop app asks the first time its window closes.",
                             });
+                        }
+                        else if (checkForAppUpdates)
+                        {
+                            bool? check = value is null ? null : ParseBool(value);
+                            await settings.SetCheckForAppUpdatesAsync(check, cancellationToken).ConfigureAwait(false);
+                            environment.Output.WriteLine(check ?? true
+                                ? $"{CheckForAppUpdates} is {(check is null ? "back to its default, true" : "now true")}: the installed desktop app looks for a newer ModShelf when it starts."
+                                : $"{CheckForAppUpdates} is now false: the installed desktop app looks for a newer ModShelf only when asked, on its Settings screen.");
                         }
                         else if (setting == SetupDone)
                         {

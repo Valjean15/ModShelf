@@ -99,6 +99,9 @@ internal sealed class InMemorySettingsService : ISettingsService
     public Task SetSetupDoneAsync(bool? done, CancellationToken cancellationToken)
         => ChangeAsync($"setupDone {done?.ToString() ?? "null"}", settings => settings with { SetupDone = done });
 
+    public Task SetCheckForAppUpdatesAsync(bool? check, CancellationToken cancellationToken)
+        => ChangeAsync($"checkForAppUpdates {check?.ToString() ?? "null"}", settings => settings with { CheckForAppUpdates = check });
+
     private async Task ChangeAsync(string change, Func<AppSettings, AppSettings> apply)
     {
         lock (_gate)

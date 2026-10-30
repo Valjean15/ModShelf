@@ -85,4 +85,9 @@ public interface ISettingsService
     /// shows it again at the next start.
     /// </summary>
     Task SetSetupDoneAsync(bool? done, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets whether the installed desktop app looks for a newer ModShelf when it starts, or sets it back to yes with null.
+    /// </summary>
+    Task SetCheckForAppUpdatesAsync(bool? check, CancellationToken cancellationToken);
 }

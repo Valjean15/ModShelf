@@ -39,4 +39,6 @@ internal sealed class FakeSettingsService : ISettingsService
     public Task SetCloseToTrayAsync(bool? closeToTray, CancellationToken cancellationToken) => throw new NotSupportedException();
 
     public Task SetSetupDoneAsync(bool? done, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    public Task SetCheckForAppUpdatesAsync(bool? check, CancellationToken cancellationToken) => throw new NotSupportedException();
 }

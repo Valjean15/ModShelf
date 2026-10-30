@@ -24,7 +24,8 @@ namespace ModShelf.Infrastructure.Settings;
 ///   "updates": { "interval": "6h" },
 ///   "appearance": { "theme": "dark" },
 ///   "window": { "closeToTray": true },
-///   "setup": { "done": true }
+///   "setup": { "done": true },
+///   "app": { "checkForUpdates": false }
 /// }
 /// </code>
 /// </summary>
@@ -48,6 +49,8 @@ internal sealed class JsonSettingsStore : ISettingsStore
     private const string CloseToTray = "closeToTray";
     private const string Setup = "setup";
     private const string Done = "done";
+    private const string App = "app";
+    private const string CheckForUpdates = "checkForUpdates";
 
     private static readonly JsonDocumentOptions Reading = new() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
     private static readonly JsonSerializerOptions Writing = new() { WriteIndented = true };
@@ -79,6 +82,7 @@ internal sealed class JsonSettingsStore : ISettingsStore
         JsonObject appearance = file?[Appearance] as JsonObject ?? [];
         JsonObject window = file?[Window] as JsonObject ?? [];
         JsonObject setup = file?[Setup] as JsonObject ?? [];
+        JsonObject app = file?[App] as JsonObject ?? [];
         try
         {
             string? root = Text(library, Root);
@@ -107,6 +111,7 @@ internal sealed class JsonSettingsStore : ISettingsStore
                 NotifyOfUpdates = Flag(updates, Notify, Updates),
                 CloseToTray = Flag(window, CloseToTray, Window),
                 SetupDone = Flag(setup, Done, Setup),
+                CheckForAppUpdates = Flag(app, CheckForUpdates, App),
                 Theme = Text(appearance, Theme, Appearance) is { } theme
                     ? ThemeNamed(theme) ?? throw new InvalidDataException($"{Appearance}.{Theme} must be system, light or dark.")
                     : null,
@@ -221,6 +226,25 @@ internal sealed class JsonSettingsStore : ISettingsStore
         else
         {
             file[Setup] = setupSection;
+        }
+
+        JsonObject appSection = file[App] as JsonObject ?? [];
+        if (settings.CheckForAppUpdates is { } check)
+        {
+            appSection[CheckForUpdates] = check;
+        }
+        else
+        {
+            appSection.Remove(CheckForUpdates);
+        }
+
+        if (appSection.Count == 0)
+        {
+            file.Remove(App);
+        }
+        else
+        {
+            file[App] = appSection;
         }
 
         JsonObject appearanceSection = file[Appearance] as JsonObject ?? [];

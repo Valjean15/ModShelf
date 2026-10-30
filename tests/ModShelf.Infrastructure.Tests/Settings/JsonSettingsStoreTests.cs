@@ -406,6 +406,34 @@ public sealed class JsonSettingsStoreTests : IDisposable
     }
 
     [Fact]
+    public async Task KeepsWhetherToCheckForANewerModShelf()
+    {
+        await WriteAsync("""{ "app": { "channel": "beta" } }""");
+
+        await Store().SaveAsync(new AppSettings { CheckForAppUpdates = false }, Cancellation);
+
+        Assert.False((await Store().LoadAsync(Cancellation)).CheckForAppUpdates);
+        string file = await File.ReadAllTextAsync(FilePath, Cancellation);
+        Assert.Contains("\"checkForUpdates\": false", file, StringComparison.Ordinal);
+        Assert.Contains("\"channel\": \"beta\"", file, StringComparison.Ordinal);
+
+        await Store().SaveAsync(new AppSettings(), Cancellation);
+
+        Assert.Null((await Store().LoadAsync(Cancellation)).CheckForAppUpdates);
+        Assert.DoesNotContain("checkForUpdates", await File.ReadAllTextAsync(FilePath, Cancellation), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SaysWhenCheckForUpdatesIsntTrueOrFalse()
+    {
+        await WriteAsync("""{ "app": { "checkForUpdates": 0 } }""");
+
+        InvalidDataException refused = await Assert.ThrowsAsync<InvalidDataException>(() => Store().LoadAsync(Cancellation));
+
+        Assert.StartsWith($"The settings in {FilePath} can't be read: app.checkForUpdates must be true or false.", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task SaysWhenSetupDoneIsntTrueOrFalse()
     {
         await WriteAsync("""{ "setup": { "done": "yes" } }""");

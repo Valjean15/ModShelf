@@ -61,6 +61,11 @@ public sealed record AppSettings
     public bool? SetupDone { get; init; }
 
     /// <summary>
+    /// Whether the installed desktop app looks for a newer ModShelf when it starts; null for yes.
+    /// </summary>
+    public bool? CheckForAppUpdates { get; init; }
+
+    /// <summary>
     /// The pattern files of <paramref name="game"/> go by.
     /// </summary>
     public FolderPattern FoldersFor(string game)

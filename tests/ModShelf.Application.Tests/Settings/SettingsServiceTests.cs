@@ -198,6 +198,18 @@ public sealed class SettingsServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task SetsWhetherToCheckForANewerModShelfAndBackToYes()
+    {
+        await _settings.SetCheckForAppUpdatesAsync(false, Cancellation);
+        bool? set = (await _settings.GetAsync(Cancellation)).CheckForAppUpdates;
+
+        await _settings.SetCheckForAppUpdatesAsync(null, Cancellation);
+
+        Assert.False(set);
+        Assert.Null((await _settings.GetAsync(Cancellation)).CheckForAppUpdates);
+    }
+
+    [Fact]
     public async Task SetsWhetherTheFirstRunSetupIsDoneAndBackToNotYet()
     {
         Assert.Null((await _settings.GetAsync(Cancellation)).SetupDone);

@@ -126,6 +126,9 @@ internal sealed class SettingsService : ISettingsService, IDisposable
     public Task SetSetupDoneAsync(bool? done, CancellationToken cancellationToken)
         => ChangeAsync((settings, _) => Task.FromResult(settings with { SetupDone = done }), cancellationToken);
 
+    public Task SetCheckForAppUpdatesAsync(bool? check, CancellationToken cancellationToken)
+        => ChangeAsync((settings, _) => Task.FromResult(settings with { CheckForAppUpdates = check }), cancellationToken);
+
     public void Dispose() => _changing.Dispose();
 
     /// <summary>
