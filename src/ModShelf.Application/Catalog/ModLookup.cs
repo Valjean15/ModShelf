@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 
-using ModShelf.Application.Downloads;
 using ModShelf.Application.Sources;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Catalog;
@@ -10,7 +9,7 @@ using ModShelf.Sources.Abstractions.Search;
 namespace ModShelf.Application.Catalog;
 
 /// <summary>
-/// Finds the source a link belongs to, as <see cref="ILinkDownloads"/> does, and asks its <see cref="IModCatalog"/>
+/// Finds the source a link belongs to, as <see cref="Downloads.ILinkDownloads"/> does, and asks its <see cref="IModCatalog"/>
 /// about the mod, all four questions at once. Searches go to the game's source's <see cref="IModSearch"/>. Each
 /// source's games are kept once read.
 /// </summary>
@@ -32,34 +31,17 @@ internal sealed class ModLookup : IModLookup
 
     public async Task<ModPage> LookUpAsync(Uri link, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(link);
-        if (!link.IsAbsoluteUri)
-        {
-            throw new ArgumentException("The link must be absolute.", nameof(link));
-        }
-
-        RecognizedLink recognized;
-        try
-        {
-            recognized = await _sources.RecognizeAsync(link, cancellationToken).ConfigureAwait(false);
-        }
-        catch (UnsupportedLinkException exception)
-        {
-            throw new UnsupportedLinkException("No source knows this link.", exception);
-        }
-
-        ModRef mod = recognized.File.Mod;
-        IModCatalog catalog = _sources.Find<IModCatalog>(mod.Game.Source)
-            ?? throw new UnsupportedLinkException("This link isn't to a mod on a site ModShelf can look mods up on.");
-        return await DescribeAsync(catalog, mod, recognized.File, cancellationToken).ConfigureAwait(false);
+        (RecognizedLink recognized, IModCatalog catalog) = await _sources.RecognizeForAsync<IModCatalog>(
+                link, "This link isn't to a mod on a site ModShelf can look mods up on.", cancellationToken)
+            .ConfigureAwait(false);
+        return await DescribeAsync(catalog, recognized.File.Mod, recognized.File, cancellationToken).ConfigureAwait(false);
     }
 
     public Task<ModPage> LookUpAsync(ModRef modRef, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(modRef);
 
-        IModCatalog catalog = _sources.Find<IModCatalog>(modRef.Game.Source)
-            ?? throw new ArgumentException($"Source '{modRef.Game.Source}' isn't registered, or can't describe its mods.", nameof(modRef));
+        IModCatalog catalog = _sources.Require<IModCatalog>(modRef.Game.Source, "can't describe its mods", nameof(modRef));
         return DescribeAsync(catalog, modRef, linkedFile: null, cancellationToken);
     }
 
@@ -67,8 +49,7 @@ internal sealed class ModLookup : IModLookup
     {
         ArgumentNullException.ThrowIfNull(source);
 
-        IModCatalog catalog = _sources.Find<IModCatalog>(source)
-            ?? throw new ArgumentException($"Source '{source}' isn't registered, or can't describe its games.", nameof(source));
+        IModCatalog catalog = _sources.Require<IModCatalog>(source, "can't describe its games", nameof(source));
         if (_games.TryGetValue(source, out IReadOnlyList<GameInfo>? kept))
         {
             return kept;
@@ -83,8 +64,7 @@ internal sealed class ModLookup : IModLookup
         ArgumentNullException.ThrowIfNull(game);
         ArgumentNullException.ThrowIfNull(query);
 
-        IModSearch search = _sources.Find<IModSearch>(game.Source)
-            ?? throw new ArgumentException($"Source '{game.Source}' isn't registered, or can't search.", nameof(game));
+        IModSearch search = _sources.Require<IModSearch>(game.Source, "can't search", nameof(game));
         return search.SearchAsync(game, query, cancellationToken);
     }
 

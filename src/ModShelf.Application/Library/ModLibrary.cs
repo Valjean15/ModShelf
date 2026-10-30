@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 
-using ModShelf.Application.Downloads;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
@@ -64,18 +63,17 @@ internal sealed partial class ModLibrary : IModLibrary
 
     public async Task<LibraryMod> WatchAsync(Uri link, CancellationToken cancellationToken)
     {
-        ModRef mod = await ModOfAsync(link, cancellationToken).ConfigureAwait(false);
-        IModCatalog catalog = _sources.Find<IModCatalog>(mod.Game.Source)
-            ?? throw new UnsupportedLinkException("This link isn't to a mod on a site where ModShelf can watch mods.");
-        return await WatchingAsync(catalog, mod, cancellationToken).ConfigureAwait(false);
+        (RecognizedLink recognized, IModCatalog catalog) = await _sources.RecognizeForAsync<IModCatalog>(
+                link, "This link isn't to a mod on a site where ModShelf can watch mods.", cancellationToken)
+            .ConfigureAwait(false);
+        return await WatchingAsync(catalog, recognized.File.Mod, cancellationToken).ConfigureAwait(false);
     }
 
     public Task<LibraryMod> WatchAsync(ModRef modRef, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(modRef);
 
-        IModCatalog catalog = _sources.Find<IModCatalog>(modRef.Game.Source)
-            ?? throw new ArgumentException($"Source '{modRef.Game.Source}' isn't registered, or can't describe its mods.", nameof(modRef));
+        IModCatalog catalog = _sources.Require<IModCatalog>(modRef.Game.Source, "can't describe its mods", nameof(modRef));
         return WatchingAsync(catalog, modRef, cancellationToken);
     }
 
@@ -84,7 +82,7 @@ internal sealed partial class ModLibrary : IModLibrary
         // A mod in the library is found by its page there, so one its site removed can still be unwatched.
         ArgumentNullException.ThrowIfNull(link);
         ModRef mod = LibraryLinks.ModAt(await _repository.ListAsync(cancellationToken).ConfigureAwait(false), link)
-            ?? await ModOfAsync(link, cancellationToken).ConfigureAwait(false);
+            ?? (await _sources.RecognizeLinkAsync(link, cancellationToken).ConfigureAwait(false)).File.Mod;
         return await UpdateAsync(mod, stored => Unwatched(stored), cancellationToken).ConfigureAwait(false);
     }
 
@@ -163,26 +161,6 @@ internal sealed partial class ModLibrary : IModLibrary
         while (folder is not null && LibraryPaths.RelativeTo(root, folder) is not null && _storage.RemoveFolderIfEmpty(folder))
         {
             folder = Path.GetDirectoryName(folder);
-        }
-    }
-
-    /// <exception cref="UnsupportedLinkException">No source knows the link.</exception>
-    private async Task<ModRef> ModOfAsync(Uri link, CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(link);
-        if (!link.IsAbsoluteUri)
-        {
-            throw new ArgumentException("The link must be absolute.", nameof(link));
-        }
-
-        try
-        {
-            RecognizedLink recognized = await _sources.RecognizeAsync(link, cancellationToken).ConfigureAwait(false);
-            return recognized.File.Mod;
-        }
-        catch (UnsupportedLinkException exception)
-        {
-            throw new UnsupportedLinkException("No source knows this link.", exception);
         }
     }
 }

@@ -24,8 +24,7 @@ internal sealed class ModUpdates : IModUpdates
     {
         ArgumentNullException.ThrowIfNull(game);
 
-        IUpdateFeed feed = _sources.Find<IUpdateFeed>(game.Source)
-            ?? throw new ArgumentException($"Source '{game.Source}' isn't registered, or has no update feed.", nameof(game));
+        IUpdateFeed feed = _sources.Require<IUpdateFeed>(game.Source, "has no update feed", nameof(game));
         IReadOnlyList<ModUpdate> updates = await feed.GetUpdatesAsync(game, since, cancellationToken).ConfigureAwait(false);
         return [.. updates.OrderByDescending(update => update.LastActivityAt).ThenBy(update => update.Mod.Id, StringComparer.Ordinal)];
     }

@@ -3,7 +3,6 @@ using ModShelf.Application.Library;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Sources;
 using ModShelf.Domain.Mods;
-using ModShelf.Sources.Abstractions.Links;
 using ModShelf.Sources.Abstractions.Watchlist;
 
 namespace ModShelf.Application.Watchlist;
@@ -32,8 +31,7 @@ internal sealed class Watchlists : IWatchlists
     {
         ArgumentNullException.ThrowIfNull(source);
 
-        IWatchlistSync watchlist = _sources.Find<IWatchlistSync>(source)
-            ?? throw new ArgumentException($"Source '{source}' isn't registered, or has no watchlist.", nameof(source));
+        IWatchlistSync watchlist = _sources.Require<IWatchlistSync>(source, "has no watchlist", nameof(source));
         return watchlist.GetWatchedAsync(cancellationToken);
     }
 
@@ -54,37 +52,18 @@ internal sealed class Watchlists : IWatchlists
     {
         ArgumentNullException.ThrowIfNull(modRef);
 
-        return _sources.Find<IWatchlistSync>(modRef.Game.Source)
-            ?? throw new ArgumentException($"Source '{modRef.Game.Source}' isn't registered, or has no watchlist.", nameof(modRef));
+        return _sources.Require<IWatchlistSync>(modRef.Game.Source, "has no watchlist", nameof(modRef));
     }
 
     /// <param name="inLibrary">Whether a link to a library mod's page is matched there first, without asking its site.</param>
     private async Task<ModRef> ChangeAsync(Uri link, bool inLibrary, Func<IWatchlistSync, ModRef, Task> change, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(link);
-        if (!link.IsAbsoluteUri)
-        {
-            throw new ArgumentException("The link must be absolute.", nameof(link));
-        }
-
         ModRef mod = (inLibrary ? LibraryLinks.ModAt(await _library.ListAsync(cancellationToken).ConfigureAwait(false), link) : null)
-            ?? await ModOfAsync(link, cancellationToken).ConfigureAwait(false);
+            ?? (await _sources.RecognizeLinkAsync(link, cancellationToken).ConfigureAwait(false)).File.Mod;
         IWatchlistSync watchlist = _sources.Find<IWatchlistSync>(mod.Game.Source)
             ?? throw new UnsupportedLinkException("This link isn't to a mod on a site where ModShelf can track mods.");
         await change(watchlist, mod).ConfigureAwait(false);
         return mod;
-    }
-
-    /// <exception cref="UnsupportedLinkException">No source knows the link.</exception>
-    private async Task<ModRef> ModOfAsync(Uri link, CancellationToken cancellationToken)
-    {
-        try
-        {
-            return (await _sources.RecognizeAsync(link, cancellationToken).ConfigureAwait(false)).File.Mod;
-        }
-        catch (UnsupportedLinkException exception)
-        {
-            throw new UnsupportedLinkException("No source knows this link.", exception);
-        }
     }
 }

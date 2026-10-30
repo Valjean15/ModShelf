@@ -82,24 +82,9 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
 
     public async Task<LibraryDownload> AddAsync(Uri link, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(link);
-        if (!link.IsAbsoluteUri)
-        {
-            throw new ArgumentException("The link must be absolute.", nameof(link));
-        }
-
-        RecognizedLink recognized;
-        try
-        {
-            recognized = await _sources.RecognizeAsync(link, cancellationToken).ConfigureAwait(false);
-        }
-        catch (UnsupportedLinkException exception)
-        {
-            throw new UnsupportedLinkException("No source knows this link.", exception);
-        }
-
-        IModCatalog catalog = _sources.Find<IModCatalog>(recognized.File.Mod.Game.Source)
-            ?? throw new UnsupportedLinkException("This link isn't to a mod on a site whose mods ModShelf keeps in a library.");
+        (RecognizedLink recognized, IModCatalog catalog) = await _sources.RecognizeForAsync<IModCatalog>(
+                link, "This link isn't to a mod on a site whose mods ModShelf keeps in a library.", cancellationToken)
+            .ConfigureAwait(false);
 
         await _lock.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
