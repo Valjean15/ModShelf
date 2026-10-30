@@ -12,6 +12,29 @@ public sealed class SecretFilesTests : IDisposable
     public void Dispose() => _folder.Dispose();
 
     [Fact]
+    public async Task CreatingWritesAFileThatIsntThere()
+    {
+        string path = Path.Combine(_folder.Path, ".machine-id");
+
+        Assert.True(await SecretFiles.CreateAsync(path, "machine-a"u8.ToArray(), Cancellation));
+
+        Assert.Equal("machine-a", await File.ReadAllTextAsync(path, Cancellation));
+        Assert.Single(Directory.EnumerateFiles(_folder.Path));
+    }
+
+    [Fact]
+    public async Task CreatingLeavesAFileThatsThereAsItIs()
+    {
+        string path = Path.Combine(_folder.Path, ".machine-id");
+        await File.WriteAllTextAsync(path, "machine-a", Cancellation);
+
+        Assert.False(await SecretFiles.CreateAsync(path, "machine-b"u8.ToArray(), Cancellation));
+
+        Assert.Equal("machine-a", await File.ReadAllTextAsync(path, Cancellation));
+        Assert.Single(Directory.EnumerateFiles(_folder.Path));
+    }
+
+    [Fact]
     public async Task WritingReplacesTheFile()
     {
         string path = Path.Combine(_folder.Path, "account_nexus.bin");

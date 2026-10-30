@@ -25,6 +25,7 @@ internal sealed class EncryptedFileSecretStore : ISecretStore
     private static readonly string[] MachineIdFiles = ["/etc/machine-id", "/var/lib/dbus/machine-id"];
 
     private readonly string _folder;
+    private readonly IReadOnlyList<string> _systemIdFiles;
     private readonly Func<string> _readMachineId;
     private readonly Lock _machineIdGate = new();
     private byte[]? _machineId;
@@ -44,7 +45,8 @@ internal sealed class EncryptedFileSecretStore : ISecretStore
     /// Reads what ties the secrets to this computer, the first time it's needed, and again after it fails; by default,
     /// as the other constructor says.
     /// </param>
-    internal EncryptedFileSecretStore(string folder, Func<string>? readMachineId)
+    /// <param name="systemIdFiles">Where the system's machine ID may be, by default; tests leave it out.</param>
+    internal EncryptedFileSecretStore(string folder, Func<string>? readMachineId, IReadOnlyList<string>? systemIdFiles = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(folder);
         if (!AesGcm.IsSupported)
@@ -53,6 +55,7 @@ internal sealed class EncryptedFileSecretStore : ISecretStore
         }
 
         _folder = folder;
+        _systemIdFiles = systemIdFiles ?? MachineIdFiles;
         _readMachineId = readMachineId ?? ReadMachineId;
     }
 
@@ -149,7 +152,7 @@ internal sealed class EncryptedFileSecretStore : ISecretStore
 
     private string ReadMachineId()
     {
-        foreach (string file in MachineIdFiles)
+        foreach (string file in _systemIdFiles)
         {
             if (File.Exists(file) && File.ReadAllText(file).Trim() is { Length: > 0 } id)
             {
@@ -157,15 +160,12 @@ internal sealed class EncryptedFileSecretStore : ISecretStore
             }
         }
 
-        // No machine ID, as in some containers: keep a random one beside the secrets instead.
+        // No machine ID, as in some containers: keep a random one beside the secrets instead. Of two processes making
+        // one at once, the first to finish wins, and the other reads it, so both encrypt with the same.
         string local = Path.Combine(_folder, ".machine-id");
         SecretFiles.EnsureFolder(_folder);
-        if (!File.Exists(local))
-        {
-            SecretFiles.WriteAsync(local, Encoding.UTF8.GetBytes(Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(16))), CancellationToken.None)
-                .GetAwaiter().GetResult();
-        }
-
+        SecretFiles.CreateAsync(local, Encoding.UTF8.GetBytes(Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(16))), CancellationToken.None)
+            .GetAwaiter().GetResult();
         return File.ReadAllText(local).Trim();
     }
 

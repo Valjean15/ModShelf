@@ -83,6 +83,29 @@ public sealed class EncryptedFileSecretStoreTests : SecretStoreContractTests
     }
 
     [Fact]
+    public async Task WithoutASystemMachineIdARandomOneIsKeptBesideTheSecrets()
+    {
+        CancellationToken cancellation = TestContext.Current.CancellationToken;
+        await WithoutSystemId().WriteAsync("account/test", "secret", cancellation);
+
+        Assert.Equal("secret", await WithoutSystemId().ReadAsync("account/test", cancellation));
+        Assert.Matches("^[0-9a-f]{32}$", (await File.ReadAllTextAsync(Path.Combine(_folder.Path, ".machine-id"), cancellation)).Trim());
+    }
+
+    [Fact]
+    public async Task AMachineIdAnotherProcessKeptFirstIsTheOneUsed()
+    {
+        // As when two processes make one at once: the one finished first stays.
+        CancellationToken cancellation = TestContext.Current.CancellationToken;
+        await File.WriteAllTextAsync(Path.Combine(_folder.Path, ".machine-id"), "machine-a\n", cancellation);
+        await new EncryptedFileSecretStore(_folder.Path, machineId: "machine-a").WriteAsync("account/test", "secret", cancellation);
+
+        Assert.Equal("secret", await WithoutSystemId().ReadAsync("account/test", cancellation));
+        Assert.Equal("machine-a\n", await File.ReadAllTextAsync(Path.Combine(_folder.Path, ".machine-id"), cancellation));
+        Assert.Empty(Directory.EnumerateFiles(_folder.Path, "*.tmp"));
+    }
+
+    [Fact]
     public async Task OnlyTheUserCanReadTheFiles()
     {
         Assert.SkipWhen(OperatingSystem.IsWindows(), "Unix file permissions don't apply on Windows.");
@@ -101,4 +124,10 @@ public sealed class EncryptedFileSecretStoreTests : SecretStoreContractTests
     protected override ISecretStore CreateStore() => new EncryptedFileSecretStore(Path.Combine(_folder.Path, "Secrets"));
 
     private string FileOf(string name) => Path.Combine(_folder.Path, "Secrets", $"{name.Replace('/', '_')}.secret");
+
+    /// <summary>
+    /// A store on a system without a machine ID of its own, as in some containers.
+    /// </summary>
+    private EncryptedFileSecretStore WithoutSystemId()
+        => new(_folder.Path, readMachineId: null, systemIdFiles: [Path.Combine(_folder.Path, "no-machine-id")]);
 }

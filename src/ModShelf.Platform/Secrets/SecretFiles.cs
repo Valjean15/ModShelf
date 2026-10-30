@@ -32,6 +32,24 @@ internal static class SecretFiles
         => WriteAsync(path, contents, overwrite: true, cancellationToken);
 
     /// <summary>
+    /// Writes the file as <see cref="WriteAsync(string, byte[], CancellationToken)"/> does, unless there's one at
+    /// <paramref name="path"/> already, such as one another process just wrote, which stays as it is.
+    /// </summary>
+    /// <returns>Whether it wrote the file.</returns>
+    public static async Task<bool> CreateAsync(string path, byte[] contents, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await WriteAsync(path, contents, overwrite: false, cancellationToken).ConfigureAwait(false);
+            return true;
+        }
+        catch (IOException) when (File.Exists(path))
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Deletes the file. Does nothing when the file or its folder doesn't exist.
     /// </summary>
     public static void Delete(string path)
