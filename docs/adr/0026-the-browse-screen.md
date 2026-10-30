@@ -30,7 +30,7 @@ The human chose, before anything was built:
   - It keeps the API's order and lists each domain name once.
   - It leaves out a game whose domain name links can't carry, since it couldn't be searched.
   - A game without a name goes by its domain name, and one without a page gets the page its domain name gives, as `GetGameAsync` does.
-- **Until the list is recorded,** the tests serve the recorded game's answer in a list, which is the shape the API documents. The recording script records `games.json`, trimmed to the first three games and the recorded one, without their categories.
+- **The list is recorded** (2026-10-30): `games.json`, trimmed to the first three games and the recorded one, without their categories. Its entries have the shape of the game answer. The shared contract tests serve it; tests written by hand still serve the recorded game in lists of their own, for duplicates and games without a domain name.
 - **The shared contract tests** check that a source lists only its own games, each once, and lists the games of its own links.
 
 ### Application
@@ -143,4 +143,3 @@ Presentation's block grows:
 
 ## Open
 
-- **The `games.json` recording.** Until a Premium run of the recording script records it, the tests take its entries to have the shape of the recorded game answer.

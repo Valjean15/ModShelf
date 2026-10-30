@@ -92,5 +92,5 @@ It works with either account and records only those, or the searches too with `-
 
 ## Open
 
-- **How Nexus Mods answers tracking and untracking.** Until a `-Tracking` recording exists, the tests use made-up statuses, and any refusal is checked against the list. Once it exists, tests replay it, and the refusals that need the check can narrow to what Nexus Mods answers.
+- **How Nexus Mods answers tracking and untracking.** Recorded on 2026-10-30 with `-Tracking`: tracking answers 201, and 201 again for a mod tracked already; untracking answers 200, and 404, "User is not tracking mod. Unable to untrack.", for a mod not tracked; tracking a mod that doesn't exist answers 404, "Mod: 999999999 not found". Tests replay each, matched by method and form. The check against the list stays for every refusal but a rate limit, a refused account and a server error: it costs a request only when something is refused, and covers statuses the recording didn't show.
 - **Whether `1m` reaches back 30 days or a calendar month.** The reach stays at 28 days either way.

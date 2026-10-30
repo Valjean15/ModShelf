@@ -59,5 +59,5 @@ Nexus Mods hasn't documented that API. Its staff call it a work in progress, and
 ## Consequences
 
 - With a linked account, the CLI can find a mod by name and go on to `mod show` and `download` with its link.
-- **Until the recording run, the Nexus search is checked only against answers written by hand.** Once the recordings exist, tests replay them, matched by their variables. Any difference from the real schema gets fixed in the query and this ADR.
+- **The query is confirmed.** A Premium run on 2026-10-30 recorded the seven searches without an error: words, author, each sort, ascending, a second page, adult content and no results. Tests replay them, each answered only when the source sends the recorded variables, which a test compares in full, so the query, its filter names and `ASC` stand as written. Answers written by hand still cover what the recordings don't show, such as a mod with fields missing.
 - **A second source** implements `IModSearch` with its own query, and maps the sorts it has. A sort it doesn't have is an `ArgumentException`.
