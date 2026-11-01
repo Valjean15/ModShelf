@@ -10,7 +10,7 @@ namespace ModShelf.Cli.Tests.Common;
 /// </summary>
 internal sealed class CliProcess : IDisposable
 {
-    private static readonly string CliAssembly = Path.Combine(AppContext.BaseDirectory, "ModShelf.Cli.dll");
+    internal static readonly string CliAssembly = Path.Combine(AppContext.BaseDirectory, "ModShelf.Cli.dll");
 
     private readonly Process _process;
     private readonly Task<string> _output;
@@ -95,7 +95,7 @@ internal sealed class CliProcess : IDisposable
     /// The dotnet that runs these tests, so the CLI runs on the same runtime. The shared runtime lives in
     /// <c>&lt;root&gt;/shared/Microsoft.NETCore.App/&lt;version&gt;/</c>, next to the host in <c>&lt;root&gt;</c>.
     /// </summary>
-    private static string DotnetHost()
+    internal static string DotnetHost()
     {
         string root = Path.GetFullPath(Path.Combine(RuntimeEnvironment.GetRuntimeDirectory(), "..", "..", ".."));
         string host = Path.Combine(root, OperatingSystem.IsWindows() ? "dotnet.exe" : "dotnet");

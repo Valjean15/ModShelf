@@ -13,7 +13,7 @@ internal static class CliCommands
 {
     public static RootCommand Create(CliEnvironment environment)
     {
-        RootCommand root = new("ModShelf from the command line: download files, look mods up, keep a library of mods, look at the download queue, link accounts, change settings, choose which app opens the links sites hand downloads over with, and write a report for bug reports.")
+        RootCommand root = new("ModShelf from the command line: download files, look mods up, keep a library of mods, look at the download queue, link accounts, change settings, choose which app opens the links sites hand downloads over with, write a report for bug reports, and run an MCP server for AI agents.")
         {
             DownloadCommand.Create(environment),
             ModCommand.Create(environment),
@@ -23,6 +23,7 @@ internal static class CliCommands
             SettingsCommand.Create(environment),
             LinksCommand.Create(environment),
             DiagnosticsCommand.Create(environment),
+            McpCommand.Create(environment),
         };
         GuardedAction.GuardAll(root, environment);
         return root;

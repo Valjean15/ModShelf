@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="ModelContextProtocol.Core" />
     <PackageReference Include="System.CommandLine" />
   </ItemGroup>
 

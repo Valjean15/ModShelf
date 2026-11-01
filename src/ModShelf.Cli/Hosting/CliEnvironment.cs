@@ -9,13 +9,17 @@ namespace ModShelf.Cli.Hosting;
 /// <param name="InputIsTerminal">Whether a person types the input, so a secret can be read without showing it.</param>
 /// <param name="OutputIsTerminal">Whether a person reads the output, so progress can update in place.</param>
 /// <param name="BuildHost">Builds the host for one command; the argument says whether queued downloads run.</param>
+/// <param name="OpenStandardStreams">
+/// Opens standard input and output as streams, for the MCP server; null where there are none to open.
+/// </param>
 internal sealed record CliEnvironment(
     TextReader Input,
     TextWriter Output,
     TextWriter Error,
     bool InputIsTerminal,
     bool OutputIsTerminal,
-    Func<bool, IHost> BuildHost)
+    Func<bool, IHost> BuildHost,
+    Func<StandardStreams>? OpenStandardStreams = null)
 {
     /// <summary>
     /// How long a read that ended at a prompt waits for Ctrl+C before it counts as the end of the input: on Windows,
@@ -35,5 +39,6 @@ internal sealed record CliEnvironment(
         Console.Error,
         InputIsTerminal: !Console.IsInputRedirected,
         OutputIsTerminal: !Console.IsOutputRedirected,
-        runDownloads => CliHost.Build(runDownloads));
+        runDownloads => CliHost.Build(runDownloads),
+        () => new StandardStreams(Console.OpenStandardInput(), Console.OpenStandardOutput()));
 }

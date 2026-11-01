@@ -21,9 +21,10 @@ internal sealed class CliRun : IAsyncDisposable
     private readonly CancellationTokenSource _ctrlC = new();
     private readonly Task<int> _exitCode;
 
-    public CliRun(string[] arguments, TextReader input, Func<bool, IHost> buildHost)
+    /// <param name="openStandardStreams">Standard input and output as streams, for the MCP server; none by default.</param>
+    public CliRun(string[] arguments, TextReader input, Func<bool, IHost> buildHost, Func<StandardStreams>? openStandardStreams = null)
     {
-        CliEnvironment environment = new(input, _output, _error, InputIsTerminal: false, OutputIsTerminal: false, buildHost);
+        CliEnvironment environment = new(input, _output, _error, InputIsTerminal: false, OutputIsTerminal: false, buildHost, openStandardStreams);
         ParseResult parsed = CliCommands.Create(environment).Parse(arguments);
         InvocationConfiguration invocation = new()
         {

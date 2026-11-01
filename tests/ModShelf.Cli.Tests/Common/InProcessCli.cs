@@ -84,6 +84,11 @@ internal sealed class InProcessCli : IAsyncDisposable
     public CliRun Start(string[] arguments, TextReader input) => new(arguments, input, BuildHost);
 
     /// <summary>
+    /// Starts <c>mcp</c>, with a client connected to it, as an agent's app starts it.
+    /// </summary>
+    public Task<McpSession> StartMcpAsync(CancellationToken cancellationToken) => McpSession.StartAsync(BuildHost, cancellationToken);
+
+    /// <summary>
     /// Starts the app as the CLI builds it, without a command, runs <paramref name="work"/>, and stops the app again:
     /// a restart in which a source uses its API.
     /// </summary>

@@ -1,0 +1,526 @@
+using System.Security.Cryptography;
+
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+
+using ModelContextProtocol.Client;
+
+using ModShelf.Application.Downloads;
+using ModShelf.Application.Downloads.Ports;
+using ModShelf.Cli.Mcp;
+using ModShelf.Cli.Tests.Common;
+using ModShelf.Cli.Tests.Fakes;
+using ModShelf.Domain.Downloads;
+using ModShelf.Domain.Mods;
+
+using static ModShelf.Cli.Tests.Fakes.FakeHandoffSource;
+
+namespace ModShelf.Cli.Tests.Mcp;
+
+/// <summary>
+/// <c>mcp</c>: ModShelf's MCP server, with a client connected as an agent's app connects, in this process. Its tools
+/// read the library, the updates, the queue and the settings, download into the library, and change the queue and the
+/// settings. No desktop app runs, so the server runs the downloads itself, unless a test stands one in.
+/// </summary>
+public sealed class ModShelfMcpServerTests : IAsyncDisposable
+{
+    private const int Done = 0;
+
+    private static readonly byte[] Content = RandomNumberGenerator.GetBytes(16 * 1024);
+    private static readonly TimeSpan Patience = TimeSpan.FromSeconds(30);
+
+    private readonly RangeFileServer _server = new(Content, "file.zip");
+    private readonly FakeAccountSite _site = new();
+    private readonly ScriptedBrowser _browser = new() { UserActs = false };
+    private readonly ScriptedQueueOwner _desktopApp = new();
+    private InProcessCli? _cli;
+
+    private static CancellationToken Cancellation => TestContext.Current.CancellationToken;
+
+    private InProcessCli Cli => _cli ??= new InProcessCli(
+        _site,
+        _browser,
+        sources: [new FakeHandoffSource(_server.FileUrl), new FakeCatalogSite()],
+        configureServices: services =>
+        {
+            if (_desktopApp.Runs)
+            {
+                services.RemoveAll<IQueueOwner>();
+                services.AddSingleton<IQueueOwner>(_desktopApp);
+            }
+        });
+
+    private string ModFolder => Path.Combine(Cli.Downloads, "ModShelf", "fake-handoff", "game", $"{ModName} (mod)");
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_cli is not null)
+        {
+            await _cli.DisposeAsync();
+        }
+
+        _browser.Dispose();
+        await _site.DisposeAsync();
+        await _server.DisposeAsync();
+    }
+
+    [Fact]
+    public async Task ListsItsToolsAndSaysWhatModShelfIs()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        IList<McpClientTool> tools = await mcp.Client.ListToolsAsync(cancellationToken: Cancellation);
+
+        Assert.Equal(
+            [
+                "accounts_status", "diagnostics", "download", "downloads_cancel", "downloads_list", "downloads_pause",
+                "downloads_resume", "downloads_retry", "library_changes", "library_check", "library_list", "library_unwatch",
+                "library_updates", "library_watch", "mod_search", "mod_show", "settings_reset", "settings_set", "settings_show",
+            ],
+            tools.Select(tool => tool.Name).Order(StringComparer.Ordinal));
+        Assert.Equal(ModShelfMcpServer.Instructions, mcp.Client.ServerInstructions);
+        Assert.Equal("modshelf", mcp.Client.ServerInfo?.Name);
+        Assert.All(
+            tools.Where(tool => tool.Name.EndsWith("_list", StringComparison.Ordinal) || tool.Name.EndsWith("_show", StringComparison.Ordinal)),
+            tool => Assert.True(tool.ProtocolTool.Annotations?.ReadOnlyHint));
+        Assert.Equal(
+            ["downloads_cancel", "settings_set"],
+            tools.Where(tool => tool.ProtocolTool.Annotations?.DestructiveHint == true).Select(tool => tool.Name).Order(StringComparer.Ordinal));
+        Assert.All(tools, tool => Assert.NotNull(tool.ProtocolTool.OutputSchema));
+    }
+
+    [Fact]
+    public async Task EndsWhenItsClientClosesIt()
+    {
+        McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await using (mcp)
+        {
+            CliResult ended = await mcp.CloseAsync(Cancellation);
+
+            Assert.Equal(Done, ended.ExitCode);
+            Assert.Empty(ended.Output);
+        }
+    }
+
+    [Fact]
+    public async Task ShowsChangesAndResetsTheSettings()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        SettingResult changed = await mcp.CallAsync<SettingResult>("settings_set", Arguments(("setting", "library.oldVersions"), ("value", "archive")), Cancellation);
+        SettingsListing shown = await mcp.CallAsync<SettingsListing>("settings_show", null, Cancellation);
+        SettingResult reset = await mcp.CallAsync<SettingResult>("settings_reset", Arguments(("setting", "library.oldVersions")), Cancellation);
+
+        Assert.Equal("library.oldVersions is now archive: when a newer version of a file is downloaded, the old ones move to an _archive folder.", changed.Message);
+        Assert.Contains(shown.Settings, setting => setting is { Name: "library.oldVersions", Value: "archive", IsDefault: false });
+        Assert.Contains(shown.Settings, setting => setting is { Name: "library.root", IsDefault: true } && setting.Value == Path.Combine(Cli.Downloads, "ModShelf"));
+        Assert.Equal(Path.Combine(Cli.Folder, "settings.json"), shown.Location);
+        Assert.StartsWith("library.oldVersions is back to its default, 2", reset.Message, StringComparison.Ordinal);
+        Assert.Contains("archive", (await Cli.RunAsync(["settings", "show"], Cancellation)).Output, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("library.everything", "1", "There's no setting called library.everything.")]
+    [InlineData("updates.interval", "soon", "soon")]
+    [InlineData("appearance.theme", "pink", "'pink' isn't system, light or dark.")]
+    public async Task ASettingThatIsntOneOrAValueThatIsntItsIsRefused(string setting, string value, string problem)
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        string refused = await mcp.CallFailingAsync("settings_set", Arguments(("setting", setting), ("value", value)), Cancellation);
+
+        Assert.Contains(problem, refused, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task TheLibrarysRootDoesntMoveWithItsFiles()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await DownloadAndWaitAsync(mcp, "2");
+
+        string refused = await mcp.CallFailingAsync(
+            "settings_set",
+            Arguments(("setting", "library.root"), ("value", Path.Combine(Cli.Folder, "Elsewhere"))),
+            Cancellation);
+
+        Assert.EndsWith("Moving the library's files is for the user, in the desktop app or with the CLI's library move.", refused, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task DownloadsIntoTheLibraryItselfWhileNoDesktopAppRunsThenLetsTheQueueGo()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        DownloadResult result = await mcp.CallAsync<DownloadResult>("download", Arguments(("link", HandoffLink("3").AbsoluteUri)), Cancellation);
+
+        Assert.Equal("this MCP server", result.RunBy);
+        Assert.Equal(Path.Combine(ModFolder, FileNameOf("3")), result.LibraryPath);
+        Assert.Contains("No desktop app is running, so this MCP server downloads it", result.Message, StringComparison.Ordinal);
+        Assert.Equal(FileNameOf("3"), result.Download?.FileName);
+        await WaitForFileAsync(mcp, "3");
+        Assert.Equal(Content, await File.ReadAllBytesAsync(Path.Combine(ModFolder, FileNameOf("3")), Cancellation));
+
+        // Nothing is under way, so the server lets the queue go, and the CLI can run it.
+        await WaitUntilAsync(
+            async () => (await Cli.RunAsync(["download", HandoffLink("1").AbsoluteUri], Cancellation)).ExitCode == Done,
+            "The MCP server kept the queue.");
+    }
+
+    [Fact]
+    public async Task AFileTheLibraryHasIsntDownloadedAgain()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await DownloadAndWaitAsync(mcp, "3");
+
+        DownloadResult again = await mcp.CallAsync<DownloadResult>("download", Arguments(("link", HandoffLink("3").AbsoluteUri)), Cancellation);
+
+        Assert.True(again.AlreadySaved);
+        Assert.Null(again.Download);
+        Assert.Equal("The library has this file already, so nothing downloads.", again.Message);
+        Assert.Single(_server.Ranges);
+    }
+
+    [Fact]
+    public async Task ADownloadTheSiteWantsTheUserToStartWaitsWithItsPageAndLetsTheQueueGo()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        DownloadResult result = await mcp.CallAsync<DownloadResult>("download", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
+
+        Assert.Equal((nameof(DownloadJobStatus.AwaitingHandoff), Page("1").AbsoluteUri), (result.Download?.Status, result.Download?.HandoffPage));
+        Assert.StartsWith("The site needs the user to start this download on its website", result.Message, StringComparison.Ordinal);
+        Assert.DoesNotContain("this MCP server downloads it", result.Message, StringComparison.Ordinal);
+
+        // Waiting for the user isn't under way: the desktop app, which the site's link starts, takes the queue over.
+        await WaitUntilAsync(
+            async () => (await Cli.RunAsync(["download", HandoffLink("2").AbsoluteUri], Cancellation)).ExitCode == Done,
+            "The MCP server kept the queue.");
+    }
+
+    [Fact]
+    public async Task WhileItRunsTheDownloadsItListsThePagesOfTheOnesWaitingForTheUser()
+    {
+        // The pages are in the memory of the process that runs the queue, not in the database. A download held part-way
+        // keeps the queue running here.
+        _server.HoldAt(1024);
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await mcp.CallAsync<DownloadResult>("download", Arguments(("link", HandoffLink("3").AbsoluteUri)), Cancellation);
+        await mcp.CallAsync<DownloadResult>("download", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
+
+        DownloadListing listed = await mcp.CallAsync<DownloadListing>("downloads_list", null, Cancellation);
+
+        Assert.Equal(
+            [(FileNameOf("3"), nameof(DownloadJobStatus.Downloading), null), (FileNameOf("1"), nameof(DownloadJobStatus.AwaitingHandoff), Page("1").AbsoluteUri)],
+            listed.Downloads.Select(download => (download.FileName, download.Status, download.HandoffPage)));
+        _server.SendEverything();
+        _server.DropHeldConnections();
+        await WaitForFileAsync(mcp, "3");
+    }
+
+    [Fact]
+    public async Task ChangesADownloadByItsIdOrItsStart()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await mcp.CallAsync<DownloadResult>("download", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
+        DownloadEntry waiting = await WaitForDownloadAsync(mcp, download => download.Status == nameof(DownloadJobStatus.AwaitingHandoff));
+
+        DownloadResult cancelled = await mcp.CallAsync<DownloadResult>("downloads_cancel", Arguments(("id", waiting.Id[..8])), Cancellation);
+
+        Assert.Equal(nameof(DownloadJobStatus.Cancelled), cancelled.Download?.Status);
+        Assert.Equal(waiting.Id, cancelled.Download?.Id);
+        Assert.Equal("Cancelled.", cancelled.Message);
+        Assert.Contains("isn't allowed", await mcp.CallFailingAsync("downloads_pause", Arguments(("id", waiting.Id)), Cancellation), StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Theory]
+    [InlineData("1234", "its first 8 characters or more")]
+    [InlineData("ffffffff", "No download has an ID that starts with ffffffff.")]
+    [InlineData("ffffffff-ffff-ffff-ffff-ffffffffffff", "No download has the ID ffffffff-ffff-ffff-ffff-ffffffffffff.")]
+    public async Task ADownloadThatIsntThereIsRefused(string id, string problem)
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        string refused = await mcp.CallFailingAsync("downloads_resume", Arguments(("id", id)), Cancellation);
+
+        Assert.Contains(problem, refused, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("mods/2400", "That isn't a complete link")]
+    [InlineData("https://handoff.example/missing/1", "The site has no such mod or file.")]
+    [InlineData("https://handoff.example/locked/1", "The site needs a linked account for that")]
+    [InlineData("https://elsewhere.example/mods/1", "")]
+    public async Task ALinkItCantDownloadIsRefused(string link, string problem)
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        string refused = await mcp.CallFailingAsync("download", Arguments(("link", link)), Cancellation);
+
+        Assert.Contains(problem, refused, StringComparison.Ordinal);
+        Assert.DoesNotContain("Something went wrong", refused, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ADesktopAppThatRunsDownloadsInstead()
+    {
+        _desktopApp.Runs = true;
+        DownloadJobSnapshot job = new(
+            DownloadJobId.New(),
+            new ModFileRef(new ModRef(new GameRef(FakeHandoffSource.SourceId, "game"), "mod"), "3"),
+            ModFolder,
+            FileNameOf("3"),
+            DownloadJobStatus.Queued,
+            0,
+            null,
+            null,
+            DateTimeOffset.UnixEpoch);
+        _desktopApp.Reply = new QueueReply(QueueOutcome.Done, Job: job, LibraryPath: Path.Combine(ModFolder, FileNameOf("3")));
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        DownloadResult result = await mcp.CallAsync<DownloadResult>("download", Arguments(("link", HandoffLink("3").AbsoluteUri)), Cancellation);
+
+        Assert.Equal("desktop app", result.RunBy);
+        Assert.Equal(job.Id.ToString(), result.Download?.Id);
+        Assert.DoesNotContain("this MCP server", result.Message, StringComparison.Ordinal);
+        Assert.Equal(QueueRequest.Download(HandoffLink("3")), Assert.Single(_desktopApp.Requests));
+        Assert.Empty(_server.Ranges);
+    }
+
+    [Theory]
+    [InlineData(QueueOutcome.NotAllowed, "A finished download can't be paused.")]
+    [InlineData(QueueOutcome.Refused, "The site refused.")]
+    public async Task WhatTheDesktopAppRefusesIsTheToolsError(QueueOutcome outcome, string problem)
+    {
+        _desktopApp.Runs = true;
+        _desktopApp.Reply = new QueueReply(outcome, problem);
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        string refused = await mcp.CallFailingAsync("downloads_pause", Arguments(("id", Guid.NewGuid().ToString())), Cancellation);
+
+        Assert.EndsWith(problem, refused, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ADesktopAppThatDoesntReplySaysItMayHaveDoneIt()
+    {
+        _desktopApp.Runs = true;
+        _desktopApp.Fails = new TimeoutException("No reply.");
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        string refused = await mcp.CallFailingAsync("download", Arguments(("link", HandoffLink("3").AbsoluteUri)), Cancellation);
+
+        Assert.Contains("didn't reply in time; it may have carried it out. downloads_list shows the queue.", refused, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SaysWhatCameIntoTheLibraryWithTheVersionsItHadBefore()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await mcp.CallAsync<SettingResult>("settings_set", Arguments(("setting", "library.oldVersions"), ("value", "archive")), Cancellation);
+        DateTimeOffset start = DateTimeOffset.UtcNow.AddSeconds(-1);
+        await DownloadAndWaitAsync(mcp, "2");
+        LibraryChanges first = await ChangesAsync(mcp, start);
+
+        await DownloadAndWaitAsync(mcp, "3");
+        LibraryChanges next = await ChangesAsync(mcp, first.Until);
+
+        NewLibraryFile two = Assert.Single(first.Files);
+        Assert.Equal(("fake-handoff", "game", "mod", ModName, "2", "1.2"), (two.Source, two.Game, two.ModId, two.ModName, two.File.FileId, two.File.Version));
+        Assert.Empty(two.OtherFiles);
+        NewLibraryFile three = Assert.Single(next.Files);
+        Assert.Equal(("3", Path.Combine(ModFolder, FileNameOf("3")), false), (three.File.FileId, three.File.Path, three.File.Archived));
+        LibraryFileEntry before = Assert.Single(three.OtherFiles);
+        Assert.Equal(("2", "1.2", true), (before.FileId, before.Version, before.Archived));
+        Assert.Equal(Path.Combine(ModFolder, "_archive", FileNameOf("2")), before.Path);
+        Assert.True(File.Exists(before.Path));
+        Assert.Equal("archive", next.OldVersions);
+        Assert.Equal(2, (await ChangesAsync(mcp, start)).Files.Count);
+    }
+
+    [Theory]
+    [InlineData("yesterday")]
+    [InlineData("")]
+    public async Task ATimeThatIsntOneIsRefused(string since)
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        Assert.Contains(
+            "since isn't a date and time, such as 2026-11-01T09:00:00Z.",
+            await mcp.CallFailingAsync("library_changes", Arguments(("since", since)), Cancellation),
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ChecksTheWatchedModsAndListsTheUpdatesWithWhatTheyReplace()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await DownloadAndWaitAsync(mcp, "1");
+        WatchResult watched = await mcp.CallAsync<WatchResult>("library_watch", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
+
+        UpdateCheckResult check = await mcp.CallAsync<UpdateCheckResult>("library_check", null, Cancellation);
+        UpdateListing updates = await mcp.CallAsync<UpdateListing>("library_updates", Arguments(("changelog", true)), Cancellation);
+
+        Assert.True(watched.Watched);
+        Assert.Equal($"Watching {ModName} (mod mod of game on fake-handoff).", watched.Message);
+        Assert.Equal(1, check.Checked);
+        Assert.Empty(check.Failures);
+        UpdateFound newest = Assert.Single(check.Found);
+        Assert.Equal(("3", "1.3", FileLink("3").AbsoluteUri, "1"), (newest.Update.FileId, newest.Update.Version, newest.Update.Link, newest.Update.Replaces?.FileId));
+        Assert.Equal(Path.Combine(ModFolder, FileNameOf("1")), newest.Update.Replaces?.Path);
+        UpdateFound listed = Assert.Single(updates.Updates);
+        Assert.Equal(["Faster.", "Fixed the crash."], listed.Changes);
+        Assert.NotNull(updates.CheckedAt);
+        Assert.Null((await mcp.CallAsync<UpdateListing>("library_updates", null, Cancellation)).Updates[0].Changes);
+    }
+
+    [Fact]
+    public async Task ListsTheLibraryAndUnwatchesAMod()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await mcp.CallAsync<WatchResult>("library_watch", Arguments(("link", FakeCatalogSite.ModLink("1").AbsoluteUri)), Cancellation);
+        await DownloadAndWaitAsync(mcp, "1");
+
+        LibraryListing library = await mcp.CallAsync<LibraryListing>("library_list", null, Cancellation);
+        WatchResult unwatched = await mcp.CallAsync<WatchResult>("library_unwatch", Arguments(("link", FakeCatalogSite.ModLink("1").AbsoluteUri)), Cancellation);
+        WatchResult again = await mcp.CallAsync<WatchResult>("library_unwatch", Arguments(("link", FakeCatalogSite.ModLink("1").AbsoluteUri)), Cancellation);
+
+        Assert.Equal(Path.Combine(Cli.Downloads, "ModShelf"), library.Root);
+        Assert.Equal([("fake-catalog", "1", true, 0), ("fake-handoff", "mod", true, 1)], library.Mods.Select(mod => (mod.Source, mod.ModId, mod.Watched, mod.Files.Count)));
+        Assert.Equal(Path.Combine(ModFolder, FileNameOf("1")), library.Mods[1].Files[0].Path);
+        Assert.Equal("Stopped watching Example Mod. It had no downloaded files, so it's out of the library.", unwatched.Message);
+        Assert.Null(unwatched.Mod);
+        Assert.Equal("Mod 1 of game on fake-catalog isn't in the library.", again.Message);
+    }
+
+    [Fact]
+    public async Task ShowsAModWithItsFilesAndWhereTheLibraryHasThem()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await DownloadAndWaitAsync(mcp, "2");
+
+        ModDetails mod = await mcp.CallAsync<ModDetails>("mod_show", Arguments(("link", FileLink("2").AbsoluteUri), ("changelog", true)), Cancellation);
+        ModDetails catalog = await mcp.CallAsync<ModDetails>("mod_show", Arguments(("link", FakeCatalogSite.ModLink("1").AbsoluteUri)), Cancellation);
+        ModDetails all = await mcp.CallAsync<ModDetails>("mod_show", Arguments(("link", FakeCatalogSite.ModLink("1").AbsoluteUri), ("allFiles", true)), Cancellation);
+
+        Assert.Equal((ModName, "Handoff Game", true), (mod.Name, mod.GameName, mod.Watched));
+        Assert.Equal(["3", "2", "1"], mod.Files.Select(file => file.FileId));
+        ModFileEntry two = mod.Files[1];
+        Assert.Equal((true, Path.Combine(ModFolder, FileNameOf("2")), "3", FileLink("2").AbsoluteUri), (two.Linked, two.LibraryPath, two.ReplacedBy, two.Link));
+        Assert.Null(mod.Files[0].LibraryPath);
+        Assert.Equal(["1.2", "1.3"], mod.Changelog?.Select(entry => entry.Version));
+        Assert.Equal(["12", "11", "20"], catalog.Files.Select(file => file.FileId));
+        Assert.Equal(3, catalog.HiddenFiles);
+        Assert.Null(catalog.Changelog);
+        Assert.True(catalog.Adult);
+        Assert.Equal(6, all.Files.Count);
+        Assert.Equal(0, all.HiddenFiles);
+    }
+
+    [Fact]
+    public async Task SearchesAGamesMods()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        SearchResult found = await mcp.CallAsync<SearchResult>(
+            "mod_search",
+            Arguments(("game", "game"), ("source", "fake-catalog"), ("author", "Someone"), ("page", 2), ("pageSize", 5), ("sort", "downloads")),
+            Cancellation);
+
+        // Of mods 101 to 145, the even ones are by Someone.
+        Assert.Equal((22, 5, true), (found.Total, found.Offset, found.HasMore));
+        Assert.Equal(5, found.Mods.Count);
+        Assert.All(found.Mods, mod => Assert.Equal(("fake-catalog", "game", "Someone"), (mod.Source, mod.Game, mod.Author)));
+    }
+
+    [Theory]
+    [InlineData("sort", "Popularity", "sort must be one of Relevance, Endorsements, Downloads, Updated, Newest.")]
+    [InlineData("sort", "9", "sort must be one of")]
+    [InlineData("pageSize", 0, "pageSize must be from 1 to 100.")]
+    [InlineData("page", 0, "page must be 1 or more")]
+    [InlineData("source", "fake-handoff", "'fake-handoff' can't search. Sites that can: ")]
+    public async Task ASearchItCantMakeIsRefused(string name, object value, string problem)
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        Dictionary<string, object?> arguments = new() { ["game"] = "game", ["source"] = "fake-catalog", [name] = value };
+
+        Assert.Contains(problem, await mcp.CallFailingAsync("mod_search", arguments, Cancellation), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SaysWhichAccountsAreLinkedButNotWhoseOrTheirKeys()
+    {
+        Assert.Equal(Done, (await Cli.RunAsync(["account", "link", FakeApiKeySource.SourceId.Value], Cancellation, _site.ApiKey + "\n")).ExitCode);
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        AccountsListing accounts = await mcp.CallAsync<AccountsListing>("accounts_status", null, Cancellation);
+        DiagnosticsReport report = await mcp.CallAsync<DiagnosticsReport>("diagnostics", null, Cancellation);
+
+        AccountEntry linked = Assert.Single(accounts.Accounts, account => account.Source == FakeApiKeySource.SourceId.Value);
+        Assert.Equal((true, FakeAccountSite.KeyTier), (linked.Linked, linked.Level));
+        Assert.Equal(["api-key"], linked.LinkWith);
+        Assert.Contains(accounts.Accounts, account => account is { Source: "nexus", Linked: false, Level: null });
+        string everything = string.Join('\n', (await mcp.CallRawAsync("accounts_status", null, Cancellation)).Content.Select(block => block.ToString())) + report.Report;
+        Assert.DoesNotContain(FakeAccountSite.KeyUser, everything, StringComparison.Ordinal);
+        Assert.DoesNotContain(_site.ApiKey, everything, StringComparison.Ordinal);
+        Assert.StartsWith("ModShelf ", report.Report, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task LinksAndTheirKeysAreNeverLogged()
+    {
+        await using (McpSession mcp = await Cli.StartMcpAsync(Cancellation))
+        {
+            await DownloadAndWaitAsync(mcp, "3");
+            await mcp.CallFailingAsync("download", Arguments(("link", "https://handoff.example/locked/1?key=" + GoodKey)), Cancellation);
+            await mcp.CloseAsync(Cancellation);
+        }
+
+        Assert.Contains(Cli.Logs.Entries, entry => entry.Contains("The MCP server started, with 19 tools", StringComparison.Ordinal));
+        Assert.DoesNotContain(Cli.Logs.Entries, entry => entry.Contains(GoodKey, StringComparison.Ordinal));
+        Assert.DoesNotContain(Cli.Logs.Entries, entry => entry.Contains("handoff.example", StringComparison.Ordinal));
+    }
+
+    private static Dictionary<string, object?> Arguments(params (string Name, object? Value)[] arguments)
+        => arguments.ToDictionary(argument => argument.Name, argument => argument.Value);
+
+    private static async Task WaitUntilAsync(Func<Task<bool>> done, string otherwise)
+    {
+        using CancellationTokenSource patience = CancellationTokenSource.CreateLinkedTokenSource(Cancellation);
+        patience.CancelAfter(Patience);
+        while (!await done())
+        {
+            try
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(200), patience.Token);
+            }
+            catch (OperationCanceledException) when (!Cancellation.IsCancellationRequested)
+            {
+                Assert.Fail(otherwise);
+            }
+        }
+    }
+
+    private static Task<LibraryChanges> ChangesAsync(McpSession mcp, DateTimeOffset since)
+        => mcp.CallAsync<LibraryChanges>("library_changes", Arguments(("since", since.ToString("O", System.Globalization.CultureInfo.InvariantCulture))), Cancellation);
+
+    private static async Task<DownloadEntry> WaitForDownloadAsync(McpSession mcp, Func<DownloadEntry, bool> matches)
+    {
+        DownloadEntry? found = null;
+        await WaitUntilAsync(
+            async () => (found = (await mcp.CallAsync<DownloadListing>("downloads_list", null, Cancellation)).Downloads.FirstOrDefault(matches)) is not null,
+            "No download came to that.");
+        return found!;
+    }
+
+    private static async Task WaitForFileAsync(McpSession mcp, string fileId)
+        => await WaitUntilAsync(
+            async () => (await mcp.CallAsync<LibraryListing>("library_list", null, Cancellation)).Mods
+                .Any(mod => mod.Source == FakeHandoffSource.SourceId.Value && mod.Files.Any(file => file.FileId == fileId)),
+            $"File {fileId} didn't come into the library.");
+
+    private static async Task DownloadAndWaitAsync(McpSession mcp, string fileId)
+    {
+        await mcp.CallAsync<DownloadResult>("download", Arguments(("link", HandoffLink(fileId).AbsoluteUri)), Cancellation);
+        await WaitForFileAsync(mcp, fileId);
+    }
+}

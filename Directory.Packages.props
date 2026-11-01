@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup Label="Command line">
+    <PackageVersion Include="ModelContextProtocol.Core" Version="2.3.0" />
     <PackageVersion Include="System.CommandLine" Version="2.0.13" />
   </ItemGroup>
 
