@@ -42,7 +42,7 @@ tests/ModShelf.Platform.Tests/bin/Debug/net10.0/ModShelf.Platform.Tests -method 
 ./build/pack.ps1 -Version 0.9.1 -Notes notes.md win-x64   # a version and its notes, for one runtime
 ```
 
-Each runtime packs a self-contained publish: `win-x64` a per-user `Setup.exe` with a Start-menu shortcut, `linux-x64` an AppImage (which needs `mksquashfs`, and `zstd` for a delta package), and `osx-arm64` or `osx-x64` an app in a `.pkg`, on a Mac only. The installers aren't signed yet. Windows installs into `%LOCALAPPDATA%\ModShelf.App`, apart from `%LOCALAPPDATA%\ModShelf`, where the library stays when ModShelf is uninstalled. [ADR 0038](docs/adr/0038-installers-and-self-update.md) has the details. `build/render-icons.py` renders the Windows and macOS icons from `modshelf.svg`.
+Each runtime packs a self-contained publish: `win-x64` a per-user `Setup.exe` with a Start-menu shortcut, `linux-x64` an AppImage (which needs `mksquashfs`, and `zstd` for a delta package), and `osx-arm64` or `osx-x64` an app in a `.pkg`, on a Mac only. The installers aren't signed yet. Windows installs into `%LOCALAPPDATA%\ModShelf.App`, apart from `%LOCALAPPDATA%\ModShelf`, where the library stays when ModShelf is uninstalled. [ADR 0038](docs/adr/0038-installers-and-self-update.md) has the details. The command line, `ModShelf.Cli`, is in the same folder as the desktop app, so it updates with it: `%LOCALAPPDATA%\ModShelf.App\current\ModShelf.Cli.exe` on Windows, and `ModShelf.app/Contents/MacOS/ModShelf.Cli` on macOS. The AppImage holds it too, but starts only the desktop app ([ADR 0040](docs/adr/0040-the-mcp-server.md)). `build/render-icons.py` renders the Windows and macOS icons from `modshelf.svg`.
 
 ### Releasing
 
@@ -103,6 +103,7 @@ dotnet run --project src/ModShelf.Cli -- account list
 dotnet run --project src/ModShelf.Cli -- account link <source> [--with api-key|browser|email]
 dotnet run --project src/ModShelf.Cli -- account check <source>
 dotnet run --project src/ModShelf.Cli -- account unlink <source>
+dotnet run --project src/ModShelf.Cli -- mcp
 ```
 
 - `download` queues the file and shows its progress until it's done. Put the link in quotes, since shells treat characters such as `&` specially. A file that won't fit on the disk fails before anything is written. One process at a time runs the downloads of a library: while the desktop app or another `download` runs them, `download` says so and exits 1, leaving the queue alone.
@@ -144,6 +145,32 @@ dotnet run --project src/ModShelf.Cli -- account unlink <source>
 - Credentials never go in the database. They go to the system's secret store: DPAPI-encrypted files on Windows, the Keychain on macOS, and the Secret Service keyring on Linux. Without a keyring (libsecret missing, no session bus, or no Secret Service on it), Linux falls back to files encrypted for this computer, and the account commands warn about it. A keyring that's there but fails, such as one that's locked or doesn't answer, is still used: ModShelf logs that it failed, and linking or unlinking says why it couldn't. To keep test credentials apart from your own, set `ModShelf__SecretScope` to another name (the Keychain and the keyring) and `ModShelf__SecretsFolder` to another folder (the files).
 - Logs go to stderr, warnings only (`Logging__LogLevel__Default=Debug` shows more there), and to a log file a day in a `logs` folder beside the library database, such as `cli-20261029.log`, from Information up. A week of files is kept.
 - A library database that can't be opened, such as a damaged one or one another program holds, is named, with what's wrong and what to do; ModShelf leaves it as it is, and every command exits 1.
+- `mcp` runs ModShelf's MCP server, for an AI agent: see below.
+
+### MCP server
+
+`mcp` runs an [MCP](https://modelcontextprotocol.io) server on standard input and output, which an agent's app, such as Claude Desktop or Claude Code, starts and talks to. Through it, an agent can see the library, its updates, the downloads and the settings, and act on them, such as when it helps you keep a mod manager's mods up to date: ModShelf downloads the files and keeps their versions, and the mod manager installs them. ModShelf never installs mods. Its tools:
+
+- `library_list`, the mods and their files, with absolute paths, versions and whether they're archived old versions; `library_changes`, the files downloaded since a time, each with its mod's other files in the library, which are the versions it may replace; `library_updates`, the updates found, each with its link and the library file it replaces, and with `changelog`, what changed; `library_check`, which checks the watched mods now; and `library_watch` and `library_unwatch`.
+- `download`, which downloads a file's or a mod's link into the library, as the desktop app does; `downloads_list`; and `downloads_pause`, `downloads_resume`, `downloads_retry` and `downloads_cancel`, by a download's ID or its first 8 characters.
+- `mod_show` and `mod_search`, as `mod show` and `mod search` do; `settings_show`, `settings_set` and `settings_reset`, as `settings` does; `accounts_status`, whether an account is linked on each site, and its level, never whose it is or its key; and `diagnostics`.
+
+It can't link accounts, delete the library's files, move the library, or take a site's links: those stay yours, in the desktop app or the command line. While the desktop app runs, the server asks it to download and change the downloads; otherwise it runs the downloads itself until none is under way, and closing it pauses what's left, which goes on the next time ModShelf runs the downloads. With a free Nexus Mods account, each download waits for you to start it on the website: `download` gives the page, and the desktop app, which the website's link starts, carries it on. The library doesn't record which version a file replaced: `library_changes` gives a new file with the mod's other files instead, and with `library.oldVersions` at a number, the older ones may be deleted already. The server logs to `cli-….log` with the command line, and never logs links. On Windows, **Restart to update** also ends a server started from the installed app; restart the agent's app to start it again.
+
+For Claude Desktop, add it to `claude_desktop_config.json` (**Settings**, **Developer**, **Edit Config**), with your own user folder, then restart Claude Desktop:
+
+```json
+{
+  "mcpServers": {
+    "modshelf": {
+      "command": "C:\\Users\\<you>\\AppData\\Local\\ModShelf.App\\current\\ModShelf.Cli.exe",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+For Claude Code, in PowerShell: `claude mcp add --transport stdio modshelf -- "$env:LOCALAPPDATA\ModShelf.App\current\ModShelf.Cli.exe" mcp`. On macOS, the command is `/Applications/ModShelf.app/Contents/MacOS/ModShelf.Cli`. From a build, it's the `ModShelf.Cli` executable in `src/ModShelf.Cli/bin/Debug/net10.0`, not `dotnet run`, which can write the build's output where the protocol goes. The environment variables the command line takes, such as `ModShelf__DatabasePath`, go in the app's configuration of the server (`"env"` in Claude Desktop's). [ADR 0040](docs/adr/0040-the-mcp-server.md) has the details, and [docs/manual-checklist-mcp.md](docs/manual-checklist-mcp.md) the checks to make by hand.
 
 ## Solution layout
 
@@ -159,11 +186,11 @@ src/
   ModShelf.Sources.DirectUrl      plain web links, with no mod site involved
   ModShelf.Presentation           ViewModels, no Avalonia reference
   ModShelf.Desktop                Avalonia views and the desktop composition root
-  ModShelf.Cli                    headless composition root
+  ModShelf.Cli                    headless composition root: the commands, and the MCP server
 tests/
   ModShelf.<Library>.Tests        one test project per library
   ModShelf.Architecture.Tests     enforces the dependency rules, keeps the installer out of ModShelf's data folder, and checks the release notes
-  ModShelf.Cli.Tests              runs the CLI end to end: stop, kill and resume a download; finish one through a handoff; download into the library, move it and check it for updates; look up and search mods; link, check, refresh and unlink fake accounts
+  ModShelf.Cli.Tests              runs the CLI end to end: stop, kill and resume a download; finish one through a handoff; download into the library, move it and check it for updates; look up and search mods; link, check, refresh and unlink fake accounts; and the MCP server's tools, with a client
   Shared                          code several test projects compile in: SourceContractTests, TempFolder, the log recorders
 ```
 

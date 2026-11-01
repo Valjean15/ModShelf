@@ -35,7 +35,7 @@ Split a feature folder by role only where the roles below apply. Don't add role 
 | Platform | `<Feature>/` | One folder per OS service (`Secrets`, `OAuth`, `Browser`, `Folders`, `Notifications`, `Instances`, `Tray`, `Links`, `Releases`). Per-OS implementations are named after their technology (`DpapiSecretStore`, `KeychainSecretStore`); a `<Library>Interop` class sits next to the class that calls it. |
 | Presentation | `ViewModels/<Feature>/`, `Services/`, `Resources/` | ViewModels in a folder per screen (`Accounts`, `Browse`, `Downloads`, `Library`, `Settings`, `Updates`), with what only that screen uses; the dialogs' in `ViewModels/Dialogs/`; the main window's and the tray's at the root of `ViewModels/`. Navigation and dialog interfaces; `.resx` strings. `Browse` is named after its screen, which searches the catalog and lists the watchlist. |
 | Sources.\<Name\> | root, then `<Capability>/`, `Api/` | `<Name>Source`, `Add<Name>Source()` and the `<Name>Options` it takes at the root; capability folders (`Accounts`, `Catalog`, `Downloads`) as the site grows; HTTP clients and DTOs in `Api/`. |
-| Cli | `Commands/`, `Hosting/` | One `<Name>Command` per command with what only commands use (`ExitCodes`, output formatting); the host builder and lifetime. |
+| Cli | `Commands/`, `Mcp/`, `Hosting/` | One `<Name>Command` per command with what only commands use (`ExitCodes`, output formatting); the MCP server, its tool types (`<Feature>Tools`) and the records they return; the host builder and lifetime. What both commands and the MCP server use goes in `Common/` (`SettingChanges`). |
 | Desktop | `Views/`, `Hosting/`, `Styles/`, `Services/` | Windows and views (`.axaml` with code-behind), dialogs in `Views/Dialogs/`, and what only views use, such as converters; the host builder and lifetime; styles and icons; Avalonia implementations of Presentation's services (`AvaloniaDialogService`). |
 
 ## 4. Visibility
@@ -85,9 +85,10 @@ Other projects see a project only through what it makes public, so keep that to 
 | 900–999 | Presentation: the main window and the screens |
 | 1000–1099 | Desktop: startup |
 | 1100–1199 | CLI: commands |
-| 1200–1299 | Platform: the desktop app's single instance and tray |
+| 1200–1299 | Platform: the desktop app's single instance, its queue's pipe, and the tray |
 | 1300–1399 | The app itself: diagnostics, the `nxm://` handler and self-update |
-| 1400 onward | Next free block |
+| 1400–1499 | CLI: the MCP server |
+| 1500 onward | Next free block |
 
 ## 7. Files
 
