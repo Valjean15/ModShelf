@@ -35,8 +35,9 @@ $project = [IO.Path]::Combine($root, 'src', 'ModShelf.Desktop', 'ModShelf.Deskto
 # ModShelf keeps its library database, settings, logs and secrets in %LocalAppData%\ModShelf, so the pack ID must never
 # be ModShelf (ADR 0038).
 $packId = 'ModShelf.App'
-$Output = if ($Output) { [IO.Path]::GetFullPath($Output) } else { [IO.Path]::Combine($root, 'artifacts', 'releases') }
-$Notes = if ($Notes) { [IO.Path]::GetFullPath($Notes) } else { $null }
+# Paths given are taken from PowerShell's current folder, which .NET's own doesn't follow.
+$Output = if ($Output) { $PSCmdlet.GetUnresolvedProviderPathFromPSPath($Output) } else { [IO.Path]::Combine($root, 'artifacts', 'releases') }
+$Notes = if ($Notes) { $PSCmdlet.GetUnresolvedProviderPathFromPSPath($Notes) } else { $null }
 
 # Works in Windows PowerShell 5.1 too, which has no $IsLinux or $IsMacOS.
 $platform = [Runtime.InteropServices.RuntimeInformation]
@@ -62,7 +63,7 @@ try {
     Invoke-Checked dotnet @('tool', 'restore') | Out-Null
 
     if (-not $Version) {
-        $Version = (& dotnet msbuild $project -nologo -t:MinVer -getProperty:MinVerVersion -p:Configuration=Release).Trim()
+        $Version = (& dotnet msbuild -restore $project -nologo -t:MinVer -getProperty:MinVerVersion -p:Configuration=Release).Trim()
         if ($LASTEXITCODE -ne 0) { throw 'MinVer could not tell the version.' }
     }
     $shortVersion = ($Version -split '[-+]')[0]

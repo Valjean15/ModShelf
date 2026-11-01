@@ -56,7 +56,7 @@ cd "$root"
 dotnet tool restore >/dev/null
 
 if [[ -z "$version" ]]; then
-  version="$(dotnet msbuild "$project" -nologo -t:MinVer -getProperty:MinVerVersion -p:Configuration=Release | tr -d '[:space:]')"
+  version="$(dotnet msbuild -restore "$project" -nologo -t:MinVer -getProperty:MinVerVersion -p:Configuration=Release | tr -d '[:space:]')"
 fi
 short_version="${version%%[-+]*}"
 echo "Packing ModShelf $version for ${runtimes[*]} into $output"
