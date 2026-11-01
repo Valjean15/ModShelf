@@ -44,6 +44,17 @@ tests/ModShelf.Platform.Tests/bin/Debug/net10.0/ModShelf.Platform.Tests -method 
 
 Each runtime packs a self-contained publish: `win-x64` a per-user `Setup.exe` with a Start-menu shortcut, `linux-x64` an AppImage (which needs `mksquashfs`, and `zstd` for a delta package), and `osx-arm64` or `osx-x64` an app in a `.pkg`, on a Mac only. The installers aren't signed yet. Windows installs into `%LOCALAPPDATA%\ModShelf.App`, apart from `%LOCALAPPDATA%\ModShelf`, where the library stays when ModShelf is uninstalled. [ADR 0038](docs/adr/0038-installers-and-self-update.md) has the details. `build/render-icons.py` renders the Windows and macOS icons from `modshelf.svg`.
 
+### Releasing
+
+Releasing a version is tagging its commit, such as `v0.9.1`, and pushing the tag:
+
+```powershell
+git tag v0.9.1
+git push origin v0.9.1
+```
+
+The release workflow, `.github/workflows/release.yml`, then tests the commit on the three systems, checks that the tag is the version MinVer gives it, writes the release notes from the `feat:` and `fix:` commits since the release before, packs `win-x64`, `linux-x64` and `osx-arm64`, and uploads them to one **draft** release, "ModShelf 0.9.1", a pre-release while ModShelf is 0.x. Installed apps see nothing until the draft is published: check its notes and files on the Releases page, then publish it. **Run workflow** on the Actions tab does all of it but the release, and keeps the packages with the run for 14 days, to download and try. [ADR 0039](docs/adr/0039-the-release-workflow.md) has the details; `build/release-notes.sh` shows the notes a tag would get.
+
 ### Desktop app
 
 `dotnet run --project src/ModShelf.Desktop` opens the main window: a sidebar of the screens, Library, Updates, Browse, Downloads, Accounts and Settings, and the one selected. The button at the top of the sidebar hides the screens' names. While the app runs, queued downloads go on, finished ones go into the library, and the watched mods are checked for updates every `updates.interval`.
@@ -137,7 +148,7 @@ dotnet run --project src/ModShelf.Cli -- account unlink <source>
 ## Solution layout
 
 ```
-build/                            packing the installers (pack.ps1, pack.sh), the macOS Info.plist, and the icons
+build/                            packing the installers (pack.ps1, pack.sh), the release notes, the macOS Info.plist, and the icons
 src/
   ModShelf.Domain                 entities and value objects, no dependencies
   ModShelf.Sources.Abstractions   IModSource and the capability interfaces a source implements
@@ -151,7 +162,7 @@ src/
   ModShelf.Cli                    headless composition root
 tests/
   ModShelf.<Library>.Tests        one test project per library
-  ModShelf.Architecture.Tests     enforces the dependency rules, and keeps the installer out of ModShelf's data folder
+  ModShelf.Architecture.Tests     enforces the dependency rules, keeps the installer out of ModShelf's data folder, and checks the release notes
   ModShelf.Cli.Tests              runs the CLI end to end: stop, kill and resume a download; finish one through a handoff; download into the library, move it and check it for updates; look up and search mods; link, check, refresh and unlink fake accounts
   Shared                          code several test projects compile in: SourceContractTests, TempFolder, the log recorders
 ```

@@ -8,7 +8,7 @@ The rules for this repository live in [CLAUDE.md](CLAUDE.md). They apply to peop
 - Before you open a pull request, `dotnet build` must finish with 0 warnings and `dotnet test` must be green. CI checks both on Windows, macOS and Linux.
 - Every behavior change comes with tests. Tests never call live mod-site APIs; live accounts are only used for the [manual checklist](docs/manual-checklist.md), which is run with a free and a Premium Nexus Mods account before each release.
 - Never commit secrets such as API keys or OAuth tokens. Use `dotnet user-secrets` or environment variables for local testing.
-- Use [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `chore:`), one logical change per commit.
+- Use [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `chore:`), one logical change per commit. A release's notes list the `feat:` and `fix:` subjects since the release before, so write those for the people who use ModShelf.
 - Record significant design decisions as an ADR in `docs/adr/NNNN-short-title.md`.
 - Ask before adding a project or package, changing a public interface in `Sources.Abstractions` or `Application`, or changing the database schema.
 - Change the schema only through a new EF Core migration: run `dotnet tool restore` once, then `dotnet ef migrations add <Name> --project src/ModShelf.Infrastructure`. Never edit a migration that's already committed.
