@@ -18,7 +18,7 @@ public sealed partial class PackagingTests
     [Fact]
     public void TheWindowsAppIsNeverInstalledIntoModShelfsDataFolder()
     {
-        string build = Path.Combine(RepositoryRoot(), "build");
+        string build = Path.Combine(Repository.Root, "build");
 
         string bash = PackId(File.ReadAllText(Path.Combine(build, "pack.sh")), BashPackId(), "--packId \"$pack_id\"");
         string powershell = PackId(File.ReadAllText(Path.Combine(build, "pack.ps1")), PowerShellPackId(), "'--packId', $packId");
@@ -31,19 +31,6 @@ public sealed partial class PackagingTests
     {
         Assert.Contains(use, script, StringComparison.Ordinal);
         return Assert.Single(assignment.Matches(script)).Groups[1].Value;
-    }
-
-    private static string RepositoryRoot()
-    {
-        for (DirectoryInfo? folder = new(AppContext.BaseDirectory); folder is not null; folder = folder.Parent)
-        {
-            if (File.Exists(Path.Combine(folder.FullName, "ModShelf.slnx")))
-            {
-                return folder.FullName;
-            }
-        }
-
-        throw new InvalidOperationException($"No ModShelf.slnx above {AppContext.BaseDirectory}.");
     }
 
     [GeneratedRegex(@"^pack_id=(\S+)\r?$", RegexOptions.Multiline)]
