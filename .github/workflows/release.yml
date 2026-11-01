@@ -1,0 +1,190 @@
+name: Release
+
+# A tag such as v0.9.0, pushed to GitHub, makes a draft release of that version: tested on the three systems, packed
+# for each, and uploaded to one draft GitHub release that installed apps see only once it's published by hand.
+# "Run workflow" on the Actions tab does the same without the release, a dry run: the packages stay with the run, to
+# download and try. ADR 0039 has the reasons.
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One release run per tag at a time; a second waits rather than uploading over the first.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  test:
+    name: Test
+    uses: ./.github/workflows/ci.yml
+
+  prepare:
+    name: Version and notes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      # MinVer reads the version from the tags, and the notes the commits since the release before: both need the
+      # whole history.
+      - name: Check out
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      # A tag MinVer doesn't take for this commit's version, such as v1.0 or a tag on another commit, stops the release.
+      - name: Version
+        id: version
+        shell: bash
+        run: |
+          version="$(dotnet msbuild -restore src/ModShelf.Desktop/ModShelf.Desktop.csproj -nologo -t:MinVer -getProperty:MinVerVersion -p:Configuration=Release | tr -d '[:space:]')"
+          if [[ "$GITHUB_REF_TYPE" == tag && "$GITHUB_REF_NAME" != "v$version" ]]; then
+            echo "::error::The tag $GITHUB_REF_NAME isn't this commit's version, which MinVer computes as $version."
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "ModShelf $version" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Release notes
+        shell: bash
+        run: |
+          build/release-notes.sh > release-notes.md
+          cat release-notes.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep the notes
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-notes
+          path: release-notes.md
+          retention-days: 14
+
+  pack:
+    name: Pack (${{ matrix.runtime }})
+    needs: [test, prepare]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: windows-latest
+            runtime: win-x64
+          - os: ubuntu-latest
+            runtime: linux-x64
+          - os: macos-latest
+            runtime: osx-arm64
+
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      RUNTIME: ${{ matrix.runtime }}
+      REPOSITORY: ${{ github.server_url }}/${{ github.repository }}
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      # vpk makes an AppImage with mksquashfs, and a delta package with zstd.
+      - name: Install the AppImage tools
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y squashfs-tools zstd
+
+      - name: Get the notes
+        uses: actions/download-artifact@v8
+        with:
+          name: release-notes
+
+      # The newest published release of this channel, so that vpk packs a delta beside the full package: an update
+      # then downloads only what changed. Drafts aren't seen. Before the first release there's none, and the update is
+      # the full package.
+      - name: Get the release before
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dotnet tool restore
+          dotnet vpk download github --repoUrl "$REPOSITORY" --channel "$RUNTIME" --pre --outputDir artifacts/releases --token "$GITHUB_TOKEN" \
+            || echo "::notice::No earlier release of $RUNTIME to make a delta from."
+
+      - name: Pack (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./build/pack.ps1 -Version $env:VERSION -Notes release-notes.md $env:RUNTIME
+
+      - name: Pack
+        if: runner.os != 'Windows'
+        shell: bash
+        run: build/pack.sh --version "$VERSION" --notes release-notes.md "$RUNTIME"
+
+      - name: Keep the packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages-${{ matrix.runtime }}
+          path: artifacts/releases/
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: Draft the release
+    needs: [prepare, pack]
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      REPOSITORY: ${{ github.server_url }}/${{ github.repository }}
+
+    steps:
+      # For the tool manifest, which pins vpk.
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Get the packages
+        uses: actions/download-artifact@v8
+        with:
+          pattern: packages-*
+          path: packages
+
+      # One channel at a time into the same draft: the first upload makes it, and --merge adds the others. The release
+      # is a pre-release while ModShelf is 0.x or the version is one, such as 0.9.0 or 1.0.0-beta.1.
+      - name: Upload to a draft release
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dotnet tool restore
+          pre=()
+          if [[ "$VERSION" == 0.* || "$VERSION" == *-* ]]; then pre=(--pre); fi
+          for runtime in win-x64 linux-x64 osx-arm64; do
+            dotnet vpk upload github --repoUrl "$REPOSITORY" --token "$GITHUB_TOKEN" --channel "$runtime" \
+              --outputDir "packages/packages-$runtime" --tag "$GITHUB_REF_NAME" --releaseName "ModShelf $VERSION" \
+              --merge "${pre[@]}"
+          done
+          echo "A draft release, ModShelf $VERSION, waits on the Releases page: check it, then publish it." >> "$GITHUB_STEP_SUMMARY"

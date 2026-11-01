@@ -1,11 +1,13 @@
 name: CI
 
 # Pushes to main, and pull requests into any branch. Pushes to other branches aren't built on their own,
-# so a branch with an open pull request is built once per push, not twice.
+# so a branch with an open pull request is built once per push, not twice. The release workflow calls it too, so a
+# release is built and tested on the three systems before it's packed.
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_call:
 
 permissions:
   contents: read
