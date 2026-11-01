@@ -229,6 +229,19 @@ public static class ApplicationServiceCollectionExtensions
     }
 
     /// <summary>
+    /// Registers <see cref="IQueueRequests"/>, which carries out requests to change the download queue in the process
+    /// that runs it. Needs <see cref="AddDownloadEngine"/> and <see cref="AddLinks"/>.
+    /// </summary>
+    public static IServiceCollection AddQueueRequests(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton<IQueueRequests, QueueRequests>();
+
+        return services;
+    }
+
+    /// <summary>
     /// Registers <see cref="IAppUninstall"/>, which gives the sites' links back and removes what ModShelf registered for
     /// itself as it's uninstalled. Needs <see cref="AddLinks"/> and Platform's <see cref="Releases.Ports.IAppRegistrations"/>.
     /// </summary>
