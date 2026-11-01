@@ -164,32 +164,6 @@ internal sealed partial class PipeSingleInstance : ISingleInstance, IDisposable
     }
 
     /// <summary>
-    /// A line of at most <see cref="MaxMessageLength"/> characters.
-    /// </summary>
-    /// <exception cref="InvalidDataException">The line is longer.</exception>
-    private static async Task<string?> ReadLineAsync(StreamReader reader, CancellationToken cancellationToken)
-    {
-        StringBuilder line = new();
-        char[] next = new char[1];
-        while (await reader.ReadAsync(next, cancellationToken).ConfigureAwait(false) == 1)
-        {
-            if (next[0] == '\n')
-            {
-                return line.ToString().TrimEnd('\r');
-            }
-
-            if (line.Length == MaxMessageLength)
-            {
-                throw new InvalidDataException($"A launch's message is longer than {MaxMessageLength} characters.");
-            }
-
-            line.Append(next[0]);
-        }
-
-        return line.Length == 0 ? null : line.ToString();
-    }
-
-    /// <summary>
     /// Sends <paramref name="arguments"/> to the desktop app that's running, and waits for it to answer.
     /// </summary>
     /// <exception cref="TimeoutException">It didn't answer in time.</exception>
@@ -333,7 +307,7 @@ internal sealed partial class PipeSingleInstance : ISingleInstance, IDisposable
         Message? message;
         try
         {
-            string? line = await ReadLineAsync(reader, reading.Token).ConfigureAwait(false);
+            string? line = await PipeLines.ReadLineAsync(reader, MaxMessageLength, reading.Token).ConfigureAwait(false);
             message = line is null ? null : JsonSerializer.Deserialize<Message>(line);
         }
         catch (Exception exception) when (exception is JsonException or InvalidDataException
