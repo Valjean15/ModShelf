@@ -4,9 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
+using ModShelf.Cli.Common;
 using ModShelf.Cli.Hosting;
 using ModShelf.Domain.Library;
-using ModShelf.Domain.Updates;
 
 namespace ModShelf.Cli.Commands;
 
@@ -16,35 +16,20 @@ namespace ModShelf.Cli.Commands;
 /// </summary>
 internal static class SettingsCommand
 {
-    private const string LibraryRoot = "library.root";
-    private const string LibraryFolders = "library.folders";
-    private const string GamePrefix = LibraryFolders + ".";
-    private const string OldVersions = "library.oldVersions";
-    private const string Interval = "updates.interval";
-    private const string Notify = "updates.notify";
-    private const string Theme = "appearance.theme";
-    private const string CloseToTray = "window.closeToTray";
-    private const string SetupDone = "setup.done";
-    private const string CheckForAppUpdates = "app.checkForUpdates";
-    private const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<game>, {OldVersions}, {Interval}, {Notify}, {Theme}, {CloseToTray}, {SetupDone}, {CheckForAppUpdates}";
-
     public static Command Create(CliEnvironment environment)
     {
         Command show = new("show", "Shows every setting, the ones left at their defaults too, and where they're kept.");
         show.SetAction((_, cancellationToken) => ShowAsync(environment, cancellationToken));
 
-        Argument<string> setName = new("setting") { Description = $"The setting: {Names}." };
+        Argument<string> setName = new("setting") { Description = $"The setting: {SettingChanges.Names}." };
         Argument<string> value = new("value")
         {
-            Description = "Its new value: a full path for library.root; all, archive or how many versions to keep for "
-                + "library.oldVersions; minutes, hours or days, such as 30m, 6h or 1d, for updates.interval; true or false for "
-                + "updates.notify, window.closeToTray, setup.done and app.checkForUpdates; system, light or dark for appearance.theme; a folder pattern, "
-                + "such as \"{source}/{game}/{mod} ({modid})/{file}\", for the others.",
+            Description = $"Its new value: {SettingChanges.Values}.",
         };
         Command set = new("set", "Changes a setting.") { setName, value };
         set.SetAction((parsed, cancellationToken) => ChangeAsync(environment, parsed.GetValue(setName)!, parsed.GetValue(value), cancellationToken));
 
-        Argument<string> resetName = new("setting") { Description = $"The setting: {Names}." };
+        Argument<string> resetName = new("setting") { Description = $"The setting: {SettingChanges.Names}." };
         Command reset = new("reset", "Sets a setting back to its default.") { resetName };
         reset.SetAction((parsed, cancellationToken) => ChangeAsync(environment, parsed.GetValue(resetName)!, null, cancellationToken));
 
@@ -78,38 +63,28 @@ internal static class SettingsCommand
                     string[][] rows =
                     [
                         ["Setting", "Value"],
-                        [LibraryRoot, stored.LibraryRoot ?? $"{settings.DefaultLibraryRoot} (default)"],
-                        [LibraryFolders, stored.LibraryFolders?.Text ?? $"{FolderPattern.Default.Text} (default)"],
-                        .. stored.GameFolders
-                            .OrderBy(game => game.Key, StringComparer.OrdinalIgnoreCase)
-                            .Select(game => new[] { GamePrefix + game.Key, game.Value.Text }),
-                        [OldVersions, stored.OldVersions?.ToString() ?? $"{OldVersionRule.Default} (default)"],
-                        [Interval, stored.UpdateInterval is { } every ? UpdateInterval.Format(every) : $"{UpdateInterval.Format(UpdateInterval.Default)} (default)"],
-                        [Notify, stored.NotifyOfUpdates is { } notify ? Text(notify) : $"{Text(true)} (default)"],
-                        [Theme, stored.Theme is { } theme ? ThemeName(theme) : $"{ThemeName(AppTheme.System)} (default)"],
-                        [CloseToTray, stored.CloseToTray is { } closeToTray ? Text(closeToTray) : "ask (default)"],
-                        [SetupDone, stored.SetupDone is { } done ? Text(done) : $"{Text(false)} (default)"],
-                        [CheckForAppUpdates, stored.CheckForAppUpdates is { } check ? Text(check) : $"{Text(true)} (default)"],
+                        .. SettingChanges.List(stored, settings.DefaultLibraryRoot)
+                            .Select(setting => new[] { setting.Name, setting.IsDefault ? $"{setting.Value} (default)" : setting.Value }),
                     ];
                     TextTable.Write(environment.Output, rows);
                     environment.Output.WriteLine(
                         $"Folder patterns use {FolderPattern.SourceToken}, {FolderPattern.GameToken}, {FolderPattern.ModToken} and "
                         + $"{FolderPattern.ModIdToken}, and end with /{FolderPattern.FileToken}.");
                     environment.Output.WriteLine(
-                        $"When a newer version of a file is downloaded, {OldVersions} keeps the old ones (all), moves them to an "
+                        $"When a newer version of a file is downloaded, {SettingChanges.OldVersions} keeps the old ones (all), moves them to an "
                         + "_archive folder (archive), or keeps that many versions and deletes the older ones (a number).");
                     environment.Output.WriteLine(
-                        $"The desktop app checks the watched mods for updates every {Interval}, and shows a notice of new ones unless "
-                        + $"{Notify} is false; library check checks them now.");
-                    environment.Output.WriteLine($"The desktop app is light or dark as {Theme} says, or follows the system's mode (system).");
+                        $"The desktop app checks the watched mods for updates every {SettingChanges.Interval}, and shows a notice of new ones unless "
+                        + $"{SettingChanges.Notify} is false; library check checks them now.");
+                    environment.Output.WriteLine($"The desktop app is light or dark as {SettingChanges.Theme} says, or follows the system's mode (system).");
                     environment.Output.WriteLine(
-                        $"Closing the desktop app's window keeps ModShelf running in the tray when {CloseToTray} is true, and quits it "
+                        $"Closing the desktop app's window keeps ModShelf running in the tray when {SettingChanges.CloseToTray} is true, and quits it "
                         + "when it's false; until it's set, the app asks the first time.");
                     environment.Output.WriteLine(
-                        $"The desktop app shows its first-run setup at the start of a new library until {SetupDone} is true; "
-                        + $"settings reset {SetupDone} shows it again.");
+                        $"The desktop app shows its first-run setup at the start of a new library until {SettingChanges.SetupDone} is true; "
+                        + $"settings reset {SettingChanges.SetupDone} shows it again.");
                     environment.Output.WriteLine(
-                        $"The installed desktop app looks for a newer ModShelf when it starts unless {CheckForAppUpdates} is false.");
+                        $"The installed desktop app looks for a newer ModShelf when it starts unless {SettingChanges.CheckForAppUpdates} is false.");
                     environment.Output.WriteLine("To change a setting: settings set <setting> <value>");
                     return ExitCodes.Done;
                 },
@@ -117,56 +92,12 @@ internal static class SettingsCommand
             .ConfigureAwait(false);
     }
 
-    private static string Text(bool value) => value ? "true" : "false";
-
-    private static string ThemeName(AppTheme theme) => theme switch
-    {
-        AppTheme.Light => "light",
-        AppTheme.Dark => "dark",
-        _ => "system",
-    };
-
-    /// <summary>
-    /// What a theme does, as a sentence.
-    /// </summary>
-    private static string Describe(AppTheme theme) => theme switch
-    {
-        AppTheme.Light => "the desktop app is light.",
-        AppTheme.Dark => "the desktop app is dark.",
-        _ => "the desktop app is light or dark as the system is.",
-    };
-
-    /// <exception cref="ArgumentException"><paramref name="value"/> names no theme.</exception>
-    private static AppTheme ParseTheme(string value)
-        => Enum.GetValues<AppTheme>().Cast<AppTheme?>().FirstOrDefault(theme => ThemeName(theme!.Value).Equals(value.Trim(), StringComparison.OrdinalIgnoreCase))
-            ?? throw new ArgumentException($"'{value}' isn't system, light or dark.", nameof(value));
-
-    /// <summary>
-    /// What a rule does with old versions, as a sentence.
-    /// </summary>
-    private static string Describe(OldVersionRule rule) => rule switch
-    {
-        { Action: OldVersionAction.KeepAll } => "every version of a file stays.",
-        { Action: OldVersionAction.Archive } => "when a newer version of a file is downloaded, the old ones move to an _archive folder.",
-        { Count: 1 } => "when a newer version of a file is downloaded, the old ones are deleted.",
-        _ => $"when a newer version of a file is downloaded, the newest {rule.Count} stay and older ones are deleted.",
-    };
-
-    /// <exception cref="ArgumentException"><paramref name="value"/> is neither true nor false.</exception>
-    private static bool ParseBool(string value)
-        => bool.TryParse(value.Trim(), out bool parsed) ? parsed : throw new ArgumentException($"'{value}' isn't true or false.", nameof(value));
-
     /// <param name="value">The setting's new value, or null to set it back to its default.</param>
     private static async Task<int> ChangeAsync(CliEnvironment environment, string name, string? value, CancellationToken cancellationToken)
     {
-        string setting = name.Trim().ToLowerInvariant();
-        string? game = setting.StartsWith(GamePrefix, StringComparison.Ordinal) ? name.Trim()[GamePrefix.Length..] : null;
-        bool oldVersions = setting.Equals(OldVersions, StringComparison.OrdinalIgnoreCase);
-        bool closeToTray = setting.Equals(CloseToTray, StringComparison.OrdinalIgnoreCase);
-        bool checkForAppUpdates = setting.Equals(CheckForAppUpdates, StringComparison.OrdinalIgnoreCase);
-        if (setting is not (LibraryRoot or LibraryFolders or Interval or Notify or Theme or SetupDone) && !closeToTray && !checkForAppUpdates && !oldVersions && string.IsNullOrWhiteSpace(game))
+        if (!SettingChanges.IsSetting(name))
         {
-            await environment.Error.WriteLineAsync($"There's no setting called {name}. Settings: {Names}.").ConfigureAwait(false);
+            await environment.Error.WriteLineAsync($"There's no setting called {name}. Settings: {SettingChanges.Names}.").ConfigureAwait(false);
             return ExitCodes.BadInput;
         }
 
@@ -177,97 +108,21 @@ internal static class SettingsCommand
                     async services =>
                     {
                         ISettingsService settings = services.GetRequiredService<ISettingsService>();
-                        if (setting == LibraryRoot)
+                        string now;
+                        try
                         {
-                            try
-                            {
-                                await settings.SetLibraryRootAsync(value, cancellationToken).ConfigureAwait(false);
-                            }
-                            catch (InvalidOperationException exception) when (value is not null)
-                            {
-                                // A library with files moves with library move; one with downloads under way has to wait for them.
-                                IReadOnlyList<LibraryMod> library = await services.GetRequiredService<IModLibrary>().ListAsync(cancellationToken).ConfigureAwait(false);
-                                string hint = library.Any(mod => mod.Files.Count > 0) ? $" To move it there: library move \"{value}\"" : string.Empty;
-                                await environment.Error.WriteLineAsync(exception.Message + hint).ConfigureAwait(false);
-                                return ExitCodes.Failed;
-                            }
-
-                            string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
-                            environment.Output.WriteLine(value is null ? $"{LibraryRoot} is back to its default, {root}." : $"{LibraryRoot} is now {root}.");
+                            now = await SettingChanges.ChangeAsync(settings, name, value, cancellationToken).ConfigureAwait(false);
                         }
-                        else if (setting == Interval)
+                        catch (InvalidOperationException exception) when (value is not null && SettingChanges.IsLibraryRoot(name))
                         {
-                            TimeSpan? interval = value is null ? null : UpdateInterval.Parse(value);
-                            await settings.SetUpdateIntervalAsync(interval, cancellationToken).ConfigureAwait(false);
-                            environment.Output.WriteLine(interval is { } every
-                                ? $"{Interval} is now {UpdateInterval.Format(every)}."
-                                : $"{Interval} is back to its default, {UpdateInterval.Format(UpdateInterval.Default)}.");
-                        }
-                        else if (setting == Notify)
-                        {
-                            bool? notify = value is null ? null : ParseBool(value);
-                            await settings.SetNotifyOfUpdatesAsync(notify, cancellationToken).ConfigureAwait(false);
-                            string what = notify ?? true
-                                ? "the desktop app shows a notice when a background check finds new updates."
-                                : "the desktop app shows no notice when a background check finds new updates.";
-                            environment.Output.WriteLine(notify is { } now ? $"{Notify} is now {Text(now)}: {what}" : $"{Notify} is back to its default, {Text(true)}: {what}");
-                        }
-                        else if (closeToTray)
-                        {
-                            bool? keepRunning = value is null ? null : ParseBool(value);
-                            await settings.SetCloseToTrayAsync(keepRunning, cancellationToken).ConfigureAwait(false);
-                            environment.Output.WriteLine(keepRunning switch
-                            {
-                                true => $"{CloseToTray} is now true: closing the desktop app's window keeps ModShelf running in the tray.",
-                                false => $"{CloseToTray} is now false: closing the desktop app's window quits ModShelf.",
-                                null => $"{CloseToTray} is back to its default: the desktop app asks the first time its window closes.",
-                            });
-                        }
-                        else if (checkForAppUpdates)
-                        {
-                            bool? check = value is null ? null : ParseBool(value);
-                            await settings.SetCheckForAppUpdatesAsync(check, cancellationToken).ConfigureAwait(false);
-                            environment.Output.WriteLine(check ?? true
-                                ? $"{CheckForAppUpdates} is {(check is null ? "back to its default, true" : "now true")}: the installed desktop app looks for a newer ModShelf when it starts."
-                                : $"{CheckForAppUpdates} is now false: the installed desktop app looks for a newer ModShelf only when asked, on its Settings screen.");
-                        }
-                        else if (setting == SetupDone)
-                        {
-                            bool? done = value is null ? null : ParseBool(value);
-                            await settings.SetSetupDoneAsync(done, cancellationToken).ConfigureAwait(false);
-                            environment.Output.WriteLine(done ?? false
-                                ? $"{SetupDone} is now true: the desktop app doesn't show its first-run setup."
-                                : $"{SetupDone} is {(done is null ? "back to its default, false" : "now false")}: a new library shows the desktop app's first-run setup at its next start.");
-                        }
-                        else if (setting == Theme)
-                        {
-                            AppTheme? theme = value is null ? null : ParseTheme(value);
-                            await settings.SetThemeAsync(theme, cancellationToken).ConfigureAwait(false);
-                            environment.Output.WriteLine(theme is { } now
-                                ? $"{Theme} is now {ThemeName(now)}: {Describe(now)}"
-                                : $"{Theme} is back to its default, {ThemeName(AppTheme.System)}: {Describe(AppTheme.System)}");
-                        }
-                        else if (oldVersions)
-                        {
-                            OldVersionRule? rule = value is null ? null : OldVersionRule.Parse(value);
-                            await settings.SetOldVersionsAsync(rule, cancellationToken).ConfigureAwait(false);
-                            environment.Output.WriteLine(rule is null
-                                ? $"{OldVersions} is back to its default, {OldVersionRule.Default}: {Describe(OldVersionRule.Default)}"
-                                : $"{OldVersions} is now {rule}: {Describe(rule)}");
-                        }
-                        else
-                        {
-                            FolderPattern? pattern = value is null ? null : FolderPattern.Parse(value);
-                            await settings.SetLibraryFoldersAsync(game, pattern, cancellationToken).ConfigureAwait(false);
-                            string named = game is null ? LibraryFolders : GamePrefix + game;
-                            environment.Output.WriteLine((pattern, game) switch
-                            {
-                                (not null, _) => $"{named} is now {pattern.Text}.",
-                                (null, null) => $"{LibraryFolders} is back to its default, {FolderPattern.Default.Text}.",
-                                (null, _) => $"{named} is gone, so {game}'s files go by {LibraryFolders} again.",
-                            });
+                            // A library with files moves with library move; one with downloads under way has to wait for them.
+                            IReadOnlyList<LibraryMod> library = await services.GetRequiredService<IModLibrary>().ListAsync(cancellationToken).ConfigureAwait(false);
+                            string hint = library.Any(mod => mod.Files.Count > 0) ? $" To move it there: library move \"{value}\"" : string.Empty;
+                            await environment.Error.WriteLineAsync(exception.Message + hint).ConfigureAwait(false);
+                            return ExitCodes.Failed;
                         }
 
+                        environment.Output.WriteLine(now);
                         return ExitCodes.Done;
                     },
                     cancellationToken)
