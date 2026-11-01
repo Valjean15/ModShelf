@@ -3,6 +3,8 @@ using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Desktop.Ports;
+using ModShelf.Application.Downloads;
+using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Links.Ports;
 using ModShelf.Application.Notifications.Ports;
 using ModShelf.Application.Releases.Ports;
@@ -106,6 +108,45 @@ public static class PlatformServiceCollectionExtensions
             folder,
             TimeSpan.FromSeconds(5),
             provider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(PipeSingleInstance).FullName!)));
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers <see cref="IQueueOwner"/>, for a process that doesn't run the download queue of the library in
+    /// <paramref name="folder"/>, such as the CLI's MCP server: the desktop app that runs it, asked over a pipe, which
+    /// takes a request within 1.5 seconds when it runs, and replies within 90.
+    /// </summary>
+    /// <param name="folder">The folder of the library database, an absolute path.</param>
+    public static IServiceCollection AddQueueOwner(this IServiceCollection services, string folder)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentException.ThrowIfNullOrWhiteSpace(folder);
+
+        services.AddSingleton<IQueueOwner>(provider => new PipeQueueOwner(
+            folder,
+            TimeSpan.FromSeconds(1.5),
+            TimeSpan.FromSeconds(90),
+            provider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(PipeQueueOwner).FullName!)));
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers what answers <see cref="IQueueOwner"/>'s requests in the desktop app, while its host runs: the library
+    /// in <paramref name="folder"/>'s queue requests, carried out by <see cref="IQueueRequests"/>.
+    /// </summary>
+    /// <param name="folder">The folder of the library database, an absolute path.</param>
+    public static IServiceCollection AddQueueListener(this IServiceCollection services, string folder)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentException.ThrowIfNullOrWhiteSpace(folder);
+
+        services.AddHostedService(provider => new PipeQueueListener(
+            folder,
+            provider.GetRequiredService<IQueueRequests>(),
+            TimeSpan.FromSeconds(5),
+            provider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(PipeQueueListener).FullName!)));
 
         return services;
     }

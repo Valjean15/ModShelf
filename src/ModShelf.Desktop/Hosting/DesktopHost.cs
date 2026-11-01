@@ -13,8 +13,8 @@ namespace ModShelf.Desktop.Hosting;
 
 /// <summary>
 /// The desktop app's composition root: the generic host with every service the CLI has, plus the ones that run in
-/// the background while the app is open (downloads, recording them into the library, and update checks), and the
-/// screens.
+/// the background while the app is open (downloads, recording them into the library, update checks, and answering
+/// other processes' queue requests), and the screens.
 /// </summary>
 internal static class DesktopHost
 {
@@ -55,6 +55,9 @@ internal static class DesktopHost
         builder.Services.AddBackgroundDownloads();
         builder.Services.AddLibraryRecording();
         builder.Services.AddBackgroundUpdateChecks();
+
+        // Other processes of this user, such as the CLI's MCP server, ask this app to change its queue (ADR 0040).
+        builder.Services.AddQueueListener(folder);
 
         builder.Services.AddPresentation();
         builder.Services.AddSingleton<IUiThread, AvaloniaUiThread>();

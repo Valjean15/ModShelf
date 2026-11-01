@@ -145,7 +145,8 @@ internal sealed partial class PipeSingleInstance : ISingleInstance, IDisposable
     /// leaves room, it's a full path in that folder, which .NET takes as the socket's path.
     /// </summary>
     /// <param name="runtimeFolder">The user's own folder for the socket, as on Linux; null for none.</param>
-    internal static string PipeNameFor(string folder, string? runtimeFolder = null)
+    /// <param name="suffix">What tells another pipe of the same app apart, such as the queue's (ADR 0040).</param>
+    internal static string PipeNameFor(string folder, string? runtimeFolder = null, string suffix = "")
     {
         string path = Path.TrimEndingDirectorySeparator(Path.GetFullPath(folder));
         if (FilePaths.Comparison == StringComparison.OrdinalIgnoreCase)
@@ -153,7 +154,7 @@ internal sealed partial class PipeSingleInstance : ISingleInstance, IDisposable
             path = path.ToUpperInvariant();
         }
 
-        string name = "ModShelf-" + Convert.ToHexString(SHA256.HashData(Utf8.GetBytes(path)))[..24];
+        string name = "ModShelf-" + Convert.ToHexString(SHA256.HashData(Utf8.GetBytes(path)))[..24] + suffix;
         if (string.IsNullOrEmpty(runtimeFolder) || !Path.IsPathFullyQualified(runtimeFolder) || !Directory.Exists(runtimeFolder))
         {
             return name;

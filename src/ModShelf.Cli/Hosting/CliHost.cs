@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging.Console;
 
 using ModShelf.Application;
 using ModShelf.Hosting;
+using ModShelf.Platform;
 
 namespace ModShelf.Cli.Hosting;
 
@@ -53,7 +54,9 @@ internal static class CliHost
         builder.Logging.AddConsoleFormatter<CliConsoleFormatter, ConsoleFormatterOptions>();
         builder.Services.AddSingleton<IHostLifetime, CliHostLifetime>();
 
-        builder.Services.AddModShelf(builder.Configuration, LogFilePrefix);
+        // The desktop app, when it runs this library's queue, carries out the queue requests of a host that doesn't.
+        string folder = builder.Services.AddModShelf(builder.Configuration, LogFilePrefix);
+        builder.Services.AddQueueOwner(folder);
         if (runDownloads)
         {
             builder.Services.AddBackgroundDownloads();

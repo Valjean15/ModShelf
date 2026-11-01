@@ -1,9 +1,12 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Desktop.Ports;
+using ModShelf.Application.Downloads;
+using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Links;
 using ModShelf.Application.Links.Ports;
 using ModShelf.Application.Notifications.Ports;
@@ -128,6 +131,29 @@ public sealed class PlatformServiceCollectionExtensionsTests : IDisposable
     }
 
     [Fact]
+    public void RegistersTheQueueOwnerForTheLibrarysFolder()
+    {
+        ServiceCollection services = new();
+        services.AddQueueOwner(_folder.Path);
+
+        Assert.IsType<PipeQueueOwner>(Single<IQueueOwner>(services).ImplementationFactory!(new StubServiceProvider()));
+        Assert.Equal(ServiceLifetime.Singleton, Single<IQueueOwner>(services).Lifetime);
+    }
+
+    [Fact]
+    public void RegistersTheQueueListenerForTheLibrarysFolderToRunWithTheHost()
+    {
+        ServiceCollection services = new();
+        services.AddQueueListener(_folder.Path);
+
+        using PipeQueueListener listener = Assert.IsType<PipeQueueListener>(Single<IHostedService>(services).ImplementationFactory!(new StubServiceProvider()));
+
+        string? runtime = OperatingSystem.IsLinux() ? Environment.GetEnvironmentVariable("XDG_RUNTIME_DIR") : null;
+        Assert.Equal(PipeSingleInstance.PipeNameFor(_folder.Path, runtime, "-queue"), listener.PipeName);
+        Assert.Equal(ServiceLifetime.Singleton, Single<IHostedService>(services).Lifetime);
+    }
+
+    [Fact]
     public void RegistersTheTrayHost()
     {
         ServiceCollection services = new();
@@ -153,6 +179,13 @@ public sealed class PlatformServiceCollectionExtensionsTests : IDisposable
         public object? GetService(Type serviceType)
             => serviceType == typeof(ILoggerFactory) ? NullLoggerFactory.Instance
             : serviceType == typeof(ISchemeRegistration) ? new MemorySchemeRegistration()
+            : serviceType == typeof(IQueueRequests) ? new NoQueueRequests()
             : null;
+    }
+
+    private sealed class NoQueueRequests : IQueueRequests
+    {
+        public Task<QueueReply> HandleAsync(QueueRequest request, CancellationToken cancellationToken)
+            => Task.FromResult(new QueueReply(QueueOutcome.Refused));
     }
 }
