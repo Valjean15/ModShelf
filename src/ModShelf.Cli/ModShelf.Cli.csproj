@@ -27,8 +27,12 @@
     <Compile Include="..\Shared\Hosting\*.cs" Link="Hosting\Shared\%(Filename)%(Extension)" />
   </ItemGroup>
 
+  <!--
+    The CLI's settings have a name of their own: an installed ModShelf has the CLI beside the desktop app, whose own are
+    appsettings.json (ADR 0040).
+  -->
   <ItemGroup>
-    <Content Include="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="appsettings.cli.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -21,10 +22,16 @@ internal static class CliHost
     /// </summary>
     private const string LogFilePrefix = "cli";
 
+    /// <summary>
+    /// The CLI's settings file, beside it. The desktop app's are appsettings.json, which an installed ModShelf has in the
+    /// same folder (ADR 0040).
+    /// </summary>
+    internal const string SettingsFile = "appsettings.cli.json";
+
     /// <param name="runDownloads">
     /// Whether queued jobs download while the host runs. A command that only reads the queue leaves this off.
     /// </param>
-    /// <param name="settings">Configuration that takes precedence over appsettings.json and environment variables.</param>
+    /// <param name="settings">Configuration that takes precedence over the settings files and environment variables.</param>
     /// <param name="configureServices">Runs after every registration, so it can add services or replace them.</param>
     public static IHost Build(
         bool runDownloads,
@@ -36,15 +43,16 @@ internal static class CliHost
             // System.CommandLine owns the arguments, so they aren't read as configuration too.
             Args = [],
 
-            // Read appsettings.json next to the executable, not from whatever directory the shell is in.
+            // Read the settings files next to the executable, not from whatever directory the shell is in.
             ContentRootPath = AppContext.BaseDirectory,
         });
+        AddCliSettings(builder.Configuration, AppContext.BaseDirectory);
         if (settings is not null)
         {
             builder.Configuration.AddInMemoryCollection(settings);
         }
 
-        // Logs go to stderr so they never mix with a command's output; appsettings.json keeps them to warnings there,
+        // Logs go to stderr so they never mix with a command's output; appsettings.cli.json keeps them to warnings there,
         // and lets more through to the log files.
         builder.Services.Configure<ConsoleLoggerOptions>(options =>
         {
@@ -65,5 +73,27 @@ internal static class CliHost
 
         configureServices?.Invoke(builder.Services);
         return builder.Build();
+    }
+
+    /// <summary>
+    /// Reads the CLI's settings file in <paramref name="folder"/> right after appsettings.json, whose settings it takes
+    /// precedence over: in an installed ModShelf, the desktop app's. The environment, and what's added after, still
+    /// take precedence over it.
+    /// </summary>
+    internal static void AddCliSettings(IConfigurationBuilder configuration, string folder)
+    {
+        IList<IConfigurationSource> sources = configuration.Sources;
+        int appsettings = -1;
+        for (int index = 0; index < sources.Count; index++)
+        {
+            if (sources[index] is JsonConfigurationSource { Path: "appsettings.json" })
+            {
+                appsettings = index;
+            }
+        }
+
+        JsonConfigurationSource cli = new() { Path = Path.Combine(folder, SettingsFile), Optional = true };
+        cli.ResolveFileProvider();
+        sources.Insert(appsettings + 1, cli);
     }
 }

@@ -4,6 +4,8 @@
 #
 #   build/pack.sh [--version 0.9.1] [--notes notes.md] [--output folder] [runtime ...]
 #
+# The CLI, and with it the MCP server (ADR 0040), is published into the same folder, so it updates with the app.
+#
 # Runtimes: win-x64 (Setup.exe, per user, with a Start-menu shortcut), linux-x64 (an AppImage), osx-arm64 and osx-x64
 # (an .app in a .pkg). Without one, it packs for this system. vpk packs for another system where it can, such as
 # Windows packages on Linux; macOS packages need a Mac. The version comes from the git tag through MinVer, unless
@@ -16,6 +18,7 @@ set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 project="$root/src/ModShelf.Desktop/ModShelf.Desktop.csproj"
+cli="$root/src/ModShelf.Cli/ModShelf.Cli.csproj"
 
 # Velopack installs the Windows app into %LocalAppData%\<pack ID>, and its uninstaller deletes that whole folder.
 # ModShelf keeps its library database, settings, logs and secrets in %LocalAppData%\ModShelf, so the pack ID must never
@@ -80,6 +83,8 @@ for runtime in "${runtimes[@]}"; do
   publish="$root/artifacts/publish/$runtime"
   rm -rf "$publish"
   dotnet publish "$project" -nologo -c Release -r "$runtime" --self-contained -o "$publish" -p:MinVerVersionOverride="$version"
+  # Beside the desktop app, sharing its runtime and libraries: the same build, so the files both have are the same.
+  dotnet publish "$cli" -nologo -c Release -r "$runtime" --self-contained -o "$publish" -p:MinVerVersionOverride="$version"
 
   pack=(--packId "$pack_id" --packVersion "$version" --packDir "$publish" --packTitle ModShelf --packAuthors ModShelf
         --runtime "$runtime" --channel "$runtime" --outputDir "$output")

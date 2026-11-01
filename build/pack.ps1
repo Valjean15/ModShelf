@@ -4,6 +4,8 @@ Packs ModShelf's installers and update packages with Velopack (vpk) into artifac
 publish of the desktop app for each runtime.
 
 .DESCRIPTION
+The CLI, and with it the MCP server (ADR 0040), is published into the same folder, so it updates with the app.
+
 Runtimes: win-x64 (Setup.exe, per user, with a Start-menu shortcut), linux-x64 (an AppImage), osx-arm64 and osx-x64
 (an .app in a .pkg). Without one, it packs for this system. vpk packs for another system where it can, such as
 Windows packages on Linux; macOS packages need a Mac. The version comes from the git tag through MinVer, unless
@@ -30,6 +32,7 @@ Set-StrictMode -Version Latest
 
 $root = Split-Path -Parent $PSScriptRoot
 $project = [IO.Path]::Combine($root, 'src', 'ModShelf.Desktop', 'ModShelf.Desktop.csproj')
+$cli = [IO.Path]::Combine($root, 'src', 'ModShelf.Cli', 'ModShelf.Cli.csproj')
 
 # Velopack installs the Windows app into %LocalAppData%\<pack ID>, and its uninstaller deletes that whole folder.
 # ModShelf keeps its library database, settings, logs and secrets in %LocalAppData%\ModShelf, so the pack ID must never
@@ -83,6 +86,8 @@ try {
         $publish = [IO.Path]::Combine($root, 'artifacts', 'publish', $runtime)
         if (Test-Path $publish) { Remove-Item $publish -Recurse -Force }
         Invoke-Checked dotnet @('publish', $project, '-nologo', '-c', 'Release', '-r', $runtime, '--self-contained', '-o', $publish, "-p:MinVerVersionOverride=$Version")
+        # Beside the desktop app, sharing its runtime and libraries: the same build, so the files both have are the same.
+        Invoke-Checked dotnet @('publish', $cli, '-nologo', '-c', 'Release', '-r', $runtime, '--self-contained', '-o', $publish, "-p:MinVerVersionOverride=$Version")
 
         $pack = @('--packId', $packId, '--packVersion', $Version, '--packDir', $publish, '--packTitle', 'ModShelf', '--packAuthors', 'ModShelf',
             '--runtime', $runtime, '--channel', $runtime, '--outputDir', $Output)
