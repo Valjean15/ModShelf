@@ -75,6 +75,10 @@ CLI, can list the queue as saved, but can't add to it or change it.
   says so when a newer desktop app's reply can't be read. On Windows, applying an update ends the processes running
   from the app's folder (Velopack's updater does), the MCP server among them: its downloads go on later, and the
   agent's app has to start it again, as Claude Desktop does when it restarts.
+- The server answers once the CLI's host has started, a second or more for a cold process. A client that gives
+  `server/discover` only a few seconds before it falls back to `initialize`, as the C# SDK's does by default, can
+  fail against a slow start, as the test's did on the Windows runner. Starting to answer before the host has started
+  would make that less likely, with the tools waiting for it.
 - A queue request to the desktop app that times out may still have been carried out; the error says so, and
   `downloads_list` shows the queue.
 - The server is a second way into the library for whatever the agent is told to do; it can't link accounts, delete the
@@ -93,9 +97,12 @@ CLI, can list the queue as saved, but can't add to it or change it.
   they replace, the library, a mod and a search, the accounts without names or keys, and no key in the logs at Trace.
   The queue's own tests run it with a host of fakes. And `modshelf mcp` as a process of its own, started as an agent's
   app starts it, with an SDK client on its standard input and output: every line it writes there is a JSON-RPC message,
-  nothing goes to standard error, and it ends with exit code 0 once its input closes. (The SDK's own stdio client
-  starts a server through `cmd.exe /c` on Windows, which can't start `C:\Program Files\dotnet\dotnet.exe` with
-  arguments that have spaces too.)
+  nothing goes to standard error, and it ends with exit code 0 once its input closes; with the newest revision's
+  `server/discover`, and with the `initialize` handshake. (The SDK's own stdio client starts a server through
+  `cmd.exe /c` on Windows, which can't start `C:\Program Files\dotnet\dotnet.exe` with arguments that have spaces
+  too. And it gives `server/discover` 5 seconds by default before it sends `initialize` on the same connection, which
+  the server can refuse once it has answered the first: the Windows runner's cold start took longer, so the test's
+  client waits.)
 - Architecture: both pack scripts publish the CLI into the desktop app's folder, and the apps' own files have names
   of their own.
 - By hand: packed for Linux, the AppImage holds both apps and their settings files; the CLI in the publish folder

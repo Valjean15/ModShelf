@@ -19,9 +19,16 @@ namespace ModShelf.Cli.Tests.Mcp;
 /// output, which carry nothing but the protocol.
 /// </summary>
 /// <remarks>
+/// <para>
 /// The test starts the process itself, as the agents' apps do. The SDK's own <see cref="StdioClientTransport"/> starts
 /// a server through <c>cmd.exe /c</c> on Windows, which can't start a program whose path has a space in it, such as
 /// <c>C:\Program Files\dotnet\dotnet.exe</c>, with arguments that have spaces too.
+/// </para>
+/// <para>
+/// The server answers once its host has started, which takes a cold process seconds on a slow machine: the client waits
+/// for it. By default, the SDK's client, asking for the newest revision, gives a <c>server/discover</c> 5 seconds, then
+/// sends <c>initialize</c> on the same connection, which a server that answered the first late can refuse.
+/// </para>
 /// </remarks>
 public sealed class McpCommandProcessTests : IDisposable
 {
@@ -37,16 +44,23 @@ public sealed class McpCommandProcessTests : IDisposable
         _folder.Dispose();
     }
 
-    [Fact]
-    public async Task AnAgentsAppStartsItListsItsToolsAndClosesIt()
+    /// <param name="protocol">
+    /// The revision the client asks for: the newest, 2026-07-28, which starts with <c>server/discover</c>; or one with
+    /// the <c>initialize</c> handshake, as the agents' apps used before it.
+    /// </param>
+    [Theory]
+    [InlineData(null)]
+    [InlineData("2025-06-18")]
+    public async Task AnAgentsAppStartsItListsItsToolsAndClosesIt(string? protocol)
     {
         List<string> errors = [];
         using Process server = Start(errors);
         await using RecordingStream output = new(server.StandardOutput.BaseStream);
+        McpClientOptions options = new() { ProtocolVersion = protocol, DiscoverProbeTimeout = Timeout.InfiniteTimeSpan };
         try
         {
             await using (McpClient client = await McpClient
-                .CreateAsync(new StreamClientTransport(server.StandardInput.BaseStream, output), cancellationToken: Cancellation)
+                .CreateAsync(new StreamClientTransport(server.StandardInput.BaseStream, output), options, cancellationToken: Cancellation)
                 .WaitAsync(Patience, Cancellation))
             {
                 IList<McpClientTool> tools = await client.ListToolsAsync(cancellationToken: Cancellation);
