@@ -91,7 +91,11 @@ CLI, can list the queue as saved, but can't add to it or change it.
   itself and lets go of, a download waiting for the user with its page, changes by ID or its start, a desktop app
   stood in (its reply, its refusal, its silence), what came into the library with the versions before, updates with what
   they replace, the library, a mod and a search, the accounts without names or keys, and no key in the logs at Trace.
-  The queue's own tests run it with a host of fakes. And `modshelf mcp` as a process an SDK client starts over stdio.
+  The queue's own tests run it with a host of fakes. And `modshelf mcp` as a process of its own, started as an agent's
+  app starts it, with an SDK client on its standard input and output: every line it writes there is a JSON-RPC message,
+  nothing goes to standard error, and it ends with exit code 0 once its input closes. (The SDK's own stdio client
+  starts a server through `cmd.exe /c` on Windows, which can't start `C:\Program Files\dotnet\dotnet.exe` with
+  arguments that have spaces too.)
 - Architecture: both pack scripts publish the CLI into the desktop app's folder, and the apps' own files have names
   of their own.
 - By hand: packed for Linux, the AppImage holds both apps and their settings files; the CLI in the publish folder
