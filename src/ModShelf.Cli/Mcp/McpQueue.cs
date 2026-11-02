@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Downloads.Ports;
+using ModShelf.Application.Library;
 using ModShelf.Domain.Downloads;
 
 namespace ModShelf.Cli.Mcp;
@@ -12,7 +13,7 @@ namespace ModShelf.Cli.Mcp;
 /// The library's download queue, as the MCP server changes it (ADR 0040). The desktop app runs the queue when it runs,
 /// so a request goes to it. When none runs, this process runs the queue, in a host of its own, until no download is under
 /// way: one waiting for the user to start it on the site isn't, so the desktop app, which the site's link starts, can
-/// take the queue over.
+/// take the queue over. It stops once the finished downloads are in the library, too.
 /// </summary>
 /// <remarks>
 /// One request at a time. Disposing stops this process's queue: a download under way stops where it is, and goes on the
@@ -182,11 +183,12 @@ internal sealed partial class McpQueue : IAsyncDisposable
     }
 
     /// <summary>
-    /// Stops the queue here once no download is under way.
+    /// Stops the queue here once no download is under way, and the ones finished are in the library.
     /// </summary>
     private async Task WatchAsync(IHost runner, CancellationToken cancellationToken)
     {
         IDownloadService downloads = runner.Services.GetRequiredService<IDownloadService>();
+        ILibraryDownloads library = runner.Services.GetRequiredService<ILibraryDownloads>();
         using PeriodicTimer timer = new(_checkEvery, _time);
         try
         {
@@ -212,6 +214,9 @@ internal sealed partial class McpQueue : IAsyncDisposable
                         continue;
                     }
 
+                    // A download that just finished may not be in the library yet, and stopping the host would stop its
+                    // recording: this waits for one being recorded, and records one not reached yet.
+                    await library.RecordMissedAsync(cancellationToken).ConfigureAwait(false);
                     LogDone(_logger);
                     Volatile.Write(ref _runner, null);
                     await StopAsync(runner).ConfigureAwait(false);
