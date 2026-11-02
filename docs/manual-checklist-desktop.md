@@ -83,6 +83,10 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
 - [ ] **3.7 Links it refuses.** Paste each, and **Search**:
   - `https://www.nexusmods.com/stardewvalley/mods/999999999`: "The site has no such mod."
   - `https://example.com/file.zip`: "No site ModShelf knows has mods at that link."
+- [ ] **3.8 Previews.** **Back to the list**, search `smapi` again, and look at the results with each of **Cards**, **Thumbnails** and **Off** under "Previews".
+  **Cards**, the default: each mod is a card with its picture across the top, as many side by side as fit; clicking one opens it. **Thumbnails**: the list, with each mod's thumbnail beside it. **Off**: the list without pictures. A mod without a picture shows a faint picture sign. The choice stays after closing and starting the app.
+- [ ] **3.9 Adult pictures.** Tick **Include adult content**, choose Skyrim Special Edition, and search `outfit`.
+  The adult mods' pictures are blurred, and their cards say "Adult · blurred". No sharp adult picture shows, even for a moment.
 
 ## 4. Download into the library (Premium only)
 
@@ -96,6 +100,8 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
   It downloads into SMAPI's folder too. The Library shows SMAPI with 2 files.
 - [ ] **4.5 Delete a file.** On the Library screen, expand SMAPI, and **Delete…** the old version.
   "Delete this file?" **Delete**: the file is gone from SMAPI's folder, and SMAPI shows 1 file.
+- [ ] **4.6 Pictures in the library.** On the Library screen, look at SMAPI with **Thumbnails**, the default, then **Cards**.
+  A thumbnail of SMAPI's picture beside its name; then a card with the picture, its name, its **…** menu, "Watched for updates" and "1 file", under Stardew Valley's heading. The test folder now has a `pictures` folder, beside `library.db`, with files named by long hexadecimal names. With the network off, closing and starting the app shows the same pictures.
 
 ## 5. Download through the website (free only)
 
@@ -176,6 +182,8 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
   The app changes at once each time. Close it (**Quit ModShelf**) with **Dark** chosen and start it again: it starts dark.
 - [ ] **10.6 Move the library** (Premium only). **Choose another folder…**, and pick another new folder in the test folder.
   "Move the library?" says how many files move, from where to where. **Move**: "The library is in … now." The files are in the new folder, in the same folders, and gone from the old one. **Open folder** in a mod's **…** menu on the Library screen opens the new place.
+- [ ] **10.6a Pictures and mod details.** The "Pictures and mod details" card.
+  "Saved pictures": "*size* of 512 MB. The oldest go first when it's full.", with a bar. **Clear** empties the test folder's `pictures` folder, and the size says 0 B; the screens download the pictures they show again. Choose **1 GB**, **1 week** under "Mod details" and **Hidden** under "Adult content": the settings file holds `"pictures": { "maxSize": 1024, "adult": "hidden" }` and `"details": { "maxAge": "7d" }`. On Browse (3.9), the adult mods show a struck-through eye instead of a picture. **Shown** shows their pictures as they are. Choose **Blurred (the default)** again.
 - [ ] **10.7 Where they're kept.** The bottom of the Settings screen.
   "Settings are kept in …\settings.json." in the test folder. The file holds what you chose.
 - [ ] **10.8 The version.** "About ModShelf", the last card of the Settings screen.
