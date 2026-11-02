@@ -70,7 +70,7 @@ public sealed class LibraryUpdatesCommandTests : IAsyncDisposable
         string[] lines = Lines(check);
         Assert.Equal(["Checked 1 mod with 1 request.", "1 new update:"], lines[..2]);
         Assert.Equal(["Handoff", "Mod", "File", "3", "1.3"], Words(lines[3])[..5]);
-        Assert.EndsWith($"{FileNameOf("1")}  {FileLink("3").AbsoluteUri}", lines[3], StringComparison.Ordinal);
+        Assert.Equal([FileNameOf("1"), FileLink("3").AbsoluteUri], Words(lines[3])[^2..]);
         Assert.Equal("To see every update: library updates", lines[4]);
         Assert.Equal(["Checked 1 mod with 1 request.", "No new updates."], Lines(again));
     }
@@ -106,6 +106,24 @@ public sealed class LibraryUpdatesCommandTests : IAsyncDisposable
         CliResult listed = await RunAsync("library", "updates", "--changelog");
 
         Assert.Equal(["File 3 (1.3):", "  - Faster.", "  - Fixed the crash.", "", "File 2 (1.2):", "  - Smaller."], Lines(listed)[^6..]);
+    }
+
+    [Fact]
+    public async Task MarksANewOptionalFile()
+    {
+        await RunAsync("download", HandoffLink("1").AbsoluteUri);
+        ModRef mod = new(new GameRef(FakeHandoffSource.SourceId, "game"), "mod");
+        LibraryUpdate optional = new(
+            new ModFileRef(mod, "7"), "Extras", "extras.zip", "1.0", ModFileCategory.Optional, DateTimeOffset.UnixEpoch.AddDays(4), null, DateTimeOffset.UnixEpoch.AddDays(10), FileLink("7"));
+        await _cli.InAppAsync(
+            services => services.GetRequiredService<ILibraryRepository>().UpdateAsync(
+                mod, stored => stored!.WithUpdates([optional, Update(mod, "3", days: 3)]), Cancellation),
+            Cancellation);
+
+        string[] lines = Lines(await RunAsync("library", "updates"));
+
+        Assert.Equal(["(new", "optional", "file)", FileLink("7").AbsoluteUri], Words(lines[2])[^4..]);
+        Assert.Equal([FileNameOf("1"), FileLink("3").AbsoluteUri], Words(lines[3])[^2..]);
     }
 
     [Fact]

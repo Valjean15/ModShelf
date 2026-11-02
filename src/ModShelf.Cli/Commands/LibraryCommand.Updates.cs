@@ -134,7 +134,7 @@ internal static partial class LibraryCommand
     }
 
     /// <summary>
-    /// A table of updates, by mod name and then the newest first.
+    /// A table of updates, by mod name and then the newest first. An optional file that replaces none is marked as new.
     /// </summary>
     private static void WriteUpdates(TextWriter output, IReadOnlyList<LibraryMod> library, IReadOnlyList<LibraryUpdate> updates)
     {
@@ -154,7 +154,8 @@ internal static partial class LibraryCommand
                         update.Name,
                         update.VersionLabel ?? "-",
                         CliText.Time(update.UploadedAt),
-                        mod?.Files.FirstOrDefault(file => file.File == update.Replaces)?.FileName ?? "-",
+                        mod?.Files.FirstOrDefault(file => file.File == update.Replaces)?.FileName
+                            ?? (update.Replaces is null && update.Category == ModFileCategory.Optional ? "(new optional file)" : "-"),
                         update.PageUrl?.AbsoluteUri ?? "-",
                     };
                 }),
