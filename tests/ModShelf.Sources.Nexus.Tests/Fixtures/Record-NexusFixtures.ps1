@@ -32,14 +32,23 @@
     refuses a key it never handed over. The script says when the link expires.
 
 .PARAMETER SearchOnly
-    Records only the search answers from the v2 GraphQL API, and the parts of its schema they rely on, leaving the
-    other recordings as they are. Works with either account. A full Premium run records them too.
+    Records only what the Browse screen asks for, leaving the other recordings as they are: the search answers from the
+    v2 GraphQL API, in each order and with each filter Browse offers, the parts of its schema they rely on, and the
+    game's trending mods from the older API. Works with either account. A full Premium run records them too.
+
+    A random order and a time window are partly a guess at the schema. A random order gets a fixed seed when the schema
+    has one, and is asked for twice and for its second page, to show whether the same seed gives the same order. A
+    filter by date is tried as ISO 8601 first, then as seconds since 1970, and the first that the answer honours is
+    kept. When Nexus Mods refuses one, its answer is saved anyway, and the script says so and goes on.
 
 .PARAMETER SearchWords
     Words to search the game's mods for. Their best match should be the mod given to -ModId.
 
 .PARAMETER SearchAuthor
     An author with a few mods for the game, to search by author.
+
+.PARAMETER SearchCategory
+    One of the game's mod categories, by its name on Nexus Mods, to search by category.
 
 .PARAMETER ExpiredNxmLink
     Free only, optional: an nxm:// link that has expired, such as the one given to -NxmLink earlier, once the
@@ -111,6 +120,8 @@ param(
 
     [string] $SearchAuthor = 'Pathoschild',
 
+    [string] $SearchCategory = 'Modding Tools',
+
     [switch] $Tracking,
 
     [switch] $Details,
@@ -157,6 +168,9 @@ query Schema {
   mod: __type(name: "Mod") { fields { name type { ...TypeRef } } }
   baseFilterValue: __type(name: "BaseFilterValue") { inputFields { name type { ...TypeRef } } }
   booleanFilterValue: __type(name: "BooleanFilterValue") { inputFields { name type { ...TypeRef } } }
+  intFilterValue: __type(name: "IntFilterValue") { inputFields { name type { ...TypeRef } } }
+  baseSortValue: __type(name: "BaseSortValue") { inputFields { name type { ...TypeRef } } }
+  randomSortValue: __type(name: "RandomSortValue") { inputFields { name type { ...TypeRef } } }
   comparison: __type(name: "FilterComparisonOperator") { enumValues { name } }
 }
 fragment TypeRef on __Type { kind name ofType { kind name ofType { kind name ofType { kind name } } } }
@@ -331,9 +345,12 @@ function Invoke-NexusGraphQl {
     }
 }
 
-# The variables the Nexus source sends for a search: the same as NexusSearchVariables builds.
+# The variables the Nexus source sends for a search: the same as NexusSearchVariables builds. -UpdatedSince is a date
+# as the filter takes it; -RandomValue is what a random order takes, such as its seed.
 function New-SearchVariables {
-    param([string] $Text, [string] $Sort = 'Relevance', [int] $Offset = 0, [int] $Count = 5, [string] $Author, [switch] $IncludeAdult, [switch] $Ascending)
+    param(
+        [string] $Text, [string] $Sort = 'Relevance', [int] $Offset = 0, [int] $Count = 5, [string] $Author, [switch] $IncludeAdult,
+        [switch] $Ascending, [string] $Category, [string] $UpdatedSince, [System.Text.Json.Nodes.JsonObject] $RandomValue)
 
     function Condition([string] $Value, [string] $Operator) {
         $condition = [System.Text.Json.Nodes.JsonObject]::new()
@@ -348,6 +365,8 @@ function New-SearchVariables {
     $filter['gameDomainName'] = Condition $Game 'EQUALS'
     if ($Text) { $filter['nameStemmed'] = Condition $Text 'MATCHES' }
     if ($Author) { $filter['author'] = Condition $Author 'MATCHES' }
+    if ($Category) { $filter['categoryName'] = Condition $Category 'EQUALS' }
+    if ($UpdatedSince) { $filter['updatedAt'] = Condition $UpdatedSince 'GTE' }
     if (-not $IncludeAdult) {
         $adult = [System.Text.Json.Nodes.JsonObject]::new()
         $adult['value'] = [System.Text.Json.Nodes.JsonValue]::Create($false)
@@ -363,13 +382,26 @@ function New-SearchVariables {
         'Downloads' { 'downloads' }
         'Updated' { 'updatedAt' }
         'Newest' { 'createdAt' }
+        'Name' { 'name' }
+        'Size' { 'size' }
+        'UniqueDownloads' { 'uniqueDownloads' }
+        'Random' { 'random' }
         default { throw "Unknown sort $Sort." }
     }
 
-    $direction = [System.Text.Json.Nodes.JsonObject]::new()
-    $direction['direction'] = [System.Text.Json.Nodes.JsonValue]::Create($(if ($Ascending) { 'ASC' } else { 'DESC' }))
+    # Plain assignments only: an if statement's output would unroll a JSON object into its properties.
     $order = [System.Text.Json.Nodes.JsonObject]::new()
-    $order[$field] = $direction
+    if ($Sort -eq 'Random') {
+        $value = [System.Text.Json.Nodes.JsonObject]::new()
+        if ($RandomValue) { $value = $RandomValue.DeepClone() }
+        $order[$field] = $value
+    }
+    else {
+        $direction = [System.Text.Json.Nodes.JsonObject]::new()
+        $direction['direction'] = [System.Text.Json.Nodes.JsonValue]::Create($(if ($Ascending) { 'ASC' } else { 'DESC' }))
+        $order[$field] = $direction
+    }
+
     $sorts = [System.Text.Json.Nodes.JsonArray]::new()
     $sorts.Add($order)
 
@@ -388,7 +420,8 @@ function Save-Searches {
     }
 
     $query = Get-Content -Raw $SearchQueryFile
-    Save-Fixture 'graphql-schema' (Invoke-NexusGraphQl $SchemaQuery 'Schema') { param($body) Limit-Schema $body }
+    $schema = Invoke-NexusGraphQl $SchemaQuery 'Schema'
+    Save-Fixture 'graphql-schema' $schema { param($body) Limit-Schema $body }
     Save-Fixture 'search-words' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Text $SearchWords))
     Save-Fixture 'search-endorsed-page-2' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort Endorsements -Offset 5))
     Save-Fixture 'search-author-updated' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Author $SearchAuthor -Sort Updated))
@@ -396,6 +429,103 @@ function Save-Searches {
     Save-Fixture 'search-newest-with-adult' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort Newest -IncludeAdult))
     Save-Fixture 'search-oldest-first' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort Newest -Ascending))
     Save-Fixture 'search-no-results' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Text 'zqxj no such mod zqxj'))
+
+    # Browse's other orders and filters, and the game's trending mods.
+    Save-GraphQlFixture 'search-name' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort Name -Ascending))
+    Save-GraphQlFixture 'search-size' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort Size))
+    Save-GraphQlFixture 'search-unique-downloads' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort UniqueDownloads))
+    $random = New-RandomValue (ConvertTo-Node $schema.Text)
+    Save-GraphQlFixture 'search-random' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort Random -RandomValue $random))
+    Save-GraphQlFixture 'search-random-again' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort Random -RandomValue $random))
+    Save-GraphQlFixture 'search-random-page-2' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort Random -RandomValue $random -Offset 5))
+    Save-GraphQlFixture 'search-category' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort Endorsements -Category $SearchCategory))
+    Save-UpdatedWithin $query
+    Save-Fixture 'trending' (Invoke-Nexus "v1/games/$Game/mods/trending.json") { param($body) Limit-Array $body 5 }
+}
+
+# What a random order takes, as the schema says: a number field, such as a seed, gets a fixed number, so the same
+# order can be asked for again. Without the schema, nothing.
+function New-RandomValue($Schema) {
+    $value = [System.Text.Json.Nodes.JsonObject]::new()
+    $fields = $null
+    if ($Schema -is [System.Text.Json.Nodes.JsonObject] -and $Schema['data'] -is [System.Text.Json.Nodes.JsonObject] -and
+        $Schema['data']['randomSortValue'] -is [System.Text.Json.Nodes.JsonObject]) {
+        $fields = $Schema['data']['randomSortValue']['inputFields']
+    }
+
+    if ($fields -isnot [System.Text.Json.Nodes.JsonArray]) {
+        return , $value
+    }
+
+    foreach ($field in $fields) {
+        $named = $field['type']
+        while ($null -ne $named -and $null -eq $named['name']) { $named = $named['ofType'] }
+        $scalar = $null
+        if ($null -ne $named) { $scalar = Get-Text $named['name'] }
+        $name = Get-Text $field['name']
+        if ($scalar -in 'Int', 'Float') {
+            $value[$name] = [System.Text.Json.Nodes.JsonValue]::Create(4242)
+        }
+        elseif ($scalar -eq 'String' -and $name -match '(?i)seed') {
+            $value[$name] = [System.Text.Json.Nodes.JsonValue]::Create('4242')
+        }
+    }
+
+    return , $value
+}
+
+# The mods updated in the last week, as Browse's time window asks for them: since the start of this hour in UTC, seven
+# days ago, the most endorsed first, so an answer that ignored the filter shows older mods. The schema doesn't say how
+# a filter writes a date: ISO 8601 is tried first, then seconds since 1970, and the first the answer honours is kept as
+# search-updated-week. When neither is, both are saved, with -iso and -unix after the name.
+function Save-UpdatedWithin([string] $Query) {
+    $now = [DateTimeOffset]::UtcNow
+    $since = [DateTimeOffset]::new($now.Year, $now.Month, $now.Day, $now.Hour, 0, 0, [TimeSpan]::Zero).AddDays(-7)
+    $tries = [ordered]@{
+        iso  = $since.ToString('yyyy-MM-ddTHH:mm:ssZ', [cultureinfo]::InvariantCulture)
+        unix = [string]$since.ToUnixTimeSeconds()
+    }
+
+    $answers = [ordered]@{}
+    foreach ($try in $tries.GetEnumerator()) {
+        $exchange = Invoke-NexusGraphQl $Query 'SearchMods' (New-SearchVariables -Sort Endorsements -UpdatedSince $try.Value)
+        if (Test-UpdatedSince $exchange $since) {
+            Save-GraphQlFixture 'search-updated-week' $exchange
+            return
+        }
+
+        $answers[$try.Key] = $exchange
+    }
+
+    foreach ($answer in $answers.GetEnumerator()) {
+        Save-GraphQlFixture "search-updated-week-$($answer.Key)" $answer.Value
+    }
+
+    Write-Warning 'Nexus Mods honoured neither way of writing the date in search-updated-week. Both answers are saved; tell Claude.'
+    $script:Refused++
+}
+
+# Whether an answer has mods, all updated since then.
+function Test-UpdatedSince($Exchange, [DateTimeOffset] $Since) {
+    if ($Exchange.Status -ne 200) { return $false }
+    $answer = ConvertTo-Node $Exchange.Text
+    if ($answer -isnot [System.Text.Json.Nodes.JsonObject] -or $null -ne $answer['errors']) { return $false }
+    if ($answer['data'] -isnot [System.Text.Json.Nodes.JsonObject] -or $answer['data']['mods'] -isnot [System.Text.Json.Nodes.JsonObject]) {
+        return $false
+    }
+
+    $nodes = $answer['data']['mods']['nodes']
+    if ($nodes -isnot [System.Text.Json.Nodes.JsonArray] -or $nodes.Count -eq 0) { return $false }
+    foreach ($node in $nodes) {
+        $updated = [DateTimeOffset]::MinValue
+        $text = $null
+        if ($node -is [System.Text.Json.Nodes.JsonObject]) { $text = Get-Text $node['updatedAt'] }
+        if (-not [DateTimeOffset]::TryParse($text, [cultureinfo]::InvariantCulture, [System.Globalization.DateTimeStyles]::AssumeUniversal, [ref]$updated) -or $updated -lt $Since) {
+            return $false
+        }
+    }
+
+    return $true
 }
 
 # The variables for the game's mods with the IDs, by the game's domain name: "mods" wants the game's numeric ID with a
