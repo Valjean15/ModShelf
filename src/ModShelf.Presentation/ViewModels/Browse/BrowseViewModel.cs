@@ -9,6 +9,7 @@ using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Library;
+using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
 using ModShelf.Application.Watchlist;
@@ -18,8 +19,8 @@ using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.Downloads;
-using ModShelf.Presentation.ViewModels.ModPages;
 using ModShelf.Presentation.ViewModels.Pictures;
+using ModShelf.Presentation.ViewModels.ModPages;
 using ModShelf.Sources.Abstractions.Search;
 
 namespace ModShelf.Presentation.ViewModels.Browse;
@@ -65,8 +66,13 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         ILibraryDownloads libraryDownloads,
         ILinkDownloads links,
         IWatchlists watchlists,
+        ILibraryRescan rescan,
+        ILibraryStorage storage,
+        ISettingsService settings,
         ISourceRegistry sources,
         IBrowserLauncher browser,
+        IFolderOpener folders,
+        IClipboard clipboard,
         IDialogService dialogs,
         INavigationService navigation,
         ModPictures pictures,
@@ -90,11 +96,17 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         _services = new ModPageServices(
             library,
             libraryDownloads,
+            rescan,
+            storage,
+            settings,
             new FolderDownloads(links, dialogs),
             new TrackedMods(watchlists),
             sources,
             browser,
+            folders,
+            clipboard,
             dialogs,
+            pictures,
             timeProvider,
             logger);
         SelectedSort = Sorts[0];
@@ -340,9 +352,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
             row.ShowLibrary(change.After);
         }
 
-        if (Mod?.Mod == change.Mod)
-        {
-            Mod.ShowLibrary(change.After);
-        }
+        // Also for a change to a mod the open mod needs.
+        Mod?.ShowLibrary();
     }
 }

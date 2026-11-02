@@ -22,10 +22,16 @@ internal sealed class LibraryHarness : IDisposable
         Time.SetLocalTimeZone(TimeZoneInfo.Utc);
         Screen = new LibraryViewModel(
             Library,
+            Lookup,
             Rescan,
+            LibraryDownloads,
+            Links,
+            Watchlists,
+            Storage,
             Settings,
             Browser,
             Folders,
+            Clipboard,
             Dialogs,
             new FakeSourceRegistry(Catalog),
             Pictures.Pictures,
@@ -38,11 +44,23 @@ internal sealed class LibraryHarness : IDisposable
 
     public ScriptedRescan Rescan { get; } = new();
 
+    public ScriptedLookup Lookup { get; } = new();
+
+    public ScriptedLibraryDownloads LibraryDownloads { get; } = new();
+
+    public ScriptedLinkDownloads Links { get; } = new();
+
+    public ScriptedWatchlists Watchlists { get; } = new();
+
+    public FakeLibraryStorage Storage { get; } = new();
+
     public FakeSettingsService Settings { get; } = new();
 
     public ScriptedBrowser Browser { get; } = new();
 
     public ScriptedFolders Folders { get; } = new();
+
+    public RecordingClipboard Clipboard { get; } = new();
 
     public ScriptedDialogs Dialogs { get; } = new();
 

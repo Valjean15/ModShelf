@@ -15,4 +15,7 @@ public sealed partial class LibraryViewModel
 
     [LoggerMessage(EventId = 941, Level = LogLevel.Error, Message = "Rescanning the library failed")]
     private static partial void LogRescanFailed(ILogger logger, Exception exception);
+
+    [LoggerMessage(EventId = 942, Level = LogLevel.Error, Message = "Opening mod {ModId} of {Game} failed")]
+    private static partial void LogOpenFailed(ILogger logger, Exception exception, string modId, string game);
 }

@@ -1730,4 +1730,146 @@
     <value>The saved pictures couldn't all be deleted: {0}</value>
     <comment>{0} is the reason.</comment>
   </data>
+  <data name="ModPageSiteFiles" xml:space="preserve">
+    <value>Files on {0}</value>
+    <comment>Heading of a mod page's files on its site. {0} is the site's name, such as Nexus Mods.</comment>
+  </data>
+  <data name="ModPageYourFiles" xml:space="preserve">
+    <value>Your files</value>
+    <comment>Heading of a mod page's files in the library.</comment>
+  </data>
+  <data name="ModPageMissing" xml:space="preserve">
+    <value>Missing from disk</value>
+    <comment>On one of the library's files that isn't where the library says it is.</comment>
+  </data>
+  <data name="ModPageArchived" xml:space="preserve">
+    <value>Archived</value>
+    <comment>On an old version of a file moved to an _archive folder.</comment>
+  </data>
+  <data name="ModPageShowOneArchived" xml:space="preserve">
+    <value>Show 1 archived version</value>
+    <comment>Button: shows the old version moved to an _archive folder.</comment>
+  </data>
+  <data name="ModPageShowArchived" xml:space="preserve">
+    <value>Show {0:N0} archived versions</value>
+    <comment>Button: shows the old versions moved to _archive folders. {0} is how many.</comment>
+  </data>
+  <data name="ModPageHideArchived" xml:space="preserve">
+    <value>Hide the archived versions</value>
+    <comment>Button: hides the old versions again.</comment>
+  </data>
+  <data name="ModPageUpdateFor" xml:space="preserve">
+    <value>Update for your {0}</value>
+    <comment>On a file on the site that's an update of a library file. {0} is the library file's version, or its name.</comment>
+  </data>
+  <data name="ModPageNewOptionalFile" xml:space="preserve">
+    <value>New optional file</value>
+    <comment>On an optional file uploaded since the mod was last checked.</comment>
+  </data>
+  <data name="ModPageUpdate" xml:space="preserve">
+    <value>Update</value>
+    <comment>On a file on the site that an update check found.</comment>
+  </data>
+  <data name="ModPageAllChanges" xml:space="preserve">
+    <value>All {0:N0} entries</value>
+    <comment>Button: shows every entry of the changelog. {0} is how many.</comment>
+  </data>
+  <data name="ModPageLatestChanges" xml:space="preserve">
+    <value>Only the latest</value>
+    <comment>Button: shows only the changelog's latest entries again.</comment>
+  </data>
+  <data name="ModPageRequirements" xml:space="preserve">
+    <value>Requirements</value>
+    <comment>Heading of what a mod needs.</comment>
+  </data>
+  <data name="ModPageRequirementsNote" xml:space="preserve">
+    <value>Open a mod it needs to download its files into the library. Installing them is up to your mod manager.</value>
+    <comment>Under a mod page's requirements.</comment>
+  </data>
+  <data name="ModPageInLibrary" xml:space="preserve">
+    <value>In library</value>
+    <comment>On a requirement the library has files of.</comment>
+  </data>
+  <data name="ModPageOpen" xml:space="preserve">
+    <value>Open</value>
+    <comment>Button: opens a required mod's page in ModShelf.</comment>
+  </data>
+  <data name="ModPageDetails" xml:space="preserve">
+    <value>Details</value>
+    <comment>Heading of a mod page's facts.</comment>
+  </data>
+  <data name="ModPageModId" xml:space="preserve">
+    <value>Mod ID</value>
+    <comment>A fact on a mod page: the mod's ID on its site.</comment>
+  </data>
+  <data name="ModPageCategory" xml:space="preserve">
+    <value>Category</value>
+    <comment>A fact on a mod page: the mod's category on its site.</comment>
+  </data>
+  <data name="ModPageInLibrarySince" xml:space="preserve">
+    <value>In the library since</value>
+    <comment>A fact on a mod page: the day the mod came into the library.</comment>
+  </data>
+  <data name="ModPageLastChecked" xml:space="preserve">
+    <value>Last checked</value>
+    <comment>A fact on a mod page: when the mod was last checked for updates.</comment>
+  </data>
+  <data name="ModPageNotChecked" xml:space="preserve">
+    <value>Not yet</value>
+    <comment>The value of Last checked for a mod never checked.</comment>
+  </data>
+  <data name="ModPageOffline" xml:space="preserve">
+    <value>{0} couldn't give the mod, so its saved details show: {1}</value>
+    <comment>A strip on a mod page opened from the Library. {0} is the site's name; {1} is what went wrong.</comment>
+  </data>
+  <data name="ModPageSha256" xml:space="preserve">
+    <value>SHA-256</value>
+  </data>
+  <data name="ModPageCopySha256" xml:space="preserve">
+    <value>Copy the SHA-256</value>
+  </data>
+  <data name="LibraryOpenMod" xml:space="preserve">
+    <value>Open</value>
+    <comment>Menu item on a library mod that opens its page in ModShelf.</comment>
+  </data>
+  <data name="LibraryOpenOnSite" xml:space="preserve">
+    <value>Open on its site</value>
+    <comment>Menu item on a library mod that opens its page on its site, in the browser.</comment>
+  </data>
+  <data name="ModPageShownOnline" xml:space="preserve">
+    <value>Shown once {0} gives the mod.</value>
+    <comment>In place of a mod's files and changelog while its page shows its saved details. {0} is the site's name.</comment>
+  </data>
+  <data name="ModPageWatching" xml:space="preserve">
+    <value>Watching</value>
+    <comment>Button on a mod page that stops watching the mod; it's pressed.</comment>
+  </data>
+  <data name="FileCategoryMain" xml:space="preserve">
+    <value>Main</value>
+    <comment>A file's section on its site.</comment>
+  </data>
+  <data name="FileCategoryUpdate" xml:space="preserve">
+    <value>Update</value>
+    <comment>A file's section on its site.</comment>
+  </data>
+  <data name="FileCategoryOptional" xml:space="preserve">
+    <value>Optional</value>
+    <comment>A file's section on its site.</comment>
+  </data>
+  <data name="FileCategoryMiscellaneous" xml:space="preserve">
+    <value>Miscellaneous</value>
+    <comment>A file's section on its site.</comment>
+  </data>
+  <data name="FileCategoryOldVersion" xml:space="preserve">
+    <value>Old version</value>
+    <comment>A file's section on its site.</comment>
+  </data>
+  <data name="FileCategoryArchived" xml:space="preserve">
+    <value>Archived</value>
+    <comment>A file's section on its site.</comment>
+  </data>
+  <data name="FileCategoryUnknown" xml:space="preserve">
+    <value>No section</value>
+    <comment>A file in no section on its site.</comment>
+  </data>
 </root>

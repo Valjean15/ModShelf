@@ -39,8 +39,13 @@ internal sealed class BrowseHarness : IDisposable
             LibraryDownloads,
             Links,
             Watchlists,
+            Rescan,
+            Storage,
+            Settings,
             new FakeSourceRegistry(Catalog),
             Browser,
+            Folders,
+            Clipboard,
             Dialogs,
             Navigation,
             Pictures.Pictures,
@@ -59,9 +64,19 @@ internal sealed class BrowseHarness : IDisposable
 
     public ScriptedWatchlists Watchlists { get; } = new();
 
+    public ScriptedRescan Rescan { get; } = new();
+
+    public FakeLibraryStorage Storage { get; } = new();
+
+    public FakeSettingsService Settings { get; } = new();
+
+    public ScriptedFolders Folders { get; } = new();
+
     public ScriptedCatalog Catalog { get; } = new(TestData.Nexus, "Nexus Mods");
 
     public ScriptedBrowser Browser { get; } = new();
+
+    public RecordingClipboard Clipboard { get; } = new();
 
     public ScriptedDialogs Dialogs { get; } = new();
 

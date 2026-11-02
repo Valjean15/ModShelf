@@ -4,8 +4,8 @@ using CommunityToolkit.Mvvm.Input;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
-using ModShelf.Presentation.ViewModels.ModPages;
 using ModShelf.Presentation.ViewModels.Pictures;
+using ModShelf.Presentation.ViewModels.ModPages;
 using ModShelf.Sources.Abstractions.Catalog;
 
 namespace ModShelf.Presentation.ViewModels.Browse;

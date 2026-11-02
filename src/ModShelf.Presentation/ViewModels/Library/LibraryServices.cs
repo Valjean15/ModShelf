@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
+using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.Pictures;
 
@@ -19,6 +20,7 @@ internal sealed class LibraryServices(
     IFolderOpener folders,
     IDialogService dialogs,
     ModPictures pictures,
+    Func<ModRef, CancellationToken, Task> open,
     TimeProvider timeProvider,
     ILogger logger)
 {
@@ -35,6 +37,11 @@ internal sealed class LibraryServices(
     public IDialogService Dialogs { get; } = dialogs ?? throw new ArgumentNullException(nameof(dialogs));
 
     public ModPictures Pictures { get; } = pictures ?? throw new ArgumentNullException(nameof(pictures));
+
+    /// <summary>
+    /// Opens a mod on its page, in place of the list.
+    /// </summary>
+    public Func<ModRef, CancellationToken, Task> Open { get; } = open ?? throw new ArgumentNullException(nameof(open));
 
     public TimeProvider TimeProvider { get; } = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
 

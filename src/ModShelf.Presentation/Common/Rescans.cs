@@ -1,36 +1,38 @@
 using ModShelf.Application.Library;
 using ModShelf.Domain.Library;
-using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
+using ModShelf.Presentation.Services;
 
-namespace ModShelf.Presentation.ViewModels.Library;
+namespace ModShelf.Presentation.Common;
 
 /// <summary>
-/// Rescanning from the Library screen, a mod or the whole library, and saying what it found.
+/// Rescanning from the Library screen or a mod's page, a mod or the whole library, and saying what it found.
 /// </summary>
 internal static class Rescans
 {
     /// <summary>
-    /// Rescans, then says what it found in a message. The screen shows the library's changes as it makes them.
+    /// Rescans, then says what it found in a message. The screens show the library's changes as it makes them.
     /// </summary>
     /// <param name="link">The mod's page, or null for the whole library.</param>
-    public static async Task RunAsync(LibraryServices services, Uri? link, CancellationToken cancellationToken)
+    public static async Task RunAsync(ILibraryRescan rescans, IModLibrary library, IDialogService dialogs, Uri? link, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(rescans);
+        ArgumentNullException.ThrowIfNull(library);
+        ArgumentNullException.ThrowIfNull(dialogs);
 
         LibraryRescan rescan;
         try
         {
-            rescan = await services.Rescan.RescanAsync(link, cancellationToken);
+            rescan = await rescans.RescanAsync(link, cancellationToken);
         }
         catch (InvalidDataException exception)
         {
-            await services.Dialogs.ShowMessageAsync(Strings.RescanFailedTitle, exception.Message, cancellationToken);
+            await dialogs.ShowMessageAsync(Strings.RescanFailedTitle, exception.Message, cancellationToken);
             return;
         }
 
-        IReadOnlyList<LibraryMod> library = await services.Library.ListAsync(cancellationToken);
-        await services.Dialogs.ShowMessageAsync(Strings.RescanDoneTitle, Summary(rescan, library), cancellationToken);
+        IReadOnlyList<LibraryMod> mods = await library.ListAsync(cancellationToken);
+        await dialogs.ShowMessageAsync(Strings.RescanDoneTitle, Summary(rescan, mods), cancellationToken);
     }
 
     /// <summary>

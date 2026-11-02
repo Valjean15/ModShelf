@@ -153,6 +153,12 @@ public sealed partial class LibraryModViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Opens the mod on its page, in place of the list.
+    /// </summary>
+    [RelayCommand]
+    private Task OpenAsync(CancellationToken cancellationToken) => _services.Open(Mod, cancellationToken);
+
+    /// <summary>
     /// Opens the mod's page on its site. When no browser opens, the page's address is shown instead.
     /// </summary>
     [RelayCommand(CanExecute = nameof(HasPage))]
@@ -241,7 +247,7 @@ public sealed partial class LibraryModViewModel : ObservableObject
     /// </summary>
     [RelayCommand(CanExecute = nameof(HasPage))]
     private Task RescanAsync(CancellationToken cancellationToken)
-        => RunAsync(ModAction.Rescan, () => Rescans.RunAsync(_services, _mod.PageUrl, cancellationToken), cancellationToken);
+        => RunAsync(ModAction.Rescan, () => Rescans.RunAsync(_services.Rescan, _services.Library, _services.Dialogs, _mod.PageUrl, cancellationToken), cancellationToken);
 
     private bool CanWatch() => !IsWatched;
 

@@ -235,8 +235,9 @@ public sealed partial class BrowseViewModel
             {
                 ModPage page = await lookUp(token);
                 token.ThrowIfCancellationRequested();
-                ModPageViewModel opened = new(page, _inLibrary.GetValueOrDefault(page.Mod.Mod), _services);
+                ModPageViewModel opened = new(page, mod => _inLibrary.GetValueOrDefault(mod), _services, Previews, OpenAsync, _stopping);
                 Mod = opened;
+                await opened.LoadAsync(token);
                 await opened.ShowTrackedAsync(token);
             });
 

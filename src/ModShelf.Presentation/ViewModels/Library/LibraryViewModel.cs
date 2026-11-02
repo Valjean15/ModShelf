@@ -7,14 +7,20 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Accounts.Ports;
+using ModShelf.Application.Catalog;
+using ModShelf.Application.Downloads;
 using ModShelf.Application.Library;
+using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
+using ModShelf.Application.Watchlist;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
+using ModShelf.Presentation.ViewModels.Downloads;
+using ModShelf.Presentation.ViewModels.ModPages;
 using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Sources.Abstractions.Catalog;
 
@@ -23,27 +29,39 @@ namespace ModShelf.Presentation.ViewModels.Library;
 /// <summary>
 /// The mods the library has files of or watches, by game, as one list of games' headings and their mods, so it can be
 /// virtualized, or as cards under each game's heading. A box filters the mods by name. With previews, each mod shows its
-/// picture, from its saved details. It follows the library's changes while the app runs.
+/// picture, from its saved details. A mod opens on its page in place of the list, read from its site, or from its saved
+/// details when the site can't give it. It follows the library's changes while the app runs.
 /// </summary>
 public sealed partial class LibraryViewModel : ScreenViewModel
 {
     private readonly IModLibrary _library;
+    private readonly IModLookup _lookup;
     private readonly ISourceRegistry _sources;
     private readonly ModPictures _pictures;
     private readonly IUiThread _uiThread;
     private readonly ILogger<LibraryViewModel> _logger;
     private readonly LibraryServices _services;
+    private readonly ModPageServices _pageServices;
     private readonly Dictionary<ModRef, LibraryModViewModel> _mods = [];
+    private readonly Dictionary<ModRef, LibraryMod> _shown = [];
     private readonly Dictionary<GameRef, LibraryGameViewModel> _games = [];
     private CancellationToken _stopping;
+    private CancellationTokenSource? _opening;
+    private ModRef? _openedMod;
     private bool _picturesShown;
 
     public LibraryViewModel(
         IModLibrary library,
+        IModLookup lookup,
         ILibraryRescan rescan,
+        ILibraryDownloads libraryDownloads,
+        ILinkDownloads links,
+        IWatchlists watchlists,
+        ILibraryStorage storage,
         ISettingsService settings,
         IBrowserLauncher browser,
         IFolderOpener folders,
+        IClipboard clipboard,
         IDialogService dialogs,
         ISourceRegistry sources,
         ModPictures pictures,
@@ -52,17 +70,35 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         ILogger<LibraryViewModel> logger)
     {
         ArgumentNullException.ThrowIfNull(library);
+        ArgumentNullException.ThrowIfNull(lookup);
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(logger);
 
         _library = library;
+        _lookup = lookup;
         _sources = sources;
         _pictures = pictures;
         _uiThread = uiThread;
         _logger = logger;
-        _services = new LibraryServices(library, rescan, settings, browser, folders, dialogs, pictures, timeProvider, logger);
+        _services = new LibraryServices(library, rescan, settings, browser, folders, dialogs, pictures, OpenAsync, timeProvider, logger);
+        _pageServices = new ModPageServices(
+            library,
+            libraryDownloads,
+            rescan,
+            storage,
+            settings,
+            new FolderDownloads(links, dialogs),
+            new TrackedMods(watchlists),
+            sources,
+            browser,
+            folders,
+            clipboard,
+            dialogs,
+            pictures,
+            timeProvider,
+            logger);
         Previews = new PreviewsViewModel(PreviewScreen.Library, pictures);
         Previews.PropertyChanged += (_, changed) =>
         {
@@ -114,6 +150,40 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     public partial string NothingMatchesText { get; private set; } = string.Empty;
 
     /// <summary>
+    /// The mod opened, in place of the list; null when none is.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsModOpen))]
+    [NotifyCanExecuteChangedFor(nameof(BackCommand))]
+    public partial ModPageViewModel? Mod { get; private set; }
+
+    public bool IsModOpen => Mod is not null;
+
+    /// <summary>
+    /// The name of the game of the mod opened, for the way back to the list.
+    /// </summary>
+    [ObservableProperty]
+    public partial string OpenGameName { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// Whether a mod is being read from its site, to open it.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsOpening { get; private set; }
+
+    /// <summary>
+    /// Why the mod opened shows its saved details rather than its site's; null when it shows its site's.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(RetryCommand))]
+    public partial string? PageProblem { get; private set; }
+
+    /// <summary>
+    /// The last opening of a mod, for tests to wait on.
+    /// </summary>
+    internal Task Opening { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
     /// Reads the previews from the settings, lists the library, then follows its changes while the app runs, and asks the
     /// games' sites for their names.
     /// </summary>
@@ -147,12 +217,121 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     partial void OnFilterChanged(string value) => Arrange();
 
     /// <summary>
+    /// Closes the mod, back to the list.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(IsModOpen))]
+    private void Back()
+    {
+        _opening?.Cancel();
+        _openedMod = null;
+        Mod = null;
+        PageProblem = null;
+    }
+
+    private bool CanRetry() => PageProblem is not null && _openedMod is not null;
+
+    /// <summary>
+    /// Reads the mod opened from its site again.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanRetry))]
+    private Task RetryAsync(CancellationToken cancellationToken) => _openedMod is { } mod ? OpenAsync(mod, cancellationToken) : Task.CompletedTask;
+
+    /// <summary>
+    /// Opens the mod on its page, in place of the list: read from its site, or from its saved details when the site
+    /// can't give it, saying why. A mod opened later drops one still being read.
+    /// </summary>
+    private Task OpenAsync(ModRef mod, CancellationToken cancellationToken)
+    {
+        Opening = OpenPageAsync(mod);
+        return Opening;
+    }
+
+    private async Task OpenPageAsync(ModRef mod)
+    {
+        using CancellationTokenSource opening = CancellationTokenSource.CreateLinkedTokenSource(_stopping);
+        CancellationTokenSource? dropped = Interlocked.Exchange(ref _opening, opening);
+        dropped?.Cancel();
+        CancellationToken token = opening.Token;
+        IsOpening = true;
+        try
+        {
+            ModPage page;
+            string? problem = null;
+            try
+            {
+                page = await _lookup.LookUpAsync(mod, token);
+            }
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
+            {
+                return;
+            }
+            catch (Exception exception) when (OfflineReason(mod, exception) is { } reason)
+            {
+                page = await SavedPageAsync(mod, token);
+                problem = reason;
+            }
+
+            token.ThrowIfCancellationRequested();
+            ModPageViewModel opened = new(page, shown => _shown.GetValueOrDefault(shown), _pageServices, Previews, OpenAsync, _stopping)
+            {
+                IsOffline = problem is not null,
+            };
+            _openedMod = mod;
+            OpenGameName = _games.TryGetValue(mod.Game, out LibraryGameViewModel? game) ? game.Name : page.Game.Name;
+            Mod = opened;
+            PageProblem = problem;
+            await opened.LoadAsync(token);
+            if (problem is null)
+            {
+                await opened.ShowTrackedAsync(token);
+            }
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            // Another mod was opened, the list shown again, or the app is closing.
+        }
+        catch (Exception exception)
+        {
+            LogOpenFailed(_logger, exception, mod.Id, mod.Game.Key);
+            await _services.Dialogs.ShowMessageAsync(Strings.ActionFailedTitle, Strings.SomethingWentWrong, CancellationToken.None);
+        }
+        finally
+        {
+            if (ReferenceEquals(_opening, opening))
+            {
+                IsOpening = false;
+                _opening = null;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Why the mod's site couldn't give it, to say over its saved details; null for a failure that isn't the site's.
+    /// </summary>
+    private string? OfflineReason(ModRef mod, Exception exception)
+        => exception is ArgumentException
+            ? Text.Format(Strings.ModPageOffline, _sources.SiteName(mod.Game.Source), exception.Message)
+            : SiteProblems.Describe(exception, _sources.SiteName(mod.Game.Source), Strings.ModPageOffline);
+
+    /// <summary>
+    /// The mod's page from what's saved: its saved details, or the library's, with no files or changelog.
+    /// </summary>
+    private async Task<ModPage> SavedPageAsync(ModRef mod, CancellationToken cancellationToken)
+    {
+        ModInfo? saved = await _pictures.Details.GetSavedAsync(mod, cancellationToken);
+        LibraryMod? inLibrary = _shown.GetValueOrDefault(mod);
+        ModInfo details = saved ?? new ModInfo(mod, inLibrary?.Name ?? mod.Id, author: inLibrary?.Author, pageUrl: inLibrary?.PageUrl);
+        string gameName = _games.TryGetValue(mod.Game, out LibraryGameViewModel? game) ? game.Name : mod.Game.Key;
+        return new ModPage(new GameInfo(mod.Game, gameName), details, [], [], null);
+    }
+
+    /// <summary>
     /// Rescans every mod's folders, then says what it found. The screen shows what it added as the library changes.
     /// </summary>
     [RelayCommand]
     private Task RescanAsync(CancellationToken cancellationToken)
         => UserCommands.RunAsync(
-            () => Rescans.RunAsync(_services, null, cancellationToken),
+            () => Rescans.RunAsync(_services.Rescan, _services.Library, _services.Dialogs, null, cancellationToken),
             _services.Dialogs,
             exception => LogRescanFailed(_logger, exception),
             cancellationToken);
@@ -169,9 +348,13 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         else
         {
             _mods.Remove(change.Mod);
+            _shown.Remove(change.Mod);
         }
 
         Arrange();
+
+        // Also for a change to a mod the open mod needs.
+        Mod?.ShowLibrary();
     }
 
     /// <summary>
@@ -180,6 +363,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     /// </summary>
     private void Show(LibraryMod mod)
     {
+        _shown[mod.Mod] = mod;
         if (_mods.TryGetValue(mod.Mod, out LibraryModViewModel? shown))
         {
             shown.Show(mod);

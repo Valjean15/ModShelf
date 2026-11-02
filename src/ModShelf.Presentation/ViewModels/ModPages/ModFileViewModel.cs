@@ -10,7 +10,7 @@ using ModShelf.Presentation.ViewModels.Downloads;
 namespace ModShelf.Presentation.ViewModels.ModPages;
 
 /// <summary>
-/// One of a mod's files on the Browse screen, as its site lists it, with downloading it into the library or a folder.
+/// One of a mod's files on its page, as its site lists it, with downloading it into the library or a folder.
 /// </summary>
 public sealed partial class ModFileViewModel : ObservableObject
 {
@@ -94,9 +94,22 @@ public sealed partial class ModFileViewModel : ObservableObject
     public partial bool IsNoteAProblem { get; private set; }
 
     /// <summary>
-    /// Shows whether the library has the file now. Runs on the UI thread.
+    /// What the file is to the library, such as "Update for your 1.3" or "New optional file"; empty for nothing.
     /// </summary>
-    internal void ShowLibrary(bool isInLibrary) => IsInLibrary = isInLibrary;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsUpdate))]
+    public partial string UpdateNote { get; private set; } = string.Empty;
+
+    public bool IsUpdate => UpdateNote.Length > 0;
+
+    /// <summary>
+    /// Shows whether the library has the file now, and what it is to the library. Runs on the UI thread.
+    /// </summary>
+    internal void ShowLibrary(bool isInLibrary, string? updateNote)
+    {
+        IsInLibrary = isInLibrary;
+        UpdateNote = updateNote ?? string.Empty;
+    }
 
     /// <summary>
     /// Downloads the file into the library, where its mod's files are, or where its game's folder pattern says.

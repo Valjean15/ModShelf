@@ -8,16 +8,24 @@ using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
+using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Sources.Abstractions.Catalog;
 
 namespace ModShelf.Presentation.ViewModels.ModPages;
 
 /// <summary>
-/// A mod opened on the Browse screen, as its site describes it: its details, its files by section, and its changelog,
-/// with watching it in the library and tracking it on its site.
+/// A mod's page, opened from the Library or Browse screen: its picture and details as its site describes them, the
+/// library's files of it, its files on the site by section, its latest changes and what it needs; with watching it,
+/// tracking it on its site, rescanning its folders and removing it from the library. ModShelf only downloads what it
+/// needs; it never installs anything.
 /// </summary>
 public sealed partial class ModPageViewModel : ObservableObject
 {
+    /// <summary>
+    /// How many of the changelog's entries show before the user asks for them all.
+    /// </summary>
+    internal const int LatestChanges = 3;
+
     // The sections shown at once, in the order the sites show them; the others only when asked.
     private static readonly ModFileCategory[] CurrentSections =
         [ModFileCategory.Main, ModFileCategory.Update, ModFileCategory.Optional, ModFileCategory.Miscellaneous];
@@ -30,15 +38,40 @@ public sealed partial class ModPageViewModel : ObservableObject
     private readonly List<(ModFileCategory Category, ModFileSectionViewModel Section)> _sections = [];
     private readonly List<ModFileViewModel> _files = [];
     private readonly ModFileRef? _linkedFile;
+    private readonly Func<ModRef, LibraryMod?> _library;
+    private LibraryMod? _inLibrary;
+    private string? _libraryRoot;
 
-    internal ModPageViewModel(ModPage page, LibraryMod? inLibrary, ModPageServices services)
+    /// <param name="library">What the library has of a mod now; null when nothing.</param>
+    /// <param name="previews">The screen's previews, which say whether the page shows the mod's picture, and how
+    /// large.</param>
+    /// <param name="open">Opens another mod's page on the screen, such as one the mod needs.</param>
+    /// <param name="stopping">Cancelled when the app closes.</param>
+    internal ModPageViewModel(
+        ModPage page,
+        Func<ModRef, LibraryMod?> library,
+        ModPageServices services,
+        PreviewsViewModel previews,
+        Func<ModRef, CancellationToken, Task> open,
+        CancellationToken stopping)
     {
         ArgumentNullException.ThrowIfNull(page);
+        ArgumentNullException.ThrowIfNull(library);
         ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(previews);
+        ArgumentNullException.ThrowIfNull(open);
 
         _services = services;
         _info = page.Mod;
         _linkedFile = page.LinkedFile;
+        _library = library;
+        Previews = previews;
+        Picture = new ModPictureViewModel(services.Pictures);
+        if (previews.ShowsPictures)
+        {
+            Picture.Show(page.Mod, stopping);
+        }
+
         Mod = page.Mod.Mod;
         Name = page.Mod.Name;
         GameName = page.Game.Name;
@@ -52,11 +85,16 @@ public sealed partial class ModPageViewModel : ObservableObject
         HasAdultContent = page.Mod.HasAdultContent;
         IsUnavailable = !page.Mod.IsAvailable;
         HasPage = page.Mod.PageUrl is not null;
-        Changelog = page.Changelogs;
+        CategoryText = page.Mod.Category ?? string.Empty;
+        Changelog = NewestFirst(page.Changelogs, page.Mod.Version);
         CanTrack = services.Tracked.CanTrack(Mod.Game.Source);
         string site = services.Sources.SiteName(Mod.Game.Source);
         TrackText = Text.Format(Strings.BrowseTrack, site);
         UntrackText = Text.Format(Strings.BrowseUntrack, site);
+        OpenPageText = Text.Format(Strings.JobOpenPage, site);
+        SiteFilesHeading = Text.Format(Strings.ModPageSiteFiles, site);
+        OfflineText = Text.Format(Strings.ModPageShownOnline, site);
+        Requirements = [.. page.Requirements.Select(requirement => new RequirementViewModel(requirement, services, open))];
 
         foreach (ModFileCategory category in CurrentSections.Concat(OtherSections))
         {
@@ -76,8 +114,9 @@ public sealed partial class ModPageViewModel : ObservableObject
         }
 
         HasFiles = _files.Count > 0;
-        ShowLibrary(inLibrary);
+        ShowLibrary();
         ShowSections();
+        ShowChanges();
     }
 
     /// <summary>
@@ -90,9 +129,23 @@ public sealed partial class ModPageViewModel : ObservableObject
         Unwatch,
         Track,
         Untrack,
+        OpenFolder,
+        Rescan,
+        Remove,
+        CopySha256,
     }
 
     public ModRef Mod { get; }
+
+    /// <summary>
+    /// The screen's previews: none shows no picture, thumbnails a small one beside the name, cards a large one above.
+    /// </summary>
+    public PreviewsViewModel Previews { get; }
+
+    /// <summary>
+    /// The mod's picture, while the screen shows pictures.
+    /// </summary>
+    public ModPictureViewModel Picture { get; }
 
     public string Name { get; }
 
@@ -120,6 +173,13 @@ public sealed partial class ModPageViewModel : ObservableObject
     /// <inheritdoc cref="BrowseModViewModel.EndorsementsText"/>
     public string EndorsementsText { get; }
 
+    /// <summary>
+    /// The mod's category on its site, such as "Gameplay"; empty when it doesn't say.
+    /// </summary>
+    public string CategoryText { get; }
+
+    public bool HasCategory => CategoryText.Length > 0;
+
     public bool HasAdultContent { get; }
 
     /// <summary>
@@ -130,9 +190,36 @@ public sealed partial class ModPageViewModel : ObservableObject
     public bool HasPage { get; }
 
     /// <summary>
+    /// Such as "Open on Nexus Mods".
+    /// </summary>
+    public string OpenPageText { get; }
+
+    /// <summary>
+    /// Such as "Files on Nexus Mods".
+    /// </summary>
+    public string SiteFilesHeading { get; }
+
+    /// <summary>
     /// Whether the site lists any files for the mod.
     /// </summary>
     public bool HasFiles { get; }
+
+    /// <summary>
+    /// Whether the page shows the mod's saved details because its site couldn't give it, so its files, changelog and
+    /// requirements aren't known.
+    /// </summary>
+    public bool IsOffline { get; internal init; }
+
+    /// <summary>
+    /// What's said in place of the files and the changelog while <see cref="IsOffline"/>, such as "Shown once Nexus Mods
+    /// gives the mod."
+    /// </summary>
+    public string OfflineText { get; }
+
+    /// <summary>
+    /// Whether to say the site lists no files: not while it couldn't be asked.
+    /// </summary>
+    public bool ShowsNoFiles => !HasFiles && !IsOffline;
 
     /// <summary>
     /// The sections of files shown: the current ones always; old versions, archived files and files in no section when
@@ -159,11 +246,89 @@ public sealed partial class ModPageViewModel : ObservableObject
     public partial string MoreFilesText { get; private set; } = string.Empty;
 
     /// <summary>
-    /// Each version's changes, in the order the site gives them.
+    /// Each version's changes, the newest first as far as can be told: the site's order, turned round when it lists the
+    /// mod's current version last.
     /// </summary>
     public IReadOnlyList<ModChangelog> Changelog { get; }
 
     public bool HasChangelog => Changelog.Count > 0;
+
+    /// <summary>
+    /// Whether to say the mod has no changelog: not while its site couldn't be asked.
+    /// </summary>
+    public bool ShowsNoChangelog => !HasChangelog && !IsOffline;
+
+    /// <summary>
+    /// The changelog's entries shown: the latest few, or all of them when asked.
+    /// </summary>
+    public ObservableCollection<ModChangelog> ShownChanges { get; } = [];
+
+    /// <summary>
+    /// Whether the changelog has more entries than the latest few.
+    /// </summary>
+    public bool HasMoreChanges => Changelog.Count > LatestChanges;
+
+    [ObservableProperty]
+    public partial bool AreAllChangesShown { get; private set; }
+
+    /// <summary>
+    /// Such as "All 9 entries", or what shows only the latest again.
+    /// </summary>
+    [ObservableProperty]
+    public partial string MoreChangesText { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// What the mod needs, as its site lists it; empty when it lists nothing, or the site can't say.
+    /// </summary>
+    public IReadOnlyList<RequirementViewModel> Requirements { get; }
+
+    public bool HasRequirements => Requirements.Count > 0;
+
+    /// <summary>
+    /// The library's files of the mod, the latest downloaded first: the current ones, and the archived ones when asked.
+    /// </summary>
+    public ObservableCollection<OwnFileViewModel> OwnFiles { get; } = [];
+
+    /// <summary>
+    /// Whether the library has files of the mod.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(OpenFolderCommand))]
+    public partial bool HasOwnFiles { get; private set; }
+
+    /// <summary>
+    /// The mod's folder in the library, where its latest file is, such as "nexus/stardewvalley/SMAPI (2400)"; empty
+    /// without files.
+    /// </summary>
+    [ObservableProperty]
+    public partial string OwnFolderText { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// Whether some of the library's files of the mod are old versions in an <c>_archive</c> folder.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool HasArchived { get; private set; }
+
+    [ObservableProperty]
+    public partial bool AreArchivedShown { get; private set; }
+
+    /// <summary>
+    /// Such as "Show 1 archived version", or what hides them again.
+    /// </summary>
+    [ObservableProperty]
+    public partial string ArchivedText { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// The mod's ID, category, and when it came into the library and was last checked for updates.
+    /// </summary>
+    public ObservableCollection<ModFact> Facts { get; } = [];
+
+    /// <summary>
+    /// Whether the library has the mod, watched or with files.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(RescanCommand), nameof(RemoveCommand))]
+    public partial bool IsInLibrary { get; private set; }
 
     /// <summary>
     /// Whether the library has files of it.
@@ -213,18 +378,27 @@ public sealed partial class ModPageViewModel : ObservableObject
     internal IReadOnlyList<ModFileViewModel> Files => _files;
 
     /// <summary>
-    /// Shows what the library has of the mod now; null when nothing. Runs on the UI thread.
+    /// Reads where the library is, so the library's files of the mod say whether they're still on disk. Settings that
+    /// can't be read leave that unsaid.
     /// </summary>
-    internal void ShowLibrary(LibraryMod? inLibrary)
+    internal async Task LoadAsync(CancellationToken cancellationToken)
     {
-        IsDownloaded = inLibrary?.Files.Count > 0;
-        IsWatched = inLibrary?.IsWatched == true;
-        HashSet<ModFileRef> kept = [.. inLibrary?.Files.Select(file => file.File) ?? []];
-        foreach (ModFileViewModel file in _files)
+        try
         {
-            file.ShowLibrary(kept.Contains(file.File));
+            _libraryRoot = await _services.Settings.GetLibraryRootAsync(cancellationToken);
         }
+        catch (InvalidDataException)
+        {
+            return;
+        }
+
+        ShowOwnFiles();
     }
+
+    /// <summary>
+    /// Shows what the library has now of the mod, and of the mods it needs. Runs on the UI thread.
+    /// </summary>
+    internal void ShowLibrary() => ShowLibrary(_library(Mod));
 
     /// <summary>
     /// Shows whether the account tracks the mod, reading its site's list the first time any mod of the site asks. When
@@ -263,6 +437,36 @@ public sealed partial class ModPageViewModel : ObservableObject
         }
 
         IsTracked = tracked;
+    }
+
+    /// <summary>
+    /// The changelog, the newest entry first: in the site's order, unless the site lists the mod's current version
+    /// last and not first. Versions are only matched, never compared.
+    /// </summary>
+    private static IReadOnlyList<ModChangelog> NewestFirst(IReadOnlyList<ModChangelog> changelog, string? currentVersion)
+    {
+        bool Current(ModChangelog entry) => currentVersion is not null && string.Equals(entry.Version, currentVersion.Trim(), StringComparison.Ordinal);
+
+        return changelog.Count > 1 && Current(changelog[^1]) && !Current(changelog[0]) ? [.. changelog.Reverse()] : changelog;
+    }
+
+    /// <summary>
+    /// What a file on the site is to the library: an update of one of its files, such as "Update for your 1.3", a new
+    /// optional file, or another update; null for none.
+    /// </summary>
+    private static string? UpdateNote(LibraryMod? inLibrary, ModFileRef file)
+    {
+        if (inLibrary?.Updates.FirstOrDefault(update => update.File == file) is not { } update)
+        {
+            return null;
+        }
+
+        if (update.Replaces is { } replaced && inLibrary.Files.FirstOrDefault(kept => kept.File == replaced) is { } yours)
+        {
+            return Text.Format(Strings.ModPageUpdateFor, yours.VersionLabel ?? yours.Name);
+        }
+
+        return update.Replaces is null && update.Category == ModFileCategory.Optional ? Strings.ModPageNewOptionalFile : Strings.ModPageUpdate;
     }
 
     private static string SectionTitle(ModFileCategory category) => category switch
@@ -354,6 +558,102 @@ public sealed partial class ModPageViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Opens the mod's folder in the library: the folder of the file downloaded last.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(HasOwnFiles))]
+    private Task OpenFolderAsync(CancellationToken cancellationToken)
+        => RunAsync(
+            PageAction.OpenFolder,
+            async () =>
+            {
+                if (_inLibrary?.Files.MaxBy(file => file.DownloadedAt) is not { } latest)
+                {
+                    return;
+                }
+
+                string root;
+                try
+                {
+                    root = await _services.Settings.GetLibraryRootAsync(cancellationToken);
+                }
+                catch (InvalidDataException exception)
+                {
+                    await _services.Dialogs.ShowMessageAsync(Strings.OpenFolderFailedTitle, exception.Message, cancellationToken);
+                    return;
+                }
+
+                string folder = Path.GetDirectoryName(LibraryPaths.Resolve(root, latest.RelativePath))!;
+                if (!await _services.FolderOpener.TryOpenAsync(folder, cancellationToken))
+                {
+                    await _services.Dialogs.ShowMessageAsync(Strings.OpenFolderFailedTitle, Text.Format(Strings.OpenFolderFailed, folder), cancellationToken);
+                }
+            },
+            cancellationToken);
+
+    private bool CanRescan() => IsInLibrary && (_inLibrary?.PageUrl ?? _info.PageUrl) is not null;
+
+    /// <summary>
+    /// Rescans the mod's folders, then says what it found. The page shows the library's changes as it makes them.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanRescan))]
+    private Task RescanAsync(CancellationToken cancellationToken)
+        => RunAsync(
+            PageAction.Rescan,
+            () => Rescans.RunAsync(_services.Rescan, _services.Library, _services.Dialogs, _inLibrary?.PageUrl ?? _info.PageUrl, cancellationToken),
+            cancellationToken);
+
+    /// <summary>
+    /// Takes the mod out of the library once the user confirms. Its files stay where they are.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(IsInLibrary))]
+    private Task RemoveAsync(CancellationToken cancellationToken)
+        => RunAsync(
+            PageAction.Remove,
+            async () =>
+            {
+                string message = Text.Format(Strings.RemoveModMessage, _inLibrary?.Name ?? Name);
+                if (!await _services.Dialogs.ConfirmAsync(Strings.RemoveModTitle, message, Strings.RemoveModConfirm, cancellationToken))
+                {
+                    return;
+                }
+
+                try
+                {
+                    await _services.Library.ForgetAsync(Mod, cancellationToken);
+                }
+                catch (KeyNotFoundException)
+                {
+                    // It left the library meanwhile.
+                }
+                catch (Exception exception) when (exception is InvalidOperationException or InvalidDataException)
+                {
+                    // Such as a download of one of its files that isn't finished, or settings that can't be read.
+                    await _services.Dialogs.ShowMessageAsync(Strings.RemoveModFailedTitle, exception.Message, cancellationToken);
+                }
+            },
+            cancellationToken);
+
+    /// <summary>
+    /// Shows all the changelog's entries, or only the latest again.
+    /// </summary>
+    [RelayCommand]
+    private void ToggleChanges()
+    {
+        AreAllChangesShown = !AreAllChangesShown;
+        ShowChanges();
+    }
+
+    /// <summary>
+    /// Shows the archived versions among the library's files of the mod, or hides them again.
+    /// </summary>
+    [RelayCommand]
+    private void ToggleArchived()
+    {
+        AreArchivedShown = !AreArchivedShown;
+        ShowOwnFiles();
+    }
+
+    /// <summary>
     /// Shows or hides the sections shown only when asked.
     /// </summary>
     [RelayCommand]
@@ -384,6 +684,89 @@ public sealed partial class ModPageViewModel : ObservableObject
             ? Strings.BrowseHideMoreFiles
             : Counts.Of(more, Strings.BrowseShowOneMoreFile, Strings.BrowseShowMoreFiles);
     }
+
+    /// <summary>
+    /// Shows what the library has of the mod, as given, and what it has now of the mods it needs.
+    /// </summary>
+    private void ShowLibrary(LibraryMod? inLibrary)
+    {
+        _inLibrary = inLibrary;
+        IsDownloaded = inLibrary?.Files.Count > 0;
+        IsWatched = inLibrary?.IsWatched == true;
+        IsInLibrary = inLibrary is not null;
+        HashSet<ModFileRef> kept = [.. inLibrary?.Files.Select(file => file.File) ?? []];
+        foreach (ModFileViewModel file in _files)
+        {
+            file.ShowLibrary(kept.Contains(file.File), UpdateNote(inLibrary, file.File));
+        }
+
+        foreach (RequirementViewModel requirement in Requirements)
+        {
+            requirement.ShowLibrary(requirement.Mod is { } needed && _library(needed) is { Files.Count: > 0 });
+        }
+
+        ShowOwnFiles();
+        ShowFacts();
+    }
+
+    private void ShowChanges()
+    {
+        ShownChanges.SyncWith([.. AreAllChangesShown ? Changelog : Changelog.Take(LatestChanges)]);
+        MoreChangesText = AreAllChangesShown ? Strings.ModPageLatestChanges : Text.Format(Strings.ModPageAllChanges, Changelog.Count);
+    }
+
+    /// <summary>
+    /// Shows the library's files of the mod, the latest downloaded first, each saying whether it's on disk once the
+    /// library's folder is known; archived versions when asked.
+    /// </summary>
+    private void ShowOwnFiles()
+    {
+        OwnFileViewModel[] files =
+        [
+            .. (_inLibrary?.Files ?? [])
+                .OrderByDescending(file => file.DownloadedAt)
+                .Select(file => new OwnFileViewModel(
+                    file,
+                    _libraryRoot is { } root && !_services.Storage.FileExists(LibraryPaths.Resolve(root, file.RelativePath)),
+                    _services.TimeProvider,
+                    CopyAsync)),
+        ];
+        int archived = files.Count(file => file.IsArchived);
+        OwnFiles.Clear();
+        foreach (OwnFileViewModel file in files.Where(file => !file.IsArchived || AreArchivedShown))
+        {
+            OwnFiles.Add(file);
+        }
+
+        HasOwnFiles = files.Length > 0;
+        HasArchived = archived > 0;
+        ArchivedText = AreArchivedShown ? Strings.ModPageHideArchived : Counts.Of(archived, Strings.ModPageShowOneArchived, Strings.ModPageShowArchived);
+        string? latest = _inLibrary?.Files.Where(file => !OwnFileViewModel.IsInArchive(file.RelativePath)).MaxBy(file => file.DownloadedAt)?.RelativePath;
+        int folderEnd = latest?.LastIndexOf(LibraryPaths.Separator) ?? -1;
+        OwnFolderText = folderEnd > 0 ? latest![..folderEnd] : string.Empty;
+    }
+
+    private void ShowFacts()
+    {
+        List<ModFact> facts = [new(Strings.ModPageModId, Mod.Id)];
+        if (HasCategory)
+        {
+            facts.Add(new ModFact(Strings.ModPageCategory, CategoryText));
+        }
+
+        if (_inLibrary is { } inLibrary)
+        {
+            facts.Add(new ModFact(Strings.ModPageInLibrarySince, Dates.Day(inLibrary.AddedAt, _services.TimeProvider)));
+            facts.Add(new ModFact(
+                Strings.ModPageLastChecked,
+                inLibrary.CheckedAt is { } checkedAt ? Dates.DayAndTime(checkedAt, _services.TimeProvider) : Strings.ModPageNotChecked));
+        }
+
+        Facts.SyncWith(facts);
+    }
+
+    private Task CopyAsync(string text, CancellationToken cancellationToken)
+        => RunAsync(PageAction.CopySha256, () => _services.Clipboard.SetTextAsync(text, cancellationToken), cancellationToken);
 
     private void Tell(string note, bool isProblem)
     {
