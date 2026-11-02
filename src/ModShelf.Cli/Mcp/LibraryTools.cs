@@ -15,10 +15,11 @@ namespace ModShelf.Cli.Mcp;
 
 /// <summary>
 /// The MCP tools for the library: its mods and files, what came in lately, the updates, checking for them, watching
-/// mods, and forgetting them.
+/// mods, forgetting them, and rescanning their folders.
 /// </summary>
 [McpServerToolType]
-internal sealed class LibraryTools(IModLibrary library, ISettingsService settings, IUpdateChecker checker, IModLookup lookup, TimeProvider time)
+internal sealed class LibraryTools(
+    IModLibrary library, ISettingsService settings, IUpdateChecker checker, IModLookup lookup, ILibraryRescan rescanner, TimeProvider time)
 {
     // The most mods a page of the library lists.
     private const int MaxLimit = 200;
@@ -214,6 +215,32 @@ internal sealed class LibraryTools(IModLibrary library, ISettingsService setting
                 true,
                 $"{forgotten.Name} is out of the library: ModShelf doesn't watch it or keep track of its files any more. {files}",
                 McpEntries.Mod(forgotten, root));
+        });
+
+    [McpServerTool(Name = "library_rescan", Title = "Rescan the library", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
+    [Description("Rescans the mods' folders: adds the files there that the library doesn't know, such as ones placed by hand, when they match one of the mod's files on its site by name and size, and reads the SHA-256 of the library's files that have none. Says which files are missing from disk, and which in the folders match nothing. With a link, one mod, which comes into the library, watched, if its files are found where the folder pattern puts them; without, every mod in the library. Nothing is moved, renamed or deleted, and the site is asked only about mods with files to match.")]
+    public Task<RescanResult> RescanAsync(
+        [Description("A link to the mod or one of its files, such as its page on Nexus Mods; leave it out to rescan the whole library.")] string? link = null,
+        CancellationToken cancellationToken = default)
+        => McpProblems.GuardAsync(async () =>
+        {
+            Uri? mod = link is null ? null : McpProblems.Link(link);
+            LibraryRescan rescan = await rescanner.RescanAsync(mod, cancellationToken).ConfigureAwait(false);
+            string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+            RescannedFile Entry(LibraryFile file)
+                => new(file.File.Mod.Game.Source.Value, file.File.Mod.Game.Key, file.File.Mod.Id, McpEntries.File(file, root));
+
+            string message = string.Create(
+                CultureInfo.InvariantCulture,
+                $"Rescanned {rescan.Mods} {(rescan.Mods == 1 ? "mod" : "mods")}: {rescan.Added.Count} files added, {rescan.Hashed.Count} hashed, {rescan.Missing.Count} missing from disk, {rescan.Unmatched.Count} matching nothing");
+            return new RescanResult(
+                rescan.Failures.Count == 0 ? $"{message}." : string.Create(CultureInfo.InvariantCulture, $"{message}; {rescan.Failures.Count} mods' files couldn't be matched."),
+                rescan.Mods,
+                [.. rescan.Added.Select(Entry)],
+                [.. rescan.Hashed.Select(Entry)],
+                [.. rescan.Missing.Select(Entry)],
+                rescan.Unmatched,
+                [.. rescan.Failures.Select(failure => new RescanFailureEntry(failure.Mod.Game.Source.Value, failure.Mod.Game.Key, failure.Mod.Id, failure.Reason))]);
         });
 
     private static string Describe(ModRef mod) => $"mod {mod.Id} of {mod.Game.Key} on {mod.Game.Source}";

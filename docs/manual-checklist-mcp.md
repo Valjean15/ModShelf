@@ -51,6 +51,10 @@ you should see.
   It says the mod is out of the library and where its file stays; the file is still there, and `library_list` no longer
   lists the mod. A desktop app running meanwhile shows it until it starts again. While a download of one of its files
   into the library isn't finished, the agent says it can't.
+- [ ] **3.5 Rescanning.** Download a file of a watched mod with the site's **Manual download** into the mod's folder in
+  the test library, as Female Nude Blend's was, then ask the agent to rescan the library.
+  The file is added, with its SHA-256; the files from before 0.9.2 get theirs; a file of your own in the folder is listed
+  as matching nothing, and stays. Rescanning the mod forgotten in 3.4 by its link brings it back, watched.
 
 ## 4. Updating
 
@@ -77,4 +81,5 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 3.2 What it can't do | | |
 | 3.3 The logs | | |
 | 3.4 Forgetting a mod | | |
+| 3.5 Rescanning | | |
 | 4.1 With the app | | |

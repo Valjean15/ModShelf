@@ -84,8 +84,8 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
             [
                 "accounts_status", "diagnostics", "download", "downloads_cancel", "downloads_list", "downloads_pause",
                 "downloads_resume", "downloads_retry", "library_changes", "library_check", "library_forget", "library_list",
-                "library_unwatch", "library_updates", "library_watch", "mod_search", "mod_show", "settings_reset", "settings_set",
-                "settings_show",
+                "library_rescan", "library_unwatch", "library_updates", "library_watch", "mod_search", "mod_show", "settings_reset",
+                "settings_set", "settings_show",
             ],
             tools.Select(tool => tool.Name).Order(StringComparer.Ordinal));
         Assert.Equal(ModShelfMcpServer.Instructions, mcp.Client.ServerInstructions);
@@ -362,6 +362,29 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
             "since isn't a date and time, such as 2026-11-01T09:00:00Z.",
             await mcp.CallFailingAsync("library_changes", Arguments(("since", since)), Cancellation),
             StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task RescansTheLibraryAndBringsAForgottenModBackByItsLink()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await DownloadAndWaitAsync(mcp, "1");
+        string placed = Path.Combine(ModFolder, FileNameOf("2"));
+        await File.WriteAllBytesAsync(placed, Content, Cancellation);
+        await File.WriteAllTextAsync(Path.Combine(ModFolder, "notes.txt"), "mine", Cancellation);
+
+        RescanResult whole = await mcp.CallAsync<RescanResult>("library_rescan", null, Cancellation);
+        await mcp.CallAsync<ForgetResult>("library_forget", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
+        RescanResult back = await mcp.CallAsync<RescanResult>("library_rescan", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
+
+        Assert.Equal("Rescanned 1 mod: 1 files added, 0 hashed, 0 missing from disk, 1 matching nothing.", whole.Message);
+        RescannedFile added = Assert.Single(whole.Added);
+        Assert.Equal(("fake-handoff", "game", "mod", "2"), (added.Source, added.Game, added.ModId, added.File.FileId));
+        Assert.Equal((placed, Sha256OfContent), (added.File.Path, added.File.Sha256));
+        Assert.Equal([Path.Combine(ModFolder, "notes.txt")], whole.Unmatched);
+        Assert.Equal(["1", "2"], back.Added.Select(file => file.File.FileId).Order());
+        LibraryModEntry mod = Assert.Single((await mcp.CallAsync<LibraryListing>("library_list", null, Cancellation)).Mods);
+        Assert.Equal((true, 2), (mod.Watched, mod.FileCount));
     }
 
     [Fact]
@@ -646,7 +669,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
             await mcp.CloseAsync(Cancellation);
         }
 
-        Assert.Contains(Cli.Logs.Entries, entry => entry.Contains("The MCP server started, with 20 tools", StringComparison.Ordinal));
+        Assert.Contains(Cli.Logs.Entries, entry => entry.Contains("The MCP server started, with 21 tools", StringComparison.Ordinal));
         Assert.DoesNotContain(Cli.Logs.Entries, entry => entry.Contains(GoodKey, StringComparison.Ordinal));
         Assert.DoesNotContain(Cli.Logs.Entries, entry => entry.Contains("handoff.example", StringComparison.Ordinal));
     }

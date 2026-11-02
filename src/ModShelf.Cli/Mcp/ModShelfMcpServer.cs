@@ -43,6 +43,7 @@ internal static partial class ModShelfMcpServer
         + "- settings_show, settings_set and settings_reset read and change the settings; library.oldVersions decides "
         + "whether old versions stay, are archived or are deleted.\n"
         + "- library_forget takes a mod out of the library, such as one the user no longer uses; its files stay on disk.\n"
+        + "- library_rescan adds files placed by hand in the mods' folders, and reads the hashes the library lacks.\n"
         + "- Linking accounts, deleting files and moving the library are for the user, in the desktop app or the CLI.";
 
     /// <summary>
