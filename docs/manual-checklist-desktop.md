@@ -93,17 +93,17 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
 - [ ] **4.1 From a mod's page.** On SMAPI's page, **Download** on its main file.
   A note says where it downloads, and that it shows on the Downloads screen. The Downloads screen shows it with its progress, speed and time left, then "Done".
 - [ ] **4.2 In the library.** Open the Library screen.
-  Stardew Valley, then SMAPI, "Watched for updates", "1 file". Expanded: the file's name, version, size and "Downloaded *today*". In its **…** menu, **Open folder** opens SMAPI's folder, `Library\nexus\stardewvalley\<SMAPI's name> (2400)` in the test folder, holding the file. **Open on its site** opens the mod's page in the browser.
+  "1 game · 1 mod · *size* on disk" under the heading. Stardew Valley's row: a cover with "S", "1 mod", "Up to date", the file's size, and in "Checked" when it was last checked for updates, or "Not yet". Click it: "Library › Stardew Valley", its cover and "1 mod · Up to date · *size* on disk" at the top, then SMAPI's row: its name, "by Pathoschild", your version (the file's), no status, "1 file", the size, and when Nexus Mods last updated it. In its **…** menu, **Open folder** opens SMAPI's folder, `Library\nexus\stardewvalley\<SMAPI's name> (2400)` in the test folder, holding the file. **Open on its site** opens the mod's page in the browser.
 - [ ] **4.3 Again.** On the Downloads screen, paste SMAPI's link (`https://www.nexusmods.com/stardewvalley/mods/2400`) and **Download**.
   "… is in the library already." Nothing new downloads.
 - [ ] **4.4 An old version.** On SMAPI's page in Browse, **Show … more files**, then **Download** on an old version.
   It downloads into SMAPI's folder too. The Library shows SMAPI with 2 files.
-- [ ] **4.5 Delete a file.** On the Library screen, expand SMAPI, and **Delete…** the old version.
-  "Delete this file?" **Delete**: the file is gone from SMAPI's folder, and SMAPI shows 1 file.
-- [ ] **4.6 Pictures in the library.** On the Library screen, look at SMAPI with **Thumbnails**, the default, then **Cards**.
-  A thumbnail of SMAPI's picture beside its name; then a card with the picture, its name, its **…** menu, "Watched for updates" and "1 file", under Stardew Valley's heading. The test folder now has a `pictures` folder, beside `library.db`, with files named by long hexadecimal names. With the network off, closing and starting the app shows the same pictures.
+- [ ] **4.5 Delete a file.** Open SMAPI's page from the Library screen. In "Your files", open the old version's **…** menu, and **Delete…**.
+  "Delete this file?", with its name and size. **Cancel** leaves it. **Delete…** again, then **Delete**: the file is gone from SMAPI's folder and from "Your files", and back in Stardew Valley's mods, SMAPI shows "1 file".
+- [ ] **4.6 Pictures in the library.** On the Library screen, look at the games, then Stardew Valley's mods, with **Thumbnails**, the default, then **Cards**.
+  The games: a small cover in each row; then cards with large covers, each with its name, mods, size and updates. The mods: a thumbnail of SMAPI's picture beside its name; then a card with the picture, its name, its **…** menu, "by Pathoschild", its version, "1 file" and size. The test folder now has a `pictures` folder, beside `library.db`, with files named by long hexadecimal names. With the network off, closing and starting the app shows the same pictures.
 - [ ] **4.7 A library mod's page.** Click SMAPI's name on the Library screen (or **Open** in its **…** menu).
-  The page opens in place of the list, under "Library › Stardew Valley › SMAPI", with the previews at the end of that line. "Your files": SMAPI's folder, then the file with "Main", its name, size, "Downloaded *today*" and its SHA-256 shortened to its ends; the copy button beside it puts the whole SHA-256 on the clipboard. **Open folder** opens SMAPI's folder. In "Files on Nexus Mods", the downloaded file says "In the library" instead of **Download**. "Details" adds "In the library since *today*" and "Last checked". **Rescan** and **Remove from library…** are under the name. **Library** or **Stardew Valley** in the line at the top goes back to the list.
+  The page opens in place of the list, under "Library › Stardew Valley › SMAPI", with the previews at the end of that line. "Your files": SMAPI's folder, then the file with "Main", its name, size, "Downloaded *today*" and its SHA-256 shortened to its ends; the copy button beside it puts the whole SHA-256 on the clipboard. **Open folder** opens SMAPI's folder. In "Files on Nexus Mods", the downloaded file says "In the library" instead of **Download**. "Details" adds "In the library since *today*" and "Last checked". **Rescan** and **Remove from library…** are under the name. **Stardew Valley** in the line at the top goes back to its mods, and **Library** to the games.
 - [ ] **4.8 A file missing from disk.** Rename SMAPI's file in its folder, then open SMAPI's page again.
   The file says "Missing from disk". Name it back, **Rescan** on the page: "Rescan finished", and the file no longer says so.
 - [ ] **4.9 Offline.** Turn the network off, open the Library screen's SMAPI again.
@@ -158,6 +158,8 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
   In "Files on Nexus Mods", its newest main file says "Update for your *version*" in a tag, and its **Download** is the blue one.
 - [ ] **8.2b What it needs.** "Requirements" on Content Patcher's page.
   "SMAPI - Stardew Modding API", "In library" (from 4.1), and **Open**, which opens SMAPI's page in its place, from the top. Under the list: installing them is up to your mod manager. SMAPI's own page has no "Requirements".
+- [ ] **8.2c A game's mods.** On the Library screen, open Stardew Valley.
+  Content Patcher says "Update to *version*" in a blue tag, and the heading counts "1 update". "Has an update 1" shows Content Patcher alone; with "Watched" on too, still it; both off, both mods. Rename SMAPI's file in its folder, then go back to the games and open Stardew Valley again: "Missing files 1", and SMAPI says "1 file missing" in an orange tag (name the file back, and open the game again). "pathos" in the filter finds Pathoschild's mods by author. "Sort" by **Updates first**, **Updated on site**, **Size** and **Added to library** reorders them, and **Name** puts them back. With the window narrow, each mod's version, files and size go under its author, and the "Your version", "Files", "Size" and "Updated on site" columns go.
 - [ ] **8.3 Changes.** **Changes** on the update.
   Its version's entry in Content Patcher's changelog, or "The changelog says nothing about this version."
 - [ ] **8.4 Download the update.** **Download** on the update (on the free account, start it on the website and paste the link).
@@ -165,16 +167,18 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
 
 ## 9. Watch and track
 
-- [ ] **9.1 Unwatch.** On the Library screen, open SMAPI's **…** menu, and **Unwatch**.
-  "Not watched". **Check now** on the Updates screen counts one mod fewer.
-- [ ] **9.2 Watch from Browse.** Open a mod you haven't downloaded in Browse, and **Watch**.
-  "Watched for updates, in the library." The Library lists it, with no files.
+- [ ] **9.1 Unwatch.** On the Library screen, in Stardew Valley's mods, open SMAPI's **…** menu, and **Unwatch**.
+  SMAPI says "Not watched"; "Watched" counts one fewer. **Check now** on the Updates screen counts one mod fewer.
+- [ ] **9.2 Watch from Browse.** Open a mod of another game you haven't downloaded in Browse, such as SkyUI for Skyrim Special Edition, and **Watch**.
+  "Watched for updates, in the library." The Library lists its game, and among the game's mods, it says "Watched only" and "No files".
+- [ ] **9.2a The games.** On the Library screen, with the games shown.
+  The heading counts 2 games. "Sort" by **Most mods** (the default), **Name**, **Most space** and **Updates first** reorders them; games that tie go by name. "stardew" in the filter leaves Stardew Valley; "zzz" says "No game's name has “zzz”." With the window narrow, each game's mods and updates go under its name, "Checked" goes, and the sort and previews go below the filter.
 - [ ] **9.3 Track** (Premium only). On SMAPI's page in Browse, **Track on Nexus Mods**.
   "Tracked on Nexus Mods." **Tracked mods** for Stardew Valley lists SMAPI, and the website's Tracking Centre shows it.
 - [ ] **9.4 Untrack** (Premium only). **Untrack on Nexus Mods**.
   "No longer tracked on Nexus Mods." It's gone from **Tracked mods** and from the website. If SMAPI was tracked before you started, track it again.
 - [ ] **9.5 Remove from the library.** On the Library screen, open the **…** menu of the mod you watched in 9.2, and **Remove from library…**.
-  "Remove this mod from the library?", saying its files stay. **Remove**: the mod leaves the Library, and **Check now** on the Updates screen counts one mod fewer. Removing a mod with files leaves them in its folder.
+  "Remove this mod from the library?", saying its files stay. **Remove**: the mod leaves the Library, and so does its game, which had no other mod; **Check now** on the Updates screen counts one mod fewer. Removing a mod with files leaves them in its folder.
 - [ ] **9.6 Rescan.** Copy a file of SMAPI's from its page on Nexus Mods (**Manual download**) into SMAPI's folder, then **Rescan** at the top of the Library screen.
   "Rescan finished", saying a file found on disk was added; SMAPI shows one file more, with its SHA-256. **Rescan** in SMAPI's **…** menu right after says "Nothing new".
 
@@ -332,10 +336,12 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 8.2 Check now | | | |
 | 8.2a The update on the mod's page | | | |
 | 8.2b What it needs | | | |
+| 8.2c A game's mods | | | |
 | 8.3 Changes | | | |
 | 8.4 Download the update | | | |
 | 9.1 Unwatch | | | |
 | 9.2 Watch from Browse | | | |
+| 9.2a The games | | | |
 | 9.3 Track | | – | |
 | 9.4 Untrack | | – | |
 | 9.5 Remove from the library | | | |
