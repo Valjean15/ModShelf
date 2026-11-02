@@ -133,6 +133,7 @@ public sealed partial class ModPageViewModel : ObservableObject
         Rescan,
         Remove,
         CopySha256,
+        DeleteFile,
     }
 
     public ModRef Mod { get; }
@@ -729,7 +730,8 @@ public sealed partial class ModPageViewModel : ObservableObject
                     file,
                     _libraryRoot is { } root && !_services.Storage.FileExists(LibraryPaths.Resolve(root, file.RelativePath)),
                     _services.TimeProvider,
-                    CopyAsync)),
+                    CopyAsync,
+                    DeleteFileAsync)),
         ];
         int archived = files.Count(file => file.IsArchived);
         OwnFiles.Clear();
@@ -764,6 +766,37 @@ public sealed partial class ModPageViewModel : ObservableObject
 
         Facts.SyncWith(facts);
     }
+
+    /// <summary>
+    /// Deletes one of the library's files of the mod from disk, for good, and from the library, once the user confirms.
+    /// The page shows the change once the library makes it.
+    /// </summary>
+    private Task DeleteFileAsync(OwnFileViewModel file, CancellationToken cancellationToken)
+        => RunAsync(
+            PageAction.DeleteFile,
+            async () =>
+            {
+                string message = Text.Format(Strings.DeleteFileMessage, file.FileName, file.SizeText);
+                if (!await _services.Dialogs.ConfirmAsync(Strings.DeleteFileTitle, message, Strings.DeleteFileConfirm, cancellationToken))
+                {
+                    return;
+                }
+
+                try
+                {
+                    await _services.Library.DeleteFileAsync(file.File, cancellationToken);
+                }
+                catch (KeyNotFoundException)
+                {
+                    // It left the library meanwhile.
+                }
+                catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
+                {
+                    string reason = exception is InvalidDataException ? exception.Message : Text.Format(Strings.DeleteFileFailed, file.FileName, exception.Message);
+                    await _services.Dialogs.ShowMessageAsync(Strings.DeleteFileFailedTitle, reason, cancellationToken);
+                }
+            },
+            cancellationToken);
 
     private Task CopyAsync(string text, CancellationToken cancellationToken)
         => RunAsync(PageAction.CopySha256, () => _services.Clipboard.SetTextAsync(text, cancellationToken), cancellationToken);

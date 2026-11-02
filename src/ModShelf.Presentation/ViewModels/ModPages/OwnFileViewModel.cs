@@ -23,14 +23,22 @@ public sealed partial class OwnFileViewModel
     private const int Sha256Ends = 8;
 
     private readonly Func<string, CancellationToken, Task> _copy;
+    private readonly Func<OwnFileViewModel, CancellationToken, Task> _delete;
 
     /// <param name="isMissing">Whether the file isn't on disk where the library says it is.</param>
     /// <param name="copy">Puts text on the clipboard, saying so when it can't.</param>
-    internal OwnFileViewModel(LibraryFile file, bool isMissing, TimeProvider timeProvider, Func<string, CancellationToken, Task> copy)
+    /// <param name="delete">Deletes the file from disk and the library, once the user confirms.</param>
+    internal OwnFileViewModel(
+        LibraryFile file,
+        bool isMissing,
+        TimeProvider timeProvider,
+        Func<string, CancellationToken, Task> copy,
+        Func<OwnFileViewModel, CancellationToken, Task> delete)
     {
         ArgumentNullException.ThrowIfNull(file);
         ArgumentNullException.ThrowIfNull(timeProvider);
         ArgumentNullException.ThrowIfNull(copy);
+        ArgumentNullException.ThrowIfNull(delete);
 
         File = file.File;
         Name = file.Name;
@@ -43,6 +51,7 @@ public sealed partial class OwnFileViewModel
         Sha256Text = Sha256.Length > (Sha256Ends * 2) + 1 ? $"{Sha256[..Sha256Ends]}…{Sha256[^Sha256Ends..]}" : Sha256;
         IsMissing = isMissing;
         _copy = copy;
+        _delete = delete;
     }
 
     public ModFileRef File { get; }
@@ -97,6 +106,12 @@ public sealed partial class OwnFileViewModel
     /// </summary>
     [RelayCommand(CanExecute = nameof(HasSha256))]
     private Task CopySha256Async(CancellationToken cancellationToken) => _copy(Sha256, cancellationToken);
+
+    /// <summary>
+    /// Deletes the file from disk, for good, and from the library, once the user confirms.
+    /// </summary>
+    [RelayCommand]
+    private Task DeleteAsync(CancellationToken cancellationToken) => _delete(this, cancellationToken);
 
     /// <summary>
     /// Whether a library path is in an <c>_archive</c> folder.

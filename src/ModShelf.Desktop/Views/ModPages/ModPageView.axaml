@@ -178,8 +178,8 @@
                         <ItemsControl ItemsSource="{Binding OwnFiles}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="vm:OwnFileViewModel">
-                                    <Border Classes="file" Classes.archived="{Binding IsArchived}" Padding="18,12">
-                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                    <Border Classes="file" Classes.archived="{Binding IsArchived}" Padding="18,12,10,12">
+                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="16">
                                             <StackPanel Spacing="2">
                                                 <WrapPanel ItemSpacing="8" LineSpacing="4">
                                                     <TextBlock TextWrapping="Wrap">
@@ -214,6 +214,19 @@
                                                     <Path Classes="line" StrokeThickness="1.8" Data="{StaticResource CopyGlyph}" />
                                                 </Button>
                                             </StackPanel>
+                                            <!-- What else to do with the file: delete it, once asked whether to. -->
+                                            <Button Grid.Column="2"
+                                                    Classes="more"
+                                                    VerticalAlignment="Center"
+                                                    ToolTip.Tip="{x:Static res:Strings.MoreActions}"
+                                                    AutomationProperties.Name="{x:Static res:Strings.MoreActions}">
+                                                <PathIcon Width="18" Height="18" Data="{StaticResource MoreIcon}" />
+                                                <Button.Flyout>
+                                                    <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                                        <MenuItem Header="{x:Static res:Strings.LibraryDeleteFile}" Command="{Binding DeleteCommand}" />
+                                                    </MenuFlyout>
+                                                </Button.Flyout>
+                                            </Button>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
