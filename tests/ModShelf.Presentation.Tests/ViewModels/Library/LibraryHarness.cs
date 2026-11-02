@@ -28,6 +28,7 @@ internal sealed class LibraryHarness : IDisposable
             Folders,
             Dialogs,
             new FakeSourceRegistry(Catalog),
+            Pictures.Pictures,
             UiThread,
             Time,
             Logger);
@@ -46,6 +47,8 @@ internal sealed class LibraryHarness : IDisposable
     public ScriptedDialogs Dialogs { get; } = new();
 
     public ScriptedCatalog Catalog { get; } = new(TestData.Nexus, "Nexus Mods");
+
+    public TestPictures Pictures { get; } = new();
 
     public QueuedUiThread UiThread { get; } = new();
 

@@ -1626,4 +1626,28 @@
     <value>The setup couldn't be marked done: {0}</value>
     <comment>{0} is the reason.</comment>
   </data>
+  <data name="Previews" xml:space="preserve">
+    <value>Previews</value>
+    <comment>Label of the buttons that choose how a screen shows its mods' pictures.</comment>
+  </data>
+  <data name="PreviewsOff" xml:space="preserve">
+    <value>Off</value>
+    <comment>Previews button: no pictures.</comment>
+  </data>
+  <data name="PreviewsThumbnails" xml:space="preserve">
+    <value>Thumbnails</value>
+    <comment>Previews button: a small picture beside each mod.</comment>
+  </data>
+  <data name="PreviewsCards" xml:space="preserve">
+    <value>Cards</value>
+    <comment>Previews button: each mod as a card with a large picture.</comment>
+  </data>
+  <data name="PictureAdultBlurred" xml:space="preserve">
+    <value>Adult · blurred</value>
+    <comment>On a card's picture: the mod has adult content, so its picture is blurred.</comment>
+  </data>
+  <data name="PictureAdultHidden" xml:space="preserve">
+    <value>Adult picture, hidden</value>
+    <comment>Said for a mod with adult content whose picture the settings hide.</comment>
+  </data>
 </root>

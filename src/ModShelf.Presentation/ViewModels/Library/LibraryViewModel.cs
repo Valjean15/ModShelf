@@ -15,24 +15,28 @@ using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
+using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Sources.Abstractions.Catalog;
 
 namespace ModShelf.Presentation.ViewModels.Library;
 
 /// <summary>
 /// The mods the library has files of or watches, by game, as one list of games' headings and their mods, so it can be
-/// virtualized. A box filters the mods by name. It follows the library's changes while the app runs.
+/// virtualized, or as cards under each game's heading. A box filters the mods by name. With previews, each mod shows its
+/// picture, from its saved details. It follows the library's changes while the app runs.
 /// </summary>
 public sealed partial class LibraryViewModel : ScreenViewModel
 {
     private readonly IModLibrary _library;
     private readonly ISourceRegistry _sources;
+    private readonly ModPictures _pictures;
     private readonly IUiThread _uiThread;
     private readonly ILogger<LibraryViewModel> _logger;
     private readonly LibraryServices _services;
     private readonly Dictionary<ModRef, LibraryModViewModel> _mods = [];
     private readonly Dictionary<GameRef, LibraryGameViewModel> _games = [];
     private CancellationToken _stopping;
+    private bool _picturesShown;
 
     public LibraryViewModel(
         IModLibrary library,
@@ -42,20 +46,31 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         IFolderOpener folders,
         IDialogService dialogs,
         ISourceRegistry sources,
+        ModPictures pictures,
         IUiThread uiThread,
         TimeProvider timeProvider,
         ILogger<LibraryViewModel> logger)
     {
         ArgumentNullException.ThrowIfNull(library);
         ArgumentNullException.ThrowIfNull(sources);
+        ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(logger);
 
         _library = library;
         _sources = sources;
+        _pictures = pictures;
         _uiThread = uiThread;
         _logger = logger;
-        _services = new LibraryServices(library, rescan, settings, browser, folders, dialogs, timeProvider, logger);
+        _services = new LibraryServices(library, rescan, settings, browser, folders, dialogs, pictures, timeProvider, logger);
+        Previews = new PreviewsViewModel(PreviewScreen.Library, pictures);
+        Previews.PropertyChanged += (_, changed) =>
+        {
+            if (changed.PropertyName == nameof(PreviewsViewModel.Level))
+            {
+                ShowPictures();
+            }
+        };
     }
 
     public override Screen Screen => Screen.Library;
@@ -69,9 +84,19 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     public partial string Filter { get; set; } = string.Empty;
 
     /// <summary>
+    /// Whether the mods show as rows, with thumbnails or not, or as cards.
+    /// </summary>
+    public PreviewsViewModel Previews { get; }
+
+    /// <summary>
     /// Each game's heading followed by its mods, games and mods by name.
     /// </summary>
     public ObservableCollection<ObservableObject> Rows { get; } = [];
+
+    /// <summary>
+    /// The games' headings in <see cref="Rows"/>, each with its mods, for cards.
+    /// </summary>
+    public ObservableCollection<LibraryGameViewModel> Games { get; } = [];
 
     /// <summary>
     /// Whether the library has no mods at all.
@@ -89,12 +114,21 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     public partial string NothingMatchesText { get; private set; } = string.Empty;
 
     /// <summary>
-    /// Lists the library, then follows its changes while the app runs, and asks the games' sites for their names.
+    /// Reads the previews from the settings, lists the library, then follows its changes while the app runs, and asks the
+    /// games' sites for their names.
     /// </summary>
-    public override Task StartAsync(CancellationToken cancellationToken)
+    public override async Task StartAsync(CancellationToken cancellationToken)
     {
         _stopping = cancellationToken;
-        return LibraryFeed.FollowAsync(
+        await _pictures.LoadAsync();
+        Previews.Refresh();
+        ShowPictures();
+        _pictures.Changed += (_, _) => _uiThread.Post(() =>
+        {
+            Previews.Refresh();
+            ShowPictures();
+        });
+        await LibraryFeed.FollowAsync(
             _library,
             _uiThread,
             mods =>
@@ -152,7 +186,12 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         }
         else
         {
-            _mods.Add(mod.Mod, new LibraryModViewModel(mod, _services));
+            LibraryModViewModel added = new(mod, _services);
+            _mods.Add(mod.Mod, added);
+            if (_picturesShown)
+            {
+                added.Picture.Show(mod.Mod, _stopping);
+            }
         }
 
         if (!_games.ContainsKey(mod.Mod.Game))
@@ -179,14 +218,42 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             LibraryGameViewModel heading = _games[game.Key];
             LibraryModViewModel[] mods = [.. game.OrderBy(mod => mod.Name, byName)];
             heading.ModsText = Counts.Of(mods.Length, Strings.LibraryOneMod, Strings.LibraryMods);
+            heading.Mods.SyncWith(mods);
             rows.Add(heading);
             rows.AddRange(mods);
         }
 
         Rows.SyncWith(rows);
+        Games.SyncWith([.. rows.OfType<LibraryGameViewModel>()]);
         IsEmpty = _mods.Count == 0;
         NothingMatches = !IsEmpty && rows.Count == 0;
         NothingMatchesText = NothingMatches ? Text.Format(Strings.LibraryNothingMatches, filter) : string.Empty;
+    }
+
+    /// <summary>
+    /// Shows each mod's picture while the screen shows pictures, as adult mods' pictures should look now; hides them
+    /// otherwise. A picture already shown isn't read again.
+    /// </summary>
+    private void ShowPictures()
+    {
+        bool shown = Previews.ShowsPictures;
+        foreach (LibraryModViewModel mod in _mods.Values)
+        {
+            if (!shown)
+            {
+                mod.Picture.Hide();
+            }
+            else if (_picturesShown)
+            {
+                mod.Picture.Refresh(_stopping);
+            }
+            else
+            {
+                mod.Picture.Show(mod.Mod, _stopping);
+            }
+        }
+
+        _picturesShown = shown;
     }
 
     /// <summary>

@@ -30,6 +30,7 @@ internal sealed class UpdatesHarness : IDisposable
             sources,
             AppLookup.Over(sources),
             Dialogs,
+            Pictures.Pictures,
             UiThread,
             Time,
             Logger);
@@ -42,6 +43,8 @@ internal sealed class UpdatesHarness : IDisposable
     public ScriptedLibraryDownloads Downloads { get; } = new();
 
     public ScriptedCatalog Catalog { get; } = new(TestData.Nexus, "Nexus Mods");
+
+    public TestPictures Pictures { get; } = new();
 
     public ScriptedDialogs Dialogs { get; } = new();
 

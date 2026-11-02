@@ -2,10 +2,29 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:ModShelf.Presentation.ViewModels.Library"
              xmlns:res="using:ModShelf.Presentation.Resources"
+             xmlns:views="using:ModShelf.Desktop.Views"
+             xmlns:pictures="using:ModShelf.Desktop.Views.Pictures"
              x:Class="ModShelf.Desktop.Views.LibraryView"
              x:DataType="vm:LibraryViewModel">
 
-    <DockPanel>
+    <!--
+      The previews at the end of the filter's row; in a narrow window, below the filter. Their place is set here rather
+      than on them, so the narrow window's can replace it.
+    -->
+    <UserControl.Styles>
+        <Style Selector="pictures|PreviewsPicker#Previews">
+            <Setter Property="Grid.Column" Value="2" />
+        </Style>
+        <ContainerQuery Name="LibraryScreen" Query="max-width:540">
+            <Style Selector="pictures|PreviewsPicker#Previews">
+                <Setter Property="Grid.Row" Value="1" />
+                <Setter Property="Grid.Column" Value="0" />
+                <Setter Property="Margin" Value="0,10,0,0" />
+            </Style>
+        </ContainerQuery>
+    </UserControl.Styles>
+
+    <DockPanel Container.Name="LibraryScreen" Container.Sizing="Width">
         <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto">
             <TextBlock Classes="heading" Text="{Binding Title}" />
             <Button Grid.Column="1"
@@ -15,13 +34,15 @@
                     IsVisible="{Binding !IsEmpty}" />
         </Grid>
 
-        <!-- As wide as the screen allows, up to a comfortable width. -->
-        <Grid DockPanel.Dock="Top" Margin="0,0,0,12" IsVisible="{Binding !IsEmpty}">
+        <!-- The filter as wide as the screen allows, up to a comfortable width; the previews at the end. -->
+        <Grid DockPanel.Dock="Top" Margin="0,0,0,12" ColumnSpacing="12" RowDefinitions="Auto,Auto" IsVisible="{Binding !IsEmpty}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="100*" MaxWidth="420" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBox Text="{Binding Filter}" PlaceholderText="{x:Static res:Strings.LibraryFilterHint}" />
+            <pictures:PreviewsPicker Name="Previews" HorizontalAlignment="Left" DataContext="{Binding Previews}" />
         </Grid>
 
         <Panel>
@@ -35,7 +56,7 @@
             <!-- One list of games' headings and their mods, so it's virtualized. Each mod is a card of its own. -->
             <ListBox Classes="stack"
                      ItemsSource="{Binding Rows}"
-                     IsVisible="{Binding !IsEmpty}">
+                     IsVisible="{Binding Previews.ShowsRows}">
                 <ListBox.DataTemplates>
                     <DataTemplate DataType="vm:LibraryGameViewModel">
                         <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,14,0,4">
@@ -47,9 +68,14 @@
                     <DataTemplate DataType="vm:LibraryModViewModel">
                         <Expander HorizontalAlignment="Stretch" IsExpanded="{Binding IsExpanded}">
                             <Expander.Header>
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <!-- Its thumbnail, while the screen shows them. -->
+                                    <Panel Margin="0,0,14,0" VerticalAlignment="Center" IsVisible="{Binding Picture.IsShown}">
+                                        <pictures:ModThumbnail DataContext="{Binding Picture}" />
+                                    </Panel>
+
                                     <!-- Wrapping, so long names go to the next line rather than under the button. -->
-                                    <StackPanel Spacing="3" VerticalAlignment="Center">
+                                    <StackPanel Grid.Column="1" Margin="0,0,16,0" Spacing="3" VerticalAlignment="Center">
                                         <WrapPanel ItemSpacing="8">
                                             <TextBlock FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding Name}" />
                                             <TextBlock Classes="note" Text="{Binding AuthorText}" />
@@ -64,7 +90,7 @@
                                     </StackPanel>
 
                                     <!-- The mod's actions, in one menu, so the list stays quiet. -->
-                                    <Button Grid.Column="1"
+                                    <Button Grid.Column="2"
                                             Classes="more"
                                             VerticalAlignment="Center"
                                             ToolTip.Tip="{x:Static res:Strings.MoreActions}"
@@ -123,6 +149,77 @@
                     </DataTemplate>
                 </ListBox.DataTemplates>
             </ListBox>
+
+            <!-- As cards: each game's heading, then its mods' cards, as many side by side as fit. -->
+            <ScrollViewer Name="Cards" IsVisible="{Binding Previews.IsCards}">
+                <ItemsControl ItemsSource="{Binding Games}" Margin="0,0,16,8">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:LibraryGameViewModel">
+                            <StackPanel Spacing="10" Margin="0,14,0,6">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <TextBlock Classes="subheading" Text="{Binding Name}" />
+                                    <TextBlock Classes="note" VerticalAlignment="Bottom" Text="{Binding ModsText}" />
+                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding Mods}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid ColumnSpacing="16"
+                                                         RowSpacing="16"
+                                                         Columns="{Binding $parent[ScrollViewer].Bounds.Width, Converter={x:Static views:CardColumnsConverter.Instance}}" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:LibraryModViewModel">
+                                            <Border Classes="modCard">
+                                                <DockPanel>
+                                                    <pictures:ModCardPicture DockPanel.Dock="Top" DataContext="{Binding Picture}" />
+                                                    <StackPanel Margin="14,10,6,14" Spacing="4">
+                                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                                                            <TextBlock VerticalAlignment="Center"
+                                                                       FontSize="15"
+                                                                       FontWeight="SemiBold"
+                                                                       TextWrapping="Wrap"
+                                                                       MaxLines="2"
+                                                                       TextTrimming="CharacterEllipsis"
+                                                                       Text="{Binding Name}" />
+                                                            <Button Grid.Column="1"
+                                                                    Classes="more"
+                                                                    VerticalAlignment="Top"
+                                                                    ToolTip.Tip="{x:Static res:Strings.MoreActions}"
+                                                                    AutomationProperties.Name="{x:Static res:Strings.MoreActions}">
+                                                                <PathIcon Width="18" Height="18" Data="{StaticResource MoreIcon}" />
+                                                                <Button.Flyout>
+                                                                    <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                                                        <MenuItem Header="{x:Static res:Strings.ModOpenPage}" Command="{Binding OpenPageCommand}" />
+                                                                        <MenuItem Header="{x:Static res:Strings.LibraryOpenFolder}" Command="{Binding OpenFolderCommand}" />
+                                                                        <MenuItem Header="{x:Static res:Strings.ModWatch}" Command="{Binding WatchCommand}" IsVisible="{Binding !IsWatched}" />
+                                                                        <MenuItem Header="{x:Static res:Strings.ModUnwatch}" Command="{Binding UnwatchCommand}" IsVisible="{Binding IsWatched}" />
+                                                                        <MenuItem Header="{x:Static res:Strings.LibraryRescan}" Command="{Binding RescanCommand}" />
+                                                                        <Separator />
+                                                                        <MenuItem Header="{x:Static res:Strings.LibraryRemoveMod}" Command="{Binding RemoveCommand}" />
+                                                                    </MenuFlyout>
+                                                                </Button.Flyout>
+                                                            </Button>
+                                                        </Grid>
+                                                        <TextBlock Classes="note" Text="{Binding AuthorText}" IsVisible="{Binding AuthorText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                                        <WrapPanel ItemSpacing="12">
+                                                            <TextBlock Classes="note" Text="{Binding WatchedText}" />
+                                                            <TextBlock Classes="note" Text="{Binding FilesText}" />
+                                                        </WrapPanel>
+                                                        <Border Classes="tag accent" HorizontalAlignment="Left" Margin="0,2,0,0" IsVisible="{Binding HasUpdates}">
+                                                            <TextBlock Text="{Binding UpdatesText}" />
+                                                        </Border>
+                                                    </StackPanel>
+                                                </DockPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
         </Panel>
     </DockPanel>
 </UserControl>

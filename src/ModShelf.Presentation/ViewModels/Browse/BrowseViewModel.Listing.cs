@@ -205,7 +205,15 @@ public sealed partial class BrowseViewModel
     }
 
     private BrowseModViewModel Row(ModInfo mod, string? problem)
-        => new(mod, problem, _inLibrary.GetValueOrDefault(mod.Mod), _services.TimeProvider, OpenAsync);
+    {
+        BrowseModViewModel row = new(mod, problem, _inLibrary.GetValueOrDefault(mod.Mod), _pictures, _services.TimeProvider, OpenAsync);
+        if (_picturesShown)
+        {
+            row.Picture.Show(mod, _stopping);
+        }
+
+        return row;
+    }
 
     /// <summary>
     /// Opens a mod of the list, read afresh from its site.

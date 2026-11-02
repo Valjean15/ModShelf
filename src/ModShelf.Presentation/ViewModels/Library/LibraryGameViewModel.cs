@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+
 using CommunityToolkit.Mvvm.ComponentModel;
 
 using ModShelf.Domain.Mods;
@@ -5,7 +7,7 @@ using ModShelf.Domain.Mods;
 namespace ModShelf.Presentation.ViewModels.Library;
 
 /// <summary>
-/// A game's heading on the Library screen, above its mods.
+/// A game's heading on the Library screen, above its mods; as cards, they're its own.
 /// </summary>
 public sealed partial class LibraryGameViewModel : ObservableObject
 {
@@ -30,4 +32,9 @@ public sealed partial class LibraryGameViewModel : ObservableObject
     /// </summary>
     [ObservableProperty]
     public partial string ModsText { get; internal set; } = string.Empty;
+
+    /// <summary>
+    /// Its mods that show, by name, for the cards under its heading.
+    /// </summary>
+    public ObservableCollection<LibraryModViewModel> Mods { get; } = [];
 }

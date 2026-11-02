@@ -9,6 +9,7 @@ using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Library;
+using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
 using ModShelf.Application.Watchlist;
 using ModShelf.Domain.Library;
@@ -17,6 +18,7 @@ using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.Downloads;
+using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Sources.Abstractions.Search;
 
 namespace ModShelf.Presentation.ViewModels.Browse;
@@ -41,6 +43,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     private readonly IModLookup _lookup;
     private readonly IModLibrary _library;
     private readonly INavigationService _navigation;
+    private readonly ModPictures _pictures;
     private readonly IUiThread _uiThread;
     private readonly ILogger<BrowseViewModel> _logger;
     private readonly BrowseServices _services;
@@ -53,6 +56,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     private IReadOnlyList<ModRef> _trackedToShow = [];
     private SourceId? _trackedSource;
     private bool _gamesRead;
+    private bool _picturesShown;
 
     public BrowseViewModel(
         IModLookup lookup,
@@ -64,6 +68,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         IBrowserLauncher browser,
         IDialogService dialogs,
         INavigationService navigation,
+        ModPictures pictures,
         IUiThread uiThread,
         TimeProvider timeProvider,
         ILogger<BrowseViewModel> logger)
@@ -71,12 +76,14 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(lookup);
         ArgumentNullException.ThrowIfNull(library);
         ArgumentNullException.ThrowIfNull(navigation);
+        ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(logger);
 
         _lookup = lookup;
         _library = library;
         _navigation = navigation;
+        _pictures = pictures;
         _uiThread = uiThread;
         _logger = logger;
         _services = new BrowseServices(
@@ -90,6 +97,14 @@ public sealed partial class BrowseViewModel : ScreenViewModel
             timeProvider,
             logger);
         SelectedSort = Sorts[0];
+        Previews = new PreviewsViewModel(PreviewScreen.Browse, pictures);
+        Previews.PropertyChanged += (_, changed) =>
+        {
+            if (changed.PropertyName == nameof(PreviewsViewModel.Level))
+            {
+                ShowPictures();
+            }
+        };
     }
 
     public override Screen Screen => Screen.Browse;
@@ -158,6 +173,11 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     /// </summary>
     [ObservableProperty]
     public partial bool IncludeAdultContent { get; set; }
+
+    /// <summary>
+    /// Whether the mods show as rows, with thumbnails or not, or as cards.
+    /// </summary>
+    public PreviewsViewModel Previews { get; }
 
     /// <summary>
     /// The mods the search found, or the account tracks, as far as listed.
@@ -229,12 +249,20 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     internal Task GamesWork { get; private set; } = Task.CompletedTask;
 
     /// <summary>
-    /// Lists the library, and follows its changes while the app runs, so each mod shows what the library has of it. The
-    /// games are read the first time the screen is shown.
+    /// Reads the previews from the settings, lists the library, and follows its changes while the app runs, so each mod
+    /// shows what the library has of it. The games are read the first time the screen is shown.
     /// </summary>
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
         _stopping = cancellationToken;
+        await _pictures.LoadAsync();
+        Previews.Refresh();
+        ShowPictures();
+        _pictures.Changed += (_, _) => _uiThread.Post(() =>
+        {
+            Previews.Refresh();
+            ShowPictures();
+        });
         _navigation.Navigated += OnNavigated;
         try
         {
@@ -273,6 +301,32 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     /// </summary>
     [RelayCommand]
     private void GoToAccounts() => _navigation.NavigateTo(Screen.Accounts);
+
+    /// <summary>
+    /// Shows each mod's picture while the screen shows pictures, as adult mods' pictures should look now; hides them
+    /// otherwise. A picture already shown isn't read again.
+    /// </summary>
+    private void ShowPictures()
+    {
+        bool shown = Previews.ShowsPictures;
+        foreach (BrowseModViewModel row in Results)
+        {
+            if (!shown)
+            {
+                row.Picture.Hide();
+            }
+            else if (_picturesShown)
+            {
+                row.Picture.Refresh(_stopping);
+            }
+            else
+            {
+                row.Picture.Show(row.Details, _stopping);
+            }
+        }
+
+        _picturesShown = shown;
+    }
 
     /// <summary>
     /// Shows what a change did to what the library has of the mod. Runs on the UI thread.

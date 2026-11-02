@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ModShelf.Presentation.ViewModels.Pictures"
+             xmlns:res="using:ModShelf.Presentation.Resources"
+             xmlns:pictures="using:ModShelf.Desktop.Views.Pictures"
+             x:Class="ModShelf.Desktop.Views.Pictures.ModCardPicture"
+             x:DataType="vm:ModPictureViewModel">
+
+    <!-- A card's picture, sixteen by nine across its top; an adult mod's says so when it's blurred. -->
+    <pictures:SixteenByNine>
+        <Border Classes="picture">
+            <Panel>
+                <Path Classes="glyph" Width="30" Height="30" Data="{StaticResource PictureGlyph}" IsVisible="{Binding ShowsPlaceholder}" />
+                <Path Classes="glyph"
+                      Width="30"
+                      Height="30"
+                      Data="{StaticResource EyeOffGlyph}"
+                      IsVisible="{Binding IsHidden}"
+                      ToolTip.Tip="{x:Static res:Strings.PictureAdultHidden}"
+                      AutomationProperties.Name="{x:Static res:Strings.PictureAdultHidden}" />
+                <pictures:ModImage File="{Binding File}"
+                                   IsBlurred="{Binding IsBlurred}"
+                                   DecodeWidth="640"
+                                   Stretch="UniformToFill"
+                                   RenderOptions.BitmapInterpolationMode="HighQuality" />
+                <Border Classes="onPicture" IsVisible="{Binding IsAdultBlurred}">
+                    <TextBlock Text="{x:Static res:Strings.PictureAdultBlurred}" />
+                </Border>
+            </Panel>
+        </Border>
+    </pictures:SixteenByNine>
+</UserControl>

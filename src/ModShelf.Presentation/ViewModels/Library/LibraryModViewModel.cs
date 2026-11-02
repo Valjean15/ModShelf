@@ -7,6 +7,7 @@ using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
+using ModShelf.Presentation.ViewModels.Pictures;
 
 namespace ModShelf.Presentation.ViewModels.Library;
 
@@ -28,6 +29,7 @@ public sealed partial class LibraryModViewModel : ObservableObject
         _mod = mod;
         _services = services;
         Mod = mod.Mod;
+        Picture = new ModPictureViewModel(services.Pictures);
         Show(mod);
     }
 
@@ -45,6 +47,11 @@ public sealed partial class LibraryModViewModel : ObservableObject
     }
 
     public ModRef Mod { get; }
+
+    /// <summary>
+    /// Its picture, as its thumbnail or card shows it, while the screen shows pictures.
+    /// </summary>
+    public ModPictureViewModel Picture { get; }
 
     [ObservableProperty]
     public partial string Name { get; private set; } = string.Empty;

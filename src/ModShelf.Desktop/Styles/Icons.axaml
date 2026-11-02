@@ -26,6 +26,16 @@
     <!-- Three dots in a row: a row's other actions. -->
     <StreamGeometry x:Key="MoreIcon">M5,10.2 A1.8,1.8 0 1 1 5,13.8 A1.8,1.8 0 1 1 5,10.2 Z M12,10.2 A1.8,1.8 0 1 1 12,13.8 A1.8,1.8 0 1 1 12,10.2 Z M19,10.2 A1.8,1.8 0 1 1 19,13.8 A1.8,1.8 0 1 1 19,10.2 Z</StreamGeometry>
 
+    <!--
+      Signs on a picture's place, drawn as lines rather than filled: Path draws them with a stroke and no fill.
+    -->
+
+    <!-- A framed landscape: where a mod's picture goes, before it's there or when it has none. -->
+    <StreamGeometry x:Key="PictureGlyph">M3,5 H21 V19 H3 Z M3,16 L8,11 L12,15 L15,12 L21,17</StreamGeometry>
+
+    <!-- An eye struck through: an adult mod's picture, hidden. -->
+    <StreamGeometry x:Key="EyeOffGlyph">M3,3 L21,21 M10.6,6.1 A9.5,9.5 0 0 1 12,6 C17,6 20.5,10.5 21.5,12 A17,17 0 0 1 18.5,15.4 M6.5,7.6 A16,16 0 0 0 2.5,12 C3.5,13.5 7,18 12,18 A9,9 0 0 0 16,17.1</StreamGeometry>
+
     <!-- Two sliders. -->
     <StreamGeometry x:Key="SettingsIcon">F1 M3,6 H21 V8 H3 Z M3,16 H21 V18 H3 Z M7,4 H10 V10 H7 Z M14,14 H17 V20 H14 Z</StreamGeometry>
 </ResourceDictionary>

@@ -8,6 +8,7 @@ using ModShelf.Presentation.ViewModels.Browse;
 using ModShelf.Presentation.ViewModels.Downloads;
 using ModShelf.Presentation.ViewModels.FirstRun;
 using ModShelf.Presentation.ViewModels.Library;
+using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Presentation.ViewModels.Settings;
 using ModShelf.Presentation.ViewModels.Updates;
 
@@ -22,14 +23,15 @@ public static class PresentationServiceCollectionExtensions
     /// Registers navigation, every screen's ViewModel, the main window's and the tray's, each once for the app's
     /// lifetime, so a screen keeps what it shows while another is shown. Needs an <see cref="IUiThread"/>, an
     /// <see cref="IDialogService"/>, an <see cref="IFolderOpener"/>, an <see cref="IThemeSwitcher"/>, an
-    /// <see cref="IClipboard"/> and an <see cref="IAppExit"/>, which Desktop registers, and Platform's tray host, notices
-    /// and ModShelf's releases.
+    /// <see cref="IClipboard"/> and an <see cref="IAppExit"/>, which Desktop registers, Platform's tray host, notices
+    /// and ModShelf's releases, and the saved pictures, which Infrastructure's <c>AddPictureCache()</c> registers.
     /// </summary>
     public static IServiceCollection AddPresentation(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
 
         services.TryAddSingleton<INavigationService, NavigationService>();
+        services.TryAddSingleton<ModPictures>();
         services.TryAddEnumerable(
         [
             ServiceDescriptor.Singleton<ScreenViewModel, LibraryViewModel>(),

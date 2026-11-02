@@ -5,6 +5,7 @@ using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
+using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Presentation.ViewModels.Downloads;
 using ModShelf.Sources.Abstractions.Accounts;
 
@@ -19,14 +20,16 @@ public sealed partial class UpdateViewModel : ObservableObject
     private readonly UpdatesServices _services;
     private LibraryUpdate _update;
 
-    internal UpdateViewModel(LibraryUpdate update, LibraryMod mod, UpdatesServices services)
+    internal UpdateViewModel(LibraryUpdate update, LibraryMod mod, UpdatesServices services, ModPictures pictures)
     {
         ArgumentNullException.ThrowIfNull(update);
         ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(pictures);
 
         _update = update;
         _services = services;
         File = update.File;
+        Picture = new ModPictureViewModel(pictures);
         Show(update, mod);
     }
 
@@ -40,6 +43,11 @@ public sealed partial class UpdateViewModel : ObservableObject
     }
 
     public ModFileRef File { get; }
+
+    /// <summary>
+    /// Its mod's picture, as its thumbnail shows it, while the screen shows pictures.
+    /// </summary>
+    public ModPictureViewModel Picture { get; }
 
     [ObservableProperty]
     public partial string ModName { get; private set; } = string.Empty;

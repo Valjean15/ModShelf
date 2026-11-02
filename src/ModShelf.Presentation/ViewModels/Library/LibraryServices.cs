@@ -4,6 +4,7 @@ using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
 using ModShelf.Presentation.Services;
+using ModShelf.Presentation.ViewModels.Pictures;
 
 namespace ModShelf.Presentation.ViewModels.Library;
 
@@ -17,6 +18,7 @@ internal sealed class LibraryServices(
     IBrowserLauncher browser,
     IFolderOpener folders,
     IDialogService dialogs,
+    ModPictures pictures,
     TimeProvider timeProvider,
     ILogger logger)
 {
@@ -31,6 +33,8 @@ internal sealed class LibraryServices(
     public IFolderOpener Folders { get; } = folders ?? throw new ArgumentNullException(nameof(folders));
 
     public IDialogService Dialogs { get; } = dialogs ?? throw new ArgumentNullException(nameof(dialogs));
+
+    public ModPictures Pictures { get; } = pictures ?? throw new ArgumentNullException(nameof(pictures));
 
     public TimeProvider TimeProvider { get; } = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
 

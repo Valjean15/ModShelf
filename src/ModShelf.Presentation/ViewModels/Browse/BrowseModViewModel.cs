@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
+using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Sources.Abstractions.Catalog;
 
 namespace ModShelf.Presentation.ViewModels.Browse;
@@ -18,13 +19,22 @@ public sealed partial class BrowseModViewModel : ObservableObject
 
     /// <param name="problem">Why the mod's details couldn't be read, for a tracked mod; null when they were.</param>
     /// <param name="open">Opens the mod on the screen.</param>
-    internal BrowseModViewModel(ModInfo mod, string? problem, LibraryMod? inLibrary, TimeProvider timeProvider, Func<ModRef, CancellationToken, Task> open)
+    internal BrowseModViewModel(
+        ModInfo mod,
+        string? problem,
+        LibraryMod? inLibrary,
+        ModPictures pictures,
+        TimeProvider timeProvider,
+        Func<ModRef, CancellationToken, Task> open)
     {
         ArgumentNullException.ThrowIfNull(mod);
+        ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(timeProvider);
         ArgumentNullException.ThrowIfNull(open);
 
         _open = open;
+        Details = mod;
+        Picture = new ModPictureViewModel(pictures);
         Mod = mod.Mod;
         Name = mod.Name;
         ModInfoText text = ModInfoText.Of(mod, timeProvider);
@@ -41,6 +51,11 @@ public sealed partial class BrowseModViewModel : ObservableObject
     }
 
     public ModRef Mod { get; }
+
+    /// <summary>
+    /// Its picture, as its thumbnail or card shows it, while the screen shows pictures.
+    /// </summary>
+    public ModPictureViewModel Picture { get; }
 
     public string Name { get; }
 
@@ -85,6 +100,11 @@ public sealed partial class BrowseModViewModel : ObservableObject
     /// Why its details couldn't be read; null when they were.
     /// </summary>
     public string? Problem { get; }
+
+    /// <summary>
+    /// The mod as the site described it, which names its picture.
+    /// </summary>
+    internal ModInfo Details { get; }
 
     /// <summary>
     /// Whether the library has files of it.

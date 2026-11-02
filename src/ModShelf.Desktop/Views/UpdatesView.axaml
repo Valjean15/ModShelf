@@ -3,16 +3,48 @@
              xmlns:sys="using:System"
              xmlns:vm="using:ModShelf.Presentation.ViewModels.Updates"
              xmlns:res="using:ModShelf.Presentation.Resources"
+             xmlns:pictures="using:ModShelf.Desktop.Views.Pictures"
              x:Class="ModShelf.Desktop.Views.UpdatesView"
              x:DataType="vm:UpdatesViewModel">
 
-    <DockPanel>
-        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" ColumnSpacing="16">
+    <!--
+      The previews beside the heading, and an update's buttons beside what it says; in a narrow window, below them.
+      Their places are set here rather than on them, so the narrow window's can replace them.
+    -->
+    <UserControl.Styles>
+        <Style Selector="pictures|PreviewsPicker#Previews">
+            <Setter Property="Grid.Column" Value="1" />
+        </Style>
+        <Style Selector="StackPanel.actions">
+            <Setter Property="Grid.Column" Value="2" />
+        </Style>
+        <ContainerQuery Name="UpdatesScreen" Query="max-width:560">
+            <Style Selector="pictures|PreviewsPicker#Previews">
+                <Setter Property="Grid.Row" Value="1" />
+                <Setter Property="Grid.Column" Value="0" />
+                <Setter Property="Grid.ColumnSpan" Value="3" />
+                <Setter Property="Margin" Value="0,0,0,16" />
+            </Style>
+            <Style Selector="StackPanel.actions">
+                <Setter Property="Grid.Row" Value="1" />
+                <Setter Property="Grid.Column" Value="1" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="Margin" Value="-10,4,0,0" />
+            </Style>
+        </ContainerQuery>
+    </UserControl.Styles>
+
+    <DockPanel Container.Name="UpdatesScreen" Container.Sizing="Width">
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="16">
             <StackPanel Spacing="4" Margin="0,0,0,16">
                 <TextBlock Classes="heading" Margin="0" Text="{Binding Title}" />
                 <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding CheckedText}" />
             </StackPanel>
-            <Button Grid.Column="1"
+            <pictures:PreviewsPicker Name="Previews"
+                                     HorizontalAlignment="Left"
+                                     VerticalAlignment="Top"
+                                     DataContext="{Binding Previews}" />
+            <Button Grid.Column="2"
                     VerticalAlignment="Top"
                     Classes="accent"
                     Content="{x:Static res:Strings.UpdatesCheckNow}"
@@ -52,9 +84,14 @@
                 <ListBox Classes="rows" ItemsSource="{Binding Updates}">
                     <ListBox.ItemTemplate>
                         <DataTemplate x:DataType="vm:UpdateViewModel">
-                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="4">
+                            <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="4">
+                                <!-- Its mod's thumbnail, while the screen shows them. -->
+                                <Panel Margin="0,0,14,0" VerticalAlignment="Top" IsVisible="{Binding Picture.IsShown}">
+                                    <pictures:ModThumbnail DataContext="{Binding Picture}" />
+                                </Panel>
+
                                 <!-- Wrapping, so long names go to the next line rather than under the buttons. -->
-                                <StackPanel Spacing="3">
+                                <StackPanel Grid.Column="1" Margin="0,0,16,0" Spacing="3">
                                     <WrapPanel ItemSpacing="8">
                                         <TextBlock FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding ModName}" />
                                         <TextBlock TextWrapping="Wrap" Text="{Binding Name}" />
@@ -70,13 +107,14 @@
                                                Text="{Binding Note}" />
                                 </StackPanel>
 
-                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                <StackPanel Classes="actions" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
                                     <Button Classes="quiet" Content="{x:Static res:Strings.UpdateChanges}" Command="{Binding ToggleChangesCommand}" />
                                     <Button Content="{x:Static res:Strings.FileDownload}" Command="{Binding DownloadCommand}" />
                                 </StackPanel>
 
                                 <!-- The update's version in its mod's changelog. -->
-                                <Border Grid.Row="1"
+                                <Border Grid.Row="2"
+                                        Grid.Column="1"
                                         Grid.ColumnSpan="2"
                                         Margin="0,6,0,0"
                                         Padding="12,8"

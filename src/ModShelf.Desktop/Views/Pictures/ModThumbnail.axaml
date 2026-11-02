@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ModShelf.Presentation.ViewModels.Pictures"
+             xmlns:res="using:ModShelf.Presentation.Resources"
+             xmlns:pictures="using:ModShelf.Desktop.Views.Pictures"
+             x:Class="ModShelf.Desktop.Views.Pictures.ModThumbnail"
+             x:DataType="vm:ModPictureViewModel"
+             Width="72"
+             Height="40">
+
+    <!-- A mod's thumbnail, beside it in a row: its picture, a sign for none, or one for an adult picture hidden. -->
+    <Border Classes="picture" CornerRadius="6">
+        <Panel>
+            <Path Classes="glyph" Width="18" Height="18" Data="{StaticResource PictureGlyph}" IsVisible="{Binding ShowsPlaceholder}" />
+            <Path Classes="glyph"
+                  Width="18"
+                  Height="18"
+                  Data="{StaticResource EyeOffGlyph}"
+                  IsVisible="{Binding IsHidden}"
+                  ToolTip.Tip="{x:Static res:Strings.PictureAdultHidden}"
+                  AutomationProperties.Name="{x:Static res:Strings.PictureAdultHidden}" />
+            <pictures:ModImage File="{Binding File}"
+                               IsBlurred="{Binding IsBlurred}"
+                               DecodeWidth="160"
+                               Stretch="UniformToFill"
+                               RenderOptions.BitmapInterpolationMode="HighQuality" />
+        </Panel>
+    </Border>
+</UserControl>

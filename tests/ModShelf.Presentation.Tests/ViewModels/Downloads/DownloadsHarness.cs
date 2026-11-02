@@ -27,12 +27,15 @@ internal sealed class DownloadsHarness : IDisposable
             Browser,
             Dialogs,
             new FakeSourceRegistry(new FakeSource(TestData.Nexus, "Nexus Mods")),
+            Pictures.Pictures,
             UiThread,
             Time,
             Logger);
     }
 
     public InMemoryDownloadService Downloads { get; } = new();
+
+    public TestPictures Pictures { get; } = new();
 
     public ScriptedLibraryDownloads Library { get; } = new();
 

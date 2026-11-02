@@ -6,9 +6,11 @@ using CommunityToolkit.Mvvm.Input;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Library;
 using ModShelf.Domain.Downloads;
+using ModShelf.Domain.Mods;
 using ModShelf.Domain.Library;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
+using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Presentation.Services;
 
 namespace ModShelf.Presentation.ViewModels.Downloads;
@@ -30,14 +32,16 @@ public sealed partial class DownloadJobViewModel : ObservableObject
     private readonly List<(DateTimeOffset At, long Bytes)> _samples = [];
     private DownloadJobSnapshot _job;
 
-    internal DownloadJobViewModel(DownloadJobSnapshot job, string siteName, DownloadJobServices services)
+    internal DownloadJobViewModel(DownloadJobSnapshot job, string siteName, DownloadJobServices services, ModPictures pictures)
     {
         ArgumentNullException.ThrowIfNull(job);
         ArgumentException.ThrowIfNullOrWhiteSpace(siteName);
         ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(pictures);
 
         _job = job;
         _services = services;
+        Picture = new ModPictureViewModel(pictures);
         SiteName = siteName;
         OpenPageLabel = Text.Format(Strings.JobOpenPage, siteName);
         Show(job);
@@ -57,6 +61,17 @@ public sealed partial class DownloadJobViewModel : ObservableObject
     }
 
     public DownloadJobId Id => _job.Id;
+
+    /// <summary>
+    /// Its mod's picture, as its thumbnail shows it, while the screen shows pictures; none for a file without a mod page,
+    /// such as a direct link's.
+    /// </summary>
+    public ModPictureViewModel Picture { get; }
+
+    /// <summary>
+    /// The mod the file is of.
+    /// </summary>
+    internal ModRef Mod => _job.File.Mod;
 
     public string FileName => _job.FileName;
 

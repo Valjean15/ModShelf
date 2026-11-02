@@ -234,6 +234,108 @@
         <Setter Property="BorderBrush" Value="Transparent" />
     </Style>
 
+    <!-- Buttons that pick one of a few, side by side in a frame, such as a screen's previews: the one picked is raised. -->
+    <Style Selector="Border.segments">
+        <Setter Property="Padding" Value="3" />
+        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />
+    </Style>
+
+    <Style Selector="RadioButton.segment">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfMutedBrush}" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="PART_Segment"
+                        MinHeight="30"
+                        Padding="12,0"
+                        CornerRadius="7"
+                        Background="{TemplateBinding Background}">
+                    <ContentPresenter Name="PART_ContentPresenter"
+                                      VerticalAlignment="Center"
+                                      Content="{TemplateBinding Content}"
+                                      Foreground="{TemplateBinding Foreground}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="RadioButton.segment:pointerover">
+        <Setter Property="Foreground" Value="{DynamicResource ShelfTextBrush}" />
+    </Style>
+
+    <Style Selector="RadioButton.segment:checked">
+        <Setter Property="Background" Value="{DynamicResource ShelfSurfaceBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfTextBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="RadioButton.segment:checked /template/ Border#PART_Segment">
+        <Setter Property="BoxShadow" Value="0 1 2 0 #40000000" />
+    </Style>
+
+    <!-- A mod's picture: on the raised colour until it's there, with a faint sign for none. -->
+    <Style Selector="Border.picture">
+        <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+
+    <Style Selector="Path.glyph">
+        <Setter Property="Stroke" Value="{DynamicResource ShelfFaintBrush}" />
+        <Setter Property="StrokeThickness" Value="1.6" />
+        <Setter Property="StrokeJoin" Value="Round" />
+        <Setter Property="StrokeLineCap" Value="Round" />
+        <Setter Property="Stretch" Value="Uniform" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- What's said on a picture, such as that it's an adult mod's, blurred: white on dark, whatever the theme. -->
+    <Style Selector="Border.onPicture">
+        <Setter Property="Background" Value="#8C000000" />
+        <Setter Property="CornerRadius" Value="11" />
+        <Setter Property="Padding" Value="10,3" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Border.onPicture TextBlock">
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <!-- A mod as a card: its picture on top, then its name and what's known of it. -->
+    <Style Selector="Border.modCard">
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Background" Value="{DynamicResource ShelfSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+
+    <Style Selector="Button.modCard">
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Background" Value="{DynamicResource ShelfSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="ClipToBounds" Value="True" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Top" />
+    </Style>
+
+    <Style Selector="Button.modCard:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfFaintBrush}" />
+    </Style>
+
     <Style Selector="TextBox">
         <Setter Property="MinHeight" Value="36" />
         <Setter Property="VerticalContentAlignment" Value="Center" />

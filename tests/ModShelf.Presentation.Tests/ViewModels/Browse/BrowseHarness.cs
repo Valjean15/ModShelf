@@ -42,6 +42,7 @@ internal sealed class BrowseHarness : IDisposable
             Browser,
             Dialogs,
             Navigation,
+            Pictures.Pictures,
             UiThread,
             Time,
             Logger);
@@ -64,6 +65,8 @@ internal sealed class BrowseHarness : IDisposable
     public ScriptedDialogs Dialogs { get; } = new();
 
     public NavigationService Navigation { get; } = new();
+
+    public TestPictures Pictures { get; } = new();
 
     public QueuedUiThread UiThread { get; } = new();
 

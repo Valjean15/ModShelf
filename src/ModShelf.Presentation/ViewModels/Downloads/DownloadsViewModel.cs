@@ -15,12 +15,13 @@ using ModShelf.Domain.Downloads;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
+using ModShelf.Presentation.ViewModels.Pictures;
 
 namespace ModShelf.Presentation.ViewModels.Downloads;
 
 /// <summary>
 /// The download queue: a box to add a link, into the library or a folder the user picks, and every download, newest
-/// first, as it goes. The badge counts the downloads waiting for the user: to be started on their site, or failed. A
+/// first, as it goes; with previews, each shows its mod's thumbnail. The badge counts the downloads waiting for the user: to be started on their site, or failed. A
 /// link another app hands over, such as an <c>nxm://</c> link the system opens ModShelf with, is said here too.
 /// </summary>
 public sealed partial class DownloadsViewModel : ScreenViewModel
@@ -30,10 +31,13 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
     private readonly IOpenedLinks _opened;
     private readonly FolderDownloads _folders;
     private readonly ISourceRegistry _sources;
+    private readonly ModPictures _pictures;
     private readonly IUiThread _uiThread;
     private readonly ILogger<DownloadsViewModel> _logger;
     private readonly DownloadJobServices _jobServices;
     private readonly Dictionary<DownloadJobId, DownloadJobViewModel> _shown = [];
+    private CancellationToken _stopping;
+    private bool _picturesShown;
 
     public DownloadsViewModel(
         IDownloadService downloads,
@@ -44,6 +48,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         IBrowserLauncher browser,
         IDialogService dialogs,
         ISourceRegistry sources,
+        ModPictures pictures,
         IUiThread uiThread,
         TimeProvider timeProvider,
         ILogger<DownloadsViewModel> logger)
@@ -54,6 +59,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(opened);
         ArgumentNullException.ThrowIfNull(dialogs);
         ArgumentNullException.ThrowIfNull(sources);
+        ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(logger);
 
@@ -62,9 +68,18 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         _opened = opened;
         _folders = new FolderDownloads(links, dialogs);
         _sources = sources;
+        _pictures = pictures;
         _uiThread = uiThread;
         _logger = logger;
         _jobServices = new DownloadJobServices(downloads, links, browser, dialogs, timeProvider, logger);
+        Previews = new PreviewsViewModel(PreviewScreen.Downloads, pictures);
+        Previews.PropertyChanged += (_, changed) =>
+        {
+            if (changed.PropertyName == nameof(PreviewsViewModel.Level))
+            {
+                ShowPictures();
+            }
+        };
     }
 
     public override Screen Screen => Screen.Downloads;
@@ -119,16 +134,31 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
     public partial bool IsQueueBusyElsewhere { get; private set; }
 
     /// <summary>
+    /// Whether the downloads show their mods' thumbnails.
+    /// </summary>
+    public PreviewsViewModel Previews { get; }
+
+    /// <summary>
     /// Every download, newest first.
     /// </summary>
     public ObservableCollection<DownloadJobViewModel> Jobs { get; } = [];
 
     /// <summary>
-    /// Lists the queue's downloads, then follows every change to them while the app runs. While another process runs
-    /// the queue, it says so, and lists the downloads again once they run here.
+    /// Reads the previews from the settings, lists the queue's downloads, then follows every change to them while the app
+    /// runs. While another process runs the queue, it says so, and lists the downloads again once they run here.
     /// </summary>
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
+        _stopping = cancellationToken;
+        await _pictures.LoadAsync();
+        Previews.Refresh();
+        ShowPictures();
+        _pictures.Changed += (_, _) => _uiThread.Post(() =>
+        {
+            Previews.Refresh();
+            ShowPictures();
+        });
+
         // Watching first and listing after, so no change from here on is missed.
         IAsyncEnumerable<DownloadJobSnapshot> changes = _downloads.WatchAsync(cancellationToken);
         bool busyElsewhere = _downloads.IsQueueBusyElsewhere;
@@ -350,8 +380,12 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
 
     private void Add(DownloadJobSnapshot job)
     {
-        DownloadJobViewModel added = new(job, _sources.SiteName(job.File.Mod.Game.Source), _jobServices);
+        DownloadJobViewModel added = new(job, _sources.SiteName(job.File.Mod.Game.Source), _jobServices, _pictures);
         _shown.Add(job.Id, added);
+        if (_picturesShown)
+        {
+            added.Picture.Show(added.Mod, _stopping);
+        }
 
         // Newest first: before the first job added no later than this one.
         int index = 0;
@@ -361,6 +395,32 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         }
 
         Jobs.Insert(index, added);
+    }
+
+    /// <summary>
+    /// Shows each download's thumbnail while the screen shows them, as adult mods' pictures should look now; hides them
+    /// otherwise. A picture already shown isn't read again.
+    /// </summary>
+    private void ShowPictures()
+    {
+        bool shown = Previews.ShowsPictures;
+        foreach (DownloadJobViewModel job in Jobs)
+        {
+            if (!shown)
+            {
+                job.Picture.Hide();
+            }
+            else if (_picturesShown)
+            {
+                job.Picture.Refresh(_stopping);
+            }
+            else
+            {
+                job.Picture.Show(job.Mod, _stopping);
+            }
+        }
+
+        _picturesShown = shown;
     }
 
     /// <summary>
