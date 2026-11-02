@@ -207,6 +207,46 @@ public sealed class ModLookupTests
     }
 
     [Fact]
+    public async Task AModPageHasWhatItsSourceSaysItNeeds()
+    {
+        FakeCatalogSource catalog = new(TestData.Nexus);
+        ModRequirement[] needs =
+        [
+            new("SMAPI", new ModRef(new GameRef(TestData.Nexus, "stardewvalley"), "2400")),
+            new("Script Extender", pageUrl: new Uri("https://example.com/extender")),
+        ];
+        CatalogWithRequirements site = new(catalog) { Requirements = needs };
+
+        ModPage page = await new ModLookup(new SourceRegistry([site])).LookUpAsync(catalog.Mod.Mod, TestContext.Current.CancellationToken);
+
+        Assert.Equal(needs, page.Requirements);
+        Assert.Equal([catalog.Mod.Mod], site.Asked);
+    }
+
+    [Fact]
+    public async Task AModPageOfASourceThatCantSayWhatModsNeedListsNothing()
+    {
+        FakeCatalogSource site = new(TestData.Nexus);
+
+        ModPage page = await new ModLookup(new SourceRegistry([site])).LookUpAsync(site.Mod.Mod, TestContext.Current.CancellationToken);
+
+        Assert.Empty(page.Requirements);
+    }
+
+    [Fact]
+    public async Task AModPageIsntShownWhenItsRequirementsCantBeRead()
+    {
+        HttpRequestException failure = new("Service unavailable.");
+        FakeCatalogSource catalog = new(TestData.Nexus);
+        CatalogWithRequirements site = new(catalog) { Failure = failure };
+
+        Exception thrown = await Assert.ThrowsAnyAsync<Exception>(
+            () => new ModLookup(new SourceRegistry([site])).LookUpAsync(catalog.Mod.Mod, TestContext.Current.CancellationToken));
+
+        Assert.Same(failure, thrown);
+    }
+
+    [Fact]
     public async Task RefusesToLookUpAModByReferenceWhoseSourceCantDescribeIt()
     {
         ModLookup lookup = new(new SourceRegistry([ScriptedLinkRecognizer.Never(TestData.Nexus)]));
@@ -309,4 +349,42 @@ public sealed class ModLookupTests
 
     private static Task<ModPage> LookUpAsync(params IModSource[] sources)
         => new ModLookup(new SourceRegistry(sources)).LookUpAsync(Link, TestContext.Current.CancellationToken);
+
+    /// <summary>
+    /// A catalog whose source also says what its mods need, recording which mods it was asked about.
+    /// </summary>
+    private sealed class CatalogWithRequirements(FakeCatalogSource catalog) : IModCatalog, IModRequirements
+    {
+        private readonly List<ModRef> _asked = [];
+
+        public SourceId Id => catalog.Id;
+
+        public string DisplayName => catalog.DisplayName;
+
+        public IReadOnlyList<ModRequirement> Requirements { get; init; } = [];
+
+        /// <summary>
+        /// What reading the requirements throws instead, when set.
+        /// </summary>
+        public Exception? Failure { get; init; }
+
+        public IReadOnlyList<ModRef> Asked => _asked;
+
+        public Task<IReadOnlyList<ModRequirement>> GetRequirementsAsync(ModRef modRef, CancellationToken cancellationToken)
+        {
+            _asked.Add(modRef);
+            return Failure is { } failure ? Task.FromException<IReadOnlyList<ModRequirement>>(failure) : Task.FromResult(Requirements);
+        }
+
+        public Task<IReadOnlyList<GameInfo>> GetGamesAsync(CancellationToken cancellationToken) => catalog.GetGamesAsync(cancellationToken);
+
+        public Task<GameInfo> GetGameAsync(GameRef game, CancellationToken cancellationToken) => catalog.GetGameAsync(game, cancellationToken);
+
+        public Task<ModInfo> GetModAsync(ModRef modRef, CancellationToken cancellationToken) => catalog.GetModAsync(modRef, cancellationToken);
+
+        public Task<IReadOnlyList<ModFile>> GetFilesAsync(ModRef modRef, CancellationToken cancellationToken) => catalog.GetFilesAsync(modRef, cancellationToken);
+
+        public Task<IReadOnlyList<ModChangelog>> GetChangelogsAsync(ModRef modRef, CancellationToken cancellationToken)
+            => catalog.GetChangelogsAsync(modRef, cancellationToken);
+    }
 }

@@ -10,8 +10,9 @@ namespace ModShelf.Application.Catalog;
 
 /// <summary>
 /// Finds the source a link belongs to, as <see cref="Downloads.ILinkDownloads"/> does, and asks its <see cref="IModCatalog"/>
-/// about the mod, all four questions at once. Searches go to the game's source's <see cref="IModSearch"/>. Each
-/// source's games, and each mod's changelog asked about by version, are kept once read.
+/// about the mod, all four questions at once, and its <see cref="IModRequirements"/>, when it has one, at the same time.
+/// Searches go to the game's source's <see cref="IModSearch"/>. Each source's games, and each mod's changelog asked about
+/// by version, are kept once read.
 /// </summary>
 internal sealed class ModLookup : IModLookup
 {
@@ -100,21 +101,27 @@ internal sealed class ModLookup : IModLookup
     }
 
     /// <summary>
-    /// Asks the catalog the four questions about the mod at once.
+    /// Asks the catalog the four questions about the mod at once, and the source what the mod needs when it can say.
     /// </summary>
-    private static async Task<ModPage> DescribeAsync(IModCatalog catalog, ModRef mod, ModFileRef? linkedFile, CancellationToken cancellationToken)
+    private async Task<ModPage> DescribeAsync(IModCatalog catalog, ModRef mod, ModFileRef? linkedFile, CancellationToken cancellationToken)
     {
         Task<GameInfo> game = catalog.GetGameAsync(mod.Game, cancellationToken);
         Task<ModInfo> info = catalog.GetModAsync(mod, cancellationToken);
         Task<IReadOnlyList<ModFile>> files = catalog.GetFilesAsync(mod, cancellationToken);
         Task<IReadOnlyList<ModChangelog>> changelogs = catalog.GetChangelogsAsync(mod, cancellationToken);
-        await Task.WhenAll(game, info, files, changelogs).ConfigureAwait(false);
+        Task<IReadOnlyList<ModRequirement>> requirements = _sources.Find<IModRequirements>(mod.Game.Source) is { } source
+            ? source.GetRequirementsAsync(mod, cancellationToken)
+            : Task.FromResult<IReadOnlyList<ModRequirement>>([]);
+        await Task.WhenAll(game, info, files, changelogs, requirements).ConfigureAwait(false);
 
         return new ModPage(
             await game.ConfigureAwait(false),
             await info.ConfigureAwait(false),
             await files.ConfigureAwait(false),
             await changelogs.ConfigureAwait(false),
-            linkedFile);
+            linkedFile)
+        {
+            Requirements = await requirements.ConfigureAwait(false),
+        };
     }
 }

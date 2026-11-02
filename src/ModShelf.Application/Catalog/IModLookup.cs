@@ -5,8 +5,8 @@ using ModShelf.Sources.Abstractions.Search;
 namespace ModShelf.Application.Catalog;
 
 /// <summary>
-/// Looks mods up on their sites: one from a link to it or by reference, with its game, files and changelog; what changed
-/// in one of its versions; a game's mods by search; or the games a site has.
+/// Looks mods up on their sites: one from a link to it or by reference, with its game, files, changelog and requirements;
+/// what changed in one of its versions; a game's mods by search; or the games a site has.
 /// </summary>
 public interface IModLookup
 {

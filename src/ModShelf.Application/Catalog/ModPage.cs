@@ -17,4 +17,10 @@ public sealed record ModPage(
     ModInfo Mod,
     IReadOnlyList<ModFile> Files,
     IReadOnlyList<ModChangelog> Changelogs,
-    ModFileRef? LinkedFile);
+    ModFileRef? LinkedFile)
+{
+    /// <summary>
+    /// What the mod needs, in the order the site lists it; empty when it lists nothing, or the mod's source can't say.
+    /// </summary>
+    public IReadOnlyList<ModRequirement> Requirements { get; init; } = [];
+}
