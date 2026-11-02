@@ -1,8 +1,10 @@
-# A mod's details from the v2 API: the one mod of a game with the ID the filter gives, with its thumbnails and its
-# category's name, which v1 doesn't give. Not used by the source yet: the recording script reads this file, so the
-# recorded answers are to this exact query, and step 8b builds on them.
-query ModDetails($filter: ModsFilter) {
-  mods(filter: $filter, count: 1) {
+# Mods' details from the v2 API, by game and ID, several at once: their thumbnails and their category, which v1 doesn't
+# give. "mods" refuses a mod ID without the game's numeric ID; legacyModsByDomain takes the game's domain name. Not used
+# by the source yet: the recording script reads this file, so the recorded answers are to this exact query, and step 8b
+# builds on them.
+query ModDetails($ids: [CompositeDomainWithIdInput!]!) {
+  legacyModsByDomain(ids: $ids) {
+    totalCount
     nodes {
       modId
       name
@@ -18,6 +20,10 @@ query ModDetails($filter: ModsFilter) {
       adultContent
       status
       category
+      modCategory {
+        categoryId
+        name
+      }
       game {
         domainName
       }

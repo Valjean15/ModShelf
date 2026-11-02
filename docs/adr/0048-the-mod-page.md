@@ -53,9 +53,10 @@ and Browse. The human approved four choices:
   › *mod*" with its previews, a strip for `PageProblem` with **Try again**, and a bar while a mod is read. Library's
   rows and cards open the page from the mod's name; their menus say **Open** and **Open on its site**.
 - **Recording:** `Record-NexusFixtures.ps1 -Details` records the v2 schema around a mod's details and requirements,
-  and the answers to `Catalog/ModDetails.graphql` and `Catalog/ModRequirements.graphql` for a mod and one that needs
-  others. Both ask `mods` with a `modId` filter, which the recorded schema has; the requirements' fields are a guess,
-  so the script saves a refused query's answer and goes on. Neither query is used yet.
+  and the answers to `Catalog/ModDetails.graphql` and `Catalog/ModRequirements.graphql` for a mod, one that needs
+  others, and both at once. Both ask `legacyModsByDomain`, which takes mods by their game's domain name and ID, several
+  at once: the first recording showed that `mods` refuses a mod ID without the game's numeric ID. A refused query's
+  answer is saved anyway, and the script goes on. Neither query is used yet.
 
 ## Consequences
 

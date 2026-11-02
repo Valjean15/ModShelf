@@ -46,10 +46,10 @@
     time the script gave has passed. Records how Nexus Mods refuses an expired key.
 
 .PARAMETER Details
-    Records a mod's details and what it needs from the v2 GraphQL API, for the mod page: the mod given to -ModId and
-    the one given to -RequiringModId, which needs other mods, and a mod that doesn't exist. Records the parts of the
-    schema around them too, and leaves the other recordings as they are; with -SearchOnly or -Tracking, those too.
-    Works with either account, and changes nothing on it.
+    Records mods' details and what they need from the v2 GraphQL API, for the mod page: the mod given to -ModId, the
+    one given to -RequiringModId, which needs other mods, both at once, and a mod that doesn't exist. Records the parts
+    of the schema around them too, and leaves the other recordings as they are; with -SearchOnly or -Tracking, those
+    too. Works with either account, and changes nothing on it.
 
     The queries are read from the Nexus source's Catalog folder. They're partly a guess at the schema: when Nexus Mods
     refuses one, its answer is saved anyway, the script says so and goes on, and the schema it recorded shows what to
@@ -173,6 +173,8 @@ query DetailsSchema {
   modRequirement: __type(name: "ModRequirement") { fields { name type { ...TypeRef } } }
   modRequirementPage: __type(name: "ModRequirementPage") { fields { name type { ...TypeRef } } }
   dlcRequirement: __type(name: "DlcRequirement") { fields { name type { ...TypeRef } } }
+  modRequirementsDlc: __type(name: "ModRequirementsDlc") { fields { name type { ...TypeRef } } }
+  modPage: __type(name: "ModPage") { fields { name type { ...TypeRef } } }
   modCategory: __type(name: "ModCategory") { fields { name type { ...TypeRef } } }
   compositeDomainWithIdInput: __type(name: "CompositeDomainWithIdInput") { inputFields { name type { ...TypeRef } } }
 }
@@ -391,22 +393,19 @@ function Save-Searches {
     Save-Fixture 'search-no-results' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Text 'zqxj no such mod zqxj'))
 }
 
-# The variables for the one mod of the game with the ID: adult or not, as a mod's page shows either.
-function New-ModVariables([int] $Id) {
-    function Condition([string] $Value) {
-        $condition = [System.Text.Json.Nodes.JsonObject]::new()
-        $condition['value'] = [System.Text.Json.Nodes.JsonValue]::Create($Value)
-        $condition['op'] = [System.Text.Json.Nodes.JsonValue]::Create('EQUALS')
-        $list = [System.Text.Json.Nodes.JsonArray]::new()
-        $list.Add($condition)
-        return , $list
+# The variables for the game's mods with the IDs, by the game's domain name: "mods" wants the game's numeric ID with a
+# mod ID, and legacyModsByDomain doesn't.
+function New-ModVariables([int[]] $Ids) {
+    $list = [System.Text.Json.Nodes.JsonArray]::new()
+    foreach ($id in $Ids) {
+        $entry = [System.Text.Json.Nodes.JsonObject]::new()
+        $entry['gameDomain'] = [System.Text.Json.Nodes.JsonValue]::Create($Game)
+        $entry['modId'] = [System.Text.Json.Nodes.JsonValue]::Create($id)
+        $list.Add($entry)
     }
 
-    $filter = [System.Text.Json.Nodes.JsonObject]::new()
-    $filter['gameDomainName'] = Condition $Game
-    $filter['modId'] = Condition ([string]$Id)
     $variables = [System.Text.Json.Nodes.JsonObject]::new()
-    $variables['filter'] = $filter
+    $variables['ids'] = $list
     return , $variables
 }
 
@@ -440,6 +439,7 @@ function Save-Details {
     Save-GraphQlFixture 'graphql-details-schema' (Invoke-NexusGraphQl $DetailsSchemaQuery 'DetailsSchema') { param($body) Limit-DetailsSchema $body }
     Save-GraphQlFixture 'details-mod' (Invoke-NexusGraphQl $detailsQuery 'ModDetails' (New-ModVariables $ModId))
     Save-GraphQlFixture 'details-requiring-mod' (Invoke-NexusGraphQl $detailsQuery 'ModDetails' (New-ModVariables $RequiringModId))
+    Save-GraphQlFixture 'details-both-mods' (Invoke-NexusGraphQl $detailsQuery 'ModDetails' (New-ModVariables $ModId, $RequiringModId))
     Save-GraphQlFixture 'details-mod-not-found' (Invoke-NexusGraphQl $detailsQuery 'ModDetails' (New-ModVariables 999999999))
     Save-GraphQlFixture 'requirements-mod' (Invoke-NexusGraphQl $requirementsQuery 'ModRequirements' (New-ModVariables $ModId))
     Save-GraphQlFixture 'requirements-requiring-mod' (Invoke-NexusGraphQl $requirementsQuery 'ModRequirements' (New-ModVariables $RequiringModId))

@@ -1,10 +1,13 @@
-# What a mod needs, from the v2 API: other mods on Nexus Mods, things elsewhere, and DLC. A best guess at the schema,
-# not used by the source yet: the recording script reads this file and records the schema beside the answer, so step
-# 8b can correct it.
-query ModRequirements($filter: ModsFilter) {
-  mods(filter: $filter, count: 1) {
+# What mods need, from the v2 API, by game and ID: other mods on Nexus Mods and things elsewhere. The fields are the ones
+# the recorded schema lists; DLC are left out until their type is recorded. Not used by the source yet: the recording
+# script reads this file, so the recorded answers are to this exact query, and step 8b builds on them.
+query ModRequirements($ids: [CompositeDomainWithIdInput!]!) {
+  legacyModsByDomain(ids: $ids) {
     nodes {
       modId
+      game {
+        domainName
+      }
       modRequirements {
         nexusRequirements {
           totalCount
