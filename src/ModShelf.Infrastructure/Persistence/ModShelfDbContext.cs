@@ -19,6 +19,8 @@ internal sealed class ModShelfDbContext(DbContextOptions<ModShelfDbContext> opti
 
     internal DbSet<LibraryModRecord> LibraryMods => Set<LibraryModRecord>();
 
+    internal DbSet<ModDetailsRecord> ModDetails => Set<ModDetailsRecord>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);
@@ -28,5 +30,6 @@ internal sealed class ModShelfDbContext(DbContextOptions<ModShelfDbContext> opti
         modelBuilder.ApplyConfiguration(new LibraryModRecordConfiguration());
         modelBuilder.ApplyConfiguration(new LibraryFileRecordConfiguration());
         modelBuilder.ApplyConfiguration(new LibraryUpdateRecordConfiguration());
+        modelBuilder.ApplyConfiguration(new ModDetailsRecordConfiguration());
     }
 }

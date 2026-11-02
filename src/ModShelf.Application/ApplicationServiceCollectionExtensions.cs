@@ -74,6 +74,21 @@ public static class ApplicationServiceCollectionExtensions
     }
 
     /// <summary>
+    /// Registers <see cref="IModDetails"/>, which keeps mods' details. Needs the settings (<see cref="AddSettings"/>) and
+    /// Infrastructure's <see cref="Catalog.Ports.IModDetailsRepository"/>, which <c>AddLibraryDatabase()</c> registers.
+    /// </summary>
+    public static IServiceCollection AddModDetails(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton(TimeProvider.System);
+        services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
+        services.TryAddSingleton<IModDetails, ModDetails>();
+
+        return services;
+    }
+
+    /// <summary>
     /// Registers <see cref="IModLibrary"/>, the library of watched and downloaded mods, and <see cref="ILibraryRescan"/>,
     /// which rescans its folders. Needs the download engine
     /// (<see cref="AddDownloadEngine"/>), the settings (<see cref="AddSettings"/>), and Infrastructure's

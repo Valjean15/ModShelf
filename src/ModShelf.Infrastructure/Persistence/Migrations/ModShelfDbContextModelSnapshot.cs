@@ -244,6 +244,65 @@ namespace ModShelf.Infrastructure.Persistence.Migrations
                     b.ToTable("LinkedAccounts", (string)null);
                 });
 
+            modelBuilder.Entity("ModShelf.Infrastructure.Persistence.Tables.ModDetailsRecord", b =>
+                {
+                    b.Property<string>("SourceId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("GameKey")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ModId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Author")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long?>("Downloads")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("Endorsements")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("HasAdultContent")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PageUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PictureUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("SavedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Summary")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ThumbnailBlurredUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ThumbnailUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Version")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("SourceId", "GameKey", "ModId");
+
+                    b.ToTable("ModDetails", (string)null);
+                });
+
             modelBuilder.Entity("ModShelf.Infrastructure.Persistence.Tables.LibraryFileRecord", b =>
                 {
                     b.HasOne("ModShelf.Infrastructure.Persistence.Tables.LibraryModRecord", null)

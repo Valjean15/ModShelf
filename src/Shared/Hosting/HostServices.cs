@@ -74,6 +74,7 @@ internal static class HostServices
         services.AddDownloadEngine();
         services.AddAccounts();
         services.AddModLookup();
+        services.AddModDetails();
         services.AddModUpdates();
         services.AddWatchlists();
         services.AddLibrary();

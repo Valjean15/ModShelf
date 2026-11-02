@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Accounts;
 using ModShelf.Application.Accounts.Ports;
+using ModShelf.Application.Catalog.Ports;
 using ModShelf.Application.Diagnostics.Ports;
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Library.Ports;
@@ -175,8 +176,9 @@ public static class InfrastructureServiceCollectionExtensions
     /// <summary>
     /// Registers the library database at <paramref name="databasePath"/>: the <see cref="ModShelfDbContext"/>
     /// factory, the repositories (<see cref="IDownloadJobRepository"/>, <see cref="ILinkedAccountRepository"/>,
-    /// <see cref="ILibraryRepository"/>), the <see cref="IDownloadQueueLock"/> beside the database, and
-    /// a hosted service that creates or migrates the database before any other hosted service starts.
+    /// <see cref="ILibraryRepository"/>, <see cref="IModDetailsRepository"/>), the <see cref="IDownloadQueueLock"/>
+    /// beside the database, and a hosted service that creates or migrates the database before any other hosted service
+    /// starts.
     /// </summary>
     /// <param name="databasePath">The absolute path of the database file. Its folder is created if missing.</param>
     public static IServiceCollection AddLibraryDatabase(this IServiceCollection services, string databasePath)
@@ -200,6 +202,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<IDownloadJobRepository, DownloadJobRepository>();
         services.AddSingleton<ILinkedAccountRepository, LinkedAccountRepository>();
         services.AddSingleton<ILibraryRepository, LibraryRepository>();
+        services.AddSingleton<IModDetailsRepository, ModDetailsRepository>();
         services.AddSingleton<IDownloadQueueLock, FileDownloadQueueLock>();
         services.AddHostedService<LibraryDatabaseMigrator>();
 
