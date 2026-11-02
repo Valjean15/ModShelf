@@ -100,6 +100,9 @@ namespace ModShelf.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Sha256")
+                        .HasColumnType("TEXT");
+
                     b.Property<long>("SizeInBytes")
                         .HasColumnType("INTEGER");
 

@@ -39,6 +39,12 @@ internal sealed class LibraryFileRecord
 
     public DateTimeOffset DownloadedAt { get; set; }
 
+    /// <summary>
+    /// The file's SHA-256, 64 lowercase hexadecimal digits; null when it hasn't been read, as for a file recorded before
+    /// ModShelf kept hashes.
+    /// </summary>
+    public string? Sha256 { get; set; }
+
     public static LibraryFileRecord From(LibraryFile file)
     {
         LibraryFileRecord record = new() { FileId = file.File.Id, Name = file.Name, RelativePath = file.RelativePath };
@@ -55,9 +61,10 @@ internal sealed class LibraryFileRecord
         RelativePath = file.RelativePath;
         SizeInBytes = file.SizeInBytes;
         DownloadedAt = file.DownloadedAt;
+        Sha256 = file.Sha256;
     }
 
     /// <exception cref="ArgumentException">The row holds values no library file can have.</exception>
     public LibraryFile ToFile(ModRef mod)
-        => new(new ModFileRef(mod, FileId), Name, VersionLabel, Category, UploadedAt, RelativePath, SizeInBytes, DownloadedAt);
+        => new(new ModFileRef(mod, FileId), Name, VersionLabel, Category, UploadedAt, RelativePath, SizeInBytes, DownloadedAt, Sha256);
 }

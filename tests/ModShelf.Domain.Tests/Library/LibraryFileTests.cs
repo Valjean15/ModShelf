@@ -64,6 +64,28 @@ public sealed class LibraryFileTests
             () => new LibraryFile(TestData.SkyUiMainFile, "SkyUI", null, ModFileCategory.Main, TestData.CreatedAt, "SkyUI.7z", -1, TestData.CreatedAt));
     }
 
+    [Fact]
+    public void KeepsItsHashInLowercaseOrNone()
+    {
+        string hash = string.Concat(Enumerable.Repeat("0123456789ABCDEF", 4));
+
+        LibraryFile hashed = new(TestData.SkyUiMainFile, "SkyUI", null, ModFileCategory.Main, TestData.CreatedAt, "SkyUI.7z", 1, TestData.CreatedAt, hash);
+
+        Assert.Equal(hash.ToLowerInvariant(), hashed.Sha256);
+        Assert.Null(File("SkyUI.7z").Sha256);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("0123456789abcdef")]
+    [InlineData("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdeg")]
+    [InlineData("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0")]
+    public void RefusesAHashThatIsntASha256(string hash)
+    {
+        Assert.Throws<ArgumentException>(
+            () => new LibraryFile(TestData.SkyUiMainFile, "SkyUI", null, ModFileCategory.Main, TestData.CreatedAt, "SkyUI.7z", 1, TestData.CreatedAt, hash));
+    }
+
     private static LibraryFile File(string path)
         => new(TestData.SkyUiMainFile, "SkyUI", null, ModFileCategory.Main, TestData.CreatedAt, path, 1, TestData.CreatedAt);
 }

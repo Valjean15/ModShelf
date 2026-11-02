@@ -24,6 +24,7 @@ public sealed class LibraryDatabaseTests
 {
     private const string InitialCreate = "20261023144452_InitialCreate";
     private const string AddLinkedAccounts = "20261023202312_AddLinkedAccounts";
+    private const string AddNeedsFullCheck = "20261029231706_AddNeedsFullCheck";
 
     [Fact]
     public async Task StartingCreatesTheFolderAndTheSchema()
@@ -189,6 +190,29 @@ public sealed class LibraryDatabaseTests
         ModRef mod = new(new GameRef(new SourceId("nexus"), "stardewvalley"), "2400");
         await database.Library.UpdateAsync(mod, _ => LibraryMod.Watch(mod, "SMAPI", null, null, DateTimeOffset.UnixEpoch), TestContext.Current.CancellationToken);
         Assert.Single(await database.Library.ListAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task ADatabaseFromBeforeFileHashesKeepsItsFilesWithoutOne()
+    {
+        await using TestLibraryDatabase database = new();
+        await using (ModShelfDbContext context = await database.CreateContextAsync())
+        {
+            // The schema 0.9.1 shipped with.
+            await context.GetService<IMigrator>().MigrateAsync(AddNeedsFullCheck, TestContext.Current.CancellationToken);
+            await context.Database.ExecuteSqlRawAsync(
+                "INSERT INTO LibraryMods (SourceId, GameKey, ModId, Name, IsWatched, AddedAt, NeedsFullCheck) "
+                + "VALUES ('nexus', 'stardewvalley', '2400', 'SMAPI', 1, '2026-10-27 12:00:00+00:00', 0);"
+                + "INSERT INTO LibraryFiles (ModSequence, FileId, Name, Category, UploadedAt, RelativePath, SizeInBytes, DownloadedAt) "
+                + "VALUES (1, '160380', 'SMAPI 4.5.2', 1, '2026-10-20 12:00:00+00:00', 'nexus/stardewvalley/2400/SMAPI 4.5.2.zip', 41889142, '2026-10-27 12:00:00+00:00');",
+                TestContext.Current.CancellationToken);
+        }
+
+        await database.StartAsync();
+
+        ModRef mod = new(new GameRef(new SourceId("nexus"), "stardewvalley"), "2400");
+        LibraryFile file = Assert.Single((await database.Library.FindAsync(mod, TestContext.Current.CancellationToken))!.Files);
+        Assert.Equal(("160380", 41_889_142L, (string?)null), (file.File.Id, file.SizeInBytes, file.Sha256));
     }
 
     [Fact]

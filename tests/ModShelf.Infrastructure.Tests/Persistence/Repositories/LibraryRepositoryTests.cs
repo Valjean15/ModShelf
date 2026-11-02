@@ -23,7 +23,8 @@ public sealed class LibraryRepositoryTests : IAsyncLifetime
     [Fact]
     public async Task AModAndItsFilesSurviveARestart()
     {
-        LibraryFile main = File(Smapi, "160380", "nexus/stardewvalley/2400/SMAPI 4.5.2.zip");
+        // The older one was recorded before ModShelf kept hashes.
+        LibraryFile main = File(Smapi, "160380", "nexus/stardewvalley/2400/SMAPI 4.5.2.zip", sha256: new string('a', 64));
         LibraryFile old = File(Smapi, "153075", "nexus/stardewvalley/2400/SMAPI 4.4.0.zip");
         LibraryMod mod = LibraryMod.Restore(
             Smapi, "SMAPI", "Pathoschild", new Uri("https://www.nexusmods.com/stardewvalley/mods/2400"), isWatched: false, Added, Added.AddHours(5), [main, old]);
@@ -297,13 +298,13 @@ public sealed class LibraryRepositoryTests : IAsyncLifetime
 
     private static LibraryMod Watched(ModRef mod) => LibraryMod.Watch(mod, "Mod " + mod.Id, null, null, Added);
 
-    private static LibraryFile File(ModRef mod, string id, string path)
-        => new(new ModFileRef(mod, id), "File " + id, "1." + id, ModFileCategory.Main, Added.AddDays(-30), path, 41_889_142, Added.AddMinutes(3));
+    private static LibraryFile File(ModRef mod, string id, string path, string? sha256 = null)
+        => new(new ModFileRef(mod, id), "File " + id, "1." + id, ModFileCategory.Main, Added.AddDays(-30), path, 41_889_142, Added.AddMinutes(3), sha256);
 
     private static void AssertSameFile(LibraryFile expected, LibraryFile actual)
         => Assert.Equal(
-            (expected.File, expected.Name, expected.VersionLabel, expected.Category, expected.UploadedAt, expected.RelativePath, expected.SizeInBytes, expected.DownloadedAt),
-            (actual.File, actual.Name, actual.VersionLabel, actual.Category, actual.UploadedAt, actual.RelativePath, actual.SizeInBytes, actual.DownloadedAt));
+            (expected.File, expected.Name, expected.VersionLabel, expected.Category, expected.UploadedAt, expected.RelativePath, expected.SizeInBytes, expected.DownloadedAt, expected.Sha256),
+            (actual.File, actual.Name, actual.VersionLabel, actual.Category, actual.UploadedAt, actual.RelativePath, actual.SizeInBytes, actual.DownloadedAt, actual.Sha256));
 
     private static LibraryUpdate Update(ModRef mod, string id, string? replaces = null, string? name = null)
         => new(
