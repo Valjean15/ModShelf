@@ -42,4 +42,7 @@ internal sealed partial class LibraryDownloads
 
     [LoggerMessage(EventId = 618, Level = LogLevel.Warning, Message = "Didn't archive the old version {FileName}: its path in the _archive folder would be too long for this system")]
     private static partial void LogArchivePathTooLong(ILogger logger, string fileName);
+
+    [LoggerMessage(EventId = 620, Level = LogLevel.Warning, Message = "Couldn't read {FileName} for its SHA-256, so the library has it without one")]
+    private static partial void LogCantHash(ILogger logger, Exception exception, string fileName);
 }

@@ -255,6 +255,58 @@ public sealed class LibraryDownloadsTests : IDisposable
     }
 
     [Fact]
+    public async Task RecordsADownloadWithItsSha256()
+    {
+        DownloadJobSnapshot done = Done(SkyUi52, SkyUiFolder, "SkyUI_5_2_SE.7z");
+        string path = Path.Combine(SkyUiFolder, "SkyUI_5_2_SE.7z");
+        _storage.Add(path);
+        _storage.Hashes[path] = new string('c', 64);
+        using LibraryDownloads library = Create();
+
+        LibraryRecord recorded = (await library.RecordAsync(done, Cancellation))!;
+
+        Assert.Equal(new string('c', 64), recorded.File.Sha256);
+        Assert.Equal(new string('c', 64), Assert.Single(Assert.Single(_library.Mods).Files).Sha256);
+        Assert.Equal([path], _storage.Hashed);
+    }
+
+    [Fact]
+    public async Task AFileTheLibraryHadDownloadedAgainGetsItsNewHash()
+    {
+        // As a file gone from disk and downloaded again: its details are the library's, its hash is read anew.
+        LibraryFile before = new(
+            File(SkyUi, SkyUi52), "SkyUI 5.2", "5.2", ModFileCategory.Main, TestData.Now.AddDays(-9), "kept/SkyUI.7z", 100, TestData.Now.AddDays(-2), new string('a', 64));
+        _library.Add(ModWith(before));
+        DownloadJobSnapshot again = Done(SkyUi52, SkyUiFolder, "SkyUI_5_2_SE.7z");
+        string path = Path.Combine(SkyUiFolder, "SkyUI_5_2_SE.7z");
+        _storage.Add(path);
+        using LibraryDownloads library = Create();
+
+        LibraryFile recorded = (await library.RecordAsync(again, Cancellation))!.File;
+
+        Assert.Equal(("SkyUI 5.2", _storage.HashOf(path)), (recorded.Name, recorded.Sha256));
+        Assert.Empty(_site.Asked);
+    }
+
+    [Fact]
+    public async Task ADownloadThatCantBeReadIsRecordedWithoutAHash()
+    {
+        DownloadJobSnapshot done = Done(SkyUi52, SkyUiFolder, "SkyUI_5_2_SE.7z");
+        string path = Path.Combine(SkyUiFolder, "SkyUI_5_2_SE.7z");
+        _storage.Add(path);
+        _storage.Failures[path] = new IOException("Another program has it locked.");
+        using LibraryDownloads library = Create();
+
+        LibraryRecord recorded = (await library.RecordAsync(done, Cancellation))!;
+
+        Assert.Null(recorded.File.Sha256);
+        Assert.Single(_library.Mods);
+        Assert.Contains(_logger.Entries, entry => entry.StartsWith(
+            "Warning: Couldn't read SkyUI_5_2_SE.7z for its SHA-256, so the library has it without one System.IO.IOException: Another program has it locked.",
+            StringComparison.Ordinal));
+    }
+
+    [Fact]
     public async Task HandsALinkThatCompletesAHandoffToTheQueue()
     {
         using LibraryDownloads library = Create();

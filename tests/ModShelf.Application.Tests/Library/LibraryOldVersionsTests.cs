@@ -111,6 +111,10 @@ public sealed class LibraryOldVersionsTests : IDisposable
         Assert.All(archived, path => Assert.True(_storage.FileExists(InRoot(path))));
         Assert.False(_storage.FileExists(InRoot($"{Folder}/SkyUI 5.0.7z")));
         Assert.Equal(("SkyUI 50", 100L), (recorded.Archived[2].Name, recorded.Archived[2].SizeInBytes));
+
+        // Moving doesn't change the content, so it isn't read again.
+        Assert.Equal(["0", "1", "2"], recorded.Archived.Select(file => file.Sha256![..1]).Reverse());
+        Assert.Equal([InRoot($"{Folder}/SkyUI 5.3.7z")], _storage.Hashed);
     }
 
     [Fact]
@@ -343,7 +347,9 @@ public sealed class LibraryOldVersionsTests : IDisposable
     }
 
     private static LibraryFile Stored(string id)
-        => new(File(SkyUi, id), $"SkyUI {id}", null, ModFileCategory.Main, TestData.Now, $"{Folder}/SkyUI {id[0]}.{id[1]}.7z", 100, TestData.Now);
+        => new(File(SkyUi, id), $"SkyUI {id}", null, ModFileCategory.Main, TestData.Now, $"{Folder}/SkyUI {id[0]}.{id[1]}.7z", 100, TestData.Now, Sha256Of(id));
+
+    private static string Sha256Of(string id) => new(id[^1], 64);
 
     private DownloadJobSnapshot Done(string fileId, string fileName)
         => RecordingDownloadService.Completed(RecordingDownloadService.Job(File(SkyUi, fileId), InRoot(Folder), fileName, DownloadJobStatus.Queued));

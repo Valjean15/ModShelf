@@ -59,6 +59,21 @@ public sealed class FileSystemLibraryStorageTests : IDisposable
     }
 
     [Fact]
+    public async Task ReadsAFilesSha256()
+    {
+        // The SHA-256 of "abc", from FIPS 180-2.
+        string file = Path.Combine(_folder.Path, "SkyUI.7z");
+        await File.WriteAllTextAsync(file, "abc", TestContext.Current.CancellationToken);
+        FileSystemLibraryStorage storage = new();
+
+        string sha256 = await storage.Sha256Async(file, TestContext.Current.CancellationToken);
+
+        Assert.Equal("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", sha256);
+        await Assert.ThrowsAsync<FileNotFoundException>(
+            () => storage.Sha256Async(Path.Combine(_folder.Path, "SKSE.7z"), TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public void MovesAFileIntoFoldersItMakes()
     {
         string from = Path.Combine(_folder.Path, "SkyUI.7z");

@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+
 using ModShelf.Application.Library.Ports;
 using ModShelf.Domain.Common;
 using ModShelf.Infrastructure.Downloads;
@@ -65,6 +67,25 @@ internal sealed class FileSystemLibraryStorage : ILibraryStorage
     {
         FileInfo file = new(path);
         return file.Exists ? file.Length : null;
+    }
+
+    public async Task<string> Sha256Async(string path, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+
+        // Read once, front to back, sharing it with programs that read it too.
+        FileStream file = new(path, new FileStreamOptions
+        {
+            Mode = FileMode.Open,
+            Access = FileAccess.Read,
+            Share = FileShare.Read,
+            Options = FileOptions.Asynchronous | FileOptions.SequentialScan,
+        });
+        await using (file.ConfigureAwait(false))
+        {
+            byte[] digest = await SHA256.HashDataAsync(file, cancellationToken).ConfigureAwait(false);
+            return Convert.ToHexStringLower(digest);
+        }
     }
 
     public void EnsurePathFits(string path)

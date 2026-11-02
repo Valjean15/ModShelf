@@ -391,11 +391,12 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
             details = await ReadDetailsAsync(catalog, job.File, cancellationToken).ConfigureAwait(false);
         }
 
+        string? sha256 = await HashAsync(TargetOf(job), cancellationToken).ConfigureAwait(false);
         DateTimeOffset now = _timeProvider.GetUtcNow();
         LibraryFile recorded = details is null
-            ? new LibraryFile(job.File, kept!.Name, kept.VersionLabel, kept.Category, kept.UploadedAt, relativePath, size, now)
+            ? new LibraryFile(job.File, kept!.Name, kept.VersionLabel, kept.Category, kept.UploadedAt, relativePath, size, now, sha256)
             : new LibraryFile(
-                job.File, details.File.Name, details.File.VersionLabel, details.File.Category, details.File.UploadedAt, relativePath, size, now);
+                job.File, details.File.Name, details.File.VersionLabel, details.File.Category, details.File.UploadedAt, relativePath, size, now, sha256);
 
         // Old versions are known from the site's list of files, which is read for a file new to the library. The library
         // never lists a file where it isn't, and no file is lost when it can't change: old versions are moved before it
@@ -534,10 +535,27 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
 
             taken.Add(archivePath);
             moved.Add((file, new LibraryFile(
-                file.File, file.Name, file.VersionLabel, file.Category, file.UploadedAt, archivePath, file.SizeInBytes, file.DownloadedAt)));
+                file.File, file.Name, file.VersionLabel, file.Category, file.UploadedAt, archivePath, file.SizeInBytes, file.DownloadedAt, file.Sha256)));
         }
 
         return moved;
+    }
+
+    /// <summary>
+    /// The SHA-256 of the finished download at <paramref name="path"/>; null when it couldn't be read, which is logged,
+    /// so the file goes into the library without one.
+    /// </summary>
+    private async Task<string?> HashAsync(string path, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await _storage.Sha256Async(path, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            LogCantHash(_logger, exception, Path.GetFileName(path));
+            return null;
+        }
     }
 
     /// <summary>

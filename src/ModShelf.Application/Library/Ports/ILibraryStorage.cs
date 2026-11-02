@@ -17,6 +17,14 @@ public interface ILibraryStorage
     long? FileSize(string path);
 
     /// <summary>
+    /// The SHA-256 of the file at <paramref name="path"/>, read through once, as 64 lowercase hexadecimal digits.
+    /// </summary>
+    /// <exception cref="FileNotFoundException">There's no file there.</exception>
+    /// <exception cref="IOException">The file couldn't be read, such as when another program has it locked.</exception>
+    /// <exception cref="UnauthorizedAccessException">This user may not read it.</exception>
+    Task<string> Sha256Async(string path, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Whether two paths lead to the same folder, however differently they name it: through a link or junction,
     /// another drive letter, or in another case or Unicode form on a file system that ignores them. False when either
     /// isn't a folder.

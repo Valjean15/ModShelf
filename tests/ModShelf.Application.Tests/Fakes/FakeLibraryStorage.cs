@@ -1,4 +1,6 @@
 using System.Collections.Concurrent;
+using System.Security.Cryptography;
+using System.Text;
 
 using ModShelf.Application.Library.Ports;
 using ModShelf.Domain.Common;
@@ -17,7 +19,7 @@ internal sealed class FakeLibraryStorage : ILibraryStorage
     public int MaxPath { get; set; } = int.MaxValue;
 
     /// <summary>
-    /// What moving or deleting the file at a path throws instead.
+    /// What moving, deleting or reading the file at a path throws instead.
     /// </summary>
     public ConcurrentDictionary<string, Exception> Failures { get; } = new(StringComparer.Ordinal);
 
@@ -70,6 +72,37 @@ internal sealed class FakeLibraryStorage : ILibraryStorage
         => FilePaths.Same(first, second) || SameFolders.Contains((first, second)) || SameFolders.Contains((second, first));
 
     public long? FileSize(string path) => _files.TryGetValue(path, out long size) ? size : null;
+
+    /// <summary>
+    /// The hashes reading a file at a path gives; any other file's is made from its path and size.
+    /// </summary>
+    public ConcurrentDictionary<string, string> Hashes { get; } = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// Every file read for its hash, in order.
+    /// </summary>
+    public ConcurrentQueue<string> Hashed { get; } = new();
+
+    /// <summary>
+    /// The hash a file at <paramref name="path"/> has, as <see cref="Sha256Async"/> gives it.
+    /// </summary>
+    public string HashOf(string path)
+        => Hashes.TryGetValue(path, out string? hash)
+            ? hash
+            : Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes($"{path}:{FileSize(path)}")));
+
+    public Task<string> Sha256Async(string path, CancellationToken cancellationToken)
+    {
+        Hashed.Enqueue(path);
+        if (Failures.TryGetValue(path, out Exception? failure))
+        {
+            return Task.FromException<string>(failure);
+        }
+
+        return _files.ContainsKey(path)
+            ? Task.FromResult(HashOf(path))
+            : Task.FromException<string>(new FileNotFoundException($"No file at {path}.", path));
+    }
 
     public void MoveFile(string source, string destination)
     {
