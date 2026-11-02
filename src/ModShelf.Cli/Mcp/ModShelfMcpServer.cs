@@ -1,9 +1,12 @@
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
@@ -40,6 +43,14 @@ internal static partial class ModShelfMcpServer
         + "- settings_show, settings_set and settings_reset read and change the settings; library.oldVersions decides "
         + "whether old versions stay, are archived or are deleted.\n"
         + "- Linking accounts, deleting files and moving the library are for the user, in the desktop app or the CLI.";
+
+    /// <summary>
+    /// How the tools' arguments and results are written: as the SDK writes them, nulls included.
+    /// </summary>
+    internal static JsonSerializerOptions Json { get; } = new(McpJsonUtilities.DefaultOptions)
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.Never,
+    };
 
     /// <summary>
     /// Runs the server until standard input ends, or <paramref name="cancellationToken"/> is cancelled.
@@ -112,6 +123,9 @@ internal static partial class ModShelfMcpServer
             ActivatorUtilities.CreateInstance<StatusTools>(services),
         ];
 
+        // The output schemas list every property as required, null allowed where it's optional; the SDK's own options
+        // leave nulls out of the results, which clients that check results against the schemas refuse.
+        McpServerToolCreateOptions options = new() { SerializerOptions = Json };
         McpServerPrimitiveCollection<McpServerTool> tools = [];
         foreach (object target in targets)
         {
@@ -119,7 +133,7 @@ internal static partial class ModShelfMcpServer
             {
                 if (method.GetCustomAttribute<McpServerToolAttribute>() is not null)
                 {
-                    tools.Add(McpServerTool.Create(method, target));
+                    tools.Add(McpServerTool.Create(method, target, options));
                 }
             }
         }

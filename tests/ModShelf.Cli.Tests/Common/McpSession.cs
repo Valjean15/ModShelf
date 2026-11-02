@@ -14,7 +14,8 @@ namespace ModShelf.Cli.Tests.Common;
 
 /// <summary>
 /// <c>mcp</c> running in this process, with an MCP client connected to its standard input and output, as an agent's
-/// app connects to it: the client's messages go down one pipe, the server's come back up another.
+/// app connects to it: the client's messages go down one pipe, the server's come back up another. Each result is
+/// checked against its tool's output schema, as some clients check it.
 /// </summary>
 internal sealed class McpSession : IAsyncDisposable
 {
@@ -24,6 +25,7 @@ internal sealed class McpSession : IAsyncDisposable
     private readonly Pipe _fromServer = new();
     private readonly CliRun _run;
     private McpClient? _client;
+    private Dictionary<string, JsonNode>? _outputSchemas;
 
     private McpSession(Func<bool, IHost> buildHost)
     {
@@ -64,6 +66,12 @@ internal sealed class McpSession : IAsyncDisposable
 
         JsonNode content = JsonSerializer.SerializeToNode(result.StructuredContent, McpJsonUtilities.DefaultOptions)
             ?? throw new InvalidOperationException($"{tool} gave no structured content.");
+
+        // As clients that check results do.
+        _outputSchemas ??= (await Client.ListToolsAsync(cancellationToken: cancellationToken).ConfigureAwait(false))
+            .ToDictionary(listed => listed.Name, listed => JsonSerializer.SerializeToNode(listed.ProtocolTool.OutputSchema, McpJsonUtilities.DefaultOptions)!);
+        Assert.Empty(OutputSchemas.Problems(content, _outputSchemas[tool]));
+
         return content.Deserialize<T>(McpJsonUtilities.DefaultOptions) ?? throw new InvalidOperationException($"{tool} gave null.");
     }
 
