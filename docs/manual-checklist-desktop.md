@@ -112,9 +112,9 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
 ## 5. Download through the website (free only)
 
 - [ ] **5.1 It waits for you.** On SMAPI's page in Browse, **Download** on its main file. Open the Downloads screen.
-  The download says "Waiting for you: start the download on Nexus Mods, then paste the link it hands over", with **Open on Nexus Mods** and **Paste link…**. The Downloads screen's badge counts 1.
-- [ ] **5.2 The page.** **Open on Nexus Mods**.
-  The file's page opens on the Files tab.
+  The download says "Waiting for you: start the download on Nexus Mods, then paste the link it hands over", with **Open on Nexus Mods** and **Paste link…**. Above the list, "1 file waits for you on Nexus Mods. …" with **Open the next page**; the line under the heading says "1 waiting for you", and the "Waiting for you" tab counts 1. The Downloads screen's badge counts 1.
+- [ ] **5.2 The page.** **Open on Nexus Mods**, then **Open the next page**.
+  Each opens the file's page on the Files tab.
 - [ ] **5.3 Not a link.** **Paste link…**, type `hello`, and **Continue**.
   "That isn't a link. Copy the link the download button on Nexus Mods holds, and paste that."
 - [ ] **5.4 The link.** On the website, start the file's download with the download for mod managers (on the "Slow download" page, the button's link). Copy the `nxm://` link it holds (right-click, copy link), then **Paste link…**, paste it, and **Continue**.
@@ -145,6 +145,8 @@ Use a file of a few hundred MB: for example a texture pack's main file. Copy its
   The download goes on from where it was, and ends "Done".
 - [ ] **7.4 Cancel.** Start another large file, and **Cancel** halfway.
   "Stop this download for good?" **Stop and delete**: "Cancelled", and the `.part` file is gone. **Clear finished** takes the done and cancelled downloads off the list; their files stay.
+- [ ] **7.5 The summary and tabs.** Start a large file and **Pause** it; start another and let it run.
+  The line under the heading says "1 downloading at *speed*, 1 paused", then "1 paused" once the second is done. "Under way" counts and shows the paused one, "Finished" the done ones, and "Failed" says "No downloads here." when none failed. **All** shows every download again. Cancel the paused one.
 
 ## 8. Updates
 
@@ -153,17 +155,17 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
 - [ ] **8.1 An old version.** In Browse, paste `https://www.nexusmods.com/stardewvalley/mods/1915` into the search box and **Search**. **Show … more files**, then **Download** on one of the newest old versions. On the free account, start it on the website and paste the link as in 5.4.
   The Library lists Content Patcher, watched, with that file.
 - [ ] **8.2 Check now.** Open the Updates screen, and **Check now**.
-  "Checked *N* mods with *N* requests. 1 new update." Content Patcher's newest main file is listed: its version, "Uploaded …", and "Replaces …" the old version. The Updates screen's badge counts 1.
+  "Checked *N* mods with *N* requests. 1 new update." The line under the heading says "1 update for 1 mod · checked just now, next in 6 hours" (the default interval). Under "Stardew Valley", "1 update" and **Update all (1)**: Content Patcher, its change of version in a blue tag ("*old* → *new*"), its file's name, "Uploaded …", and "Replaces …" the old version. The Updates screen's badge counts 1.
 - [ ] **8.2a The update on the mod's page.** Open Content Patcher's page from the Library screen.
   In "Files on Nexus Mods", its newest main file says "Update for your *version*" in a tag, and its **Download** is the blue one.
 - [ ] **8.2b What it needs.** "Requirements" on Content Patcher's page.
   "SMAPI - Stardew Modding API", "In library" (from 4.1), and **Open**, which opens SMAPI's page in its place, from the top. Under the list: installing them is up to your mod manager. SMAPI's own page has no "Requirements".
 - [ ] **8.2c A game's mods.** On the Library screen, open Stardew Valley.
-  Content Patcher says "Update to *version*" in a blue tag, and the heading counts "1 update". "Has an update 1" shows Content Patcher alone; with "Watched" on too, still it; both off, both mods. Rename SMAPI's file in its folder, then go back to the games and open Stardew Valley again: "Missing files 1", and SMAPI says "1 file missing" in an orange tag (name the file back, and open the game again). "pathos" in the filter finds Pathoschild's mods by author. "Sort" by **Updates first**, **Updated on site**, **Size** and **Added to library** reorders them, and **Name** puts them back. With the window narrow, each mod's version, files and size go under its author, and the "Your version", "Files", "Size" and "Updated on site" columns go.
-- [ ] **8.3 Changes.** **Changes** on the update.
-  Its version's entry in Content Patcher's changelog, or "The changelog says nothing about this version."
-- [ ] **8.4 Download the update.** **Download** on the update (on the free account, start it on the website and paste the link).
-  "Downloading into …", Content Patcher's folder. Once done, the update leaves the list and the badge goes. The Library's Content Patcher has both files: the default rule keeps the newest 2 versions.
+  Content Patcher says "Update to *version*" in a blue tag, and the heading counts "1 update", with **Update all (1)** beside **Rescan**. "Has an update 1" shows Content Patcher alone; with "Watched" on too, still it; both off, both mods. Rename SMAPI's file in its folder, then go back to the games and open Stardew Valley again: "Missing files 1", and SMAPI says "1 file missing" in an orange tag (name the file back, and open the game again). "pathos" in the filter finds Pathoschild's mods by author. "Sort" by **Updates first**, **Updated on site**, **Size** and **Added to library** reorders them, and **Name** puts them back. With the window narrow, each mod's version, files and size go under its author, and the "Your version", "Files", "Size" and "Updated on site" columns go.
+- [ ] **8.3 Changes.** Look under the update, without clicking anything.
+  "What changed in *version*" and its entry in Content Patcher's changelog, or "The changelog says nothing about this version." Going to another screen and back doesn't read it again (the log has no new request).
+- [ ] **8.4 Download the update.** **Update all (1)** at the top of the Updates screen.
+  "Downloading into …", Content Patcher's folder, under the update. On the free account, the Downloads screen says "1 file waits for you on Nexus Mods. …": **Open the next page** opens the file's page; start it there and paste the link as in 5.4. Once done, the update leaves the list and the badge goes. The Library's Content Patcher has both files: the default rule keeps the newest 2 versions.
 
 ## 9. Watch and track
 
@@ -332,6 +334,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 7.2 Resume | | | |
 | 7.3 Quit halfway | | – | |
 | 7.4 Cancel | | | |
+| 7.5 The summary and tabs | | | |
 | 8.1 An old version | | | |
 | 8.2 Check now | | | |
 | 8.2a The update on the mod's page | | | |
