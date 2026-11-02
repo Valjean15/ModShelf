@@ -102,7 +102,6 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
   "Delete this file?" **Delete**: the file is gone from SMAPI's folder, and SMAPI shows 1 file.
 - [ ] **4.6 Pictures in the library.** On the Library screen, look at SMAPI with **Thumbnails**, the default, then **Cards**.
   A thumbnail of SMAPI's picture beside its name; then a card with the picture, its name, its **…** menu, "Watched for updates" and "1 file", under Stardew Valley's heading. The test folder now has a `pictures` folder, beside `library.db`, with files named by long hexadecimal names. With the network off, closing and starting the app shows the same pictures.
-
 - [ ] **4.7 A library mod's page.** Click SMAPI's name on the Library screen (or **Open** in its **…** menu).
   The page opens in place of the list, under "Library › Stardew Valley › SMAPI", with the previews at the end of that line. "Your files": SMAPI's folder, then the file with "Main", its name, size, "Downloaded *today*" and its SHA-256 shortened to its ends; the copy button beside it puts the whole SHA-256 on the clipboard. **Open folder** opens SMAPI's folder. In "Files on Nexus Mods", the downloaded file says "In the library" instead of **Download**. "Details" adds "In the library since *today*" and "Last checked". **Rescan** and **Remove from library…** are under the name. **Library** or **Stardew Valley** in the line at the top goes back to the list.
 - [ ] **4.8 A file missing from disk.** Rename SMAPI's file in its folder, then open SMAPI's page again.
@@ -157,6 +156,8 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
   "Checked *N* mods with *N* requests. 1 new update." Content Patcher's newest main file is listed: its version, "Uploaded …", and "Replaces …" the old version. The Updates screen's badge counts 1.
 - [ ] **8.2a The update on the mod's page.** Open Content Patcher's page from the Library screen.
   In "Files on Nexus Mods", its newest main file says "Update for your *version*" in a tag, and its **Download** is the blue one.
+- [ ] **8.2b What it needs.** "Requirements" on Content Patcher's page.
+  "SMAPI - Stardew Modding API", "In library" (from 4.1), and **Open**, which opens SMAPI's page in its place, from the top. Under the list: installing them is up to your mod manager. SMAPI's own page has no "Requirements".
 - [ ] **8.3 Changes.** **Changes** on the update.
   Its version's entry in Content Patcher's changelog, or "The changelog says nothing about this version."
 - [ ] **8.4 Download the update.** **Download** on the update (on the free account, start it on the website and paste the link).
@@ -330,6 +331,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 8.1 An old version | | | |
 | 8.2 Check now | | | |
 | 8.2a The update on the mod's page | | | |
+| 8.2b What it needs | | | |
 | 8.3 Changes | | | |
 | 8.4 Download the update | | | |
 | 9.1 Unwatch | | | |
