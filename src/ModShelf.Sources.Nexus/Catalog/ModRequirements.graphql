@@ -1,6 +1,6 @@
-# What mods need, from the v2 API, by game and ID: other mods on Nexus Mods and things elsewhere. The fields are the ones
-# the recorded schema lists; DLC are left out until their type is recorded. Not used by the source yet: the recording
-# script reads this file, so the recorded answers are to this exact query, and step 8b builds on them.
+# What a mod needs, for the Nexus source's IModRequirements, from the v2 API, by its game and ID: other mods on Nexus
+# Mods, named by their game's number, and things elsewhere. DLC are left out until their type is recorded. The recording
+# script reads this file too, so the recorded answers are to this exact query.
 query ModRequirements($ids: [CompositeDomainWithIdInput!]!) {
   legacyModsByDomain(ids: $ids) {
     nodes {

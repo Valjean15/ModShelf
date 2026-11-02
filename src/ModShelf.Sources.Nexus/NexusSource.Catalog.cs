@@ -35,10 +35,16 @@ public sealed partial class NexusSource : IModCatalog
         {
             if (NexusLink.GameFromApi(game?.DomainName) is { } domain && listed.Add(domain))
             {
-                games.Add(ToGameInfo(new GameRef(NexusId, domain), domain, game!));
+                if (game!.Id is { } number)
+                {
+                    _gameDomains[number] = domain;
+                }
+
+                games.Add(ToGameInfo(new GameRef(NexusId, domain), domain, game));
             }
         }
 
+        _gamesListed = true;
         return games;
     }
 
@@ -255,10 +261,15 @@ public sealed partial class NexusSource : IModCatalog
     }
 
     /// <summary>
-    /// Keeps what a read of the game says that its mods need: its categories' names.
+    /// Keeps what a read of the game says that its mods need: its categories' names, and its number.
     /// </summary>
     private FrozenDictionary<long, string> Remember(string domain, NexusGame game)
     {
+        if (game.Id is { } number)
+        {
+            _gameDomains[number] = domain;
+        }
+
         FrozenDictionary<long, string> names = CategoriesOf(game);
         _categories[domain] = names;
         return names;

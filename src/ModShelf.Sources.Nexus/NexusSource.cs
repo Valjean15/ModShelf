@@ -25,6 +25,12 @@ public sealed partial class NexusSource : IAccountLinker
     // Each game's mod categories by ID, once read: they rarely change, and a mod names only its category's ID.
     private readonly ConcurrentDictionary<string, IReadOnlyDictionary<long, string>> _categories = new(StringComparer.Ordinal);
 
+    // Games' domain names by number, as each read of a game or of the list says: mods' requirements name games by number.
+    private readonly ConcurrentDictionary<long, string> _gameDomains = new();
+
+    // Whether the list of games was read while the app runs, so a requirement of a game not yet read can be named.
+    private volatile bool _gamesListed;
+
     /// <param name="strategies">The ways to link an account, in the order to offer them.</param>
     /// <param name="quota">The account's rate limit, as the API client's last response reported it.</param>
     internal NexusSource(NexusApiClient api, IReadOnlyList<IAuthStrategy> strategies, NexusQuota quota, TimeProvider timeProvider)
