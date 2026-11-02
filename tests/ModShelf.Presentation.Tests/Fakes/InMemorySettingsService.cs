@@ -102,6 +102,25 @@ internal sealed class InMemorySettingsService : ISettingsService
     public Task SetCheckForAppUpdatesAsync(bool? check, CancellationToken cancellationToken)
         => ChangeAsync($"checkForAppUpdates {check?.ToString() ?? "null"}", settings => settings with { CheckForAppUpdates = check });
 
+    public Task SetPreviewAsync(PreviewScreen screen, PreviewLevel? level, CancellationToken cancellationToken)
+        => ChangeAsync(
+            $"preview {screen} {level?.ToString() ?? "null"}",
+            settings => settings with
+            {
+                Previews = level is { } set
+                    ? settings.Previews.ToImmutableDictionary().SetItem(screen, set)
+                    : settings.Previews.ToImmutableDictionary().Remove(screen),
+            });
+
+    public Task SetPicturesMegabytesAsync(int? megabytes, CancellationToken cancellationToken)
+        => ChangeAsync($"picturesMegabytes {megabytes?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "null"}", settings => settings with { PicturesMegabytes = megabytes });
+
+    public Task SetDetailsMaxAgeAsync(TimeSpan? age, CancellationToken cancellationToken)
+        => ChangeAsync($"detailsMaxAge {age?.ToString() ?? "null"}", settings => settings with { DetailsMaxAge = age });
+
+    public Task SetAdultPicturesAsync(AdultPictures? pictures, CancellationToken cancellationToken)
+        => ChangeAsync($"adultPictures {pictures?.ToString() ?? "null"}", settings => settings with { AdultPictures = pictures });
+
     private async Task ChangeAsync(string change, Func<AppSettings, AppSettings> apply)
     {
         lock (_gate)

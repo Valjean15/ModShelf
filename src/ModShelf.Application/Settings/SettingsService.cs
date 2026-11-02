@@ -129,6 +129,63 @@ internal sealed class SettingsService : ISettingsService, IDisposable
     public Task SetCheckForAppUpdatesAsync(bool? check, CancellationToken cancellationToken)
         => ChangeAsync((settings, _) => Task.FromResult(settings with { CheckForAppUpdates = check }), cancellationToken);
 
+    public Task SetPreviewAsync(PreviewScreen screen, PreviewLevel? level, CancellationToken cancellationToken)
+    {
+        if (!Enum.IsDefined(screen))
+        {
+            throw new ArgumentOutOfRangeException(nameof(screen), screen, "The screen must be Library, Updates, Browse or Downloads.");
+        }
+
+        if (level is { } value && !Enum.IsDefined(value))
+        {
+            throw new ArgumentOutOfRangeException(nameof(level), value, "The previews must be Off, Thumbnails or Cards.");
+        }
+
+        return ChangeAsync(
+            (settings, _) =>
+            {
+                ImmutableDictionary<PreviewScreen, PreviewLevel> previews = settings.Previews.ToImmutableDictionary();
+                return Task.FromResult(settings with { Previews = level is { } set ? previews.SetItem(screen, set) : previews.Remove(screen) });
+            },
+            cancellationToken);
+    }
+
+    public Task SetPicturesMegabytesAsync(int? megabytes, CancellationToken cancellationToken)
+    {
+        if (megabytes is < AppSettings.MinPicturesMegabytes or > AppSettings.MaxPicturesMegabytes)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(megabytes),
+                megabytes,
+                $"Saved pictures can take from {AppSettings.MinPicturesMegabytes} to {AppSettings.MaxPicturesMegabytes} MB.");
+        }
+
+        return ChangeAsync((settings, _) => Task.FromResult(settings with { PicturesMegabytes = megabytes }), cancellationToken);
+    }
+
+    public Task SetDetailsMaxAgeAsync(TimeSpan? age, CancellationToken cancellationToken)
+    {
+        if (age is { } value && (value < UpdateInterval.Minimum || value > UpdateInterval.Maximum))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(age),
+                value,
+                $"Mod details can be kept from {UpdateInterval.Format(UpdateInterval.Minimum)} to {UpdateInterval.Format(UpdateInterval.Maximum)}.");
+        }
+
+        return ChangeAsync((settings, _) => Task.FromResult(settings with { DetailsMaxAge = age }), cancellationToken);
+    }
+
+    public Task SetAdultPicturesAsync(AdultPictures? pictures, CancellationToken cancellationToken)
+    {
+        if (pictures is { } value && !Enum.IsDefined(value))
+        {
+            throw new ArgumentOutOfRangeException(nameof(pictures), value, "Adult pictures must be Hidden, Blurred or Shown.");
+        }
+
+        return ChangeAsync((settings, _) => Task.FromResult(settings with { AdultPictures = pictures }), cancellationToken);
+    }
+
     public void Dispose() => _changing.Dispose();
 
     /// <summary>

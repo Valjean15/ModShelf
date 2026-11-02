@@ -25,7 +25,10 @@ namespace ModShelf.Infrastructure.Settings;
 ///   "appearance": { "theme": "dark" },
 ///   "window": { "closeToTray": true },
 ///   "setup": { "done": true },
-///   "app": { "checkForUpdates": false }
+///   "app": { "checkForUpdates": false },
+///   "previews": { "library": "cards", "updates": "thumbnails" },
+///   "pictures": { "maxSize": 1024, "adult": "hidden" },
+///   "details": { "maxAge": "7d" }
 /// }
 /// </code>
 /// </summary>
@@ -51,6 +54,12 @@ internal sealed class JsonSettingsStore : ISettingsStore
     private const string Done = "done";
     private const string App = "app";
     private const string CheckForUpdates = "checkForUpdates";
+    private const string Previews = "previews";
+    private const string Pictures = "pictures";
+    private const string MaxSize = "maxSize";
+    private const string Adult = "adult";
+    private const string Details = "details";
+    private const string MaxAge = "maxAge";
 
     private static readonly JsonDocumentOptions Reading = new() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
     private static readonly JsonSerializerOptions Writing = new() { WriteIndented = true };
@@ -83,6 +92,9 @@ internal sealed class JsonSettingsStore : ISettingsStore
         JsonObject window = file?[Window] as JsonObject ?? [];
         JsonObject setup = file?[Setup] as JsonObject ?? [];
         JsonObject app = file?[App] as JsonObject ?? [];
+        JsonObject previews = file?[Previews] as JsonObject ?? [];
+        JsonObject pictures = file?[Pictures] as JsonObject ?? [];
+        JsonObject details = file?[Details] as JsonObject ?? [];
         try
         {
             string? root = Text(library, Root);
@@ -115,6 +127,12 @@ internal sealed class JsonSettingsStore : ISettingsStore
                 Theme = Text(appearance, Theme, Appearance) is { } theme
                     ? ThemeNamed(theme) ?? throw new InvalidDataException($"{Appearance}.{Theme} must be system, light or dark.")
                     : null,
+                Previews = ReadPreviews(previews),
+                PicturesMegabytes = ReadMegabytes(pictures),
+                AdultPictures = Text(pictures, Adult, Pictures) is { } adult
+                    ? Named<AdultPictures>(adult) ?? throw new InvalidDataException($"{Pictures}.{Adult} must be hidden, blurred or shown.")
+                    : null,
+                DetailsMaxAge = Text(details, MaxAge, Details) is { } age ? UpdateInterval.Parse(age) : null,
             };
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or InvalidDataException or FormatException)
@@ -247,6 +265,32 @@ internal sealed class JsonSettingsStore : ISettingsStore
             file[App] = appSection;
         }
 
+        // Each screen's previews by name; a screen this version doesn't know stays as it is.
+        JsonObject previewsSection = file[Previews] as JsonObject ?? [];
+        foreach (PreviewScreen screen in Enum.GetValues<PreviewScreen>())
+        {
+            Set(previewsSection, Name(screen), settings.Previews.TryGetValue(screen, out PreviewLevel level) ? Name(level) : null);
+        }
+
+        Keep(file, Previews, previewsSection);
+
+        JsonObject picturesSection = file[Pictures] as JsonObject ?? [];
+        if (settings.PicturesMegabytes is { } megabytes)
+        {
+            picturesSection[MaxSize] = megabytes;
+        }
+        else
+        {
+            picturesSection.Remove(MaxSize);
+        }
+
+        Set(picturesSection, Adult, settings.AdultPictures is { } adultPictures ? Name(adultPictures) : null);
+        Keep(file, Pictures, picturesSection);
+
+        JsonObject detailsSection = file[Details] as JsonObject ?? [];
+        Set(detailsSection, MaxAge, settings.DetailsMaxAge is { } maxAge ? UpdateInterval.Format(maxAge) : null);
+        Keep(file, Details, detailsSection);
+
         JsonObject appearanceSection = file[Appearance] as JsonObject ?? [];
         Set(appearanceSection, Theme, settings.Theme is { } theme ? ThemeName(theme) : null);
         if (appearanceSection.Count == 0)
@@ -333,6 +377,60 @@ internal sealed class JsonSettingsStore : ISettingsStore
     /// <returns>The theme named, in any case; null for a name that's none.</returns>
     private static AppTheme? ThemeNamed(string name)
         => Enum.GetValues<AppTheme>().Cast<AppTheme?>().FirstOrDefault(theme => string.Equals(ThemeName(theme!.Value), name.Trim(), StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>
+    /// A value of an enum as the file names it: in lower case, such as thumbnails.
+    /// </summary>
+    private static string Name<T>(T value) where T : struct, Enum => value.ToString().ToLowerInvariant();
+
+    /// <returns>The value named, in any case; null for a name that's none.</returns>
+    private static T? Named<T>(string name) where T : struct, Enum
+        => Enum.GetValues<T>().Cast<T?>().FirstOrDefault(value => string.Equals(Name(value!.Value), name.Trim(), StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>
+    /// Each screen's previews; a screen this version doesn't know is left out.
+    /// </summary>
+    private static ImmutableDictionary<PreviewScreen, PreviewLevel> ReadPreviews(JsonObject previews)
+    {
+        ImmutableDictionary<PreviewScreen, PreviewLevel>.Builder levels = ImmutableDictionary.CreateBuilder<PreviewScreen, PreviewLevel>();
+        foreach ((string name, _) in previews)
+        {
+            if (Named<PreviewScreen>(name) is { } screen && Text(previews, name, Previews) is { } level)
+            {
+                levels[screen] = Named<PreviewLevel>(level)
+                    ?? throw new InvalidDataException($"{Previews}.{name} must be off, thumbnails or cards.");
+            }
+        }
+
+        return levels.ToImmutable();
+    }
+
+    /// <summary>
+    /// The room saved pictures take, a whole number of megabytes within the limits.
+    /// </summary>
+    private static int? ReadMegabytes(JsonObject pictures) => pictures[MaxSize] switch
+    {
+        null => null,
+        JsonValue value when value.TryGetValue(out int megabytes)
+            && megabytes is >= AppSettings.MinPicturesMegabytes and <= AppSettings.MaxPicturesMegabytes => megabytes,
+        _ => throw new InvalidDataException(
+            $"{Pictures}.{MaxSize} must be a number of megabytes from {AppSettings.MinPicturesMegabytes} to {AppSettings.MaxPicturesMegabytes}."),
+    };
+
+    /// <summary>
+    /// Puts a section in the file, or takes it out when it's empty.
+    /// </summary>
+    private static void Keep(JsonObject file, string name, JsonObject section)
+    {
+        if (section.Count == 0)
+        {
+            file.Remove(name);
+        }
+        else
+        {
+            file[name] = section;
+        }
+    }
 
     /// <summary>
     /// The rule for old versions: a count, or text as <see cref="OldVersionRule.Parse"/> reads it.

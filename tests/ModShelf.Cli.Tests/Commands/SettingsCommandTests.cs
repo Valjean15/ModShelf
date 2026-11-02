@@ -22,6 +22,8 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     private const int Failed = 1;
     private const int BadInput = 2;
 
+    private static readonly string[] PreviewScreens = ["library", "updates", "browse", "downloads"];
+
     private readonly FakeAccountSite _site = new();
     private readonly ScriptedBrowser _browser = new();
     private readonly InProcessCli _cli;
@@ -60,6 +62,12 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         Assert.Equal("ask (default)", Value(shown, "window.closeToTray"));
         Assert.Equal("false (default)", Value(shown, "setup.done"));
         Assert.Equal("true (default)", Value(shown, "app.checkForUpdates"));
+        Assert.Equal(
+            ["thumbnails (default)", "off (default)", "cards (default)", "off (default)"],
+            PreviewScreens.Select(screen => Value(shown, "previews." + screen)));
+        Assert.Equal("512 (default)", Value(shown, "pictures.maxSize"));
+        Assert.Equal("blurred (default)", Value(shown, "pictures.adult"));
+        Assert.Equal("1d (default)", Value(shown, "details.maxAge"));
         Assert.Contains("To change a setting: settings set <setting> <value>", shown.Output, StringComparison.Ordinal);
     }
 
@@ -137,11 +145,17 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     [InlineData("set", "library.root", "Mods", "isn't a full path")]
     [InlineData("set", "library.folders", "{mod}", "The last part must be exactly {file}.")]
     [InlineData("set", "library.folders.skyrimspecialedition", "{name}/{file}", "{name} isn't a folder's part.")]
-    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<game>, library.oldVersions, updates.interval, updates.notify, appearance.theme, window.closeToTray, setup.done, app.checkForUpdates.")]
+    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<game>, library.oldVersions, updates.interval, updates.notify, appearance.theme, window.closeToTray, setup.done, app.checkForUpdates, previews.library, previews.updates, previews.browse, previews.downloads, pictures.maxSize, pictures.adult, details.maxAge.")]
     [InlineData("reset", "library.folders.", null, "There's no setting called library.folders.")]
     [InlineData("set", "library.oldVersions", "0", "'0' isn't a rule for old versions. Use all, archive, or how many versions to keep, from 1 to 99, such as 2.")]
     [InlineData("set", "appearance.theme", "blue", "'blue' isn't system, light or dark.")]
     [InlineData("set", "window.closeToTray", "yes", "'yes' isn't true or false.")]
+    [InlineData("set", "previews.library", "big", "'big' isn't off, thumbnails or cards.")]
+    [InlineData("set", "previews.history", "cards", "There's no setting called previews.history.")]
+    [InlineData("set", "pictures.maxSize", "10", "'10' isn't a number of megabytes from 64 to 8192.")]
+    [InlineData("set", "pictures.maxSize", "1GB", "'1GB' isn't a number of megabytes from 64 to 8192.")]
+    [InlineData("set", "pictures.adult", "maybe", "'maybe' isn't hidden, blurred or shown.")]
+    [InlineData("set", "details.maxAge", "8d", "'8d' isn't an interval.")]
     public async Task SaysWhatsWrongWithASetting(string command, string name, string? value, string message)
     {
         CliResult refused = await RunAsync([command, name, .. value is null ? Array.Empty<string>() : [value]]);
@@ -167,6 +181,47 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         Assert.Equal(Done, reset.ExitCode);
         Assert.Equal("appearance.theme is back to its default, system: the desktop app is light or dark as the system is.", reset.Output.Trim());
         Assert.Equal("system (default)", Value(await RunAsync("show"), "appearance.theme"));
+    }
+
+    [Fact]
+    public async Task SetsAScreensPreviewsAndResetsThem()
+    {
+        CliResult set = await RunAsync("set", "Previews.Library", " Cards ");
+        string file = await File.ReadAllTextAsync(SettingsFile, Cancellation);
+        string shownSet = Value(await RunAsync("show"), "previews.library");
+        CliResult reset = await RunAsync("reset", "previews.library");
+
+        Assert.Equal(Done, set.ExitCode);
+        Assert.Equal("previews.library is now cards: the desktop app's Library screen shows its mods as cards, with large pictures.", set.Output.Trim());
+        Assert.Contains("\"library\": \"cards\"", file, StringComparison.Ordinal);
+        Assert.Equal("cards", shownSet);
+        Assert.Equal("previews.library is back to its default, thumbnails: the desktop app's Library screen shows a small picture at the start of each row.", reset.Output.Trim());
+        Assert.Equal("thumbnails (default)", Value(await RunAsync("show"), "previews.library"));
+    }
+
+    [Fact]
+    public async Task SetsThePicturesRoomAdultPicturesAndTheDetailsAgeAndResetsThem()
+    {
+        CliResult size = await RunAsync("set", "pictures.maxSize", "1024");
+        CliResult adult = await RunAsync("set", "pictures.adult", "hidden");
+        CliResult age = await RunAsync("set", "details.maxAge", "7d");
+        string file = await File.ReadAllTextAsync(SettingsFile, Cancellation);
+        CliResult sizeReset = await RunAsync("reset", "pictures.maxSize");
+        CliResult adultReset = await RunAsync("reset", "pictures.adult");
+        CliResult ageReset = await RunAsync("reset", "details.maxAge");
+
+        Assert.Equal("pictures.maxSize is now 1024: saved pictures take at most 1024 MB, the oldest going first.", size.Output.Trim());
+        Assert.Equal("pictures.adult is now hidden: the desktop app shows no picture for mods with adult content.", adult.Output.Trim());
+        Assert.Equal("details.maxAge is now 7d: saved mod details are read from their site again once they're 7d old.", age.Output.Trim());
+        foreach (string written in new[] { "\"maxSize\": 1024", "\"adult\": \"hidden\"", "\"maxAge\": \"7d\"" })
+        {
+            Assert.Contains(written, file, StringComparison.Ordinal);
+        }
+
+        Assert.Equal("pictures.maxSize is back to its default, 512: saved pictures take at most 512 MB, the oldest going first.", sizeReset.Output.Trim());
+        Assert.Equal("pictures.adult is back to its default, blurred: the desktop app shows the pictures of mods with adult content blurred.", adultReset.Output.Trim());
+        Assert.Equal("details.maxAge is back to its default, 1d: saved mod details are read from their site again once they're 1d old.", ageReset.Output.Trim());
+        Assert.Equal("{}", (await File.ReadAllTextAsync(SettingsFile, Cancellation)).Trim());
     }
 
     [Fact]

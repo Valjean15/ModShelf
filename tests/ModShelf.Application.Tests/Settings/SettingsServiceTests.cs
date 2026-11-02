@@ -236,6 +236,80 @@ public sealed class SettingsServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task EachScreenShowsItsDefaultPreviewsUntilSet()
+    {
+        AppSettings settings = await _settings.GetAsync(Cancellation);
+
+        Assert.Equal(
+            [PreviewLevel.Thumbnails, PreviewLevel.Off, PreviewLevel.Cards, PreviewLevel.Off],
+            Enum.GetValues<PreviewScreen>().Select(settings.PreviewFor));
+    }
+
+    [Fact]
+    public async Task SetsAScreensPreviewsAndBackToItsDefault()
+    {
+        await _settings.SetPreviewAsync(PreviewScreen.Library, PreviewLevel.Cards, Cancellation);
+        await _settings.SetPreviewAsync(PreviewScreen.Downloads, PreviewLevel.Thumbnails, Cancellation);
+        AppSettings set = await _settings.GetAsync(Cancellation);
+
+        await _settings.SetPreviewAsync(PreviewScreen.Library, null, Cancellation);
+        AppSettings reset = await _settings.GetAsync(Cancellation);
+
+        Assert.Equal((PreviewLevel.Cards, PreviewLevel.Thumbnails), (set.PreviewFor(PreviewScreen.Library), set.PreviewFor(PreviewScreen.Downloads)));
+        Assert.Equal((PreviewLevel.Thumbnails, PreviewLevel.Thumbnails), (reset.PreviewFor(PreviewScreen.Library), reset.PreviewFor(PreviewScreen.Downloads)));
+        Assert.Equal([PreviewScreen.Downloads], reset.Previews.Keys);
+    }
+
+    [Fact]
+    public async Task RefusesPreviewsThatArentOnes()
+    {
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _settings.SetPreviewAsync((PreviewScreen)9, PreviewLevel.Off, Cancellation));
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _settings.SetPreviewAsync(PreviewScreen.Browse, (PreviewLevel)9, Cancellation));
+
+        Assert.Empty((await _settings.GetAsync(Cancellation)).Previews);
+    }
+
+    [Fact]
+    public async Task SetsThePicturesRoomTheDetailsAgeAndAdultPicturesAndBackToTheirDefaults()
+    {
+        await _settings.SetPicturesMegabytesAsync(AppSettings.MaxPicturesMegabytes, Cancellation);
+        await _settings.SetDetailsMaxAgeAsync(TimeSpan.FromDays(7), Cancellation);
+        await _settings.SetAdultPicturesAsync(AdultPictures.Hidden, Cancellation);
+        AppSettings set = await _settings.GetAsync(Cancellation);
+
+        await _settings.SetPicturesMegabytesAsync(null, Cancellation);
+        await _settings.SetDetailsMaxAgeAsync(null, Cancellation);
+        await _settings.SetAdultPicturesAsync(null, Cancellation);
+        AppSettings reset = await _settings.GetAsync(Cancellation);
+
+        Assert.Equal((AppSettings.MaxPicturesMegabytes, TimeSpan.FromDays(7), AdultPictures.Hidden), (set.PicturesMegabytes!.Value, set.DetailsMaxAge!.Value, set.AdultPictures!.Value));
+        Assert.Equal(((int?)null, (TimeSpan?)null, (AdultPictures?)null), (reset.PicturesMegabytes, reset.DetailsMaxAge, reset.AdultPictures));
+    }
+
+    [Theory]
+    [InlineData(AppSettings.MinPicturesMegabytes - 1)]
+    [InlineData(AppSettings.MaxPicturesMegabytes + 1)]
+    public async Task RefusesRoomForPicturesOutsideTheLimits(int megabytes)
+    {
+        await _settings.SetPicturesMegabytesAsync(AppSettings.MinPicturesMegabytes, Cancellation);
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _settings.SetPicturesMegabytesAsync(megabytes, Cancellation));
+
+        Assert.Equal(AppSettings.MinPicturesMegabytes, (await _settings.GetAsync(Cancellation)).PicturesMegabytes);
+    }
+
+    [Fact]
+    public async Task RefusesDetailsAgesOutsideTheLimitsAndAdultPicturesThatArentOnes()
+    {
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _settings.SetDetailsMaxAgeAsync(TimeSpan.FromMinutes(14), Cancellation));
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _settings.SetDetailsMaxAgeAsync(TimeSpan.FromDays(8), Cancellation));
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _settings.SetAdultPicturesAsync((AdultPictures)3, Cancellation));
+
+        AppSettings settings = await _settings.GetAsync(Cancellation);
+        Assert.Equal(((TimeSpan?)null, (AdultPictures?)null), (settings.DetailsMaxAge, settings.AdultPictures));
+    }
+
+    [Fact]
     public async Task RefusesAThemeThatIsntOne()
     {
         await _settings.SetThemeAsync(AppTheme.Light, Cancellation);

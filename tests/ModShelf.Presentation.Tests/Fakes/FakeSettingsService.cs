@@ -41,4 +41,12 @@ internal sealed class FakeSettingsService : ISettingsService
     public Task SetSetupDoneAsync(bool? done, CancellationToken cancellationToken) => throw new NotSupportedException();
 
     public Task SetCheckForAppUpdatesAsync(bool? check, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    public Task SetPreviewAsync(PreviewScreen screen, PreviewLevel? level, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    public Task SetPicturesMegabytesAsync(int? megabytes, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    public Task SetDetailsMaxAgeAsync(TimeSpan? age, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    public Task SetAdultPicturesAsync(AdultPictures? pictures, CancellationToken cancellationToken) => throw new NotSupportedException();
 }

@@ -90,4 +90,37 @@ public interface ISettingsService
     /// Sets whether the installed desktop app looks for a newer ModShelf when it starts, or sets it back to yes with null.
     /// </summary>
     Task SetCheckForAppUpdatesAsync(bool? check, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets the previews <paramref name="screen"/> shows, or sets it back to its default with null.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="screen"/> isn't a <see cref="PreviewScreen"/>, or <paramref name="level"/> isn't a <see cref="PreviewLevel"/>.
+    /// </exception>
+    Task SetPreviewAsync(PreviewScreen screen, PreviewLevel? level, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets the most room saved pictures take, in megabytes, or sets it back to
+    /// <see cref="AppSettings.DefaultPicturesMegabytes"/> with null. The oldest go when it's full.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="megabytes"/> is below <see cref="AppSettings.MinPicturesMegabytes"/> or above <see cref="AppSettings.MaxPicturesMegabytes"/>.
+    /// </exception>
+    Task SetPicturesMegabytesAsync(int? megabytes, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets how long saved mod details count as current, or sets it back to <see cref="AppSettings.DefaultDetailsMaxAge"/>
+    /// with null.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// The age is shorter than <see cref="UpdateInterval.Minimum"/> or longer than <see cref="UpdateInterval.Maximum"/>.
+    /// </exception>
+    Task SetDetailsMaxAgeAsync(TimeSpan? age, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets how the pictures of mods with adult content show, or sets it back to <see cref="AdultPictures.Blurred"/> with
+    /// null.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="pictures"/> isn't an <see cref="AdultPictures"/>.</exception>
+    Task SetAdultPicturesAsync(AdultPictures? pictures, CancellationToken cancellationToken);
 }

@@ -10,6 +10,26 @@ namespace ModShelf.Application.Settings;
 public sealed record AppSettings
 {
     /// <summary>
+    /// The most room saved pictures take when <see cref="PicturesMegabytes"/> isn't set.
+    /// </summary>
+    public const int DefaultPicturesMegabytes = 512;
+
+    /// <summary>
+    /// The least room saved pictures can be given, in megabytes.
+    /// </summary>
+    public const int MinPicturesMegabytes = 64;
+
+    /// <summary>
+    /// The most room saved pictures can be given, in megabytes.
+    /// </summary>
+    public const int MaxPicturesMegabytes = 8192;
+
+    /// <summary>
+    /// How long saved mod details count as current when <see cref="DetailsMaxAge"/> isn't set.
+    /// </summary>
+    public static TimeSpan DefaultDetailsMaxAge { get; } = TimeSpan.FromDays(1);
+
+    /// <summary>
     /// The library's root folder, as an absolute path; null for the default, a ModShelf folder in the user's Downloads
     /// folder.
     /// </summary>
@@ -64,6 +84,46 @@ public sealed record AppSettings
     /// Whether the installed desktop app looks for a newer ModShelf when it starts; null for yes.
     /// </summary>
     public bool? CheckForAppUpdates { get; init; }
+
+    /// <summary>
+    /// The previews each screen shows, by screen; a screen left out shows its default (<see cref="PreviewFor"/>).
+    /// </summary>
+    public IReadOnlyDictionary<PreviewScreen, PreviewLevel> Previews { get; init; }
+        = ImmutableDictionary<PreviewScreen, PreviewLevel>.Empty;
+
+    /// <summary>
+    /// The most room saved pictures take, in megabytes, before the oldest are dropped; null for
+    /// <see cref="DefaultPicturesMegabytes"/>.
+    /// </summary>
+    public int? PicturesMegabytes { get; init; }
+
+    /// <summary>
+    /// How long saved mod details count as current before they're read from the site again; null for
+    /// <see cref="DefaultDetailsMaxAge"/>.
+    /// </summary>
+    public TimeSpan? DetailsMaxAge { get; init; }
+
+    /// <summary>
+    /// How the pictures of mods with adult content show; null for <see cref="Settings.AdultPictures.Blurred"/>.
+    /// </summary>
+    public AdultPictures? AdultPictures { get; init; }
+
+    /// <summary>
+    /// The previews <paramref name="screen"/> shows: as set, or its default, thumbnails on the Library screen, cards on
+    /// Browse, and none on the others.
+    /// </summary>
+    public PreviewLevel PreviewFor(PreviewScreen screen)
+        => Previews.TryGetValue(screen, out PreviewLevel level) ? level : DefaultPreview(screen);
+
+    /// <summary>
+    /// The previews <paramref name="screen"/> shows when it's not set.
+    /// </summary>
+    public static PreviewLevel DefaultPreview(PreviewScreen screen) => screen switch
+    {
+        PreviewScreen.Library => PreviewLevel.Thumbnails,
+        PreviewScreen.Browse => PreviewLevel.Cards,
+        _ => PreviewLevel.Off,
+    };
 
     /// <summary>
     /// The pattern files of <paramref name="game"/> go by.

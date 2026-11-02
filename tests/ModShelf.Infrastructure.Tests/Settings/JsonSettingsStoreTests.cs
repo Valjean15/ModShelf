@@ -351,6 +351,81 @@ public sealed class JsonSettingsStoreTests : IDisposable
         Assert.StartsWith($"The settings in {FilePath} can't be read: {message}", refused.Message, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task KeepsThePreviewsThePicturesAndTheDetails()
+    {
+        // A screen this version doesn't know, and a setting of a newer one, stay.
+        await WriteAsync("""{ "previews": { "history": "cards" }, "pictures": { "format": "webp" } }""");
+        AppSettings settings = new()
+        {
+            Previews = ImmutableDictionary<PreviewScreen, PreviewLevel>.Empty
+                .Add(PreviewScreen.Library, PreviewLevel.Cards)
+                .Add(PreviewScreen.Downloads, PreviewLevel.Thumbnails),
+            PicturesMegabytes = 1024,
+            AdultPictures = AdultPictures.Hidden,
+            DetailsMaxAge = TimeSpan.FromDays(7),
+        };
+
+        await Store().SaveAsync(settings, Cancellation);
+
+        AppSettings loaded = await Store().LoadAsync(Cancellation);
+        Assert.Equal(settings.Previews.OrderBy(entry => entry.Key), loaded.Previews.OrderBy(entry => entry.Key));
+        Assert.Equal((1024, AdultPictures.Hidden, TimeSpan.FromDays(7)), (loaded.PicturesMegabytes!.Value, loaded.AdultPictures!.Value, loaded.DetailsMaxAge!.Value));
+        string file = await File.ReadAllTextAsync(FilePath, Cancellation);
+        foreach (string written in new[] { "\"library\": \"cards\"", "\"downloads\": \"thumbnails\"", "\"history\": \"cards\"", "\"maxSize\": 1024", "\"adult\": \"hidden\"", "\"format\": \"webp\"", "\"maxAge\": \"7d\"" })
+        {
+            Assert.Contains(written, file, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
+    public async Task ThePreviewsPicturesAndDetailsDefaultsLeaveTheFile()
+    {
+        await Store().SaveAsync(
+            new AppSettings
+            {
+                Previews = ImmutableDictionary<PreviewScreen, PreviewLevel>.Empty.Add(PreviewScreen.Browse, PreviewLevel.Off),
+                PicturesMegabytes = 256,
+                AdultPictures = AdultPictures.Shown,
+                DetailsMaxAge = TimeSpan.FromHours(6),
+            },
+            Cancellation);
+
+        await Store().SaveAsync(new AppSettings(), Cancellation);
+
+        AppSettings loaded = await Store().LoadAsync(Cancellation);
+        Assert.Empty(loaded.Previews);
+        Assert.Equal(((int?)null, (AdultPictures?)null, (TimeSpan?)null), (loaded.PicturesMegabytes, loaded.AdultPictures, loaded.DetailsMaxAge));
+        Assert.Equal("{}", (await File.ReadAllTextAsync(FilePath, Cancellation)).Trim());
+    }
+
+    [Fact]
+    public async Task ReadsPreviewsAndAdultPicturesWrittenByHandInAnyCase()
+    {
+        await WriteAsync("""{ "previews": { "Updates": " THUMBNAILS " }, "pictures": { "adult": "Blurred" } }""");
+
+        AppSettings loaded = await Store().LoadAsync(Cancellation);
+
+        Assert.Equal(PreviewLevel.Thumbnails, loaded.PreviewFor(PreviewScreen.Updates));
+        Assert.Equal(AdultPictures.Blurred, loaded.AdultPictures);
+    }
+
+    [Theory]
+    [InlineData("""{ "previews": { "library": "big" } }""", "previews.library must be off, thumbnails or cards.")]
+    [InlineData("""{ "previews": { "browse": 2 } }""", "previews.browse must be text.")]
+    [InlineData("""{ "pictures": { "maxSize": 63 } }""", "pictures.maxSize must be a number of megabytes from 64 to 8192.")]
+    [InlineData("""{ "pictures": { "maxSize": "512" } }""", "pictures.maxSize must be a number of megabytes from 64 to 8192.")]
+    [InlineData("""{ "pictures": { "adult": "maybe" } }""", "pictures.adult must be hidden, blurred or shown.")]
+    [InlineData("""{ "details": { "maxAge": "a year" } }""", "'a year' isn't an interval.")]
+    public async Task SaysWhenAPreviewPictureOrDetailsSettingIsWrong(string content, string message)
+    {
+        await WriteAsync(content);
+
+        InvalidDataException refused = await Assert.ThrowsAsync<InvalidDataException>(() => Store().LoadAsync(Cancellation));
+
+        Assert.StartsWith($"The settings in {FilePath} can't be read: {message}", refused.Message, StringComparison.Ordinal);
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
