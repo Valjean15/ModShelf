@@ -112,7 +112,7 @@ public sealed class LibraryUpdateAllTests : IDisposable
             ("Queued 1 update. It shows on the Downloads screen. 2 updates couldn't be queued. The first: The site needs a linked account to look that link up, or refused the one linked. Link it on the Accounts screen, then try again.", true),
             (skyrim.UpdateNote, skyrim.IsUpdateNoteAProblem));
         Assert.StartsWith(
-            "Error: Downloading update 2 of mod 1 for Update all failed System.InvalidOperationException",
+            "Error: Queuing a file of mod 1 of skyrimspecialedition for the library failed System.InvalidOperationException",
             Assert.Single(_harness.Logger.Entries),
             StringComparison.Ordinal);
         Assert.Empty(_harness.Dialogs.Messages);
@@ -140,6 +140,25 @@ public sealed class LibraryUpdateAllTests : IDisposable
         await skyrim.UpdateAllCommand.ExecuteAsync(null);
 
         Assert.Equal(("The updates' files are in the library already.", false), (skyrim.UpdateNote, skyrim.IsUpdateNoteAProblem));
+    }
+
+    [Fact]
+    public async Task UpdatesInTheLibraryAlreadyAreCountedBesideThoseQueued()
+    {
+        await _harness.StartAsync(
+            WithUpdates(SkyUi, "SkyUI", Update(SkyUi, "2", linked: true)),
+            WithUpdates(Address, "Address Library", Update(Address, "2", linked: true)));
+        int asked = 0;
+        _harness.LibraryDownloads.Answer = _ => ++asked == 1
+            ? new LibraryDownload(Path.Combine(TestData.LibraryRoot, "file.7z"), null)
+            : Queued();
+        LibraryGameViewModel skyrim = _harness.Game(SkyUi.Game);
+
+        await skyrim.UpdateAllCommand.ExecuteAsync(null);
+
+        Assert.Equal(
+            ("Queued 1 update. It shows on the Downloads screen. 1 was in the library already.", false),
+            (skyrim.UpdateNote, skyrim.IsUpdateNoteAProblem));
     }
 
     private static string Of(Uri link) => $"{link.Segments[^1]}{link.Query.Replace("?tab=files&file_id=", "/", StringComparison.Ordinal)}";

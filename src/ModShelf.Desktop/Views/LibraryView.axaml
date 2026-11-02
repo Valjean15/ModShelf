@@ -22,7 +22,7 @@
             <Setter Property="Grid.Column" Value="1" />
         </Style>
         <Style Selector=":is(Control).statusCell">
-            <Setter Property="Grid.Column" Value="3" />
+            <Setter Property="Grid.Column" Value="4" />
         </Style>
         <Style Selector=":is(Control).narrowCell">
             <Setter Property="IsVisible" Value="False" />
@@ -46,7 +46,7 @@
                 <Setter Property="Grid.ColumnSpan" Value="3" />
             </Style>
             <Style Selector=":is(Control).statusCell">
-                <Setter Property="Grid.Column" Value="4" />
+                <Setter Property="Grid.Column" Value="5" />
             </Style>
             <Style Selector=":is(Control).sizeCell">
                 <Setter Property="Grid.ColumnSpan" Value="2" />
@@ -270,6 +270,18 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+
+                <!-- Selecting the mods shown, and what to do with those selected. -->
+                <WrapPanel ItemSpacing="12" LineSpacing="8" IsVisible="{Binding !NoModMatches}">
+                    <CheckBox Classes="selectAll"
+                              IsChecked="{Binding AreAllShownSelected}"
+                              Content="{x:Static res:Strings.SelectAllShown}" />
+                    <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding HasSelection}">
+                        <TextBlock Classes="note" VerticalAlignment="Center" Text="{Binding SelectionText}" />
+                        <Button Classes="accent" Content="{Binding UpdateSelectedText}" Command="{Binding UpdateSelectedCommand}" />
+                        <Button Classes="quiet" Content="{x:Static res:Strings.SelectionClear}" Command="{Binding ClearSelectionCommand}" />
+                    </StackPanel>
+                </WrapPanel>
             </StackPanel>
 
             <Panel>
@@ -285,24 +297,28 @@
                     </Border.IsVisible>
                     <DockPanel>
                         <Border DockPanel.Dock="Top" Classes="tableHead">
-                            <Grid ColumnDefinitions="Auto,2.4*,0.8*,1.5*,0.9*,0.7*,1.1*,34" ColumnSpacing="12">
-                                <Panel Width="72" IsVisible="{Binding Previews.IsThumbnails}" />
-                                <TextBlock Grid.Column="1" Classes="modCell" Text="{x:Static res:Strings.LibraryColumnMod}" />
-                                <TextBlock Grid.Column="2" Classes="wideCell" Text="{x:Static res:Strings.LibraryColumnVersion}" />
+                            <Grid ColumnDefinitions="Auto,Auto,2.4*,0.8*,1.5*,0.9*,0.7*,1.1*,34" ColumnSpacing="12">
+                                <Panel Width="20" />
+                                <Panel Grid.Column="1" Width="72" IsVisible="{Binding Previews.IsThumbnails}" />
+                                <TextBlock Grid.Column="2" Classes="modCell" Text="{x:Static res:Strings.LibraryColumnMod}" />
+                                <TextBlock Grid.Column="3" Classes="wideCell" Text="{x:Static res:Strings.LibraryColumnVersion}" />
                                 <TextBlock Classes="statusCell" Text="{x:Static res:Strings.LibraryColumnStatus}" />
-                                <TextBlock Grid.Column="4" Classes="wideCell" Text="{x:Static res:Strings.LibraryColumnFiles}" />
-                                <TextBlock Grid.Column="5" Classes="wideCell" Text="{x:Static res:Strings.LibraryColumnSize}" />
-                                <TextBlock Grid.Column="6" Classes="wideCell" Text="{x:Static res:Strings.LibraryColumnUpdated}" />
+                                <TextBlock Grid.Column="5" Classes="wideCell" Text="{x:Static res:Strings.LibraryColumnFiles}" />
+                                <TextBlock Grid.Column="6" Classes="wideCell" Text="{x:Static res:Strings.LibraryColumnSize}" />
+                                <TextBlock Grid.Column="7" Classes="wideCell" Text="{x:Static res:Strings.LibraryColumnUpdated}" />
                             </Grid>
                         </Border>
                         <ListBox Classes="rows" ItemsSource="{Binding GameMods}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate x:DataType="vm:LibraryModViewModel">
-                                    <Grid ColumnDefinitions="Auto,2.4*,0.8*,1.5*,0.9*,0.7*,1.1*,34" ColumnSpacing="12">
-                                        <Panel VerticalAlignment="Center" IsVisible="{Binding Picture.IsShown}">
+                                    <Grid ColumnDefinitions="Auto,Auto,2.4*,0.8*,1.5*,0.9*,0.7*,1.1*,34" ColumnSpacing="12">
+                                        <CheckBox Classes="select"
+                                                  IsChecked="{Binding IsSelected}"
+                                                  AutomationProperties.Name="{Binding SelectText}" />
+                                        <Panel Grid.Column="1" VerticalAlignment="Center" IsVisible="{Binding Picture.IsShown}">
                                             <pictures:ModThumbnail DataContext="{Binding Picture}" />
                                         </Panel>
-                                        <StackPanel Grid.Column="1" Classes="modCell" VerticalAlignment="Center" Spacing="1">
+                                        <StackPanel Grid.Column="2" Classes="modCell" VerticalAlignment="Center" Spacing="1">
                                             <Button Classes="name" HorizontalAlignment="Left" Command="{Binding OpenCommand}">
                                                 <TextBlock TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
                                             </Button>
@@ -313,7 +329,7 @@
                                                 <TextBlock Classes="note" FontSize="12.5" Text="{Binding SizeText}" IsVisible="{Binding HasFiles}" />
                                             </WrapPanel>
                                         </StackPanel>
-                                        <TextBlock Grid.Column="2" Classes="wideCell" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Text="{Binding VersionText}" />
+                                        <TextBlock Grid.Column="3" Classes="wideCell" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Text="{Binding VersionText}" />
                                         <ItemsControl Classes="statusCell" VerticalAlignment="Center" ItemsSource="{Binding Statuses}">
                                             <ItemsControl.ItemsPanel>
                                                 <ItemsPanelTemplate>
@@ -330,10 +346,10 @@
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
-                                        <TextBlock Grid.Column="4" Classes="note wideCell" VerticalAlignment="Center" TextWrapping="Wrap" Text="{Binding FilesText}" />
-                                        <TextBlock Grid.Column="5" Classes="note wideCell" VerticalAlignment="Center" Text="{Binding SizeText}" />
-                                        <TextBlock Grid.Column="6" Classes="note wideCell" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Text="{Binding UpdatedText}" />
-                                        <Button Grid.Column="7"
+                                        <TextBlock Grid.Column="5" Classes="note wideCell" VerticalAlignment="Center" TextWrapping="Wrap" Text="{Binding FilesText}" />
+                                        <TextBlock Grid.Column="6" Classes="note wideCell" VerticalAlignment="Center" Text="{Binding SizeText}" />
+                                        <TextBlock Grid.Column="7" Classes="note wideCell" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Text="{Binding UpdatedText}" />
+                                        <Button Grid.Column="8"
                                                 Classes="more"
                                                 VerticalAlignment="Center"
                                                 ToolTip.Tip="{x:Static res:Strings.MoreActions}"
@@ -373,7 +389,14 @@
                             <DataTemplate x:DataType="vm:LibraryModViewModel">
                                 <Border Classes="modCard">
                                     <DockPanel>
-                                        <pictures:ModCardPicture DockPanel.Dock="Top" DataContext="{Binding Picture}" />
+                                        <Panel DockPanel.Dock="Top">
+                                            <pictures:ModCardPicture DataContext="{Binding Picture}" />
+                                            <Border Classes="onPicture box">
+                                                <CheckBox Classes="select"
+                                                          IsChecked="{Binding IsSelected}"
+                                                          AutomationProperties.Name="{Binding SelectText}" />
+                                            </Border>
+                                        </Panel>
                                         <StackPanel Margin="14,10,6,14" Spacing="4">
                                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
                                                 <Button Classes="name" VerticalAlignment="Center" Command="{Binding OpenCommand}">

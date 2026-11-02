@@ -54,6 +54,7 @@ public sealed partial class LibraryModViewModel : ObservableObject
     public ModPictureViewModel Picture { get; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SelectText))]
     public partial string Name { get; private set; } = string.Empty;
 
     /// <summary>
@@ -143,6 +144,17 @@ public sealed partial class LibraryModViewModel : ObservableObject
     public int UpdateCount { get; private set; }
 
     /// <summary>
+    /// Whether it's selected, for Update selected; the screen unselects it when it's no longer shown.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsSelected { get; set; }
+
+    /// <summary>
+    /// Such as "Select SkyUI", for screen readers.
+    /// </summary>
+    public string SelectText => Text.Format(Strings.SelectMod, Name);
+
+    /// <summary>
     /// Its updates whose files can be downloaded, by its site's link to each, the newest first.
     /// </summary>
     internal IReadOnlyList<LibraryUpdate> DownloadableUpdates { get; private set; } = [];
@@ -204,6 +216,8 @@ public sealed partial class LibraryModViewModel : ObservableObject
         VersionText = yours?.VersionLabel ?? Strings.NoValue;
         ShowStatuses();
     }
+
+    partial void OnIsSelectedChanged(bool value) => _services.SelectionChanged();
 
     /// <summary>
     /// Shows how many of its files aren't on disk. Runs on the UI thread.

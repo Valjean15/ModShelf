@@ -21,6 +21,7 @@ internal sealed class LibraryServices(
     IDialogService dialogs,
     ModPictures pictures,
     Func<ModRef, CancellationToken, Task> open,
+    Action selectionChanged,
     TimeProvider timeProvider,
     ILogger logger)
 {
@@ -42,6 +43,11 @@ internal sealed class LibraryServices(
     /// Opens a mod on its page, in place of the list.
     /// </summary>
     public Func<ModRef, CancellationToken, Task> Open { get; } = open ?? throw new ArgumentNullException(nameof(open));
+
+    /// <summary>
+    /// Tells the screen a mod was selected, or no longer is.
+    /// </summary>
+    public Action SelectionChanged { get; } = selectionChanged ?? throw new ArgumentNullException(nameof(selectionChanged));
 
     public TimeProvider TimeProvider { get; } = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
 

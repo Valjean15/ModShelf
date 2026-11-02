@@ -1,44 +1,39 @@
 using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Library;
-using ModShelf.Domain.Library;
+using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
-using ModShelf.Presentation.ViewModels.Downloads;
 
-namespace ModShelf.Presentation.ViewModels.Library;
+namespace ModShelf.Presentation.ViewModels.Downloads;
 
 /// <summary>
-/// Update all on a game's heading: its mods' updates downloaded into the library, one after the other, and what to say
-/// of them.
+/// Several updates queued for the library at once, such as a game's or the mods selected in the Library, one after
+/// the other, and what to say of them.
 /// </summary>
-internal static partial class GameUpdates
+internal static partial class LibraryBatch
 {
     /// <summary>
-    /// Queues each update's file for the library. One that can't be queued doesn't stop the others; one that fails
-    /// unexpectedly is logged.
+    /// Queues each link's file for the library, as Download does for one. One that can't be queued doesn't stop the
+    /// others; one that fails unexpectedly is logged.
     /// </summary>
+    /// <param name="items">Each file's link, and its mod, which the log names.</param>
     /// <returns>What to say, such as "Queued 2 updates. They show on the Downloads screen.", and whether it's a problem.</returns>
     public static async Task<(string Note, bool IsProblem)> QueueAsync(
         ILibraryDownloads downloads,
-        IReadOnlyList<LibraryUpdate> updates,
+        IReadOnlyList<(Uri Link, ModRef Mod)> items,
         ILogger logger,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(downloads);
-        ArgumentNullException.ThrowIfNull(updates);
+        ArgumentNullException.ThrowIfNull(items);
         ArgumentNullException.ThrowIfNull(logger);
 
         int queued = 0;
         int inLibrary = 0;
         List<string> problems = [];
-        foreach (LibraryUpdate update in updates)
+        foreach ((Uri link, ModRef mod) in items)
         {
-            if (update.PageUrl is not { } link)
-            {
-                continue;
-            }
-
             try
             {
                 LibraryDownload placed = await downloads.AddAsync(link, cancellationToken);
@@ -61,7 +56,7 @@ internal static partial class GameUpdates
             }
             catch (Exception exception)
             {
-                LogUpdateFailed(logger, exception, update.File.Id, update.File.Mod.Id);
+                LogQueueFailed(logger, exception, mod.Id, mod.Game.Key);
                 problems.Add(Strings.SomethingWentWrong);
             }
         }
@@ -71,9 +66,12 @@ internal static partial class GameUpdates
         {
             said.Add(Counts.Of(queued, Strings.GameUpdatesQueuedOne, Strings.GameUpdatesQueued));
         }
-        else if (inLibrary > 0 && problems.Count == 0)
+
+        if (inLibrary > 0)
         {
-            said.Add(Strings.GameUpdatesInLibrary);
+            said.Add(queued == 0 && problems.Count == 0
+                ? Strings.GameUpdatesInLibrary
+                : Counts.Of(inLibrary, Strings.BatchInLibraryOne, Strings.BatchInLibrary));
         }
 
         if (problems.Count > 0)
@@ -85,7 +83,4 @@ internal static partial class GameUpdates
 
         return (string.Join(" ", said), problems.Count > 0);
     }
-
-    [LoggerMessage(EventId = 944, Level = LogLevel.Error, Message = "Downloading update {FileId} of mod {ModId} for Update all failed")]
-    private static partial void LogUpdateFailed(ILogger logger, Exception exception, string fileId, string modId);
 }

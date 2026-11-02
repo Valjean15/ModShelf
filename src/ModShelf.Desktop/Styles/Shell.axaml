@@ -511,6 +511,30 @@
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
+    <!-- A box that selects a row or a card, without text beside it. -->
+    <Style Selector="CheckBox.select">
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- The box that selects every row shown, with its words beside it. -->
+    <Style Selector="CheckBox.selectAll">
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfMutedBrush}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- A card's box, in the top left corner of its picture. -->
+    <Style Selector="Border.onPicture.box">
+        <Setter Property="Padding" Value="4,2" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Margin" Value="10" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+
     <!-- A mod as a card: its picture on top, then its name and what's known of it. -->
     <Style Selector="Border.modCard">
         <Setter Property="CornerRadius" Value="10" />

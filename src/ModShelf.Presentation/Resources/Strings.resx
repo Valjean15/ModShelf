@@ -2182,4 +2182,31 @@
     <value>Open the next page</value>
     <comment>Opens the page of the oldest download waiting for the user.</comment>
   </data>
+  <data name="BatchInLibraryOne" xml:space="preserve">
+    <value>1 was in the library already.</value>
+    <comment>After queuing several files, when some were in the library already.</comment>
+  </data>
+  <data name="BatchInLibrary" xml:space="preserve">
+    <value>{0:N0} were in the library already.</value>
+    <comment>After queuing several files. {0} counts those in the library already.</comment>
+  </data>
+  <data name="SelectionCount" xml:space="preserve">
+    <value>{0:N0} selected</value>
+    <comment>Over a list, while mods are selected.</comment>
+  </data>
+  <data name="SelectionClear" xml:space="preserve">
+    <value>Clear selection</value>
+  </data>
+  <data name="SelectAllShown" xml:space="preserve">
+    <value>Select all shown</value>
+    <comment>A box over a list's rows, read out for screen readers.</comment>
+  </data>
+  <data name="SelectMod" xml:space="preserve">
+    <value>Select {0}</value>
+    <comment>A row's box, read out for screen readers. {0} is the mod's name.</comment>
+  </data>
+  <data name="LibraryUpdateSelected" xml:space="preserve">
+    <value>Update selected ({0:N0})</value>
+    <comment>Downloads the updates of the mods selected in a game. {0} counts the updates.</comment>
+  </data>
 </root>

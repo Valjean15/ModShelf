@@ -54,6 +54,9 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     private CancellationTokenSource? _checking;
     private ModRef? _openedMod;
 
+    // While the selection changes in bulk, or is being shown, the mods' changes don't show it again each time.
+    private bool _showingSelection;
+
     public LibraryViewModel(
         IModLibrary library,
         IModLookup lookup,
@@ -87,7 +90,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         _pictures = pictures;
         _uiThread = uiThread;
         _logger = logger;
-        _services = new LibraryServices(library, rescan, settings, browser, folders, dialogs, pictures, OpenAsync, timeProvider, logger);
+        _services = new LibraryServices(library, rescan, settings, browser, folders, dialogs, pictures, OpenAsync, ShowSelection, timeProvider, logger);
         _pageServices = new ModPageServices(
             library,
             libraryDownloads,
@@ -224,6 +227,34 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     public partial bool NoModMatches { get; private set; }
 
     /// <summary>
+    /// Such as "3 selected": the open game's mods selected, which are always among those shown.
+    /// </summary>
+    [ObservableProperty]
+    public partial string SelectionText { get; private set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool HasSelection { get; private set; }
+
+    /// <summary>
+    /// Such as "Update selected (2)": how many of the selected mods' updates can be downloaded.
+    /// </summary>
+    [ObservableProperty]
+    public partial string UpdateSelectedText { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// Whether the selected mods have updates to download, while the game's updates aren't being downloaded.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(UpdateSelectedCommand))]
+    public partial bool CanUpdateSelected { get; private set; }
+
+    /// <summary>
+    /// Whether every mod shown is selected, none, or some (null). Setting it selects or unselects every mod shown.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool? AreAllShownSelected { get; set; } = false;
+
+    /// <summary>
     /// The mod opened, in place of its game's mods; null when none is.
     /// </summary>
     [ObservableProperty]
@@ -312,7 +343,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         CloseMod();
         _checking?.Cancel();
         OpenGame = null;
-        GameMods.Clear();
+        ArrangeMods();
         ShowPictures();
     }
 
@@ -505,15 +536,120 @@ public sealed partial class LibraryViewModel : ScreenViewModel
                 .OrderBy(mod => mod.Name, byName)
                 .SelectMany(mod => mod.DownloadableUpdates),
         ];
+        await QueueAsync(game, updates, cancellationToken);
+    }
+
+    /// <summary>
+    /// Downloads the selected mods' updates into the library, mod by mod as they're shown, then says what it did on the
+    /// game's heading, and unselects them.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanUpdateSelected))]
+    private async Task UpdateSelectedAsync(CancellationToken cancellationToken)
+    {
+        if (OpenGame is not { } game)
+        {
+            return;
+        }
+
+        LibraryModViewModel[] selected = [.. GameMods.Where(mod => mod.IsSelected)];
+        await QueueAsync(game, [.. selected.SelectMany(mod => mod.DownloadableUpdates)], cancellationToken);
+        Unselect(selected);
+    }
+
+    /// <summary>
+    /// Queues the updates, while the game says Update all and Update selected are busy, then says what it did.
+    /// </summary>
+    private async Task QueueAsync(LibraryGameViewModel game, IReadOnlyList<LibraryUpdate> updates, CancellationToken cancellationToken)
+    {
         game.ShowUpdating(null, false);
+        ShowSelection();
         (string Note, bool IsProblem) done = (string.Empty, false);
         try
         {
-            done = await GameUpdates.QueueAsync(_pageServices.LibraryDownloads, updates, _logger, cancellationToken);
+            done = await LibraryBatch.QueueAsync(
+                _pageServices.LibraryDownloads,
+                [.. updates.Select(update => (update.PageUrl!, update.File.Mod))],
+                _logger,
+                cancellationToken);
         }
         finally
         {
             game.ShowUpdating(done.Note, done.IsProblem);
+            ShowSelection();
+        }
+    }
+
+    [RelayCommand]
+    private void ClearSelection() => Unselect([.. _mods.Values]);
+
+    /// <summary>
+    /// Unselects the mods, telling the screen once.
+    /// </summary>
+    private void Unselect(IEnumerable<LibraryModViewModel> mods)
+    {
+        _showingSelection = true;
+        try
+        {
+            foreach (LibraryModViewModel mod in mods)
+            {
+                mod.IsSelected = false;
+            }
+        }
+        finally
+        {
+            _showingSelection = false;
+        }
+
+        ShowSelection();
+    }
+
+    partial void OnAreAllShownSelectedChanged(bool? value)
+    {
+        if (_showingSelection || value is null)
+        {
+            return;
+        }
+
+        _showingSelection = true;
+        try
+        {
+            foreach (LibraryModViewModel mod in GameMods)
+            {
+                mod.IsSelected = value.Value;
+            }
+        }
+        finally
+        {
+            _showingSelection = false;
+        }
+
+        ShowSelection();
+    }
+
+    /// <summary>
+    /// Counts the selected mods, among those shown, and their updates that can be downloaded. Runs on the UI thread.
+    /// </summary>
+    private void ShowSelection()
+    {
+        if (_showingSelection)
+        {
+            return;
+        }
+
+        LibraryModViewModel[] selected = [.. GameMods.Where(mod => mod.IsSelected)];
+        int updates = selected.Sum(mod => mod.DownloadableUpdates.Count);
+        SelectionText = Text.Format(Strings.SelectionCount, selected.Length);
+        HasSelection = selected.Length > 0;
+        UpdateSelectedText = Text.Format(Strings.LibraryUpdateSelected, updates);
+        CanUpdateSelected = updates > 0 && OpenGame is { IsUpdating: false };
+        _showingSelection = true;
+        try
+        {
+            AreAllShownSelected = selected.Length == 0 ? false : selected.Length == GameMods.Count ? true : null;
+        }
+        finally
+        {
+            _showingSelection = false;
         }
     }
 
@@ -648,9 +784,16 @@ public sealed partial class LibraryViewModel : ScreenViewModel
 
     /// <summary>
     /// Puts the open game's mods in order: those whose names or authors have the filter and that every toggle that's on
-    /// says, as the order says, then by name. Each toggle counts the game's mods it says.
+    /// says, as the order says, then by name. Each toggle counts the game's mods it says. A selected mod no longer shown
+    /// is unselected.
     /// </summary>
     private void ArrangeMods()
+    {
+        ShowMods();
+        Unselect([.. _mods.Values.Where(mod => mod.IsSelected && !GameMods.Contains(mod))]);
+    }
+
+    private void ShowMods()
     {
         if (OpenGame is not { } game)
         {
