@@ -48,8 +48,9 @@
 .PARAMETER Details
     Records mods' details and what they need from the v2 GraphQL API, for the mod page: the mod given to -ModId, the
     one given to -RequiringModId, which needs other mods, both at once, and a mod that doesn't exist. Records the parts
-    of the schema around them too, and leaves the other recordings as they are; with -SearchOnly or -Tracking, those
-    too. Works with either account, and changes nothing on it.
+    of the schema around them too, and around games, whose pictures the Library's game covers will show, and leaves
+    the other recordings as they are; with -SearchOnly or -Tracking, those too. Works with either account, and changes
+    nothing on it.
 
     The queries are read from the Nexus source's Catalog folder. They're partly a guess at the schema: when Nexus Mods
     refuses one, its answer is saved anyway, the script says so and goes on, and the schema it recorded shows what to
@@ -164,7 +165,8 @@ fragment TypeRef on __Type { kind name ofType { kind name ofType { kind name ofT
 # The queries for a mod's page, as the Nexus source will send them.
 $CatalogFolder = Join-Path $PSScriptRoot '..' '..' '..' 'src' 'ModShelf.Sources.Nexus' 'Catalog'
 
-# The parts of the v2 schema around a mod's details and requirements. A type that doesn't exist comes back as null.
+# The parts of the v2 schema around a mod's details and requirements, and around games, for their covers. A type that
+# doesn't exist comes back as null.
 $DetailsSchemaQuery = @'
 query DetailsSchema {
   query: __type(name: "Query") { fields { name args { name type { ...TypeRef } } type { ...TypeRef } } }
@@ -177,6 +179,9 @@ query DetailsSchema {
   modPage: __type(name: "ModPage") { fields { name type { ...TypeRef } } }
   modCategory: __type(name: "ModCategory") { fields { name type { ...TypeRef } } }
   compositeDomainWithIdInput: __type(name: "CompositeDomainWithIdInput") { inputFields { name type { ...TypeRef } } }
+  game: __type(name: "Game") { fields { name args { name type { ...TypeRef } } type { ...TypeRef } } }
+  gameExpansion: __type(name: "GameExpansion") { fields { name type { ...TypeRef } } }
+  gamesFilter: __type(name: "GamesFilter") { inputFields { name type { ...TypeRef } } }
 }
 fragment TypeRef on __Type { kind name ofType { kind name ofType { kind name ofType { kind name } } } }
 '@
@@ -557,7 +562,8 @@ function Limit-Schema($Body) {
     }
 }
 
-# Of the Query type's fields, keeps those about mods, their requirements and categories: the rest is the whole API.
+# Of the Query type's fields, keeps those about mods, their requirements and categories, and games: the rest is the
+# whole API.
 function Limit-DetailsSchema($Body) {
     if ($Body -isnot [System.Text.Json.Nodes.JsonObject]) { return }
     $data = $Body['data']
@@ -567,7 +573,7 @@ function Limit-DetailsSchema($Body) {
     $fields = $type['fields']
     if ($fields -isnot [System.Text.Json.Nodes.JsonArray]) { return }
     for ($index = $fields.Count - 1; $index -ge 0; $index--) {
-        if ((Get-Text $fields[$index]['name']) -notmatch '(?i)mod|requir|categor') {
+        if ((Get-Text $fields[$index]['name']) -notmatch '(?i)mod|requir|categor|game') {
             $fields.RemoveAt($index)
         }
     }
