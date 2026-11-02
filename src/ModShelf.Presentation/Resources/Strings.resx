@@ -1650,4 +1650,84 @@
     <value>Adult picture, hidden</value>
     <comment>Said for a mod with adult content whose picture the settings hide.</comment>
   </data>
+  <data name="SettingsPicturesHeading" xml:space="preserve">
+    <value>Pictures and mod details</value>
+    <comment>Heading of the Settings card about saved pictures, saved mod details and adult pictures.</comment>
+  </data>
+  <data name="SettingsSavedPictures" xml:space="preserve">
+    <value>Saved pictures</value>
+    <comment>Setting: the room mods' pictures may take on disk.</comment>
+  </data>
+  <data name="SettingsSavedPicturesSize" xml:space="preserve">
+    <value>{0} of {1}. The oldest go first when it's full.</value>
+    <comment>{0} is the room the saved pictures take, such as 84 MB; {1} is the most they may take, such as 512 MB.</comment>
+  </data>
+  <data name="SettingsPicturesAtMost" xml:space="preserve">
+    <value>At most</value>
+    <comment>Before the choice of the most room saved pictures may take.</comment>
+  </data>
+  <data name="SettingsPicturesClear" xml:space="preserve">
+    <value>Clear</value>
+    <comment>Button: deletes every saved picture; they're downloaded again as they're shown.</comment>
+  </data>
+  <data name="SettingsModDetails" xml:space="preserve">
+    <value>Mod details</value>
+    <comment>Setting: how long mods' saved details are kept before they're read from their site again.</comment>
+  </data>
+  <data name="SettingsModDetailsNote" xml:space="preserve">
+    <value>Saved, so the Library shows them at once and offline. They're read from their site again after a while.</value>
+    <comment>Under Mod details.</comment>
+  </data>
+  <data name="SettingsModDetailsReadAgain" xml:space="preserve">
+    <value>Read again after</value>
+    <comment>Before the choice of how old saved mod details may get.</comment>
+  </data>
+  <data name="SettingsAdultContent" xml:space="preserve">
+    <value>Adult content</value>
+    <comment>Setting: how the pictures of mods with adult content show.</comment>
+  </data>
+  <data name="SettingsAdultContentNote" xml:space="preserve">
+    <value>How adult mods' pictures show on every screen.</value>
+    <comment>Under Adult content.</comment>
+  </data>
+  <data name="AdultPicturesHidden" xml:space="preserve">
+    <value>Hidden</value>
+    <comment>Adult content choice: no picture.</comment>
+  </data>
+  <data name="AdultPicturesBlurred" xml:space="preserve">
+    <value>Blurred</value>
+    <comment>Adult content choice: a blurred picture.</comment>
+  </data>
+  <data name="AdultPicturesShown" xml:space="preserve">
+    <value>Shown</value>
+    <comment>Adult content choice: the picture as it is.</comment>
+  </data>
+  <data name="AgeMinutes" xml:space="preserve">
+    <value>{0} minutes</value>
+    <comment>How old saved mod details may get. {0} is a number of minutes.</comment>
+  </data>
+  <data name="AgeOneHour" xml:space="preserve">
+    <value>1 hour</value>
+    <comment>How old saved mod details may get.</comment>
+  </data>
+  <data name="AgeHours" xml:space="preserve">
+    <value>{0} hours</value>
+    <comment>How old saved mod details may get. {0} is a number of hours.</comment>
+  </data>
+  <data name="AgeOneDay" xml:space="preserve">
+    <value>1 day</value>
+    <comment>How old saved mod details may get.</comment>
+  </data>
+  <data name="AgeDays" xml:space="preserve">
+    <value>{0} days</value>
+    <comment>How old saved mod details may get. {0} is a number of days.</comment>
+  </data>
+  <data name="AgeOneWeek" xml:space="preserve">
+    <value>1 week</value>
+    <comment>How old saved mod details may get.</comment>
+  </data>
+  <data name="SettingsPicturesCantClear" xml:space="preserve">
+    <value>The saved pictures couldn't all be deleted: {0}</value>
+    <comment>{0} is the reason.</comment>
+  </data>
 </root>

@@ -41,6 +41,7 @@ public static class PresentationServiceCollectionExtensions
             ServiceDescriptor.Singleton<ScreenViewModel, AccountsViewModel>(),
             ServiceDescriptor.Singleton<ScreenViewModel, SettingsViewModel>(),
         ]);
+        services.TryAddSingleton<PicturesViewModel>();
         services.TryAddSingleton<LinksViewModel>();
         services.TryAddSingleton<FirstRunViewModel>();
         services.TryAddSingleton<AboutViewModel>();

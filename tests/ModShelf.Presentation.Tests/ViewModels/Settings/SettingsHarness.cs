@@ -20,10 +20,18 @@ internal sealed class SettingsHarness
         About = new AboutViewModel(new AppInfo("0.9.0", "a60d76b"), Diagnostics, Diagnostics, new RecordingClipboard(), new ScriptedFolders(), new RecordingLogger<AboutViewModel>());
         Links = new LinksViewModel(LinkHandlers, Navigation, UiThread, LinksLogger);
         AppUpdate = new AppUpdateViewModel(Releases, Exit, UiThread, AppUpdateLogger);
-        Screen = new SettingsViewModel(Settings, Library, Mover, new FixedSecretStore(protectedByOs), Themes, Tray, Dialogs, Links, About, AppUpdate, Logger);
+        Pictures = new TestPictures(Settings);
+        PicturesCard = new PicturesViewModel(Settings, Pictures.Pictures, PicturesLogger);
+        Screen = new SettingsViewModel(Settings, Library, Mover, new FixedSecretStore(protectedByOs), Themes, Tray, Dialogs, PicturesCard, Links, About, AppUpdate, Logger);
     }
 
     public InMemorySettingsService Settings { get; } = new();
+
+    public TestPictures Pictures { get; }
+
+    public RecordingLogger<PicturesViewModel> PicturesLogger { get; } = new();
+
+    public PicturesViewModel PicturesCard { get; }
 
     public InMemoryModLibrary Library { get; } = new();
 

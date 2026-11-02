@@ -150,6 +150,60 @@
                         </StackPanel>
                     </Border>
 
+                    <!-- Pictures and mod details: each setting beside what it is, divided by lines. -->
+                    <Border Classes="card" DataContext="{Binding Pictures}">
+                        <StackPanel Spacing="14" x:DataType="vm:PicturesViewModel">
+                            <TextBlock Classes="subheading" Text="{x:Static res:Strings.SettingsPicturesHeading}" />
+                            <Border Classes="strip" IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                <TextBlock Text="{Binding Problem}" />
+                            </Border>
+
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
+                                <StackPanel Spacing="4">
+                                    <TextBlock FontWeight="SemiBold" Text="{x:Static res:Strings.SettingsSavedPictures}" />
+                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding SizeText}" />
+                                    <ProgressBar Margin="0,4,0,0" MinHeight="6" Minimum="0" Maximum="100" Value="{Binding UsedPercent}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <TextBlock Classes="note" VerticalAlignment="Center" Text="{x:Static res:Strings.SettingsPicturesAtMost}" />
+                                    <ComboBox MinWidth="150" ItemsSource="{Binding SizeChoices}" SelectedItem="{Binding SelectedSize}" />
+                                </StackPanel>
+                                <Button Grid.Column="2"
+                                        VerticalAlignment="Center"
+                                        Content="{x:Static res:Strings.SettingsPicturesClear}"
+                                        Command="{Binding ClearCommand}" />
+                            </Grid>
+
+                            <Border Height="1" Background="{DynamicResource ShelfLineBrush}" />
+
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                <StackPanel Spacing="4">
+                                    <TextBlock FontWeight="SemiBold" Text="{x:Static res:Strings.SettingsModDetails}" />
+                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.SettingsModDetailsNote}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <TextBlock Classes="note" VerticalAlignment="Center" Text="{x:Static res:Strings.SettingsModDetailsReadAgain}" />
+                                    <ComboBox MinWidth="150" ItemsSource="{Binding AgeChoices}" SelectedItem="{Binding SelectedAge}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <Border Height="1" Background="{DynamicResource ShelfLineBrush}" />
+
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                <StackPanel Spacing="4">
+                                    <TextBlock FontWeight="SemiBold" Text="{x:Static res:Strings.SettingsAdultContent}" />
+                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.SettingsAdultContentNote}" />
+                                </StackPanel>
+                                <ComboBox Grid.Column="1"
+                                          MinWidth="170"
+                                          VerticalAlignment="Center"
+                                          ItemsSource="{Binding AdultChoices}"
+                                          SelectedItem="{Binding SelectedAdult}"
+                                          AutomationProperties.Name="{x:Static res:Strings.SettingsAdultContent}" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
                     <Border Classes="card" DataContext="{Binding Links}">
                         <StackPanel Spacing="8" x:DataType="vm:LinksViewModel">
                             <TextBlock Classes="subheading" Text="{x:Static res:Strings.LinksHeading}" />
