@@ -29,6 +29,10 @@ you should see.
   download waiting, with **Open on Nexus Mods**.
 - [ ] **2.3 Changing a download.** Ask the agent to pause it, resume it, then cancel another.
   The Downloads screen follows each change; cancelling deletes only the part downloaded.
+- [ ] **2.3a Several links.** Ask the agent to download three mods at once, one of them a link that isn't a mod's (such
+  as `https://www.nexusmods.com/stardewvalley`).
+  One call to `download` with three links: two downloading or waiting for you, and the third's result says why it
+  couldn't be downloaded. The summary says "Of 3 links, …".
 - [ ] **2.4 What came in.** Ask the agent what came into the library since this morning.
   The new files, each with the mod's other files: the old version, archived when `library.oldVersions` is `archive`.
 - [ ] **2.5 New optional files.** For a watched mod you have files of whose author has added an optional file since its
@@ -74,6 +78,7 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 2.1 Without the desktop app | | |
 | 2.2 With the desktop app | | |
 | 2.3 Changing a download | | |
+| 2.3a Several links | | |
 | 2.4 What came in | | |
 | 2.5 New optional files | | |
 | 2.6 Hashes | | |

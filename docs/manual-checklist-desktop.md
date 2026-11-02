@@ -87,6 +87,8 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
   **Cards**, the default: each mod is a card with its picture across the top, as many side by side as fit; clicking one opens it. **Thumbnails**: the list, with each mod's thumbnail beside it. **Off**: the list without pictures. A mod without a picture shows a faint picture sign. The choice stays after closing and starting the app.
 - [ ] **3.9 Adult pictures.** Tick **Include adult content**, choose Skyrim Special Edition, and search `outfit`.
   The adult mods' pictures are blurred, and their cards say "Adult · blurred". No sharp adult picture shows, even for a moment.
+- [ ] **3.10 Select mods.** Choose Stardew Valley, search `smapi`, and tick the boxes of two mods (at the top left of each card; with **Off**, beside each name).
+  "2 selected", with **Download selected (2)** and **Clear selection**, and **Select all shown** is half ticked. Clicking a box doesn't open its mod. Ticking **Select all shown** selects every mod listed; **Load more** keeps them, and **Select all shown** is half ticked again. **Clear selection** clears them all, and a new search starts with none selected. Don't download them here: 9.7 does.
 
 ## 4. Download into the library (Premium only)
 
@@ -162,6 +164,8 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
   "SMAPI - Stardew Modding API", "In library" (from 4.1), and **Open**, which opens SMAPI's page in its place, from the top. Under the list: installing them is up to your mod manager. SMAPI's own page has no "Requirements".
 - [ ] **8.2c A game's mods.** On the Library screen, open Stardew Valley.
   Content Patcher says "Update to *version*" in a blue tag, and the heading counts "1 update", with **Update all (1)** beside **Rescan**. "Has an update 1" shows Content Patcher alone; with "Watched" on too, still it; both off, both mods. Rename SMAPI's file in its folder, then go back to the games and open Stardew Valley again: "Missing files 1", and SMAPI says "1 file missing" in an orange tag (name the file back, and open the game again). "pathos" in the filter finds Pathoschild's mods by author. "Sort" by **Updates first**, **Updated on site**, **Size** and **Added to library** reorders them, and **Name** puts them back. With the window narrow, each mod's version, files and size go under its author, and the "Your version", "Files", "Size" and "Updated on site" columns go.
+- [ ] **8.2d Select mods.** In Stardew Valley's mods, tick SMAPI's box, then Content Patcher's.
+  "1 selected" with **Update selected (0)** greyed out, then "2 selected" with **Update selected (1)**, and **Select all shown** goes from half ticked to ticked. "content" in the filter hides SMAPI and unselects it: "1 selected". Clear the filter; **Select all shown** selects both, and **Clear selection** neither. With **Cards**, each card has its box at the top left, and clicking it doesn't open the mod. Don't update them here: 8.4 does.
 - [ ] **8.3 Changes.** Look under the update, without clicking anything.
   "What changed in *version*" and its entry in Content Patcher's changelog, or "The changelog says nothing about this version." Going to another screen and back doesn't read it again (the log has no new request).
 - [ ] **8.4 Download the update.** **Update all (1)** at the top of the Updates screen.
@@ -183,6 +187,8 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
   "Remove this mod from the library?", saying its files stay. **Remove**: the mod leaves the Library, and so does its game, which had no other mod; **Check now** on the Updates screen counts one mod fewer. Removing a mod with files leaves them in its folder.
 - [ ] **9.6 Rescan.** Copy a file of SMAPI's from its page on Nexus Mods (**Manual download**) into SMAPI's folder, then **Rescan** at the top of the Library screen.
   "Rescan finished", saying a file found on disk was added; SMAPI shows one file more, with its SHA-256. **Rescan** in SMAPI's **…** menu right after says "Nothing new".
+- [ ] **9.7 Download selected.** In Browse, choose Skyrim Special Edition, search `skyui`, select the first two mods, and **Download selected (2)**.
+  "Queued 2 files. They show on the Downloads screen.", and the boxes clear; a mod without a main file says instead that it couldn't be queued, and why. The Downloads screen downloads each one's newest main file into its folder in the library (on the free account, both wait for you: start them as in 5.4, or cancel them). Once they're done, select the same two again and **Download selected (2)**: "Their files are in the library already."
 
 ## 10. Settings
 
@@ -312,6 +318,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 3.7 Links it refuses | | | |
 | 3.8 Previews | | | |
 | 3.9 Adult pictures | | | |
+| 3.10 Select mods | | | |
 | 4.1 From a mod's page | | – | |
 | 4.2 In the library | | – | |
 | 4.3 Again | | – | |
@@ -340,6 +347,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 8.2a The update on the mod's page | | | |
 | 8.2b What it needs | | | |
 | 8.2c A game's mods | | | |
+| 8.2d Select mods | | | |
 | 8.3 Changes | | | |
 | 8.4 Download the update | | | |
 | 9.1 Unwatch | | | |
@@ -349,6 +357,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 9.4 Untrack | | – | |
 | 9.5 Remove from the library | | | |
 | 9.6 Rescan | | | |
+| 9.7 Download selected | | | |
 | 10.1 Folder patterns | | | |
 | 10.2 A game's own pattern | | | |
 | 10.3 Old versions | | | |
