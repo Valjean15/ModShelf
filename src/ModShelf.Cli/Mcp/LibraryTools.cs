@@ -14,8 +14,8 @@ using ModShelf.Domain.Mods;
 namespace ModShelf.Cli.Mcp;
 
 /// <summary>
-/// The MCP tools for the library: its mods and files, what came in lately, the updates, checking for them, and watching
-/// mods.
+/// The MCP tools for the library: its mods and files, what came in lately, the updates, checking for them, watching
+/// mods, and forgetting them.
 /// </summary>
 [McpServerToolType]
 internal sealed class LibraryTools(IModLibrary library, ISettingsService settings, IUpdateChecker checker, IModLookup lookup, TimeProvider time)
@@ -177,6 +177,43 @@ internal sealed class LibraryTools(IModLibrary library, ISettingsService setting
                 _ => $"Stopped watching {change.Before.Name}. Its downloaded files stay in the library.",
             };
             return new WatchResult(false, message, change.After is { } after ? McpEntries.Mod(after, root) : null);
+        });
+
+    [McpServerTool(Name = "library_forget", Title = "Forget a mod", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
+    [Description("Takes a mod out of ModShelf's library, with its file records and its updates, so it isn't watched any more, such as a mod the user no longer uses. Nothing on disk is touched: its downloaded files stay where they are, no longer the library's, and its completed downloads leave the download queue. Refused while a download of one of its files into the library isn't finished.")]
+    public Task<ForgetResult> ForgetAsync(
+        [Description("A link to the mod or one of its files, such as its page on Nexus Mods.")] string link,
+        CancellationToken cancellationToken)
+        => McpProblems.GuardAsync(async () =>
+        {
+            Uri mod = McpProblems.Link(link);
+            LibraryChange change;
+            try
+            {
+                change = await library.ForgetAsync(mod, cancellationToken).ConfigureAwait(false);
+            }
+            catch (KeyNotFoundException exception)
+            {
+                // Nothing to forget, as unwatching a mod that isn't watched.
+                return new ForgetResult(false, exception.Message, null);
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new McpException(exception.Message, exception);
+            }
+
+            string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+            LibraryMod forgotten = change.Before!;
+            string files = forgotten.Files.Count switch
+            {
+                0 => "It had no downloaded files.",
+                1 => "Its downloaded file stays on disk, at the path in mod.files.",
+                _ => string.Create(CultureInfo.InvariantCulture, $"Its {forgotten.Files.Count} downloaded files stay on disk, at the paths in mod.files."),
+            };
+            return new ForgetResult(
+                true,
+                $"{forgotten.Name} is out of the library: ModShelf doesn't watch it or keep track of its files any more. {files}",
+                McpEntries.Mod(forgotten, root));
         });
 
     private static string Describe(ModRef mod) => $"mod {mod.Id} of {mod.Game.Key} on {mod.Game.Source}";

@@ -80,8 +80,9 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         Assert.Equal(
             [
                 "accounts_status", "diagnostics", "download", "downloads_cancel", "downloads_list", "downloads_pause",
-                "downloads_resume", "downloads_retry", "library_changes", "library_check", "library_list", "library_unwatch",
-                "library_updates", "library_watch", "mod_search", "mod_show", "settings_reset", "settings_set", "settings_show",
+                "downloads_resume", "downloads_retry", "library_changes", "library_check", "library_forget", "library_list",
+                "library_unwatch", "library_updates", "library_watch", "mod_search", "mod_show", "settings_reset", "settings_set",
+                "settings_show",
             ],
             tools.Select(tool => tool.Name).Order(StringComparer.Ordinal));
         Assert.Equal(ModShelfMcpServer.Instructions, mcp.Client.ServerInstructions);
@@ -399,6 +400,46 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task ForgetsAModWhoseFilesStayOnDisk()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await DownloadAndWaitAsync(mcp, "1");
+        await mcp.CallAsync<WatchResult>("library_watch", Arguments(("link", FakeCatalogSite.ModLink("1").AbsoluteUri)), Cancellation);
+
+        ForgetResult forgot = await mcp.CallAsync<ForgetResult>("library_forget", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
+        ForgetResult again = await mcp.CallAsync<ForgetResult>("library_forget", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
+        ForgetResult withoutFiles = await mcp.CallAsync<ForgetResult>("library_forget", Arguments(("link", FakeCatalogSite.ModLink("1").AbsoluteUri)), Cancellation);
+        LibraryListing library = await mcp.CallAsync<LibraryListing>("library_list", null, Cancellation);
+
+        Assert.True(forgot.Forgotten);
+        Assert.Equal(
+            $"{ModName} is out of the library: ModShelf doesn't watch it or keep track of its files any more. Its downloaded file stays on disk, at the path in mod.files.",
+            forgot.Message);
+        Assert.Equal((Path.Combine(ModFolder, FileNameOf("1")), false), (forgot.Mod?.Files?[0].Path, forgot.Mod?.Files?[0].Missing));
+        Assert.Equal(Content, await File.ReadAllBytesAsync(Path.Combine(ModFolder, FileNameOf("1")), Cancellation));
+        Assert.Equal((false, "Mod mod of game on fake-handoff isn't in the library.", (LibraryModEntry?)null), (again.Forgotten, again.Message, again.Mod));
+        Assert.EndsWith("It had no downloaded files.", withoutFiles.Message, StringComparison.Ordinal);
+        Assert.Equal(0, library.Total);
+
+        // Its completed download left the queue as saved, so no later start records it again.
+        IReadOnlyList<DownloadJob> saved = await Cli.InAppAsync(services => services.GetRequiredService<IDownloadJobRepository>().ListAsync(Cancellation), Cancellation);
+        Assert.Empty(saved);
+    }
+
+    [Fact]
+    public async Task AModWithADownloadIntoTheLibraryUnderWayIsntForgotten()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await DownloadAndWaitAsync(mcp, "1");
+        await mcp.CallAsync<DownloadResult>("download", Arguments(("link", FileLink("3").AbsoluteUri)), Cancellation);
+
+        string refused = await mcp.CallFailingAsync("library_forget", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
+
+        Assert.EndsWith($": A download of a file of {ModName} into the library isn't finished. Let it finish, or cancel it, first.", refused, StringComparison.Ordinal);
+        Assert.Equal(1, (await mcp.CallAsync<LibraryListing>("library_list", null, Cancellation)).Total);
+    }
+
+    [Fact]
     public async Task ShowsAModWithItsFilesAndWhereTheLibraryHasThem()
     {
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
@@ -571,7 +612,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
             await mcp.CloseAsync(Cancellation);
         }
 
-        Assert.Contains(Cli.Logs.Entries, entry => entry.Contains("The MCP server started, with 19 tools", StringComparison.Ordinal));
+        Assert.Contains(Cli.Logs.Entries, entry => entry.Contains("The MCP server started, with 20 tools", StringComparison.Ordinal));
         Assert.DoesNotContain(Cli.Logs.Entries, entry => entry.Contains(GoodKey, StringComparison.Ordinal));
         Assert.DoesNotContain(Cli.Logs.Entries, entry => entry.Contains("handoff.example", StringComparison.Ordinal));
     }

@@ -66,7 +66,7 @@ public sealed class McpCommandProcessTests : IDisposable
                 IList<McpClientTool> tools = await client.ListToolsAsync(cancellationToken: Cancellation);
                 CallToolResult settings = await client.CallToolAsync("settings_show", cancellationToken: Cancellation);
 
-                Assert.Equal(19, tools.Count);
+                Assert.Equal(20, tools.Count);
                 Assert.Equal(ModShelfMcpServer.Instructions, client.ServerInstructions);
                 Assert.NotEqual(true, settings.IsError);
                 Assert.Equal(

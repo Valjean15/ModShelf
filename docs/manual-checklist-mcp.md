@@ -12,7 +12,7 @@ you should see.
 ## 1. The server
 
 - [ ] **1.1 Tools.** Start the agent's app, and ask it which ModShelf tools it has.
-  19 tools, from `library_list` to `diagnostics`. Claude Desktop's settings show the server as running.
+  20 tools, from `library_list` to `diagnostics`. Claude Desktop's settings show the server as running.
 - [ ] **1.2 Reading.** Ask for the library, the updates and the settings.
   The mods, their files' full paths in the test library, and the settings with their defaults marked.
 - [ ] **1.3 Accounts.** Ask which accounts are linked.
@@ -40,6 +40,10 @@ you should see.
   It has no tool for these, and says so; nothing changes.
 - [ ] **3.3 The logs.** Open the test library's `logs\cli-….log`.
   The server's start and end, and what it did with the queue; no link, key or `nxm://`.
+- [ ] **3.4 Forgetting a mod.** Ask the agent to forget a mod with a downloaded file.
+  It says the mod is out of the library and where its file stays; the file is still there, and `library_list` no longer
+  lists the mod. A desktop app running meanwhile shows it until it starts again. While a download of one of its files
+  into the library isn't finished, the agent says it can't.
 
 ## 4. Updating
 
@@ -63,4 +67,5 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 3.1 A setting | | |
 | 3.2 What it can't do | | |
 | 3.3 The logs | | |
+| 3.4 Forgetting a mod | | |
 | 4.1 With the app | | |
