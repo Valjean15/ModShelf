@@ -1,5 +1,7 @@
 using System.Globalization;
 
+using ModShelf.Presentation.Resources;
+
 namespace ModShelf.Presentation.Common;
 
 /// <summary>
@@ -16,6 +18,26 @@ internal static class Dates
     /// The short date and time, such as "10/29/2026 4:40 PM".
     /// </summary>
     public static string DayAndTime(DateTimeOffset moment, TimeProvider timeProvider) => Write(moment, timeProvider, "g");
+
+    /// <summary>
+    /// How long ago, such as "2 hours ago" or "yesterday", up to 30 days; the short date before that, or for a moment
+    /// a minute or more to come, which a clock set back gives. A moment less than a minute to come, which clocks a little
+    /// apart give, is "just now".
+    /// </summary>
+    public static string Ago(DateTimeOffset moment, TimeProvider timeProvider)
+    {
+        ArgumentNullException.ThrowIfNull(timeProvider);
+        TimeSpan age = timeProvider.GetUtcNow() - moment;
+        return age switch
+        {
+            { TotalMinutes: <= -1 } => Day(moment, timeProvider),
+            { TotalMinutes: < 1 } => Strings.AgoJustNow,
+            { TotalHours: < 1 } => Counts.Of((long)age.TotalMinutes, Strings.AgoOneMinute, Strings.AgoMinutes),
+            { TotalDays: < 1 } => Counts.Of((long)age.TotalHours, Strings.AgoOneHour, Strings.AgoHours),
+            { TotalDays: <= 30 } => Counts.Of((long)age.TotalDays, Strings.AgoOneDay, Strings.AgoDays),
+            _ => Day(moment, timeProvider),
+        };
+    }
 
     /// <summary>
     /// The short time, such as "4:40 PM".

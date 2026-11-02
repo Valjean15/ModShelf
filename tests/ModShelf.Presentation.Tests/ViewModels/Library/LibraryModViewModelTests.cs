@@ -53,18 +53,16 @@ public sealed class LibraryModViewModelTests : IDisposable
     }
 
     [Fact]
-    public async Task ListsItsFilesTheLatestDownloadedFirstAndKeepsTheirRows()
+    public async Task FollowsItsChangesInTheSameRow()
     {
-        LibraryFile older = TestData.LibraryFile(SkyUi, "1", "older.7z", daysAgo: 9);
-        LibraryFile newer = TestData.LibraryFile(SkyUi, "2", "newer.7z", daysAgo: 2);
-        LibraryModViewModel row = await ShowAsync(TestData.LibraryMod(SkyUi, "SkyUI", watched: true, older, newer));
-        LibraryFileViewModel olderRow = row.Files[1];
+        LibraryFile older = TestData.LibraryFile(SkyUi, "1", "older.7z", "1.0", daysAgo: 9);
+        LibraryModViewModel row = await ShowAsync(TestData.LibraryMod(SkyUi, "SkyUI", watched: true, older));
 
-        LibraryFile newest = TestData.LibraryFile(SkyUi, "3", "newest.7z", daysAgo: 0);
-        _harness.Library.Change(SkyUi, TestData.LibraryMod(SkyUi, "SkyUI", watched: true, older, newest));
+        LibraryFile newer = TestData.LibraryFile(SkyUi, "2", "newer.7z", "2.0", daysAgo: 0);
+        _harness.Library.Change(SkyUi, TestData.LibraryMod(SkyUi, "SkyUI", watched: true, older, newer));
 
-        Assert.Equal(["newest.7z", "older.7z"], row.Files.Select(file => file.FileName));
-        Assert.Same(olderRow, row.Files[1]);
+        Assert.Same(row, _harness.Row(TestData.LibraryMod(SkyUi, "SkyUI")));
+        Assert.Equal(("2.0", "2 files"), (row.VersionText, row.FilesText));
     }
 
     [Theory]
@@ -90,7 +88,7 @@ public sealed class LibraryModViewModelTests : IDisposable
 
         await row.UnwatchCommand.ExecuteAsync(null);
 
-        Assert.Empty(_harness.Screen.Rows);
+        Assert.Empty(_harness.Screen.Games);
     }
 
     [Fact]
@@ -108,7 +106,7 @@ public sealed class LibraryModViewModelTests : IDisposable
                 "Remove")],
             _harness.Dialogs.Confirmations);
         Assert.Equal(["Forget 12604"], _harness.Library.Asked);
-        Assert.Empty(_harness.Screen.Rows);
+        Assert.Empty(_harness.Screen.Games);
     }
 
     [Fact]

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Time.Testing;
 
 using ModShelf.Domain.Library;
+using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.ViewModels.Library;
 using ModShelf.Testing;
@@ -95,20 +96,49 @@ internal sealed class LibraryHarness : IDisposable
     }
 
     /// <summary>
-    /// The screen's row for the mod.
+    /// The screen's row for the mod, opening its game when another one, or none, is open.
     /// </summary>
-    public LibraryModViewModel Row(LibraryMod mod) => Assert.Single(Screen.Rows.OfType<LibraryModViewModel>(), row => row.Mod == mod.Mod);
+    public LibraryModViewModel Row(LibraryMod mod)
+    {
+        if (Screen.OpenGame?.Game != mod.Mod.Game)
+        {
+            Game(mod.Mod.Game).OpenCommand.Execute(null);
+        }
+
+        return Assert.Single(Screen.GameMods, row => row.Mod == mod.Mod);
+    }
 
     /// <summary>
-    /// The rows as text: "# " and a game's name for its heading, then its mods' names.
+    /// The game among the screen's games.
+    /// </summary>
+    public LibraryGameViewModel Game(GameRef game) => Assert.Single(Screen.Games, shown => shown.Game == game);
+
+    /// <summary>
+    /// The games and their mods as text: "# " and a game's name, then its mods' names as opening it shows them. The
+    /// screen then shows what it showed before.
     /// </summary>
     public IReadOnlyList<string> Lines()
-        => [.. Screen.Rows.Select(row => row switch
+    {
+        LibraryGameViewModel? open = Screen.OpenGame;
+        List<string> lines = [];
+        foreach (LibraryGameViewModel game in Screen.Games.ToList())
         {
-            LibraryGameViewModel game => $"# {game.Name}",
-            LibraryModViewModel mod => mod.Name,
-            _ => throw new InvalidOperationException("Unknown row."),
-        })];
+            lines.Add($"# {game.Name}");
+            game.OpenCommand.Execute(null);
+            lines.AddRange(Screen.GameMods.Select(mod => mod.Name));
+        }
+
+        if (open is null)
+        {
+            Screen.ShowGamesCommand.Execute(null);
+        }
+        else
+        {
+            open.OpenCommand.Execute(null);
+        }
+
+        return lines;
+    }
 
     /// <summary>
     /// Stops the screen's work, as closing the app does. Once is enough.

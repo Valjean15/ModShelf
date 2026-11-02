@@ -28,7 +28,7 @@ public sealed class LibraryViewModelTests : IDisposable
         Assert.Equal(
             ["# Skyrim Special Edition", "Address Library", "SkyUI", "unofficial patch", "# Stardew Valley", "SMAPI"],
             _harness.Lines());
-        Assert.Equal(["3 mods", "1 mod"], Screen.Rows.OfType<LibraryGameViewModel>().Select(game => game.ModsText));
+        Assert.Equal(["3 mods", "1 mod"], Screen.Games.Select(game => game.ModsText));
         Assert.False(Screen.IsEmpty);
         Assert.Equal(0, Screen.Badge);
     }
@@ -41,7 +41,7 @@ public sealed class LibraryViewModelTests : IDisposable
         LibraryMod other = TestData.LibraryMod(TestData.Mod("1", "zgame"), "Other");
         await _harness.StartAsync(SkyUi, other);
         IReadOnlyList<string> before = _harness.Lines();
-        LibraryGameViewModel skyrim = Screen.Rows.OfType<LibraryGameViewModel>().First();
+        LibraryGameViewModel skyrim = Screen.Games.First();
 
         // The names arrive on threads of their own, so they're held for the UI thread to show one after the other.
         _harness.UiThread.Inline = false;
@@ -51,7 +51,7 @@ public sealed class LibraryViewModelTests : IDisposable
 
         Assert.Equal(["# skyrimspecialedition", "SkyUI", "# zgame", "Other"], before);
         Assert.Equal(["# A Game", "Other", "# Skyrim Special Edition", "SkyUI"], _harness.Lines());
-        Assert.Same(skyrim, Screen.Rows[2]);
+        Assert.Same(skyrim, Screen.Games[1]);
     }
 
     [Fact]
@@ -153,18 +153,18 @@ public sealed class LibraryViewModelTests : IDisposable
 
         Assert.True(Screen.IsEmpty);
         Assert.False(Screen.NothingMatches);
-        Assert.Empty(Screen.Rows);
+        Assert.Empty(Screen.Games);
     }
 
     [Fact]
-    public async Task TheFilterShowsTheModsWhoseNamesHaveItAndTheirGames()
+    public async Task TheGamesFilterShowsTheGamesWhoseNamesHaveIt()
     {
         await _harness.StartAsync(SkyUi, Smapi, Ussep, Address);
 
-        Screen.Filter = " SKY ";
+        Screen.GamesFilter = " SKY ";
 
-        Assert.Equal(["# Skyrim Special Edition", "SkyUI"], _harness.Lines());
-        Assert.Equal("1 mod", Assert.Single(Screen.Rows.OfType<LibraryGameViewModel>()).ModsText);
+        Assert.Equal(["# Skyrim Special Edition", "Address Library", "SkyUI", "unofficial patch"], _harness.Lines());
+        Assert.Equal("3 mods", Assert.Single(Screen.Games).ModsText);
         Assert.False(Screen.NothingMatches);
     }
 
@@ -173,13 +173,13 @@ public sealed class LibraryViewModelTests : IDisposable
     {
         await _harness.StartAsync(SkyUi, Smapi);
 
-        Screen.Filter = "zzz";
+        Screen.GamesFilter = "zzz";
         (bool, string) nothing = (Screen.NothingMatches, Screen.NothingMatchesText);
-        Screen.Filter = string.Empty;
+        Screen.GamesFilter = string.Empty;
 
-        Assert.Equal((true, "No mod's name has “zzz”."), nothing);
+        Assert.Equal((true, "No game's name has “zzz”."), nothing);
         Assert.False(Screen.NothingMatches);
-        Assert.Equal(4, Screen.Rows.Count);
+        Assert.Equal(2, Screen.Games.Count);
     }
 
     [Fact]
@@ -188,7 +188,6 @@ public sealed class LibraryViewModelTests : IDisposable
         _harness.Catalog.GameNames["stardewvalley"] = "Stardew Valley";
         await _harness.StartAsync(SkyUi, Address);
         LibraryModViewModel row = _harness.Row(SkyUi);
-        row.IsExpanded = true;
 
         _harness.Library.Change(Smapi.Mod, Smapi);
         _harness.Library.Change(Address.Mod, null);
@@ -196,7 +195,6 @@ public sealed class LibraryViewModelTests : IDisposable
 
         Assert.Equal(["# Skyrim Special Edition", "SkyUI renamed", "# Stardew Valley", "SMAPI"], _harness.Lines());
         Assert.Same(row, _harness.Row(SkyUi));
-        Assert.True(row.IsExpanded);
         Assert.False(row.IsWatched);
     }
 
@@ -218,7 +216,7 @@ public sealed class LibraryViewModelTests : IDisposable
         _harness.Library.Change(SkyUi.Mod, null);
 
         Assert.True(Screen.IsEmpty);
-        Assert.Empty(Screen.Rows);
+        Assert.Empty(Screen.Games);
     }
 
     [Fact]
@@ -226,15 +224,15 @@ public sealed class LibraryViewModelTests : IDisposable
     {
         _harness.UiThread.Inline = false;
         await _harness.StartAsync(SkyUi);
-        bool listedBeforeTheUiThreadRan = Screen.Rows.Count > 0;
+        bool listedBeforeTheUiThreadRan = Screen.Games.Count > 0;
         _harness.UiThread.RunPending();
 
         _harness.Library.Change(Address.Mod, Address);
-        int beforeTheUiThreadRan = Screen.Rows.Count;
+        int beforeTheUiThreadRan = Screen.Games.Single().ModCount;
         _harness.UiThread.RunPending();
 
         Assert.False(listedBeforeTheUiThreadRan);
-        Assert.Equal(2, beforeTheUiThreadRan);
+        Assert.Equal(1, beforeTheUiThreadRan);
         Assert.Equal(["# Skyrim Special Edition", "Address Library", "SkyUI"], _harness.Lines());
     }
 

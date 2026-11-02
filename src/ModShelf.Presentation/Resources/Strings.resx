@@ -386,17 +386,9 @@
     <value>That isn't a link. Copy the link the download button on {0} holds, and paste that.</value>
     <comment>When the text pasted for a handoff isn't a link. {0} is the site's name.</comment>
   </data>
-  <data name="LibraryFilterHint" xml:space="preserve">
-    <value>Filter by mod name</value>
-    <comment>The empty box at the top of the Library screen.</comment>
-  </data>
   <data name="LibraryEmpty" xml:space="preserve">
     <value>The library is empty. Mods you download into it show here, watched for updates.</value>
     <comment>Shown when the library has no mods.</comment>
-  </data>
-  <data name="LibraryNothingMatches" xml:space="preserve">
-    <value>No mod's name has “{0}”.</value>
-    <comment>Shown when the filter hides every mod. {0} is what the user typed.</comment>
   </data>
   <data name="LibraryOneMod" xml:space="preserve">
     <value>1 mod</value>
@@ -465,10 +457,6 @@
   <data name="LibraryFileDownloaded" xml:space="preserve">
     <value>Downloaded {0}</value>
     <comment>When a file was downloaded. {0} is a date.</comment>
-  </data>
-  <data name="LibraryFileSha256" xml:space="preserve">
-    <value>SHA-256 {0}</value>
-    <comment>A library file's hash, to check a copy of it against. {0} is 64 hexadecimal digits.</comment>
   </data>
   <data name="LibraryDeleteFile" xml:space="preserve">
     <value>Delete…</value>
@@ -1871,5 +1859,182 @@
   <data name="FileCategoryUnknown" xml:space="preserve">
     <value>No section</value>
     <comment>A file in no section on its site.</comment>
+  </data>
+  <data name="AgoJustNow" xml:space="preserve">
+    <value>just now</value>
+  </data>
+  <data name="AgoOneMinute" xml:space="preserve">
+    <value>1 minute ago</value>
+  </data>
+  <data name="AgoMinutes" xml:space="preserve">
+    <value>{0:N0} minutes ago</value>
+  </data>
+  <data name="AgoOneHour" xml:space="preserve">
+    <value>1 hour ago</value>
+  </data>
+  <data name="AgoHours" xml:space="preserve">
+    <value>{0:N0} hours ago</value>
+  </data>
+  <data name="AgoOneDay" xml:space="preserve">
+    <value>yesterday</value>
+  </data>
+  <data name="AgoDays" xml:space="preserve">
+    <value>{0:N0} days ago</value>
+    <comment>Up to 30 days; older moments are written as dates.</comment>
+  </data>
+  <data name="NoValue" xml:space="preserve">
+    <value>—</value>
+    <comment>In a table cell with nothing to say, such as a mod without files has no version.</comment>
+  </data>
+  <data name="LibraryOneGame" xml:space="preserve">
+    <value>1 game</value>
+  </data>
+  <data name="LibraryGames" xml:space="preserve">
+    <value>{0:N0} games</value>
+  </data>
+  <data name="LibrarySummary" xml:space="preserve">
+    <value>{0} · {1} · {2} on disk</value>
+    <comment>Under the Library heading: games, mods, and the space their files take, such as "4 games · 112 mods · 41.8 GB on disk".</comment>
+  </data>
+  <data name="LibraryCheckedAgo" xml:space="preserve">
+    <value>{0} · checked {1}</value>
+    <comment>A summary, then when updates were last checked, such as "… · checked 2 hours ago".</comment>
+  </data>
+  <data name="LibraryGameSummary" xml:space="preserve">
+    <value>{0} · {1} · {2} on disk</value>
+    <comment>Under a game's heading: its mods, its updates, and the space its files take.</comment>
+  </data>
+  <data name="LibraryGameSummaryArchived" xml:space="preserve">
+    <value>{0} · {1} · {2} on disk, {3} of it archived versions</value>
+  </data>
+  <data name="LibraryUpToDate" xml:space="preserve">
+    <value>Up to date</value>
+    <comment>A game without updates found.</comment>
+  </data>
+  <data name="LibrarySizeArchived" xml:space="preserve">
+    <value>{0} archived</value>
+    <comment>Such as "1.2 GB archived": the space a game's archived versions take.</comment>
+  </data>
+  <data name="LibraryNotChecked" xml:space="preserve">
+    <value>Not yet</value>
+    <comment>When a game's mods were last checked for updates, when they never were.</comment>
+  </data>
+  <data name="LibraryGamesFilterHint" xml:space="preserve">
+    <value>Filter games</value>
+  </data>
+  <data name="LibraryModsFilterHint" xml:space="preserve">
+    <value>Filter by name or author</value>
+  </data>
+  <data name="LibraryNothingMatchesGames" xml:space="preserve">
+    <value>No game's name has “{0}”.</value>
+  </data>
+  <data name="LibraryNothingMatchesMods" xml:space="preserve">
+    <value>No mod matches. Clear the filter or the toggles to see them all.</value>
+  </data>
+  <data name="LibrarySortLabel" xml:space="preserve">
+    <value>Sort</value>
+  </data>
+  <data name="LibraryShowOnly" xml:space="preserve">
+    <value>Show only</value>
+  </data>
+  <data name="GameOrderMostMods" xml:space="preserve">
+    <value>Most mods</value>
+  </data>
+  <data name="GameOrderName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="GameOrderMostSpace" xml:space="preserve">
+    <value>Most space</value>
+  </data>
+  <data name="GameOrderUpdatesFirst" xml:space="preserve">
+    <value>Updates first</value>
+  </data>
+  <data name="ModOrderName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="ModOrderUpdatesFirst" xml:space="preserve">
+    <value>Updates first</value>
+  </data>
+  <data name="ModOrderUpdatedOnSite" xml:space="preserve">
+    <value>Last updated on the site</value>
+  </data>
+  <data name="ModOrderSize" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="ModOrderAdded" xml:space="preserve">
+    <value>Added to the library</value>
+  </data>
+  <data name="ModFilterUpdates" xml:space="preserve">
+    <value>Has an update</value>
+  </data>
+  <data name="ModFilterWatched" xml:space="preserve">
+    <value>Watched</value>
+  </data>
+  <data name="ModFilterArchived" xml:space="preserve">
+    <value>Archived versions</value>
+  </data>
+  <data name="ModFilterMissing" xml:space="preserve">
+    <value>Missing files</value>
+  </data>
+  <data name="LibraryColumnGame" xml:space="preserve">
+    <value>Game</value>
+  </data>
+  <data name="LibraryColumnMods" xml:space="preserve">
+    <value>Mods</value>
+  </data>
+  <data name="LibraryColumnUpdates" xml:space="preserve">
+    <value>Updates</value>
+  </data>
+  <data name="LibraryColumnOnDisk" xml:space="preserve">
+    <value>On disk</value>
+  </data>
+  <data name="LibraryColumnChecked" xml:space="preserve">
+    <value>Checked</value>
+  </data>
+  <data name="LibraryColumnMod" xml:space="preserve">
+    <value>Mod</value>
+  </data>
+  <data name="LibraryColumnVersion" xml:space="preserve">
+    <value>Your version</value>
+  </data>
+  <data name="LibraryColumnStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="LibraryColumnFiles" xml:space="preserve">
+    <value>Files</value>
+  </data>
+  <data name="LibraryColumnSize" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="LibraryColumnUpdated" xml:space="preserve">
+    <value>Updated on site</value>
+  </data>
+  <data name="LibraryFilesArchived" xml:space="preserve">
+    <value>{0}, {1:N0} archived</value>
+    <comment>Such as "2 files, 1 archived".</comment>
+  </data>
+  <data name="ModStatusUpdateTo" xml:space="preserve">
+    <value>Update to {0}</value>
+    <comment>A mod's update, with the new version.</comment>
+  </data>
+  <data name="ModStatusUpdates" xml:space="preserve">
+    <value>{0:N0} updates</value>
+  </data>
+  <data name="ModStatusOneMissing" xml:space="preserve">
+    <value>1 file missing</value>
+  </data>
+  <data name="ModStatusMissing" xml:space="preserve">
+    <value>{0:N0} files missing</value>
+  </data>
+  <data name="ModStatusWatchedOnly" xml:space="preserve">
+    <value>Watched only</value>
+    <comment>A mod the library watches without having any of its files.</comment>
+  </data>
+  <data name="ModStatusNotWatched" xml:space="preserve">
+    <value>Not watched</value>
+  </data>
+  <data name="LibraryOpenGame" xml:space="preserve">
+    <value>Open {0}</value>
+    <comment>Read out for a game's tile.</comment>
   </data>
 </root>

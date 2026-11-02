@@ -27,10 +27,12 @@ using ModShelf.Sources.Abstractions.Catalog;
 namespace ModShelf.Presentation.ViewModels.Library;
 
 /// <summary>
-/// The mods the library has files of or watches, by game, as one list of games' headings and their mods, so it can be
-/// virtualized, or as cards under each game's heading. A box filters the mods by name. With previews, each mod shows its
-/// picture, from its saved details. A mod opens on its page in place of the list, read from its site, or from its saved
-/// details when the site can't give it. It follows the library's changes while the app runs.
+/// The library by game. It opens on the games, as tiles or rows, each with how many mods it has, the updates found for
+/// them, the space their files take and when they were last checked; a box filters them by name, and a list orders
+/// them. A game opens on its mods, as rows or cards, which a box filters by name or author, toggles narrow to those with
+/// updates, watched, with archived versions or with files missing from disk, and a list orders; with previews, each
+/// shows its picture, from its saved details. A mod opens on its page in place of its game's mods, read from its site,
+/// or from its saved details when the site can't give it. It follows the library's changes while the app runs.
 /// </summary>
 public sealed partial class LibraryViewModel : ScreenViewModel
 {
@@ -39,16 +41,18 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     private readonly ISourceRegistry _sources;
     private readonly ModPictures _pictures;
     private readonly IUiThread _uiThread;
+    private readonly TimeProvider _timeProvider;
     private readonly ILogger<LibraryViewModel> _logger;
     private readonly LibraryServices _services;
     private readonly ModPageServices _pageServices;
     private readonly Dictionary<ModRef, LibraryModViewModel> _mods = [];
     private readonly Dictionary<ModRef, LibraryMod> _shown = [];
     private readonly Dictionary<GameRef, LibraryGameViewModel> _games = [];
+    private readonly HashSet<ModRef> _picturesShown = [];
     private CancellationToken _stopping;
     private CancellationTokenSource? _opening;
+    private CancellationTokenSource? _checking;
     private ModRef? _openedMod;
-    private bool _picturesShown;
 
     public LibraryViewModel(
         IModLibrary library,
@@ -74,6 +78,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(uiThread);
+        ArgumentNullException.ThrowIfNull(timeProvider);
         ArgumentNullException.ThrowIfNull(logger);
 
         _library = library;
@@ -99,6 +104,31 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             pictures,
             timeProvider,
             logger);
+        _timeProvider = timeProvider;
+        GameOrders =
+        [
+            new(GameOrder.MostMods, Strings.GameOrderMostMods),
+            new(GameOrder.Name, Strings.GameOrderName),
+            new(GameOrder.MostSpace, Strings.GameOrderMostSpace),
+            new(GameOrder.UpdatesFirst, Strings.GameOrderUpdatesFirst),
+        ];
+        SelectedGameOrder = GameOrders[0];
+        ModOrders =
+        [
+            new(ModOrder.Name, Strings.ModOrderName),
+            new(ModOrder.UpdatesFirst, Strings.ModOrderUpdatesFirst),
+            new(ModOrder.UpdatedOnSite, Strings.ModOrderUpdatedOnSite),
+            new(ModOrder.Size, Strings.ModOrderSize),
+            new(ModOrder.AddedToLibrary, Strings.ModOrderAdded),
+        ];
+        SelectedModOrder = ModOrders[0];
+        ModFilters =
+        [
+            new(ModFilterKind.HasUpdates, Strings.ModFilterUpdates, ArrangeMods),
+            new(ModFilterKind.Watched, Strings.ModFilterWatched, ArrangeMods),
+            new(ModFilterKind.Archived, Strings.ModFilterArchived, ArrangeMods),
+            new(ModFilterKind.Missing, Strings.ModFilterMissing, ArrangeMods),
+        ];
         Previews = new PreviewsViewModel(PreviewScreen.Library, pictures);
         Previews.PropertyChanged += (_, changed) =>
         {
@@ -114,25 +144,31 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     public override string Title => Strings.LibraryTitle;
 
     /// <summary>
-    /// What the mods' names must have to show; empty for every mod.
-    /// </summary>
-    [ObservableProperty]
-    public partial string Filter { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Whether the mods show as rows, with thumbnails or not, or as cards.
+    /// Whether the mods show as rows, with thumbnails or not, or as cards; and the games too.
     /// </summary>
     public PreviewsViewModel Previews { get; }
 
     /// <summary>
-    /// Each game's heading followed by its mods, games and mods by name.
-    /// </summary>
-    public ObservableCollection<ObservableObject> Rows { get; } = [];
-
-    /// <summary>
-    /// The games' headings in <see cref="Rows"/>, each with its mods, for cards.
+    /// The games with mods in the library whose names have <see cref="GamesFilter"/>, in <see cref="SelectedGameOrder"/>.
     /// </summary>
     public ObservableCollection<LibraryGameViewModel> Games { get; } = [];
+
+    /// <summary>
+    /// What the games' names must have to show; empty for every game.
+    /// </summary>
+    [ObservableProperty]
+    public partial string GamesFilter { get; set; } = string.Empty;
+
+    public IReadOnlyList<LibraryChoice<GameOrder>> GameOrders { get; }
+
+    [ObservableProperty]
+    public partial LibraryChoice<GameOrder> SelectedGameOrder { get; set; }
+
+    /// <summary>
+    /// Such as "4 games · 112 mods · 41.8 GB on disk · checked 2 hours ago".
+    /// </summary>
+    [ObservableProperty]
+    public partial string SummaryText { get; private set; } = string.Empty;
 
     /// <summary>
     /// Whether the library has no mods at all.
@@ -141,7 +177,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     public partial bool IsEmpty { get; private set; } = true;
 
     /// <summary>
-    /// Whether the library has mods, but the filter hides them all; <see cref="NothingMatchesText"/> says so.
+    /// Whether the library has games, but the filter hides them all; <see cref="NothingMatchesText"/> says so.
     /// </summary>
     [ObservableProperty]
     public partial bool NothingMatches { get; private set; }
@@ -150,17 +186,55 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     public partial string NothingMatchesText { get; private set; } = string.Empty;
 
     /// <summary>
-    /// The mod opened, in place of the list; null when none is.
+    /// The game whose mods show, in place of the games; null when the games show.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsGameOpen))]
+    [NotifyCanExecuteChangedFor(nameof(ShowGamesCommand))]
+    public partial LibraryGameViewModel? OpenGame { get; private set; }
+
+    public bool IsGameOpen => OpenGame is not null;
+
+    /// <summary>
+    /// The open game's mods that pass <see cref="ModsFilter"/> and the toggles that are on, in
+    /// <see cref="SelectedModOrder"/>.
+    /// </summary>
+    public ObservableCollection<LibraryModViewModel> GameMods { get; } = [];
+
+    /// <summary>
+    /// What the open game's mods' names or authors must have to show; empty for every mod.
+    /// </summary>
+    [ObservableProperty]
+    public partial string ModsFilter { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The toggles that narrow the open game's mods, each with how many it would show.
+    /// </summary>
+    public IReadOnlyList<ModFilterViewModel> ModFilters { get; }
+
+    public IReadOnlyList<LibraryChoice<ModOrder>> ModOrders { get; }
+
+    [ObservableProperty]
+    public partial LibraryChoice<ModOrder> SelectedModOrder { get; set; }
+
+    /// <summary>
+    /// Whether the open game has mods, but the filter and toggles hide them all.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool NoModMatches { get; private set; }
+
+    /// <summary>
+    /// The mod opened, in place of its game's mods; null when none is.
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsModOpen))]
-    [NotifyCanExecuteChangedFor(nameof(BackCommand))]
+    [NotifyCanExecuteChangedFor(nameof(BackCommand), nameof(ShowGamesCommand))]
     public partial ModPageViewModel? Mod { get; private set; }
 
     public bool IsModOpen => Mod is not null;
 
     /// <summary>
-    /// The name of the game of the mod opened, for the way back to the list.
+    /// The name of the game of the mod opened, for the way back to its mods.
     /// </summary>
     [ObservableProperty]
     public partial string OpenGameName { get; private set; } = string.Empty;
@@ -182,6 +256,11 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     /// The last opening of a mod, for tests to wait on.
     /// </summary>
     internal Task Opening { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
+    /// The last check of the open game's mods' files and saved details, for tests to wait on.
+    /// </summary>
+    internal Task Checking { get; private set; } = Task.CompletedTask;
 
     /// <summary>
     /// Reads the previews from the settings, lists the library, then follows its changes while the app runs, and asks the
@@ -214,18 +293,41 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             cancellationToken);
     }
 
-    partial void OnFilterChanged(string value) => Arrange();
+    partial void OnGamesFilterChanged(string value) => Arrange();
+
+    partial void OnSelectedGameOrderChanged(LibraryChoice<GameOrder> value) => Arrange();
+
+    partial void OnModsFilterChanged(string value) => ArrangeMods();
+
+    partial void OnSelectedModOrderChanged(LibraryChoice<ModOrder> value) => ArrangeMods();
+
+    private bool CanShowGames() => IsGameOpen || IsModOpen;
 
     /// <summary>
-    /// Closes the mod, back to the list.
+    /// Closes the mod and the game, back to the games.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanShowGames))]
+    private void ShowGames()
+    {
+        CloseMod();
+        _checking?.Cancel();
+        OpenGame = null;
+        GameMods.Clear();
+        ShowPictures();
+    }
+
+    /// <summary>
+    /// Closes the mod, back to its game's mods.
     /// </summary>
     [RelayCommand(CanExecute = nameof(IsModOpen))]
     private void Back()
     {
-        _opening?.Cancel();
-        _openedMod = null;
-        Mod = null;
-        PageProblem = null;
+        ModRef? closed = _openedMod;
+        CloseMod();
+        if (closed is { } mod && OpenGame?.Game != mod.Game && Games.FirstOrDefault(game => game.Game == mod.Game) is { } its)
+        {
+            Open(its);
+        }
     }
 
     private bool CanRetry() => PageProblem is not null && _openedMod is not null;
@@ -349,17 +451,22 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         {
             _mods.Remove(change.Mod);
             _shown.Remove(change.Mod);
+            _picturesShown.Remove(change.Mod);
         }
 
         Arrange();
+        if (change.After is { } changed && OpenGame?.Game == changed.Mod.Game)
+        {
+            Checking = CheckAsync([changed], _checking?.Token ?? _stopping);
+        }
 
         // Also for a change to a mod the open mod needs.
         Mod?.ShowLibrary();
     }
 
     /// <summary>
-    /// Shows the mod as it is now, adding its row, and its game's heading, when they're new. A game's heading is kept
-    /// once made, so its site is asked for its name once.
+    /// Shows the mod as it is now, adding its row, and its game, when they're new. A game is kept once made, so its site
+    /// is asked for its name once.
     /// </summary>
     private void Show(LibraryMod mod)
     {
@@ -372,7 +479,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         {
             LibraryModViewModel added = new(mod, _services);
             _mods.Add(mod.Mod, added);
-            if (_picturesShown)
+            if (Previews.ShowsPictures && OpenGame?.Game == mod.Mod.Game && _picturesShown.Add(mod.Mod))
             {
                 added.Picture.Show(mod.Mod, _stopping);
             }
@@ -380,64 +487,220 @@ public sealed partial class LibraryViewModel : ScreenViewModel
 
         if (!_games.ContainsKey(mod.Mod.Game))
         {
-            _games.Add(mod.Mod.Game, new LibraryGameViewModel(mod.Mod.Game));
+            _games.Add(mod.Mod.Game, new LibraryGameViewModel(mod.Mod.Game, Open, _timeProvider));
             _ = NameAsync(mod.Mod.Game);
         }
     }
 
     /// <summary>
-    /// Puts the rows in order: games by name, each with the mods whose names match the filter, by name. A game without
-    /// such mods doesn't show.
+    /// Shows the game's mods in place of the games, and checks their files and saved details.
+    /// </summary>
+    private void Open(LibraryGameViewModel game)
+    {
+        CloseMod();
+        _checking?.Cancel();
+        _checking = CancellationTokenSource.CreateLinkedTokenSource(_stopping);
+        OpenGame = game;
+        ArrangeMods();
+        ShowPictures();
+        Checking = CheckAsync([.. _shown.Values.Where(mod => mod.Mod.Game == game.Game)], _checking.Token);
+    }
+
+    private void CloseMod()
+    {
+        _opening?.Cancel();
+        _openedMod = null;
+        Mod = null;
+        PageProblem = null;
+    }
+
+    /// <summary>
+    /// Counts the mods' files missing from disk, once the library's folder is known, and reads when their sites last
+    /// updated them from their saved details; then shows both. Started on the UI thread.
+    /// </summary>
+    private async Task CheckAsync(IReadOnlyList<LibraryMod> mods, CancellationToken cancellationToken)
+    {
+        try
+        {
+            string? root;
+            try
+            {
+                root = await _pageServices.Settings.GetLibraryRootAsync(cancellationToken);
+            }
+            catch (InvalidDataException)
+            {
+                // Settings that can't be read: what's on disk isn't known.
+                root = null;
+            }
+
+            Dictionary<ModRef, int> missing = root is null
+                ? []
+                : await Task.Run(
+                    () => mods.ToDictionary(
+                        mod => mod.Mod,
+                        mod => mod.Files.Count(file => !_pageServices.Storage.FileExists(LibraryPaths.Resolve(root, file.RelativePath)))),
+                    cancellationToken);
+            Dictionary<ModRef, DateTimeOffset?> updated = [];
+            foreach (LibraryMod mod in mods)
+            {
+                updated[mod.Mod] = (await _pictures.Details.GetSavedAsync(mod.Mod, cancellationToken))?.UpdatedAt;
+            }
+
+            _uiThread.Post(() =>
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                foreach (LibraryMod mod in mods)
+                {
+                    if (_mods.TryGetValue(mod.Mod, out LibraryModViewModel? row))
+                    {
+                        row.ShowMissing(missing.GetValueOrDefault(mod.Mod));
+                        row.ShowSiteUpdate(updated.GetValueOrDefault(mod.Mod));
+                    }
+                }
+
+                ArrangeMods();
+            });
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // Another game was opened, the games shown again, or the app is closing.
+        }
+        catch (Exception exception)
+        {
+            LogCheckFailed(_logger, exception, OpenGame?.Game.Key ?? string.Empty);
+        }
+    }
+
+    /// <summary>
+    /// Puts the games in order: those with mods whose names have the filter, as the order says; then the open game's
+    /// mods. A game whose last mod left the library goes, and when it's open, the games show again.
     /// </summary>
     private void Arrange()
     {
         StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
-        string filter = Filter.Trim();
-        List<ObservableObject> rows = [];
-        foreach (IGrouping<GameRef, LibraryModViewModel> game in _mods.Values
-            .Where(mod => filter.Length == 0 || CultureInfo.CurrentCulture.CompareInfo.IndexOf(mod.Name, filter, CompareOptions.IgnoreCase) >= 0)
-            .GroupBy(mod => mod.Mod.Game)
-            .OrderBy(game => _games[game.Key].Name, byName))
+        Dictionary<GameRef, LibraryModViewModel[]> byGame = _mods.Values.GroupBy(mod => mod.Mod.Game).ToDictionary(game => game.Key, game => game.ToArray());
+        foreach ((GameRef game, LibraryModViewModel[] mods) in byGame)
         {
-            LibraryGameViewModel heading = _games[game.Key];
-            LibraryModViewModel[] mods = [.. game.OrderBy(mod => mod.Name, byName)];
-            heading.ModsText = Counts.Of(mods.Length, Strings.LibraryOneMod, Strings.LibraryMods);
-            heading.Mods.SyncWith(mods);
-            rows.Add(heading);
-            rows.AddRange(mods);
+            _games[game].Show(mods);
         }
 
-        Rows.SyncWith(rows);
-        Games.SyncWith([.. rows.OfType<LibraryGameViewModel>()]);
+        string filter = GamesFilter.Trim();
+        IEnumerable<LibraryGameViewModel> shown = byGame.Keys.Select(game => _games[game]).Where(game => Has(game.Name, filter));
+        IOrderedEnumerable<LibraryGameViewModel> ordered = SelectedGameOrder.Value switch
+        {
+            GameOrder.MostMods => shown.OrderByDescending(game => game.ModCount),
+            GameOrder.MostSpace => shown.OrderByDescending(game => game.Size),
+            GameOrder.UpdatesFirst => shown.OrderByDescending(game => game.UpdateCount),
+            _ => shown.OrderBy(game => 0),
+        };
+        Games.SyncWith([.. ordered.ThenBy(game => game.Name, byName)]);
+
+        long size = _mods.Values.Sum(mod => mod.Size);
+        string summary = Text.Format(
+            Strings.LibrarySummary,
+            Counts.Of(byGame.Count, Strings.LibraryOneGame, Strings.LibraryGames),
+            Counts.Of(_mods.Count, Strings.LibraryOneMod, Strings.LibraryMods),
+            Sizes.Format(size));
+        SummaryText = _mods.Values.Max(mod => mod.CheckedAt) is { } checkedAt
+            ? Text.Format(Strings.LibraryCheckedAgo, summary, Dates.Ago(checkedAt, _timeProvider))
+            : summary;
         IsEmpty = _mods.Count == 0;
-        NothingMatches = !IsEmpty && rows.Count == 0;
-        NothingMatchesText = NothingMatches ? Text.Format(Strings.LibraryNothingMatches, filter) : string.Empty;
+        NothingMatches = !IsEmpty && Games.Count == 0;
+        NothingMatchesText = NothingMatches ? Text.Format(Strings.LibraryNothingMatchesGames, filter) : string.Empty;
+
+        if (OpenGame is { } open && !byGame.ContainsKey(open.Game))
+        {
+            _checking?.Cancel();
+            OpenGame = null;
+        }
+
+        ArrangeMods();
     }
 
     /// <summary>
-    /// Shows each mod's picture while the screen shows pictures, as adult mods' pictures should look now; hides them
-    /// otherwise. A picture already shown isn't read again.
+    /// Puts the open game's mods in order: those whose names or authors have the filter and that every toggle that's on
+    /// says, as the order says, then by name. Each toggle counts the game's mods it says.
+    /// </summary>
+    private void ArrangeMods()
+    {
+        if (OpenGame is not { } game)
+        {
+            GameMods.Clear();
+            NoModMatches = false;
+            return;
+        }
+
+        StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
+        LibraryModViewModel[] mods = [.. _mods.Values.Where(mod => mod.Mod.Game == game.Game)];
+        foreach (ModFilterViewModel toggle in ModFilters)
+        {
+            toggle.Count = mods.Count(mod => Says(toggle.Kind, mod));
+        }
+
+        string filter = ModsFilter.Trim();
+        IEnumerable<LibraryModViewModel> shown = mods
+            .Where(mod => Has(mod.Name, filter) || (_shown.GetValueOrDefault(mod.Mod)?.Author is { } author && Has(author, filter)))
+            .Where(mod => ModFilters.All(toggle => !toggle.IsOn || Says(toggle.Kind, mod)));
+        IOrderedEnumerable<LibraryModViewModel> ordered = SelectedModOrder.Value switch
+        {
+            ModOrder.UpdatesFirst => shown.OrderByDescending(mod => mod.UpdateCount > 0),
+            ModOrder.UpdatedOnSite => shown.OrderByDescending(mod => mod.SiteUpdatedAt ?? DateTimeOffset.MinValue),
+            ModOrder.Size => shown.OrderByDescending(mod => mod.Size),
+            ModOrder.AddedToLibrary => shown.OrderByDescending(mod => mod.AddedAt),
+            _ => shown.OrderBy(mod => 0),
+        };
+        GameMods.SyncWith([.. ordered.ThenBy(mod => mod.Name, byName)]);
+        NoModMatches = GameMods.Count == 0;
+    }
+
+    /// <summary>
+    /// Whether the text has the filter, as the user's culture compares text, case aside; any text has an empty filter.
+    /// </summary>
+    private static bool Has(string text, string filter)
+        => filter.Length == 0 || CultureInfo.CurrentCulture.CompareInfo.IndexOf(text, filter, CompareOptions.IgnoreCase) >= 0;
+
+    private static bool Says(ModFilterKind kind, LibraryModViewModel mod) => kind switch
+    {
+        ModFilterKind.HasUpdates => mod.UpdateCount > 0,
+        ModFilterKind.Watched => mod.IsWatched,
+        ModFilterKind.Archived => mod.ArchivedCount > 0,
+        ModFilterKind.Missing => mod.MissingCount > 0,
+        _ => false,
+    };
+
+    /// <summary>
+    /// Shows the open game's mods' pictures while the screen shows pictures, as adult mods' pictures should look now;
+    /// hides every picture otherwise. A picture already shown isn't read again.
     /// </summary>
     private void ShowPictures()
     {
-        bool shown = Previews.ShowsPictures;
+        if (!Previews.ShowsPictures)
+        {
+            foreach (ModRef mod in _picturesShown)
+            {
+                _mods.GetValueOrDefault(mod)?.Picture.Hide();
+            }
+
+            _picturesShown.Clear();
+            return;
+        }
+
         foreach (LibraryModViewModel mod in _mods.Values)
         {
-            if (!shown)
-            {
-                mod.Picture.Hide();
-            }
-            else if (_picturesShown)
+            if (_picturesShown.Contains(mod.Mod))
             {
                 mod.Picture.Refresh(_stopping);
             }
-            else
+            else if (OpenGame?.Game == mod.Mod.Game)
             {
+                _picturesShown.Add(mod.Mod);
                 mod.Picture.Show(mod.Mod, _stopping);
             }
         }
-
-        _picturesShown = shown;
     }
 
     /// <summary>

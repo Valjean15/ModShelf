@@ -9,29 +9,65 @@
              x:DataType="vm:LibraryViewModel">
 
     <!--
-      The previews at the end of the filter's row, or of the way back from a mod; in a narrow window, below them. Their
-      places are set here rather than on them, so the narrow window's can replace them.
+      The order and previews at the end of the filter's row, or the previews at the end of the way back from a mod; in a
+      narrow window, below them. In a table, a narrow window drops the columns of numbers: a mod's go under its author,
+      a game's mods and updates under its name, and the time it was checked goes. Places and columns are set here rather than on what they place, so the narrow window's
+      can replace them.
     -->
     <UserControl.Styles>
-        <Style Selector="pictures|PreviewsPicker#Previews">
+        <Style Selector="WrapPanel.tools">
             <Setter Property="Grid.Column" Value="2" />
         </Style>
         <Style Selector="pictures|PreviewsPicker#PagePreviews">
             <Setter Property="Grid.Column" Value="1" />
         </Style>
-        <ContainerQuery Name="LibraryScreen" Query="max-width:540">
-            <Style Selector="pictures|PreviewsPicker#Previews, pictures|PreviewsPicker#PagePreviews">
+        <Style Selector=":is(Control).statusCell">
+            <Setter Property="Grid.Column" Value="3" />
+        </Style>
+        <Style Selector=":is(Control).narrowCell">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <ContainerQuery Name="LibraryScreen" Query="max-width:760">
+            <Style Selector="WrapPanel.tools, pictures|PreviewsPicker#PagePreviews">
                 <Setter Property="Grid.Row" Value="1" />
                 <Setter Property="Grid.Column" Value="0" />
+                <Setter Property="Grid.ColumnSpan" Value="3" />
                 <Setter Property="Margin" Value="0,10,0,0" />
+            </Style>
+        </ContainerQuery>
+        <ContainerQuery Name="LibraryScreen" Query="max-width:900">
+            <Style Selector=":is(Control).wideCell">
+                <Setter Property="IsVisible" Value="False" />
+            </Style>
+            <Style Selector=":is(Control).narrowCell">
+                <Setter Property="IsVisible" Value="True" />
+            </Style>
+            <Style Selector=":is(Control).modCell, :is(Control).statusCell">
+                <Setter Property="Grid.ColumnSpan" Value="3" />
+            </Style>
+            <Style Selector=":is(Control).statusCell">
+                <Setter Property="Grid.Column" Value="4" />
+            </Style>
+            <Style Selector=":is(Control).sizeCell">
+                <Setter Property="Grid.ColumnSpan" Value="2" />
             </Style>
         </ContainerQuery>
     </UserControl.Styles>
 
     <Panel Container.Name="LibraryScreen" Container.Sizing="Width">
-        <DockPanel IsVisible="{Binding !IsModOpen}">
-            <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto">
-                <TextBlock Classes="heading" Text="{Binding Title}" />
+        <!-- The games: tiles or rows, each opening on its mods. -->
+        <DockPanel>
+            <DockPanel.IsVisible>
+                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                    <Binding Path="!IsGameOpen" />
+                    <Binding Path="!IsModOpen" />
+                </MultiBinding>
+            </DockPanel.IsVisible>
+            <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+                <StackPanel Spacing="2">
+                    <TextBlock Classes="heading" Margin="0" Text="{Binding Title}" />
+                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding SummaryText}" IsVisible="{Binding !IsEmpty}" />
+                </StackPanel>
                 <Button Grid.Column="1"
                         VerticalAlignment="Top"
                         Content="{x:Static res:Strings.LibraryRescan}"
@@ -39,65 +75,257 @@
                         IsVisible="{Binding !IsEmpty}" />
             </Grid>
 
-            <!-- The filter as wide as the screen allows, up to a comfortable width; the previews at the end. -->
-            <Grid DockPanel.Dock="Top" Margin="0,0,0,12" ColumnSpacing="12" RowDefinitions="Auto,Auto" IsVisible="{Binding !IsEmpty}">
+            <!-- The filter as wide as the screen allows, up to a comfortable width; the order and previews at the end. -->
+            <Grid DockPanel.Dock="Top" Margin="0,0,0,14" ColumnSpacing="12" RowDefinitions="Auto,Auto" IsVisible="{Binding !IsEmpty}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="100*" MaxWidth="420" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBox Text="{Binding Filter}" PlaceholderText="{x:Static res:Strings.LibraryFilterHint}" />
-                <pictures:PreviewsPicker Name="Previews" HorizontalAlignment="Left" DataContext="{Binding Previews}" />
+                <TextBox Text="{Binding GamesFilter}" PlaceholderText="{x:Static res:Strings.LibraryGamesFilterHint}" />
+                <WrapPanel Classes="tools" ItemSpacing="16" LineSpacing="10">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Classes="note" VerticalAlignment="Center" Text="{x:Static res:Strings.LibrarySortLabel}" />
+                        <ComboBox MinWidth="150" ItemsSource="{Binding GameOrders}" SelectedItem="{Binding SelectedGameOrder}" />
+                    </StackPanel>
+                    <pictures:PreviewsPicker DataContext="{Binding Previews}" />
+                </WrapPanel>
             </Grid>
 
             <Panel>
-                <TextBlock Classes="note empty"
-                           Text="{x:Static res:Strings.LibraryEmpty}"
-                           IsVisible="{Binding IsEmpty}" />
-                <TextBlock Classes="note empty"
-                           Text="{Binding NothingMatchesText}"
-                           IsVisible="{Binding NothingMatches}" />
+                <TextBlock Classes="note empty" Text="{x:Static res:Strings.LibraryEmpty}" IsVisible="{Binding IsEmpty}" />
+                <TextBlock Classes="note empty" Text="{Binding NothingMatchesText}" IsVisible="{Binding NothingMatches}" />
 
-                <!-- One list of games' headings and their mods, so it's virtualized. Each mod is a card of its own. -->
-                <ListBox Classes="stack"
-                         ItemsSource="{Binding Rows}"
-                         IsVisible="{Binding Previews.ShowsRows}">
-                    <ListBox.DataTemplates>
-                        <DataTemplate DataType="vm:LibraryGameViewModel">
-                            <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,14,0,4">
-                                <TextBlock Classes="subheading" Text="{Binding Name}" />
-                                <TextBlock Classes="note" VerticalAlignment="Bottom" Text="{Binding ModsText}" />
-                            </StackPanel>
-                        </DataTemplate>
-
-                        <DataTemplate DataType="vm:LibraryModViewModel">
-                            <Expander HorizontalAlignment="Stretch" IsExpanded="{Binding IsExpanded}">
-                                <Expander.Header>
-                                    <Grid ColumnDefinitions="Auto,*,Auto">
-                                        <!-- Its thumbnail, while the screen shows them. -->
-                                        <Panel Margin="0,0,14,0" VerticalAlignment="Center" IsVisible="{Binding Picture.IsShown}">
-                                            <pictures:ModThumbnail DataContext="{Binding Picture}" />
-                                        </Panel>
-
-                                        <!-- Wrapping, so long names go to the next line rather than under the button. -->
-                                        <StackPanel Grid.Column="1" Margin="0,0,16,0" Spacing="3" VerticalAlignment="Center">
-                                            <WrapPanel ItemSpacing="8">
-                                                <Button Classes="name" Command="{Binding OpenCommand}">
-                                                    <TextBlock TextWrapping="Wrap" Text="{Binding Name}" />
-                                                </Button>
-                                                <TextBlock Classes="note" Text="{Binding AuthorText}" />
+                <!-- As cards: each game's cover, then its name and numbers, as many side by side as fit. -->
+                <ScrollViewer IsVisible="{Binding Previews.IsCards}">
+                    <ItemsControl ItemsSource="{Binding Games}" Margin="0,0,16,8" VerticalAlignment="Top">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid ColumnSpacing="16"
+                                             RowSpacing="16"
+                                             Columns="{Binding $parent[ScrollViewer].Bounds.Width, Converter={x:Static views:CardColumnsConverter.Instance}}" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:LibraryGameViewModel">
+                                <Button Classes="modCard" Command="{Binding OpenCommand}" AutomationProperties.Name="{Binding OpenText}">
+                                    <DockPanel>
+                                        <pictures:SixteenByNine DockPanel.Dock="Top">
+                                            <Border Classes="cover" Background="{Binding CoverHue, Converter={x:Static views:CoverBrushConverter.Instance}}">
+                                                <TextBlock FontSize="44" Text="{Binding Initial}" />
+                                            </Border>
+                                        </pictures:SixteenByNine>
+                                        <StackPanel Margin="14,10,14,14" Spacing="4">
+                                            <TextBlock FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
+                                            <WrapPanel ItemSpacing="12">
+                                                <TextBlock Classes="note" Text="{Binding ModsText}" />
+                                                <TextBlock Classes="note" Text="{Binding SizeText}" />
                                             </WrapPanel>
-                                            <WrapPanel ItemSpacing="14" LineSpacing="4">
-                                                <TextBlock Classes="note" VerticalAlignment="Center" Text="{Binding WatchedText}" />
-                                                <TextBlock Classes="note" VerticalAlignment="Center" Text="{Binding FilesText}" />
+                                            <WrapPanel ItemSpacing="8" LineSpacing="4">
                                                 <Border Classes="tag accent" IsVisible="{Binding HasUpdates}">
                                                     <TextBlock Text="{Binding UpdatesText}" />
                                                 </Border>
+                                                <TextBlock Classes="note" VerticalAlignment="Center" Text="{Binding UpdatesText}" IsVisible="{Binding !HasUpdates}" />
+                                                <TextBlock Classes="note" VerticalAlignment="Center" Text="{Binding ArchivedText}" IsVisible="{Binding HasArchived}" />
                                             </WrapPanel>
                                         </StackPanel>
+                                    </DockPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
 
-                                        <!-- The mod's actions, in one menu, so the list stays quiet. -->
-                                        <Button Grid.Column="2"
+                <!-- As rows: a table of the games, with each one's cover when the previews say thumbnails. -->
+                <Border Classes="list" VerticalAlignment="Top" Margin="0,0,0,8" IsVisible="{Binding Previews.ShowsRows}">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Top" Classes="tableHead">
+                            <Grid ColumnDefinitions="Auto,2.2*,*,*,*,*" ColumnSpacing="12">
+                                <Panel Width="72" IsVisible="{Binding Previews.IsThumbnails}" />
+                                <TextBlock Grid.Column="1" Classes="modCell" Text="{x:Static res:Strings.LibraryColumnGame}" />
+                                <TextBlock Grid.Column="2" Classes="wideCell" Text="{x:Static res:Strings.LibraryColumnMods}" />
+                                <TextBlock Grid.Column="3" Classes="wideCell" Text="{x:Static res:Strings.LibraryColumnUpdates}" />
+                                <TextBlock Grid.Column="4" Classes="sizeCell" Text="{x:Static res:Strings.LibraryColumnOnDisk}" />
+                                <TextBlock Grid.Column="5" Classes="wideCell" Text="{x:Static res:Strings.LibraryColumnChecked}" />
+                            </Grid>
+                        </Border>
+                        <ListBox Classes="rows browse" ItemsSource="{Binding Games}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="vm:LibraryGameViewModel">
+                                    <Button Classes="row" Command="{Binding OpenCommand}" AutomationProperties.Name="{Binding OpenText}">
+                                        <Grid ColumnDefinitions="Auto,2.2*,*,*,*,*" ColumnSpacing="12">
+                                            <Border Classes="cover"
+                                                    Width="72"
+                                                    Height="40"
+                                                    CornerRadius="6"
+                                                    Background="{Binding CoverHue, Converter={x:Static views:CoverBrushConverter.Instance}}"
+                                                    IsVisible="{Binding $parent[ListBox].((vm:LibraryViewModel)DataContext).Previews.IsThumbnails, FallbackValue=False}">
+                                                <TextBlock FontSize="18" Text="{Binding Initial}" />
+                                            </Border>
+                                            <StackPanel Grid.Column="1" Classes="modCell" VerticalAlignment="Center" Spacing="2">
+                                                <TextBlock FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
+                                                <WrapPanel Classes="narrowCell" ItemSpacing="10" LineSpacing="4">
+                                                    <TextBlock Classes="note" FontSize="12.5" VerticalAlignment="Center" Text="{Binding ModsText}" />
+                                                    <Border Classes="tag accent" IsVisible="{Binding HasUpdates}">
+                                                        <TextBlock Text="{Binding UpdatesText}" />
+                                                    </Border>
+                                                    <TextBlock Classes="note" FontSize="12.5" VerticalAlignment="Center" Text="{Binding UpdatesText}" IsVisible="{Binding !HasUpdates}" />
+                                                </WrapPanel>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="2" Classes="note wideCell" VerticalAlignment="Center" Text="{Binding ModsText}" />
+                                            <Panel Grid.Column="3" Classes="wideCell" VerticalAlignment="Center">
+                                                <Border Classes="tag accent" HorizontalAlignment="Left" IsVisible="{Binding HasUpdates}">
+                                                    <TextBlock Text="{Binding UpdatesText}" />
+                                                </Border>
+                                                <TextBlock Classes="note" Text="{Binding UpdatesText}" IsVisible="{Binding !HasUpdates}" />
+                                            </Panel>
+                                            <StackPanel Grid.Column="4" Classes="sizeCell" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding SizeText}" />
+                                                <TextBlock Classes="note" FontSize="12" TextTrimming="CharacterEllipsis" Text="{Binding ArchivedText}" IsVisible="{Binding HasArchived}" />
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="5" Classes="note wideCell" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Text="{Binding CheckedText}" />
+                                        </Grid>
+                                    </Button>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </DockPanel>
+                </Border>
+            </Panel>
+        </DockPanel>
+
+        <!-- A game's mods: the way back, its heading, the filter, toggles and order, then its mods. -->
+        <DockPanel>
+            <DockPanel.IsVisible>
+                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                    <Binding Path="IsGameOpen" />
+                    <Binding Path="!IsModOpen" />
+                </MultiBinding>
+            </DockPanel.IsVisible>
+            <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12" ItemSpacing="4" LineSpacing="4">
+                <Button Classes="crumb" Content="{Binding Title}" Command="{Binding ShowGamesCommand}" />
+                <TextBlock Classes="note" VerticalAlignment="Center" Text="›" />
+                <TextBlock Classes="note" VerticalAlignment="Center" Margin="4,0,0,0" TextWrapping="Wrap" Text="{Binding OpenGame.Name, FallbackValue=''}" />
+            </WrapPanel>
+
+            <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,16">
+                <Border Classes="cover"
+                        Width="96"
+                        Height="54"
+                        Margin="0,0,16,0"
+                        CornerRadius="8"
+                        VerticalAlignment="Top"
+                        Background="{Binding OpenGame.CoverHue, Converter={x:Static views:CoverBrushConverter.Instance}, FallbackValue={x:Null}}"
+                        IsVisible="{Binding Previews.ShowsPictures}">
+                    <TextBlock FontSize="24" Text="{Binding OpenGame.Initial, FallbackValue=''}" />
+                </Border>
+                <StackPanel Grid.Column="1" Spacing="2">
+                    <TextBlock Classes="heading" Margin="0" TextWrapping="Wrap" Text="{Binding OpenGame.Name, FallbackValue=''}" />
+                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding OpenGame.SummaryText, FallbackValue=''}" />
+                </StackPanel>
+                <Button Grid.Column="2"
+                        VerticalAlignment="Top"
+                        Content="{x:Static res:Strings.LibraryRescan}"
+                        Command="{Binding RescanCommand}" />
+            </Grid>
+
+            <StackPanel DockPanel.Dock="Top" Margin="0,0,0,14" Spacing="10">
+                <Grid ColumnSpacing="12" RowDefinitions="Auto,Auto">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100*" MaxWidth="420" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Text="{Binding ModsFilter}" PlaceholderText="{x:Static res:Strings.LibraryModsFilterHint}" />
+                    <WrapPanel Classes="tools" ItemSpacing="16" LineSpacing="10">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Classes="note" VerticalAlignment="Center" Text="{x:Static res:Strings.LibrarySortLabel}" />
+                            <ComboBox MinWidth="190" ItemsSource="{Binding ModOrders}" SelectedItem="{Binding SelectedModOrder}" />
+                        </StackPanel>
+                        <pictures:PreviewsPicker DataContext="{Binding Previews}" />
+                    </WrapPanel>
+                </Grid>
+                <ItemsControl ItemsSource="{Binding ModFilters}" AutomationProperties.Name="{x:Static res:Strings.LibraryShowOnly}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel ItemSpacing="8" LineSpacing="8" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ModFilterViewModel">
+                            <ToggleButton Classes="chip" IsChecked="{Binding IsOn}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="{Binding Label}" />
+                                    <TextBlock Opacity="0.75" Text="{Binding Count}" />
+                                </StackPanel>
+                            </ToggleButton>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
+            <Panel>
+                <TextBlock Classes="note empty" Text="{x:Static res:Strings.LibraryNothingMatchesMods}" IsVisible="{Binding NoModMatches}" />
+
+                <!-- As rows: a table, one line per mod, its name opening its page, its actions in its menu. -->
+                <Border Classes="list" VerticalAlignment="Top" Margin="0,0,0,8">
+                    <Border.IsVisible>
+                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                            <Binding Path="Previews.ShowsRows" />
+                            <Binding Path="!NoModMatches" />
+                        </MultiBinding>
+                    </Border.IsVisible>
+                    <DockPanel>
+                        <Border DockPanel.Dock="Top" Classes="tableHead">
+                            <Grid ColumnDefinitions="Auto,2.4*,0.8*,1.5*,0.9*,0.7*,1.1*,34" ColumnSpacing="12">
+                                <Panel Width="72" IsVisible="{Binding Previews.IsThumbnails}" />
+                                <TextBlock Grid.Column="1" Classes="modCell" Text="{x:Static res:Strings.LibraryColumnMod}" />
+                                <TextBlock Grid.Column="2" Classes="wideCell" Text="{x:Static res:Strings.LibraryColumnVersion}" />
+                                <TextBlock Classes="statusCell" Text="{x:Static res:Strings.LibraryColumnStatus}" />
+                                <TextBlock Grid.Column="4" Classes="wideCell" Text="{x:Static res:Strings.LibraryColumnFiles}" />
+                                <TextBlock Grid.Column="5" Classes="wideCell" Text="{x:Static res:Strings.LibraryColumnSize}" />
+                                <TextBlock Grid.Column="6" Classes="wideCell" Text="{x:Static res:Strings.LibraryColumnUpdated}" />
+                            </Grid>
+                        </Border>
+                        <ListBox Classes="rows" ItemsSource="{Binding GameMods}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="vm:LibraryModViewModel">
+                                    <Grid ColumnDefinitions="Auto,2.4*,0.8*,1.5*,0.9*,0.7*,1.1*,34" ColumnSpacing="12">
+                                        <Panel VerticalAlignment="Center" IsVisible="{Binding Picture.IsShown}">
+                                            <pictures:ModThumbnail DataContext="{Binding Picture}" />
+                                        </Panel>
+                                        <StackPanel Grid.Column="1" Classes="modCell" VerticalAlignment="Center" Spacing="1">
+                                            <Button Classes="name" HorizontalAlignment="Left" Command="{Binding OpenCommand}">
+                                                <TextBlock TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
+                                            </Button>
+                                            <TextBlock Classes="note" FontSize="12.5" TextTrimming="CharacterEllipsis" Text="{Binding AuthorText}" />
+                                            <WrapPanel Classes="narrowCell" ItemSpacing="10">
+                                                <TextBlock Classes="note" FontSize="12.5" Text="{Binding VersionText}" IsVisible="{Binding HasFiles}" />
+                                                <TextBlock Classes="note" FontSize="12.5" Text="{Binding FilesText}" />
+                                                <TextBlock Classes="note" FontSize="12.5" Text="{Binding SizeText}" IsVisible="{Binding HasFiles}" />
+                                            </WrapPanel>
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="2" Classes="wideCell" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Text="{Binding VersionText}" />
+                                        <ItemsControl Classes="statusCell" VerticalAlignment="Center" ItemsSource="{Binding Statuses}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel ItemSpacing="4" LineSpacing="4" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:ModStatus">
+                                                    <Border Classes="tag"
+                                                            Classes.accent="{Binding Kind, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:ModStatusKind.Update}}"
+                                                            Classes.warn="{Binding Kind, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:ModStatusKind.Problem}}">
+                                                        <TextBlock Text="{Binding Text}" />
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <TextBlock Grid.Column="4" Classes="note wideCell" VerticalAlignment="Center" TextWrapping="Wrap" Text="{Binding FilesText}" />
+                                        <TextBlock Grid.Column="5" Classes="note wideCell" VerticalAlignment="Center" Text="{Binding SizeText}" />
+                                        <TextBlock Grid.Column="6" Classes="note wideCell" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Text="{Binding UpdatedText}" />
+                                        <Button Grid.Column="7"
                                                 Classes="more"
                                                 VerticalAlignment="Center"
                                                 ToolTip.Tip="{x:Static res:Strings.MoreActions}"
@@ -117,114 +345,77 @@
                                             </Button.Flyout>
                                         </Button>
                                     </Grid>
-                                </Expander.Header>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </DockPanel>
+                </Border>
 
-                                <ItemsControl ItemsSource="{Binding Files}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Spacing="12" />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="vm:LibraryFileViewModel">
-                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                                                <StackPanel Spacing="2">
-                                                    <TextBlock FontWeight="Medium" TextTrimming="CharacterEllipsis" Text="{Binding FileName}" />
-                                                    <WrapPanel ItemSpacing="14">
-                                                        <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding Name}" />
-                                                        <TextBlock Classes="note" Text="{Binding VersionText}" />
-                                                        <TextBlock Classes="note" Text="{Binding SizeText}" />
-                                                        <TextBlock Classes="note" Text="{Binding DownloadedText}" />
-                                                    </WrapPanel>
-                                                    <!-- Selectable, so the hash can be copied to check a copy of the file. -->
-                                                    <SelectableTextBlock Classes="note"
-                                                                         FontFamily="{DynamicResource ShelfMonoFont}"
-                                                                         FontSize="12.5"
-                                                                         TextWrapping="Wrap"
-                                                                         Text="{Binding Sha256Text}"
-                                                                         IsVisible="{Binding Sha256Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                                                </StackPanel>
-                                                <Button Grid.Column="1"
-                                                        Classes="quiet"
-                                                        VerticalAlignment="Center"
-                                                        Content="{x:Static res:Strings.LibraryDeleteFile}"
-                                                        Command="{Binding DeleteCommand}" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </Expander>
-                        </DataTemplate>
-                    </ListBox.DataTemplates>
-                </ListBox>
-
-                <!-- As cards: each game's heading, then its mods' cards, as many side by side as fit. -->
-                <ScrollViewer Name="Cards" IsVisible="{Binding Previews.IsCards}">
-                    <ItemsControl ItemsSource="{Binding Games}" Margin="0,0,16,8">
+                <!-- As cards: each mod's picture, then its name, numbers and what to know of it. -->
+                <ScrollViewer IsVisible="{Binding Previews.IsCards}">
+                    <ItemsControl ItemsSource="{Binding GameMods}" Margin="0,0,16,8" VerticalAlignment="Top">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid ColumnSpacing="16"
+                                             RowSpacing="16"
+                                             Columns="{Binding $parent[ScrollViewer].Bounds.Width, Converter={x:Static views:CardColumnsConverter.Instance}}" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="vm:LibraryGameViewModel">
-                                <StackPanel Spacing="10" Margin="0,14,0,6">
-                                    <StackPanel Orientation="Horizontal" Spacing="10">
-                                        <TextBlock Classes="subheading" Text="{Binding Name}" />
-                                        <TextBlock Classes="note" VerticalAlignment="Bottom" Text="{Binding ModsText}" />
-                                    </StackPanel>
-                                    <ItemsControl ItemsSource="{Binding Mods}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <UniformGrid ColumnSpacing="16"
-                                                             RowSpacing="16"
-                                                             Columns="{Binding $parent[ScrollViewer].Bounds.Width, Converter={x:Static views:CardColumnsConverter.Instance}}" />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate x:DataType="vm:LibraryModViewModel">
-                                                <Border Classes="modCard">
-                                                    <DockPanel>
-                                                        <pictures:ModCardPicture DockPanel.Dock="Top" DataContext="{Binding Picture}" />
-                                                        <StackPanel Margin="14,10,6,14" Spacing="4">
-                                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
-                                                                <Button Classes="name" VerticalAlignment="Center" Command="{Binding OpenCommand}">
-                                                                    <TextBlock FontSize="15"
-                                                                               TextWrapping="Wrap"
-                                                                               MaxLines="2"
-                                                                               TextTrimming="CharacterEllipsis"
-                                                                               Text="{Binding Name}" />
-                                                                </Button>
-                                                                <Button Grid.Column="1"
-                                                                        Classes="more"
-                                                                        VerticalAlignment="Top"
-                                                                        ToolTip.Tip="{x:Static res:Strings.MoreActions}"
-                                                                        AutomationProperties.Name="{x:Static res:Strings.MoreActions}">
-                                                                    <PathIcon Width="18" Height="18" Data="{StaticResource MoreIcon}" />
-                                                                    <Button.Flyout>
-                                                                        <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                                                            <MenuItem Header="{x:Static res:Strings.LibraryOpenMod}" Command="{Binding OpenCommand}" />
-                                                                            <MenuItem Header="{x:Static res:Strings.LibraryOpenOnSite}" Command="{Binding OpenPageCommand}" />
-                                                                            <MenuItem Header="{x:Static res:Strings.LibraryOpenFolder}" Command="{Binding OpenFolderCommand}" />
-                                                                            <MenuItem Header="{x:Static res:Strings.ModWatch}" Command="{Binding WatchCommand}" IsVisible="{Binding !IsWatched}" />
-                                                                            <MenuItem Header="{x:Static res:Strings.ModUnwatch}" Command="{Binding UnwatchCommand}" IsVisible="{Binding IsWatched}" />
-                                                                            <MenuItem Header="{x:Static res:Strings.LibraryRescan}" Command="{Binding RescanCommand}" />
-                                                                            <Separator />
-                                                                            <MenuItem Header="{x:Static res:Strings.LibraryRemoveMod}" Command="{Binding RemoveCommand}" />
-                                                                        </MenuFlyout>
-                                                                    </Button.Flyout>
-                                                                </Button>
-                                                            </Grid>
-                                                            <TextBlock Classes="note" Text="{Binding AuthorText}" IsVisible="{Binding AuthorText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                                                            <WrapPanel ItemSpacing="12">
-                                                                <TextBlock Classes="note" Text="{Binding WatchedText}" />
-                                                                <TextBlock Classes="note" Text="{Binding FilesText}" />
-                                                            </WrapPanel>
-                                                            <Border Classes="tag accent" HorizontalAlignment="Left" Margin="0,2,0,0" IsVisible="{Binding HasUpdates}">
-                                                                <TextBlock Text="{Binding UpdatesText}" />
-                                                            </Border>
-                                                        </StackPanel>
-                                                    </DockPanel>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
+                            <DataTemplate x:DataType="vm:LibraryModViewModel">
+                                <Border Classes="modCard">
+                                    <DockPanel>
+                                        <pictures:ModCardPicture DockPanel.Dock="Top" DataContext="{Binding Picture}" />
+                                        <StackPanel Margin="14,10,6,14" Spacing="4">
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                                                <Button Classes="name" VerticalAlignment="Center" Command="{Binding OpenCommand}">
+                                                    <TextBlock FontSize="15" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
+                                                </Button>
+                                                <Button Grid.Column="1"
+                                                        Classes="more"
+                                                        VerticalAlignment="Top"
+                                                        ToolTip.Tip="{x:Static res:Strings.MoreActions}"
+                                                        AutomationProperties.Name="{x:Static res:Strings.MoreActions}">
+                                                    <PathIcon Width="18" Height="18" Data="{StaticResource MoreIcon}" />
+                                                    <Button.Flyout>
+                                                        <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                                            <MenuItem Header="{x:Static res:Strings.LibraryOpenMod}" Command="{Binding OpenCommand}" />
+                                                            <MenuItem Header="{x:Static res:Strings.LibraryOpenOnSite}" Command="{Binding OpenPageCommand}" />
+                                                            <MenuItem Header="{x:Static res:Strings.LibraryOpenFolder}" Command="{Binding OpenFolderCommand}" />
+                                                            <MenuItem Header="{x:Static res:Strings.ModWatch}" Command="{Binding WatchCommand}" IsVisible="{Binding !IsWatched}" />
+                                                            <MenuItem Header="{x:Static res:Strings.ModUnwatch}" Command="{Binding UnwatchCommand}" IsVisible="{Binding IsWatched}" />
+                                                            <MenuItem Header="{x:Static res:Strings.LibraryRescan}" Command="{Binding RescanCommand}" />
+                                                            <Separator />
+                                                            <MenuItem Header="{x:Static res:Strings.LibraryRemoveMod}" Command="{Binding RemoveCommand}" />
+                                                        </MenuFlyout>
+                                                    </Button.Flyout>
+                                                </Button>
+                                            </Grid>
+                                            <TextBlock Classes="note" Text="{Binding AuthorText}" IsVisible="{Binding AuthorText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                            <WrapPanel ItemSpacing="12">
+                                                <TextBlock Classes="note" Text="{Binding VersionText}" IsVisible="{Binding HasFiles}" />
+                                                <TextBlock Classes="note" Text="{Binding FilesText}" />
+                                                <TextBlock Classes="note" Text="{Binding SizeText}" IsVisible="{Binding HasFiles}" />
+                                            </WrapPanel>
+                                            <ItemsControl Margin="0,2,0,0" ItemsSource="{Binding Statuses}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <WrapPanel ItemSpacing="4" LineSpacing="4" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:ModStatus">
+                                                        <Border Classes="tag"
+                                                                Classes.accent="{Binding Kind, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:ModStatusKind.Update}}"
+                                                                Classes.warn="{Binding Kind, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:ModStatusKind.Problem}}">
+                                                            <TextBlock Text="{Binding Text}" />
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </DockPanel>
+                                </Border>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -232,11 +423,11 @@
             </Panel>
         </DockPanel>
 
-        <!-- The mod opened, in place of the list: the way back, then its page. -->
+        <!-- The mod opened, in place of its game's mods: the way back, then its page. -->
         <DockPanel IsVisible="{Binding IsModOpen}">
             <Grid DockPanel.Dock="Top" Margin="0,0,0,16" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
                 <WrapPanel VerticalAlignment="Center" ItemSpacing="4" LineSpacing="4">
-                    <Button Classes="crumb" Content="{Binding Title}" Command="{Binding BackCommand}" />
+                    <Button Classes="crumb" Content="{Binding Title}" Command="{Binding ShowGamesCommand}" />
                     <TextBlock Classes="note" VerticalAlignment="Center" Text="›" />
                     <Button Classes="crumb" Content="{Binding OpenGameName}" Command="{Binding BackCommand}" />
                     <TextBlock Classes="note" VerticalAlignment="Center" Text="›" />

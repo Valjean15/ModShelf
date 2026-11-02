@@ -10,7 +10,7 @@ using ModShelf.Presentation.ViewModels.Pictures;
 namespace ModShelf.Presentation.ViewModels.Library;
 
 /// <summary>
-/// What each mod and file on the Library screen uses, handed over by the screen as one.
+/// What each mod on the Library screen uses, handed over by the screen as one.
 /// </summary>
 internal sealed class LibraryServices(
     IModLibrary library,

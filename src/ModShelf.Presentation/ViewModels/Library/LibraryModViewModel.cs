@@ -1,5 +1,3 @@
-using System.Collections.ObjectModel;
-
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -7,18 +5,19 @@ using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
+using ModShelf.Presentation.ViewModels.ModPages;
 using ModShelf.Presentation.ViewModels.Pictures;
 
 namespace ModShelf.Presentation.ViewModels.Library;
 
 /// <summary>
-/// One mod in the library: its name and author, whether it's watched, its files and updates, and what can be done with
-/// it.
+/// One mod in the library, as a row or card of its game's mods: its name and author, your version, what to know of it
+/// (updates, files missing from disk, whether it's watched), its files and the space they take, when its site last
+/// updated it, and what can be done with it. Its files are on its page.
 /// </summary>
 public sealed partial class LibraryModViewModel : ObservableObject
 {
     private readonly LibraryServices _services;
-    private readonly Dictionary<ModFileRef, LibraryFileViewModel> _files = [];
     private LibraryMod _mod;
 
     internal LibraryModViewModel(LibraryMod mod, LibraryServices services)
@@ -30,6 +29,7 @@ public sealed partial class LibraryModViewModel : ObservableObject
         _services = services;
         Mod = mod.Mod;
         Picture = new ModPictureViewModel(services.Pictures);
+        UpdatedText = Strings.NoValue;
         Show(mod);
     }
 
@@ -96,15 +96,68 @@ public sealed partial class LibraryModViewModel : ObservableObject
     public partial bool HasPage { get; private set; }
 
     /// <summary>
-    /// Whether its files are shown, kept here so the list can reuse its rows.
+    /// The version of your newest file, a main file when there is one, archived versions aside; "—" for none.
     /// </summary>
     [ObservableProperty]
-    public partial bool IsExpanded { get; set; }
+    public partial string VersionText { get; private set; } = string.Empty;
 
     /// <summary>
-    /// Its files, the latest downloaded first.
+    /// The space its files take, archived versions included; "—" without files.
     /// </summary>
-    public ObservableCollection<LibraryFileViewModel> Files { get; } = [];
+    [ObservableProperty]
+    public partial string SizeText { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// The space its files take, in bytes, archived versions included.
+    /// </summary>
+    public long Size { get; private set; }
+
+    /// <summary>
+    /// The space its archived versions take, in bytes.
+    /// </summary>
+    public long ArchivedSize { get; private set; }
+
+    /// <summary>
+    /// How many of its files are old versions in an <c>_archive</c> folder.
+    /// </summary>
+    public int ArchivedCount { get; private set; }
+
+    /// <summary>
+    /// How many of its files aren't on disk where the library says they are; 0 until they're checked.
+    /// </summary>
+    public int MissingCount { get; private set; }
+
+    /// <summary>
+    /// When it came into the library.
+    /// </summary>
+    public DateTimeOffset AddedAt { get; private set; }
+
+    /// <summary>
+    /// When its updates were last checked; null when they never were.
+    /// </summary>
+    public DateTimeOffset? CheckedAt { get; private set; }
+
+    /// <summary>
+    /// How many updates were found for it.
+    /// </summary>
+    public int UpdateCount { get; private set; }
+
+    /// <summary>
+    /// When its site last updated it, as its saved details say; null until they're read, or when they don't say.
+    /// </summary>
+    public DateTimeOffset? SiteUpdatedAt { get; private set; }
+
+    /// <summary>
+    /// Such as "2 days ago": when its site last updated it; "—" when that isn't known.
+    /// </summary>
+    [ObservableProperty]
+    public partial string UpdatedText { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// What to know of it, such as "Update to 1.4", "1 file missing" or "Watched only"; empty when there's nothing.
+    /// </summary>
+    [ObservableProperty]
+    public partial IReadOnlyList<ModStatus> Statuses { get; private set; } = [];
 
     /// <summary>
     /// Shows the mod as the library has it now. Runs on the UI thread.
@@ -122,34 +175,46 @@ public sealed partial class LibraryModViewModel : ObservableObject
         AuthorText = mod.Author is { } author ? Text.Format(Strings.ModByAuthor, author) : string.Empty;
         IsWatched = mod.IsWatched;
         WatchedText = mod.IsWatched ? Strings.LibraryWatched : Strings.LibraryNotWatched;
-        FilesText = Counts.Of(mod.Files.Count, Strings.LibraryNoFiles, Strings.LibraryOneFile, Strings.LibraryFiles);
+        LibraryFile[] archived = [.. mod.Files.Where(file => OwnFileViewModel.IsInArchive(file.RelativePath))];
+        int current = mod.Files.Count - archived.Length;
+        string filesText = Counts.Of(current, Strings.LibraryNoFiles, Strings.LibraryOneFile, Strings.LibraryFiles);
+        FilesText = archived.Length > 0 ? Text.Format(Strings.LibraryFilesArchived, filesText, archived.Length) : filesText;
         HasFiles = mod.Files.Count > 0;
+        UpdateCount = mod.Updates.Count;
         UpdatesText = Counts.Of(mod.Updates.Count, string.Empty, Strings.LibraryOneUpdate, Strings.LibraryUpdates);
         HasUpdates = mod.Updates.Count > 0;
         HasPage = mod.PageUrl is not null;
+        ArchivedCount = archived.Length;
+        ArchivedSize = archived.Sum(file => file.SizeInBytes);
+        Size = mod.Files.Sum(file => file.SizeInBytes);
+        SizeText = HasFiles ? Sizes.Format(Size) : Strings.NoValue;
+        AddedAt = mod.AddedAt;
+        CheckedAt = mod.CheckedAt;
+        LibraryFile? yours = mod.Files
+            .Where(file => !OwnFileViewModel.IsInArchive(file.RelativePath))
+            .OrderByDescending(file => file.Category == ModFileCategory.Main)
+            .ThenByDescending(file => file.DownloadedAt)
+            .FirstOrDefault();
+        VersionText = yours?.VersionLabel ?? Strings.NoValue;
+        ShowStatuses();
+    }
 
-        List<LibraryFileViewModel> files = [];
-        foreach (LibraryFile file in mod.Files.OrderByDescending(file => file.DownloadedAt))
-        {
-            if (_files.TryGetValue(file.File, out LibraryFileViewModel? shown))
-            {
-                shown.Show(file);
-            }
-            else
-            {
-                shown = new LibraryFileViewModel(file, _services);
-                _files.Add(file.File, shown);
-            }
+    /// <summary>
+    /// Shows how many of its files aren't on disk. Runs on the UI thread.
+    /// </summary>
+    internal void ShowMissing(int count)
+    {
+        MissingCount = count;
+        ShowStatuses();
+    }
 
-            files.Add(shown);
-        }
-
-        foreach (ModFileRef gone in _files.Keys.Except(mod.Files.Select(file => file.File)).ToList())
-        {
-            _files.Remove(gone);
-        }
-
-        Files.SyncWith(files);
+    /// <summary>
+    /// Shows when its site last updated it, from its saved details. Runs on the UI thread.
+    /// </summary>
+    internal void ShowSiteUpdate(DateTimeOffset? updatedAt)
+    {
+        SiteUpdatedAt = updatedAt;
+        UpdatedText = updatedAt is { } updated ? Dates.Ago(updated, _services.TimeProvider) : Strings.NoValue;
     }
 
     /// <summary>
@@ -270,6 +335,42 @@ public sealed partial class LibraryModViewModel : ObservableObject
                 }
             },
             cancellationToken);
+
+    /// <summary>
+    /// Its updates: "Update to" the new version when one replaces a file, a new optional file, or how many; then the
+    /// files missing from disk; then whether it's watched only, or not watched.
+    /// </summary>
+    private void ShowStatuses()
+    {
+        List<ModStatus> statuses = [];
+        if (_mod.Updates is [LibraryUpdate update])
+        {
+            string text = update.Replaces is not null
+                ? Text.Format(Strings.ModStatusUpdateTo, update.VersionLabel ?? update.Name)
+                : update.Category == ModFileCategory.Optional ? Strings.ModPageNewOptionalFile : Strings.ModPageUpdate;
+            statuses.Add(new ModStatus(text, ModStatusKind.Update));
+        }
+        else if (_mod.Updates.Count > 1)
+        {
+            statuses.Add(new ModStatus(Text.Format(Strings.ModStatusUpdates, _mod.Updates.Count), ModStatusKind.Update));
+        }
+
+        if (MissingCount > 0)
+        {
+            statuses.Add(new ModStatus(Counts.Of(MissingCount, Strings.ModStatusOneMissing, Strings.ModStatusMissing), ModStatusKind.Problem));
+        }
+
+        if (!_mod.IsWatched)
+        {
+            statuses.Add(new ModStatus(Strings.ModStatusNotWatched, ModStatusKind.Note));
+        }
+        else if (_mod.Files.Count == 0)
+        {
+            statuses.Add(new ModStatus(Strings.ModStatusWatchedOnly, ModStatusKind.Note));
+        }
+
+        Statuses = statuses;
+    }
 
     private Task RunAsync(ModAction action, Func<Task> work, CancellationToken cancellationToken)
         => UserCommands.RunAsync(work, _services.Dialogs, exception => LogActionFailed(_services.Logger, exception, action, Mod.Id, Mod.Game.Key), cancellationToken);
