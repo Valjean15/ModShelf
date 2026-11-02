@@ -4,6 +4,8 @@ namespace ModShelf.Sources.Nexus.Api;
 /// A mod in a GraphQL answer. Unlike v1, the names are camelCase and the dates ISO 8601.
 /// </summary>
 /// <param name="Status">Such as <c>published</c>.</param>
+/// <param name="Category">The name of the mod's category; the search doesn't ask for it.</param>
+/// <param name="ModCategory">The mod's category, with its name; the search doesn't ask for it.</param>
 internal sealed record NexusModNode(
     long ModId,
     string? Name,
@@ -18,7 +20,11 @@ internal sealed record NexusModNode(
     long? Downloads,
     bool? AdultContent,
     string? Status,
-    NexusModNode.GameNode? Game)
+    NexusModNode.GameNode? Game,
+    string? Category = null,
+    NexusModNode.CategoryNode? ModCategory = null)
 {
     internal sealed record GameNode(string? DomainName);
+
+    internal sealed record CategoryNode(long? CategoryId, string? Name);
 }

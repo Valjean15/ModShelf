@@ -12,7 +12,7 @@ namespace ModShelf.Sources.Nexus;
 /// </summary>
 public sealed partial class NexusSource : IModSearch
 {
-    private static readonly string SearchModsQuery = ReadQuery("SearchMods.graphql");
+    private static readonly string SearchModsQuery = ReadQuery("Search", "SearchMods.graphql");
 
     /// <exception cref="ArgumentException">The game isn't Nexus Mods'.</exception>
     /// <exception cref="HttpRequestException">The API couldn't be reached, or refused the search.</exception>
@@ -27,18 +27,27 @@ public sealed partial class NexusSource : IModSearch
 
         // Only the asked game's mods, in case a node says otherwise.
         return new SearchPage(
-            (mods.Nodes ?? [])
-                .Where(node => node.Game?.DomainName is null || string.Equals(node.Game.DomainName, domain, StringComparison.OrdinalIgnoreCase))
-                .Select(node => ToModInfo(game, domain, node)),
+            (mods.Nodes ?? []).Where(node => IsOfGame(node.Game, domain)).Select(node => ToModInfo(new ModRef(game, ModIdOf(node)), domain, node)),
             mods.TotalCount,
             query.Offset);
     }
 
-    private static ModInfo ToModInfo(GameRef game, string domain, NexusModNode node)
+    /// <summary>
+    /// Whether a node is of the game, or doesn't say.
+    /// </summary>
+    private static bool IsOfGame(NexusModNode.GameNode? node, string domain)
+        => node?.DomainName is null || string.Equals(node.DomainName, domain, StringComparison.OrdinalIgnoreCase);
+
+    private static string ModIdOf(NexusModNode node) => node.ModId.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+    /// <summary>
+    /// A mod as the v2 API describes it, in a search or by its ID: with its category when it was asked for.
+    /// </summary>
+    private static ModInfo ToModInfo(ModRef mod, string domain, NexusModNode node)
     {
-        string id = node.ModId.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        string id = ModIdOf(node);
         return new ModInfo(
-            new ModRef(game, id),
+            mod,
             string.IsNullOrWhiteSpace(node.Name) ? $"Mod {id}" : node.Name,
             node.Summary,
             node.Author,
@@ -51,16 +60,17 @@ public sealed partial class NexusSource : IModSearch
             downloads: Count(node.Downloads),
             endorsements: Count(node.Endorsements),
             thumbnailUrl: WebLink(node.ThumbnailUrl),
-            thumbnailBlurredUrl: WebLink(node.ThumbnailBlurredUrl));
+            thumbnailBlurredUrl: WebLink(node.ThumbnailBlurredUrl),
+            category: node.ModCategory?.Name ?? node.Category);
     }
 
     /// <summary>
-    /// The query in the file of that name under <c>Search/</c>, which ships inside the assembly.
+    /// The query in the file of that name in the folder, such as <c>Search/</c>, which ships inside the assembly.
     /// </summary>
-    private static string ReadQuery(string fileName)
+    private static string ReadQuery(string folder, string fileName)
     {
-        using Stream stream = typeof(NexusSource).Assembly.GetManifestResourceStream($"ModShelf.Sources.Nexus.Search.{fileName}")
-            ?? throw new InvalidOperationException($"The query {fileName} isn't embedded in the assembly.");
+        using Stream stream = typeof(NexusSource).Assembly.GetManifestResourceStream($"ModShelf.Sources.Nexus.{folder}.{fileName}")
+            ?? throw new InvalidOperationException($"The query {folder}/{fileName} isn't embedded in the assembly.");
         using StreamReader reader = new(stream);
         return reader.ReadToEnd();
     }

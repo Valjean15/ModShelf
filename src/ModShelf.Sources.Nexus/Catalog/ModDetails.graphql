@@ -1,7 +1,7 @@
-# Mods' details from the v2 API, by game and ID, several at once: their thumbnails and their category, which v1 doesn't
-# give. "mods" refuses a mod ID without the game's numeric ID; legacyModsByDomain takes the game's domain name. Not used
-# by the source yet: the recording script reads this file, so the recorded answers are to this exact query, and step 8b
-# builds on them.
+# Describes a mod for the Nexus source's IModCatalog, from the v2 API, by its game and ID: with its thumbnails and its
+# category's name, which v1 doesn't give. "mods" refuses a mod ID without the game's number; legacyModsByDomain takes
+# the game's domain name, and several mods at once. The recording script reads this file too, so the recorded answers
+# are to this exact query.
 query ModDetails($ids: [CompositeDomainWithIdInput!]!) {
   legacyModsByDomain(ids: $ids) {
     totalCount

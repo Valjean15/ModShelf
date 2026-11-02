@@ -283,6 +283,18 @@ public sealed partial class NexusApiClientTests : IDisposable
         await Assert.ThrowsAsync<HttpRequestException>(() => QueryAsync<GraphQlData>("{ mod { modId } }", []));
     }
 
+    [Theory]
+    [InlineData("""{"data": null, "errors": [{"message": "Field 'nope' doesn't exist"}]}""")]
+    [InlineData("""{"data": null}""")]
+    public async Task ARefusedQueryIsToldFromASiteThatCantBeReached(string answer)
+    {
+        _api.AnswerPost(GraphQlPath, response => response.WithStatusCode(200).WithBody(answer));
+
+        HttpRequestException refused = await Assert.ThrowsAsync<HttpRequestException>(() => QueryAsync<GraphQlData>("{ nope }", []));
+
+        Assert.Equal(HttpRequestError.InvalidResponse, refused.HttpRequestError);
+    }
+
     [Fact]
     public async Task AGraphQlQueryWithARefusedKeyIsAnAuthenticationFailure()
     {

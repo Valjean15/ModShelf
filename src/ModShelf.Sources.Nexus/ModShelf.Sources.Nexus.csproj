@@ -20,6 +20,7 @@
   <!-- The GraphQL queries ship inside the assembly, under their file names. -->
   <ItemGroup>
     <EmbeddedResource Include="Search\*.graphql" LogicalName="ModShelf.Sources.Nexus.Search.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Catalog\*.graphql" LogicalName="ModShelf.Sources.Nexus.Catalog.%(Filename)%(Extension)" />
   </ItemGroup>
 
   <!-- The Strings class is generated from Strings.resx at build time, as in ModShelf.Sources.DirectUrl. -->

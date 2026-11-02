@@ -5,15 +5,19 @@ using System.Text.Json;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Nexus.Api;
+using ModShelf.Sources.Nexus.Catalog;
 using ModShelf.Sources.Nexus.Links;
 
 namespace ModShelf.Sources.Nexus;
 
 /// <summary>
-/// The <see cref="IModCatalog"/> half: games, mods, files and changelogs from the v1 API, one request each.
+/// The <see cref="IModCatalog"/> half: games, files and changelogs from the v1 API, one request each; mods from the v2
+/// API, with their thumbnails and category, or from v1 when v2 doesn't give them.
 /// </summary>
 public sealed partial class NexusSource : IModCatalog
 {
+    private static readonly string ModDetailsQuery = ReadQuery("Catalog", "ModDetails.graphql");
+
     /// <summary>
     /// The approved games, from <c>v1/games.json</c>: one request for them all.
     /// </summary>
@@ -44,19 +48,26 @@ public sealed partial class NexusSource : IModCatalog
     {
         string domain = NexusLink.ForGame(game);
         NexusGame found = await _api.GetAsync<NexusGame>($"{NexusLink.GameApiPath(domain)}.json", cancellationToken).ConfigureAwait(false);
-        _categories[domain] = CategoriesOf(found);
+        Remember(domain, found);
         return ToGameInfo(game, domain, found);
     }
 
     /// <summary>
-    /// The mod, from <c>v1/games/{game}/mods/{id}.json</c>; its category's name from the game's categories, read the first
-    /// time one of its mods is, and left out when they can't be read.
+    /// The mod, from the v2 API's <c>ModDetails</c> query, with its thumbnails and category. When v2 doesn't give it, such
+    /// as a mod it doesn't list or a query it refuses, from <c>v1/games/{game}/mods/{id}.json</c>, as before v2 was asked:
+    /// with no thumbnails, and its category's name from the game's categories, read the first time one of its mods is,
+    /// and left out when they can't be read.
     /// </summary>
     /// <exception cref="ArgumentException">The mod isn't Nexus Mods'.</exception>
     /// <exception cref="HttpRequestException">The API couldn't be reached or refused; with 404 when there's no such mod.</exception>
     public async Task<ModInfo> GetModAsync(ModRef modRef, CancellationToken cancellationToken)
     {
         NexusLink mod = NexusLink.ForMod(modRef);
+        if (await DescribeAsync(modRef, mod, cancellationToken).ConfigureAwait(false) is { } described)
+        {
+            return described;
+        }
+
         NexusMod found = await _api.GetAsync<NexusMod>($"{mod.ModApiPath}.json", cancellationToken).ConfigureAwait(false);
         string? category = found.CategoryId is { } id ? await CategoryAsync(mod.Game, id, cancellationToken).ConfigureAwait(false) : null;
         return new ModInfo(
@@ -121,9 +132,6 @@ public sealed partial class NexusSource : IModCatalog
     }
 
     /// <summary>
-    /// The game by its name, or its domain name if it has none, with its page, or the page its domain name gives.
-    /// </summary>
-    /// <summary>
     /// Each of the game's categories with a name, by ID. <see cref="ModInfo"/> trims the name, and takes a blank one for
     /// none.
     /// </summary>
@@ -141,6 +149,9 @@ public sealed partial class NexusSource : IModCatalog
         return names.ToFrozenDictionary();
     }
 
+    /// <summary>
+    /// The game by its name, or its domain name if it has none, with its page, or the page its domain name gives.
+    /// </summary>
     private static GameInfo ToGameInfo(GameRef game, string domain, NexusGame found)
         => new(
             game,
@@ -205,7 +216,7 @@ public sealed partial class NexusSource : IModCatalog
             try
             {
                 NexusGame found = await _api.GetAsync<NexusGame>($"{NexusLink.GameApiPath(game)}.json", cancellationToken).ConfigureAwait(false);
-                names = _categories.GetOrAdd(game, CategoriesOf(found));
+                names = Remember(game, found);
             }
             catch (HttpRequestException)
             {
@@ -215,5 +226,41 @@ public sealed partial class NexusSource : IModCatalog
         }
 
         return names.GetValueOrDefault(category);
+    }
+
+    /// <summary>
+    /// The mod from the v2 API; null when v2 doesn't give it, so v1 is asked instead: a mod it doesn't list, a query it
+    /// refuses or answers in a way that isn't understood, or a status it answers with. A site that can't be reached
+    /// isn't asked again through v1; nor is the rate limit, once used up, which the quota handler refuses before v1's
+    /// request is sent.
+    /// </summary>
+    private async Task<ModInfo?> DescribeAsync(ModRef modRef, NexusLink mod, CancellationToken cancellationToken)
+    {
+        long id = long.Parse(mod.ModId, NumberStyles.None, CultureInfo.InvariantCulture);
+        NexusModsByDomain found;
+        try
+        {
+            found = await _api.QueryAsync<NexusModsByDomain>(ModDetailsQuery, NexusModIds.For(mod.Game, id), cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (HttpRequestException exception)
+            when (exception.HttpRequestError == HttpRequestError.InvalidResponse || exception.StatusCode is not null)
+        {
+            return null;
+        }
+
+        return found.LegacyModsByDomain?.Nodes?.FirstOrDefault(node => node.ModId == id && IsOfGame(node.Game, mod.Game)) is { } node
+            ? ToModInfo(modRef, mod.Game, node)
+            : null;
+    }
+
+    /// <summary>
+    /// Keeps what a read of the game says that its mods need: its categories' names.
+    /// </summary>
+    private FrozenDictionary<long, string> Remember(string domain, NexusGame game)
+    {
+        FrozenDictionary<long, string> names = CategoriesOf(game);
+        _categories[domain] = names;
+        return names;
     }
 }

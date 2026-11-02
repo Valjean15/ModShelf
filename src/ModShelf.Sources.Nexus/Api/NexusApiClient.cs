@@ -88,7 +88,8 @@ internal sealed partial class NexusApiClient(IHttpClientFactory clients)
     /// <param name="variables">The query's variables, with the API's camelCase names.</param>
     /// <exception cref="AuthenticationFailedException">The API refused the account's key or token (401).</exception>
     /// <exception cref="HttpRequestException">
-    /// Any other refusal or failure, including an answer that lists GraphQL errors instead of data.
+    /// Any other refusal or failure. An answer that lists GraphQL errors instead of data, or no data, has
+    /// <see cref="HttpRequestError.InvalidResponse"/>, so a caller can tell a refused query from a site it couldn't reach.
     /// </exception>
     public async Task<T> QueryAsync<T>(string query, JsonObject variables, CancellationToken cancellationToken)
     {
@@ -103,10 +104,10 @@ internal sealed partial class NexusApiClient(IHttpClientFactory clients)
         if (answer.Errors is { Count: > 0 } errors)
         {
             string messages = string.Join(" ", errors.Select(error => error.Message).Where(message => !string.IsNullOrWhiteSpace(message)));
-            throw new HttpRequestException($"Nexus Mods refused the query. {Shorten(messages)}");
+            throw new HttpRequestException(HttpRequestError.InvalidResponse, $"Nexus Mods refused the query. {Shorten(messages)}");
         }
 
-        return answer.Data ?? throw new HttpRequestException("Nexus Mods answered the query with no data.");
+        return answer.Data ?? throw new HttpRequestException(HttpRequestError.InvalidResponse, "Nexus Mods answered the query with no data.");
     }
 
     private static async Task ThrowIfRefusedAsync(HttpResponseMessage response, CancellationToken cancellationToken)
