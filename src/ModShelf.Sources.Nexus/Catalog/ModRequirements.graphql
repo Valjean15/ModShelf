@@ -1,0 +1,24 @@
+# What a mod needs, from the v2 API: other mods on Nexus Mods, things elsewhere, and DLC. A best guess at the schema,
+# not used by the source yet: the recording script reads this file and records the schema beside the answer, so step
+# 8b can correct it.
+query ModRequirements($filter: ModsFilter) {
+  mods(filter: $filter, count: 1) {
+    nodes {
+      modId
+      modRequirements {
+        nexusRequirements {
+          totalCount
+          nodes {
+            id
+            modId
+            modName
+            gameId
+            notes
+            url
+            externalRequirement
+          }
+        }
+      }
+    }
+  }
+}

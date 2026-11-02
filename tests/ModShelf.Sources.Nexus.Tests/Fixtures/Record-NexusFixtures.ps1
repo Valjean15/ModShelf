@@ -45,6 +45,19 @@
     Free only, optional: an nxm:// link that has expired, such as the one given to -NxmLink earlier, once the
     time the script gave has passed. Records how Nexus Mods refuses an expired key.
 
+.PARAMETER Details
+    Records a mod's details and what it needs from the v2 GraphQL API, for the mod page: the mod given to -ModId and
+    the one given to -RequiringModId, which needs other mods, and a mod that doesn't exist. Records the parts of the
+    schema around them too, and leaves the other recordings as they are; with -SearchOnly or -Tracking, those too.
+    Works with either account, and changes nothing on it.
+
+    The queries are read from the Nexus source's Catalog folder. They're partly a guess at the schema: when Nexus Mods
+    refuses one, its answer is saved anyway, the script says so and goes on, and the schema it recorded shows what to
+    ask instead.
+
+.PARAMETER RequiringModId
+    With -Details: a mod of the game that needs other mods, such as Content Patcher, which needs SMAPI.
+
 .PARAMETER Tracking
     Records how Nexus Mods answers tracking and untracking the mod given to -ModId: tracking it, tracking it again,
     untracking it, untracking it again, and tracking a mod that doesn't exist. Records only those, leaving the other
@@ -68,6 +81,9 @@
 
 .EXAMPLE
     ./Record-NexusFixtures.ps1 -Account Premium -Tracking
+
+.EXAMPLE
+    ./Record-NexusFixtures.ps1 -Account Premium -Details
 #>
 
 #Requires -Version 7.2
@@ -96,6 +112,11 @@ param(
 
     [switch] $Tracking,
 
+    [switch] $Details,
+
+    [ValidateRange(1, [int]::MaxValue)]
+    [int] $RequiringModId = 1915,
+
     # Only for testing this script against a local fake of the API.
     [uri] $ApiBase = 'https://api.nexusmods.com/'
 )
@@ -115,6 +136,14 @@ if ($Tracking -and ($NxmLink -or $ExpiredNxmLink)) {
     throw '-Tracking records only tracking; run the nxm:// links separately.'
 }
 
+if ($Details -and ($NxmLink -or $ExpiredNxmLink)) {
+    throw '-Details records only mods'' details; run the nxm:// links separately.'
+}
+
+if ($Details -and $RequiringModId -eq $ModId) {
+    throw '-RequiringModId should be another mod, one that needs the mod given to -ModId or others.'
+}
+
 # The search query the Nexus source sends, so the recorded answers are to exactly that query.
 $SearchQueryFile = Join-Path $PSScriptRoot '..' '..' '..' 'src' 'ModShelf.Sources.Nexus' 'Search' 'SearchMods.graphql'
 
@@ -128,6 +157,24 @@ query Schema {
   baseFilterValue: __type(name: "BaseFilterValue") { inputFields { name type { ...TypeRef } } }
   booleanFilterValue: __type(name: "BooleanFilterValue") { inputFields { name type { ...TypeRef } } }
   comparison: __type(name: "FilterComparisonOperator") { enumValues { name } }
+}
+fragment TypeRef on __Type { kind name ofType { kind name ofType { kind name ofType { kind name } } } }
+'@
+
+# The queries for a mod's page, as the Nexus source will send them.
+$CatalogFolder = Join-Path $PSScriptRoot '..' '..' '..' 'src' 'ModShelf.Sources.Nexus' 'Catalog'
+
+# The parts of the v2 schema around a mod's details and requirements. A type that doesn't exist comes back as null.
+$DetailsSchemaQuery = @'
+query DetailsSchema {
+  query: __type(name: "Query") { fields { name args { name type { ...TypeRef } } type { ...TypeRef } } }
+  mod: __type(name: "Mod") { fields { name args { name type { ...TypeRef } } type { ...TypeRef } } }
+  modRequirements: __type(name: "ModRequirements") { fields { name args { name type { ...TypeRef } } type { ...TypeRef } } }
+  modRequirement: __type(name: "ModRequirement") { fields { name type { ...TypeRef } } }
+  modRequirementPage: __type(name: "ModRequirementPage") { fields { name type { ...TypeRef } } }
+  dlcRequirement: __type(name: "DlcRequirement") { fields { name type { ...TypeRef } } }
+  modCategory: __type(name: "ModCategory") { fields { name type { ...TypeRef } } }
+  compositeDomainWithIdInput: __type(name: "CompositeDomainWithIdInput") { inputFields { name type { ...TypeRef } } }
 }
 fragment TypeRef on __Type { kind name ofType { kind name ofType { kind name ofType { kind name } } } }
 '@
@@ -344,6 +391,60 @@ function Save-Searches {
     Save-Fixture 'search-no-results' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Text 'zqxj no such mod zqxj'))
 }
 
+# The variables for the one mod of the game with the ID: adult or not, as a mod's page shows either.
+function New-ModVariables([int] $Id) {
+    function Condition([string] $Value) {
+        $condition = [System.Text.Json.Nodes.JsonObject]::new()
+        $condition['value'] = [System.Text.Json.Nodes.JsonValue]::Create($Value)
+        $condition['op'] = [System.Text.Json.Nodes.JsonValue]::Create('EQUALS')
+        $list = [System.Text.Json.Nodes.JsonArray]::new()
+        $list.Add($condition)
+        return , $list
+    }
+
+    $filter = [System.Text.Json.Nodes.JsonObject]::new()
+    $filter['gameDomainName'] = Condition $Game
+    $filter['modId'] = Condition ([string]$Id)
+    $variables = [System.Text.Json.Nodes.JsonObject]::new()
+    $variables['filter'] = $filter
+    return , $variables
+}
+
+# Saves a GraphQL answer even when Nexus Mods refused the query, saying so: the queries are partly a guess.
+function Save-GraphQlFixture([string] $Name, $Exchange, [scriptblock] $Shape) {
+    Save-Fixture $Name $Exchange $Shape
+    # Plain assignments only: an if statement's output would unroll the JSON array of errors.
+    $answer = ConvertTo-Node $Exchange.Text
+    $errors = $null
+    if ($answer -is [System.Text.Json.Nodes.JsonObject]) { $errors = $answer['errors'] }
+    if ($Exchange.Status -ne 200 -or $null -ne $errors) {
+        $first = "HTTP $($Exchange.Status)"
+        if ($errors -is [System.Text.Json.Nodes.JsonArray] -and $errors.Count -gt 0) { $first = Get-Text $errors[0]['message'] }
+        Write-Warning "Nexus Mods refused $Name ($first). Its answer is saved anyway; tell Claude."
+        $script:Refused++
+    }
+}
+
+# A mod's details and requirements for its page, and the schema around them.
+function Save-Details {
+    $detailsFile = Join-Path $CatalogFolder 'ModDetails.graphql'
+    $requirementsFile = Join-Path $CatalogFolder 'ModRequirements.graphql'
+    foreach ($file in $detailsFile, $requirementsFile) {
+        if (-not (Test-Path $file)) {
+            throw "The query isn't at $file. Run the script from its place in the repository."
+        }
+    }
+
+    $detailsQuery = Get-Content -Raw $detailsFile
+    $requirementsQuery = Get-Content -Raw $requirementsFile
+    Save-GraphQlFixture 'graphql-details-schema' (Invoke-NexusGraphQl $DetailsSchemaQuery 'DetailsSchema') { param($body) Limit-DetailsSchema $body }
+    Save-GraphQlFixture 'details-mod' (Invoke-NexusGraphQl $detailsQuery 'ModDetails' (New-ModVariables $ModId))
+    Save-GraphQlFixture 'details-requiring-mod' (Invoke-NexusGraphQl $detailsQuery 'ModDetails' (New-ModVariables $RequiringModId))
+    Save-GraphQlFixture 'details-mod-not-found' (Invoke-NexusGraphQl $detailsQuery 'ModDetails' (New-ModVariables 999999999))
+    Save-GraphQlFixture 'requirements-mod' (Invoke-NexusGraphQl $requirementsQuery 'ModRequirements' (New-ModVariables $ModId))
+    Save-GraphQlFixture 'requirements-requiring-mod' (Invoke-NexusGraphQl $requirementsQuery 'ModRequirements' (New-ModVariables $RequiringModId))
+}
+
 # How Nexus Mods answers each way of tracking and untracking. The account's tracked mods end as they started, even
 # when something fails part-way.
 function Save-Tracking {
@@ -451,6 +552,22 @@ function Limit-Schema($Body) {
     if ($fields -isnot [System.Text.Json.Nodes.JsonArray]) { return }
     for ($index = $fields.Count - 1; $index -ge 0; $index--) {
         if ((Get-Text $fields[$index]['name']) -ne 'mods') {
+            $fields.RemoveAt($index)
+        }
+    }
+}
+
+# Of the Query type's fields, keeps those about mods, their requirements and categories: the rest is the whole API.
+function Limit-DetailsSchema($Body) {
+    if ($Body -isnot [System.Text.Json.Nodes.JsonObject]) { return }
+    $data = $Body['data']
+    if ($data -isnot [System.Text.Json.Nodes.JsonObject]) { return }
+    $type = $data['query']
+    if ($type -isnot [System.Text.Json.Nodes.JsonObject]) { return }
+    $fields = $type['fields']
+    if ($fields -isnot [System.Text.Json.Nodes.JsonArray]) { return }
+    for ($index = $fields.Count - 1; $index -ge 0; $index--) {
+        if ((Get-Text $fields[$index]['name']) -notmatch '(?i)mod|requir|categor') {
             $fields.RemoveAt($index)
         }
     }
@@ -607,6 +724,7 @@ function Save-Fixture([string] $Name, $Exchange, [scriptblock] $Shape) {
     Write-Host ("  {0,-44} {1}" -f "$Name.json", $Exchange.Status)
 }
 
+$Refused = 0
 $ApiKey = Get-ApiKey
 $Secrets = [System.Collections.Generic.List[object]]::new()
 $Secrets.Add([pscustomobject]@{ Kind = 'key'; Label = 'your API key'; Value = $ApiKey; Stand = $RedactedKey })
@@ -642,7 +760,7 @@ try {
     }
 
     Write-Host "Recording as a $Account account into $OutFolder"
-    if ($SearchOnly -or $Tracking) {
+    if ($SearchOnly -or $Tracking -or $Details) {
         if ($SearchOnly) {
             Save-Searches
         }
@@ -651,7 +769,17 @@ try {
             Save-Tracking
         }
 
-        Write-Host 'Done. Review the files, then tell Claude they are there.'
+        if ($Details) {
+            Save-Details
+        }
+
+        if ($Refused) {
+            Write-Host "Done, but Nexus Mods refused $Refused of the queries. Review the files, then tell Claude they are there."
+        }
+        else {
+            Write-Host 'Done. Review the files, then tell Claude they are there.'
+        }
+
         return
     }
 
