@@ -1,0 +1,398 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ModShelf.Presentation.ViewModels.ModPages"
+             xmlns:res="using:ModShelf.Presentation.Resources"
+             xmlns:catalog="using:ModShelf.Sources.Abstractions.Catalog"
+             xmlns:pictures="using:ModShelf.Desktop.Views.Pictures"
+             x:Class="ModShelf.Desktop.Views.ModPages.ModPageView"
+             x:DataType="vm:ModPageViewModel">
+
+    <!--
+      Wide, the files on the left and the changelog, requirements and details beside them; narrow, all in one column,
+      with a smaller thumbnail. Their places and sizes are set here rather than on them, so the narrow page's can replace
+      them.
+    -->
+    <UserControl.Styles>
+        <Style Selector="StackPanel#Aside">
+            <Setter Property="Grid.Column" Value="1" />
+        </Style>
+        <Style Selector="Border#Thumbnail">
+            <Setter Property="Width" Value="192" />
+            <Setter Property="Height" Value="108" />
+        </Style>
+        <ContainerQuery Name="ModPage" Query="max-width:860">
+            <Style Selector="Border#Thumbnail">
+                <Setter Property="Width" Value="128" />
+                <Setter Property="Height" Value="72" />
+                <Setter Property="Margin" Value="0,0,16,0" />
+            </Style>
+            <Style Selector="StackPanel#Main">
+                <Setter Property="Grid.ColumnSpan" Value="2" />
+            </Style>
+            <Style Selector="StackPanel#Aside">
+                <Setter Property="Grid.Row" Value="1" />
+                <Setter Property="Grid.Column" Value="0" />
+                <Setter Property="Grid.ColumnSpan" Value="2" />
+                <Setter Property="Margin" Value="0,20,0,0" />
+            </Style>
+        </ContainerQuery>
+    </UserControl.Styles>
+
+    <StackPanel Container.Name="ModPage" Container.Sizing="Width" Spacing="20">
+        <!-- As a card: its picture across the page. -->
+        <Border Classes="picture" Height="280" CornerRadius="12">
+            <Border.IsVisible>
+                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                    <Binding Path="Previews.IsCards" />
+                    <Binding Path="Picture.IsShown" />
+                </MultiBinding>
+            </Border.IsVisible>
+            <Panel>
+                <Path Classes="glyph" Width="48" Height="48" Data="{StaticResource PictureGlyph}" IsVisible="{Binding Picture.ShowsPlaceholder}" />
+                <Path Classes="glyph"
+                      Width="48"
+                      Height="48"
+                      Data="{StaticResource EyeOffGlyph}"
+                      IsVisible="{Binding Picture.IsHidden}"
+                      ToolTip.Tip="{x:Static res:Strings.PictureAdultHidden}"
+                      AutomationProperties.Name="{x:Static res:Strings.PictureAdultHidden}" />
+                <pictures:ModImage File="{Binding Picture.File}"
+                                   IsBlurred="{Binding Picture.IsBlurred}"
+                                   DecodeWidth="1280"
+                                   Stretch="UniformToFill"
+                                   RenderOptions.BitmapInterpolationMode="HighQuality" />
+                <Border Classes="onPicture" IsVisible="{Binding Picture.IsAdultBlurred}">
+                    <TextBlock Text="{x:Static res:Strings.PictureAdultBlurred}" />
+                </Border>
+            </Panel>
+        </Border>
+
+        <!-- Its name, what's known of it, and what can be done with it; as thumbnails, its picture beside them. -->
+        <Grid ColumnDefinitions="Auto,*">
+            <Border Name="Thumbnail" Classes="picture" Margin="0,0,20,0" VerticalAlignment="Top" CornerRadius="10">
+                <Border.IsVisible>
+                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                        <Binding Path="Previews.IsThumbnails" />
+                        <Binding Path="Picture.IsShown" />
+                    </MultiBinding>
+                </Border.IsVisible>
+                <Panel>
+                    <Path Classes="glyph" Width="30" Height="30" Data="{StaticResource PictureGlyph}" IsVisible="{Binding Picture.ShowsPlaceholder}" />
+                    <Path Classes="glyph"
+                          Width="30"
+                          Height="30"
+                          Data="{StaticResource EyeOffGlyph}"
+                          IsVisible="{Binding Picture.IsHidden}"
+                          ToolTip.Tip="{x:Static res:Strings.PictureAdultHidden}"
+                          AutomationProperties.Name="{x:Static res:Strings.PictureAdultHidden}" />
+                    <pictures:ModImage File="{Binding Picture.File}"
+                                       IsBlurred="{Binding Picture.IsBlurred}"
+                                       DecodeWidth="400"
+                                       Stretch="UniformToFill"
+                                       RenderOptions.BitmapInterpolationMode="HighQuality" />
+                </Panel>
+            </Border>
+
+            <StackPanel Grid.Column="1" Spacing="6">
+                <WrapPanel ItemSpacing="10" LineSpacing="4">
+                    <TextBlock FontSize="28" FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding Name}" />
+                    <Border Classes="tag" IsVisible="{Binding HasAdultContent}">
+                        <TextBlock Text="{x:Static res:Strings.BrowseAdultTag}" />
+                    </Border>
+                </WrapPanel>
+                <WrapPanel ItemSpacing="14" LineSpacing="2">
+                    <TextBlock Classes="note" Text="{Binding AuthorText}" IsVisible="{Binding AuthorText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    <TextBlock Classes="note" Text="{Binding CategoryText}" IsVisible="{Binding HasCategory}" />
+                    <TextBlock Classes="note" Text="{Binding VersionText}" IsVisible="{Binding VersionText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    <TextBlock Classes="note" Text="{Binding EndorsementsText}" IsVisible="{Binding EndorsementsText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    <TextBlock Classes="note" Text="{Binding DownloadsText}" IsVisible="{Binding DownloadsText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    <TextBlock Classes="note" Text="{Binding UpdatedText}" IsVisible="{Binding UpdatedText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                </WrapPanel>
+                <TextBlock Classes="note"
+                           MaxWidth="640"
+                           HorizontalAlignment="Left"
+                           TextWrapping="Wrap"
+                           Text="{Binding Summary}"
+                           IsVisible="{Binding Summary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+                <WrapPanel Margin="0,10,0,0" ItemSpacing="8" LineSpacing="8">
+                    <Button Command="{Binding OpenPageCommand}" IsVisible="{Binding HasPage}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock VerticalAlignment="Center" Text="{Binding OpenPageText}" />
+                            <Path Classes="line" Width="13" Height="13" Data="{StaticResource ExternalGlyph}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Classes.on="{Binding IsWatched}" Command="{Binding ToggleWatchCommand}">
+                        <Panel>
+                            <TextBlock Text="{x:Static res:Strings.ModWatch}" IsVisible="{Binding !IsWatched}" />
+                            <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsWatched}">
+                                <Path Classes="line" Width="14" Height="14" Data="{StaticResource CheckGlyph}" />
+                                <TextBlock VerticalAlignment="Center" Text="{x:Static res:Strings.ModPageWatching}" />
+                            </StackPanel>
+                        </Panel>
+                    </Button>
+                    <Button Classes.on="{Binding IsTracked}" Command="{Binding ToggleTrackCommand}" IsVisible="{Binding CanTrack}">
+                        <Panel>
+                            <TextBlock Text="{Binding TrackText}" IsVisible="{Binding !IsTracked}" />
+                            <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsTracked}">
+                                <Path Classes="line" Width="14" Height="14" Data="{StaticResource CheckGlyph}" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding UntrackText}" />
+                            </StackPanel>
+                        </Panel>
+                    </Button>
+                    <Button Content="{x:Static res:Strings.LibraryRescan}" Command="{Binding RescanCommand}" IsVisible="{Binding IsInLibrary}" />
+                    <Button Classes="quiet"
+                            Foreground="{DynamicResource ShelfMutedBrush}"
+                            Content="{x:Static res:Strings.LibraryRemoveMod}"
+                            Command="{Binding RemoveCommand}"
+                            IsVisible="{Binding IsInLibrary}" />
+                </WrapPanel>
+            </StackPanel>
+        </Grid>
+
+        <TextBlock Classes="problem" TextWrapping="Wrap" Text="{x:Static res:Strings.BrowseUnavailable}" IsVisible="{Binding IsUnavailable}" />
+        <TextBlock Classes="note message" Classes.problem="{Binding IsNoteAProblem}" Text="{Binding Note}" />
+
+        <Grid ColumnDefinitions="2*,*" RowDefinitions="Auto,Auto" ColumnSpacing="20">
+            <StackPanel Name="Main" Spacing="20">
+                <!-- The library's files of the mod, where they are, and whether they're still there. -->
+                <Border Classes="list" IsVisible="{Binding HasOwnFiles}">
+                    <StackPanel>
+                        <Border Classes="file" Padding="18,14">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                <StackPanel Spacing="2">
+                                    <TextBlock Classes="subheading" Text="{x:Static res:Strings.ModPageYourFiles}" />
+                                    <SelectableTextBlock Classes="note"
+                                                         FontFamily="{DynamicResource ShelfMonoFont}"
+                                                         FontSize="12.5"
+                                                         TextWrapping="Wrap"
+                                                         Text="{Binding OwnFolderText}"
+                                                         IsVisible="{Binding OwnFolderText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                </StackPanel>
+                                <Button Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        Content="{x:Static res:Strings.LibraryOpenFolder}"
+                                        Command="{Binding OpenFolderCommand}" />
+                            </Grid>
+                        </Border>
+                        <ItemsControl ItemsSource="{Binding OwnFiles}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:OwnFileViewModel">
+                                    <Border Classes="file" Classes.archived="{Binding IsArchived}" Padding="18,12">
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                            <StackPanel Spacing="2">
+                                                <WrapPanel ItemSpacing="8" LineSpacing="4">
+                                                    <TextBlock TextWrapping="Wrap">
+                                                        <Run FontWeight="SemiBold" Text="{Binding Name}" />
+                                                        <Run Foreground="{DynamicResource ShelfFaintBrush}" Text="·" />
+                                                        <Run Foreground="{DynamicResource ShelfFaintBrush}" Text="{Binding CategoryText}" />
+                                                    </TextBlock>
+                                                    <Border Classes="tag" IsVisible="{Binding IsArchived}">
+                                                        <TextBlock Text="{x:Static res:Strings.ModPageArchived}" />
+                                                    </Border>
+                                                    <Border Classes="tag warn" IsVisible="{Binding IsMissing}">
+                                                        <TextBlock Text="{x:Static res:Strings.ModPageMissing}" />
+                                                    </Border>
+                                                </WrapPanel>
+                                                <WrapPanel ItemSpacing="14">
+                                                    <TextBlock Classes="note" FontSize="12.5" TextWrapping="Wrap" Text="{Binding FileName}" />
+                                                    <TextBlock Classes="note" FontSize="12.5" Text="{Binding SizeText}" />
+                                                    <TextBlock Classes="note" FontSize="12.5" Text="{Binding DownloadedText}" />
+                                                </WrapPanel>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" IsVisible="{Binding HasSha256}">
+                                                <TextBlock Classes="note" FontSize="12.5" VerticalAlignment="Center" Text="{x:Static res:Strings.ModPageSha256}" />
+                                                <TextBlock FontFamily="{DynamicResource ShelfMonoFont}"
+                                                           FontSize="12.5"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding Sha256Text}"
+                                                           ToolTip.Tip="{Binding Sha256}" />
+                                                <Button Classes="icon"
+                                                        Command="{Binding CopySha256Command}"
+                                                        ToolTip.Tip="{x:Static res:Strings.ModPageCopySha256}"
+                                                        AutomationProperties.Name="{x:Static res:Strings.ModPageCopySha256}">
+                                                    <Path Classes="line" StrokeThickness="1.8" Data="{StaticResource CopyGlyph}" />
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Button Margin="8"
+                                HorizontalAlignment="Left"
+                                Classes="quiet"
+                                Content="{Binding ArchivedText}"
+                                Command="{Binding ToggleArchivedCommand}"
+                                IsVisible="{Binding HasArchived}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- The files on its site, by section, each saying what it is to the library. Buttons line up through shared widths. -->
+                <Border Classes="list">
+                    <StackPanel Grid.IsSharedSizeScope="True">
+                        <!-- The heading whole; the other files' button in the room left, its text wrapping when it must. -->
+                        <Border Classes="file" Padding="18,14">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <TextBlock Classes="subheading" VerticalAlignment="Center" Text="{Binding SiteFilesHeading}" />
+                                <Button Grid.Column="1"
+                                        HorizontalAlignment="Right"
+                                        Classes="quiet"
+                                        Command="{Binding ToggleMoreFilesCommand}"
+                                        IsVisible="{Binding HasMoreFiles}">
+                                    <TextBlock TextAlignment="Right" TextWrapping="Wrap" Text="{Binding MoreFilesText}" />
+                                </Button>
+                            </Grid>
+                        </Border>
+                        <TextBlock Classes="note" Margin="18,12" TextWrapping="Wrap" Text="{x:Static res:Strings.BrowseNoFiles}" IsVisible="{Binding ShowsNoFiles}" />
+                        <TextBlock Classes="note" Margin="18,12" TextWrapping="Wrap" Text="{Binding OfflineText}" IsVisible="{Binding IsOffline}" />
+                        <ItemsControl ItemsSource="{Binding Sections}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ModFileSectionViewModel">
+                                    <StackPanel>
+                                        <TextBlock Classes="note" Margin="18,12,18,4" FontSize="12.5" FontWeight="SemiBold" Text="{Binding Title}" />
+                                        <ItemsControl ItemsSource="{Binding Files}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:ModFileViewModel">
+                                                    <Border Classes="file" Padding="18,10">
+                                                        <Grid ColumnSpacing="16">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="Auto" SharedSizeGroup="FileButtons" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <StackPanel Spacing="2">
+                                                                <WrapPanel ItemSpacing="8" LineSpacing="4">
+                                                                    <TextBlock FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding Name}" />
+                                                                    <Border Classes="tag accent" IsVisible="{Binding IsUpdate}">
+                                                                        <TextBlock Text="{Binding UpdateNote}" />
+                                                                    </Border>
+                                                                    <Border Classes="tag accent" IsVisible="{Binding IsLinked}">
+                                                                        <TextBlock Text="{x:Static res:Strings.BrowseFileLinked}" />
+                                                                    </Border>
+                                                                </WrapPanel>
+                                                                <WrapPanel ItemSpacing="14">
+                                                                    <TextBlock Classes="note" FontSize="12.5" TextWrapping="Wrap" Text="{Binding FileName}" />
+                                                                    <TextBlock Classes="note" FontSize="12.5" Text="{Binding VersionText}" />
+                                                                    <TextBlock Classes="note" FontSize="12.5" Text="{Binding SizeText}" />
+                                                                    <TextBlock Classes="note" FontSize="12.5" Text="{Binding UploadedText}" />
+                                                                </WrapPanel>
+                                                                <TextBlock Classes="note message" Classes.problem="{Binding IsNoteAProblem}" Text="{Binding Note}" />
+                                                            </StackPanel>
+                                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                                                <StackPanel Classes="had" Margin="0,0,8,0" IsVisible="{Binding IsInLibrary}">
+                                                                    <Path Data="{StaticResource CheckGlyph}" />
+                                                                    <TextBlock Text="{x:Static res:Strings.BrowseFileInLibrary}" />
+                                                                </StackPanel>
+                                                                <Button Classes="quiet" Content="{x:Static res:Strings.SaveToFolder}" Command="{Binding SaveToFolderCommand}" />
+                                                                <Button Classes.accent="{Binding IsUpdate}"
+                                                                        Content="{x:Static res:Strings.FileDownload}"
+                                                                        Command="{Binding DownloadCommand}"
+                                                                        IsVisible="{Binding !IsInLibrary}" />
+                                                            </StackPanel>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <StackPanel Name="Aside" Spacing="20">
+                <!-- Its latest changes, newest first; all of them when asked. -->
+                <Border Classes="card" Padding="18,14">
+                    <StackPanel Spacing="8">
+                        <TextBlock Classes="subheading" Text="{x:Static res:Strings.BrowseChangelog}" />
+                        <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.BrowseNoChangelog}" IsVisible="{Binding ShowsNoChangelog}" />
+                        <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding OfflineText}" IsVisible="{Binding IsOffline}" />
+                        <ItemsControl ItemsSource="{Binding ShownChanges}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="catalog:ModChangelog">
+                                    <Border Classes="file" Padding="0,8">
+                                        <StackPanel Spacing="4">
+                                            <TextBlock FontWeight="SemiBold" Text="{Binding Version}" />
+                                            <ItemsControl Classes="bullets" Foreground="{DynamicResource ShelfMutedBrush}" ItemsSource="{Binding Changes}" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Button HorizontalAlignment="Left"
+                                Classes="quiet"
+                                Padding="0,6"
+                                Content="{Binding MoreChangesText}"
+                                Command="{Binding ToggleChangesCommand}"
+                                IsVisible="{Binding HasMoreChanges}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- What it needs: mods open on their page here, other things on their site. -->
+                <Border Classes="card" Padding="18,14" IsVisible="{Binding HasRequirements}">
+                    <StackPanel Spacing="8">
+                        <TextBlock Classes="subheading" Text="{x:Static res:Strings.ModPageRequirements}" />
+                        <ItemsControl ItemsSource="{Binding Requirements}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:RequirementViewModel">
+                                    <Border Classes="file" Padding="0,8">
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                            <StackPanel Spacing="2" VerticalAlignment="Center">
+                                                <TextBlock FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding Name}" />
+                                                <TextBlock Classes="note"
+                                                           FontSize="12.5"
+                                                           TextWrapping="Wrap"
+                                                           Text="{Binding Notes}"
+                                                           IsVisible="{Binding Notes, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                                <StackPanel Classes="had" IsVisible="{Binding IsInLibrary}">
+                                                    <Path Data="{StaticResource CheckGlyph}" />
+                                                    <TextBlock Text="{x:Static res:Strings.ModPageInLibrary}" />
+                                                </StackPanel>
+                                                <Button Classes.quiet="{Binding IsInLibrary}"
+                                                        Content="{x:Static res:Strings.ModPageOpen}"
+                                                        Command="{Binding OpenCommand}"
+                                                        IsVisible="{Binding IsMod}" />
+                                                <Button Command="{Binding OpenPageCommand}" IsVisible="{Binding IsElsewhere}">
+                                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                                        <TextBlock VerticalAlignment="Center" Text="{x:Static res:Strings.ModOpenPage}" />
+                                                        <Path Classes="line" Width="13" Height="13" Data="{StaticResource ExternalGlyph}" />
+                                                    </StackPanel>
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Classes="note" FontSize="12.5" TextWrapping="Wrap" Text="{x:Static res:Strings.ModPageRequirementsNote}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- What's known of it, label beside value. -->
+                <Border Classes="card" Padding="18,14">
+                    <StackPanel Spacing="8">
+                        <TextBlock Classes="subheading" Text="{x:Static res:Strings.ModPageDetails}" />
+                        <ItemsControl Grid.IsSharedSizeScope="True" ItemsSource="{Binding Facts}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ModFact">
+                                    <Grid Margin="0,3" ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="FactLabels" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Classes="note" Text="{Binding Label}" />
+                                        <SelectableTextBlock Grid.Column="1" TextWrapping="Wrap" Text="{Binding Value}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </StackPanel>
+</UserControl>

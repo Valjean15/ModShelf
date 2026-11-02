@@ -180,11 +180,62 @@
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
+    <Style Selector="Border.tag.warn">
+        <Setter Property="Background" Value="{DynamicResource ShelfWarnSoftBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfWarnSoftBrush}" />
+    </Style>
+
+    <Style Selector="Border.tag.warn TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource ShelfWarnBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
     <!-- One of a mod's files, in its section. -->
     <Style Selector="Border.file">
         <Setter Property="Padding" Value="16,10" />
         <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
         <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <!-- A file kept only as an old version, in the _archive folder: on the raised colour, below the others. -->
+    <Style Selector="Border.file.archived">
+        <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />
+    </Style>
+
+    <!--
+      A sign drawn as lines in a button, such as a tick: in the colour of the button's text, which pointing at the button
+      changes. That's its template's presenter's, found up the visual tree: up the logical tree is the button's parent.
+    -->
+    <Style Selector="Path.line">
+        <Setter Property="Stroke" Value="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType=ContentPresenter, Tree=Visual}}" />
+        <Setter Property="StrokeThickness" Value="2" />
+        <Setter Property="StrokeJoin" Value="Round" />
+        <Setter Property="StrokeLineCap" Value="Round" />
+        <Setter Property="Stretch" Value="Uniform" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- What's had, such as a file in the library: a tick and a word, in the good colour. -->
+    <Style Selector="StackPanel.had">
+        <Setter Property="Orientation" Value="Horizontal" />
+        <Setter Property="Spacing" Value="6" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="StackPanel.had TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource ShelfGoodBrush}" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="StackPanel.had Path">
+        <Setter Property="Stroke" Value="{DynamicResource ShelfGoodBrush}" />
+        <Setter Property="StrokeThickness" Value="2.2" />
+        <Setter Property="StrokeJoin" Value="Round" />
+        <Setter Property="StrokeLineCap" Value="Round" />
+        <Setter Property="Stretch" Value="Uniform" />
+        <Setter Property="Width" Value="14" />
+        <Setter Property="Height" Value="14" />
     </Style>
 
     <!-- Buttons: plain by default, "accent" for the one main action of a screen or row, "quiet" for the least. -->
@@ -216,6 +267,72 @@
     <Style Selector="Button.quiet:disabled /template/ ContentPresenter#PART_ContentPresenter, Button.more:disabled /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+
+    <!-- A button that's on: soft accent, such as Watching. -->
+    <Style Selector="Button.on">
+        <Setter Property="Background" Value="{DynamicResource ShelfAccentSoftBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfAccentSoftBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfAccentTextBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="Button.on:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfAccentSoftBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfAccentTextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfAccentTextBrush}" />
+    </Style>
+
+    <!-- A small button holding only a sign, such as copying a hash. -->
+    <Style Selector="Button.icon">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfMutedBrush}" />
+        <Setter Property="MinHeight" Value="28" />
+        <Setter Property="Width" Value="28" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="Padding" Value="6" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.icon:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfTextBrush}" />
+    </Style>
+
+    <!-- A step of the way back, such as "Library" above a mod: a link in the accent colour. -->
+    <Style Selector="Button.crumb">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfAccentTextBrush}" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="MinHeight" Value="28" />
+        <Setter Property="Padding" Value="4,2" />
+    </Style>
+
+    <Style Selector="Button.crumb:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfAccentTextBrush}" />
+    </Style>
+
+    <!-- A mod's name that opens its page: text until pointed at, then underlined in the accent colour. -->
+    <Style Selector="Button.name">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+
+    <Style Selector="Button.name:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfAccentTextBrush}" />
+    </Style>
+
+    <Style Selector="Button.name:pointerover TextBlock">
+        <Setter Property="TextDecorations" Value="Underline" />
     </Style>
 
     <!-- The "…" button that holds a row's other actions. -->
