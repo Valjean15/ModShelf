@@ -157,6 +157,8 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
   "Tracked on Nexus Mods." **Tracked mods** for Stardew Valley lists SMAPI, and the website's Tracking Centre shows it.
 - [ ] **9.4 Untrack** (Premium only). **Untrack on Nexus Mods**.
   "No longer tracked on Nexus Mods." It's gone from **Tracked mods** and from the website. If SMAPI was tracked before you started, track it again.
+- [ ] **9.5 Remove from the library.** On the Library screen, expand the mod you watched in 9.2, and **Remove from library…**.
+  "Remove this mod from the library?", saying its files stay. **Remove**: the mod leaves the Library, and **Check now** on the Updates screen counts one mod fewer. Removing a mod with files leaves them in its folder.
 
 ## 10. Settings
 
@@ -308,6 +310,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 9.2 Watch from Browse | | | |
 | 9.3 Track | | – | |
 | 9.4 Untrack | | – | |
+| 9.5 Remove from the library | | | |
 | 10.1 Folder patterns | | | |
 | 10.2 A game's own pattern | | | |
 | 10.3 Old versions | | | |

@@ -93,6 +93,80 @@ public sealed class LibraryModViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task RemovesTheModFromTheLibraryOnceTheUserConfirms()
+    {
+        LibraryModViewModel row = await ShowAsync(TestData.LibraryMod(SkyUi, "SkyUI", watched: true, TestData.LibraryFile(SkyUi, "1", "a.7z")));
+        _harness.Dialogs.Confirm.Enqueue(true);
+
+        await row.RemoveCommand.ExecuteAsync(null);
+
+        Assert.Equal(
+            [(
+                "Remove this mod from the library?",
+                "SkyUI leaves the library with its updates, and isn't watched any more. Its files stay in the folder, no longer the library's, and its completed downloads leave the Downloads list.",
+                "Remove")],
+            _harness.Dialogs.Confirmations);
+        Assert.Equal(["Forget 12604"], _harness.Library.Asked);
+        Assert.Empty(_harness.Screen.Rows);
+    }
+
+    [Fact]
+    public async Task NotConfirmingKeepsTheMod()
+    {
+        LibraryModViewModel row = await ShowAsync(TestData.LibraryMod(SkyUi, "SkyUI"));
+        _harness.Dialogs.Confirm.Enqueue(false);
+
+        await row.RemoveCommand.ExecuteAsync(null);
+
+        Assert.Empty(_harness.Library.Asked);
+        Assert.Single(_harness.Library.Mods);
+    }
+
+    [Theory]
+    [InlineData(typeof(InvalidOperationException), "A download of a file of SkyUI into the library isn't finished. Let it finish, or cancel it, first.")]
+    [InlineData(typeof(InvalidDataException), "settings.json isn't valid JSON.")]
+    public async Task AModThatCantBeRemovedSaysWhy(Type failure, string reason)
+    {
+        LibraryModViewModel row = await ShowAsync(TestData.LibraryMod(SkyUi, "SkyUI"));
+        _harness.Dialogs.Confirm.Enqueue(true);
+        _harness.Library.Refusal = (Exception)Activator.CreateInstance(failure, reason)!;
+
+        await row.RemoveCommand.ExecuteAsync(null);
+
+        Assert.Equal([("The mod wasn't removed", reason)], _harness.Dialogs.Messages);
+        Assert.Empty(_harness.Logger.Entries);
+    }
+
+    [Fact]
+    public async Task AModRemovedMeanwhileIsLeftAlone()
+    {
+        LibraryModViewModel row = await ShowAsync(TestData.LibraryMod(SkyUi, "SkyUI"));
+        _harness.Dialogs.Confirm.Enqueue(true);
+        _harness.Library.Refusal = new KeyNotFoundException();
+
+        await row.RemoveCommand.ExecuteAsync(null);
+
+        Assert.Empty(_harness.Dialogs.Messages);
+        Assert.Empty(_harness.Logger.Entries);
+    }
+
+    [Fact]
+    public async Task ARemoveThatFailsUnexpectedlyIsLoggedAndTold()
+    {
+        LibraryModViewModel row = await ShowAsync(TestData.LibraryMod(SkyUi, "SkyUI"));
+        _harness.Dialogs.Confirm.Enqueue(true);
+        _harness.Library.Refusal = new IOException("The disk is full.");
+
+        await row.RemoveCommand.ExecuteAsync(null);
+
+        Assert.Equal([("That didn't work", "Something went wrong. The log has the details.")], _harness.Dialogs.Messages);
+        Assert.StartsWith(
+            "Error: Remove of mod 12604 of skyrimspecialedition failed System.IO.IOException: The disk is full.",
+            Assert.Single(_harness.Logger.Entries),
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task AModThatLeftMeanwhileIsLeftAlone()
     {
         LibraryModViewModel row = await ShowAsync(TestData.LibraryMod(SkyUi, "SkyUI"));

@@ -76,27 +76,32 @@
                                 </Grid>
                             </Expander.Header>
 
-                            <ItemsControl ItemsSource="{Binding Files}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:LibraryFileViewModel">
-                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16" Margin="0,4">
-                                            <StackPanel Spacing="2">
-                                                <TextBlock TextTrimming="CharacterEllipsis" Text="{Binding FileName}" />
-                                                <WrapPanel ItemSpacing="16">
-                                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding Name}" />
-                                                    <TextBlock Classes="note" Text="{Binding VersionText}" />
-                                                    <TextBlock Classes="note" Text="{Binding SizeText}" />
-                                                    <TextBlock Classes="note" Text="{Binding DownloadedText}" />
-                                                </WrapPanel>
-                                            </StackPanel>
-                                            <Button Grid.Column="1"
-                                                    VerticalAlignment="Center"
-                                                    Content="{x:Static res:Strings.LibraryDeleteFile}"
-                                                    Command="{Binding DeleteCommand}" />
-                                        </Grid>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
+                            <StackPanel Spacing="8">
+                                <ItemsControl ItemsSource="{Binding Files}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:LibraryFileViewModel">
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16" Margin="0,4">
+                                                <StackPanel Spacing="2">
+                                                    <TextBlock TextTrimming="CharacterEllipsis" Text="{Binding FileName}" />
+                                                    <WrapPanel ItemSpacing="16">
+                                                        <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding Name}" />
+                                                        <TextBlock Classes="note" Text="{Binding VersionText}" />
+                                                        <TextBlock Classes="note" Text="{Binding SizeText}" />
+                                                        <TextBlock Classes="note" Text="{Binding DownloadedText}" />
+                                                    </WrapPanel>
+                                                </StackPanel>
+                                                <Button Grid.Column="1"
+                                                        VerticalAlignment="Center"
+                                                        Content="{x:Static res:Strings.LibraryDeleteFile}"
+                                                        Command="{Binding DeleteCommand}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Button HorizontalAlignment="Right"
+                                        Content="{x:Static res:Strings.LibraryRemoveMod}"
+                                        Command="{Binding RemoveCommand}" />
+                            </StackPanel>
                         </Expander>
                     </DataTemplate>
                 </ListBox.DataTemplates>

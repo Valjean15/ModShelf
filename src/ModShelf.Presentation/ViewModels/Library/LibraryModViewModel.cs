@@ -40,6 +40,7 @@ public sealed partial class LibraryModViewModel : ObservableObject
         OpenFolder,
         Watch,
         Unwatch,
+        Remove,
     }
 
     public ModRef Mod { get; }
@@ -193,6 +194,38 @@ public sealed partial class LibraryModViewModel : ObservableObject
 
     [RelayCommand(CanExecute = nameof(IsWatched))]
     private Task UnwatchAsync(CancellationToken cancellationToken) => SetWatchedAsync(ModAction.Unwatch, false, cancellationToken);
+
+    /// <summary>
+    /// Takes the mod out of the library once the user confirms. Its files stay where they are. The screen shows the change
+    /// once the library makes it.
+    /// </summary>
+    [RelayCommand]
+    private Task RemoveAsync(CancellationToken cancellationToken)
+        => RunAsync(
+            ModAction.Remove,
+            async () =>
+            {
+                string message = Text.Format(Strings.RemoveModMessage, Name);
+                if (!await _services.Dialogs.ConfirmAsync(Strings.RemoveModTitle, message, Strings.RemoveModConfirm, cancellationToken))
+                {
+                    return;
+                }
+
+                try
+                {
+                    await _services.Library.ForgetAsync(Mod, cancellationToken);
+                }
+                catch (KeyNotFoundException)
+                {
+                    // It left the library meanwhile.
+                }
+                catch (Exception exception) when (exception is InvalidOperationException or InvalidDataException)
+                {
+                    // Such as a download of one of its files that isn't finished, or settings that can't be read.
+                    await _services.Dialogs.ShowMessageAsync(Strings.RemoveModFailedTitle, exception.Message, cancellationToken);
+                }
+            },
+            cancellationToken);
 
     private bool CanWatch() => !IsWatched;
 

@@ -486,6 +486,26 @@
     <value>{0} couldn't be deleted: {1} It stays in the library.</value>
     <comment>{0} is the file's name, {1} the system's reason.</comment>
   </data>
+  <data name="LibraryRemoveMod" xml:space="preserve">
+    <value>Remove from library…</value>
+    <comment>Button on a mod: take it out of the library, after asking. Its files stay on disk.</comment>
+  </data>
+  <data name="RemoveModTitle" xml:space="preserve">
+    <value>Remove this mod from the library?</value>
+    <comment>Title of the dialog confirming that a mod leaves the library.</comment>
+  </data>
+  <data name="RemoveModMessage" xml:space="preserve">
+    <value>{0} leaves the library with its updates, and isn't watched any more. Its files stay in the folder, no longer the library's, and its completed downloads leave the Downloads list.</value>
+    <comment>{0} is the mod's name.</comment>
+  </data>
+  <data name="RemoveModConfirm" xml:space="preserve">
+    <value>Remove</value>
+    <comment>Button that takes a mod out of the library. Its files stay.</comment>
+  </data>
+  <data name="RemoveModFailedTitle" xml:space="preserve">
+    <value>The mod wasn't removed</value>
+    <comment>Title of the message when a mod couldn't leave the library, such as while one of its downloads isn't finished.</comment>
+  </data>
   <data name="OpenFolderFailedTitle" xml:space="preserve">
     <value>Couldn't open the folder</value>
     <comment>Title of the message when a folder didn't open.</comment>
