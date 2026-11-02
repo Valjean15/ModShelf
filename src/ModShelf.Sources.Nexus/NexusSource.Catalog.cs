@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Globalization;
 using System.Text.Json;
 
@@ -43,15 +44,21 @@ public sealed partial class NexusSource : IModCatalog
     {
         string domain = NexusLink.ForGame(game);
         NexusGame found = await _api.GetAsync<NexusGame>($"{NexusLink.GameApiPath(domain)}.json", cancellationToken).ConfigureAwait(false);
+        _categories[domain] = CategoriesOf(found);
         return ToGameInfo(game, domain, found);
     }
 
+    /// <summary>
+    /// The mod, from <c>v1/games/{game}/mods/{id}.json</c>; its category's name from the game's categories, read the first
+    /// time one of its mods is, and left out when they can't be read.
+    /// </summary>
     /// <exception cref="ArgumentException">The mod isn't Nexus Mods'.</exception>
     /// <exception cref="HttpRequestException">The API couldn't be reached or refused; with 404 when there's no such mod.</exception>
     public async Task<ModInfo> GetModAsync(ModRef modRef, CancellationToken cancellationToken)
     {
         NexusLink mod = NexusLink.ForMod(modRef);
         NexusMod found = await _api.GetAsync<NexusMod>($"{mod.ModApiPath}.json", cancellationToken).ConfigureAwait(false);
+        string? category = found.CategoryId is { } id ? await CategoryAsync(mod.Game, id, cancellationToken).ConfigureAwait(false) : null;
         return new ModInfo(
             modRef,
             string.IsNullOrWhiteSpace(found.Name) ? $"Mod {mod.ModId}" : found.Name,
@@ -64,7 +71,8 @@ public sealed partial class NexusSource : IModCatalog
             isAvailable: IsAvailable(found.Available, found.Status),
             hasAdultContent: found.ContainsAdultContent == true,
             downloads: Count(found.ModDownloads),
-            endorsements: Count(found.EndorsementCount));
+            endorsements: Count(found.EndorsementCount),
+            category: category);
     }
 
     /// <exception cref="ArgumentException">The mod isn't Nexus Mods'.</exception>
@@ -115,6 +123,24 @@ public sealed partial class NexusSource : IModCatalog
     /// <summary>
     /// The game by its name, or its domain name if it has none, with its page, or the page its domain name gives.
     /// </summary>
+    /// <summary>
+    /// Each of the game's categories with a name, by ID. <see cref="ModInfo"/> trims the name, and takes a blank one for
+    /// none.
+    /// </summary>
+    private static FrozenDictionary<long, string> CategoriesOf(NexusGame game)
+    {
+        Dictionary<long, string> names = [];
+        foreach (NexusCategory? category in game.Categories ?? [])
+        {
+            if (category is { Name: { } name })
+            {
+                names[category.CategoryId] = name;
+            }
+        }
+
+        return names.ToFrozenDictionary();
+    }
+
     private static GameInfo ToGameInfo(GameRef game, string domain, NexusGame found)
         => new(
             game,
@@ -167,4 +193,27 @@ public sealed partial class NexusSource : IModCatalog
         => seconds >= 0 && seconds <= DateTimeOffset.MaxValue.ToUnixTimeSeconds()
             ? DateTimeOffset.FromUnixTimeSeconds(seconds)
             : DateTimeOffset.UnixEpoch;
+
+    /// <summary>
+    /// The name of one of the game's categories, reading the game's categories the first time; null when the category
+    /// isn't listed, or the game can't be read, which the mod's details don't need.
+    /// </summary>
+    private async Task<string?> CategoryAsync(string game, long category, CancellationToken cancellationToken)
+    {
+        if (!_categories.TryGetValue(game, out IReadOnlyDictionary<long, string>? names))
+        {
+            try
+            {
+                NexusGame found = await _api.GetAsync<NexusGame>($"{NexusLink.GameApiPath(game)}.json", cancellationToken).ConfigureAwait(false);
+                names = _categories.GetOrAdd(game, CategoriesOf(found));
+            }
+            catch (HttpRequestException)
+            {
+                // Asked again with the next mod.
+                return null;
+            }
+        }
+
+        return names.GetValueOrDefault(category);
+    }
 }

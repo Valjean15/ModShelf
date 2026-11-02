@@ -23,7 +23,8 @@ public sealed record ModInfo
         long? downloads = null,
         long? endorsements = null,
         Uri? thumbnailUrl = null,
-        Uri? thumbnailBlurredUrl = null)
+        Uri? thumbnailBlurredUrl = null,
+        string? category = null)
     {
         ArgumentNullException.ThrowIfNull(mod);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -55,6 +56,7 @@ public sealed record ModInfo
         Endorsements = endorsements;
         ThumbnailUrl = thumbnailUrl;
         ThumbnailBlurredUrl = thumbnailBlurredUrl;
+        Category = Blank(category);
     }
 
     public ModRef Mod { get; }
@@ -116,6 +118,11 @@ public sealed record ModInfo
     /// site gives none. Shown instead of the thumbnail, so the real picture isn't downloaded.
     /// </summary>
     public Uri? ThumbnailBlurredUrl { get; }
+
+    /// <summary>
+    /// The name of the mod's category on its site, such as "Gameplay", or null when it doesn't say.
+    /// </summary>
+    public string? Category { get; }
 
     private static string? Blank(string? text) => string.IsNullOrWhiteSpace(text) ? null : text.Trim();
 }

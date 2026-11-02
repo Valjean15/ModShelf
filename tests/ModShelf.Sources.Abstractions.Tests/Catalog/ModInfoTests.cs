@@ -60,13 +60,21 @@ public sealed class ModInfoTests
     }
 
     [Fact]
+    public void KeepsTheCategoryTrimmed()
+    {
+        Assert.Equal("Gameplay Mechanics", new ModInfo(Smapi, "SMAPI", category: " Gameplay Mechanics ").Category);
+        Assert.Null(new ModInfo(Smapi, "SMAPI").Category);
+    }
+
+    [Fact]
     public void TreatsBlankTextAsNone()
     {
-        ModInfo mod = new(Smapi, "SMAPI", summary: " ", author: "", version: "\t");
+        ModInfo mod = new(Smapi, "SMAPI", summary: " ", author: "", version: "\t", category: " ");
 
         Assert.Null(mod.Summary);
         Assert.Null(mod.Author);
         Assert.Null(mod.Version);
+        Assert.Null(mod.Category);
     }
 
     [Fact]

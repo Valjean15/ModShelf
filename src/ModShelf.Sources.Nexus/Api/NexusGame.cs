@@ -5,4 +5,6 @@ namespace ModShelf.Sources.Nexus.Api;
 /// </summary>
 /// <param name="NexusmodsUrl">The game's page, such as <c>https://www.nexusmods.com/stardewvalley</c>.</param>
 /// <param name="DomainName">The game's name in links, such as <c>stardewvalley</c>.</param>
-internal sealed record NexusGame(string? Name, string? NexusmodsUrl, string? DomainName = null);
+/// <param name="Categories">The game's mod categories; the list of games gives them too, but they're read from the
+/// game.</param>
+internal sealed record NexusGame(string? Name, string? NexusmodsUrl, string? DomainName = null, IReadOnlyList<NexusCategory?>? Categories = null);

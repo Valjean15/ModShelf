@@ -18,4 +18,5 @@ internal sealed record NexusMod(
     string? Status,
     bool? ContainsAdultContent,
     long? ModDownloads = null,
-    long? EndorsementCount = null);
+    long? EndorsementCount = null,
+    long? CategoryId = null);

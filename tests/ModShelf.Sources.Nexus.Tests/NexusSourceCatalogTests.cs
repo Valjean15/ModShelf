@@ -18,6 +18,7 @@ public sealed class NexusSourceCatalogTests : IDisposable
     private const string ModPath = "/v1/games/stardewvalley/mods/2400.json";
     private const string FilesPath = "/v1/games/stardewvalley/mods/2400/files.json";
     private const string ChangelogsPath = "/v1/games/stardewvalley/mods/2400/changelogs.json";
+    private const string GamePath = "/v1/games/stardewvalley.json";
 
     private static readonly GameRef StardewValley = new(new SourceId("nexus"), "stardewvalley");
     private static readonly ModRef Smapi = new(StardewValley, "2400");
@@ -172,6 +173,61 @@ public sealed class NexusSourceCatalogTests : IDisposable
         Assert.False(mod.HasAdultContent);
         Assert.Equal(recorded["mod_downloads"]!.GetValue<long>(), mod.Downloads);
         Assert.Equal(recorded["endorsement_count"]!.GetValue<long>(), mod.Endorsements);
+    }
+
+    [Fact]
+    public async Task AModHasItsCategoryFromItsGame()
+    {
+        _api.Serve(RecordedNexusApi.Premium, "mod");
+        _api.Serve(RecordedNexusApi.Premium, "game");
+
+        ModInfo first = await Source.GetModAsync(Smapi, Cancellation);
+        ModInfo again = await Source.GetModAsync(Smapi, Cancellation);
+
+        // The recorded SMAPI is in category 9, which the recorded game calls "Modding Tools".
+        Assert.Equal(("Modding Tools", "Modding Tools"), (first.Category, again.Category));
+        Assert.Single(_api.Requests, request => request.RequestMessage?.Path == GamePath);
+    }
+
+    [Fact]
+    public async Task TheGamesCategoriesReadWithTheGameServeItsMods()
+    {
+        _api.Serve(RecordedNexusApi.Premium, "game");
+        _api.Serve(RecordedNexusApi.Premium, "mod");
+
+        await Source.GetGameAsync(StardewValley, Cancellation);
+        ModInfo mod = await Source.GetModAsync(Smapi, Cancellation);
+
+        Assert.Equal("Modding Tools", mod.Category);
+        Assert.Single(_api.Requests, request => request.RequestMessage?.Path == GamePath);
+    }
+
+    [Fact]
+    public async Task AModWhoseGameCantBeReadHasNoCategoryUntilItCan()
+    {
+        _api.Serve(RecordedNexusApi.Premium, "mod");
+        _api.AnswerInTurn(
+            GamePath,
+            // Not one the client retries.
+            response => response.WithStatusCode(404),
+            response => response.WithStatusCode(200).WithBody(RecordedNexusApi.Recording(RecordedNexusApi.Premium, "game")["response"]!["body"]!.ToJsonString()));
+
+        ModInfo unread = await Source.GetModAsync(Smapi, Cancellation);
+        ModInfo read = await Source.GetModAsync(Smapi, Cancellation);
+
+        Assert.Null(unread.Category);
+        Assert.Equal("Modding Tools", read.Category);
+    }
+
+    [Fact]
+    public async Task AModInACategoryTheGameDoesntListHasNone()
+    {
+        _api.Answer(ModPath, response => response.WithStatusCode(200).WithBody("""{"mod_id": 2400, "name": "SMAPI", "category_id": 424242}"""));
+        _api.Serve(RecordedNexusApi.Premium, "game");
+
+        ModInfo mod = await Source.GetModAsync(Smapi, Cancellation);
+
+        Assert.Null(mod.Category);
     }
 
     [Theory]

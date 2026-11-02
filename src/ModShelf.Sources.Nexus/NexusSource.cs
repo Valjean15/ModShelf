@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Nexus.Api;
@@ -19,6 +21,9 @@ public sealed partial class NexusSource : IAccountLinker
     private readonly NexusApiClient _api;
     private readonly NexusQuota _quota;
     private readonly TimeProvider _timeProvider;
+
+    // Each game's mod categories by ID, once read: they rarely change, and a mod names only its category's ID.
+    private readonly ConcurrentDictionary<string, IReadOnlyDictionary<long, string>> _categories = new(StringComparer.Ordinal);
 
     /// <param name="strategies">The ways to link an account, in the order to offer them.</param>
     /// <param name="quota">The account's rate limit, as the API client's last response reported it.</param>
