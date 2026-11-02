@@ -222,11 +222,19 @@
                 <StackPanel Grid.Column="1" Spacing="2">
                     <TextBlock Classes="heading" Margin="0" TextWrapping="Wrap" Text="{Binding OpenGame.Name, FallbackValue=''}" />
                     <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding OpenGame.SummaryText, FallbackValue=''}" />
+                    <!-- What the last Update all did. -->
+                    <TextBlock Classes="note message"
+                               Margin="0,4,0,0"
+                               Classes.problem="{Binding OpenGame.IsUpdateNoteAProblem, FallbackValue=False}"
+                               Text="{Binding OpenGame.UpdateNote, FallbackValue={x:Null}}" />
                 </StackPanel>
-                <Button Grid.Column="2"
-                        VerticalAlignment="Top"
-                        Content="{x:Static res:Strings.LibraryRescan}"
-                        Command="{Binding RescanCommand}" />
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Top">
+                    <Button Content="{x:Static res:Strings.LibraryRescan}" Command="{Binding RescanCommand}" />
+                    <Button Classes="accent"
+                            Content="{Binding OpenGame.UpdateAllText, FallbackValue=''}"
+                            Command="{Binding OpenGame.UpdateAllCommand, FallbackValue={x:Null}}"
+                            IsVisible="{Binding OpenGame.HasUpdates, FallbackValue=False}" />
+                </StackPanel>
             </Grid>
 
             <StackPanel DockPanel.Dock="Top" Margin="0,0,0,14" Spacing="10">

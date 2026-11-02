@@ -14,17 +14,22 @@ namespace ModShelf.Presentation.ViewModels.Library;
 public sealed partial class LibraryGameViewModel : ObservableObject
 {
     private readonly Action<LibraryGameViewModel> _open;
+    private readonly Func<LibraryGameViewModel, CancellationToken, Task> _updateAll;
     private readonly TimeProvider _timeProvider;
+    private int _downloadable;
 
     /// <param name="open">Opens the game, showing its mods in place of the games.</param>
-    internal LibraryGameViewModel(GameRef game, Action<LibraryGameViewModel> open, TimeProvider timeProvider)
+    /// <param name="updateAll">Downloads its mods' updates into the library, one after the other.</param>
+    internal LibraryGameViewModel(GameRef game, Action<LibraryGameViewModel> open, Func<LibraryGameViewModel, CancellationToken, Task> updateAll, TimeProvider timeProvider)
     {
         ArgumentNullException.ThrowIfNull(game);
         ArgumentNullException.ThrowIfNull(open);
+        ArgumentNullException.ThrowIfNull(updateAll);
         ArgumentNullException.ThrowIfNull(timeProvider);
 
         Game = game;
         _open = open;
+        _updateAll = updateAll;
         _timeProvider = timeProvider;
         CoverHue = Covers.HueOf(game.Key);
         Name = game.Key;
@@ -108,6 +113,34 @@ public sealed partial class LibraryGameViewModel : ObservableObject
     public partial string SummaryText { get; private set; } = string.Empty;
 
     /// <summary>
+    /// Such as "Update all (2)": how many of its mods' updates can be downloaded.
+    /// </summary>
+    [ObservableProperty]
+    public partial string UpdateAllText { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// Whether any of its mods' updates can be downloaded, while Update all isn't downloading them already.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(UpdateAllCommand))]
+    public partial bool CanUpdateAll { get; private set; }
+
+    /// <summary>
+    /// Whether Update all is downloading its mods' updates.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsUpdating { get; private set; }
+
+    /// <summary>
+    /// What the last Update all did, such as "Queued 2 updates. They show on the Downloads screen."; null before any.
+    /// </summary>
+    [ObservableProperty]
+    public partial string? UpdateNote { get; private set; }
+
+    [ObservableProperty]
+    public partial bool IsUpdateNoteAProblem { get; private set; }
+
+    /// <summary>
     /// Such as "Open Stardew Valley", for screen readers.
     /// </summary>
     public string OpenText => Text.Format(Strings.LibraryOpenGame, Name);
@@ -134,12 +167,30 @@ public sealed partial class LibraryGameViewModel : ObservableObject
         long archived = mods.Sum(mod => mod.ArchivedSize);
         HasArchived = archived > 0;
         ArchivedText = HasArchived ? Text.Format(Strings.LibrarySizeArchived, Sizes.Format(archived)) : string.Empty;
+        _downloadable = mods.Sum(mod => mod.DownloadableUpdates.Count);
+        UpdateAllText = Text.Format(Strings.UpdatesUpdateAll, _downloadable);
+        CanUpdateAll = _downloadable > 0 && !IsUpdating;
         CheckedAt = mods.Max(mod => mod.CheckedAt);
         CheckedText = CheckedAt is { } checkedAt ? Dates.Ago(checkedAt, _timeProvider) : Strings.LibraryNotChecked;
         string summary = HasArchived
             ? Text.Format(Strings.LibraryGameSummaryArchived, ModsText, UpdatesText, SizeText, Sizes.Format(archived))
             : Text.Format(Strings.LibraryGameSummary, ModsText, UpdatesText, SizeText);
         SummaryText = CheckedAt is { } checkedSummary ? Text.Format(Strings.LibraryCheckedAgo, summary, Dates.Ago(checkedSummary, _timeProvider)) : summary;
+    }
+
+    /// <summary>
+    /// Says Update all is downloading the updates, or has, with what it did. Runs on the UI thread.
+    /// </summary>
+    /// <param name="note">What it did; null while it runs.</param>
+    internal void ShowUpdating(string? note, bool isProblem)
+    {
+        IsUpdating = note is null;
+        CanUpdateAll = _downloadable > 0 && !IsUpdating;
+        if (note is not null)
+        {
+            UpdateNote = note;
+            IsUpdateNoteAProblem = isProblem;
+        }
     }
 
     partial void OnNameChanged(string value) => OnPropertyChanged(nameof(OpenText));
@@ -149,4 +200,10 @@ public sealed partial class LibraryGameViewModel : ObservableObject
     /// </summary>
     [RelayCommand]
     private void Open() => _open(this);
+
+    /// <summary>
+    /// Downloads each of its mods' updates into the library, as Update all on the Updates screen does for the game.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanUpdateAll))]
+    private Task UpdateAllAsync(CancellationToken cancellationToken) => _updateAll(this, cancellationToken);
 }

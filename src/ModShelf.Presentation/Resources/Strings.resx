@@ -2086,4 +2086,24 @@
   <data name="InDays" xml:space="preserve">
     <value>in {0:N0} days</value>
   </data>
+  <data name="GameUpdatesQueuedOne" xml:space="preserve">
+    <value>Queued 1 update. It shows on the Downloads screen.</value>
+    <comment>After Update all on a game's heading in the Library.</comment>
+  </data>
+  <data name="GameUpdatesQueued" xml:space="preserve">
+    <value>Queued {0:N0} updates. They show on the Downloads screen.</value>
+    <comment>After Update all on a game's heading in the Library. {0} counts them.</comment>
+  </data>
+  <data name="GameUpdatesInLibrary" xml:space="preserve">
+    <value>The updates' files are in the library already.</value>
+    <comment>After Update all, when there was nothing to download.</comment>
+  </data>
+  <data name="GameUpdatesFailedOne" xml:space="preserve">
+    <value>1 update couldn't be queued: {0}</value>
+    <comment>After Update all. {0} says why.</comment>
+  </data>
+  <data name="GameUpdatesFailed" xml:space="preserve">
+    <value>{0:N0} updates couldn't be queued. The first: {1}</value>
+    <comment>After Update all. {0} counts them; {1} says why the first couldn't.</comment>
+  </data>
 </root>

@@ -487,8 +487,33 @@ public sealed partial class LibraryViewModel : ScreenViewModel
 
         if (!_games.ContainsKey(mod.Mod.Game))
         {
-            _games.Add(mod.Mod.Game, new LibraryGameViewModel(mod.Mod.Game, Open, _timeProvider));
+            _games.Add(mod.Mod.Game, new LibraryGameViewModel(mod.Mod.Game, Open, UpdateGameAsync, _timeProvider));
             _ = NameAsync(mod.Mod.Game);
+        }
+    }
+
+    /// <summary>
+    /// Downloads the game's mods' updates into the library, mod by mod in order of name, then says what it did.
+    /// </summary>
+    private async Task UpdateGameAsync(LibraryGameViewModel game, CancellationToken cancellationToken)
+    {
+        StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
+        LibraryUpdate[] updates =
+        [
+            .. _mods.Values
+                .Where(mod => mod.Mod.Game == game.Game)
+                .OrderBy(mod => mod.Name, byName)
+                .SelectMany(mod => mod.DownloadableUpdates),
+        ];
+        game.ShowUpdating(null, false);
+        (string Note, bool IsProblem) done = (string.Empty, false);
+        try
+        {
+            done = await GameUpdates.QueueAsync(_pageServices.LibraryDownloads, updates, _logger, cancellationToken);
+        }
+        finally
+        {
+            game.ShowUpdating(done.Note, done.IsProblem);
         }
     }
 

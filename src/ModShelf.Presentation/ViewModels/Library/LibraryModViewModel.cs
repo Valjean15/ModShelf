@@ -143,6 +143,11 @@ public sealed partial class LibraryModViewModel : ObservableObject
     public int UpdateCount { get; private set; }
 
     /// <summary>
+    /// Its updates whose files can be downloaded, by its site's link to each, the newest first.
+    /// </summary>
+    internal IReadOnlyList<LibraryUpdate> DownloadableUpdates { get; private set; } = [];
+
+    /// <summary>
     /// When its site last updated it, as its saved details say; null until they're read, or when they don't say.
     /// </summary>
     public DateTimeOffset? SiteUpdatedAt { get; private set; }
@@ -181,6 +186,7 @@ public sealed partial class LibraryModViewModel : ObservableObject
         FilesText = archived.Length > 0 ? Text.Format(Strings.LibraryFilesArchived, filesText, archived.Length) : filesText;
         HasFiles = mod.Files.Count > 0;
         UpdateCount = mod.Updates.Count;
+        DownloadableUpdates = [.. mod.Updates.Where(update => update.PageUrl is not null).OrderByDescending(update => update.UploadedAt)];
         UpdatesText = Counts.Of(mod.Updates.Count, string.Empty, Strings.LibraryOneUpdate, Strings.LibraryUpdates);
         HasUpdates = mod.Updates.Count > 0;
         HasPage = mod.PageUrl is not null;
