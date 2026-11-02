@@ -1,8 +1,10 @@
 using Microsoft.Extensions.Logging;
 
+using ModShelf.Application.Downloads;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
+using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Catalog;
@@ -21,6 +23,8 @@ internal sealed partial class ModLibrary : IModLibrary
     private readonly ILibraryRepository _repository;
     private readonly ISettingsService _settings;
     private readonly ILibraryStorage _storage;
+    private readonly IDownloadService _downloads;
+    private readonly ICompletedDownloads _completed;
     private readonly LibraryChanges _changes;
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<ModLibrary> _logger;
@@ -30,6 +34,8 @@ internal sealed partial class ModLibrary : IModLibrary
         ILibraryRepository repository,
         ISettingsService settings,
         ILibraryStorage storage,
+        IDownloadService downloads,
+        ICompletedDownloads completed,
         LibraryChanges changes,
         TimeProvider timeProvider,
         ILogger<ModLibrary> logger)
@@ -38,6 +44,8 @@ internal sealed partial class ModLibrary : IModLibrary
         ArgumentNullException.ThrowIfNull(repository);
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(storage);
+        ArgumentNullException.ThrowIfNull(downloads);
+        ArgumentNullException.ThrowIfNull(completed);
         ArgumentNullException.ThrowIfNull(changes);
         ArgumentNullException.ThrowIfNull(timeProvider);
         ArgumentNullException.ThrowIfNull(logger);
@@ -46,6 +54,8 @@ internal sealed partial class ModLibrary : IModLibrary
         _repository = repository;
         _settings = settings;
         _storage = storage;
+        _downloads = downloads;
+        _completed = completed;
         _changes = changes;
         _timeProvider = timeProvider;
         _logger = logger;
@@ -79,10 +89,7 @@ internal sealed partial class ModLibrary : IModLibrary
 
     public async Task<LibraryChange> UnwatchAsync(Uri link, CancellationToken cancellationToken)
     {
-        // A mod in the library is found by its page there, so one its site removed can still be unwatched.
-        ArgumentNullException.ThrowIfNull(link);
-        ModRef mod = LibraryLinks.ModAt(await _repository.ListAsync(cancellationToken).ConfigureAwait(false), link)
-            ?? (await _sources.RecognizeLinkAsync(link, cancellationToken).ConfigureAwait(false)).File.Mod;
+        ModRef mod = await ModAtAsync(link, cancellationToken).ConfigureAwait(false);
         return await UpdateAsync(mod, stored => Unwatched(stored), cancellationToken).ConfigureAwait(false);
     }
 
@@ -116,7 +123,43 @@ internal sealed partial class ModLibrary : IModLibrary
         return change;
     }
 
+    public async Task<LibraryChange> ForgetAsync(Uri link, CancellationToken cancellationToken)
+    {
+        ModRef mod = await ModAtAsync(link, cancellationToken).ConfigureAwait(false);
+        return await ForgetAsync(mod, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<LibraryChange> ForgetAsync(ModRef modRef, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(modRef);
+
+        LibraryMod stored = await _repository.FindAsync(modRef, cancellationToken).ConfigureAwait(false) ?? throw NotInLibrary(modRef);
+        string root = await _settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+        DownloadJobSnapshot[] downloads = [.. (await _downloads.ListAsync(cancellationToken).ConfigureAwait(false))
+            .Where(job => job.File.Mod == modRef && LibraryPaths.RelativeTo(root, Path.Combine(job.TargetDirectory, job.FileName)) is not null)];
+
+        // An unfinished one would be recorded once it finishes, which adds the mod back.
+        int unfinished = downloads.Count(job => job.Status is not (DownloadJobStatus.Completed or DownloadJobStatus.Cancelled));
+        if (unfinished > 0)
+        {
+            throw new InvalidOperationException(unfinished == 1
+                ? $"A download of a file of {stored.Name} into the library isn't finished. Let it finish, or cancel it, first."
+                : $"{unfinished} downloads of files of {stored.Name} into the library aren't finished. Let them finish, or cancel them, first.");
+        }
+
+        // The completed ones first: left in the queue, the next start would record them again.
+        HashSet<DownloadJobId> completed = [.. downloads.Where(job => job.Status == DownloadJobStatus.Completed).Select(job => job.Id)];
+        int cleared = completed.Count > 0 ? await _completed.ClearCompletedAsync(completed, cancellationToken).ConfigureAwait(false) : 0;
+        LibraryChange change = await UpdateAsync(modRef, current => current is null ? throw NotInLibrary(modRef) : null, cancellationToken)
+            .ConfigureAwait(false);
+        LogForgot(_logger, modRef.Id, modRef.Game.Key, change.Before!.Files.Count, cleared);
+        return change;
+    }
+
     public IAsyncEnumerable<LibraryChange> ChangesAsync(CancellationToken cancellationToken) => _changes.Watch(cancellationToken);
+
+    private static KeyNotFoundException NotInLibrary(ModRef modRef)
+        => new($"Mod {modRef.Id} of {modRef.Game.Key} on {modRef.Game.Source} isn't in the library.");
 
     /// <summary>
     /// Adds the mod to the library, watched, or watches it again, with its details as its site gives them now.
@@ -134,6 +177,17 @@ internal sealed partial class ModLibrary : IModLibrary
                 cancellationToken)
             .ConfigureAwait(false);
         return change.After!;
+    }
+
+    /// <summary>
+    /// The mod a link is to: a library mod by its page there, so one its site removed is found, or else as its site
+    /// says.
+    /// </summary>
+    private async Task<ModRef> ModAtAsync(Uri link, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(link);
+        return LibraryLinks.ModAt(await _repository.ListAsync(cancellationToken).ConfigureAwait(false), link)
+            ?? (await _sources.RecognizeLinkAsync(link, cancellationToken).ConfigureAwait(false)).File.Mod;
     }
 
     /// <summary>

@@ -66,9 +66,36 @@ public interface IModLibrary
     Task<LibraryChange> DeleteFileAsync(ModFileRef file, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Forgets the mod a link is to, as <see cref="ForgetAsync(ModRef, CancellationToken)"/> does. A link to a library
+    /// mod's page, or to one of its files there, is matched without asking its site, which may have removed it.
+    /// </summary>
+    /// <exception cref="Downloads.UnsupportedLinkException">No source knows the link.</exception>
+    /// <exception cref="ArgumentException">The link is malformed, or is the site's but not to a mod or a file.</exception>
+    /// <exception cref="KeyNotFoundException">The mod isn't in the library.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// A download of one of the mod's files into the library isn't finished. Nothing changed.
+    /// </exception>
+    /// <exception cref="InvalidDataException">The settings can't be read, so the library root isn't known.</exception>
+    Task<LibraryChange> ForgetAsync(Uri link, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Takes a mod out of the library, with its file records and its updates, in one change, so it isn't watched any
+    /// more. No file on disk is touched: the mod's files stay where they are, no longer the library's, so moving the
+    /// library leaves them behind. Its completed downloads into the library leave the download queue, which would
+    /// otherwise record them again.
+    /// </summary>
+    /// <exception cref="KeyNotFoundException">The mod isn't in the library.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// A download of one of the mod's files into the library isn't finished, so it would come back once it is. Nothing
+    /// changed.
+    /// </exception>
+    /// <exception cref="InvalidDataException">The settings can't be read, so the library root isn't known.</exception>
+    Task<LibraryChange> ForgetAsync(ModRef modRef, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Every change to the library from now on, made by anything in this app: watching and unwatching, downloads recorded
-    /// and their old versions, update checks, and deleted files. A change that leaves a mod as it was isn't listed. The
-    /// stream ends when <paramref name="cancellationToken"/> is cancelled.
+    /// and their old versions, update checks, deleted files, and forgotten mods. A change that leaves a mod as it was isn't
+    /// listed. The stream ends when <paramref name="cancellationToken"/> is cancelled.
     /// </summary>
     /// <remarks>
     /// It's subscribed when called, so listing the library after calling it misses nothing. Changes made by another

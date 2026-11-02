@@ -8,6 +8,7 @@ using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
 using ModShelf.Application.Tests.Common;
 using ModShelf.Application.Tests.Fakes;
+using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions;
@@ -25,6 +26,7 @@ public sealed class ModLibraryTests : IDisposable
     private readonly FakeCatalogSource _site = new(TestData.Nexus);
     private readonly FakeLibraryStorage _storage = new();
     private readonly LibraryChanges _changes = new();
+    private readonly RecordingDownloadService _downloads = new();
     private readonly RecordingLogger<ModLibrary> _logger = new();
     private readonly SettingsService _settings;
 
@@ -372,6 +374,160 @@ public sealed class ModLibraryTests : IDisposable
     }
 
     [Fact]
+    public async Task ForgettingAModTakesItOutWithItsFilesAndUpdatesAndLeavesItsFilesOnDisk()
+    {
+        LibraryFile older = File("35407", "nexus/skyrimspecialedition/SkyUI (12604)/SkyUI_5_1_SE.7z");
+        LibraryFile newer = File("35408", "nexus/skyrimspecialedition/SkyUI (12604)/SkyUI_5_2_SE.7z");
+        Stored(watched: true, older, newer);
+        LibraryMod stored = (await _repository.FindAsync(SkyUi, Cancellation))!.WithUpdates(
+            [new LibraryUpdate(new ModFileRef(SkyUi, "35409"), "SkyUI 5.3", "SkyUI_5_3_SE.7z", "5.3", ModFileCategory.Main, TestData.Now, newer.File, TestData.Now)]);
+        await _repository.UpdateAsync(SkyUi, _ => stored, Cancellation);
+        string[] onDisk = [.. _storage.Files];
+
+        LibraryChange change = await Library(_site).ForgetAsync(SkyUi, Cancellation);
+
+        Assert.Equal(new LibraryChange(SkyUi, stored, null), change);
+        Assert.Empty(_repository.Mods);
+        Assert.Equal(onDisk, _storage.Files);
+        Assert.Empty(_storage.RemovedFolders);
+        Assert.Empty(_downloads.Changes);
+        Assert.Empty(_site.Asked);
+        Assert.Equal(
+            ["Information: Forgot mod 12604 of skyrimspecialedition: its 2 files stay on disk, and 0 of its completed downloads left the queue "],
+            _logger.Entries);
+    }
+
+    [Fact]
+    public async Task ForgetsALibraryModByItsPageWithoutAskingItsSite()
+    {
+        // Such as a mod its site removed, whose links it no longer knows.
+        _repository.Add(LibraryMod.Watch(SkyUi, "SkyUI", null, Link, TestData.Now).WithFile(File("35407")));
+
+        LibraryChange change = await Library(_site).ForgetAsync(new Uri("http://NexusMods.com/skyrimspecialedition/mods/12604/?tab=files&file_id=35407"), Cancellation);
+
+        Assert.Null(change.After);
+        Assert.Empty(_repository.Mods);
+        Assert.Empty(_site.Asked);
+    }
+
+    [Fact]
+    public async Task ForgetsTheModALinkIsToAsItsSiteSays()
+    {
+        Stored(watched: false, File("35407"));
+
+        LibraryChange change = await Library(_site).ForgetAsync(Link, Cancellation);
+
+        Assert.Equal((SkyUi, (LibraryMod?)null), (change.Mod, change.After));
+        Assert.Empty(_repository.Mods);
+        Assert.Equal(["RecognizeAsync"], _site.Asked);
+    }
+
+    [Fact]
+    public async Task ForgettingAModNotInTheLibraryIsRefused()
+    {
+        ModLibrary library = Library(_site);
+        _repository.Add(LibraryMod.Watch(new ModRef(SkyUi.Game, "3863"), "SkyUI Survival", null, null, TestData.Now));
+        _downloads.Add(RecordingDownloadService.Job(
+            File("35407").File, Path.Combine(Root, "nexus", "skyrimspecialedition", "SkyUI (12604)"), "SkyUI_5_2_SE.7z", DownloadJobStatus.Completed));
+
+        KeyNotFoundException byRef = await Assert.ThrowsAsync<KeyNotFoundException>(() => library.ForgetAsync(SkyUi, Cancellation));
+        KeyNotFoundException byLink = await Assert.ThrowsAsync<KeyNotFoundException>(() => library.ForgetAsync(Link, Cancellation));
+
+        Assert.Equal("Mod 12604 of skyrimspecialedition on nexus isn't in the library.", byRef.Message);
+        Assert.Equal(byRef.Message, byLink.Message);
+        Assert.Single(_repository.Mods);
+        Assert.Empty(_downloads.Changes);
+    }
+
+    [Fact]
+    public async Task ForgettingAModClearsItsCompletedDownloadsIntoTheLibraryFromTheQueue()
+    {
+        // Left there, the next start would record them again, and the mod would be back.
+        Stored(watched: true, File("35407"));
+        string folder = Path.Combine(Root, "nexus", "skyrimspecialedition", "SkyUI (12604)");
+        DownloadJobSnapshot completed = RecordingDownloadService.Job(File("35407").File, folder, "SkyUI_5_2_SE.7z", DownloadJobStatus.Completed);
+        DownloadJobSnapshot again = RecordingDownloadService.Job(File("35407").File, folder, "SkyUI_5_2_SE.7z", DownloadJobStatus.Completed);
+        DownloadJobSnapshot cancelled = RecordingDownloadService.Job(File("35408").File, folder, "SkyUI_5_3_SE.7z", DownloadJobStatus.Cancelled);
+        DownloadJobSnapshot elsewhere = RecordingDownloadService.Job(File("35407").File, TestData.TargetDirectory, "SkyUI_5_2_SE.7z", DownloadJobStatus.Completed);
+        DownloadJobSnapshot otherMod = RecordingDownloadService.Job(
+            new ModFileRef(new ModRef(SkyUi.Game, "3863"), "1"), Path.Combine(Root, "nexus", "skyrimspecialedition", "Survival (3863)"), "survival.7z", DownloadJobStatus.Completed);
+        foreach (DownloadJobSnapshot job in new[] { completed, again, cancelled, elsewhere, otherMod })
+        {
+            _downloads.Add(job);
+        }
+
+        await Library(_site).ForgetAsync(SkyUi, Cancellation);
+
+        Assert.Equivalent(new[] { completed.Id, again.Id }, Assert.Single(_downloads.ClearedCompleted), strict: true);
+        Assert.Equal([cancelled.Id, elsewhere.Id, otherMod.Id], (await _downloads.ListAsync(Cancellation)).Select(job => job.Id));
+        Assert.Empty(_repository.Mods);
+        Assert.Equal(
+            ["Information: Forgot mod 12604 of skyrimspecialedition: its 1 files stay on disk, and 2 of its completed downloads left the queue "],
+            _logger.Entries);
+    }
+
+    [Theory]
+    [InlineData(DownloadJobStatus.Queued)]
+    [InlineData(DownloadJobStatus.Resolving)]
+    [InlineData(DownloadJobStatus.Downloading)]
+    [InlineData(DownloadJobStatus.Verifying)]
+    [InlineData(DownloadJobStatus.Paused)]
+    [InlineData(DownloadJobStatus.Failed)]
+    [InlineData(DownloadJobStatus.AwaitingHandoff)]
+    public async Task AnUnfinishedDownloadOfItsFilesIntoTheLibraryStopsAForget(DownloadJobStatus status)
+    {
+        // Once it finished, it would be recorded, and the mod would be back.
+        LibraryMod stored = Stored(watched: true, File("35407"));
+        string folder = Path.Combine(Root, "nexus", "skyrimspecialedition", "SkyUI (12604)");
+        _downloads.Add(RecordingDownloadService.Job(File("35407").File, folder, "SkyUI_5_2_SE.7z", DownloadJobStatus.Completed));
+        _downloads.Add(RecordingDownloadService.Job(File("35408").File, folder, "SkyUI_5_3_SE.7z", status));
+
+        InvalidOperationException refused = await Assert.ThrowsAsync<InvalidOperationException>(() => Library(_site).ForgetAsync(SkyUi, Cancellation));
+
+        Assert.Equal("A download of a file of SkyUI into the library isn't finished. Let it finish, or cancel it, first.", refused.Message);
+        Assert.Same(stored, Assert.Single(_repository.Mods));
+        Assert.Equal(2, (await _downloads.ListAsync(Cancellation)).Count);
+        Assert.Empty(_downloads.Changes);
+        Assert.Empty(_logger.Entries);
+    }
+
+    [Fact]
+    public async Task UnfinishedDownloadsOfItsFilesIntoTheLibraryAreCountedAndOnesElsewhereDontCount()
+    {
+        Stored(watched: true, File("35407"));
+        string folder = Path.Combine(Root, "nexus", "skyrimspecialedition", "SkyUI (12604)");
+        _downloads.Add(RecordingDownloadService.Job(File("35407").File, folder, "SkyUI_5_2_SE.7z", DownloadJobStatus.Queued));
+        _downloads.Add(RecordingDownloadService.Job(File("35408").File, folder, "SkyUI_5_3_SE.7z", DownloadJobStatus.Downloading));
+        ModLibrary library = Library(_site);
+
+        InvalidOperationException refused = await Assert.ThrowsAsync<InvalidOperationException>(() => library.ForgetAsync(SkyUi, Cancellation));
+        _downloads.Update(RecordingDownloadService.Job(File("35407").File, TestData.TargetDirectory, "SkyUI_5_2_SE.7z", DownloadJobStatus.Downloading));
+        foreach (DownloadJobSnapshot job in (await _downloads.ListAsync(Cancellation)).Where(job => job.TargetDirectory == folder))
+        {
+            _downloads.Update(job with { Status = DownloadJobStatus.Cancelled });
+        }
+
+        LibraryChange change = await library.ForgetAsync(SkyUi, Cancellation);
+
+        Assert.Equal("2 downloads of files of SkyUI into the library aren't finished. Let them finish, or cancel them, first.", refused.Message);
+        Assert.Null(change.After);
+        Assert.Empty(_downloads.ClearedCompleted);
+    }
+
+    [Fact]
+    public async Task AQueueThatCantBeClearedLeavesTheModInTheLibrary()
+    {
+        LibraryMod stored = Stored(watched: true, File("35407"));
+        _downloads.Add(RecordingDownloadService.Job(
+            File("35407").File, Path.Combine(Root, "nexus", "skyrimspecialedition", "SkyUI (12604)"), "SkyUI_5_2_SE.7z", DownloadJobStatus.Completed));
+        _downloads.ClearRefusal = new InvalidOperationException("The download scheduler has stopped.");
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => Library(_site).ForgetAsync(SkyUi, Cancellation));
+
+        Assert.Same(stored, Assert.Single(_repository.Mods));
+    }
+
+    [Fact]
     public async Task EveryChangeIsToldToWhoWatchesTheLibrary()
     {
         ModLibrary library = Library(_site);
@@ -383,9 +539,11 @@ public sealed class ModLibraryTests : IDisposable
         Stored(watched: false, File("35407"));
         LibraryChange rewatched = await library.SetWatchedAsync(SkyUi, true, Cancellation);
         LibraryChange deleted = await library.DeleteFileAsync(File("35407").File, Cancellation);
+        Stored(watched: false, File("35407"));
+        LibraryChange forgotten = await library.ForgetAsync(SkyUi, Cancellation);
 
         Assert.Equal(
-            [new LibraryChange(SkyUi, null, watched), new LibraryChange(SkyUi, watched, null), rewatched, deleted],
+            [new LibraryChange(SkyUi, null, watched), new LibraryChange(SkyUi, watched, null), rewatched, deleted, forgotten],
             await seen.StopAsync());
     }
 
@@ -406,7 +564,7 @@ public sealed class ModLibraryTests : IDisposable
         => new(new ModFileRef(TestData.File(TestData.Nexus, id).Mod, id), "SkyUI 5.2", "5.2", ModFileCategory.Main, TestData.Now, relativePath, 1, TestData.Now);
 
     private ModLibrary Library(params IModSource[] sources)
-        => new(new SourceRegistry(sources), _repository, _settings, _storage, _changes, _time, _logger);
+        => new(new SourceRegistry(sources), _repository, _settings, _storage, _downloads, _downloads, _changes, _time, _logger);
 
     /// <summary>
     /// SkyUI in the library, watched or not, with its files on disk.

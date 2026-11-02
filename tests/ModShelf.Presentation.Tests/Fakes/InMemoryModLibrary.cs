@@ -14,7 +14,7 @@ internal sealed class InMemoryModLibrary : IModLibrary
     private readonly ControlledWatchers<LibraryChange> _watchers = new();
 
     /// <summary>
-    /// What was asked of the library, in order, such as "Unwatch 12604" or "Delete 35407".
+    /// What was asked of the library, in order, such as "Unwatch 12604", "Delete 35407" or "Forget 12604".
     /// </summary>
     public List<string> Asked { get; } = [];
 
@@ -145,6 +145,20 @@ internal sealed class InMemoryModLibrary : IModLibrary
         LibraryMod mod = Mods.FirstOrDefault(listed => listed.Mod == file.Mod && listed.Files.Any(kept => kept.File == file))
             ?? throw new KeyNotFoundException($"No file {file.Id}.");
         return Task.FromResult(Change(file.Mod, mod.WithoutFile(file)));
+    }
+
+    public Task<LibraryChange> ForgetAsync(Uri link, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    public Task<LibraryChange> ForgetAsync(ModRef modRef, CancellationToken cancellationToken)
+    {
+        Asked.Add($"Forget {modRef.Id}");
+        if (Refusal is not null)
+        {
+            throw Refusal;
+        }
+
+        _ = Mods.FirstOrDefault(listed => listed.Mod == modRef) ?? throw new KeyNotFoundException($"No mod {modRef.Id}.");
+        return Task.FromResult(Change(modRef, null));
     }
 
     public IAsyncEnumerable<LibraryChange> ChangesAsync(CancellationToken cancellationToken) => _watchers.Watch(cancellationToken);

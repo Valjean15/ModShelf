@@ -28,5 +28,9 @@ internal sealed class ListedLibrary : IModLibrary
 
     public Task<LibraryChange> DeleteFileAsync(ModFileRef file, CancellationToken cancellationToken) => throw new NotSupportedException();
 
+    public Task<LibraryChange> ForgetAsync(Uri link, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    public Task<LibraryChange> ForgetAsync(ModRef modRef, CancellationToken cancellationToken) => throw new NotSupportedException();
+
     public IAsyncEnumerable<LibraryChange> ChangesAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
 }

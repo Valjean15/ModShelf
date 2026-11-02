@@ -524,6 +524,28 @@ public sealed class LibraryDownloadsTests : IDisposable
     }
 
     [Fact]
+    public async Task AForgottenModsDownloadsArentRecordedAgainOnTheNextStart()
+    {
+        DownloadJobSnapshot done = Done(SkyUi52, SkyUiFolder, "SkyUI_5_2_SE.7z");
+        _downloads.Update(done);
+        _storage.Add(Path.Combine(SkyUiFolder, "SkyUI_5_2_SE.7z"));
+        using (LibraryDownloads before = Create())
+        {
+            await before.RecordAsync(done, Cancellation);
+        }
+
+        ModLibrary mods = new(
+            new SourceRegistry([_site]), _library, _settings, _storage, _downloads, _downloads, _changes, _time, new RecordingLogger<ModLibrary>());
+        await mods.ForgetAsync(Assert.Single(_library.Mods).Mod, Cancellation);
+        using LibraryDownloads library = Create();
+
+        await library.RecordMissedAsync(Cancellation);
+
+        Assert.Empty(_library.Mods);
+        Assert.True(_storage.FileExists(Path.Combine(SkyUiFolder, "SkyUI_5_2_SE.7z")));
+    }
+
+    [Fact]
     public async Task AnOlderDownloadElsewhereDoesntReplaceTheLibrarysFile()
     {
         DownloadJobSnapshot older = Done(SkyUi52, InRoot("older"), "SkyUI_5_2_SE.7z") with { CreatedAt = TestData.Now.AddDays(-2) };
