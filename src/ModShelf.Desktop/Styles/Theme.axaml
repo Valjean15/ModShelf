@@ -1,0 +1,169 @@
+<!--
+  ModShelf's colours, light and dark (ADR 0046). The screens use the Shelf brushes; the Fluent keys after them make
+  Fluent's own controls (buttons, text boxes, combo boxes, the expander, check boxes and progress bars) match.
+  Text on each background passes 4.5:1, faint text included.
+-->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <CornerRadius x:Key="ControlCornerRadius">8</CornerRadius>
+    <CornerRadius x:Key="OverlayCornerRadius">10</CornerRadius>
+
+    <!-- For hashes and paths: the system's monospaced font. -->
+    <FontFamily x:Key="ShelfMonoFont">Cascadia Mono, Consolas, Menlo, DejaVu Sans Mono</FontFamily>
+
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+            <!-- ModShelf's blue, as in its icon. -->
+            <Color x:Key="SystemAccentColor">#1F6FEB</Color>
+            <Color x:Key="SystemAccentColorLight1">#3A82F0</Color>
+            <Color x:Key="SystemAccentColorLight2">#5C97F3</Color>
+            <Color x:Key="SystemAccentColorLight3">#7FADF6</Color>
+            <Color x:Key="SystemAccentColorDark1">#1A5FD1</Color>
+            <Color x:Key="SystemAccentColorDark2">#154EAD</Color>
+            <Color x:Key="SystemAccentColorDark3">#103D88</Color>
+
+            <SolidColorBrush x:Key="ShelfBackgroundBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ShelfSidebarBrush" Color="#F4F5F7" />
+            <SolidColorBrush x:Key="ShelfSidebarHoverBrush" Color="#EBEEF1" />
+            <SolidColorBrush x:Key="ShelfSidebarSelectedBrush" Color="#E2E6EB" />
+            <SolidColorBrush x:Key="ShelfSurfaceBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ShelfRaisedBrush" Color="#F1F3F5" />
+            <SolidColorBrush x:Key="ShelfLineBrush" Color="#E1E4E8" />
+            <SolidColorBrush x:Key="ShelfTextBrush" Color="#16191D" />
+            <SolidColorBrush x:Key="ShelfMutedBrush" Color="#59616B" />
+            <SolidColorBrush x:Key="ShelfFaintBrush" Color="#69717B" />
+            <SolidColorBrush x:Key="ShelfAccentBrush" Color="#1F6FEB" />
+            <SolidColorBrush x:Key="ShelfOnAccentBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ShelfAccentTextBrush" Color="#1A5FD1" />
+            <SolidColorBrush x:Key="ShelfAccentSoftBrush" Color="#E6EFFD" />
+            <SolidColorBrush x:Key="ShelfWarnBrush" Color="#9A5200" />
+            <SolidColorBrush x:Key="ShelfWarnSoftBrush" Color="#FDF0E0" />
+            <SolidColorBrush x:Key="ShelfGoodBrush" Color="#1D7A4E" />
+            <SolidColorBrush x:Key="ShelfGoodSoftBrush" Color="#E4F4EC" />
+
+            <SolidColorBrush x:Key="ButtonBackground" Color="#F1F3F5" />
+            <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#E7EAEE" />
+            <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#DDE1E6" />
+            <SolidColorBrush x:Key="ButtonBorderBrush" Color="#E1E4E8" />
+            <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="#CDD2D8" />
+            <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#CDD2D8" />
+            <SolidColorBrush x:Key="ButtonForeground" Color="#16191D" />
+            <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="#16191D" />
+            <SolidColorBrush x:Key="ButtonForegroundPressed" Color="#16191D" />
+            <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#F4F5F7" />
+            <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="#E8EBEE" />
+            <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="#A3A9B1" />
+            <SolidColorBrush x:Key="AccentButtonBackground" Color="#1F6FEB" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#1A5FD1" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#154EAD" />
+            <SolidColorBrush x:Key="AccentButtonBorderBrush" Color="#1F6FEB" />
+            <SolidColorBrush x:Key="AccentButtonBorderBrushPointerOver" Color="#1A5FD1" />
+            <SolidColorBrush x:Key="AccentButtonBorderBrushPressed" Color="#154EAD" />
+            <SolidColorBrush x:Key="AccentButtonForeground" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#F4F5F7" />
+            <SolidColorBrush x:Key="AccentButtonBorderBrushDisabled" Color="#E8EBEE" />
+            <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="#A3A9B1" />
+
+            <SolidColorBrush x:Key="TextControlBackground" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="TextControlBorderBrush" Color="#C9CED5" />
+            <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="#AEB5BE" />
+            <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#1F6FEB" />
+            <SolidColorBrush x:Key="ComboBoxBackground" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="#F7F8F9" />
+            <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="#F1F3F5" />
+            <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="#C9CED5" />
+            <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver" Color="#AEB5BE" />
+            <SolidColorBrush x:Key="ComboBoxBorderBrushPressed" Color="#AEB5BE" />
+
+            <SolidColorBrush x:Key="ExpanderHeaderBackground" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="#F7F8F9" />
+            <SolidColorBrush x:Key="ExpanderHeaderBackgroundPressed" Color="#F1F3F5" />
+            <SolidColorBrush x:Key="ExpanderHeaderBorderBrush" Color="#E1E4E8" />
+            <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPointerOver" Color="#E1E4E8" />
+            <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPressed" Color="#E1E4E8" />
+            <SolidColorBrush x:Key="ExpanderContentBackground" Color="#F7F8F9" />
+            <SolidColorBrush x:Key="ExpanderContentBorderBrush" Color="#E1E4E8" />
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="Dark">
+            <Color x:Key="SystemAccentColor">#1F6FEB</Color>
+            <Color x:Key="SystemAccentColorLight1">#3A82F0</Color>
+            <Color x:Key="SystemAccentColorLight2">#4F8FF2</Color>
+            <Color x:Key="SystemAccentColorLight3">#79A9F7</Color>
+            <Color x:Key="SystemAccentColorDark1">#1A5FD1</Color>
+            <Color x:Key="SystemAccentColorDark2">#154EAD</Color>
+            <Color x:Key="SystemAccentColorDark3">#103D88</Color>
+
+            <SolidColorBrush x:Key="ShelfBackgroundBrush" Color="#121417" />
+            <SolidColorBrush x:Key="ShelfSidebarBrush" Color="#0C0E11" />
+            <SolidColorBrush x:Key="ShelfSidebarHoverBrush" Color="#16191C" />
+            <SolidColorBrush x:Key="ShelfSidebarSelectedBrush" Color="#23272C" />
+            <SolidColorBrush x:Key="ShelfSurfaceBrush" Color="#1A1D21" />
+            <SolidColorBrush x:Key="ShelfRaisedBrush" Color="#23272C" />
+            <SolidColorBrush x:Key="ShelfLineBrush" Color="#2C3137" />
+            <SolidColorBrush x:Key="ShelfTextBrush" Color="#E8EAED" />
+            <SolidColorBrush x:Key="ShelfMutedBrush" Color="#A7AFB9" />
+            <SolidColorBrush x:Key="ShelfFaintBrush" Color="#8D96A1" />
+            <SolidColorBrush x:Key="ShelfAccentBrush" Color="#1F6FEB" />
+            <SolidColorBrush x:Key="ShelfOnAccentBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="ShelfAccentTextBrush" Color="#79A9F7" />
+            <SolidColorBrush x:Key="ShelfAccentSoftBrush" Color="#17294A" />
+            <SolidColorBrush x:Key="ShelfWarnBrush" Color="#E6A75A" />
+            <SolidColorBrush x:Key="ShelfWarnSoftBrush" Color="#3A2A14" />
+            <SolidColorBrush x:Key="ShelfGoodBrush" Color="#7CC9A2" />
+            <SolidColorBrush x:Key="ShelfGoodSoftBrush" Color="#15301F" />
+
+            <SolidColorBrush x:Key="ButtonBackground" Color="#23272C" />
+            <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#2B3036" />
+            <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#33393F" />
+            <SolidColorBrush x:Key="ButtonBorderBrush" Color="#2C3137" />
+            <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="#3A4048" />
+            <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="#3A4048" />
+            <SolidColorBrush x:Key="ButtonForeground" Color="#E8EAED" />
+            <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="#E8EAED" />
+            <SolidColorBrush x:Key="ButtonForegroundPressed" Color="#E8EAED" />
+            <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#1C1F23" />
+            <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="#262A2F" />
+            <SolidColorBrush x:Key="ButtonForegroundDisabled" Color="#5F666F" />
+            <SolidColorBrush x:Key="AccentButtonBackground" Color="#1F6FEB" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#3A82F0" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#1A5FD1" />
+            <SolidColorBrush x:Key="AccentButtonBorderBrush" Color="#1F6FEB" />
+            <SolidColorBrush x:Key="AccentButtonBorderBrushPointerOver" Color="#3A82F0" />
+            <SolidColorBrush x:Key="AccentButtonBorderBrushPressed" Color="#1A5FD1" />
+            <SolidColorBrush x:Key="AccentButtonForeground" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#1C1F23" />
+            <SolidColorBrush x:Key="AccentButtonBorderBrushDisabled" Color="#262A2F" />
+            <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="#5F666F" />
+
+            <SolidColorBrush x:Key="TextControlBackground" Color="#1A1D21" />
+            <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="#1A1D21" />
+            <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#1A1D21" />
+            <SolidColorBrush x:Key="TextControlBorderBrush" Color="#3A4048" />
+            <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="#4A515A" />
+            <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#1F6FEB" />
+            <SolidColorBrush x:Key="ComboBoxBackground" Color="#1A1D21" />
+            <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="#23272C" />
+            <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="#23272C" />
+            <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="#3A4048" />
+            <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver" Color="#4A515A" />
+            <SolidColorBrush x:Key="ComboBoxBorderBrushPressed" Color="#4A515A" />
+
+            <SolidColorBrush x:Key="ExpanderHeaderBackground" Color="#1A1D21" />
+            <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="#1F2226" />
+            <SolidColorBrush x:Key="ExpanderHeaderBackgroundPressed" Color="#23272C" />
+            <SolidColorBrush x:Key="ExpanderHeaderBorderBrush" Color="#2C3137" />
+            <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPointerOver" Color="#2C3137" />
+            <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPressed" Color="#2C3137" />
+            <SolidColorBrush x:Key="ExpanderContentBackground" Color="#16191C" />
+            <SolidColorBrush x:Key="ExpanderContentBorderBrush" Color="#2C3137" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

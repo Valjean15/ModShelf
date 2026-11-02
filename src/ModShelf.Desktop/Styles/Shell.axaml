@@ -1,40 +1,44 @@
-<!-- The look of the main window's sidebar, and of what the screens share: headings, notes, problems, lists and tags. -->
+<!--
+  The look of what the screens share (ADR 0046): the window, the sidebar, headings, notes and problems, cards, lists,
+  pills, buttons and dialogs. Colours come from Theme.axaml, so each works in light and dark.
+-->
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:sys="using:System">
 
-    <!-- Every window has ModShelf's icon, in its title bar and the taskbar. -->
+    <!-- Every window has ModShelf's icon, in its title bar and the taskbar, and the theme's background and text. -->
     <Style Selector="Window">
         <Setter Property="Icon" Value="/Assets/modshelf.png" />
+        <Setter Property="Background" Value="{DynamicResource ShelfBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfTextBrush}" />
     </Style>
 
     <Style Selector="TextBlock.heading">
-        <Setter Property="FontSize" Value="24" />
+        <Setter Property="FontSize" Value="26" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Margin" Value="0,0,0,16" />
     </Style>
 
-    <!-- A heading inside a screen, such as a game's above its mods. -->
+    <!-- A heading inside a screen, such as a game's above its mods, or a card's. -->
     <Style Selector="TextBlock.subheading">
-        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontSize" Value="16" />
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
     <!-- Text that wants the user's attention without being a problem, such as updates found. -->
     <Style Selector="TextBlock.attention">
-        <Setter Property="Foreground" Value="{DynamicResource SystemAccentColor}" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfAccentTextBrush}" />
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
     <!-- Text that says more about what's above it, such as a folder or a status. -->
-    <Style Selector="TextBlock.note">
-        <Setter Property="Opacity" Value="0.75" />
+    <Style Selector=":is(TextBlock).note">
+        <Setter Property="Foreground" Value="{DynamicResource ShelfMutedBrush}" />
     </Style>
 
-    <!-- Text that says what went wrong. -->
-    <Style Selector="TextBlock.problem">
-        <Setter Property="Opacity" Value="1" />
-        <Setter Property="Foreground" Value="{DynamicResource SystemControlErrorTextForegroundBrush}" />
+    <!-- Text that says what went wrong: after note, so a note that becomes a problem shows as one. -->
+    <Style Selector=":is(TextBlock).problem">
+        <Setter Property="Foreground" Value="{DynamicResource ShelfWarnBrush}" />
     </Style>
 
     <!-- What a command said, such as what became of a link: shown only while there's something to say. -->
@@ -62,59 +66,177 @@
         </Setter>
     </Style>
 
-    <!-- A list of things to act on, rather than to pick from: rows stretch, and aren't highlighted when clicked. -->
+    <!-- A thing of its own among others, such as a site's account, or a group of settings. -->
+    <Style Selector="Border.card">
+        <Setter Property="Padding" Value="20" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Background" Value="{DynamicResource ShelfSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <!-- The frame of a list of rows: a card without padding, whose rows are divided by lines. -->
+    <Style Selector="Border.list">
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Background" Value="{DynamicResource ShelfSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+
+    <!-- What went wrong, or needs the user, said once above what it's about, rather than in red lines. -->
+    <Style Selector="Border.strip">
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="14,10" />
+        <Setter Property="Background" Value="{DynamicResource ShelfWarnSoftBrush}" />
+    </Style>
+
+    <Style Selector="Border.strip.info">
+        <Setter Property="Background" Value="{DynamicResource ShelfAccentSoftBrush}" />
+    </Style>
+
+    <Style Selector="Border.strip :is(TextBlock)">
+        <Setter Property="Foreground" Value="{DynamicResource ShelfTextBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <!-- A list of things to act on, rather than to pick from: rows stretch, divided by lines, never highlighted. -->
     <Style Selector="ListBox.rows">
         <Setter Property="Background" Value="Transparent" />
     </Style>
 
     <Style Selector="ListBox.rows ListBoxItem">
-        <Setter Property="Padding" Value="12" />
+        <Setter Property="Padding" Value="16,12" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <!-- Cards stacked one above the other, such as the library's mods: no lines between them. -->
+    <Style Selector="ListBox.stack">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <Style Selector="ListBox.stack ListBoxItem">
+        <Setter Property="Padding" Value="0,4" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     </Style>
 
-    <Style Selector="ListBox.rows ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter, ListBox.rows ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Style Selector="ListBox.rows ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter, ListBox.rows ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter, ListBox.stack ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter, ListBox.stack ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Background" Value="Transparent" />
     </Style>
 
     <!-- A list whose rows are buttons, such as the mods a search found: the button pads the row instead. -->
     <Style Selector="ListBox.browse ListBoxItem">
-        <Setter Property="Padding" Value="0,2" />
+        <Setter Property="Padding" Value="0" />
     </Style>
 
     <!-- A row the user clicks to open, such as a mod a search found. -->
     <Style Selector="Button.row">
         <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="0" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-        <Setter Property="Padding" Value="12,10" />
+        <Setter Property="Padding" Value="16,12" />
     </Style>
 
-    <!-- A short label beside a name, such as "Watched". -->
+    <Style Selector="Button.row:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />
+    </Style>
+
+    <!-- A short label beside a name, such as "Watched": a pill, plain, or coloured for what it says. -->
     <Style Selector="Border.tag">
-        <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColor}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="4" />
-        <Setter Property="Padding" Value="6,0" />
+        <Setter Property="CornerRadius" Value="11" />
+        <Setter Property="Padding" Value="8,1" />
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
     <Style Selector="Border.tag TextBlock">
         <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfMutedBrush}" />
     </Style>
 
-    <!-- A thing of its own among others, such as a site's account on the Accounts screen. -->
-    <Style Selector="Border.card">
-        <Setter Property="Padding" Value="16" />
-        <Setter Property="CornerRadius" Value="8" />
-        <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseLowBrush}" />
-        <Setter Property="BorderThickness" Value="1" />
+    <Style Selector="Border.tag.accent">
+        <Setter Property="Background" Value="{DynamicResource ShelfAccentSoftBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfAccentSoftBrush}" />
+    </Style>
+
+    <Style Selector="Border.tag.accent TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource ShelfAccentTextBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="Border.tag.good">
+        <Setter Property="Background" Value="{DynamicResource ShelfGoodSoftBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfGoodSoftBrush}" />
+    </Style>
+
+    <Style Selector="Border.tag.good TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource ShelfGoodBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
     <!-- One of a mod's files, in its section. -->
     <Style Selector="Border.file">
-        <Setter Property="Padding" Value="12,8" />
-        <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseLowBrush}" />
+        <Setter Property="Padding" Value="16,10" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
         <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <!-- Buttons: plain by default, "accent" for the one main action of a screen or row, "quiet" for the least. -->
+    <Style Selector="Button">
+        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="Padding" Value="14,6" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.accent">
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="Button.quiet">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfAccentTextBrush}" />
+        <Setter Property="Padding" Value="10,6" />
+    </Style>
+
+    <Style Selector="Button.quiet:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfAccentTextBrush}" />
+    </Style>
+
+    <Style Selector="Button.quiet:disabled /template/ ContentPresenter#PART_ContentPresenter, Button.more:disabled /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+
+    <!-- The "…" button that holds a row's other actions. -->
+    <Style Selector="Button.more">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfMutedBrush}" />
+        <Setter Property="Width" Value="34" />
+        <Setter Property="Height" Value="34" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.more:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+
+    <Style Selector="TextBox">
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
     <!-- A dialog: as tall as what it says and no more, over the main window, and not in the taskbar. -->
@@ -123,16 +245,25 @@
         <Setter Property="CanResize" Value="False" />
         <Setter Property="ShowInTaskbar" Value="False" />
         <Setter Property="WindowStartupLocation" Value="CenterOwner" />
+        <Setter Property="Background" Value="{DynamicResource ShelfSurfaceBrush}" />
     </Style>
 
     <Style Selector="Window.dialog > DockPanel">
-        <Setter Property="Margin" Value="24" />
+        <Setter Property="Margin" Value="24,22,24,20" />
+    </Style>
+
+    <!-- A dialog's title, above what it says, as well as in its title bar. -->
+    <Style Selector="TextBlock.dialogTitle">
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="Margin" Value="0,0,0,8" />
     </Style>
 
     <!-- A dialog's buttons, below what it says, on the right. -->
     <Style Selector="StackPanel.dialogButtons, ItemsControl.dialogButtons">
         <Setter Property="HorizontalAlignment" Value="Right" />
-        <Setter Property="Margin" Value="0,24,0,0" />
+        <Setter Property="Margin" Value="0,20,0,0" />
     </Style>
 
     <Style Selector="StackPanel.dialogButtons">
@@ -140,22 +271,49 @@
         <Setter Property="Spacing" Value="8" />
     </Style>
 
+    <!-- The sidebar: darker than the screens, its screens as quiet rows, the current one raised. -->
     <Style Selector="Button.sidebarToggle">
         <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfMutedBrush}" />
         <Setter Property="Width" Value="40" />
         <Setter Property="Height" Value="40" />
-        <Setter Property="Margin" Value="4" />
+        <Setter Property="Margin" Value="8" />
         <Setter Property="Padding" Value="0" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
+    <Style Selector="Button.sidebarToggle:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfSidebarHoverBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+
     <Style Selector="ListBox.sidebar">
         <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Padding" Value="6,0" />
     </Style>
 
     <Style Selector="ListBox.sidebar ListBoxItem">
-        <Setter Property="Padding" Value="14,10" />
+        <Setter Property="Padding" Value="12,10" />
+        <Setter Property="Margin" Value="0,1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfMutedBrush}" />
+        <Setter Property="FontWeight" Value="Medium" />
+    </Style>
+
+    <Style Selector="ListBox.sidebar ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfSidebarHoverBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfTextBrush}" />
+    </Style>
+
+    <Style Selector="ListBox.sidebar ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter, ListBox.sidebar ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter, ListBox.sidebar ListBoxItem:selected:pressed /template/ ContentPresenter#PART_ContentPresenter, ListBox.sidebar ListBoxItem:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfSidebarSelectedBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfTextBrush}" />
+    </Style>
+
+    <Style Selector="ListBox.sidebar ListBoxItem:selected">
+        <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
     <Style Selector="PathIcon">
@@ -164,7 +322,7 @@
     </Style>
 
     <Style Selector="Border.badge">
-        <Setter Property="Background" Value="{DynamicResource SystemAccentColor}" />
+        <Setter Property="Background" Value="{DynamicResource ShelfAccentBrush}" />
         <Setter Property="CornerRadius" Value="8" />
         <Setter Property="MinWidth" Value="16" />
         <Setter Property="Height" Value="16" />
@@ -175,8 +333,9 @@
     </Style>
 
     <Style Selector="Border.badge TextBlock">
-        <Setter Property="FontSize" Value="11" />
-        <Setter Property="Foreground" Value="White" />
+        <Setter Property="FontSize" Value="10.5" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfOnAccentBrush}" />
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>

@@ -12,38 +12,50 @@
 
     <SplitView IsPaneOpen="{Binding IsSidebarOpen}"
                DisplayMode="CompactInline"
-               CompactPaneLength="48"
-               OpenPaneLength="208">
+               CompactPaneLength="56"
+               OpenPaneLength="216"
+               PaneBackground="{DynamicResource ShelfSidebarBrush}">
         <SplitView.Pane>
-            <DockPanel>
-                <Button DockPanel.Dock="Top"
-                        Classes="sidebarToggle"
-                        Command="{Binding ToggleSidebarCommand}"
-                        ToolTip.Tip="{x:Static res:Strings.ToggleSidebar}">
-                    <PathIcon Data="{StaticResource MenuIcon}" />
-                </Button>
-                <ListBox Classes="sidebar"
-                         ItemsSource="{Binding Screens}"
-                         SelectedItem="{Binding CurrentScreen}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate x:DataType="vm:ScreenViewModel">
-                            <StackPanel Orientation="Horizontal" Spacing="16">
-                                <!-- The badge sits on the icon, so it shows with the names hidden too. -->
-                                <Panel>
-                                    <PathIcon Data="{Binding Screen, Converter={x:Static views:ScreenIconConverter.Instance}}" />
-                                    <Border Classes="badge" IsVisible="{Binding HasBadge}">
-                                        <TextBlock Text="{Binding Badge}" />
-                                    </Border>
-                                </Panel>
-                                <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </DockPanel>
+            <Border BorderBrush="{DynamicResource ShelfLineBrush}" BorderThickness="0,0,1,0">
+                <DockPanel>
+                    <!-- The toggle, then ModShelf's icon and name, which the collapsed sidebar hides. -->
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="2" Margin="0,4,0,8">
+                        <Button Classes="sidebarToggle"
+                                Command="{Binding ToggleSidebarCommand}"
+                                ToolTip.Tip="{x:Static res:Strings.ToggleSidebar}"
+                                AutomationProperties.Name="{x:Static res:Strings.ToggleSidebar}">
+                            <PathIcon Data="{StaticResource MenuIcon}" />
+                        </Button>
+                        <Image Source="/Assets/modshelf.png" Width="24" Height="24" VerticalAlignment="Center" />
+                        <TextBlock Margin="8,0,0,0"
+                                   VerticalAlignment="Center"
+                                   FontSize="15"
+                                   FontWeight="SemiBold"
+                                   Text="{x:Static res:Strings.AppTitle}" />
+                    </StackPanel>
+                    <ListBox Classes="sidebar"
+                             ItemsSource="{Binding Screens}"
+                             SelectedItem="{Binding CurrentScreen}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ScreenViewModel">
+                                <StackPanel Orientation="Horizontal" Spacing="16">
+                                    <!-- The badge sits on the icon, so it shows with the names hidden too. -->
+                                    <Panel>
+                                        <PathIcon Data="{Binding Screen, Converter={x:Static views:ScreenIconConverter.Instance}}" />
+                                        <Border Classes="badge" IsVisible="{Binding HasBadge}">
+                                            <TextBlock Text="{Binding Badge}" />
+                                        </Border>
+                                    </Panel>
+                                    <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
         </SplitView.Pane>
 
         <!-- App.axaml's data templates pick each screen's view. -->
-        <ContentControl Margin="32,24" Content="{Binding CurrentScreen}" />
+        <ContentControl Margin="32,28,32,24" Content="{Binding CurrentScreen}" />
     </SplitView>
 </Window>
