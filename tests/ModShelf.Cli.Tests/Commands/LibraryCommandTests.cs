@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using ModShelf.Application.Library;
 using ModShelf.Application.Library.Ports;
+using ModShelf.Application.Settings;
 using ModShelf.Cli.Tests.Common;
 using ModShelf.Cli.Tests.Fakes;
 using ModShelf.Domain.Library;
@@ -12,8 +13,8 @@ using static ModShelf.Cli.Tests.Fakes.FakeCatalogSite;
 namespace ModShelf.Cli.Tests.Commands;
 
 /// <summary>
-/// <c>library list</c>, <c>library watch</c> and <c>library unwatch</c> against a fake site. Each command is a run of
-/// the app of its own, so what one stores, the next finds after a restart.
+/// <c>library list</c>, <c>library watch</c>, <c>library unwatch</c> and <c>library forget</c> against a fake site. Each
+/// command is a run of the app of its own, so what one stores, the next finds after a restart.
 /// </summary>
 public sealed class LibraryCommandTests : IAsyncDisposable
 {
@@ -136,12 +137,52 @@ public sealed class LibraryCommandTests : IAsyncDisposable
     }
 
     [Theory]
+    [InlineData(0, "Example Mod is out of the library. It had no downloaded files.")]
+    [InlineData(1, "Example Mod is out of the library. Its downloaded file stays on disk.")]
+    [InlineData(2, "Example Mod is out of the library. Its 2 downloaded files stay on disk.")]
+    public async Task ForgetsAModWhoseFilesStay(int files, string message)
+    {
+        await StoreAsync(files);
+        string[] onDisk = await PutFilesOnDiskAsync(files);
+
+        CliResult forgot = await RunAsync("forget", ModLink("1").AbsoluteUri);
+
+        Assert.Equal(Done, forgot.ExitCode);
+        Assert.Equal(message, forgot.Output.Trim());
+        Assert.Empty(Rows(await ListAsync()));
+        Assert.All(onDisk, path => Assert.True(File.Exists(path)));
+    }
+
+    [Fact]
+    public async Task SaysWhenAModToForgetIsntInTheLibrary()
+    {
+        CliResult forgot = await RunAsync("forget", ModLink("1").AbsoluteUri);
+
+        Assert.Equal(Done, forgot.ExitCode);
+        Assert.Equal("Mod 1 of game on fake-catalog isn't in the library.", forgot.Output.Trim());
+    }
+
+    [Fact]
+    public async Task SaysWhenTheSettingsCantBeReadToForget()
+    {
+        await StoreAsync(1);
+        await File.WriteAllTextAsync(Path.Combine(_cli.Folder, "settings.json"), "{ not json", Cancellation);
+
+        CliResult refused = await RunAsync("forget", ModLink("1").AbsoluteUri);
+
+        Assert.Equal(Failed, refused.ExitCode);
+        Assert.StartsWith("The settings in", refused.Errors.Trim(), StringComparison.Ordinal);
+    }
+
+    [Theory]
     [InlineData("watch", "not a link", BadInput, "isn't a complete link")]
     [InlineData("watch", "ftp://elsewhere.example/mod.zip", BadInput, "No source knows this link.")]
     [InlineData("watch", "https://elsewhere.example/files/mod.zip", BadInput, "isn't to a mod on a site where ModShelf can watch mods.")]
     [InlineData("watch", "https://catalog.example/game/mods/404", BadInput, "The site has no such mod or file.")]
     [InlineData("watch", "https://catalog.example/game/mods/401", Failed, "account link")]
     [InlineData("unwatch", "https://catalog.example/game/mods/404", BadInput, "The site has no such mod or file.")]
+    [InlineData("forget", "not a link", BadInput, "isn't a complete link")]
+    [InlineData("forget", "https://catalog.example/game/mods/404", BadInput, "The site has no such mod or file.")]
     public async Task SaysWhyItCantWatchOrUnwatch(string command, string link, int exitCode, string message)
     {
         CliResult refused = await RunAsync(command, link);
@@ -165,6 +206,28 @@ public sealed class LibraryCommandTests : IAsyncDisposable
     private Task<CliResult> ListAsync() => _cli.RunAsync(["library", "list"], Cancellation);
 
     private Task<CliResult> RunAsync(string command, string link) => _cli.RunAsync(["library", command, link], Cancellation);
+
+    /// <summary>
+    /// Puts the files <see cref="StoreAsync"/> stored on disk, where the library has them.
+    /// </summary>
+    private Task<string[]> PutFilesOnDiskAsync(int files) => _cli.InAppAsync(
+        async services =>
+        {
+            string root = await services.GetRequiredService<ISettingsService>().GetLibraryRootAsync(Cancellation);
+            string[] paths =
+            [
+                .. Enumerable.Range(1, files).Select(file => LibraryPaths.Resolve(
+                    root, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"fake-catalog/game/1/file-{file}.zip"))),
+            ];
+            foreach (string path in paths)
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                await File.WriteAllTextAsync(path, "mod", Cancellation);
+            }
+
+            return paths;
+        },
+        Cancellation);
 
     /// <summary>
     /// Puts mod 1 in the library, watched, with <paramref name="files"/> downloaded files, as a download would.

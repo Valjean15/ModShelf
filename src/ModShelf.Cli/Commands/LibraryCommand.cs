@@ -11,9 +11,9 @@ using ModShelf.Domain.Mods;
 namespace ModShelf.Cli.Commands;
 
 /// <summary>
-/// <c>library list</c>, <c>library watch &lt;link&gt;</c>, <c>library unwatch &lt;link&gt;</c> and
-/// <c>library move &lt;folder&gt;</c>: the mods ModShelf watches for updates or has downloaded files of, and where their
-/// files are. Checking for updates is in its own file.
+/// <c>library list</c>, <c>library watch &lt;link&gt;</c>, <c>library unwatch &lt;link&gt;</c>,
+/// <c>library forget &lt;link&gt;</c> and <c>library move &lt;folder&gt;</c>: the mods ModShelf watches for updates or
+/// has downloaded files of, and where their files are. Checking for updates is in its own file.
 /// </summary>
 internal static partial class LibraryCommand
 {
@@ -32,11 +32,12 @@ internal static partial class LibraryCommand
         };
         move.SetAction((parsed, cancellationToken) => MoveAsync(environment, parsed.GetValue(folder)!, cancellationToken));
 
-        return new Command("library", "Shows the library of watched and downloaded mods, watches mods and checks them for updates, and moves the library.")
+        return new Command("library", "Shows the library of watched and downloaded mods, watches mods and checks them for updates, forgets mods, and moves the library.")
         {
             list,
             CreateWatch(environment, watch: true),
             CreateWatch(environment, watch: false),
+            CreateForget(environment),
             CreateCheck(environment),
             CreateUpdates(environment),
             move,
@@ -54,6 +55,21 @@ internal static partial class LibraryCommand
             ? new("watch", "Watches a mod for updates, adding it to the library. Nothing is downloaded.") { link }
             : new("unwatch", "Stops watching a mod for updates. A mod with downloaded files stays in the library.") { link };
         command.SetAction((parsed, cancellationToken) => WatchAsync(environment, parsed.GetValue(link)!, watch, cancellationToken));
+        return command;
+    }
+
+    private static Command CreateForget(CliEnvironment environment)
+    {
+        Argument<string> link = new("link")
+        {
+            Description = "A link to the mod or one of its files, such as a mod's page on Nexus Mods.",
+        };
+
+        Command command = new("forget", "Takes a mod out of the library, with its updates, so it isn't watched any more. Its downloaded files stay on disk, no longer the library's.")
+        {
+            link,
+        };
+        command.SetAction((parsed, cancellationToken) => ForgetAsync(environment, parsed.GetValue(link)!, cancellationToken));
         return command;
     }
 
@@ -194,6 +210,51 @@ internal static partial class LibraryCommand
                 cancellationToken)
             .ConfigureAwait(false);
     }
+
+    private static async Task<int> ForgetAsync(CliEnvironment environment, string linkText, CancellationToken cancellationToken)
+    {
+        if (!ModLinkArgument.TryRead(environment, linkText, out Uri? link))
+        {
+            return ExitCodes.BadInput;
+        }
+
+        return await CommandHost.RunAsync(
+                environment,
+                async services =>
+                {
+                    try
+                    {
+                        LibraryChange change = await services.GetRequiredService<IModLibrary>().ForgetAsync(link, cancellationToken).ConfigureAwait(false);
+                        await environment.Output.WriteLineAsync(Forgot(change.Before!)).ConfigureAwait(false);
+                    }
+                    catch (KeyNotFoundException exception)
+                    {
+                        // Nothing to forget, as unwatching a mod that isn't watched.
+                        await environment.Output.WriteLineAsync(exception.Message).ConfigureAwait(false);
+                    }
+                    catch (Exception exception) when (exception is InvalidOperationException or InvalidDataException)
+                    {
+                        await environment.Error.WriteLineAsync(exception.Message).ConfigureAwait(false);
+                        return ExitCodes.Failed;
+                    }
+                    catch (Exception exception) when (LinkProblems.Describe(exception) is { } problem)
+                    {
+                        await environment.Error.WriteLineAsync(problem.Message).ConfigureAwait(false);
+                        return problem.ExitCode;
+                    }
+
+                    return ExitCodes.Done;
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    private static string Forgot(LibraryMod forgotten) => forgotten.Files.Count switch
+    {
+        0 => $"{forgotten.Name} is out of the library. It had no downloaded files.",
+        1 => $"{forgotten.Name} is out of the library. Its downloaded file stays on disk.",
+        _ => string.Create(CultureInfo.CurrentCulture, $"{forgotten.Name} is out of the library. Its {forgotten.Files.Count:N0} downloaded files stay on disk."),
+    };
 
     private static string Unwatched(LibraryChange change) => change switch
     {

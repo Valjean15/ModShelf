@@ -160,6 +160,39 @@ public sealed class DownloadCommandLibraryTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task AForgottenModLeavesItsFileOnDiskAndIsntRecordedAgain()
+    {
+        await RunAsync("download", HandoffLink("1").AbsoluteUri);
+
+        CliResult forgot = await RunAsync("library", "forget", FileLink("1").AbsoluteUri);
+
+        // A run with downloads first records the finished downloads the library lacks: the forgotten one isn't one.
+        CliResult next = await RunAsync("download", HandoffLink("3").AbsoluteUri);
+
+        Assert.Equal(Done, forgot.ExitCode);
+        Assert.Equal($"{ModName} is out of the library. Its downloaded file stays on disk.", forgot.Output.Trim());
+        Assert.Equal(Content, await File.ReadAllBytesAsync(Path.Combine(ModFolder, FileNameOf("1")), Cancellation));
+        Assert.Equal(Done, next.ExitCode);
+        string[] row = Assert.Single(Rows(await RunAsync("library", "list")));
+        Assert.Equal(["mod", "Handoff", "Mod", "yes", "1"], row[1..6]);
+    }
+
+    [Fact]
+    public async Task AModWithADownloadIntoTheLibraryWaitingIsntForgotten()
+    {
+        await RunAsync("download", HandoffLink("1").AbsoluteUri);
+        Assert.Equal(Waiting, (await RunAsync("download", FileLink("3").AbsoluteUri)).ExitCode);
+
+        CliResult refused = await RunAsync("library", "forget", FileLink("1").AbsoluteUri);
+
+        Assert.Equal(Failed, refused.ExitCode);
+        Assert.Equal(
+            $"A download of a file of {ModName} into the library isn't finished. Let it finish, or cancel it, first.",
+            refused.Errors.Trim());
+        Assert.Single(Rows(await RunAsync("library", "list")));
+    }
+
+    [Fact]
     public async Task GoesWhereTheSettingsSay()
     {
         string root = Path.Combine(_folder.Path, "Mods");
