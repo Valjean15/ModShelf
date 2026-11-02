@@ -17,6 +17,13 @@ internal static class PartialFiles
     /// </summary>
     public static string PathFor(string destinationPath) => destinationPath + Extension;
 
+    /// <summary>
+    /// Whether <paramref name="path"/> is a download's partial file, or what the server said of it.
+    /// </summary>
+    public static bool IsPartial(string path)
+        => path.EndsWith(Extension, StringComparison.OrdinalIgnoreCase)
+            || path.EndsWith(Extension + RecordExtension, StringComparison.OrdinalIgnoreCase);
+
     public static long LengthOf(string partialPath)
         => File.Exists(partialPath) ? new FileInfo(partialPath).Length : 0;
 

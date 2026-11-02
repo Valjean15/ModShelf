@@ -19,6 +19,9 @@ internal sealed class FileSystemLibraryStorage : ILibraryStorage
     /// </remarks>
     internal const int MaxWindowsPath = 259;
 
+    // The start of the name of the file that marks a folder while it's looked for under another name.
+    private const string MarkPrefix = ".modshelf-";
+
     private readonly bool _isWindows;
     private readonly Func<string> _markName;
 
@@ -32,7 +35,7 @@ internal sealed class FileSystemLibraryStorage : ILibraryStorage
     internal FileSystemLibraryStorage(bool isWindows, Func<string>? markName = null)
     {
         _isWindows = isWindows;
-        _markName = markName ?? (() => $".modshelf-{Guid.NewGuid():N}.tmp");
+        _markName = markName ?? (() => $"{MarkPrefix}{Guid.NewGuid():N}.tmp");
     }
 
     public bool FileExists(string path) => File.Exists(path);
@@ -67,6 +70,16 @@ internal sealed class FileSystemLibraryStorage : ILibraryStorage
     {
         FileInfo file = new(path);
         return file.Exists ? file.Length : null;
+    }
+
+    public IReadOnlyList<string> FilesIn(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+
+        // The files a download under way writes, and the mark that compares folders, aren't the library's.
+        return Directory.Exists(path)
+            ? [.. Directory.EnumerateFiles(path).Where(file => !PartialFiles.IsPartial(file) && !IsMark(file)).Order(StringComparer.Ordinal)]
+            : [];
     }
 
     public async Task<string> Sha256Async(string path, CancellationToken cancellationToken)
@@ -141,4 +154,6 @@ internal sealed class FileSystemLibraryStorage : ILibraryStorage
             return false;
         }
     }
+
+    private static bool IsMark(string path) => Path.GetFileName(path).StartsWith(MarkPrefix, StringComparison.Ordinal);
 }

@@ -74,6 +74,24 @@ internal sealed class FakeLibraryStorage : ILibraryStorage
     public long? FileSize(string path) => _files.TryGetValue(path, out long size) ? size : null;
 
     /// <summary>
+    /// What listing the folder at a path throws instead.
+    /// </summary>
+    public ConcurrentDictionary<string, Exception> ListFailures { get; } = new(StringComparer.Ordinal);
+
+    public IReadOnlyList<string> FilesIn(string path)
+    {
+        if (ListFailures.TryGetValue(path, out Exception? failure))
+        {
+            throw failure;
+        }
+
+        string folder = path.EndsWith(Path.DirectorySeparatorChar) ? path : path + Path.DirectorySeparatorChar;
+        return [.. _files.Keys
+            .Where(file => file.StartsWith(folder, StringComparison.Ordinal) && file.IndexOf(Path.DirectorySeparatorChar, folder.Length) < 0)
+            .Order(StringComparer.Ordinal)];
+    }
+
+    /// <summary>
     /// The hashes reading a file at a path gives; any other file's is made from its path and size.
     /// </summary>
     public ConcurrentDictionary<string, string> Hashes { get; } = new(StringComparer.Ordinal);
@@ -91,8 +109,14 @@ internal sealed class FakeLibraryStorage : ILibraryStorage
             ? hash
             : Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes($"{path}:{FileSize(path)}")));
 
+    /// <summary>
+    /// Runs before each file is read for its hash, with its path.
+    /// </summary>
+    public Action<string>? BeforeHash { get; set; }
+
     public Task<string> Sha256Async(string path, CancellationToken cancellationToken)
     {
+        BeforeHash?.Invoke(path);
         Hashed.Enqueue(path);
         if (Failures.TryGetValue(path, out Exception? failure))
         {

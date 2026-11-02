@@ -59,6 +59,23 @@ public sealed class FileSystemLibraryStorageTests : IDisposable
     }
 
     [Fact]
+    public void ListsTheFilesInAFolderButDownloadsUnderWay()
+    {
+        string folder = Path.Combine(_folder.Path, "SkyUI (12604)");
+        Directory.CreateDirectory(Path.Combine(folder, "_archive"));
+        foreach (string name in new[] { "SkyUI.7z", "Readme.txt", "SkyUI 5.3.7z.part", "SkyUI 5.3.7z.part.info", ".modshelf-0f3c.tmp" })
+        {
+            File.WriteAllText(Path.Combine(folder, name), "x");
+        }
+
+        File.WriteAllText(Path.Combine(folder, "_archive", "SkyUI 5.1.7z"), "x");
+        FileSystemLibraryStorage storage = new();
+
+        Assert.Equal([Path.Combine(folder, "Readme.txt"), Path.Combine(folder, "SkyUI.7z")], storage.FilesIn(folder));
+        Assert.Empty(storage.FilesIn(Path.Combine(_folder.Path, "Nothing here")));
+    }
+
+    [Fact]
     public async Task ReadsAFilesSha256()
     {
         // The SHA-256 of "abc", from FIPS 180-2.

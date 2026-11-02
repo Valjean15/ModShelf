@@ -74,7 +74,8 @@ public static class ApplicationServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers <see cref="IModLibrary"/>, the library of watched and downloaded mods. Needs the download engine
+    /// Registers <see cref="IModLibrary"/>, the library of watched and downloaded mods, and <see cref="ILibraryRescan"/>,
+    /// which rescans its folders. Needs the download engine
     /// (<see cref="AddDownloadEngine"/>), the settings (<see cref="AddSettings"/>), and Infrastructure's
     /// <see cref="Library.Ports.ILibraryRepository"/>, which <c>AddLibraryFiles()</c> registers, and
     /// <see cref="Library.Ports.ILibraryStorage"/>.
@@ -87,6 +88,7 @@ public static class ApplicationServiceCollectionExtensions
         services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
         services.TryAddSingleton<LibraryChanges>();
         services.TryAddSingleton<IModLibrary, ModLibrary>();
+        services.TryAddSingleton<ILibraryRescan, LibraryRescanner>();
 
         return services;
     }

@@ -17,6 +17,14 @@ public interface ILibraryStorage
     long? FileSize(string path);
 
     /// <summary>
+    /// The files directly in the folder at <paramref name="path"/>, by their full paths, leaving out downloads under way:
+    /// none when there's no folder there.
+    /// </summary>
+    /// <exception cref="IOException">The folder couldn't be read.</exception>
+    /// <exception cref="UnauthorizedAccessException">This user may not list it.</exception>
+    IReadOnlyList<string> FilesIn(string path);
+
+    /// <summary>
     /// The SHA-256 of the file at <paramref name="path"/>, read through once, as 64 lowercase hexadecimal digits.
     /// </summary>
     /// <exception cref="FileNotFoundException">There's no file there.</exception>
