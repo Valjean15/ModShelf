@@ -46,6 +46,16 @@ public sealed class UpdateViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task ANewOptionalFileSaysSo()
+    {
+        LibraryUpdate update = new(new ModFileRef(SkyUi, "54"), "Extra textures", "extra.7z", "1.0", ModFileCategory.Optional, TestData.Now, null, TestData.Now);
+        LibraryMod mod = TestData.LibraryMod(SkyUi, "SkyUI", watched: true, TestData.LibraryFile(SkyUi, "1", "a.7z")).WithUpdates([update]);
+        await _harness.StartAsync(mod);
+
+        Assert.Equal("New optional file", _harness.Row("54").ReplacesText);
+    }
+
+    [Fact]
     public async Task DownloadsTheUpdateIntoTheLibrary()
     {
         UpdateViewModel row = await ShowAsync("53");

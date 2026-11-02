@@ -590,6 +590,10 @@
     <value>Replaces {0}</value>
     <comment>The library's file an update replaces. {0} is its file name.</comment>
   </data>
+  <data name="UpdateNewOptionalFile" xml:space="preserve">
+    <value>New optional file</value>
+    <comment>On an update that's a new optional file of a mod, replacing none of its files.</comment>
+  </data>
   <data name="FileDownload" xml:space="preserve">
     <value>Download</value>
     <comment>Button: download the update into the library.</comment>

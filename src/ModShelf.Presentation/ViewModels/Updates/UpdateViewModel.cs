@@ -66,7 +66,7 @@ public sealed partial class UpdateViewModel : ObservableObject
     public partial string UploadedText { get; private set; } = string.Empty;
 
     /// <summary>
-    /// Such as "Replaces SkyUI_5_2_SE.7z"; empty when it replaces no file the library has.
+    /// Such as "Replaces SkyUI_5_2_SE.7z"; "New optional file" for an optional file that replaces none; empty otherwise.
     /// </summary>
     [ObservableProperty]
     public partial string ReplacesText { get; private set; } = string.Empty;
@@ -127,7 +127,7 @@ public sealed partial class UpdateViewModel : ObservableObject
         UploadedText = Text.Format(Strings.FileUploaded, Dates.Day(update.UploadedAt, _services.TimeProvider));
         ReplacesText = mod.Files.FirstOrDefault(file => file.File == update.Replaces) is { } replaced
             ? Text.Format(Strings.UpdateReplaces, replaced.FileName)
-            : string.Empty;
+            : update.Replaces is null && update.Category == ModFileCategory.Optional ? Strings.UpdateNewOptionalFile : string.Empty;
         CanDownload = update.PageUrl is not null;
     }
 
