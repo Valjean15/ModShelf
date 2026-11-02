@@ -25,7 +25,7 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
         [ModFileCategory.Main, ModFileCategory.Update, ModFileCategory.Optional, ModFileCategory.Miscellaneous];
 
     [McpServerTool(Name = "mod_show", Title = "Show a mod", ReadOnly = true, Idempotent = true, OpenWorld = true, UseStructuredContent = true)]
-    [Description("Shows a mod as its site describes it, with its files, each with the link to download it and where the library has it, if it does. Old versions, archived files and files in no section are left out unless allFiles is set, but for the one the link points to.")]
+    [Description("Shows a mod as its site describes it, with its files, each with the link to download it, and where the library has it, if it does, and whether it's missing from disk. Old versions, archived files and files in no section are left out unless allFiles is set, but for the one the link points to.")]
     public Task<ModDetails> ShowAsync(
         [Description("A link to the mod or one of its files, such as its page on Nexus Mods.")] string link,
         [Description("Also list old versions, archived files and files in no section.")] bool allFiles = false,
@@ -62,18 +62,25 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
                 mod.Endorsements,
                 known?.IsWatched ?? false,
                 [
-                    .. listed.Select(file => new ModFileEntry(
-                        file.Reference.Id,
-                        file.Name,
-                        file.VersionLabel,
-                        file.Category.ToString(),
-                        file.FileName,
-                        file.SizeInBytes,
-                        file.UploadedAt,
-                        file.PageUrl?.AbsoluteUri,
-                        file.ReplacedBy?.Id,
-                        file.Reference == page.LinkedFile,
-                        known?.Files.FirstOrDefault(have => have.File == file.Reference) is { } have ? LibraryPaths.Resolve(root, have.RelativePath) : null)),
+                    .. listed.Select(file =>
+                    {
+                        string? path = known?.Files.FirstOrDefault(have => have.File == file.Reference) is { } have
+                            ? LibraryPaths.Resolve(root, have.RelativePath)
+                            : null;
+                        return new ModFileEntry(
+                            file.Reference.Id,
+                            file.Name,
+                            file.VersionLabel,
+                            file.Category.ToString(),
+                            file.FileName,
+                            file.SizeInBytes,
+                            file.UploadedAt,
+                            file.PageUrl?.AbsoluteUri,
+                            file.ReplacedBy?.Id,
+                            file.Reference == page.LinkedFile,
+                            path,
+                            path is not null && !File.Exists(path));
+                    }),
                 ],
                 page.Files.Count - listed.Length,
                 changelog ? [.. page.Changelogs.Select(entry => new ChangelogEntry(entry.Version, entry.Changes))] : null);

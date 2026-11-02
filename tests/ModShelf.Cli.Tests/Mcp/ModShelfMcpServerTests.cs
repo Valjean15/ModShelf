@@ -33,14 +33,20 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     private readonly FakeAccountSite _site = new();
     private readonly ScriptedBrowser _browser = new() { UserActs = false };
     private readonly ScriptedQueueOwner _desktopApp = new();
+    private readonly FakeHandoffSource _handoff;
     private InProcessCli? _cli;
+
+    public ModShelfMcpServerTests()
+    {
+        _handoff = new FakeHandoffSource(_server.FileUrl);
+    }
 
     private static CancellationToken Cancellation => TestContext.Current.CancellationToken;
 
     private InProcessCli Cli => _cli ??= new InProcessCli(
         _site,
         _browser,
-        sources: [new FakeHandoffSource(_server.FileUrl), new FakeCatalogSite()],
+        sources: [_handoff, new FakeCatalogSite()],
         configureServices: services =>
         {
             if (_desktopApp.Runs)
@@ -385,8 +391,8 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         WatchResult again = await mcp.CallAsync<WatchResult>("library_unwatch", Arguments(("link", FakeCatalogSite.ModLink("1").AbsoluteUri)), Cancellation);
 
         Assert.Equal(Path.Combine(Cli.Downloads, "ModShelf"), library.Root);
-        Assert.Equal([("fake-catalog", "1", true, 0), ("fake-handoff", "mod", true, 1)], library.Mods.Select(mod => (mod.Source, mod.ModId, mod.Watched, mod.Files.Count)));
-        Assert.Equal(Path.Combine(ModFolder, FileNameOf("1")), library.Mods[1].Files[0].Path);
+        Assert.Equal([("fake-catalog", "1", true, 0), ("fake-handoff", "mod", true, 1)], library.Mods.Select(mod => (mod.Source, mod.ModId, mod.Watched, mod.FileCount)));
+        Assert.Equal((Path.Combine(ModFolder, FileNameOf("1")), false), (library.Mods[1].Files?[0].Path, library.Mods[1].Files?[0].Missing));
         Assert.Equal("Stopped watching Example Mod. It had no downloaded files, so it's out of the library.", unwatched.Message);
         Assert.Null(unwatched.Mod);
         Assert.Equal("Mod 1 of game on fake-catalog isn't in the library.", again.Message);
@@ -406,7 +412,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         Assert.Equal(["3", "2", "1"], mod.Files.Select(file => file.FileId));
         ModFileEntry two = mod.Files[1];
         Assert.Equal((true, Path.Combine(ModFolder, FileNameOf("2")), "3", FileLink("2").AbsoluteUri), (two.Linked, two.LibraryPath, two.ReplacedBy, two.Link));
-        Assert.Null(mod.Files[0].LibraryPath);
+        Assert.Equal((null, false), (mod.Files[0].LibraryPath, mod.Files[0].Missing));
         Assert.Equal(["1.2", "1.3"], mod.Changelog?.Select(entry => entry.Version));
         Assert.Equal(["12", "11", "20"], catalog.Files.Select(file => file.FileId));
         Assert.Equal(3, catalog.HiddenFiles);
@@ -414,6 +420,77 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         Assert.True(catalog.Adult);
         Assert.Equal(6, all.Files.Count);
         Assert.Equal(0, all.HiddenFiles);
+    }
+
+    [Fact]
+    public async Task AFileGoneFromDiskIsMissing()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await mcp.CallAsync<SettingResult>("settings_set", Arguments(("setting", "library.oldVersions"), ("value", "all")), Cancellation);
+        DateTimeOffset start = DateTimeOffset.UtcNow.AddSeconds(-1);
+        await DownloadAndWaitAsync(mcp, "1");
+        await DownloadAndWaitAsync(mcp, "2");
+        await DownloadAndWaitAsync(mcp, "3");
+        File.Delete(Path.Combine(ModFolder, FileNameOf("3")));
+
+        LibraryListing library = await mcp.CallAsync<LibraryListing>("library_list", Arguments(("source", "fake-handoff")), Cancellation);
+        ModDetails mod = await mcp.CallAsync<ModDetails>("mod_show", Arguments(("link", FileLink("3").AbsoluteUri)), Cancellation);
+        LibraryChanges changes = await ChangesAsync(mcp, start);
+
+        LibraryModEntry entry = Assert.Single(library.Mods);
+        Assert.Equal((3, 1), (entry.FileCount, entry.MissingCount));
+        Assert.Equal([("3", true), ("2", false), ("1", false)], entry.Files!.Select(file => (file.FileId, file.Missing)));
+        Assert.Equal([("3", true), ("2", false), ("1", false)], mod.Files.Select(file => (file.FileId, file.Missing)));
+        Assert.Equal([("1", false), ("2", false), ("3", true)], changes.Files.Select(file => (file.File.FileId, file.File.Missing)));
+    }
+
+    [Fact]
+    public async Task ListsALargeLibraryAPageAGameOrAModAtATime()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        foreach (string catalogMod in new[] { "1", "3", "5" })
+        {
+            await mcp.CallAsync<WatchResult>("library_watch", Arguments(("link", FakeCatalogSite.ModLink(catalogMod).AbsoluteUri)), Cancellation);
+        }
+
+        await DownloadAndWaitAsync(mcp, "1");
+        await mcp.CallAsync<UpdateCheckResult>("library_check", null, Cancellation);
+        await mcp.CallAsync<WatchResult>("library_unwatch", Arguments(("link", FakeCatalogSite.ModLink("5").AbsoluteUri)), Cancellation);
+
+        LibraryListing first = await mcp.CallAsync<LibraryListing>("library_list", Arguments(("limit", 2)), Cancellation);
+        LibraryListing second = await mcp.CallAsync<LibraryListing>("library_list", Arguments(("limit", 2), ("offset", 2)), Cancellation);
+        LibraryListing compact = await mcp.CallAsync<LibraryListing>("library_list", Arguments(("compact", true)), Cancellation);
+        LibraryListing whole = await mcp.CallAsync<LibraryListing>("library_list", Arguments(("limit", 3)), Cancellation);
+        LibraryListing site = await mcp.CallAsync<LibraryListing>("library_list", Arguments(("source", "FAKE-catalog"), ("game", "Game")), Cancellation);
+        LibraryListing elsewhere = await mcp.CallAsync<LibraryListing>("library_list", Arguments(("game", "elsewhere")), Cancellation);
+        LibraryListing one = await mcp.CallAsync<LibraryListing>("library_list", Arguments(("mod", "3")), Cancellation);
+        LibraryListing updated = await mcp.CallAsync<LibraryListing>("library_list", Arguments(("updatesOnly", true)), Cancellation);
+        await mcp.CallAsync<WatchResult>("library_unwatch", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
+        LibraryListing watched = await mcp.CallAsync<LibraryListing>("library_list", Arguments(("watchedOnly", true)), Cancellation);
+
+        // Mod 5 left the library with no files when it was unwatched; the handoff mod stays, unwatched, with its file.
+        Assert.Equal((3, 0, true), (first.Total, first.Offset, first.HasMore));
+        Assert.Equal((3, 2, false), (second.Total, second.Offset, second.HasMore));
+        Assert.Equal(["1", "3", "mod"], first.Mods.Concat(second.Mods).Select(mod => mod.ModId));
+        Assert.All(compact.Mods, mod => Assert.Equal((null, null), (mod.Files, mod.Updates)));
+        Assert.Equal((1, 1), (compact.Mods[2].FileCount, compact.Mods[2].UpdateCount));
+        Assert.Equal((3, false), (whole.Mods.Count, whole.HasMore));
+        Assert.Equal(["1", "3"], site.Mods.Select(mod => mod.ModId));
+        Assert.Equal((0, false), (elsewhere.Total, elsewhere.HasMore));
+        Assert.Equal("3", Assert.Single(one.Mods).ModId);
+        Assert.Equal(["1", "3"], watched.Mods.Select(mod => mod.ModId));
+        Assert.Equal(("mod", "3"), (Assert.Single(updated.Mods).ModId, Assert.Single(updated.Mods[0].Updates!).FileId));
+    }
+
+    [Theory]
+    [InlineData("limit", 0, "limit must be from 1 to 200.")]
+    [InlineData("limit", 201, "limit must be from 1 to 200.")]
+    [InlineData("offset", -1, "offset must be 0 or more.")]
+    public async Task APageItCantGiveIsRefused(string name, int value, string problem)
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        Assert.EndsWith(problem, await mcp.CallFailingAsync("library_list", Arguments((name, value)), Cancellation), StringComparison.Ordinal);
     }
 
     [Fact]
@@ -515,7 +592,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     private static async Task WaitForFileAsync(McpSession mcp, string fileId)
         => await WaitUntilAsync(
             async () => (await mcp.CallAsync<LibraryListing>("library_list", null, Cancellation)).Mods
-                .Any(mod => mod.Source == FakeHandoffSource.SourceId.Value && mod.Files.Any(file => file.FileId == fileId)),
+                .Any(mod => mod.Source == FakeHandoffSource.SourceId.Value && mod.Files!.Any(file => file.FileId == fileId)),
             $"File {fileId} didn't come into the library.");
 
     private static async Task DownloadAndWaitAsync(McpSession mcp, string fileId)

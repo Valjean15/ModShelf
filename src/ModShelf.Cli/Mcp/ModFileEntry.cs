@@ -7,6 +7,7 @@ namespace ModShelf.Cli.Mcp;
 /// <param name="ReplacedBy">The newer file that replaces it, by the site's word.</param>
 /// <param name="Linked">Whether the link asked about points to this file.</param>
 /// <param name="LibraryPath">Where the library has it, an absolute path; null when it doesn't.</param>
+/// <param name="Missing">Whether the library has it, but it's gone from disk.</param>
 internal sealed record ModFileEntry(
     string FileId,
     string Name,
@@ -18,4 +19,5 @@ internal sealed record ModFileEntry(
     string? Link,
     string? ReplacedBy,
     bool Linked,
-    string? LibraryPath);
+    string? LibraryPath,
+    bool Missing);

@@ -20,22 +20,54 @@ namespace ModShelf.Cli.Mcp;
 [McpServerToolType]
 internal sealed class LibraryTools(IModLibrary library, ISettingsService settings, IUpdateChecker checker, IModLookup lookup, TimeProvider time)
 {
+    // The most mods a page of the library lists.
+    private const int MaxLimit = 200;
+
     [McpServerTool(Name = "library_list", Title = "List the library", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Lists the mods in ModShelf's library, the ones watched for updates and the ones with downloaded files, each with its files (their absolute paths, versions, and whether they're old versions archived) and the updates found for it.")]
-    public Task<LibraryListing> ListAsync(CancellationToken cancellationToken)
+    [Description("Lists the mods in ModShelf's library, the ones watched for updates and the ones with downloaded files, by site, game and name, a page at a time: each with its files (their absolute paths, versions, whether they're old versions archived, and whether they're missing from disk) and the updates found for it. A large library reads best a game or a mod at a time, or compact first, which gives counts instead of files and updates.")]
+    public Task<LibraryListing> ListAsync(
+        [Description("Only this game's mods, as the site names it in its links, such as stardewvalley.")] string? game = null,
+        [Description("Only this site's mods, such as nexus.")] string? source = null,
+        [Description("Only the mod with this ID, as in its link.")] string? mod = null,
+        [Description("Only the mods watched for updates.")] bool watchedOnly = false,
+        [Description("Only the mods with updates found.")] bool updatesOnly = false,
+        [Description("Leave out each mod's files and updates, and give how many there are.")] bool compact = false,
+        [Description("How many mods to skip: the offset of the page.")] int offset = 0,
+        [Description("How many mods a page lists, from 1 to 200.")] int limit = 50,
+        CancellationToken cancellationToken = default)
         => McpProblems.GuardAsync(async () =>
         {
+            if (limit is < 1 or > MaxLimit)
+            {
+                throw new McpException($"limit must be from 1 to {MaxLimit}.");
+            }
+
+            if (offset < 0)
+            {
+                throw new McpException("offset must be 0 or more.");
+            }
+
             string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
             IReadOnlyList<LibraryMod> mods = await library.ListAsync(cancellationToken).ConfigureAwait(false);
+            LibraryMod[] matching =
+            [
+                .. mods
+                    .Where(found => game is null || string.Equals(found.Mod.Game.Key, game.Trim(), StringComparison.OrdinalIgnoreCase))
+                    .Where(found => source is null || string.Equals(found.Mod.Game.Source.Value, source.Trim(), StringComparison.OrdinalIgnoreCase))
+                    .Where(found => mod is null || string.Equals(found.Mod.Id, mod.Trim(), StringComparison.OrdinalIgnoreCase))
+                    .Where(found => !watchedOnly || found.IsWatched)
+                    .Where(found => !updatesOnly || found.Updates.Count > 0)
+                    .OrderBy(found => found.Mod.Game.Source.Value, StringComparer.Ordinal)
+                    .ThenBy(found => found.Mod.Game.Key, StringComparer.Ordinal)
+                    .ThenBy(found => found.Name, StringComparer.OrdinalIgnoreCase)
+                    .ThenBy(found => found.Mod.Id, StringComparer.Ordinal),
+            ];
             return new LibraryListing(
                 root,
-                [
-                    .. mods
-                        .OrderBy(mod => mod.Mod.Game.Source.Value, StringComparer.Ordinal)
-                        .ThenBy(mod => mod.Mod.Game.Key, StringComparer.Ordinal)
-                        .ThenBy(mod => mod.Name, StringComparer.OrdinalIgnoreCase)
-                        .Select(mod => McpEntries.Mod(mod, root)),
-                ]);
+                matching.Length,
+                offset,
+                (long)offset + limit < matching.Length,
+                [.. matching.Skip(offset).Take(limit).Select(found => McpEntries.Mod(found, root, compact))]);
         });
 
     [McpServerTool(Name = "library_changes", Title = "What's new in the library", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]

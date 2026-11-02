@@ -15,10 +15,12 @@ internal static class McpEntries
     private const string ArchiveFolder = "_archive";
 
     /// <param name="root">The library's root folder.</param>
-    public static LibraryModEntry Mod(LibraryMod mod, string root)
+    /// <param name="compact">Whether to leave out the files and updates, giving how many there are.</param>
+    public static LibraryModEntry Mod(LibraryMod mod, string root, bool compact = false)
     {
         ArgumentNullException.ThrowIfNull(mod);
 
+        LibraryFileEntry[] files = [.. mod.Files.OrderByDescending(file => file.UploadedAt).Select(file => File(file, root))];
         return new LibraryModEntry(
             mod.Mod.Game.Source.Value,
             mod.Mod.Game.Key,
@@ -29,8 +31,11 @@ internal static class McpEntries
             mod.IsWatched,
             mod.AddedAt,
             mod.CheckedAt,
-            [.. mod.Files.OrderByDescending(file => file.UploadedAt).Select(file => File(file, root))],
-            [.. mod.Updates.OrderByDescending(update => update.UploadedAt).Select(update => Update(update, mod, root))]);
+            files.Length,
+            files.Count(file => file.Missing),
+            mod.Updates.Count,
+            compact ? null : files,
+            compact ? null : [.. mod.Updates.OrderByDescending(update => update.UploadedAt).Select(update => Update(update, mod, root))]);
     }
 
     public static LibraryFileEntry File(LibraryFile file, string root)
@@ -48,7 +53,8 @@ internal static class McpEntries
             file.SizeInBytes,
             file.UploadedAt,
             file.DownloadedAt,
-            string.Equals(Path.GetFileName(Path.GetDirectoryName(path)), ArchiveFolder, StringComparison.OrdinalIgnoreCase));
+            string.Equals(Path.GetFileName(Path.GetDirectoryName(path)), ArchiveFolder, StringComparison.OrdinalIgnoreCase),
+            !System.IO.File.Exists(path));
     }
 
     public static LibraryUpdateEntry Update(LibraryUpdate update, LibraryMod mod, string root)
