@@ -23,6 +23,9 @@
     <!-- A head and shoulders. -->
     <StreamGeometry x:Key="AccountsIcon">M12,3 A4,4 0 1 1 12,11 A4,4 0 1 1 12,3 Z M4,21 C4,16 7.6,13 12,13 C16.4,13 20,16 20,21 Z</StreamGeometry>
 
+    <!-- Three dots in a row: a row's other actions. -->
+    <StreamGeometry x:Key="MoreIcon">M5,10.2 A1.8,1.8 0 1 1 5,13.8 A1.8,1.8 0 1 1 5,10.2 Z M12,10.2 A1.8,1.8 0 1 1 12,13.8 A1.8,1.8 0 1 1 12,10.2 Z M19,10.2 A1.8,1.8 0 1 1 19,13.8 A1.8,1.8 0 1 1 19,10.2 Z</StreamGeometry>
+
     <!-- Two sliders. -->
     <StreamGeometry x:Key="SettingsIcon">F1 M3,6 H21 V8 H3 Z M3,16 H21 V18 H3 Z M7,4 H10 V10 H7 Z M14,14 H17 V20 H14 Z</StreamGeometry>
 </ResourceDictionary>

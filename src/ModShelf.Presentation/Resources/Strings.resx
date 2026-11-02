@@ -442,6 +442,10 @@
     <value>Open page</value>
     <comment>Button: open the mod's page on its site.</comment>
   </data>
+  <data name="MoreActions" xml:space="preserve">
+    <value>More actions</value>
+    <comment>Tooltip and accessible name of the "…" button that holds a row's other actions.</comment>
+  </data>
   <data name="LibraryOpenFolder" xml:space="preserve">
     <value>Open folder</value>
     <comment>Button: open the folder of the mod's files.</comment>

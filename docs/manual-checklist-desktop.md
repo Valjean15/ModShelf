@@ -89,7 +89,7 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
 - [ ] **4.1 From a mod's page.** On SMAPI's page, **Download** on its main file.
   A note says where it downloads, and that it shows on the Downloads screen. The Downloads screen shows it with its progress, speed and time left, then "Done".
 - [ ] **4.2 In the library.** Open the Library screen.
-  Stardew Valley, then SMAPI, "Watched for updates", "1 file". Expanded: the file's name, version, size and "Downloaded *today*". **Open folder** opens SMAPI's folder, `Library\nexus\stardewvalley\<SMAPI's name> (2400)` in the test folder, holding the file. **Open page** opens the mod's page.
+  Stardew Valley, then SMAPI, "Watched for updates", "1 file". Expanded: the file's name, version, size and "Downloaded *today*". In its **…** menu, **Open folder** opens SMAPI's folder, `Library\nexus\stardewvalley\<SMAPI's name> (2400)` in the test folder, holding the file. **Open page** opens the mod's page.
 - [ ] **4.3 Again.** On the Downloads screen, paste SMAPI's link (`https://www.nexusmods.com/stardewvalley/mods/2400`) and **Download**.
   "… is in the library already." Nothing new downloads.
 - [ ] **4.4 An old version.** On SMAPI's page in Browse, **Show … more files**, then **Download** on an old version.
@@ -149,7 +149,7 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
 
 ## 9. Watch and track
 
-- [ ] **9.1 Unwatch.** On the Library screen, **Unwatch** SMAPI.
+- [ ] **9.1 Unwatch.** On the Library screen, open SMAPI's **…** menu, and **Unwatch**.
   "Not watched". **Check now** on the Updates screen counts one mod fewer.
 - [ ] **9.2 Watch from Browse.** Open a mod you haven't downloaded in Browse, and **Watch**.
   "Watched for updates, in the library." The Library lists it, with no files.
@@ -157,10 +157,10 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
   "Tracked on Nexus Mods." **Tracked mods** for Stardew Valley lists SMAPI, and the website's Tracking Centre shows it.
 - [ ] **9.4 Untrack** (Premium only). **Untrack on Nexus Mods**.
   "No longer tracked on Nexus Mods." It's gone from **Tracked mods** and from the website. If SMAPI was tracked before you started, track it again.
-- [ ] **9.5 Remove from the library.** On the Library screen, expand the mod you watched in 9.2, and **Remove from library…**.
+- [ ] **9.5 Remove from the library.** On the Library screen, open the **…** menu of the mod you watched in 9.2, and **Remove from library…**.
   "Remove this mod from the library?", saying its files stay. **Remove**: the mod leaves the Library, and **Check now** on the Updates screen counts one mod fewer. Removing a mod with files leaves them in its folder.
 - [ ] **9.6 Rescan.** Copy a file of SMAPI's from its page on Nexus Mods (**Manual download**) into SMAPI's folder, then **Rescan** at the top of the Library screen.
-  "Rescan finished", saying a file found on disk was added; SMAPI shows one file more, with its SHA-256. **Rescan** on SMAPI right after says "Nothing new".
+  "Rescan finished", saying a file found on disk was added; SMAPI shows one file more, with its SHA-256. **Rescan** in SMAPI's **…** menu right after says "Nothing new".
 
 ## 10. Settings
 
@@ -175,7 +175,7 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
 - [ ] **10.5 Theme.** Choose **Dark**, then **Light**, then **As the system is**.
   The app changes at once each time. Close it (**Quit ModShelf**) with **Dark** chosen and start it again: it starts dark.
 - [ ] **10.6 Move the library** (Premium only). **Choose another folder…**, and pick another new folder in the test folder.
-  "Move the library?" says how many files move, from where to where. **Move**: "The library is in … now." The files are in the new folder, in the same folders, and gone from the old one. **Open folder** on the Library screen opens the new place.
+  "Move the library?" says how many files move, from where to where. **Move**: "The library is in … now." The files are in the new folder, in the same folders, and gone from the old one. **Open folder** in a mod's **…** menu on the Library screen opens the new place.
 - [ ] **10.7 Where they're kept.** The bottom of the Settings screen.
   "Settings are kept in …\settings.json." in the test folder. The file holds what you chose.
 - [ ] **10.8 The version.** "About ModShelf", the last card of the Settings screen.
