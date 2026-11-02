@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using ModShelf.Application;
 using ModShelf.Desktop.Services;
 using ModShelf.Hosting;
+using ModShelf.Infrastructure;
 using ModShelf.Platform;
 using ModShelf.Presentation;
 using ModShelf.Presentation.Services;
@@ -59,6 +60,7 @@ internal static class DesktopHost
         // Other processes of this user, such as the CLI's MCP server, ask this app to change its queue (ADR 0040).
         builder.Services.AddQueueListener(folder);
 
+        builder.Services.AddPictureCache();
         builder.Services.AddPresentation();
         builder.Services.AddSingleton<IUiThread, AvaloniaUiThread>();
         builder.Services.AddSingleton<IDialogService, AvaloniaDialogService>();

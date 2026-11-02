@@ -88,7 +88,8 @@ Other projects see a project only through what it makes public, so keep that to 
 | 1200–1299 | Platform: the desktop app's single instance, its queue's pipe, and the tray |
 | 1300–1399 | The app itself: diagnostics, the `nxm://` handler and self-update |
 | 1400–1499 | CLI: the MCP server |
-| 1500 onward | Next free block |
+| 1500–1599 | Pictures and mod details |
+| 1600 onward | Next free block |
 
 ## 7. Files
 

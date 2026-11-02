@@ -13,12 +13,14 @@ using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Diagnostics.Ports;
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Library.Ports;
+using ModShelf.Application.Pictures;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Infrastructure.Downloads;
 using ModShelf.Infrastructure.Library;
 using ModShelf.Infrastructure.Logging;
 using ModShelf.Infrastructure.Persistence;
 using ModShelf.Infrastructure.Persistence.Repositories;
+using ModShelf.Infrastructure.Pictures;
 using ModShelf.Infrastructure.Settings;
 using ModShelf.Infrastructure.Sources;
 using ModShelf.Sources.Abstractions.Http;
@@ -69,6 +71,33 @@ public static class InfrastructureServiceCollectionExtensions
                     });
                 }
             });
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers a <c>pictures</c> folder beside the library database as the <see cref="IPictureCache"/>, with an HTTP
+    /// client that retries transient failures. Needs <see cref="IAppFolders"/>, which <see cref="AddLibraryFiles"/>
+    /// registers, and the <see cref="ISettingsStore"/>, for the room the pictures may take.
+    /// </summary>
+    public static IServiceCollection AddPictureCache(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton(TimeProvider.System);
+        services.AddSingleton<IPictureCache, DiskPictureCache>();
+        services
+            .AddHttpClient(
+                DiskPictureCache.HttpClientName,
+                client => client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("ModShelf", Version)))
+
+            // The factory's request logging writes each address; DiskPictureCache logs the host only.
+            .RemoveAllLoggers()
+            .AddResilienceHandler("pictures", pipeline => pipeline.AddRetry(new HttpRetryStrategyOptions
+            {
+                MaxRetryAttempts = 2,
+                Delay = TimeSpan.FromSeconds(1),
+            }));
 
         return services;
     }
