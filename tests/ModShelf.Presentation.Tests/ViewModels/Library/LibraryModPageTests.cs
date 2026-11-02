@@ -140,8 +140,12 @@ public sealed class LibraryModPageTests : IDisposable
         await _harness.Row(InLibrary).OpenCommand.ExecuteAsync(null);
         ModPageViewModel mod = Screen.Mod!;
 
+        // Each change to a mod of the open game checks it again, on a thread of its own here: waited for, so the next
+        // change doesn't race with it.
         _harness.Library.Change(SkyUi, InLibrary.WithFile(TestData.LibraryFile(SkyUi, "2", "SkyUI 2.7z", daysAgo: 0)));
+        await Screen.Checking;
         _harness.Library.Change(Address, TestData.LibraryMod(Address, "Address Library", files: [TestData.LibraryFile(Address, "1", "Address.7z")]));
+        await Screen.Checking;
         IReadOnlyList<string> files = [.. mod.OwnFiles.Select(file => file.FileName)];
         bool[] onSite = [.. mod.Files.OrderBy(file => file.File.Id, StringComparer.Ordinal).Select(file => file.IsInLibrary)];
         _harness.Library.Change(SkyUi, null);

@@ -96,13 +96,13 @@ internal sealed class LibraryHarness : IDisposable
     }
 
     /// <summary>
-    /// The screen's row for the mod, opening its game when another one, or none, is open.
+    /// The screen's row for the mod, opening its game when another one, or none, is open, and waiting for its check.
     /// </summary>
     public LibraryModViewModel Row(LibraryMod mod)
     {
         if (Screen.OpenGame?.Game != mod.Mod.Game)
         {
-            Game(mod.Mod.Game).OpenCommand.Execute(null);
+            Open(Game(mod.Mod.Game));
         }
 
         return Assert.Single(Screen.GameMods, row => row.Mod == mod.Mod);
@@ -124,7 +124,7 @@ internal sealed class LibraryHarness : IDisposable
         foreach (LibraryGameViewModel game in Screen.Games.ToList())
         {
             lines.Add($"# {game.Name}");
-            game.OpenCommand.Execute(null);
+            Open(game);
             lines.AddRange(Screen.GameMods.Select(mod => mod.Name));
         }
 
@@ -134,10 +134,20 @@ internal sealed class LibraryHarness : IDisposable
         }
         else
         {
-            open.OpenCommand.Execute(null);
+            Open(open);
         }
 
         return lines;
+    }
+
+    /// <summary>
+    /// Opens the game and waits for its check, whose result the UI thread shows: here, the check's own thread, which
+    /// would race with the test's next step.
+    /// </summary>
+    private void Open(LibraryGameViewModel game)
+    {
+        game.OpenCommand.Execute(null);
+        Assert.True(Screen.Checking.Wait(TimeSpan.FromSeconds(10)));
     }
 
     /// <summary>

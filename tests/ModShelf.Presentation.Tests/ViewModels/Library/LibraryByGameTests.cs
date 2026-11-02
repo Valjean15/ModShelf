@@ -109,6 +109,7 @@ public sealed class LibraryByGameTests : IDisposable
         bool couldShowGames = Screen.ShowGamesCommand.CanExecute(null);
 
         _harness.Game(SkyUi.Game).OpenCommand.Execute(null);
+        await Screen.Checking;
         bool isOpen = Screen.IsGameOpen;
         string[] shown = [.. Screen.GameMods.Select(mod => mod.Name)];
         Screen.ShowGamesCommand.Execute(null);
