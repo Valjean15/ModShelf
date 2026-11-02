@@ -7,77 +7,95 @@
              x:DataType="vm:UpdatesViewModel">
 
     <DockPanel>
-        <TextBlock DockPanel.Dock="Top" Classes="heading" Text="{Binding Title}" />
-
-        <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,*" ColumnSpacing="16">
-            <Button Classes="accent" Content="{x:Static res:Strings.UpdatesCheckNow}" Command="{Binding CheckNowCommand}" />
-            <TextBlock Grid.Column="1"
-                       Classes="note"
-                       VerticalAlignment="Center"
-                       TextWrapping="Wrap"
-                       Text="{Binding CheckedText}" />
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" ColumnSpacing="16">
+            <StackPanel Spacing="4" Margin="0,0,0,16">
+                <TextBlock Classes="heading" Margin="0" Text="{Binding Title}" />
+                <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding CheckedText}" />
+            </StackPanel>
+            <Button Grid.Column="1"
+                    VerticalAlignment="Top"
+                    Classes="accent"
+                    Content="{x:Static res:Strings.UpdatesCheckNow}"
+                    Command="{Binding CheckNowCommand}" />
         </Grid>
 
-        <ProgressBar DockPanel.Dock="Top" Margin="0,12,0,0" IsIndeterminate="True" IsVisible="{Binding IsChecking}" />
+        <ProgressBar DockPanel.Dock="Top" Margin="0,0,0,12" IsIndeterminate="True" IsVisible="{Binding IsChecking}" />
 
         <TextBlock DockPanel.Dock="Top"
-                   Margin="0,8,0,0"
+                   Margin="0,0,0,8"
                    Classes="note message"
                    Classes.problem="{Binding IsCheckResultAProblem}"
                    Text="{Binding CheckResult}" />
 
-        <!-- What the last check couldn't check, and why. -->
-        <ItemsControl DockPanel.Dock="Top" Margin="0,4,0,0" ItemsSource="{Binding CheckFailures}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="sys:String">
-                    <TextBlock Classes="problem" TextWrapping="Wrap" Text="{Binding}" />
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <!-- What the last check couldn't check, and why: once, above the updates. -->
+        <Border DockPanel.Dock="Top" Classes="strip" Margin="0,0,0,12" IsVisible="{Binding !!CheckFailures.Count}">
+            <ItemsControl ItemsSource="{Binding CheckFailures}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="4" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="sys:String">
+                        <TextBlock Text="{Binding}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Border>
 
-        <Panel Margin="0,16,0,0">
+        <Panel>
             <TextBlock Classes="note empty"
                        Text="{Binding NoUpdatesText}"
                        IsVisible="{Binding !HasUpdates}" />
 
-            <ListBox Classes="rows" ItemsSource="{Binding Updates}" IsVisible="{Binding HasUpdates}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate x:DataType="vm:UpdateViewModel">
-                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="4">
-                            <!-- Wrapping, so long names go to the next line rather than under the buttons. -->
-                            <StackPanel Spacing="2">
-                                <WrapPanel ItemSpacing="8">
-                                    <TextBlock FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding ModName}" />
-                                    <TextBlock TextWrapping="Wrap" Text="{Binding Name}" />
-                                </WrapPanel>
-                                <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding FileName}" />
-                                <WrapPanel ItemSpacing="16">
-                                    <TextBlock Classes="note" Text="{Binding VersionText}" />
-                                    <TextBlock Classes="note" Text="{Binding UploadedText}" />
-                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding ReplacesText}" />
-                                </WrapPanel>
-                                <TextBlock Classes="note message"
-                                           Classes.problem="{Binding IsNoteAProblem}"
-                                           Text="{Binding Note}" />
-                            </StackPanel>
+            <Border Classes="list" VerticalAlignment="Top" IsVisible="{Binding HasUpdates}">
+                <ListBox Classes="rows" ItemsSource="{Binding Updates}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:UpdateViewModel">
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="16" RowSpacing="4">
+                                <!-- Wrapping, so long names go to the next line rather than under the buttons. -->
+                                <StackPanel Spacing="3">
+                                    <WrapPanel ItemSpacing="8">
+                                        <TextBlock FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding ModName}" />
+                                        <TextBlock TextWrapping="Wrap" Text="{Binding Name}" />
+                                    </WrapPanel>
+                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding FileName}" />
+                                    <WrapPanel ItemSpacing="14">
+                                        <TextBlock Classes="note" Text="{Binding VersionText}" />
+                                        <TextBlock Classes="note" Text="{Binding UploadedText}" />
+                                        <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding ReplacesText}" />
+                                    </WrapPanel>
+                                    <TextBlock Classes="note message"
+                                               Classes.problem="{Binding IsNoteAProblem}"
+                                               Text="{Binding Note}" />
+                                </StackPanel>
 
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                <Button Content="{x:Static res:Strings.UpdateChanges}" Command="{Binding ToggleChangesCommand}" />
-                                <Button Classes="accent" Content="{x:Static res:Strings.FileDownload}" Command="{Binding DownloadCommand}" />
-                            </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                    <Button Classes="quiet" Content="{x:Static res:Strings.UpdateChanges}" Command="{Binding ToggleChangesCommand}" />
+                                    <Button Content="{x:Static res:Strings.FileDownload}" Command="{Binding DownloadCommand}" />
+                                </StackPanel>
 
-                            <!-- The update's version in its mod's changelog. -->
-                            <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="12,4,0,0" Spacing="2" IsVisible="{Binding AreChangesShown}">
-                                <TextBlock Classes="note"
-                                           TextWrapping="Wrap"
-                                           Text="{Binding ChangesNote}"
-                                           IsVisible="{Binding ChangesNote, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                                <ItemsControl Classes="bullets" ItemsSource="{Binding Changes}" />
-                            </StackPanel>
-                        </Grid>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                                <!-- The update's version in its mod's changelog. -->
+                                <Border Grid.Row="1"
+                                        Grid.ColumnSpan="2"
+                                        Margin="0,6,0,0"
+                                        Padding="12,8"
+                                        CornerRadius="8"
+                                        Background="{DynamicResource ShelfRaisedBrush}"
+                                        IsVisible="{Binding AreChangesShown}">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Classes="note"
+                                                   TextWrapping="Wrap"
+                                                   Text="{Binding ChangesNote}"
+                                                   IsVisible="{Binding ChangesNote, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                        <ItemsControl Classes="bullets" ItemsSource="{Binding Changes}" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
         </Panel>
     </DockPanel>
 </UserControl>

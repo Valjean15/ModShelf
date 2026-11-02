@@ -7,11 +7,11 @@
              x:DataType="vm:SettingsViewModel">
 
     <StackPanel Spacing="8">
-        <SelectableTextBlock FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding LibraryRoot}" />
+        <SelectableTextBlock FontFamily="{DynamicResource ShelfMonoFont}" FontSize="13" TextWrapping="Wrap" Text="{Binding LibraryRoot}" />
         <TextBlock Classes="note" Text="{x:Static res:Strings.SettingsDefaultFolder}" IsVisible="{Binding IsDefaultRoot}" />
         <StackPanel Orientation="Horizontal" Spacing="8">
             <Button Content="{x:Static res:Strings.SettingsChooseFolder}" Command="{Binding ChooseRootCommand}" />
-            <Button Content="{x:Static res:Strings.SettingsUseDefaultFolder}" Command="{Binding UseDefaultRootCommand}" />
+            <Button Classes="quiet" Content="{x:Static res:Strings.SettingsUseDefaultFolder}" Command="{Binding UseDefaultRootCommand}" />
         </StackPanel>
         <StackPanel Spacing="4" IsVisible="{Binding IsMoving}">
             <TextBlock Classes="note" Text="{x:Static res:Strings.SettingsMoving}" />

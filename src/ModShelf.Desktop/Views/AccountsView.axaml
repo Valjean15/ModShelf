@@ -10,12 +10,9 @@
         <TextBlock DockPanel.Dock="Top" Classes="heading" Text="{Binding Title}" />
 
         <!-- Linux without a keyring: the credentials are in a file other programs running as the user can read. -->
-        <TextBlock DockPanel.Dock="Top"
-                   Margin="0,0,0,12"
-                   Classes="problem"
-                   TextWrapping="Wrap"
-                   Text="{x:Static res:Strings.CredentialsNotProtected}"
-                   IsVisible="{Binding IsStoreUnprotected}" />
+        <Border DockPanel.Dock="Top" Classes="strip" Margin="0,0,0,12" IsVisible="{Binding IsStoreUnprotected}">
+            <TextBlock Text="{x:Static res:Strings.CredentialsNotProtected}" />
+        </Border>
 
         <ProgressBar DockPanel.Dock="Top" IsIndeterminate="True" IsVisible="{Binding IsLoading}" />
 
@@ -25,18 +22,25 @@
                    Text="{Binding EmptyText}" />
 
         <ScrollViewer>
-            <ItemsControl ItemsSource="{Binding Sources}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Spacing="12" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="vm:AccountViewModel">
-                        <views:AccountCard />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            <!-- As wide as the screen allows, up to a comfortable width. -->
+            <Grid VerticalAlignment="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100*" MaxWidth="760" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <ItemsControl ItemsSource="{Binding Sources}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="12" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:AccountViewModel">
+                            <views:AccountCard />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
         </ScrollViewer>
     </DockPanel>
 </UserControl>

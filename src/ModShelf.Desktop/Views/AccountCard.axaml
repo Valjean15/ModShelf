@@ -8,9 +8,9 @@
              x:DataType="vm:AccountViewModel">
 
     <Border Classes="card">
-        <StackPanel Spacing="8">
+        <StackPanel Spacing="10">
             <StackPanel Spacing="2">
-                <TextBlock Classes="subheading" Text="{Binding SiteName}" />
+                <TextBlock Classes="subheading" FontSize="17" Text="{Binding SiteName}" />
                 <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding AboutText}" />
             </StackPanel>
 
@@ -20,7 +20,7 @@
                            VerticalAlignment="Center"
                            Text="{Binding AccountName}"
                            IsVisible="{Binding IsLinked}" />
-                <Border Classes="tag" IsVisible="{Binding Tier, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                <Border Classes="tag accent" IsVisible="{Binding Tier, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
                     <TextBlock Text="{Binding Tier}" />
                 </Border>
                 <TextBlock Classes="note" VerticalAlignment="Center" Text="{Binding LinkedText}" />
@@ -52,7 +52,7 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
                 <Button Content="{x:Static res:Strings.AccountCheck}" Command="{Binding CheckCommand}" IsVisible="{Binding IsLinked}" />
-                <Button Content="{x:Static res:Strings.AccountUnlink}" Command="{Binding UnlinkCommand}" IsVisible="{Binding IsLinked}" />
+                <Button Classes="quiet" Content="{x:Static res:Strings.AccountUnlink}" Command="{Binding UnlinkCommand}" IsVisible="{Binding IsLinked}" />
             </WrapPanel>
 
             <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
@@ -65,7 +65,7 @@
                                      IsVisible="{Binding BrowserPageText, Converter={x:Static ObjectConverters.IsNotNull}}" />
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <Button Content="{x:Static res:Strings.AccountOpenPageAgain}" Command="{Binding OpenBrowserPageAgainCommand}" />
-                    <Button Content="{x:Static res:Strings.AccountStopLinking}" Command="{Binding StopLinkingCommand}" />
+                    <Button Classes="quiet" Content="{x:Static res:Strings.AccountStopLinking}" Command="{Binding StopLinkingCommand}" />
                 </StackPanel>
             </StackPanel>
 
