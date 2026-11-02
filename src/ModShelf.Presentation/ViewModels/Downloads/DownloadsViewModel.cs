@@ -20,9 +20,12 @@ using ModShelf.Presentation.ViewModels.Pictures;
 namespace ModShelf.Presentation.ViewModels.Downloads;
 
 /// <summary>
-/// The download queue: a box to add a link, into the library or a folder the user picks, and every download, newest
-/// first, as it goes; with previews, each shows its mod's thumbnail. The badge counts the downloads waiting for the user: to be started on their site, or failed. A
-/// link another app hands over, such as an <c>nxm://</c> link the system opens ModShelf with, is said here too.
+/// The download queue: a box to add a link, into the library or a folder the user picks, a summary of what's under way,
+/// and every download, newest first, as it goes, by tab: all, under way, waiting for the user, failed or finished; with
+/// previews, each shows its mod's thumbnail. Downloads waiting for the user to start them on their site are said above
+/// the list, with a way to open the next one's page. The badge counts the downloads waiting for the user: to be started
+/// on their site, or failed. A link another app hands over, such as an <c>nxm://</c> link the system opens ModShelf
+/// with, is said here too.
 /// </summary>
 public sealed partial class DownloadsViewModel : ScreenViewModel
 {
@@ -72,6 +75,15 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         _uiThread = uiThread;
         _logger = logger;
         _jobServices = new DownloadJobServices(downloads, links, browser, dialogs, timeProvider, logger);
+        Tabs =
+        [
+            new(DownloadTab.All, Strings.DownloadsTabAll),
+            new(DownloadTab.UnderWay, Strings.DownloadsTabUnderWay),
+            new(DownloadTab.WaitingForYou, Strings.DownloadsTabWaitingForYou),
+            new(DownloadTab.Failed, Strings.DownloadsTabFailed),
+            new(DownloadTab.Finished, Strings.DownloadsTabFinished),
+        ];
+        SelectedTab = Tabs[0];
         Previews = new PreviewsViewModel(PreviewScreen.Downloads, pictures);
         Previews.PropertyChanged += (_, changed) =>
         {
@@ -144,6 +156,50 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
     public ObservableCollection<DownloadJobViewModel> Jobs { get; } = [];
 
     /// <summary>
+    /// The tabs over the list, each counting its downloads.
+    /// </summary>
+    public IReadOnlyList<DownloadTabViewModel> Tabs { get; }
+
+    /// <summary>
+    /// The tab shown; all downloads at first.
+    /// </summary>
+    [ObservableProperty]
+    public partial DownloadTabViewModel SelectedTab { get; set; }
+
+    /// <summary>
+    /// The downloads the tab shows, newest first.
+    /// </summary>
+    public ObservableCollection<DownloadJobViewModel> ShownJobs { get; } = [];
+
+    /// <summary>
+    /// Whether the tab shows none, though there are downloads.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool NothingInTab { get; private set; }
+
+    /// <summary>
+    /// Such as "2 downloading at 4.10 MB/s, 1 queued · 2 waiting for you · 1 failed"; empty without downloads.
+    /// </summary>
+    [ObservableProperty]
+    public partial string SummaryText { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// Such as "2 files wait for you on Nexus Mods. …"; empty when none does.
+    /// </summary>
+    [ObservableProperty]
+    public partial string WaitingText { get; private set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool HasWaiting { get; private set; }
+
+    /// <summary>
+    /// Whether a download waiting for the user has its page to open.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(OpenNextPageCommand))]
+    public partial bool CanOpenNextPage { get; private set; }
+
+    /// <summary>
     /// Reads the previews from the settings, lists the queue's downloads, then follows every change to them while the app
     /// runs. While another process runs the queue, it says so, and lists the downloads again once they run here.
     /// </summary>
@@ -182,6 +238,18 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
     }
 
     private bool CanAdd() => !IsAdding && !string.IsNullOrWhiteSpace(Link);
+
+    partial void OnSelectedTabChanged(DownloadTabViewModel value) => Count();
+
+    /// <summary>
+    /// Opens the page of the download that has waited longest for the user, where they start it. One page a click: the
+    /// next opens with the next click.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanOpenNextPage))]
+    private Task OpenNextPageAsync()
+        => Jobs.Where(job => job.CanOpenPage).OrderBy(job => job.CreatedAt).FirstOrDefault() is { } next
+            ? next.OpenPageCommand.ExecuteAsync(null)
+            : Task.CompletedTask;
 
     /// <summary>
     /// Once the other process lets go of the queue, lists the downloads as this one loaded them.
@@ -424,13 +492,91 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
     }
 
     /// <summary>
-    /// Counts what the screen's badge, the empty list and the clear button show.
+    /// Counts what the screen's badge, summary, tabs, the downloads waiting for the user, the empty list and the clear
+    /// button show, and shows the selected tab's downloads.
     /// </summary>
     private void Count()
     {
         Badge = Jobs.Count(job => job.IsAwaitingHandoff || job.IsFailed);
         HasJobs = Jobs.Count > 0;
         HasFinished = Jobs.Any(job => job.IsFinished);
+        foreach (DownloadTabViewModel tab in Tabs)
+        {
+            tab.Count = Jobs.Count(job => Shows(tab.Tab, job));
+        }
+
+        ShownJobs.SyncWith([.. Jobs.Where(job => Shows(SelectedTab?.Tab ?? DownloadTab.All, job))]);
+        NothingInTab = HasJobs && ShownJobs.Count == 0;
+        SummaryText = Summarize();
+
+        DownloadJobViewModel[] waiting = [.. Jobs.Where(job => job.IsAwaitingHandoff)];
+        string[] sites = [.. waiting.Select(job => job.SiteName).Distinct(StringComparer.Ordinal)];
+        HasWaiting = waiting.Length > 0;
+        WaitingText = sites switch
+        {
+            [] => string.Empty,
+            [{ } site] => waiting.Length == 1
+                ? Text.Format(Strings.DownloadsWaitingOne, site)
+                : Text.Format(Strings.DownloadsWaiting, waiting.Length, site),
+            _ => Text.Format(Strings.DownloadsWaitingOnSites, waiting.Length),
+        };
+        CanOpenNextPage = waiting.Any(job => job.CanOpenPage);
+    }
+
+    private static bool Shows(DownloadTab tab, DownloadJobViewModel job) => tab == DownloadTab.All || job.Tab == tab;
+
+    /// <summary>
+    /// Such as "2 downloading at 4.10 MB/s, 1 queued · 2 waiting for you · 1 failed": what's under way, then what waits for
+    /// the user. "Nothing under way" when every download is finished; empty without downloads.
+    /// </summary>
+    private string Summarize()
+    {
+        if (Jobs.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        DownloadJobViewModel[] downloading = [.. Jobs.Where(job => job.Status is DownloadJobStatus.Resolving or DownloadJobStatus.Downloading or DownloadJobStatus.Verifying)];
+        long speed = downloading.Sum(job => job.BytesPerSecond);
+        int queued = Jobs.Count(job => job.Status == DownloadJobStatus.Queued);
+        int paused = Jobs.Count(job => job.Status == DownloadJobStatus.Paused);
+        List<string> underWay = [];
+        if (downloading.Length > 0)
+        {
+            underWay.Add(speed > 0
+                ? Text.Format(Strings.DownloadsSummaryDownloadingAt, downloading.Length, Sizes.Format(speed))
+                : Text.Format(Strings.DownloadsSummaryDownloading, downloading.Length));
+        }
+
+        if (queued > 0)
+        {
+            underWay.Add(Text.Format(Strings.DownloadsSummaryQueued, queued));
+        }
+
+        if (paused > 0)
+        {
+            underWay.Add(Text.Format(Strings.DownloadsSummaryPaused, paused));
+        }
+
+        List<string> parts = [];
+        if (underWay.Count > 0)
+        {
+            parts.Add(string.Join(Strings.ListJoin, underWay));
+        }
+
+        int waiting = Jobs.Count(job => job.IsAwaitingHandoff);
+        if (waiting > 0)
+        {
+            parts.Add(Text.Format(Strings.DownloadsSummaryWaiting, waiting));
+        }
+
+        int failed = Jobs.Count(job => job.IsFailed);
+        if (failed > 0)
+        {
+            parts.Add(Text.Format(Strings.DownloadsSummaryFailed, failed));
+        }
+
+        return parts.Count == 0 ? Strings.DownloadsSummaryIdle : string.Join(Strings.SummaryJoin, parts);
     }
 
     private void Say(string message)

@@ -141,6 +141,22 @@ public sealed partial class DownloadJobViewModel : ObservableObject
     [ObservableProperty]
     public partial string SpeedText { get; private set; } = string.Empty;
 
+    /// <summary>
+    /// The speed over the last few seconds, in bytes a second; 0 when not downloading, or before it can be measured.
+    /// </summary>
+    internal long BytesPerSecond { get; private set; }
+
+    /// <summary>
+    /// The tab that shows it, besides all of them.
+    /// </summary>
+    internal DownloadTab Tab => Status switch
+    {
+        DownloadJobStatus.AwaitingHandoff => DownloadTab.WaitingForYou,
+        DownloadJobStatus.Failed => DownloadTab.Failed,
+        DownloadJobStatus.Completed or DownloadJobStatus.Cancelled => DownloadTab.Finished,
+        _ => DownloadTab.UnderWay,
+    };
+
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PauseCommand))]
     public partial bool CanPause { get; private set; }
@@ -272,6 +288,7 @@ public sealed partial class DownloadJobViewModel : ObservableObject
     /// </summary>
     private string Measure(DownloadJobSnapshot job)
     {
+        BytesPerSecond = 0;
         if (job.Status != DownloadJobStatus.Downloading)
         {
             _samples.Clear();
@@ -295,6 +312,7 @@ public sealed partial class DownloadJobViewModel : ObservableObject
         }
 
         double bytesPerSecond = (job.BytesDownloaded - _samples[0].Bytes) / measured.TotalSeconds;
+        BytesPerSecond = (long)bytesPerSecond;
         string speed = Sizes.Format((long)bytesPerSecond);
         return job.TotalBytes is { } total && bytesPerSecond > 0
             ? Text.Format(Strings.JobSpeed, speed, DescribeTimeLeft(Math.Max(0, total - job.BytesDownloaded) / bytesPerSecond))

@@ -2106,4 +2106,80 @@
     <value>{0:N0} updates couldn't be queued. The first: {1}</value>
     <comment>After Update all. {0} counts them; {1} says why the first couldn't.</comment>
   </data>
+  <data name="DownloadsTabAll" xml:space="preserve">
+    <value>All</value>
+    <comment>A tab of the Downloads screen: every download.</comment>
+  </data>
+  <data name="DownloadsTabUnderWay" xml:space="preserve">
+    <value>Under way</value>
+    <comment>A tab of the Downloads screen: queued, downloading or paused.</comment>
+  </data>
+  <data name="DownloadsTabWaitingForYou" xml:space="preserve">
+    <value>Waiting for you</value>
+    <comment>A tab of the Downloads screen: downloads to start on their site.</comment>
+  </data>
+  <data name="DownloadsTabFailed" xml:space="preserve">
+    <value>Failed</value>
+    <comment>A tab of the Downloads screen.</comment>
+  </data>
+  <data name="DownloadsTabFinished" xml:space="preserve">
+    <value>Finished</value>
+    <comment>A tab of the Downloads screen: done or cancelled.</comment>
+  </data>
+  <data name="DownloadsNothingInTab" xml:space="preserve">
+    <value>No downloads here.</value>
+    <comment>When the tab picked shows none.</comment>
+  </data>
+  <data name="DownloadsSummaryDownloading" xml:space="preserve">
+    <value>{0:N0} downloading</value>
+    <comment>Part of the Downloads screen's summary, such as "2 downloading, 1 queued · 1 failed".</comment>
+  </data>
+  <data name="DownloadsSummaryDownloadingAt" xml:space="preserve">
+    <value>{0:N0} downloading at {1}/s</value>
+    <comment>Part of the Downloads screen's summary. {1} is their speed together, such as "4.10 MB".</comment>
+  </data>
+  <data name="DownloadsSummaryQueued" xml:space="preserve">
+    <value>{0:N0} queued</value>
+    <comment>Part of the Downloads screen's summary.</comment>
+  </data>
+  <data name="DownloadsSummaryPaused" xml:space="preserve">
+    <value>{0:N0} paused</value>
+    <comment>Part of the Downloads screen's summary.</comment>
+  </data>
+  <data name="DownloadsSummaryWaiting" xml:space="preserve">
+    <value>{0:N0} waiting for you</value>
+    <comment>Part of the Downloads screen's summary: downloads to start on their site.</comment>
+  </data>
+  <data name="DownloadsSummaryFailed" xml:space="preserve">
+    <value>{0:N0} failed</value>
+    <comment>Part of the Downloads screen's summary.</comment>
+  </data>
+  <data name="DownloadsSummaryIdle" xml:space="preserve">
+    <value>Nothing under way</value>
+    <comment>The Downloads screen's summary when every download is finished.</comment>
+  </data>
+  <data name="ListJoin" xml:space="preserve">
+    <value>, </value>
+    <comment>Between the items of a short list in a sentence, such as "2 downloading, 1 queued".</comment>
+  </data>
+  <data name="SummaryJoin" xml:space="preserve">
+    <value> · </value>
+    <comment>Between the parts of a summary under a heading, such as "2 downloading · 1 failed".</comment>
+  </data>
+  <data name="DownloadsWaitingOne" xml:space="preserve">
+    <value>1 file waits for you on {0}. Start it from its page there, and ModShelf goes on with the link the site hands over.</value>
+    <comment>Above the downloads, with Open the next page. {0} is the site, such as Nexus Mods.</comment>
+  </data>
+  <data name="DownloadsWaiting" xml:space="preserve">
+    <value>{0:N0} files wait for you on {1}. Start each from its page there, and ModShelf goes on with the link the site hands over.</value>
+    <comment>Above the downloads, with Open the next page. {0} counts them; {1} is the site, such as Nexus Mods.</comment>
+  </data>
+  <data name="DownloadsWaitingOnSites" xml:space="preserve">
+    <value>{0:N0} files wait for you on their sites. Start each from its page there, and ModShelf goes on with the link the site hands over.</value>
+    <comment>As DownloadsWaiting, when they're on several sites.</comment>
+  </data>
+  <data name="DownloadsOpenNextPage" xml:space="preserve">
+    <value>Open the next page</value>
+    <comment>Opens the page of the oldest download waiting for the user.</comment>
+  </data>
 </root>
