@@ -73,9 +73,8 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
                 [
                     .. listed.Select(file =>
                     {
-                        string? path = known?.Files.FirstOrDefault(have => have.File == file.Reference) is { } have
-                            ? LibraryPaths.Resolve(root, have.RelativePath)
-                            : null;
+                        LibraryFile? have = known?.Files.FirstOrDefault(kept => kept.File == file.Reference);
+                        string? path = have is null ? null : LibraryPaths.Resolve(root, have.RelativePath);
                         return new ModFileEntry(
                             file.Reference.Id,
                             file.Name,
@@ -89,6 +88,7 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
                             file.ReplacedBy is { } next ? onSite.Contains(next) : null,
                             file.Reference == page.LinkedFile,
                             path,
+                            have?.Sha256,
                             path is not null && !File.Exists(path));
                     }),
                 ],

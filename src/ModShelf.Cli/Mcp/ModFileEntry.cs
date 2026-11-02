@@ -11,6 +11,10 @@ namespace ModShelf.Cli.Mcp;
 /// </param>
 /// <param name="Linked">Whether the link asked about points to this file.</param>
 /// <param name="LibraryPath">Where the library has it, an absolute path; null when it doesn't.</param>
+/// <param name="LibrarySha256">
+/// The SHA-256 of the library's copy, read when it was recorded; null when the library doesn't have it, or has it without
+/// a hash, as one recorded before ModShelf kept hashes.
+/// </param>
 /// <param name="Missing">Whether the library has it, but it's gone from disk.</param>
 internal sealed record ModFileEntry(
     string FileId,
@@ -25,4 +29,5 @@ internal sealed record ModFileEntry(
     bool? ReplacedByOnSite,
     bool Linked,
     string? LibraryPath,
+    string? LibrarySha256,
     bool Missing);

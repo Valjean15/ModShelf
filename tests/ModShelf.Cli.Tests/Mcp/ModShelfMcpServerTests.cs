@@ -29,6 +29,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     private const int Done = 0;
 
     private static readonly byte[] Content = RandomNumberGenerator.GetBytes(16 * 1024);
+    private static readonly string Sha256OfContent = Convert.ToHexStringLower(SHA256.HashData(Content));
     private static readonly TimeSpan Patience = TimeSpan.FromSeconds(30);
 
     private readonly RangeFileServer _server = new(Content, "file.zip");
@@ -341,6 +342,10 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         LibraryFileEntry before = Assert.Single(three.OtherFiles);
         Assert.Equal(("2", "1.2", true), (before.FileId, before.Version, before.Archived));
         Assert.Equal(Path.Combine(ModFolder, "_archive", FileNameOf("2")), before.Path);
+
+        // Read once, as each came in: archiving keeps it.
+        Assert.Equal((Sha256OfContent, Content.Length), (three.File.Sha256, (int)three.File.SizeBytes));
+        Assert.Equal(Sha256OfContent, before.Sha256);
         Assert.True(File.Exists(before.Path));
         Assert.Equal("archive", next.OldVersions);
         Assert.Equal(2, (await ChangesAsync(mcp, start)).Files.Count);
@@ -482,6 +487,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         ModFileEntry two = mod.Files[1];
         Assert.Equal((true, Path.Combine(ModFolder, FileNameOf("2")), "3", true, FileLink("2").AbsoluteUri), (two.Linked, two.LibraryPath, two.ReplacedBy, two.ReplacedByOnSite, two.Link));
         Assert.Equal((null, null, false), (mod.Files[0].LibraryPath, mod.Files[0].ReplacedByOnSite, mod.Files[0].Missing));
+        Assert.Equal((Sha256OfContent, (string?)null), (two.LibrarySha256, mod.Files[0].LibrarySha256));
         Assert.Empty(mod.LibraryOnly);
         Assert.False(mod.NewerInLibrary);
         Assert.Equal(["1.2", "1.3"], mod.Changelog?.Select(entry => entry.Version));

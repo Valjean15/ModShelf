@@ -51,6 +51,7 @@ internal static class McpEntries
             file.FileName,
             path,
             file.SizeInBytes,
+            file.Sha256,
             file.UploadedAt,
             file.DownloadedAt,
             string.Equals(Path.GetFileName(Path.GetDirectoryName(path)), ArchiveFolder, StringComparison.OrdinalIgnoreCase),

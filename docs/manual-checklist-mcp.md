@@ -35,6 +35,9 @@ you should see.
   last check, such as Bestiary, ask the agent to check for updates.
   The optional file is listed with kind `newFile`, replacing nothing; the desktop app's Updates screen says "New
   optional file". Once it's downloaded, it leaves the list.
+- [ ] **2.6 Hashes.** Ask the agent for the SHA-256 of a file downloaded in 2.1, and compare it with
+  `Get-FileHash -Algorithm SHA256 <its path>` in PowerShell.
+  They match (`Get-FileHash` writes it in capitals). A file from before 0.9.2 has none (`sha256` is null).
 
 ## 3. Settings and refusals
 
@@ -69,6 +72,7 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 2.3 Changing a download | | |
 | 2.4 What came in | | |
 | 2.5 New optional files | | |
+| 2.6 Hashes | | |
 | 3.1 A setting | | |
 | 3.2 What it can't do | | |
 | 3.3 The logs | | |
