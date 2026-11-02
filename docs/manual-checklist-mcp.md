@@ -31,6 +31,10 @@ you should see.
   The Downloads screen follows each change; cancelling deletes only the part downloaded.
 - [ ] **2.4 What came in.** Ask the agent what came into the library since this morning.
   The new files, each with the mod's other files: the old version, archived when `library.oldVersions` is `archive`.
+- [ ] **2.5 New optional files.** For a watched mod you have files of whose author has added an optional file since its
+  last check, such as Bestiary, ask the agent to check for updates.
+  The optional file is listed with kind `newFile`, replacing nothing; the desktop app's Updates screen says "New
+  optional file". Once it's downloaded, it leaves the list.
 
 ## 3. Settings and refusals
 
@@ -64,6 +68,7 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 2.2 With the desktop app | | |
 | 2.3 Changing a download | | |
 | 2.4 What came in | | |
+| 2.5 New optional files | | |
 | 3.1 A setting | | |
 | 3.2 What it can't do | | |
 | 3.3 The logs | | |

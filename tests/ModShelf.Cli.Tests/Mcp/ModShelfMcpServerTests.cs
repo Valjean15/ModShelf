@@ -7,10 +7,12 @@ using ModelContextProtocol.Client;
 
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Downloads.Ports;
+using ModShelf.Application.Library.Ports;
 using ModShelf.Cli.Mcp;
 using ModShelf.Cli.Tests.Common;
 using ModShelf.Cli.Tests.Fakes;
 using ModShelf.Domain.Downloads;
+using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 
 using static ModShelf.Cli.Tests.Fakes.FakeHandoffSource;
@@ -358,6 +360,31 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task ANewOptionalFileIsANewFileThatReplacesNone()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await DownloadAndWaitAsync(mcp, "1");
+        ModRef mod = new(new GameRef(FakeHandoffSource.SourceId, "game"), "mod");
+        await Cli.InAppAsync(
+            services => services.GetRequiredService<ILibraryRepository>().UpdateAsync(
+                mod,
+                stored => stored!.WithUpdates(
+                [
+                    new LibraryUpdate(
+                        new ModFileRef(mod, "7"), "Extra textures", "extra.zip", "1.0", ModFileCategory.Optional, DateTimeOffset.UtcNow, null, DateTimeOffset.UtcNow, FileLink("7")),
+                ]),
+                Cancellation),
+            Cancellation);
+
+        UpdateListing updates = await mcp.CallAsync<UpdateListing>("library_updates", null, Cancellation);
+        LibraryListing library = await mcp.CallAsync<LibraryListing>("library_list", null, Cancellation);
+
+        LibraryUpdateEntry found = Assert.Single(updates.Updates).Update;
+        Assert.Equal(("7", "Optional", "newFile", (LibraryFileEntry?)null), (found.FileId, found.Category, found.Kind, found.Replaces));
+        Assert.Equal("newFile", Assert.Single(Assert.Single(library.Mods).Updates!).Kind);
+    }
+
+    [Fact]
     public async Task ChecksTheWatchedModsAndListsTheUpdatesWithWhatTheyReplace()
     {
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
@@ -374,6 +401,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         UpdateFound newest = Assert.Single(check.Found);
         Assert.Equal(("3", "1.3", FileLink("3").AbsoluteUri, "1"), (newest.Update.FileId, newest.Update.Version, newest.Update.Link, newest.Update.Replaces?.FileId));
         Assert.Equal(Path.Combine(ModFolder, FileNameOf("1")), newest.Update.Replaces?.Path);
+        Assert.Equal("update", newest.Update.Kind);
         UpdateFound listed = Assert.Single(updates.Updates);
         Assert.Equal(["Faster.", "Fixed the crash."], listed.Changes);
         Assert.NotNull(updates.CheckedAt);

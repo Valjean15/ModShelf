@@ -109,7 +109,7 @@ internal sealed class LibraryTools(IModLibrary library, ISettingsService setting
         });
 
     [McpServerTool(Name = "library_updates", Title = "List the updates", ReadOnly = true, Idempotent = true, OpenWorld = true, UseStructuredContent = true)]
-    [Description("Lists the updates the last checks found for the watched mods, each with the link to download it and the library file it replaces, by mod name and the newest first. With changelog, also what each update's version changes, from its mod's changelog, which asks each mod's site.")]
+    [Description("Lists the updates the last checks found for the watched mods, each with the link to download it and the library file it replaces, by mod name and the newest first. An update's kind is update for a newer version of a library file, or newFile for a file that replaces none, such as an optional file the mod's author added. With changelog, also what each update's version changes, from its mod's changelog, which asks each mod's site.")]
     public Task<UpdateListing> UpdatesAsync(
         [Description("Also read each update's changes from its mod's changelog.")] bool changelog = false,
         CancellationToken cancellationToken = default)
