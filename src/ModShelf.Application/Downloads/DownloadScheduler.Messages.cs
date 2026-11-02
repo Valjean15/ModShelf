@@ -76,6 +76,11 @@ internal sealed partial class DownloadScheduler
         public override void Reject(Exception exception) => Reply.TrySetException(exception);
     }
 
+    private sealed record ClearCompletedCommand(IReadOnlySet<DownloadJobId> Ids, TaskCompletionSource<int> Reply) : Command
+    {
+        public override void Reject(Exception exception) => Reply.TrySetException(exception);
+    }
+
     /// <param name="Link">Secret: it can carry a key, so it's left out of <see cref="ToString"/>.</param>
     private sealed record HandOffCommand(ModFileRef File, Uri Link, TaskCompletionSource Reply) : Command
     {

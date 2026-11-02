@@ -171,6 +171,29 @@ public sealed class DownloadSchedulerControlTests
     }
 
     [Fact]
+    public async Task ClearingChosenCompletedJobsRemovesOnlyThoseThatCompleted()
+    {
+        DownloadJob chosen = CompletedJob(Stored("chosen"));
+        DownloadJob other = CompletedJob(Stored("other"));
+        DownloadJob cancelled = Stored("cancelled");
+        cancelled.Cancel();
+        DownloadJob failed = Stored("failed");
+        failed.StartResolving();
+        failed.Fail(DownloadFailureReason.Network);
+        await using SchedulerHarness harness = await SchedulerHarness.StartAsync(storedJobs: [chosen, other, cancelled, failed]);
+        HashSet<DownloadJobId> ids = [chosen.Id, cancelled.Id, failed.Id, DownloadJobId.New()];
+
+        int cleared = await harness.Scheduler.ClearCompletedAsync(ids, TestContext.Current.CancellationToken);
+        int clearedAgain = await harness.Scheduler.ClearCompletedAsync(ids, TestContext.Current.CancellationToken);
+
+        Assert.Equal((1, 0), (cleared, clearedAgain));
+        Assert.Equal([other.Id, cancelled.Id, failed.Id], (await harness.SettleAsync()).Select(job => job.Id));
+        Assert.Equal([chosen.Id], harness.Repository.Deleted);
+        Assert.Empty(harness.Transfer.DeletedPartialFiles);
+        Assert.Single(harness.Logger.Entries, entry => entry.StartsWith("Information: Cleared 1 completed download jobs from the queue, as the library asked", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public async Task RequestsForAnUnknownJobThrow()
     {
         await using SchedulerHarness harness = await SchedulerHarness.StartAsync();
@@ -199,6 +222,15 @@ public sealed class DownloadSchedulerControlTests
 
     private static DownloadJob Stored(string fileId)
         => DownloadJob.Create(TestData.File(TestData.Nexus, fileId), TestData.TargetDirectory, $"{fileId}.7z", TestData.Now);
+
+    private static DownloadJob CompletedJob(DownloadJob job)
+    {
+        job.StartResolving();
+        job.StartDownloading(0, 100);
+        job.StartVerifying();
+        job.Complete();
+        return job;
+    }
 
     /// <summary>
     /// Queues a Nexus job and lets its transfer start and report <paramref name="bytesDownloaded"/> of 100 bytes.

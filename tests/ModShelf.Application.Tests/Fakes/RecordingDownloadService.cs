@@ -8,10 +8,10 @@ using ModShelf.Domain.Mods;
 namespace ModShelf.Application.Tests.Fakes;
 
 /// <summary>
-/// A download queue that only lists jobs, adds them, takes handoff links, and resumes and retries them, recording what
-/// it was given. The test changes jobs with <see cref="Update"/>, which one watcher sees.
+/// A download queue that only lists jobs, adds them, takes handoff links, resumes and retries them, and clears completed
+/// ones, recording what it was given. The test changes jobs with <see cref="Update"/>, which one watcher sees.
 /// </summary>
-internal sealed class RecordingDownloadService(params DownloadJobSnapshot[] existingJobs) : IDownloadService
+internal sealed class RecordingDownloadService(params DownloadJobSnapshot[] existingJobs) : IDownloadService, ICompletedDownloads
 {
     private readonly Lock _lock = new();
     private readonly List<DownloadJobSnapshot> _jobs = [.. existingJobs];
@@ -133,6 +133,32 @@ internal sealed class RecordingDownloadService(params DownloadJobSnapshot[] exis
     public Task CancelAsync(DownloadJobId id, CancellationToken cancellationToken) => throw new NotSupportedException();
 
     public Task<int> ClearFinishedAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    /// <summary>
+    /// The IDs each clear of completed jobs was given, in order.
+    /// </summary>
+    public List<IReadOnlySet<DownloadJobId>> ClearedCompleted { get; } = [];
+
+    /// <summary>
+    /// What the next clear of completed jobs throws.
+    /// </summary>
+    public Exception? ClearRefusal { get; set; }
+
+    public Task<int> ClearCompletedAsync(IReadOnlySet<DownloadJobId> ids, CancellationToken cancellationToken)
+    {
+        ClearedCompleted.Add(ids);
+        Changes.Add(nameof(ClearCompletedAsync));
+        if (ClearRefusal is { } refusal)
+        {
+            ClearRefusal = null;
+            return Task.FromException<int>(refusal);
+        }
+
+        lock (_lock)
+        {
+            return Task.FromResult(_jobs.RemoveAll(job => job.Status == DownloadJobStatus.Completed && ids.Contains(job.Id)));
+        }
+    }
 
     /// <summary>
     /// Queues the job again, as resuming or retrying it does, and records the call.

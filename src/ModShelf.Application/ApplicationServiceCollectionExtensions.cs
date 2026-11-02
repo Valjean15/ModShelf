@@ -22,8 +22,9 @@ public static class ApplicationServiceCollectionExtensions
 {
     /// <summary>
     /// Registers the download engine: the <see cref="ISourceRegistry"/>, the <see cref="DownloadScheduler"/> as the
-    /// <see cref="IDownloadService"/>, and <see cref="ILinkDownloads"/>. Nothing downloads until
-    /// <see cref="AddBackgroundDownloads"/> is also called. Needs the queue lock and the file storage from Infrastructure.
+    /// <see cref="IDownloadService"/> and the <see cref="ICompletedDownloads"/>, and <see cref="ILinkDownloads"/>.
+    /// Nothing downloads until <see cref="AddBackgroundDownloads"/> is also called. Needs the queue lock and the file
+    /// storage from Infrastructure.
     /// </summary>
     public static IServiceCollection AddDownloadEngine(this IServiceCollection services, DownloadSchedulerOptions? options = null)
     {
@@ -34,6 +35,7 @@ public static class ApplicationServiceCollectionExtensions
         services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
         services.AddSingleton<DownloadScheduler>();
         services.AddSingleton<IDownloadService>(provider => provider.GetRequiredService<DownloadScheduler>());
+        services.AddSingleton<ICompletedDownloads>(provider => provider.GetRequiredService<DownloadScheduler>());
         services.AddSingleton<ILinkDownloads, LinkDownloads>();
 
         return services;

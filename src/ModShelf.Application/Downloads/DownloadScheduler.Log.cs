@@ -45,4 +45,7 @@ internal sealed partial class DownloadScheduler
 
     [LoggerMessage(EventId = 12, Level = LogLevel.Information, Message = "Download job {JobId} was saved before ModShelf last closed, but not marked so; it's completed now")]
     private static partial void LogCompletedOnStart(ILogger logger, Guid jobId);
+
+    [LoggerMessage(EventId = 13, Level = LogLevel.Information, Message = "Cleared {Count} completed download jobs from the queue, as the library asked")]
+    private static partial void LogClearedCompleted(ILogger logger, int count);
 }

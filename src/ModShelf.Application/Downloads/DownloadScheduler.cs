@@ -29,9 +29,10 @@ namespace ModShelf.Application.Downloads;
 /// and the pages to start them on live in memory only: links can carry a key, and pages come from the source.
 /// </para>
 /// <para>
-/// Register one instance as both <see cref="IDownloadService"/> and a hosted service. On start it requeues
-/// jobs that were interrupted mid-download, and asks the sources again about jobs that were waiting for a
-/// handoff, since their pages are gone; on stop it requeues the running ones, so they continue next time.
+/// Register one instance as the <see cref="IDownloadService"/>, the <see cref="ICompletedDownloads"/> and a hosted
+/// service. On start it requeues jobs that were interrupted mid-download, and asks the sources again about jobs that
+/// were waiting for a handoff, since their pages are gone; on stop it requeues the running ones, so they continue next
+/// time.
 /// </para>
 /// <para>
 /// A job that can't be saved, such as while the database is locked or the disk is full, goes on all the same: the
@@ -45,7 +46,7 @@ namespace ModShelf.Application.Downloads;
 /// them as at any start. One that's never started, in a process that doesn't run downloads, lists the jobs as saved too.
 /// </para>
 /// </remarks>
-internal sealed partial class DownloadScheduler : BackgroundService, IDownloadService
+internal sealed partial class DownloadScheduler : BackgroundService, IDownloadService, ICompletedDownloads
 {
     // How long the scheduler waits before reading the stored jobs again when the database couldn't be read at start.
     private static readonly TimeSpan LoadRetryDelay = TimeSpan.FromSeconds(5);
@@ -176,6 +177,19 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
     {
         TaskCompletionSource<int> reply = NewReply<int>();
         Post(new ClearFinishedCommand(reply));
+        return await reply.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<int> ClearCompletedAsync(IReadOnlySet<DownloadJobId> ids, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(ids);
+        if (!_started)
+        {
+            return await ClearSavedCompletedAsync(ids, cancellationToken).ConfigureAwait(false);
+        }
+
+        TaskCompletionSource<int> reply = NewReply<int>();
+        Post(new ClearCompletedCommand(ids, reply));
         return await reply.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
     }
 
@@ -344,6 +358,18 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
             catch (Exception exception)
             {
                 list.Reject(exception);
+            }
+        }
+        else if (message is ClearCompletedCommand clear)
+        {
+            // A completed job never runs again, so the process that runs the queue only lists it.
+            try
+            {
+                clear.Reply.TrySetResult(await ClearSavedCompletedAsync(clear.Ids, CancellationToken.None).ConfigureAwait(false));
+            }
+            catch (Exception exception)
+            {
+                clear.Reject(exception);
             }
         }
         else
@@ -532,6 +558,9 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
                 case ClearFinishedCommand command:
                     await ClearFinishedAsync(command).ConfigureAwait(false);
                     break;
+                case ClearCompletedCommand command:
+                    await ClearCompletedAsync(command).ConfigureAwait(false);
+                    break;
                 case TransferStarted report:
                     await OnTransferStartedAsync(report).ConfigureAwait(false);
                     break;
@@ -641,19 +670,57 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
         DownloadJob[] finished = [.. _jobs.Where(job => job.Status is DownloadJobStatus.Completed or DownloadJobStatus.Cancelled)];
         if (finished.Length > 0)
         {
-            HashSet<DownloadJobId> ids = [.. finished.Select(job => job.Id)];
-            await _repository.DeleteAsync(ids, CancellationToken.None).ConfigureAwait(false);
-            _jobs.RemoveAll(job => ids.Contains(job.Id));
-            foreach (DownloadJobId id in ids)
-            {
-                _lastProgressSnapshot.Remove(id);
-                _handoffPages.Remove(id);
-            }
-
+            await RemoveAsync([.. finished.Select(job => job.Id)]).ConfigureAwait(false);
             LogClearedFinished(_logger, finished.Length);
         }
 
         command.Reply.TrySetResult(finished.Length);
+    }
+
+    private async Task ClearCompletedAsync(ClearCompletedCommand command)
+    {
+        // A completed job never runs again, so nothing else holds it.
+        HashSet<DownloadJobId> completed = [.. _jobs
+            .Where(job => job.Status == DownloadJobStatus.Completed && command.Ids.Contains(job.Id))
+            .Select(job => job.Id)];
+        if (completed.Count > 0)
+        {
+            await RemoveAsync(completed).ConfigureAwait(false);
+            LogClearedCompleted(_logger, completed.Count);
+        }
+
+        command.Reply.TrySetResult(completed.Count);
+    }
+
+    /// <summary>
+    /// Deletes the finished jobs with these IDs from the database, then from the queue.
+    /// </summary>
+    private async Task RemoveAsync(HashSet<DownloadJobId> ids)
+    {
+        await _repository.DeleteAsync(ids, CancellationToken.None).ConfigureAwait(false);
+        _jobs.RemoveAll(job => ids.Contains(job.Id));
+        foreach (DownloadJobId id in ids)
+        {
+            _lastProgressSnapshot.Remove(id);
+            _handoffPages.Remove(id);
+        }
+    }
+
+    /// <summary>
+    /// Deletes the saved jobs with these IDs that have completed, in a process that doesn't run the queue.
+    /// </summary>
+    private async Task<int> ClearSavedCompletedAsync(IReadOnlySet<DownloadJobId> ids, CancellationToken cancellationToken)
+    {
+        HashSet<DownloadJobId> completed = [.. (await _repository.ListAsync(cancellationToken).ConfigureAwait(false))
+            .Where(job => job.Status == DownloadJobStatus.Completed && ids.Contains(job.Id))
+            .Select(job => job.Id)];
+        if (completed.Count > 0)
+        {
+            await _repository.DeleteAsync(completed, cancellationToken).ConfigureAwait(false);
+            LogClearedCompleted(_logger, completed.Count);
+        }
+
+        return completed.Count;
     }
 
     private async Task OnTransferStartedAsync(TransferStarted report)

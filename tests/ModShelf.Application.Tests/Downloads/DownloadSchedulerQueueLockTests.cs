@@ -65,6 +65,26 @@ public sealed class DownloadSchedulerQueueLockTests
     }
 
     [Fact]
+    public async Task WhileAnotherProcessRunsTheQueueChosenCompletedJobsLeaveTheDatabase()
+    {
+        // A completed job never runs again, so the other process only lists it, until it stops or clears it.
+        DownloadJob completed = StoredJob("1");
+        completed.StartResolving();
+        completed.StartDownloading(0, 100);
+        completed.StartVerifying();
+        completed.Complete();
+        DownloadJob queued = StoredJob("2");
+        await using SchedulerHarness harness = await SchedulerHarness.StartAsync(storedJobs: [completed, queued], queueBusyElsewhere: true);
+
+        int cleared = await harness.Scheduler.ClearCompletedAsync(new HashSet<DownloadJobId> { completed.Id, queued.Id }, TestContext.Current.CancellationToken);
+
+        Assert.Equal(1, cleared);
+        Assert.Equal([completed.Id], harness.Repository.Deleted);
+        Assert.Equal([queued.Id], (await harness.SettleAsync()).Select(job => job.Id));
+        Assert.True(harness.Scheduler.IsQueueBusyElsewhere);
+    }
+
+    [Fact]
     public async Task RunsTheQueueOnceTheOtherProcessLetsGo()
     {
         DownloadJob interrupted = StoredJob("1");

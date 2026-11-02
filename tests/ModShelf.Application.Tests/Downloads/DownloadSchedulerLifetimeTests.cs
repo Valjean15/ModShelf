@@ -5,6 +5,7 @@ using ModShelf.Application.Sources;
 using ModShelf.Application.Tests.Fakes;
 using ModShelf.Domain.Downloads;
 using ModShelf.Sources.Abstractions.Downloads;
+using ModShelf.Testing;
 
 using static ModShelf.Domain.Downloads.DownloadJobStatus;
 
@@ -184,6 +185,36 @@ public sealed class DownloadSchedulerLifetimeTests
             .WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
 
         Assert.Equal(stored.Id, Assert.Single(listed).Id);
+    }
+
+    [Fact]
+    public async Task ASchedulerNeverStartedClearsChosenCompletedJobsFromTheDatabase()
+    {
+        DownloadJob completed = StoredJob();
+        completed.StartResolving();
+        completed.StartDownloading(0, 100);
+        completed.StartVerifying();
+        completed.Complete();
+        DownloadJob queued = DownloadJob.Create(TestData.File(TestData.Nexus, "35408"), TestData.TargetDirectory, "35408.7z", TestData.Now);
+        InMemoryDownloadJobRepository repository = new([completed, queued]);
+        RecordingLogger<DownloadScheduler> logger = new();
+        using DownloadScheduler scheduler = new(
+            repository,
+            new SourceRegistry([]),
+            new ControlledFileTransfer(),
+            new ScriptedQueueLock(),
+            new FakeLibraryStorage(),
+            TimeProvider.System,
+            new DownloadSchedulerOptions(),
+            logger);
+
+        int cleared = await scheduler.ClearCompletedAsync(new HashSet<DownloadJobId> { completed.Id, queued.Id }, TestContext.Current.CancellationToken)
+            .WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+
+        Assert.Equal(1, cleared);
+        Assert.Equal([completed.Id], repository.Deleted);
+        Assert.Equal([queued.Id], (await scheduler.ListAsync(TestContext.Current.CancellationToken)).Select(job => job.Id));
+        Assert.Single(logger.Entries, entry => entry.StartsWith("Information: Cleared 1 completed download jobs from the queue", StringComparison.Ordinal));
     }
 
     private static DownloadJob StoredJob()
