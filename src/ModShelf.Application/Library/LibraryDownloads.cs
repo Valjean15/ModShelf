@@ -207,8 +207,10 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
             details = await ReadDetailsAsync(catalog, file, cancellationToken).ConfigureAwait(false);
             string pathByPattern = settings.FoldersFor(file.Mod.Game.Key).Render(
                 file.Mod.Game.Source.Value, file.Mod.Game.Key, details.Mod.Name, file.Mod.Id, details.File.FileName);
-            string folder = stored is { Files.Count: > 0 } ? ModFolderOf(stored.Files[^1].RelativePath) : FolderOf(pathByPattern);
-            relativePath = FreePath(root, library, jobs, folder, NameOf(pathByPattern), file);
+            string folder = stored is { Files.Count: > 0 }
+                ? LibraryLocations.ModFolderOf(stored.Files[^1].RelativePath)
+                : LibraryLocations.FolderOf(pathByPattern);
+            relativePath = FreePath(root, library, jobs, folder, LibraryLocations.NameOf(pathByPattern), file);
         }
 
         string target = LibraryPaths.Resolve(root, relativePath);
@@ -238,33 +240,6 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
     private static bool IsRecorded(LibraryFile kept, DownloadJobSnapshot job) => kept.DownloadedAt >= job.CreatedAt;
 
     /// <summary>
-    /// The name a file gets when its own is taken: with the file's ID before its extension, as <c>SkyUI (35407).7z</c>.
-    /// </summary>
-    private static string WithId(string name, string fileId)
-        => LibraryNames.File($"{Path.GetFileNameWithoutExtension(name)} ({fileId}){Path.GetExtension(name)}");
-
-    /// <summary>
-    /// The folder part of a library path, with no ending separator; empty for a file at the root.
-    /// </summary>
-    private static string FolderOf(string relativePath)
-    {
-        int separator = relativePath.LastIndexOf(LibraryPaths.Separator);
-        return separator < 0 ? string.Empty : relativePath[..separator];
-    }
-
-    /// <summary>
-    /// The folder of a mod with a file at <paramref name="relativePath"/>: the file's folder, or the one holding its
-    /// <c>_archive</c> folder.
-    /// </summary>
-    private static string ModFolderOf(string relativePath)
-        => OldVersions.IsArchived(relativePath) ? FolderOf(FolderOf(relativePath)) : FolderOf(relativePath);
-
-    /// <summary>
-    /// The last part of a library path: the file's name.
-    /// </summary>
-    private static string NameOf(string relativePath) => relativePath[(relativePath.LastIndexOf(LibraryPaths.Separator) + 1)..];
-
-    /// <summary>
     /// The file's path in <paramref name="folder"/>: under its own name; or, when that's taken, with its ID added.
     /// A name is taken when another file of the library, another unfinished download or a file on disk has it, in any
     /// case, since case doesn't matter on Windows and macOS.
@@ -279,7 +254,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
         string name,
         ModFileRef file)
     {
-        string withId = WithId(name, file.Id);
+        string withId = LibraryLocations.WithId(name, file.Id);
         foreach (string candidate in new[] { name, withId })
         {
             string relativePath = folder.Length == 0 ? candidate : $"{folder}{LibraryPaths.Separator}{candidate}";
@@ -487,7 +462,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
         foreach (LibraryFile file in files)
         {
             string from = LibraryPaths.Resolve(root, file.RelativePath);
-            string withId = WithId(file.FileName, file.File.Id);
+            string withId = LibraryLocations.WithId(file.FileName, file.File.Id);
             string[] candidates = [.. new[] { file.FileName, withId }
                 .Select(name => OldVersions.ArchivePath(file.RelativePath, name))
                 .Where(candidate => !taken.Contains(candidate))];
