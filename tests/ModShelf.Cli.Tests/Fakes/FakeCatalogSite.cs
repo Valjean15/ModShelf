@@ -80,6 +80,11 @@ internal sealed partial class FakeCatalogSite : ILinkRecognizer, IModCatalog, IM
     public Task<IReadOnlyList<ModFile>> GetFilesAsync(ModRef modRef, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(modRef);
+        if (modRef.Game.Key == "broken")
+        {
+            return Task.FromException<IReadOnlyList<ModFile>>(new HttpRequestException("Service unavailable.", null, HttpStatusCode.ServiceUnavailable));
+        }
+
         if (modRef.Id == "2")
         {
             return Task.FromResult<IReadOnlyList<ModFile>>([]);

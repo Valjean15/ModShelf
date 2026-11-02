@@ -180,6 +180,47 @@ public sealed class LibraryCommandTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task RescanReadsTheHashesTheLibraryLacksWithoutAskingTheSite()
+    {
+        await StoreAsync(2);
+        await PutFilesOnDiskAsync(2);
+
+        CliResult rescan = await RunAsync("rescan", ModLink("1").AbsoluteUri);
+        CliResult again = await _cli.RunAsync(["library", "rescan"], Cancellation);
+
+        Assert.Equal(Done, rescan.ExitCode);
+        Assert.Equal("Rescanned 1 mod.\nRead the SHA-256 of 2 files.", rescan.Output.TrimEnd().ReplaceLineEndings("\n"));
+        Assert.Equal(
+            "Rescanned 1 mod.\nNothing new: every file in the mods' folders is in the library, and every file has its SHA-256.",
+            again.Output.TrimEnd().ReplaceLineEndings("\n"));
+    }
+
+    [Fact]
+    public async Task RescanSaysWhichModsFilesCouldntBeMatchedAndFails()
+    {
+        ModRef broken = new(new GameRef(FakeCatalogSite.SourceId, "broken"), "7");
+        string folder = await _cli.InAppAsync(
+            async services =>
+            {
+                LibraryFile file = new(new ModFileRef(broken, "70"), "File 70", null, ModFileCategory.Main, DateTimeOffset.UnixEpoch, "fake-catalog/broken/7/file-70.zip", 3, DateTimeOffset.UnixEpoch);
+                await services.GetRequiredService<ILibraryRepository>().UpdateAsync(
+                    broken, _ => LibraryMod.Watch(broken, "Broken Mod", null, null, DateTimeOffset.UnixEpoch).WithFile(file), Cancellation);
+                string root = await services.GetRequiredService<ISettingsService>().GetLibraryRootAsync(Cancellation);
+                return LibraryPaths.Resolve(root, "fake-catalog/broken/7");
+            },
+            Cancellation);
+        Directory.CreateDirectory(folder);
+        await File.WriteAllTextAsync(Path.Combine(folder, "file-70.zip"), "mod", Cancellation);
+        await File.WriteAllTextAsync(Path.Combine(folder, "placed.zip"), "mod", Cancellation);
+
+        CliResult rescan = await _cli.RunAsync(["library", "rescan"], Cancellation);
+
+        Assert.Equal(Failed, rescan.ExitCode);
+        Assert.Equal("Rescanned 1 mod.\nRead the SHA-256 of 1 file.", rescan.Output.TrimEnd().ReplaceLineEndings("\n"));
+        Assert.Equal("Couldn't match the files of mod 7 of broken on fake-catalog: Service unavailable.", rescan.Errors.Trim());
+    }
+
+    [Fact]
     public async Task SaysWhenAModToForgetIsntInTheLibrary()
     {
         CliResult forgot = await RunAsync("forget", ModLink("1").AbsoluteUri);
@@ -209,6 +250,8 @@ public sealed class LibraryCommandTests : IAsyncDisposable
     [InlineData("unwatch", "https://catalog.example/game/mods/404", BadInput, "The site has no such mod or file.")]
     [InlineData("forget", "not a link", BadInput, "isn't a complete link")]
     [InlineData("forget", "https://catalog.example/game/mods/404", BadInput, "The site has no such mod or file.")]
+    [InlineData("rescan", "not a link", BadInput, "isn't a complete link")]
+    [InlineData("rescan", "ftp://elsewhere.example/mod.zip", BadInput, "No source knows this link.")]
     public async Task SaysWhyItCantWatchOrUnwatch(string command, string link, int exitCode, string message)
     {
         CliResult refused = await RunAsync(command, link);

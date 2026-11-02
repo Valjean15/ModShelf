@@ -82,6 +82,62 @@ public sealed class DownloadCommandLibraryTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task RescanAddsAFilePlacedByHandInTheModsFolder()
+    {
+        await RunAsync("download", HandoffLink("1").AbsoluteUri);
+        string placed = Path.Combine(ModFolder, FileNameOf("2"));
+        await File.WriteAllBytesAsync(placed, Content, Cancellation);
+
+        CliResult rescan = await RunAsync("library", "rescan");
+        CliResult files = await RunAsync("library", "list", "--files");
+
+        Assert.Equal(Done, rescan.ExitCode);
+        string[] lines = Lines(rescan);
+        Assert.Equal(["Rescanned 1 mod.", "Added 1 file found on disk:"], lines[..2]);
+        Assert.Equal(["game", "mod", FileNameOf("2"), "1.2"], lines[3].Split(' ', StringSplitOptions.RemoveEmptyEntries)[..4]);
+        Assert.EndsWith(placed, lines[3], StringComparison.Ordinal);
+        Assert.Equal("The library has 2 files.", Lines(files)[^4]);
+        Assert.Contains(Convert.ToHexStringLower(SHA256.HashData(Content)), Lines(files)[^1], StringComparison.Ordinal);
+        Assert.Equal(Content, await File.ReadAllBytesAsync(placed, Cancellation));
+    }
+
+    [Fact]
+    public async Task RescanByLinkBringsAForgottenModBackWatched()
+    {
+        await RunAsync("download", HandoffLink("1").AbsoluteUri);
+        await RunAsync("library", "forget", FileLink("1").AbsoluteUri);
+
+        CliResult rescan = await RunAsync("library", "rescan", FileLink("1").AbsoluteUri);
+
+        Assert.Equal((Done, "Added 1 file found on disk:"), (rescan.ExitCode, Lines(rescan)[1]));
+        Assert.Equal(["mod", "Handoff", "Mod", "yes", "1"], Assert.Single(Rows(await RunAsync("library", "list")))[1..6]);
+    }
+
+    [Fact]
+    public async Task RescanSaysWhichFilesAreMissingAndWhichMatchNothing()
+    {
+        await RunAsync("download", HandoffLink("1").AbsoluteUri);
+        File.Delete(Path.Combine(ModFolder, FileNameOf("1")));
+        string notes = Path.Combine(ModFolder, "notes.txt");
+        await File.WriteAllTextAsync(notes, "mine", Cancellation);
+
+        CliResult rescan = await RunAsync("library", "rescan");
+        CliResult again = await RunAsync("library", "rescan");
+
+        Assert.Equal(
+            [
+                "Rescanned 1 mod.",
+                "1 file is missing from disk:",
+                $"  {Path.Combine(ModFolder, FileNameOf("1"))}",
+                "1 file in the mods' folders matches none of their files:",
+                $"  {notes}",
+            ],
+            Lines(rescan));
+        Assert.Equal(Lines(rescan), Lines(again));
+        Assert.True(File.Exists(notes));
+    }
+
+    [Fact]
     public async Task DoesntDownloadAFileTheLibraryHasAgain()
     {
         await RunAsync("download", HandoffLink("3").AbsoluteUri);
@@ -403,6 +459,8 @@ public sealed class DownloadCommandLibraryTests : IAsyncDisposable
         Assert.StartsWith("The settings in", refused.Errors.Trim(), StringComparison.Ordinal);
         Assert.Empty(_server.Ranges);
     }
+
+    private static string[] Lines(CliResult result) => result.Output.TrimEnd().ReplaceLineEndings("\n").Split('\n');
 
     /// <summary>
     /// The rows of <c>library list</c>, without its heading, split on spaces.
