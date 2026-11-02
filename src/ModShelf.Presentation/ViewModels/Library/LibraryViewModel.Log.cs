@@ -12,4 +12,7 @@ public sealed partial class LibraryViewModel
 
     [LoggerMessage(EventId = 909, Level = LogLevel.Warning, Message = "Reading the name of game {Game} from {Source} failed, so it goes by its key")]
     private static partial void LogGameNameFailed(ILogger logger, Exception exception, string game, string source);
+
+    [LoggerMessage(EventId = 941, Level = LogLevel.Error, Message = "Rescanning the library failed")]
+    private static partial void LogRescanFailed(ILogger logger, Exception exception);
 }

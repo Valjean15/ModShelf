@@ -490,6 +490,66 @@
     <value>{0} couldn't be deleted: {1} It stays in the library.</value>
     <comment>{0} is the file's name, {1} the system's reason.</comment>
   </data>
+  <data name="LibraryRescan" xml:space="preserve">
+    <value>Rescan</value>
+    <comment>Button: look for files placed by hand in the mods' folders, and read the hashes the library lacks.</comment>
+  </data>
+  <data name="RescanDoneTitle" xml:space="preserve">
+    <value>Rescan finished</value>
+    <comment>Title of the message saying what a rescan found.</comment>
+  </data>
+  <data name="RescanFailedTitle" xml:space="preserve">
+    <value>The library wasn't rescanned</value>
+    <comment>Title of the message when a rescan couldn't run, such as when the settings can't be read.</comment>
+  </data>
+  <data name="RescanNothingNew" xml:space="preserve">
+    <value>Nothing new: every file in the mods' folders is in the library, and every file has its SHA-256.</value>
+    <comment>What a rescan that found nothing says.</comment>
+  </data>
+  <data name="RescanAddedOne" xml:space="preserve">
+    <value>1 file found on disk was added to the library.</value>
+    <comment>A file placed by hand that a rescan matched to its mod.</comment>
+  </data>
+  <data name="RescanAdded" xml:space="preserve">
+    <value>{0} files found on disk were added to the library.</value>
+    <comment>{0} is how many files placed by hand a rescan matched to their mods.</comment>
+  </data>
+  <data name="RescanHashedOne" xml:space="preserve">
+    <value>Read the SHA-256 of 1 file.</value>
+    <comment>A library file whose hash a rescan read.</comment>
+  </data>
+  <data name="RescanHashed" xml:space="preserve">
+    <value>Read the SHA-256 of {0} files.</value>
+    <comment>{0} is how many library files' hashes a rescan read.</comment>
+  </data>
+  <data name="RescanMissingOne" xml:space="preserve">
+    <value>1 file is missing from disk.</value>
+    <comment>A library file a rescan didn't find on disk.</comment>
+  </data>
+  <data name="RescanMissing" xml:space="preserve">
+    <value>{0} files are missing from disk.</value>
+    <comment>{0} is how many library files a rescan didn't find on disk.</comment>
+  </data>
+  <data name="RescanUnmatchedOne" xml:space="preserve">
+    <value>1 file in the mods' folders matches none of their files.</value>
+    <comment>A file in a mod's folder that's none of the mod's files on its site.</comment>
+  </data>
+  <data name="RescanUnmatched" xml:space="preserve">
+    <value>{0} files in the mods' folders match none of their files.</value>
+    <comment>{0} is how many files in the mods' folders are none of their mods' files on their sites.</comment>
+  </data>
+  <data name="RescanNotMatched" xml:space="preserve">
+    <value>The files of {0} couldn't be matched: {1}</value>
+    <comment>{0} is a mod's name, or its ID; {1} why its site couldn't be asked. Said for the first such mod.</comment>
+  </data>
+  <data name="RescanNotMatchedMoreOne" xml:space="preserve">
+    <value>1 more mod's files couldn't be matched; the log says why.</value>
+    <comment>Another mod whose files a rescan couldn't match.</comment>
+  </data>
+  <data name="RescanNotMatchedMore" xml:space="preserve">
+    <value>{0} more mods' files couldn't be matched; the log says why.</value>
+    <comment>{0} is how many other mods' files a rescan couldn't match.</comment>
+  </data>
   <data name="LibraryRemoveMod" xml:space="preserve">
     <value>Remove from library…</value>
     <comment>Button on a mod: take it out of the library, after asking. Its files stay on disk.</comment>

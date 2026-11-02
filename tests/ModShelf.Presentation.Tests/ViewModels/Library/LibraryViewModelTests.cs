@@ -1,3 +1,4 @@
+using ModShelf.Application.Library;
 using ModShelf.Domain.Library;
 using ModShelf.Presentation.Tests.Common;
 using ModShelf.Presentation.ViewModels.Library;
@@ -89,6 +90,60 @@ public sealed class LibraryViewModelTests : IDisposable
 
         Assert.Equal(["GetGameAsync skyrimspecialedition"], _harness.Catalog.Asked);
         Assert.Equal(["# Skyrim Special Edition", "SkyUI"], _harness.Lines());
+    }
+
+    [Fact]
+    public async Task RescansTheWholeLibraryAndSaysWhatItFound()
+    {
+        await _harness.StartAsync(SkyUi, Address);
+        LibraryFile file = TestData.LibraryFile(SkyUi.Mod, "1", "a.7z");
+        _harness.Rescan.Result = new LibraryRescan(
+            2,
+            [file, file],
+            [file],
+            [file, file, file],
+            ["/library/notes.txt"],
+            [new RescanFailure(Address.Mod, "Slow down."), new RescanFailure(SkyUi.Mod, "Not asked.")]);
+
+        await Screen.RescanCommand.ExecuteAsync(null);
+
+        Assert.Equal([null], _harness.Rescan.Asked);
+        Assert.Equal(
+            [(
+                "Rescan finished",
+                string.Join(
+                    Environment.NewLine,
+                    "2 files found on disk were added to the library.",
+                    "Read the SHA-256 of 1 file.",
+                    "3 files are missing from disk.",
+                    "1 file in the mods' folders matches none of their files.",
+                    "The files of Address Library couldn't be matched: Slow down.",
+                    "1 more mod's files couldn't be matched; the log says why."))],
+            _harness.Dialogs.Messages);
+    }
+
+    [Fact]
+    public async Task ARescanThatFindsNothingSaysSo()
+    {
+        await _harness.StartAsync(SkyUi);
+
+        await Screen.RescanCommand.ExecuteAsync(null);
+
+        Assert.Equal(
+            [("Rescan finished", "Nothing new: every file in the mods' folders is in the library, and every file has its SHA-256.")],
+            _harness.Dialogs.Messages);
+    }
+
+    [Fact]
+    public async Task ARescanThatFailsUnexpectedlyIsLoggedAndTold()
+    {
+        await _harness.StartAsync(SkyUi);
+        _harness.Rescan.Refusal = new IOException("The disk is gone.");
+
+        await Screen.RescanCommand.ExecuteAsync(null);
+
+        Assert.Equal([("That didn't work", "Something went wrong. The log has the details.")], _harness.Dialogs.Messages);
+        Assert.StartsWith("Error: Rescanning the library failed System.IO.IOException: The disk is gone.", Assert.Single(_harness.Logger.Entries), StringComparison.Ordinal);
     }
 
     [Fact]

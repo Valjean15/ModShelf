@@ -22,6 +22,7 @@ internal sealed class LibraryHarness : IDisposable
         Time.SetLocalTimeZone(TimeZoneInfo.Utc);
         Screen = new LibraryViewModel(
             Library,
+            Rescan,
             Settings,
             Browser,
             Folders,
@@ -33,6 +34,8 @@ internal sealed class LibraryHarness : IDisposable
     }
 
     public InMemoryModLibrary Library { get; } = new();
+
+    public ScriptedRescan Rescan { get; } = new();
 
     public FakeSettingsService Settings { get; } = new();
 

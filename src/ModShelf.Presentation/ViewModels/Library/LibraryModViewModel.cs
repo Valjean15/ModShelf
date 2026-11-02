@@ -41,6 +41,7 @@ public sealed partial class LibraryModViewModel : ObservableObject
         Watch,
         Unwatch,
         Remove,
+        Rescan,
     }
 
     public ModRef Mod { get; }
@@ -84,7 +85,7 @@ public sealed partial class LibraryModViewModel : ObservableObject
     public partial bool HasUpdates { get; private set; }
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(OpenPageCommand))]
+    [NotifyCanExecuteChangedFor(nameof(OpenPageCommand), nameof(RescanCommand))]
     public partial bool HasPage { get; private set; }
 
     /// <summary>
@@ -226,6 +227,14 @@ public sealed partial class LibraryModViewModel : ObservableObject
                 }
             },
             cancellationToken);
+
+    /// <summary>
+    /// Rescans the mod's folders, then says what it found. The mod is found by its page in the library, without asking
+    /// its site, which is asked only when there are files to match.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(HasPage))]
+    private Task RescanAsync(CancellationToken cancellationToken)
+        => RunAsync(ModAction.Rescan, () => Rescans.RunAsync(_services, _mod.PageUrl, cancellationToken), cancellationToken);
 
     private bool CanWatch() => !IsWatched;
 

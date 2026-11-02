@@ -1,3 +1,4 @@
+using ModShelf.Application.Library;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.ViewModels.Library;
@@ -164,6 +165,38 @@ public sealed class LibraryModViewModelTests : IDisposable
             "Error: Remove of mod 12604 of skyrimspecialedition failed System.IO.IOException: The disk is full.",
             Assert.Single(_harness.Logger.Entries),
             StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task RescansTheModByItsPageAndSaysWhatItFound()
+    {
+        LibraryModViewModel row = await ShowAsync(TestData.LibraryMod(SkyUi, "SkyUI"));
+        _harness.Rescan.Result = new LibraryRescan(1, [TestData.LibraryFile(SkyUi, "2", "b.7z")], [], [], [], []);
+
+        await row.RescanCommand.ExecuteAsync(null);
+
+        Assert.Equal([new Uri("https://www.nexusmods.com/skyrimspecialedition/mods/12604")], _harness.Rescan.Asked);
+        Assert.Equal([("Rescan finished", "1 file found on disk was added to the library.")], _harness.Dialogs.Messages);
+    }
+
+    [Fact]
+    public async Task AModWithoutAPageCantBeRescanned()
+    {
+        LibraryModViewModel row = await ShowAsync(LibraryMod.Restore(SkyUi, "SkyUI", null, null, isWatched: true, TestData.Now, null, []));
+
+        Assert.False(row.RescanCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public async Task ARescanThatCantRunSaysWhy()
+    {
+        LibraryModViewModel row = await ShowAsync(TestData.LibraryMod(SkyUi, "SkyUI"));
+        _harness.Rescan.Refusal = new InvalidDataException("settings.json isn't valid JSON.");
+
+        await row.RescanCommand.ExecuteAsync(null);
+
+        Assert.Equal([("The library wasn't rescanned", "settings.json isn't valid JSON.")], _harness.Dialogs.Messages);
+        Assert.Empty(_harness.Logger.Entries);
     }
 
     [Fact]

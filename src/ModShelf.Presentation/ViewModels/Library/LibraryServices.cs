@@ -12,6 +12,7 @@ namespace ModShelf.Presentation.ViewModels.Library;
 /// </summary>
 internal sealed class LibraryServices(
     IModLibrary library,
+    ILibraryRescan rescan,
     ISettingsService settings,
     IBrowserLauncher browser,
     IFolderOpener folders,
@@ -20,6 +21,8 @@ internal sealed class LibraryServices(
     ILogger logger)
 {
     public IModLibrary Library { get; } = library ?? throw new ArgumentNullException(nameof(library));
+
+    public ILibraryRescan Rescan { get; } = rescan ?? throw new ArgumentNullException(nameof(rescan));
 
     public ISettingsService Settings { get; } = settings ?? throw new ArgumentNullException(nameof(settings));
 

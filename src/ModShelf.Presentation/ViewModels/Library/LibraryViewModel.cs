@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 using Microsoft.Extensions.Logging;
 
@@ -35,6 +36,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
 
     public LibraryViewModel(
         IModLibrary library,
+        ILibraryRescan rescan,
         ISettingsService settings,
         IBrowserLauncher browser,
         IFolderOpener folders,
@@ -53,7 +55,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         _sources = sources;
         _uiThread = uiThread;
         _logger = logger;
-        _services = new LibraryServices(library, settings, browser, folders, dialogs, timeProvider, logger);
+        _services = new LibraryServices(library, rescan, settings, browser, folders, dialogs, timeProvider, logger);
     }
 
     public override Screen Screen => Screen.Library;
@@ -109,6 +111,17 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     }
 
     partial void OnFilterChanged(string value) => Arrange();
+
+    /// <summary>
+    /// Rescans every mod's folders, then says what it found. The screen shows what it added as the library changes.
+    /// </summary>
+    [RelayCommand]
+    private Task RescanAsync(CancellationToken cancellationToken)
+        => UserCommands.RunAsync(
+            () => Rescans.RunAsync(_services, null, cancellationToken),
+            _services.Dialogs,
+            exception => LogRescanFailed(_logger, exception),
+            cancellationToken);
 
     /// <summary>
     /// Shows what a change did. Runs on the UI thread.
