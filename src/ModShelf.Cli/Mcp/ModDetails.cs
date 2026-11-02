@@ -4,6 +4,10 @@ namespace ModShelf.Cli.Mcp;
 /// A mod as its site describes it, with its files, and whether the library watches it.
 /// </summary>
 /// <param name="HiddenFiles">How many old, archived or unsorted files aren't listed, unless asked for.</param>
+/// <param name="LibraryOnly">
+/// The library's files of the mod that the site no longer lists, as a file its author pulled or hid, the newest first.
+/// </param>
+/// <param name="NewerInLibrary">Whether one of those is newer than every file the site lists.</param>
 /// <param name="Changelog">The mod's changelog, when asked for; null otherwise.</param>
 internal sealed record ModDetails(
     string Source,
@@ -23,4 +27,6 @@ internal sealed record ModDetails(
     bool Watched,
     IReadOnlyList<ModFileEntry> Files,
     int HiddenFiles,
+    IReadOnlyList<LibraryFileEntry> LibraryOnly,
+    bool NewerInLibrary,
     IReadOnlyList<ChangelogEntry>? Changelog);

@@ -111,7 +111,13 @@ internal sealed class FakeHandoffSource(Uri fileUrl) : ILinkRecognizer, IDownloa
         => Task.FromResult(new ModInfo(modRef, ModName, author: "Someone", pageUrl: new Uri($"https://{Host}/mod")));
 
     /// <summary>
-    /// Files 1 to 3, each the update of the one before, at versions 1.1 to 1.3, with their pages.
+    /// The files its catalog no longer lists, as an author's pulled or hidden files; the file before still names one as
+    /// what replaces it.
+    /// </summary>
+    public ConcurrentBag<string> Pulled { get; } = [];
+
+    /// <summary>
+    /// Files 1 to 3, each the update of the one before, at versions 1.1 to 1.3, with their pages; but the pulled ones.
     /// </summary>
     public Task<IReadOnlyList<ModFile>> GetFilesAsync(ModRef modRef, CancellationToken cancellationToken)
         => Task.FromResult<IReadOnlyList<ModFile>>(
@@ -126,7 +132,8 @@ internal sealed class FakeHandoffSource(Uri fileUrl) : ILinkRecognizer, IDownloa
                 DateTimeOffset.UnixEpoch.AddDays(index),
                 [],
                 FileLink(id),
-                index + 1 < FileIds.Length ? File(FileIds[index + 1]) : null)),
+                index + 1 < FileIds.Length ? File(FileIds[index + 1]) : null))
+                .Where(file => !Pulled.Contains(file.Reference.Id)),
         ]);
 
     /// <summary>

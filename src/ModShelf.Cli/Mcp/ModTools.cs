@@ -25,7 +25,7 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
         [ModFileCategory.Main, ModFileCategory.Update, ModFileCategory.Optional, ModFileCategory.Miscellaneous];
 
     [McpServerTool(Name = "mod_show", Title = "Show a mod", ReadOnly = true, Idempotent = true, OpenWorld = true, UseStructuredContent = true)]
-    [Description("Shows a mod as its site describes it, with its files, each with the link to download it, and where the library has it, if it does, and whether it's missing from disk. Old versions, archived files and files in no section are left out unless allFiles is set, but for the one the link points to.")]
+    [Description("Shows a mod as its site describes it, with its files, each with the link to download it, what replaces it, and where the library has it, if it does. Old versions, archived files and files in no section are left out unless allFiles is set, but for the one the link points to. The library's files that the site no longer lists, such as a pulled file, are in libraryOnly; newerInLibrary says when one of them is newer than everything the site lists.")]
     public Task<ModDetails> ShowAsync(
         [Description("A link to the mod or one of its files, such as its page on Nexus Mods.")] string link,
         [Description("Also list old versions, archived files and files in no section.")] bool allFiles = false,
@@ -45,6 +45,15 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
                     .ThenByDescending(file => file.UploadedAt),
             ];
             ModInfo mod = page.Mod;
+            HashSet<ModFileRef> onSite = [.. page.Files.Select(file => file.Reference)];
+            LibraryFileEntry[] libraryOnly =
+            [
+                .. (known?.Files ?? [])
+                    .Where(file => !onSite.Contains(file.File))
+                    .OrderByDescending(file => file.UploadedAt)
+                    .Select(file => McpEntries.File(file, root)),
+            ];
+            DateTimeOffset? newestOnSite = page.Files.Count == 0 ? null : page.Files.Max(file => file.UploadedAt);
             return new ModDetails(
                 mod.Mod.Game.Source.Value,
                 mod.Mod.Game.Key,
@@ -77,12 +86,15 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
                             file.UploadedAt,
                             file.PageUrl?.AbsoluteUri,
                             file.ReplacedBy?.Id,
+                            file.ReplacedBy is { } next ? onSite.Contains(next) : null,
                             file.Reference == page.LinkedFile,
                             path,
                             path is not null && !File.Exists(path));
                     }),
                 ],
                 page.Files.Count - listed.Length,
+                libraryOnly,
+                libraryOnly.Any(file => newestOnSite is null || file.UploadedAt > newestOnSite),
                 changelog ? [.. page.Changelogs.Select(entry => new ChangelogEntry(entry.Version, entry.Changes))] : null);
         });
 

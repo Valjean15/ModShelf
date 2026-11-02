@@ -411,8 +411,10 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         Assert.Equal((ModName, "Handoff Game", true), (mod.Name, mod.GameName, mod.Watched));
         Assert.Equal(["3", "2", "1"], mod.Files.Select(file => file.FileId));
         ModFileEntry two = mod.Files[1];
-        Assert.Equal((true, Path.Combine(ModFolder, FileNameOf("2")), "3", FileLink("2").AbsoluteUri), (two.Linked, two.LibraryPath, two.ReplacedBy, two.Link));
-        Assert.Equal((null, false), (mod.Files[0].LibraryPath, mod.Files[0].Missing));
+        Assert.Equal((true, Path.Combine(ModFolder, FileNameOf("2")), "3", true, FileLink("2").AbsoluteUri), (two.Linked, two.LibraryPath, two.ReplacedBy, two.ReplacedByOnSite, two.Link));
+        Assert.Equal((null, null, false), (mod.Files[0].LibraryPath, mod.Files[0].ReplacedByOnSite, mod.Files[0].Missing));
+        Assert.Empty(mod.LibraryOnly);
+        Assert.False(mod.NewerInLibrary);
         Assert.Equal(["1.2", "1.3"], mod.Changelog?.Select(entry => entry.Version));
         Assert.Equal(["12", "11", "20"], catalog.Files.Select(file => file.FileId));
         Assert.Equal(3, catalog.HiddenFiles);
@@ -420,6 +422,23 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         Assert.True(catalog.Adult);
         Assert.Equal(6, all.Files.Count);
         Assert.Equal(0, all.HiddenFiles);
+    }
+
+    [Fact]
+    public async Task AFilePulledFromTheSiteThatTheLibraryHasIsShownWithItsPlace()
+    {
+        // As Dynamic Menu Overhaul's 2.8: the site lists 2.7, replaced by a file it no longer lists, which you have.
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await DownloadAndWaitAsync(mcp, "3");
+        _handoff.Pulled.Add("3");
+
+        ModDetails mod = await mcp.CallAsync<ModDetails>("mod_show", Arguments(("link", FileLink("2").AbsoluteUri)), Cancellation);
+
+        Assert.Equal(["2", "1"], mod.Files.Select(file => file.FileId));
+        Assert.Equal(("3", false), (mod.Files[0].ReplacedBy, mod.Files[0].ReplacedByOnSite));
+        LibraryFileEntry pulled = Assert.Single(mod.LibraryOnly);
+        Assert.Equal(("3", "1.3", Path.Combine(ModFolder, FileNameOf("3"))), (pulled.FileId, pulled.Version, pulled.Path));
+        Assert.True(mod.NewerInLibrary);
     }
 
     [Fact]

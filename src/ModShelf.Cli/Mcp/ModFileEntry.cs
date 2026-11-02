@@ -5,6 +5,10 @@ namespace ModShelf.Cli.Mcp;
 /// </summary>
 /// <param name="Link">The file's page on its site, which <c>download</c> takes.</param>
 /// <param name="ReplacedBy">The newer file that replaces it, by the site's word.</param>
+/// <param name="ReplacedByOnSite">
+/// Whether the site still lists that newer file: false when it's hidden or removed, which the library may still have
+/// (the mod's <c>libraryOnly</c>); null when nothing replaces this one.
+/// </param>
 /// <param name="Linked">Whether the link asked about points to this file.</param>
 /// <param name="LibraryPath">Where the library has it, an absolute path; null when it doesn't.</param>
 /// <param name="Missing">Whether the library has it, but it's gone from disk.</param>
@@ -18,6 +22,7 @@ internal sealed record ModFileEntry(
     DateTimeOffset UploadedAt,
     string? Link,
     string? ReplacedBy,
+    bool? ReplacedByOnSite,
     bool Linked,
     string? LibraryPath,
     bool Missing);
