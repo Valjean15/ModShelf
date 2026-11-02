@@ -184,6 +184,8 @@ public sealed class NexusSourceSearchTests : IDisposable
             {
               "modId": 2400, "name": "SMAPI - Stardew Modding API", "summary": "The mod loader.", "author": "Pathoschild",
               "version": "4.5.2", "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/2400/picture.png",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/2400/picture.png",
+              "thumbnailBlurredUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/2400/blurred.png",
               "updatedAt": "2026-03-14T19:07:23Z", "endorsements": 387171, "downloads": 30286114, "adultContent": false,
               "status": "published", "game": {"domainName": "stardewvalley"}
             }
@@ -200,6 +202,10 @@ public sealed class NexusSourceSearchTests : IDisposable
             (smapi.Name, smapi.Summary, smapi.Author, smapi.Version));
         Assert.Equal(new Uri("https://www.nexusmods.com/stardewvalley/mods/2400"), smapi.PageUrl);
         Assert.Equal(new Uri("https://staticdelivery.nexusmods.com/mods/1303/images/2400/picture.png"), smapi.PictureUrl);
+        Assert.Equal(
+            (new Uri("https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/2400/picture.png"),
+             new Uri("https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/2400/blurred.png")),
+            (smapi.ThumbnailUrl, smapi.ThumbnailBlurredUrl));
         Assert.Equal(new DateTimeOffset(2026, 3, 14, 19, 7, 23, TimeSpan.Zero), smapi.UpdatedAt);
         Assert.Equal((30286114L, 387171L), (smapi.Downloads!.Value, smapi.Endorsements!.Value));
         Assert.True(smapi.IsAvailable);
@@ -211,12 +217,13 @@ public sealed class NexusSourceSearchTests : IDisposable
     {
         _api.AnswerPost(GraphQlPath, Page(
             total: 1,
-            """{"modId": 7, "pictureUrl": "javascript:alert(1)", "status": "hidden", "adultContent": true, "downloads": -1}"""));
+            """{"modId": 7, "pictureUrl": "javascript:alert(1)", "thumbnailUrl": "file:///etc/passwd", "thumbnailBlurredUrl": "", "status": "hidden", "adultContent": true, "downloads": -1}"""));
 
         ModInfo mod = Assert.Single((await Source.SearchAsync(StardewValley, new SearchQuery(), Cancellation)).Mods);
 
         Assert.Equal("Mod 7", mod.Name);
         Assert.Null(mod.PictureUrl);
+        Assert.Equal((null, null), (mod.ThumbnailUrl, mod.ThumbnailBlurredUrl));
         Assert.Null(mod.Downloads);
         Assert.False(mod.IsAvailable);
         Assert.True(mod.HasAdultContent);

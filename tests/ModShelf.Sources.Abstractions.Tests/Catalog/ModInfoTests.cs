@@ -48,6 +48,18 @@ public sealed class ModInfoTests
     }
 
     [Fact]
+    public void KeepsTheThumbnails()
+    {
+        Uri thumbnail = new("https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/2400/picture.png");
+        Uri blurred = new("https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/2400/picture-blurred.png");
+
+        ModInfo mod = new(Smapi, "SMAPI", thumbnailUrl: thumbnail, thumbnailBlurredUrl: blurred);
+
+        Assert.Equal((thumbnail, blurred), (mod.ThumbnailUrl, mod.ThumbnailBlurredUrl));
+        Assert.Equal((null, null), (new ModInfo(Smapi, "SMAPI").ThumbnailUrl, new ModInfo(Smapi, "SMAPI").ThumbnailBlurredUrl));
+    }
+
+    [Fact]
     public void TreatsBlankTextAsNone()
     {
         ModInfo mod = new(Smapi, "SMAPI", summary: " ", author: "", version: "\t");
@@ -70,5 +82,7 @@ public sealed class ModInfoTests
 
         Assert.Throws<ArgumentException>(() => new ModInfo(Smapi, "SMAPI", pageUrl: script));
         Assert.Throws<ArgumentException>(() => new ModInfo(Smapi, "SMAPI", pictureUrl: script));
+        Assert.Throws<ArgumentException>(() => new ModInfo(Smapi, "SMAPI", thumbnailUrl: script));
+        Assert.Throws<ArgumentException>(() => new ModInfo(Smapi, "SMAPI", thumbnailBlurredUrl: script));
     }
 }

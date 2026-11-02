@@ -11,6 +11,8 @@ internal sealed record NexusModNode(
     string? Author,
     string? Version,
     string? PictureUrl,
+    string? ThumbnailUrl,
+    string? ThumbnailBlurredUrl,
     DateTimeOffset? UpdatedAt,
     long? Endorsements,
     long? Downloads,

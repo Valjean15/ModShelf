@@ -49,7 +49,9 @@ public sealed partial class NexusSource : IModSearch
             isAvailable: IsAvailable(available: null, node.Status),
             hasAdultContent: node.AdultContent == true,
             downloads: Count(node.Downloads),
-            endorsements: Count(node.Endorsements));
+            endorsements: Count(node.Endorsements),
+            thumbnailUrl: WebLink(node.ThumbnailUrl),
+            thumbnailBlurredUrl: WebLink(node.ThumbnailBlurredUrl));
     }
 
     /// <summary>

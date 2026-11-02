@@ -21,12 +21,16 @@ public sealed record ModInfo
         bool isAvailable = true,
         bool hasAdultContent = false,
         long? downloads = null,
-        long? endorsements = null)
+        long? endorsements = null,
+        Uri? thumbnailUrl = null,
+        Uri? thumbnailBlurredUrl = null)
     {
         ArgumentNullException.ThrowIfNull(mod);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         CatalogUrls.EnsureWebUrl(pageUrl);
         CatalogUrls.EnsureWebUrl(pictureUrl);
+        CatalogUrls.EnsureWebUrl(thumbnailUrl);
+        CatalogUrls.EnsureWebUrl(thumbnailBlurredUrl);
         if (downloads < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(downloads), downloads, "A count can't be negative.");
@@ -49,6 +53,8 @@ public sealed record ModInfo
         HasAdultContent = hasAdultContent;
         Downloads = downloads;
         Endorsements = endorsements;
+        ThumbnailUrl = thumbnailUrl;
+        ThumbnailBlurredUrl = thumbnailBlurredUrl;
     }
 
     public ModRef Mod { get; }
@@ -99,6 +105,17 @@ public sealed record ModInfo
     /// How many users endorsed, liked or followed the mod, whatever the site counts as approval, or null when it doesn't say.
     /// </summary>
     public long? Endorsements { get; }
+
+    /// <summary>
+    /// A small version of the picture, for lists, or null when the site gives none: the picture can stand in.
+    /// </summary>
+    public Uri? ThumbnailUrl { get; }
+
+    /// <summary>
+    /// The thumbnail blurred by the site, for adult mods whose pictures the user chose to see blurred, or null when the
+    /// site gives none. Shown instead of the thumbnail, so the real picture isn't downloaded.
+    /// </summary>
+    public Uri? ThumbnailBlurredUrl { get; }
 
     private static string? Blank(string? text) => string.IsNullOrWhiteSpace(text) ? null : text.Trim();
 }
