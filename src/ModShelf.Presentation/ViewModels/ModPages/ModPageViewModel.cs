@@ -10,7 +10,7 @@ using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Sources.Abstractions.Catalog;
 
-namespace ModShelf.Presentation.ViewModels.Browse;
+namespace ModShelf.Presentation.ViewModels.ModPages;
 
 /// <summary>
 /// A mod opened on the Browse screen, as its site describes it: its details, its files by section, and its changelog,
@@ -25,13 +25,13 @@ public sealed partial class ModPageViewModel : ObservableObject
     private static readonly ModFileCategory[] OtherSections =
         [ModFileCategory.OldVersion, ModFileCategory.Archived, ModFileCategory.Unknown];
 
-    private readonly BrowseServices _services;
+    private readonly ModPageServices _services;
     private readonly ModInfo _info;
     private readonly List<(ModFileCategory Category, ModFileSectionViewModel Section)> _sections = [];
     private readonly List<ModFileViewModel> _files = [];
     private readonly ModFileRef? _linkedFile;
 
-    internal ModPageViewModel(ModPage page, LibraryMod? inLibrary, BrowseServices services)
+    internal ModPageViewModel(ModPage page, LibraryMod? inLibrary, ModPageServices services)
     {
         ArgumentNullException.ThrowIfNull(page);
         ArgumentNullException.ThrowIfNull(services);

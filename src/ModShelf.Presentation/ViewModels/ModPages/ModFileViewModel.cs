@@ -7,7 +7,7 @@ using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.ViewModels.Downloads;
 
-namespace ModShelf.Presentation.ViewModels.Browse;
+namespace ModShelf.Presentation.ViewModels.ModPages;
 
 /// <summary>
 /// One of a mod's files on the Browse screen, as its site lists it, with downloading it into the library or a folder.
@@ -15,11 +15,11 @@ namespace ModShelf.Presentation.ViewModels.Browse;
 public sealed partial class ModFileViewModel : ObservableObject
 {
     private readonly ModFile _file;
-    private readonly BrowseServices _services;
+    private readonly ModPageServices _services;
 
     /// <param name="isLinked">Whether it's the file the link the user gave is to.</param>
     /// <param name="modIsAvailable">Whether its mod can be downloaded from, rather than hidden or removed.</param>
-    internal ModFileViewModel(ModFile file, bool isLinked, bool modIsAvailable, BrowseServices services)
+    internal ModFileViewModel(ModFile file, bool isLinked, bool modIsAvailable, ModPageServices services)
     {
         ArgumentNullException.ThrowIfNull(file);
         ArgumentNullException.ThrowIfNull(services);

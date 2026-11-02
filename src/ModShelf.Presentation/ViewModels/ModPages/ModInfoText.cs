@@ -2,7 +2,7 @@ using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Sources.Abstractions.Catalog;
 
-namespace ModShelf.Presentation.ViewModels.Browse;
+namespace ModShelf.Presentation.ViewModels.ModPages;
 
 /// <summary>
 /// What Browse writes of a mod from what its site says, each part empty when the site doesn't say.

@@ -7,6 +7,7 @@ using ModShelf.Presentation.Services;
 using ModShelf.Presentation.Tests.Common;
 using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.ViewModels.Browse;
+using ModShelf.Presentation.ViewModels.ModPages;
 using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Search;

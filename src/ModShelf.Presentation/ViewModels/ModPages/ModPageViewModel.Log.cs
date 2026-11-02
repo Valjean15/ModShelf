@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace ModShelf.Presentation.ViewModels.Browse;
+namespace ModShelf.Presentation.ViewModels.ModPages;
 
 /// <summary>
 /// A browsed mod's log messages, logged as the Browse screen's.

@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:ModShelf.Presentation.ViewModels.Browse"
+             xmlns:pages="using:ModShelf.Presentation.ViewModels.ModPages"
              xmlns:res="using:ModShelf.Presentation.Resources"
              xmlns:catalog="using:ModShelf.Sources.Abstractions.Catalog"
              xmlns:views="using:ModShelf.Desktop.Views"
@@ -204,7 +205,7 @@
                 <ScrollViewer Margin="0,12,0,0">
                     <ContentControl Content="{Binding Mod}">
                         <ContentControl.ContentTemplate>
-                            <DataTemplate x:DataType="vm:ModPageViewModel">
+                            <DataTemplate x:DataType="pages:ModPageViewModel">
                                 <StackPanel Spacing="12" Margin="0,0,16,0">
                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
                                         <StackPanel Spacing="4">
@@ -262,13 +263,13 @@
                                     <TextBlock Classes="note" Text="{x:Static res:Strings.BrowseNoFiles}" IsVisible="{Binding !HasFiles}" />
                                     <ItemsControl Grid.IsSharedSizeScope="True" ItemsSource="{Binding Sections}">
                                         <ItemsControl.ItemTemplate>
-                                            <DataTemplate x:DataType="vm:ModFileSectionViewModel">
+                                            <DataTemplate x:DataType="pages:ModFileSectionViewModel">
                                                 <StackPanel Spacing="6" Margin="0,4,0,8">
                                                     <TextBlock Classes="note" FontWeight="SemiBold" Text="{Binding Title}" />
                                                     <Border Classes="list">
                                                         <ItemsControl ItemsSource="{Binding Files}">
                                                             <ItemsControl.ItemTemplate>
-                                                                <DataTemplate x:DataType="vm:ModFileViewModel">
+                                                                <DataTemplate x:DataType="pages:ModFileViewModel">
                                                                     <Border Classes="file">
                                                                         <Grid ColumnSpacing="16">
                                                                             <Grid.ColumnDefinitions>

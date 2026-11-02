@@ -6,12 +6,12 @@ using ModShelf.Application.Sources;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.Downloads;
 
-namespace ModShelf.Presentation.ViewModels.Browse;
+namespace ModShelf.Presentation.ViewModels.ModPages;
 
 /// <summary>
-/// What each mod and file on the Browse screen uses, handed over by the screen as one.
+/// What a mod's page and its files use, handed over by the screen that shows it as one.
 /// </summary>
-internal sealed class BrowseServices(
+internal sealed class ModPageServices(
     IModLibrary library,
     ILibraryDownloads libraryDownloads,
     FolderDownloads folders,

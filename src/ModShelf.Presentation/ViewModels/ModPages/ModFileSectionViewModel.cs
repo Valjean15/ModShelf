@@ -1,4 +1,4 @@
-namespace ModShelf.Presentation.ViewModels.Browse;
+namespace ModShelf.Presentation.ViewModels.ModPages;
 
 /// <summary>
 /// One section of a mod's files, as its site sorts them, such as its main files, newest first.

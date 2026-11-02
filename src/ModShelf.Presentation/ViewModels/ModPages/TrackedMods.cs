@@ -1,7 +1,7 @@
 using ModShelf.Application.Watchlist;
 using ModShelf.Domain.Mods;
 
-namespace ModShelf.Presentation.ViewModels.Browse;
+namespace ModShelf.Presentation.ViewModels.ModPages;
 
 /// <summary>
 /// The mods the linked accounts track on their sites, as far as the Browse screen knows: each site's list is read once,

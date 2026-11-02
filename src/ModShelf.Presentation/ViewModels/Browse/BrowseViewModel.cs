@@ -18,6 +18,7 @@ using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.Downloads;
+using ModShelf.Presentation.ViewModels.ModPages;
 using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Sources.Abstractions.Search;
 
@@ -46,7 +47,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     private readonly ModPictures _pictures;
     private readonly IUiThread _uiThread;
     private readonly ILogger<BrowseViewModel> _logger;
-    private readonly BrowseServices _services;
+    private readonly ModPageServices _services;
     private readonly Dictionary<ModRef, LibraryMod> _inLibrary = [];
     private CancellationToken _stopping;
     private CancellationTokenSource? _listing;
@@ -86,7 +87,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         _pictures = pictures;
         _uiThread = uiThread;
         _logger = logger;
-        _services = new BrowseServices(
+        _services = new ModPageServices(
             library,
             libraryDownloads,
             new FolderDownloads(links, dialogs),

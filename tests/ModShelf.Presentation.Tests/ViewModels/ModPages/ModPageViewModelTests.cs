@@ -6,11 +6,13 @@ using ModShelf.Application.Library;
 using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Tests.Common;
+using ModShelf.Presentation.Tests.ViewModels.Browse;
 using ModShelf.Presentation.ViewModels.Browse;
+using ModShelf.Presentation.ViewModels.ModPages;
 using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Catalog;
 
-namespace ModShelf.Presentation.Tests.ViewModels.Browse;
+namespace ModShelf.Presentation.Tests.ViewModels.ModPages;
 
 public sealed class ModPageViewModelTests : IDisposable
 {
