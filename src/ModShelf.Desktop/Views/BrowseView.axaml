@@ -70,7 +70,24 @@
         <Panel Margin="0,12,0,0">
             <!-- The search's results, or the tracked mods. Clicking a mod opens it. -->
             <DockPanel IsVisible="{Binding !IsModOpen}">
-                <TextBlock DockPanel.Dock="Top" Classes="note" Text="{Binding ResultsText}" />
+                <!-- How many match; selecting the mods listed, and what to do with those selected. -->
+                <WrapPanel DockPanel.Dock="Top" ItemSpacing="12" LineSpacing="8">
+                    <CheckBox Classes="selectAll"
+                              IsChecked="{Binding AreAllShownSelected}"
+                              Content="{x:Static res:Strings.SelectAllShown}"
+                              IsVisible="{Binding !!Results.Count}" />
+                    <TextBlock Classes="note" VerticalAlignment="Center" Text="{Binding ResultsText}" />
+                    <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding HasSelection}">
+                        <TextBlock Classes="note" VerticalAlignment="Center" Text="{Binding SelectionText}" />
+                        <Button Classes="accent" Content="{Binding DownloadSelectedText}" Command="{Binding DownloadSelectedCommand}" />
+                        <Button Classes="quiet" Content="{x:Static res:Strings.SelectionClear}" Command="{Binding ClearSelectionCommand}" />
+                    </StackPanel>
+                </WrapPanel>
+                <TextBlock DockPanel.Dock="Top"
+                           Classes="note message"
+                           Classes.problem="{Binding IsSelectionNoteAProblem}"
+                           Margin="0,6,0,0"
+                           Text="{Binding SelectionNote}" />
                 <Button DockPanel.Dock="Bottom"
                         Margin="0,8,0,0"
                         HorizontalAlignment="Center"
@@ -90,12 +107,18 @@
                             <ListBox.ItemTemplate>
                                 <DataTemplate x:DataType="vm:BrowseModViewModel">
                                     <Button Classes="row" Command="{Binding OpenCommand}">
-                                        <Grid ColumnDefinitions="Auto,*">
+                                        <Grid ColumnDefinitions="Auto,Auto,*">
+                                            <CheckBox Classes="select"
+                                                      Margin="0,0,14,0"
+                                                      VerticalAlignment="Top"
+                                                      IsChecked="{Binding IsSelected}"
+                                                      IsEnabled="{Binding CanSelect}"
+                                                      AutomationProperties.Name="{Binding SelectText}" />
                                             <!-- Its thumbnail, while the screen shows them. -->
-                                            <Panel Margin="0,0,14,0" VerticalAlignment="Top" IsVisible="{Binding Picture.IsShown}">
+                                            <Panel Grid.Column="1" Margin="0,0,14,0" VerticalAlignment="Top" IsVisible="{Binding Picture.IsShown}">
                                                 <pictures:ModThumbnail DataContext="{Binding Picture}" />
                                             </Panel>
-                                            <StackPanel Grid.Column="1" Spacing="2">
+                                            <StackPanel Grid.Column="2" Spacing="2">
                                                 <WrapPanel ItemSpacing="8">
                                                     <TextBlock FontWeight="SemiBold" Text="{Binding Name}" />
                                                     <TextBlock Classes="note" Text="{Binding AuthorText}" />
@@ -149,7 +172,14 @@
                                 <DataTemplate x:DataType="vm:BrowseModViewModel">
                                     <Button Classes="modCard" Command="{Binding OpenCommand}">
                                         <DockPanel>
-                                            <pictures:ModCardPicture DockPanel.Dock="Top" DataContext="{Binding Picture}" />
+                                            <Panel DockPanel.Dock="Top">
+                                                <pictures:ModCardPicture DataContext="{Binding Picture}" />
+                                                <Border Classes="onPicture box" IsVisible="{Binding CanSelect}">
+                                                    <CheckBox Classes="select"
+                                                              IsChecked="{Binding IsSelected}"
+                                                              AutomationProperties.Name="{Binding SelectText}" />
+                                                </Border>
+                                            </Panel>
                                             <StackPanel Margin="14,10,14,14" Spacing="4">
                                                 <TextBlock FontSize="15"
                                                            FontWeight="SemiBold"

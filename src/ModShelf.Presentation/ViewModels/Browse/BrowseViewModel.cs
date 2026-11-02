@@ -110,6 +110,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
             timeProvider,
             logger);
         SelectedSort = Sorts[0];
+        Results.CollectionChanged += (_, _) => ShowSelection();
         Previews = new PreviewsViewModel(PreviewScreen.Browse, pictures);
         Previews.PropertyChanged += (_, changed) =>
         {

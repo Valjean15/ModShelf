@@ -569,6 +569,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             done = await LibraryBatch.QueueAsync(
                 _pageServices.LibraryDownloads,
                 [.. updates.Select(update => (update.PageUrl!, update.File.Mod))],
+                ofUpdates: true,
                 _logger,
                 cancellationToken);
         }

@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
+using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Presentation.ViewModels.ModPages;
 using ModShelf.Sources.Abstractions.Catalog;
@@ -17,23 +18,28 @@ namespace ModShelf.Presentation.ViewModels.Browse;
 public sealed partial class BrowseModViewModel : ObservableObject
 {
     private readonly Func<ModRef, CancellationToken, Task> _open;
+    private readonly Action _selectionChanged;
 
     /// <param name="problem">Why the mod's details couldn't be read, for a tracked mod; null when they were.</param>
     /// <param name="open">Opens the mod on the screen.</param>
+    /// <param name="selectionChanged">Tells the screen the mod was selected, or no longer is.</param>
     internal BrowseModViewModel(
         ModInfo mod,
         string? problem,
         LibraryMod? inLibrary,
         ModPictures pictures,
         TimeProvider timeProvider,
-        Func<ModRef, CancellationToken, Task> open)
+        Func<ModRef, CancellationToken, Task> open,
+        Action selectionChanged)
     {
         ArgumentNullException.ThrowIfNull(mod);
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(timeProvider);
         ArgumentNullException.ThrowIfNull(open);
+        ArgumentNullException.ThrowIfNull(selectionChanged);
 
         _open = open;
+        _selectionChanged = selectionChanged;
         Details = mod;
         Picture = new ModPictureViewModel(pictures);
         Mod = mod.Mod;
@@ -48,6 +54,8 @@ public sealed partial class BrowseModViewModel : ObservableObject
         HasAdultContent = mod.HasAdultContent;
         IsHidden = !mod.IsAvailable;
         Problem = problem;
+        CanSelect = !IsHidden && mod.PageUrl is not null;
+        SelectText = Text.Format(Strings.SelectMod, Name);
         ShowLibrary(inLibrary);
     }
 
@@ -108,6 +116,22 @@ public sealed partial class BrowseModViewModel : ObservableObject
     internal ModInfo Details { get; }
 
     /// <summary>
+    /// Whether it can be selected, for Download selected: a mod its site still lists, with its page's link.
+    /// </summary>
+    public bool CanSelect { get; }
+
+    /// <summary>
+    /// Such as "Select SkyUI", for screen readers.
+    /// </summary>
+    public string SelectText { get; }
+
+    /// <summary>
+    /// Whether it's selected, for Download selected.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsSelected { get; set; }
+
+    /// <summary>
     /// Whether the library has files of it.
     /// </summary>
     [ObservableProperty]
@@ -126,6 +150,17 @@ public sealed partial class BrowseModViewModel : ObservableObject
     {
         IsDownloaded = inLibrary?.Files.Count > 0;
         IsWatched = inLibrary?.IsWatched == true;
+    }
+
+    partial void OnIsSelectedChanged(bool value)
+    {
+        if (value && !CanSelect)
+        {
+            IsSelected = false;
+            return;
+        }
+
+        _selectionChanged();
     }
 
     /// <summary>

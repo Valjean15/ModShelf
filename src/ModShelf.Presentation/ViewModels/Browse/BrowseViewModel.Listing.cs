@@ -207,7 +207,7 @@ public sealed partial class BrowseViewModel
 
     private BrowseModViewModel Row(ModInfo mod, string? problem)
     {
-        BrowseModViewModel row = new(mod, problem, _inLibrary.GetValueOrDefault(mod.Mod), _pictures, _services.TimeProvider, OpenAsync);
+        BrowseModViewModel row = new(mod, problem, _inLibrary.GetValueOrDefault(mod.Mod), _pictures, _services.TimeProvider, OpenAsync, ShowSelection);
         if (_picturesShown)
         {
             row.Picture.Show(mod, _stopping);
