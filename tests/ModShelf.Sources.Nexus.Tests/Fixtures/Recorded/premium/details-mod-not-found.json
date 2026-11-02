@@ -1,0 +1,32 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/v2/graphql",
+    "query": "",
+    "body": {
+      "operationName": "ModDetails",
+      "variables": {
+        "ids": [
+          {
+            "gameDomain": "stardewvalley",
+            "modId": 999999999
+          }
+        ]
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": {
+        "legacyModsByDomain": {
+          "totalCount": 0,
+          "nodes": []
+        }
+      }
+    }
+  }
+}

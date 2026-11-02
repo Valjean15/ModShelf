@@ -1,0 +1,56 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/v2/graphql",
+    "query": "",
+    "body": {
+      "operationName": "ModDetails",
+      "variables": {
+        "ids": [
+          {
+            "gameDomain": "stardewvalley",
+            "modId": 2400
+          }
+        ]
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": {
+        "legacyModsByDomain": {
+          "totalCount": 1,
+          "nodes": [
+            {
+              "modId": 2400,
+              "name": "SMAPI - Stardew Modding API",
+              "summary": "The mod loader for Stardew Valley.",
+              "author": "Pathoschild",
+              "version": "4.5.2",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/2400/2400-1739896414-1995424095.png",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/2400/2400-1739896414-1995424095.png",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/24/2400/2400-1739896414-1995424095.png",
+              "updatedAt": "2026-03-14T19:07:23Z",
+              "endorsements": 388540,
+              "downloads": 30407540,
+              "adultContent": false,
+              "status": "published",
+              "category": "Modding Tools",
+              "modCategory": {
+                "categoryId": 9,
+                "name": "Modding Tools"
+              },
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

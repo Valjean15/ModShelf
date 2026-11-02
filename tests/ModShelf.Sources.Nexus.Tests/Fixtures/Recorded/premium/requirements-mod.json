@@ -1,0 +1,44 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/v2/graphql",
+    "query": "",
+    "body": {
+      "operationName": "ModRequirements",
+      "variables": {
+        "ids": [
+          {
+            "gameDomain": "stardewvalley",
+            "modId": 2400
+          }
+        ]
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": {
+        "legacyModsByDomain": {
+          "nodes": [
+            {
+              "modId": 2400,
+              "game": {
+                "domainName": "stardewvalley"
+              },
+              "modRequirements": {
+                "nexusRequirements": {
+                  "totalCount": 0,
+                  "nodes": []
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

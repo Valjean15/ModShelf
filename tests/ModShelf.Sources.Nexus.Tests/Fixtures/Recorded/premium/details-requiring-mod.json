@@ -1,0 +1,56 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/v2/graphql",
+    "query": "",
+    "body": {
+      "operationName": "ModDetails",
+      "variables": {
+        "ids": [
+          {
+            "gameDomain": "stardewvalley",
+            "modId": 1915
+          }
+        ]
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": {
+        "legacyModsByDomain": {
+          "totalCount": 1,
+          "nodes": [
+            {
+              "modId": 1915,
+              "name": "Content Patcher",
+              "summary": "Loads content packs that change the game's data, images, and maps without replacing XNB files.",
+              "author": "Pathoschild",
+              "version": "2.9.1",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/1915/1915-1519967846-411398257.png",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/1915/1915-1519967846-411398257.png",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/19/1915/1915-1519967846-411398257.png",
+              "updatedAt": "2026-04-16T11:18:42Z",
+              "endorsements": 495086,
+              "downloads": 24949238,
+              "adultContent": false,
+              "status": "published",
+              "category": "Modding Tools",
+              "modCategory": {
+                "categoryId": 9,
+                "name": "Modding Tools"
+              },
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
