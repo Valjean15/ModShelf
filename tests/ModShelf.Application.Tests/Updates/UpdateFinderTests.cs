@@ -6,7 +6,7 @@ namespace ModShelf.Application.Tests.Updates;
 
 /// <summary>
 /// Updates from a mod's files on its site. 50 was replaced by 51 and 51 by 52, all main files. 60 is a main file in no
-/// chain, and 61 a later one. 70 and 71 are optional files in no chain, 71 the later.
+/// chain, and 61 a later one. 70 and 71 are optional files in no chain, 71 the later, uploaded 5 days ago.
 /// </summary>
 public sealed class UpdateFinderTests
 {
@@ -266,6 +266,93 @@ public sealed class UpdateFinderTests
     }
 
     [Fact]
+    public void AModWithFilesGetsTheOptionalFilesUploadedSinceItsLastCheck()
+    {
+        // As Bestiary: a file to add, not a newer version of one the library has.
+        ModFile[] site =
+        [
+            .. Site,
+            Listed("77", days: -5, category: ModFileCategory.Miscellaneous),
+            Listed("78", days: -5, category: ModFileCategory.Archived),
+        ];
+
+        LibraryUpdate update = Assert.Single(Find(WithFiles("52"), site, since: Now.AddDays(-12)));
+
+        Assert.Equal(("71", (ModFileRef?)null, ModFileCategory.Optional), (update.File.Id, update.Replaces, update.Category));
+    }
+
+    [Fact]
+    public void AnOptionalFileUploadedBeforeTheLastCheckIsntNew()
+    {
+        Assert.Empty(Find(WithFiles("52"), since: Now.AddDays(-4)));
+    }
+
+    [Fact]
+    public void AnOptionalFileTheLibraryHasIsntNew()
+    {
+        Assert.Empty(Find(WithFiles("52", "71"), since: Now.AddDays(-12)));
+    }
+
+    [Fact]
+    public void OnlyTheNewestOfAChainOfNewOptionalFilesIsNew()
+    {
+        // 75's replacement isn't listed, as a file its author pulled, so 75 is the newest of its chain.
+        ModFile[] site =
+        [
+            Listed("52", days: -10),
+            Listed("73", days: -3, replacedBy: "74", category: ModFileCategory.Optional),
+            Listed("74", days: -2, category: ModFileCategory.Optional),
+            Listed("75", days: -3, replacedBy: "76", category: ModFileCategory.Optional),
+        ];
+
+        IReadOnlyList<LibraryUpdate> updates = Find(WithFiles("52"), site, since: Now.AddDays(-12));
+
+        Assert.Equal(["74", "75"], updates.Select(update => update.File.Id));
+        Assert.All(updates, update => Assert.Null(update.Replaces));
+    }
+
+    [Fact]
+    public void AnOptionalFileThatsALibraryFilesUpdateReplacesIt()
+    {
+        ModFile[] site =
+        [
+            Listed("52", days: -10),
+            Listed("73", days: -30, replacedBy: "74", category: ModFileCategory.Optional),
+            Listed("74", days: -2, category: ModFileCategory.Optional),
+        ];
+
+        LibraryUpdate update = Assert.Single(Find(WithFiles("52", "73"), site, since: Now.AddDays(-12)));
+
+        Assert.Equal(("74", "73"), (update.File.Id, update.Replaces?.Id));
+    }
+
+    [Fact]
+    public void ANewOptionalFileFoundBeforeStaysWhileTheSiteListsIt()
+    {
+        LibraryMod mod = WithFiles("52").WithUpdates([EarlierOptional("71"), EarlierOptional("99"), Earlier("61")]);
+
+        IReadOnlyList<LibraryUpdate> updates = Find(mod, since: Now.AddDays(-1));
+
+        Assert.Equal(["71"], updates.Select(update => update.File.Id));
+    }
+
+    [Fact]
+    public void ANewOptionalFileFoundBeforeGoesOnceItHasANewerVersion()
+    {
+        ModFile[] site =
+        [
+            Listed("52", days: -10),
+            Listed("71", days: -5, replacedBy: "72", category: ModFileCategory.Optional),
+            Listed("72", days: -3, category: ModFileCategory.Optional),
+        ];
+        LibraryMod mod = WithFiles("52").WithUpdates([EarlierOptional("71")]);
+
+        IReadOnlyList<LibraryUpdate> updates = Find(mod, site, since: Now.AddDays(-4));
+
+        Assert.Equal(["72"], updates.Select(update => update.File.Id));
+    }
+
+    [Fact]
     public void ListsTheNewestFirst()
     {
         IReadOnlyList<LibraryUpdate> updates = Find(WithFiles("50", "60"));
@@ -299,6 +386,9 @@ public sealed class UpdateFinderTests
 
     private static LibraryUpdate Earlier(string id)
         => new(Ref(id), $"SkyUI {id}", $"{id}.7z", null, ModFileCategory.Main, Now.AddDays(-30), null, Now.AddDays(-2));
+
+    private static LibraryUpdate EarlierOptional(string id)
+        => new(Ref(id), $"SkyUI {id}", $"{id}.7z", null, ModFileCategory.Optional, Now.AddDays(-5), null, Now.AddDays(-2));
 
     private static LibraryMod Watched() => LibraryMod.Watch(SkyUi, "SkyUI", null, null, Now.AddDays(-100));
 

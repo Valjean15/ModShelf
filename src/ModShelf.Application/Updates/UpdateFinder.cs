@@ -22,13 +22,21 @@ namespace ModShelf.Application.Updates;
 /// A mod that's only watched, without files other than archived ones, has the main files uploaded since it was last
 /// checked, and keeps those found before while the site still lists them.
 /// </item>
+/// <item>
+/// A mod with files has the optional files uploaded since it was last checked that are new to it: not in the library,
+/// the newest of their chain, and no library file's update. Each replaces nothing, and is kept while it stays new and the
+/// site lists it. Once downloaded, it's a library file like any, whose chain is followed.
+/// </item>
 /// </list>
 /// </remarks>
 internal static class UpdateFinder
 {
     /// <param name="mod">The mod as the library has it.</param>
     /// <param name="siteFiles">The mod's files as its site lists them now.</param>
-    /// <param name="since">For a mod that's only watched: when it was last checked, or added, less the margin for clocks.</param>
+    /// <param name="since">
+    /// When the mod was last checked, or added, less the margin for clocks: for a mod that's only watched, its new main
+    /// files, and for a mod with files, its new optional files.
+    /// </param>
     /// <param name="foundAt">When this check started.</param>
     /// <returns>The mod's updates, the newest first.</returns>
     public static IReadOnlyList<LibraryUpdate> Find(LibraryMod mod, IReadOnlyList<ModFile> siteFiles, DateTimeOffset since, DateTimeOffset foundAt)
@@ -67,6 +75,27 @@ internal static class UpdateFinder
             foreach (LibraryUpdate earlier in mod.Updates.Where(update => update.Replaces is null && !have.Contains(update.File)))
             {
                 if (listed.TryGetValue(earlier.File, out ModFile? file))
+                {
+                    Add(file, null);
+                }
+            }
+        }
+        else
+        {
+            // One that's a library file's update, the newest of its chain, is found below as that instead.
+            bool IsNewOptional(ModFile file)
+                => file.Category == ModFileCategory.Optional
+                    && !have.Contains(file.Reference)
+                    && !(Replacements.Next(file, listed) is { } next && listed.ContainsKey(next));
+
+            foreach (ModFile file in siteFiles.Where(file => file.UploadedAt > since && IsNewOptional(file)))
+            {
+                Add(file, null);
+            }
+
+            foreach (LibraryUpdate earlier in mod.Updates.Where(update => update.Replaces is null))
+            {
+                if (listed.TryGetValue(earlier.File, out ModFile? file) && IsNewOptional(file))
                 {
                     Add(file, null);
                 }

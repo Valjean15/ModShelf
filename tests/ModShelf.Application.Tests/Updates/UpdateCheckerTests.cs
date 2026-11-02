@@ -392,6 +392,31 @@ public sealed class UpdateCheckerTests : IDisposable
     }
 
     [Fact]
+    public async Task AModWithFilesGetsItsNewOptionalFilesAndFollowsOneOnceDownloaded()
+    {
+        // As Bestiary: an optional file uploaded since the last check; the one uploaded before it isn't news.
+        await CheckedAtAsync(TestData.Now.AddHours(-2));
+        _site.AddFile("3", "31", "31.7z", "Optional", replacedBy: "33", category: ModFileCategory.Optional, uploadedAt: TestData.Now.AddHours(-1));
+        _site.AddFile("3", "32", "32.7z", "Older optional", category: ModFileCategory.Optional, uploadedAt: TestData.Now.AddDays(-1));
+
+        UpdateCheck first = await CheckAsync(_site);
+        _time.Advance(TimeSpan.FromHours(1));
+        UpdateCheck second = await CheckAsync(_site);
+        LibraryUpdate kept = Assert.Single(Mod("3").Updates);
+
+        await _library.UpdateAsync(FakeModSite.Mod("3"), stored => stored!.WithFile(Stored("3", "31")), Cancellation);
+        _site.AddFile("3", "33", "33.7z", "Optional 2", category: ModFileCategory.Optional, uploadedAt: TestData.Now.AddMinutes(30));
+        _time.Advance(TimeSpan.FromHours(1));
+        await CheckAsync(_site);
+
+        Assert.Contains("3 31", first.Found.Select(update => $"{update.File.Mod.Id} {update.File.Id}"));
+        Assert.DoesNotContain(second.Found, update => update.File.Mod.Id == "3");
+        Assert.Equal(("31", (ModFileRef?)null, ModFileCategory.Optional, TestData.Now), (kept.File.Id, kept.Replaces, kept.Category, kept.FoundAt));
+        LibraryUpdate followed = Assert.Single(Mod("3").Updates);
+        Assert.Equal(("33", "31"), (followed.File.Id, followed.Replaces?.Id));
+    }
+
+    [Fact]
     public async Task ModsCheckedLaterThanNowAreAskedAboutOnTheirOwn()
     {
         // The clock has moved back since the last check, so when that was isn't known.
