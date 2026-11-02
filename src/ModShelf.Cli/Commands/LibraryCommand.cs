@@ -4,6 +4,7 @@ using System.Globalization;
 using Microsoft.Extensions.DependencyInjection;
 
 using ModShelf.Application.Library;
+using ModShelf.Application.Settings;
 using ModShelf.Cli.Hosting;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
@@ -19,8 +20,15 @@ internal static partial class LibraryCommand
 {
     public static Command Create(CliEnvironment environment)
     {
-        Command list = new("list", "Shows the mods in the library: the ones watched for updates, and the ones with downloaded files.");
-        list.SetAction((_, cancellationToken) => ListAsync(environment, cancellationToken));
+        Option<bool> files = new("--files")
+        {
+            Description = "Also list each mod's files: version, size, SHA-256 and where each is.",
+        };
+        Command list = new("list", "Shows the mods in the library: the ones watched for updates, and the ones with downloaded files.")
+        {
+            files,
+        };
+        list.SetAction((parsed, cancellationToken) => ListAsync(environment, parsed.GetValue(files), cancellationToken));
 
         Argument<DirectoryInfo> folder = new("folder")
         {
@@ -132,7 +140,7 @@ internal static partial class LibraryCommand
         }
     }
 
-    private static async Task<int> ListAsync(CliEnvironment environment, CancellationToken cancellationToken)
+    private static async Task<int> ListAsync(CliEnvironment environment, bool files, CancellationToken cancellationToken)
     {
         return await CommandHost.RunAsync(
                 environment,
@@ -168,10 +176,67 @@ internal static partial class LibraryCommand
                             }),
                     ];
                     TextTable.Write(environment.Output, rows);
+                    if (files)
+                    {
+                        string root;
+                        try
+                        {
+                            root = await services.GetRequiredService<ISettingsService>().GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+                        }
+                        catch (InvalidDataException exception)
+                        {
+                            await environment.Error.WriteLineAsync(exception.Message).ConfigureAwait(false);
+                            return ExitCodes.Failed;
+                        }
+
+                        WriteFiles(environment.Output, mods, root);
+                    }
+
                     return ExitCodes.Done;
                 },
                 cancellationToken)
             .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// A table of the library's files, by mod as the mods are listed, the latest downloaded first. A file recorded before
+    /// ModShelf kept hashes has none until a rescan reads it.
+    /// </summary>
+    private static void WriteFiles(TextWriter output, IReadOnlyList<LibraryMod> mods, string root)
+    {
+        LibraryFile[] all =
+        [
+            .. mods
+                .OrderBy(mod => mod.Mod.Game.Source.Value, StringComparer.Ordinal)
+                .ThenBy(mod => mod.Mod.Game.Key, StringComparer.Ordinal)
+                .ThenBy(mod => mod.Name, StringComparer.CurrentCultureIgnoreCase)
+                .SelectMany(mod => mod.Files.OrderByDescending(file => file.DownloadedAt)),
+        ];
+        output.WriteLine();
+        if (all.Length == 0)
+        {
+            output.WriteLine("The library has no downloaded files.");
+            return;
+        }
+
+        output.WriteLine(all.Length == 1
+            ? "The library has 1 file."
+            : string.Create(CultureInfo.CurrentCulture, $"The library has {all.Length:N0} files."));
+        string[][] rows =
+        [
+            ["Game", "ID", "File", "Version", "Size", "SHA-256", "Path"],
+            .. all.Select(file => new[]
+            {
+                file.File.Mod.Game.Key,
+                file.File.Mod.Id,
+                file.FileName,
+                file.VersionLabel ?? "-",
+                Sizes.Format(file.SizeInBytes),
+                file.Sha256 ?? "-",
+                LibraryPaths.Resolve(root, file.RelativePath),
+            }),
+        ];
+        TextTable.Write(output, rows);
     }
 
     private static async Task<int> WatchAsync(CliEnvironment environment, string linkText, bool watch, CancellationToken cancellationToken)

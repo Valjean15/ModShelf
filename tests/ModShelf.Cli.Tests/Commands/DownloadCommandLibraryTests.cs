@@ -65,6 +65,23 @@ public sealed class DownloadCommandLibraryTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task ListsTheFileWithItsSha256()
+    {
+        await RunAsync("download", HandoffLink("1").AbsoluteUri);
+
+        CliResult listed = await RunAsync("library", "list", "--files");
+
+        Assert.Equal(Done, listed.ExitCode);
+        string[] lines = listed.Output.TrimEnd().ReplaceLineEndings("\n").Split('\n');
+        Assert.Equal("The library has 1 file.", lines[^3]);
+        Assert.Equal(["Game", "ID", "File", "Version", "Size", "SHA-256", "Path"], lines[^2].Split(' ', StringSplitOptions.RemoveEmptyEntries));
+        Assert.Equal(
+            ["game", "mod", FileNameOf("1"), "1.1", "64.0", "KB", Convert.ToHexStringLower(SHA256.HashData(Content))],
+            lines[^1].Split(' ', StringSplitOptions.RemoveEmptyEntries)[..7]);
+        Assert.EndsWith(Path.Combine(ModFolder, FileNameOf("1")), lines[^1], StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task DoesntDownloadAFileTheLibraryHasAgain()
     {
         await RunAsync("download", HandoffLink("3").AbsoluteUri);

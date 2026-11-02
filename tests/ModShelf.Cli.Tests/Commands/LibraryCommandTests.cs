@@ -154,6 +154,32 @@ public sealed class LibraryCommandTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task ListsTheFilesWithoutAHashTheyWereRecordedWithout()
+    {
+        await StoreAsync(2);
+        await RunAsync("watch", FakeCatalogSite.ModLink("2").AbsoluteUri);
+
+        CliResult listed = await _cli.RunAsync(["library", "list", "--files"], Cancellation);
+
+        Assert.Equal(Done, listed.ExitCode);
+        string[] lines = listed.Output.TrimEnd().ReplaceLineEndings("\n").Split('\n');
+        Assert.Equal("The library has 2 files.", lines[^4]);
+        Assert.Equal(
+            [["game", "1", "file-1.zip", "-", "1", "B", "-"], ["game", "1", "file-2.zip", "-", "1", "B", "-"]],
+            lines[^2..].Select(line => line.Split(' ', StringSplitOptions.RemoveEmptyEntries)[..7]));
+    }
+
+    [Fact]
+    public async Task ListingTheFilesOfModsWithoutAnySaysSo()
+    {
+        await RunAsync("watch", ModLink("1").AbsoluteUri);
+
+        CliResult listed = await _cli.RunAsync(["library", "list", "--files"], Cancellation);
+
+        Assert.Equal("The library has no downloaded files.", listed.Output.TrimEnd().ReplaceLineEndings("\n").Split('\n')[^1]);
+    }
+
+    [Fact]
     public async Task SaysWhenAModToForgetIsntInTheLibrary()
     {
         CliResult forgot = await RunAsync("forget", ModLink("1").AbsoluteUri);
