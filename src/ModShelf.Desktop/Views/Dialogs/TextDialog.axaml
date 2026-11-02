@@ -15,20 +15,26 @@
     </Window.Styles>
 
     <DockPanel>
+        <!-- Cancel first, so the main button sits in the corner. -->
         <StackPanel DockPanel.Dock="Bottom" Classes="dialogButtons">
+            <Button IsCancel="True"
+                    Content="{Binding CancelLabel}"
+                    Click="OnCancel" />
             <Button Classes="accent"
                     IsDefault="True"
                     Content="{Binding ConfirmLabel}"
                     Click="OnConfirm" />
-            <Button IsCancel="True"
-                    Content="{Binding CancelLabel}"
-                    Click="OnCancel" />
         </StackPanel>
+        <TextBlock DockPanel.Dock="Top" Classes="dialogTitle" Text="{Binding Title}" />
         <StackPanel Spacing="12">
-            <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+            <TextBlock Classes="note" Text="{Binding Message}" TextWrapping="Wrap" />
 
             <!-- A page that helps answer, such as where to find an API key. -->
-            <Button Content="{Binding HelpPageLabel}" IsVisible="{Binding HasHelpPage}" Command="{Binding OpenHelpPageCommand}" />
+            <Button HorizontalAlignment="Left"
+                    Classes="quiet"
+                    Content="{Binding HelpPageLabel}"
+                    IsVisible="{Binding HasHelpPage}"
+                    Command="{Binding OpenHelpPageCommand}" />
             <SelectableTextBlock Text="{Binding HelpPageProblem}"
                                  TextWrapping="Wrap"
                                  IsVisible="{Binding HelpPageProblem, Converter={x:Static ObjectConverters.IsNotNull}}" />

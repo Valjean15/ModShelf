@@ -12,17 +12,20 @@
         MinWidth="480"
         MinHeight="440"
         ShowInTaskbar="False"
-        WindowStartupLocation="CenterOwner">
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource ShelfSurfaceBrush}">
 
     <DockPanel Margin="24">
-        <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
-            <TextBlock Classes="heading" Text="{x:Static res:Strings.FirstRunTitle}" />
+        <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,16">
+            <TextBlock Classes="heading" FontSize="22" Margin="0" Text="{x:Static res:Strings.FirstRunTitle}" />
             <TextBlock Classes="note" Text="{Binding StepText}" />
         </StackPanel>
 
+        <Border DockPanel.Dock="Top" Height="1" Margin="0,0,0,16" Background="{DynamicResource ShelfLineBrush}" />
+
         <!-- Skipping on the left, going through the pages on the right. -->
         <DockPanel DockPanel.Dock="Bottom" Margin="0,16,0,0">
-            <Button DockPanel.Dock="Left" Content="{x:Static res:Strings.FirstRunSkip}" Command="{Binding SkipCommand}" />
+            <Button DockPanel.Dock="Left" Classes="quiet" Content="{x:Static res:Strings.FirstRunSkip}" Command="{Binding SkipCommand}" />
             <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
                 <Button Content="{x:Static res:Strings.FirstRunBack}" Command="{Binding BackCommand}" />
                 <Button Classes="accent"
@@ -37,12 +40,14 @@
             </StackPanel>
         </DockPanel>
 
-        <TextBlock DockPanel.Dock="Bottom"
-                   Margin="0,12,0,0"
-                   Classes="problem"
-                   TextWrapping="Wrap"
-                   Text="{Binding Problem}"
-                   IsVisible="{Binding Problem, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+        <Border DockPanel.Dock="Bottom" Height="1" Margin="0,16,0,0" Background="{DynamicResource ShelfLineBrush}" />
+
+        <Border DockPanel.Dock="Bottom"
+                Classes="strip"
+                Margin="0,12,0,0"
+                IsVisible="{Binding Problem, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <TextBlock Text="{Binding Problem}" />
+        </Border>
 
         <ScrollViewer>
             <Panel Margin="0,0,16,0">

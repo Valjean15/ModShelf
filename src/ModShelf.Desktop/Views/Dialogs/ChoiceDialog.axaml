@@ -23,6 +23,7 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
-        <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+        <TextBlock DockPanel.Dock="Top" Classes="dialogTitle" Text="{Binding Title}" />
+        <TextBlock Classes="note" Text="{Binding Message}" TextWrapping="Wrap" />
     </DockPanel>
 </Window>
