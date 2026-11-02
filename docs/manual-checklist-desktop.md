@@ -77,7 +77,7 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
 - [ ] **3.4 Author.** Type `Pathoschild` in the author box, and search again.
   Only Pathoschild's mods.
 - [ ] **3.5 A mod's page.** Clear the author box, search `smapi`, and click SMAPI.
-  Its name, author, version, last update, endorsements and downloads, and **Open page**. Its main file is listed with **Download** and **Save to a folder…**. **Show *N* more files: old versions, …** lists the old versions; **Changelog** shows the changelog, or "The mod has no changelog."
+  Its picture across the top (with **Cards**), its name, then "by Pathoschild", "Modding Tools", its version, endorsements, downloads and last update, and its summary. **Open on Nexus Mods**, **Watch** and **Track on Nexus Mods** (Premium). "Files on Nexus Mods" lists its main file with **Download** and **Save to a folder…**; **Show *N* more files: old versions, …** lists the old versions. Beside them (below them in a narrow window), "Changelog" shows the latest three versions, newest first, with **All *N* entries** for the rest, and "Details" says "Mod ID 2400" and "Category Modding Tools".
 - [ ] **3.6 A link in the search box.** **Back to the list**, paste `https://www.nexusmods.com/stardewvalley/mods/2400` into the search box, and **Search**.
   SMAPI's page opens.
 - [ ] **3.7 Links it refuses.** Paste each, and **Search**:
@@ -93,7 +93,7 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
 - [ ] **4.1 From a mod's page.** On SMAPI's page, **Download** on its main file.
   A note says where it downloads, and that it shows on the Downloads screen. The Downloads screen shows it with its progress, speed and time left, then "Done".
 - [ ] **4.2 In the library.** Open the Library screen.
-  Stardew Valley, then SMAPI, "Watched for updates", "1 file". Expanded: the file's name, version, size and "Downloaded *today*". In its **…** menu, **Open folder** opens SMAPI's folder, `Library\nexus\stardewvalley\<SMAPI's name> (2400)` in the test folder, holding the file. **Open page** opens the mod's page.
+  Stardew Valley, then SMAPI, "Watched for updates", "1 file". Expanded: the file's name, version, size and "Downloaded *today*". In its **…** menu, **Open folder** opens SMAPI's folder, `Library\nexus\stardewvalley\<SMAPI's name> (2400)` in the test folder, holding the file. **Open on its site** opens the mod's page in the browser.
 - [ ] **4.3 Again.** On the Downloads screen, paste SMAPI's link (`https://www.nexusmods.com/stardewvalley/mods/2400`) and **Download**.
   "… is in the library already." Nothing new downloads.
 - [ ] **4.4 An old version.** On SMAPI's page in Browse, **Show … more files**, then **Download** on an old version.
@@ -102,6 +102,13 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
   "Delete this file?" **Delete**: the file is gone from SMAPI's folder, and SMAPI shows 1 file.
 - [ ] **4.6 Pictures in the library.** On the Library screen, look at SMAPI with **Thumbnails**, the default, then **Cards**.
   A thumbnail of SMAPI's picture beside its name; then a card with the picture, its name, its **…** menu, "Watched for updates" and "1 file", under Stardew Valley's heading. The test folder now has a `pictures` folder, beside `library.db`, with files named by long hexadecimal names. With the network off, closing and starting the app shows the same pictures.
+
+- [ ] **4.7 A library mod's page.** Click SMAPI's name on the Library screen (or **Open** in its **…** menu).
+  The page opens in place of the list, under "Library › Stardew Valley › SMAPI", with the previews at the end of that line. "Your files": SMAPI's folder, then the file with "Main", its name, size, "Downloaded *today*" and its SHA-256 shortened to its ends; the copy button beside it puts the whole SHA-256 on the clipboard. **Open folder** opens SMAPI's folder. In "Files on Nexus Mods", the downloaded file says "In the library" instead of **Download**. "Details" adds "In the library since *today*" and "Last checked". **Rescan** and **Remove from library…** are under the name. **Library** or **Stardew Valley** in the line at the top goes back to the list.
+- [ ] **4.8 A file missing from disk.** Rename SMAPI's file in its folder, then open SMAPI's page again.
+  The file says "Missing from disk". Name it back, **Rescan** on the page: "Rescan finished", and the file no longer says so.
+- [ ] **4.9 Offline.** Turn the network off, open the Library screen's SMAPI again.
+  A strip says "Nexus Mods couldn't give the mod, so its saved details show: …", with **Try again**. The page shows SMAPI's saved name and picture, and your files; "Files on Nexus Mods" and "Changelog" say "Shown once Nexus Mods gives the mod." Turn the network on and **Try again**: the strip goes, and the whole page shows.
 
 ## 5. Download through the website (free only)
 
@@ -148,6 +155,8 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
   The Library lists Content Patcher, watched, with that file.
 - [ ] **8.2 Check now.** Open the Updates screen, and **Check now**.
   "Checked *N* mods with *N* requests. 1 new update." Content Patcher's newest main file is listed: its version, "Uploaded …", and "Replaces …" the old version. The Updates screen's badge counts 1.
+- [ ] **8.2a The update on the mod's page.** Open Content Patcher's page from the Library screen.
+  In "Files on Nexus Mods", its newest main file says "Update for your *version*" in a tag, and its **Download** is the blue one.
 - [ ] **8.3 Changes.** **Changes** on the update.
   Its version's entry in Content Patcher's changelog, or "The changelog says nothing about this version."
 - [ ] **8.4 Download the update.** **Download** on the update (on the free account, start it on the website and paste the link).
@@ -294,11 +303,17 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 3.5 Mod's page | | | |
 | 3.6 Link in the search box | | | |
 | 3.7 Links it refuses | | | |
+| 3.8 Previews | | | |
+| 3.9 Adult pictures | | | |
 | 4.1 From a mod's page | | – | |
 | 4.2 In the library | | – | |
 | 4.3 Again | | – | |
 | 4.4 Old version | | – | |
 | 4.5 Delete a file | | – | |
+| 4.6 Pictures in the library | | – | |
+| 4.7 A library mod's page | | – | |
+| 4.8 A file missing from disk | | – | |
+| 4.9 Offline | | – | |
 | 5.1 It waits for you | – | | |
 | 5.2 The page | – | | |
 | 5.3 Not a link | – | | |
@@ -314,6 +329,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 7.4 Cancel | | | |
 | 8.1 An old version | | | |
 | 8.2 Check now | | | |
+| 8.2a The update on the mod's page | | | |
 | 8.3 Changes | | | |
 | 8.4 Download the update | | | |
 | 9.1 Unwatch | | | |
@@ -328,6 +344,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 10.4 Updates | | | |
 | 10.5 Theme | | | |
 | 10.6 Move the library | | – | |
+| 10.6a Pictures and mod details | | | |
 | 10.7 Where they're kept | | | |
 | 10.8 Version | | | |
 | 10.9 Copy diagnostics | | | |
