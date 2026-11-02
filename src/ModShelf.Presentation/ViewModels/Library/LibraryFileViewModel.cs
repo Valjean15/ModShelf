@@ -9,7 +9,7 @@ using ModShelf.Presentation.Resources;
 namespace ModShelf.Presentation.ViewModels.Library;
 
 /// <summary>
-/// One of a mod's files in the library: its name, version, size and when it was downloaded, and deleting it.
+/// One of a mod's files in the library: its name, version, size, when it was downloaded and its hash, and deleting it.
 /// </summary>
 public sealed partial class LibraryFileViewModel : ObservableObject
 {
@@ -52,6 +52,12 @@ public sealed partial class LibraryFileViewModel : ObservableObject
     public partial string DownloadedText { get; private set; } = string.Empty;
 
     /// <summary>
+    /// Such as "SHA-256 ba7816bf…", to check a copy of the file against; empty for a file recorded without one.
+    /// </summary>
+    [ObservableProperty]
+    public partial string Sha256Text { get; private set; } = string.Empty;
+
+    /// <summary>
     /// Shows the file as the library has it now. Runs on the UI thread.
     /// </summary>
     internal void Show(LibraryFile file)
@@ -63,6 +69,7 @@ public sealed partial class LibraryFileViewModel : ObservableObject
         VersionText = file.VersionLabel is { } version ? Text.Format(Strings.FileVersion, version) : string.Empty;
         SizeText = Sizes.Format(file.SizeInBytes);
         DownloadedText = Text.Format(Strings.LibraryFileDownloaded, Dates.Day(file.DownloadedAt, _services.TimeProvider));
+        Sha256Text = file.Sha256 is { } sha256 ? Text.Format(Strings.LibraryFileSha256, sha256) : string.Empty;
     }
 
     /// <summary>

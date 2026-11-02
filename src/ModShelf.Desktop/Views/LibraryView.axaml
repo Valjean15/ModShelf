@@ -89,6 +89,11 @@
                                                         <TextBlock Classes="note" Text="{Binding SizeText}" />
                                                         <TextBlock Classes="note" Text="{Binding DownloadedText}" />
                                                     </WrapPanel>
+                                                    <!-- Selectable, so the hash can be copied to check a copy of the file. -->
+                                                    <SelectableTextBlock Classes="note"
+                                                                         TextWrapping="Wrap"
+                                                                         Text="{Binding Sha256Text}"
+                                                                         IsVisible="{Binding Sha256Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                                                 </StackPanel>
                                                 <Button Grid.Column="1"
                                                         VerticalAlignment="Center"

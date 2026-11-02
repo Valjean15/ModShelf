@@ -462,6 +462,10 @@
     <value>Downloaded {0}</value>
     <comment>When a file was downloaded. {0} is a date.</comment>
   </data>
+  <data name="LibraryFileSha256" xml:space="preserve">
+    <value>SHA-256 {0}</value>
+    <comment>A library file's hash, to check a copy of it against. {0} is 64 hexadecimal digits.</comment>
+  </data>
   <data name="LibraryDeleteFile" xml:space="preserve">
     <value>Delete…</value>
     <comment>Button on a file: delete it, after asking.</comment>

@@ -24,6 +24,18 @@ public sealed class LibraryFileViewModelTests : IDisposable
         Assert.Equal(
             ("SkyUI_5_2_SE.7z", "SkyUI_5_2_SE.7z file", "Version 5.2", "3.00 MB", "Downloaded 10/21/2026"),
             (row.FileName, row.Name, row.VersionText, row.SizeText, row.DownloadedText));
+        Assert.Equal(string.Empty, row.Sha256Text);
+    }
+
+    [Fact]
+    public async Task ShowsTheFilesHash()
+    {
+        string sha256 = new('b', 64);
+        LibraryFile hashed = new(File.File, File.Name, File.VersionLabel, File.Category, File.UploadedAt, File.RelativePath, File.SizeInBytes, File.DownloadedAt, sha256);
+
+        LibraryFileViewModel row = await ShowAsync(hashed);
+
+        Assert.Equal($"SHA-256 {sha256}", row.Sha256Text);
     }
 
     [Fact]
