@@ -11,6 +11,9 @@ namespace ModShelf.Presentation.Tests.Fakes;
 /// </summary>
 internal sealed class ScriptedCatalog(SourceId id, string displayName) : IModCatalog
 {
+    private int _readingChangelogs;
+    private int _mostChangelogs;
+
     public SourceId Id { get; } = id;
 
     public string DisplayName { get; } = displayName;
@@ -39,6 +42,16 @@ internal sealed class ScriptedCatalog(SourceId id, string displayName) : IModCat
     /// When set, naming a game waits for it.
     /// </summary>
     public TaskCompletionSource? HoldGames { get; set; }
+
+    /// <summary>
+    /// When set, reading a changelog waits for it, counting how many wait at once.
+    /// </summary>
+    public TaskCompletionSource? HoldChangelogs { get; set; }
+
+    /// <summary>
+    /// The most changelogs that waited for <see cref="HoldChangelogs"/> at once.
+    /// </summary>
+    public int MostChangelogsAtOnce => _mostChangelogs;
 
     /// <summary>
     /// What was asked, in order, such as "GetGameAsync skyrimspecialedition".
@@ -81,13 +94,39 @@ internal sealed class ScriptedCatalog(SourceId id, string displayName) : IModCat
             return Task.FromException<IReadOnlyList<ModChangelog>>(Refusal);
         }
 
-        return Task.FromResult(Changelogs.TryGetValue(modRef.Id, out IReadOnlyList<ModChangelog>? changelogs) ? changelogs : []);
+        IReadOnlyList<ModChangelog> changelogs = Changelogs.TryGetValue(modRef.Id, out IReadOnlyList<ModChangelog>? known) ? known : [];
+        return HoldChangelogs is { } hold ? ChangelogsAfterAsync(hold.Task, changelogs) : Task.FromResult(changelogs);
     }
 
     private Task<GameInfo> Name(GameRef game)
         => GameNames.TryGetValue(game.Key, out string? name)
             ? Task.FromResult(new GameInfo(game, name))
             : Task.FromException<GameInfo>(new HttpRequestException("No such game.", null, System.Net.HttpStatusCode.NotFound));
+
+    private async Task<IReadOnlyList<ModChangelog>> ChangelogsAfterAsync(Task hold, IReadOnlyList<ModChangelog> changelogs)
+    {
+        int reading = Interlocked.Increment(ref _readingChangelogs);
+        InterlockedMax(ref _mostChangelogs, reading);
+        try
+        {
+            await hold;
+            return changelogs;
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _readingChangelogs);
+        }
+    }
+
+    private static void InterlockedMax(ref int most, int value)
+    {
+        int seen;
+        do
+        {
+            seen = most;
+        }
+        while (value > seen && Interlocked.CompareExchange(ref most, value, seen) != seen);
+    }
 
     private async Task<GameInfo> NameAfterAsync(Task hold, GameRef game)
     {

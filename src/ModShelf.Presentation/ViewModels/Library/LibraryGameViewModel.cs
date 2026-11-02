@@ -26,7 +26,7 @@ public sealed partial class LibraryGameViewModel : ObservableObject
         Game = game;
         _open = open;
         _timeProvider = timeProvider;
-        CoverHue = HueOf(game.Key);
+        CoverHue = Covers.HueOf(game.Key);
         Name = game.Key;
     }
 
@@ -42,7 +42,7 @@ public sealed partial class LibraryGameViewModel : ObservableObject
     /// <summary>
     /// The first letter of its name, on its cover until the game has a picture of its own.
     /// </summary>
-    public string Initial => Name.Length > 0 ? char.ToUpper(Name[0], System.Globalization.CultureInfo.CurrentCulture).ToString() : string.Empty;
+    public string Initial => Covers.InitialOf(Name);
 
     /// <summary>
     /// The hue of its cover, from 0 to 359, the same for the game every time.
@@ -143,20 +143,6 @@ public sealed partial class LibraryGameViewModel : ObservableObject
     }
 
     partial void OnNameChanged(string value) => OnPropertyChanged(nameof(OpenText));
-
-    /// <summary>
-    /// A hue from the game's key that's the same in every run, which <see cref="string.GetHashCode()"/> isn't.
-    /// </summary>
-    private static int HueOf(string key)
-    {
-        uint hash = 2166136261;
-        foreach (char letter in key)
-        {
-            hash = (hash ^ letter) * 16777619;
-        }
-
-        return (int)(hash % 360);
-    }
 
     /// <summary>
     /// Shows the game's mods in place of the games.

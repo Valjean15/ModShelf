@@ -708,35 +708,18 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     /// </summary>
     private async Task NameAsync(GameRef game)
     {
-        if (_sources.Find<IModCatalog>(game.Source) is not { } catalog)
+        if (await GameNames.ReadAsync(_sources, game, _logger, _stopping) is not { } name)
         {
             return;
         }
 
-        try
+        _uiThread.Post(() =>
         {
-            GameInfo info = await catalog.GetGameAsync(game, _stopping);
-            _uiThread.Post(() =>
+            if (_games.TryGetValue(game, out LibraryGameViewModel? heading))
             {
-                if (_games.TryGetValue(game, out LibraryGameViewModel? heading))
-                {
-                    heading.Name = info.Name;
-                    Arrange();
-                }
-            });
-        }
-        catch (OperationCanceledException) when (_stopping.IsCancellationRequested)
-        {
-            // The app is closing.
-        }
-        catch (Exception exception) when (SiteProblems.IsSiteProblem(exception))
-        {
-            // Expected without a linked account, or offline: no stack trace for it.
-            LogGameNameUnknown(_logger, game.Key, game.Source.Value, exception.Message);
-        }
-        catch (Exception exception)
-        {
-            LogGameNameFailed(_logger, exception, game.Key, game.Source.Value);
-        }
+                heading.Name = name;
+                Arrange();
+            }
+        });
     }
 }

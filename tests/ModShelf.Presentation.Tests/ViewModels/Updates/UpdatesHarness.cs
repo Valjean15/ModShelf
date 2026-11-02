@@ -9,8 +9,9 @@ using ModShelf.Testing;
 namespace ModShelf.Presentation.Tests.ViewModels.Updates;
 
 /// <summary>
-/// The Updates screen over fakes, with a Nexus Mods catalog for changelogs and a site without one. Its work starts with
-/// <see cref="StartAsync"/> and stops when the harness is disposed.
+/// The Updates screen over fakes, with a Nexus Mods catalog for changelogs and games' names (Skyrim Special Edition and
+/// Stardew Valley), and a site without one. Its work starts with <see cref="StartAsync"/> and stops when the harness is
+/// disposed.
 /// </summary>
 internal sealed class UpdatesHarness : IDisposable
 {
@@ -22,6 +23,8 @@ internal sealed class UpdatesHarness : IDisposable
     public UpdatesHarness()
     {
         Time.SetLocalTimeZone(TimeZoneInfo.Utc);
+        Catalog.GameNames["skyrimspecialedition"] = "Skyrim Special Edition";
+        Catalog.GameNames["stardewvalley"] = "Stardew Valley";
         FakeSourceRegistry sources = new(Catalog, new FakeSource(Plain, "Plain Site"));
         Screen = new UpdatesViewModel(
             Library,
@@ -30,6 +33,7 @@ internal sealed class UpdatesHarness : IDisposable
             sources,
             AppLookup.Over(sources),
             Dialogs,
+            Settings,
             Pictures.Pictures,
             UiThread,
             Time,
@@ -47,6 +51,8 @@ internal sealed class UpdatesHarness : IDisposable
     public TestPictures Pictures { get; } = new();
 
     public ScriptedDialogs Dialogs { get; } = new();
+
+    public InMemorySettingsService Settings { get; } = new();
 
     public QueuedUiThread UiThread { get; } = new();
 
@@ -106,6 +112,21 @@ internal sealed class UpdatesHarness : IDisposable
     }
 
     /// <summary>
+    /// What the catalog was asked for changelogs, leaving out games' names.
+    /// </summary>
+    public IReadOnlyList<string> ChangelogsAsked => [.. Catalog.Asked.Where(asked => asked.StartsWith("GetChangelogsAsync", StringComparison.Ordinal))];
+
+    /// <summary>
+    /// Shows the screen, as the main window does, and waits until it has read the changelogs and the update interval.
+    /// </summary>
+    public async Task ShowAsync()
+    {
+        Screen.OnShown();
+        await Screen.ReadingChanges.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+        await Screen.ReadingInterval.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>
     /// The screen's row for the update.
     /// </summary>
     public UpdateViewModel Row(string fileId) => Assert.Single(Screen.Updates, row => row.File.Id == fileId);
@@ -123,5 +144,6 @@ internal sealed class UpdatesHarness : IDisposable
         _disposed = true;
         _stopping.Cancel();
         _stopping.Dispose();
+        Screen.Dispose();
     }
 }

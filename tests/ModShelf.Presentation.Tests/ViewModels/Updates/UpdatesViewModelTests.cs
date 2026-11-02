@@ -1,5 +1,3 @@
-using System.Globalization;
-
 using ModShelf.Application.Updates;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
@@ -48,12 +46,12 @@ public sealed class UpdatesViewModelTests : IDisposable
         await _harness.StartAsync(TestData.LibraryMod(SkyUi, "SkyUI", watched: false, TestData.LibraryFile(SkyUi, "1", "a.7z")));
 
         Assert.Equal("No mods are watched. Mods you download into the library are watched for updates.", Screen.NoUpdatesText);
-        Assert.Equal(string.Empty, Screen.CheckedText);
+        Assert.Equal(string.Empty, Screen.SummaryText);
         Assert.False(Screen.CheckNowCommand.CanExecute(null));
     }
 
     [Fact]
-    public async Task SaysWhenEveryWatchedModWasCheckedBy()
+    public async Task SaysWhenEveryWatchedModWasCheckedByAndWhenTheNextCheckIs()
     {
         using CultureScope culture = new("en-US");
 
@@ -61,10 +59,8 @@ public sealed class UpdatesViewModelTests : IDisposable
             UpdatesHarness.ModWithUpdates(SkyUi, "SkyUI", TestData.Now.AddHours(-1)),
             UpdatesHarness.ModWithUpdates(Address, "Address Library", TestData.Now.AddHours(-3)));
 
-        // The oldest check, in the user's time zone (UTC here); how the culture writes a time varies with its ICU version.
-        string oldest = new DateTime(2026, 10, 27, 9, 0, 0).ToString("g", CultureInfo.CurrentCulture);
-        Assert.Equal($"Every watched mod was checked on {oldest} or later.", Screen.CheckedText);
-        Assert.StartsWith("Every watched mod was checked on 10/27/2026 9:00", Screen.CheckedText, StringComparison.Ordinal);
+        // The oldest check, and the default interval, 6 hours, after it.
+        Assert.Equal("No updates · checked 3 hours ago, next in 3 hours", Screen.SummaryText);
     }
 
     [Fact]
@@ -74,7 +70,7 @@ public sealed class UpdatesViewModelTests : IDisposable
             UpdatesHarness.ModWithUpdates(SkyUi, "SkyUI", TestData.Now),
             UpdatesHarness.ModWithUpdates(Address, "Address Library", null));
 
-        Assert.Equal("Some watched mods haven't been checked yet.", Screen.CheckedText);
+        Assert.Equal("No updates · some watched mods haven't been checked yet", Screen.SummaryText);
     }
 
     [Fact]

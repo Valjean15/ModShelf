@@ -12,13 +12,15 @@ using ModShelf.Sources.Abstractions.Accounts;
 namespace ModShelf.Presentation.ViewModels.Updates;
 
 /// <summary>
-/// One update on the Updates screen: a newer file of a watched mod, with downloading it into the library and reading its
-/// changes.
+/// One update on the Updates screen: a newer file of a watched mod, with its version's entry in the mod's changelog,
+/// read once the screen is shown, and downloading it into the library.
 /// </summary>
 public sealed partial class UpdateViewModel : ObservableObject
 {
     private readonly UpdatesServices _services;
     private LibraryUpdate _update;
+    private Task? _reading;
+    private bool _changesRead;
 
     internal UpdateViewModel(LibraryUpdate update, LibraryMod mod, UpdatesServices services, ModPictures pictures)
     {
@@ -74,10 +76,17 @@ public sealed partial class UpdateViewModel : ObservableObject
     public partial string UploadedText { get; private set; } = string.Empty;
 
     /// <summary>
-    /// Such as "Replaces SkyUI_5_2_SE.7z"; "New optional file" for an optional file that replaces none; empty otherwise.
+    /// Such as "Replaces SkyUI_5_2_SE.7z"; empty when it replaces none of the library's files.
     /// </summary>
     [ObservableProperty]
     public partial string ReplacesText { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// What it changes, such as "1.3 → 1.4" from the version of the file it replaces; "New optional file" for an optional
+    /// file that replaces none; otherwise its version, such as "Version 1.4", or nothing.
+    /// </summary>
+    [ObservableProperty]
+    public partial string ChangeText { get; private set; } = string.Empty;
 
     /// <summary>
     /// When the update was uploaded, which orders a mod's updates.
@@ -101,10 +110,10 @@ public sealed partial class UpdateViewModel : ObservableObject
     public partial bool IsNoteAProblem { get; private set; }
 
     /// <summary>
-    /// Whether its changes show.
+    /// Such as "What changed in 1.4"; empty for a file without a version.
     /// </summary>
     [ObservableProperty]
-    public partial bool AreChangesShown { get; private set; }
+    public partial string ChangesTitle { get; private set; } = string.Empty;
 
     /// <summary>
     /// Its version's entry in its mod's changelog, a line per change.
@@ -133,10 +142,60 @@ public sealed partial class UpdateViewModel : ObservableObject
         FileName = update.FileName;
         VersionText = update.VersionLabel is { } version ? Text.Format(Strings.FileVersion, version) : string.Empty;
         UploadedText = Text.Format(Strings.FileUploaded, Dates.Day(update.UploadedAt, _services.TimeProvider));
-        ReplacesText = mod.Files.FirstOrDefault(file => file.File == update.Replaces) is { } replaced
-            ? Text.Format(Strings.UpdateReplaces, replaced.FileName)
-            : update.Replaces is null && update.Category == ModFileCategory.Optional ? Strings.UpdateNewOptionalFile : string.Empty;
+        LibraryFile? replaced = mod.Files.FirstOrDefault(file => file.File == update.Replaces);
+        ReplacesText = replaced is null ? string.Empty : Text.Format(Strings.UpdateReplaces, replaced.FileName);
+        ChangeText = (replaced?.VersionLabel, update.VersionLabel) switch
+        {
+            ({ } before, { } after) => Text.Format(Strings.UpdateChange, before, after),
+            _ when update.Replaces is null && update.Category == ModFileCategory.Optional => Strings.UpdateNewOptionalFile,
+            _ => VersionText,
+        };
+        ChangesTitle = update.VersionLabel is { } changed ? Text.Format(Strings.ChangelogWhatChanged, changed) : string.Empty;
         CanDownload = update.PageUrl is not null;
+    }
+
+    /// <summary>
+    /// Reads its version's entry in its mod's changelog, once: the site is asked again later only when it couldn't say
+    /// this time. A read already under way is the one returned. Runs on the UI thread.
+    /// </summary>
+    /// <param name="gate">How many changelogs may be read at once.</param>
+    internal Task ReadChangesAsync(SemaphoreSlim gate, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(gate);
+
+        if (_changesRead || _reading is { IsCompleted: false })
+        {
+            return _reading ?? Task.CompletedTask;
+        }
+
+        _reading = ReadChangesOnceAsync(gate, cancellationToken);
+        return _reading;
+    }
+
+    /// <summary>
+    /// Downloads the update into the library, as Download does, as one of several: what went wrong unexpectedly is
+    /// logged and said in its note, so the others go on.
+    /// </summary>
+    internal async Task QueueAsync(CancellationToken cancellationToken)
+    {
+        if (_update.PageUrl is not { } link)
+        {
+            return;
+        }
+
+        try
+        {
+            await DownloadNotes.AddToLibraryAsync(_services.Downloads, link, Tell, cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            LogActionFailed(_services.Logger, exception, UpdateAction.Download, File.Id, File.Mod.Id);
+            Tell(Strings.SomethingWentWrong, true);
+        }
     }
 
     /// <summary>
@@ -156,63 +215,61 @@ public sealed partial class UpdateViewModel : ObservableObject
             },
             cancellationToken);
 
-    /// <summary>
-    /// Shows or hides the update's changes: its version's entry in its mod's changelog, read from the site the first time
-    /// any update of the mod asks.
-    /// </summary>
-    [RelayCommand]
-    private Task ToggleChangesAsync(CancellationToken cancellationToken)
-        => RunAsync(
-            UpdateAction.Changes,
-            async () =>
+    private async Task ReadChangesOnceAsync(SemaphoreSlim gate, CancellationToken cancellationToken)
+    {
+        if (_update.VersionLabel is not { } version)
+        {
+            ChangesNote = Strings.ChangelogNoVersion;
+            _changesRead = true;
+            return;
+        }
+
+        ChangesNote = Strings.ChangelogReading;
+        IReadOnlyList<string>? changes;
+        try
+        {
+            await gate.WaitAsync(cancellationToken);
+            try
             {
-                AreChangesShown = !AreChangesShown;
-                if (!AreChangesShown)
-                {
-                    return;
-                }
+                changes = await _services.Lookup.GetChangesAsync(File.Mod, version, cancellationToken);
+            }
+            finally
+            {
+                gate.Release();
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // The app is closing.
+            return;
+        }
+        catch (AuthenticationFailedException)
+        {
+            ChangesNote = Strings.ChangelogNeedsAccount;
+            return;
+        }
+        catch (Exception exception) when (SiteProblems.IsSiteProblem(exception))
+        {
+            ChangesNote = Text.Format(Strings.ChangelogFailed, exception.Message);
+            return;
+        }
+        catch (Exception exception)
+        {
+            LogActionFailed(_services.Logger, exception, UpdateAction.Changes, File.Id, File.Mod.Id);
+            ChangesNote = Strings.ChangelogUnexpected;
+            return;
+        }
 
-                if (_update.VersionLabel is not { } version)
-                {
-                    ChangesNote = Strings.ChangelogNoVersion;
-                    return;
-                }
+        _changesRead = true;
+        if (changes is null)
+        {
+            ChangesNote = Text.Format(Strings.ChangelogNone, _services.Sources.SiteName(File.Mod.Game.Source));
+            return;
+        }
 
-                ChangesNote = Strings.ChangelogReading;
-                IReadOnlyList<string>? changes;
-                try
-                {
-                    changes = await _services.Lookup.GetChangesAsync(File.Mod, version, cancellationToken);
-                }
-                catch (AuthenticationFailedException)
-                {
-                    ChangesNote = Strings.ChangelogNeedsAccount;
-                    return;
-                }
-                catch (Exception exception) when (SiteProblems.IsSiteProblem(exception))
-                {
-                    ChangesNote = Text.Format(Strings.ChangelogFailed, exception.Message);
-                    return;
-                }
-                catch (Exception)
-                {
-                    // The command tells what went wrong. The changes hide, so they don't say they're being read any more,
-                    // and showing them again asks once more.
-                    ChangesNote = string.Empty;
-                    AreChangesShown = false;
-                    throw;
-                }
-
-                if (changes is null)
-                {
-                    ChangesNote = Text.Format(Strings.ChangelogNone, _services.Sources.SiteName(File.Mod.Game.Source));
-                    return;
-                }
-
-                Changes = changes;
-                ChangesNote = Changes.Count == 0 ? Strings.ChangelogNothing : string.Empty;
-            },
-            cancellationToken);
+        Changes = changes;
+        ChangesNote = Changes.Count == 0 ? Strings.ChangelogNothing : string.Empty;
+    }
 
     private void Tell(string note, bool isProblem)
     {

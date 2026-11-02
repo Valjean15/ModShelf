@@ -3,52 +3,51 @@
              xmlns:sys="using:System"
              xmlns:vm="using:ModShelf.Presentation.ViewModels.Updates"
              xmlns:res="using:ModShelf.Presentation.Resources"
+             xmlns:views="using:ModShelf.Desktop.Views"
              xmlns:pictures="using:ModShelf.Desktop.Views.Pictures"
              x:Class="ModShelf.Desktop.Views.UpdatesView"
              x:DataType="vm:UpdatesViewModel">
 
     <!--
-      The previews beside the heading, and an update's buttons beside what it says; in a narrow window, below them.
-      Their places are set here rather than on them, so the narrow window's can replace them.
+      The previews and buttons beside the heading, and an update's Download beside what it says; in a narrow window,
+      below them. Their places are set here rather than on them, so the narrow window's can replace them.
     -->
     <UserControl.Styles>
-        <Style Selector="pictures|PreviewsPicker#Previews">
+        <Style Selector="StackPanel.tools">
             <Setter Property="Grid.Column" Value="1" />
         </Style>
-        <Style Selector="StackPanel.actions">
+        <Style Selector="Button.download">
             <Setter Property="Grid.Column" Value="2" />
         </Style>
-        <ContainerQuery Name="UpdatesScreen" Query="max-width:560">
-            <Style Selector="pictures|PreviewsPicker#Previews">
+        <ContainerQuery Name="UpdatesScreen" Query="max-width:620">
+            <Style Selector="StackPanel.tools">
                 <Setter Property="Grid.Row" Value="1" />
                 <Setter Property="Grid.Column" Value="0" />
-                <Setter Property="Grid.ColumnSpan" Value="3" />
                 <Setter Property="Margin" Value="0,0,0,16" />
             </Style>
-            <Style Selector="StackPanel.actions">
+            <Style Selector="Button.download">
                 <Setter Property="Grid.Row" Value="1" />
                 <Setter Property="Grid.Column" Value="1" />
                 <Setter Property="HorizontalAlignment" Value="Left" />
-                <Setter Property="Margin" Value="-10,4,0,0" />
+                <Setter Property="Margin" Value="0,8,0,0" />
             </Style>
         </ContainerQuery>
     </UserControl.Styles>
 
     <DockPanel Container.Name="UpdatesScreen" Container.Sizing="Width">
-        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="16">
-            <StackPanel Spacing="4" Margin="0,0,0,16">
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="16">
+            <StackPanel Spacing="2" Margin="0,0,0,16">
                 <TextBlock Classes="heading" Margin="0" Text="{Binding Title}" />
-                <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding CheckedText}" />
+                <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding SummaryText}" />
             </StackPanel>
-            <pictures:PreviewsPicker Name="Previews"
-                                     HorizontalAlignment="Left"
-                                     VerticalAlignment="Top"
-                                     DataContext="{Binding Previews}" />
-            <Button Grid.Column="2"
-                    VerticalAlignment="Top"
-                    Classes="accent"
-                    Content="{x:Static res:Strings.UpdatesCheckNow}"
-                    Command="{Binding CheckNowCommand}" />
+            <StackPanel Classes="tools" Orientation="Horizontal" Spacing="10" VerticalAlignment="Top">
+                <pictures:PreviewsPicker DataContext="{Binding Previews}" />
+                <Button Content="{x:Static res:Strings.UpdatesCheckNow}" Command="{Binding CheckNowCommand}" />
+                <Button Classes="accent"
+                        Content="{Binding UpdateAllText}"
+                        Command="{Binding UpdateAllCommand}"
+                        IsVisible="{Binding HasUpdates}" />
+            </StackPanel>
         </Grid>
 
         <ProgressBar DockPanel.Dock="Top" Margin="0,0,0,12" IsIndeterminate="True" IsVisible="{Binding IsChecking}" />
@@ -80,60 +79,96 @@
                        Text="{Binding NoUpdatesText}"
                        IsVisible="{Binding !HasUpdates}" />
 
-            <Border Classes="list" VerticalAlignment="Top" IsVisible="{Binding HasUpdates}">
-                <ListBox Classes="rows" ItemsSource="{Binding Updates}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate x:DataType="vm:UpdateViewModel">
-                            <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="4">
-                                <!-- Its mod's thumbnail, while the screen shows them. -->
-                                <Panel Margin="0,0,14,0" VerticalAlignment="Top" IsVisible="{Binding Picture.IsShown}">
-                                    <pictures:ModThumbnail DataContext="{Binding Picture}" />
-                                </Panel>
-
-                                <!-- Wrapping, so long names go to the next line rather than under the buttons. -->
-                                <StackPanel Grid.Column="1" Margin="0,0,16,0" Spacing="3">
-                                    <WrapPanel ItemSpacing="8">
-                                        <TextBlock FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding ModName}" />
-                                        <TextBlock TextWrapping="Wrap" Text="{Binding Name}" />
+            <!-- Each game: its heading with Update all, then its updates, each with its changes. -->
+            <ScrollViewer IsVisible="{Binding HasUpdates}">
+                <ItemsControl ItemsSource="{Binding Games}" Margin="0,0,16,16">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="20" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:UpdateGameViewModel">
+                            <StackPanel Spacing="10">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                    <Border Classes="cover"
+                                            Width="40"
+                                            Height="40"
+                                            CornerRadius="8"
+                                            Background="{Binding CoverHue, Converter={x:Static views:CoverBrushConverter.Instance}}">
+                                        <TextBlock FontSize="17" Text="{Binding Initial}" />
+                                    </Border>
+                                    <WrapPanel Grid.Column="1" VerticalAlignment="Center" ItemSpacing="8">
+                                        <TextBlock Classes="subheading" Text="{Binding Name}" />
+                                        <TextBlock Classes="note" VerticalAlignment="Center" Text="{Binding CountText}" />
                                     </WrapPanel>
-                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding FileName}" />
-                                    <WrapPanel ItemSpacing="14">
-                                        <TextBlock Classes="note" Text="{Binding VersionText}" />
-                                        <TextBlock Classes="note" Text="{Binding UploadedText}" />
-                                        <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding ReplacesText}" />
-                                    </WrapPanel>
-                                    <TextBlock Classes="note message"
-                                               Classes.problem="{Binding IsNoteAProblem}"
-                                               Text="{Binding Note}" />
-                                </StackPanel>
+                                    <Button Grid.Column="2"
+                                            VerticalAlignment="Center"
+                                            Content="{Binding UpdateAllText}"
+                                            Command="{Binding UpdateAllCommand}" />
+                                </Grid>
 
-                                <StackPanel Classes="actions" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                                    <Button Classes="quiet" Content="{x:Static res:Strings.UpdateChanges}" Command="{Binding ToggleChangesCommand}" />
-                                    <Button Content="{x:Static res:Strings.FileDownload}" Command="{Binding DownloadCommand}" />
-                                </StackPanel>
+                                <Border Classes="list">
+                                    <ItemsControl ItemsSource="{Binding Updates}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:UpdateViewModel">
+                                                <Border Classes="file" Padding="16,12">
+                                                    <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="14">
+                                                        <!-- Its mod's thumbnail, while the screen shows them. -->
+                                                        <Panel VerticalAlignment="Top" IsVisible="{Binding Picture.IsShown}">
+                                                            <pictures:ModThumbnail DataContext="{Binding Picture}" />
+                                                        </Panel>
 
-                                <!-- The update's version in its mod's changelog. -->
-                                <Border Grid.Row="2"
-                                        Grid.Column="1"
-                                        Grid.ColumnSpan="2"
-                                        Margin="0,6,0,0"
-                                        Padding="12,8"
-                                        CornerRadius="8"
-                                        Background="{DynamicResource ShelfRaisedBrush}"
-                                        IsVisible="{Binding AreChangesShown}">
-                                    <StackPanel Spacing="2">
-                                        <TextBlock Classes="note"
-                                                   TextWrapping="Wrap"
-                                                   Text="{Binding ChangesNote}"
-                                                   IsVisible="{Binding ChangesNote, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                                        <ItemsControl Classes="bullets" ItemsSource="{Binding Changes}" />
-                                    </StackPanel>
+                                                        <!-- Wrapping, so long names go to the next line rather than under the button. -->
+                                                        <StackPanel Grid.Column="1" Spacing="3">
+                                                            <WrapPanel ItemSpacing="10" LineSpacing="4">
+                                                                <TextBlock FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding ModName}" />
+                                                                <Border Classes="tag accent"
+                                                                        VerticalAlignment="Center"
+                                                                        IsVisible="{Binding ChangeText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                                                    <TextBlock Text="{Binding ChangeText}" />
+                                                                </Border>
+                                                            </WrapPanel>
+                                                            <WrapPanel ItemSpacing="12" LineSpacing="2">
+                                                                <TextBlock Classes="note" FontSize="12.5" TextWrapping="Wrap" Text="{Binding FileName}" />
+                                                                <TextBlock Classes="note" FontSize="12.5" Text="{Binding UploadedText}" />
+                                                                <TextBlock Classes="note" FontSize="12.5" TextWrapping="Wrap" Text="{Binding ReplacesText}" />
+                                                            </WrapPanel>
+
+                                                            <!-- Its version's entry in its mod's changelog. -->
+                                                            <StackPanel Margin="0,6,0,0" Spacing="2">
+                                                                <TextBlock FontSize="12.5"
+                                                                           FontWeight="SemiBold"
+                                                                           Text="{Binding ChangesTitle}"
+                                                                           IsVisible="{Binding !!Changes.Count}" />
+                                                                <ItemsControl Classes="bullets" ItemsSource="{Binding Changes}" />
+                                                                <TextBlock Classes="note"
+                                                                           FontSize="12.5"
+                                                                           TextWrapping="Wrap"
+                                                                           Text="{Binding ChangesNote}"
+                                                                           IsVisible="{Binding ChangesNote, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                                            </StackPanel>
+
+                                                            <TextBlock Classes="note message"
+                                                                       Classes.problem="{Binding IsNoteAProblem}"
+                                                                       Text="{Binding Note}" />
+                                                        </StackPanel>
+
+                                                        <Button Classes="download"
+                                                                VerticalAlignment="Top"
+                                                                Content="{x:Static res:Strings.FileDownload}"
+                                                                Command="{Binding DownloadCommand}" />
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
                                 </Border>
-                            </Grid>
+                            </StackPanel>
                         </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </Border>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
         </Panel>
     </DockPanel>
 </UserControl>

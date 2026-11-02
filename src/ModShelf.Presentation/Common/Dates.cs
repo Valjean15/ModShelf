@@ -20,6 +20,23 @@ internal static class Dates
     public static string DayAndTime(DateTimeOffset moment, TimeProvider timeProvider) => Write(moment, timeProvider, "g");
 
     /// <summary>
+    /// How long until something, to the nearest minute, such as "in 4 hours" or "in 25 minutes": a whole hour or day
+    /// starts at its first minute, so 5 hours and 59.5 minutes is "in 6 hours". "In a moment" for less than half a minute,
+    /// or for something due already.
+    /// </summary>
+    public static string In(TimeSpan wait)
+    {
+        TimeSpan rounded = TimeSpan.FromMinutes(Math.Round(wait.TotalMinutes, MidpointRounding.AwayFromZero));
+        return rounded switch
+        {
+            { TotalMinutes: < 1 } => Strings.InAMoment,
+            { TotalHours: < 1 } => Counts.Of((long)rounded.TotalMinutes, Strings.InOneMinute, Strings.InMinutes),
+            { TotalDays: < 1 } => Counts.Of((long)rounded.TotalHours, Strings.InOneHour, Strings.InHours),
+            _ => Counts.Of((long)rounded.TotalDays, Strings.InOneDay, Strings.InDays),
+        };
+    }
+
+    /// <summary>
     /// How long ago, such as "2 hours ago" or "yesterday", up to 30 days; the short date before that, or for a moment
     /// a minute or more to come, which a clock set back gives. A moment less than a minute to come, which clocks a little
     /// apart give, is "just now".

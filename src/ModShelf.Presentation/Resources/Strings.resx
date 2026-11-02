@@ -590,14 +590,6 @@
     <value>No updates found.</value>
     <comment>Shown when the watched mods have no updates.</comment>
   </data>
-  <data name="UpdatesNotAllChecked" xml:space="preserve">
-    <value>Some watched mods haven't been checked yet.</value>
-    <comment>When a watched mod was never checked.</comment>
-  </data>
-  <data name="UpdatesCheckedSince" xml:space="preserve">
-    <value>Every watched mod was checked on {0} or later.</value>
-    <comment>{0} is a date and time.</comment>
-  </data>
   <data name="CheckOneMod" xml:space="preserve">
     <value>1 mod</value>
     <comment>In a check's summary: how many mods it checked.</comment>
@@ -653,10 +645,6 @@
   <data name="FileDownload" xml:space="preserve">
     <value>Download</value>
     <comment>Button: download the update into the library.</comment>
-  </data>
-  <data name="UpdateChanges" xml:space="preserve">
-    <value>Changes</value>
-    <comment>Button: show or hide the update's changes, from its mod's changelog.</comment>
   </data>
   <data name="AddedDownloadingInto" xml:space="preserve">
     <value>Downloading into {0}. It shows on the Downloads screen.</value>
@@ -2036,5 +2024,66 @@
   <data name="LibraryOpenGame" xml:space="preserve">
     <value>Open {0}</value>
     <comment>Read out for a game's tile.</comment>
+  </data>
+  <data name="UpdatesForMods" xml:space="preserve">
+    <value>{0} for {1}</value>
+    <comment>The Updates screen's count, such as "3 updates for 2 mods". {0} counts the updates, {1} the mods.</comment>
+  </data>
+  <data name="UpdatesNoUpdates" xml:space="preserve">
+    <value>No updates</value>
+    <comment>Before when the watched mods were checked, under the Updates screen's heading, when none was found.</comment>
+  </data>
+  <data name="UpdatesSummary" xml:space="preserve">
+    <value>{0} · {1}</value>
+    <comment>Under the Updates screen's heading: {0} counts the updates, {1} says when the watched mods were checked.</comment>
+  </data>
+  <data name="UpdatesCheckedAgo" xml:space="preserve">
+    <value>checked {0}</value>
+    <comment>{0} is how long ago every watched mod was checked by, such as "2 hours ago".</comment>
+  </data>
+  <data name="UpdatesCheckedAgoNext" xml:space="preserve">
+    <value>checked {0}, next {1}</value>
+    <comment>{0} is how long ago every watched mod was checked by, such as "2 hours ago"; {1} when the next check is, such as "in 4 hours".</comment>
+  </data>
+  <data name="UpdatesSomeNotChecked" xml:space="preserve">
+    <value>some watched mods haven't been checked yet</value>
+    <comment>After the count of updates, when a watched mod was never checked.</comment>
+  </data>
+  <data name="UpdatesUpdateAll" xml:space="preserve">
+    <value>Update all ({0:N0})</value>
+    <comment>Downloads every update shown, or a game's. {0} counts them.</comment>
+  </data>
+  <data name="UpdateChange" xml:space="preserve">
+    <value>{0} → {1}</value>
+    <comment>An update's change of version, such as "1.3 → 1.4": the version of the file it replaces, then its own.</comment>
+  </data>
+  <data name="ChangelogWhatChanged" xml:space="preserve">
+    <value>What changed in {0}</value>
+    <comment>Above an update's entry in its mod's changelog. {0} is its version.</comment>
+  </data>
+  <data name="ChangelogUnexpected" xml:space="preserve">
+    <value>The changelog couldn't be read. The log has the details.</value>
+  </data>
+  <data name="InAMoment" xml:space="preserve">
+    <value>in a moment</value>
+    <comment>When something is due now, or overdue.</comment>
+  </data>
+  <data name="InOneMinute" xml:space="preserve">
+    <value>in 1 minute</value>
+  </data>
+  <data name="InMinutes" xml:space="preserve">
+    <value>in {0:N0} minutes</value>
+  </data>
+  <data name="InOneHour" xml:space="preserve">
+    <value>in 1 hour</value>
+  </data>
+  <data name="InHours" xml:space="preserve">
+    <value>in {0:N0} hours</value>
+  </data>
+  <data name="InOneDay" xml:space="preserve">
+    <value>in 1 day</value>
+  </data>
+  <data name="InDays" xml:space="preserve">
+    <value>in {0:N0} days</value>
   </data>
 </root>

@@ -28,6 +28,7 @@ public sealed class UpdateViewModelTests : IDisposable
 
         Assert.Equal(("SkyUI", "Update 53", "update-53.7z", "Version 53"), (row.ModName, row.Name, row.FileName, row.VersionText));
         Assert.Equal(("Uploaded 10/26/2026", "Replaces SkyUI-1.7z"), (row.UploadedText, row.ReplacesText));
+        Assert.Equal(("1.0 → 53", "What changed in 53"), (row.ChangeText, row.ChangesTitle));
         Assert.True(row.DownloadCommand.CanExecute(null));
         Assert.Null(row.Note);
     }
@@ -42,7 +43,19 @@ public sealed class UpdateViewModelTests : IDisposable
         UpdateViewModel row = _harness.Row("53");
 
         Assert.Equal((string.Empty, string.Empty), (row.VersionText, row.ReplacesText));
+        Assert.Equal((string.Empty, string.Empty), (row.ChangeText, row.ChangesTitle));
         Assert.False(row.DownloadCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public async Task AnUpdateThatReplacesNoneOfTheLibrarysFilesSaysItsVersion()
+    {
+        LibraryUpdate update = new(new ModFileRef(SkyUi, "53"), "Update 53", "update-53.7z", "5.3", ModFileCategory.Main, TestData.Now, null, TestData.Now);
+        await _harness.StartAsync(TestData.LibraryMod(SkyUi, "SkyUI", watched: true, TestData.LibraryFile(SkyUi, "1", "a.7z")).WithUpdates([update]));
+
+        UpdateViewModel row = _harness.Row("53");
+
+        Assert.Equal(("Version 5.3", string.Empty, "What changed in 5.3"), (row.ChangeText, row.ReplacesText, row.ChangesTitle));
     }
 
     [Fact]
@@ -52,7 +65,7 @@ public sealed class UpdateViewModelTests : IDisposable
         LibraryMod mod = TestData.LibraryMod(SkyUi, "SkyUI", watched: true, TestData.LibraryFile(SkyUi, "1", "a.7z")).WithUpdates([update]);
         await _harness.StartAsync(mod);
 
-        Assert.Equal("New optional file", _harness.Row("54").ReplacesText);
+        Assert.Equal(("New optional file", string.Empty), (_harness.Row("54").ChangeText, _harness.Row("54").ReplacesText));
     }
 
     [Fact]
@@ -130,29 +143,30 @@ public sealed class UpdateViewModelTests : IDisposable
         UpdateViewModel newer = _harness.Row("53");
         UpdateViewModel older = _harness.Row("52");
 
-        await newer.ToggleChangesCommand.ExecuteAsync(null);
-        await older.ToggleChangesCommand.ExecuteAsync(null);
+        await _harness.ShowAsync();
 
-        Assert.Equal((true, string.Empty), (newer.AreChangesShown, newer.ChangesNote));
+        Assert.Equal(string.Empty, newer.ChangesNote);
         Assert.Equal(["Fixed the map.", "Faster."], newer.Changes);
         Assert.Equal(["Older."], older.Changes);
-        Assert.Equal(["GetChangelogsAsync 12604"], _harness.Catalog.Asked);
+        Assert.Equal(["GetChangelogsAsync 12604"], _harness.ChangelogsAsked);
     }
 
     [Fact]
-    public async Task ShowingTheChangesAgainHidesThem()
+    public async Task TheChangesAreReadOnceTheScreenIsShownAndNotAgain()
     {
         _harness.Catalog.Changelogs["12604"] = [new ModChangelog("53", ["Fixed the map."])];
         UpdateViewModel row = await ShowAsync("53");
-        await row.ToggleChangesCommand.ExecuteAsync(null);
+        (IReadOnlyList<string>, string, int) before = (row.Changes, row.ChangesNote, _harness.ChangelogsAsked.Count);
 
-        await row.ToggleChangesCommand.ExecuteAsync(null);
-        bool hidden = !row.AreChangesShown;
-        await row.ToggleChangesCommand.ExecuteAsync(null);
+        await _harness.ShowAsync();
+        List<string?> changedAfter = [];
+        row.PropertyChanged += (_, changed) => changedAfter.Add(changed.PropertyName);
+        await _harness.ShowAsync();
 
-        Assert.True(hidden);
-        Assert.True(row.AreChangesShown);
-        Assert.Single(_harness.Catalog.Asked);
+        Assert.Equal(([], string.Empty, 0), before);
+        Assert.Equal(["Fixed the map."], row.Changes);
+        Assert.Single(_harness.ChangelogsAsked);
+        Assert.Empty(changedAfter);
     }
 
     [Fact]
@@ -161,7 +175,7 @@ public sealed class UpdateViewModelTests : IDisposable
         _harness.Catalog.Changelogs["12604"] = [new ModChangelog("52", ["Older."])];
         UpdateViewModel row = await ShowAsync("53");
 
-        await row.ToggleChangesCommand.ExecuteAsync(null);
+        await _harness.ShowAsync();
 
         Assert.Equal(("The changelog says nothing about this version.", 0), (row.ChangesNote, row.Changes.Count));
     }
@@ -173,10 +187,10 @@ public sealed class UpdateViewModelTests : IDisposable
         await _harness.StartAsync(TestData.LibraryMod(SkyUi, "SkyUI", watched: true, TestData.LibraryFile(SkyUi, "1", "a.7z")).WithUpdates([update]));
         UpdateViewModel row = _harness.Row("53");
 
-        await row.ToggleChangesCommand.ExecuteAsync(null);
+        await _harness.ShowAsync();
 
         Assert.Equal("The file has no version, so its changes can't be found in the changelog.", row.ChangesNote);
-        Assert.Empty(_harness.Catalog.Asked);
+        Assert.Empty(_harness.ChangelogsAsked);
     }
 
     [Fact]
@@ -186,7 +200,7 @@ public sealed class UpdateViewModelTests : IDisposable
         await _harness.StartAsync(UpdatesHarness.ModWithUpdates(plain, "Plain mod", TestData.Now, "2"));
         UpdateViewModel row = _harness.Row("2");
 
-        await row.ToggleChangesCommand.ExecuteAsync(null);
+        await _harness.ShowAsync();
 
         Assert.Equal("Plain Site doesn't give changelogs.", row.ChangesNote);
     }
@@ -196,38 +210,37 @@ public sealed class UpdateViewModelTests : IDisposable
     {
         UpdateViewModel row = await ShowAsync("53");
         _harness.Catalog.Refusal = new AuthenticationFailedException();
-        await row.ToggleChangesCommand.ExecuteAsync(null);
+        await _harness.ShowAsync();
         string refused = row.ChangesNote;
         _harness.Catalog.Refusal = new HttpRequestException("Service unavailable.", null, HttpStatusCode.ServiceUnavailable);
-        await row.ToggleChangesCommand.ExecuteAsync(null);
 
-        await row.ToggleChangesCommand.ExecuteAsync(null);
+        await _harness.ShowAsync();
 
         Assert.Equal(
             "The site needs a linked account to give the changelog, or refused the one linked. Link it on the Accounts screen.",
             refused);
         Assert.Equal("The site couldn't give the changelog: Service unavailable.", row.ChangesNote);
-        Assert.Equal(2, _harness.Catalog.Asked.Count);
+        Assert.Equal(2, _harness.ChangelogsAsked.Count);
     }
 
     [Fact]
-    public async Task AChangelogThatFailsUnexpectedlyIsHiddenAndAskedForAgainNextTime()
+    public async Task AChangelogThatFailsUnexpectedlyIsLoggedAndAskedForAgainNextTime()
     {
         _harness.Catalog.Changelogs["12604"] = [new ModChangelog("53", ["Fixed the map."])];
         UpdateViewModel row = await ShowAsync("53");
         _harness.Catalog.Refusal = new InvalidOperationException("Something broke.");
-        await row.ToggleChangesCommand.ExecuteAsync(null);
-        (bool Shown, string Note) failed = (row.AreChangesShown, row.ChangesNote);
+        await _harness.ShowAsync();
+        string failed = row.ChangesNote;
         _harness.Catalog.Refusal = null;
 
-        await row.ToggleChangesCommand.ExecuteAsync(null);
+        await _harness.ShowAsync();
 
-        Assert.Equal((false, string.Empty), failed);
-        Assert.Equal([("That didn't work", "Something went wrong. The log has the details.")], _harness.Dialogs.Messages);
-        Assert.Single(_harness.Logger.Entries);
-        Assert.Equal((true, string.Empty), (row.AreChangesShown, row.ChangesNote));
+        Assert.Equal("The changelog couldn't be read. The log has the details.", failed);
+        Assert.Empty(_harness.Dialogs.Messages);
+        Assert.StartsWith("Error: Changes of update 53 of mod 12604 failed System.InvalidOperationException", Assert.Single(_harness.Logger.Entries), StringComparison.Ordinal);
+        Assert.Equal(string.Empty, row.ChangesNote);
         Assert.Equal(["Fixed the map."], row.Changes);
-        Assert.Equal(2, _harness.Catalog.Asked.Count);
+        Assert.Equal(2, _harness.ChangelogsAsked.Count);
     }
 
     private async Task<UpdateViewModel> ShowAsync(string update)

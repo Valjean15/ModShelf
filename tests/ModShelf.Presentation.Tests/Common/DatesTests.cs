@@ -41,6 +41,23 @@ public sealed class DatesTests
         Assert.Equal("12:05", Dates.Time(Moment, _time));
     }
 
+    [Theory]
+    [InlineData(-3600, "in a moment")]
+    [InlineData(29, "in a moment")]
+    [InlineData(30, "in 1 minute")]
+    [InlineData(60, "in 1 minute")]
+    [InlineData((59 * 60) + 29, "in 59 minutes")]
+    [InlineData((59 * 60) + 30, "in 1 hour")]
+    [InlineData((24 * 60 * 60) - 31, "in 23 hours")]
+    [InlineData((24 * 60 * 60) - 30, "in 1 day")]
+    [InlineData(3 * 24 * 60 * 60, "in 3 days")]
+    public void SaysHowLongUntil(int seconds, string expected)
+    {
+        using CultureScope culture = new("en-US");
+
+        Assert.Equal(expected, Dates.In(TimeSpan.FromSeconds(seconds)));
+    }
+
     [Fact]
     public void WritesDatesAsTheCultureDoes()
     {
