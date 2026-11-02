@@ -71,6 +71,20 @@ public sealed class MainWindowViewModelTests : IDisposable
     }
 
     [Fact]
+    public void EachScreenIsToldEachTimeItsShown()
+    {
+        TestScreen library = (TestScreen)_window.Screens[(int)Screen.Library];
+        TestScreen updates = (TestScreen)_window.Screens[(int)Screen.Updates];
+
+        _window.NavigateCommand.Execute(Screen.Updates);
+        _window.NavigateCommand.Execute(Screen.Updates);
+        _window.CurrentScreen = null!;
+        _window.NavigateCommand.Execute(Screen.Library);
+
+        Assert.Equal((2, 1), (library.Shows, updates.Shows));
+    }
+
+    [Fact]
     public void ASidebarWithNothingSelectedKeepsTheScreen()
     {
         _window.NavigateCommand.Execute(Screen.Browse);

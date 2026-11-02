@@ -38,4 +38,13 @@ public abstract partial class ScreenViewModel : ObservableObject
     /// <paramref name="cancellationToken"/> when the app closes. A screen without such work has nothing to do.
     /// </summary>
     public virtual Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+    /// <summary>
+    /// Called on the UI thread each time the main window shows the screen, before or after <see cref="StartAsync"/> has
+    /// begun, for work worth doing only once the user looks, such as reading what a site says. A screen without such work
+    /// does nothing.
+    /// </summary>
+    public virtual void OnShown()
+    {
+    }
 }

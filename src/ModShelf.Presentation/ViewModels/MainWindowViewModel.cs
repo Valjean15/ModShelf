@@ -26,6 +26,9 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
     private readonly CancellationTokenSource _stopping = new();
     private readonly List<Task> _screensWork = [];
 
+    // The screen last shown, which a sidebar that clears its selection, and selects it again, doesn't show anew.
+    private ScreenViewModel? _shown;
+
     /// <param name="screens">One of each <see cref="Services.Screen"/>, in any order.</param>
     public MainWindowViewModel(
         INavigationService navigation,
@@ -168,6 +171,11 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         }
 
         _navigation.NavigateTo(value.Screen);
+        if (!ReferenceEquals(value, _shown))
+        {
+            _shown = value;
+            value.OnShown();
+        }
     }
 
     private void OnNavigated(object? sender, Screen screen) => _uiThread.Post(() => CurrentScreen = ScreenFor(_navigation.Current));
