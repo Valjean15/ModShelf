@@ -161,7 +161,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     {
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
 
-        DownloadResult result = await mcp.CallAsync<DownloadResult>("download", Arguments(("link", HandoffLink("3").AbsoluteUri)), Cancellation);
+        LinkDownloadResult result = await DownloadAsync(mcp, HandoffLink("3").AbsoluteUri);
 
         Assert.Equal("this MCP server", result.RunBy);
         Assert.Equal(Path.Combine(ModFolder, FileNameOf("3")), result.LibraryPath);
@@ -177,12 +177,63 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task SeveralLinksDownloadInTheOrderGivenEachWithItsResult()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await DownloadAndWaitAsync(mcp, "2");
+
+        DownloadsResult downloaded = await mcp.CallAsync<DownloadsResult>(
+            "download",
+            Arguments(("links", new[] { HandoffLink("3").AbsoluteUri, "mods/2400", FileLink("1").AbsoluteUri, HandoffLink("2").AbsoluteUri })),
+            Cancellation);
+
+        Assert.Equal(
+            [
+                (FileNameOf("3"), (string?)null, false),
+                (null, "That isn't a complete link, such as https://www.nexusmods.com/stardewvalley/mods/2400.", false),
+                (FileNameOf("1"), null, false),
+                (null, null, true),
+            ],
+            downloaded.Results.Select(result => (result.Download?.FileName, result.Problem, result.AlreadySaved)));
+        Assert.Equal(nameof(DownloadJobStatus.AwaitingHandoff), downloaded.Results[2].Download?.Status);
+        Assert.Equal(
+            "Of 4 links, 2 are downloading or waiting for the user, 1 was in the library already, and 1 couldn't be downloaded; each result says more, in the order the links were given.",
+            downloaded.Message);
+        await WaitForFileAsync(mcp, "3");
+    }
+
+    [Fact]
+    public async Task TwoLinksThatCouldntBeDownloadedSaySo()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        string[] links = ["a", "b"];
+
+        DownloadsResult downloaded = await mcp.CallAsync<DownloadsResult>("download", Arguments(("links", links)), Cancellation);
+
+        Assert.Equal("Of 2 links, 2 couldn't be downloaded; each result says more, in the order the links were given.", downloaded.Message);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(51)]
+    public async Task NoLinksOrTooManyAreRefused(int count)
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        string refused = await mcp.CallFailingAsync("download", Arguments(("links", Enumerable.Repeat(HandoffLink("3").AbsoluteUri, count).ToArray())), Cancellation);
+
+        Assert.Contains("Give from 1 to 50 links.", refused, StringComparison.Ordinal);
+        Assert.Empty(_server.Ranges);
+    }
+
+    [Fact]
     public async Task AFileTheLibraryHasIsntDownloadedAgain()
     {
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
         await DownloadAndWaitAsync(mcp, "3");
 
-        DownloadResult again = await mcp.CallAsync<DownloadResult>("download", Arguments(("link", HandoffLink("3").AbsoluteUri)), Cancellation);
+        LinkDownloadResult again = await DownloadAsync(mcp, HandoffLink("3").AbsoluteUri);
 
         Assert.True(again.AlreadySaved);
         Assert.Null(again.Download);
@@ -195,7 +246,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     {
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
 
-        DownloadResult result = await mcp.CallAsync<DownloadResult>("download", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
+        LinkDownloadResult result = await DownloadAsync(mcp, FileLink("1").AbsoluteUri);
 
         Assert.Equal((nameof(DownloadJobStatus.AwaitingHandoff), Page("1").AbsoluteUri), (result.Download?.Status, result.Download?.HandoffPage));
         Assert.StartsWith("The site needs the user to start this download on its website", result.Message, StringComparison.Ordinal);
@@ -214,8 +265,8 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         // keeps the queue running here.
         _server.HoldAt(1024);
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
-        await mcp.CallAsync<DownloadResult>("download", Arguments(("link", HandoffLink("3").AbsoluteUri)), Cancellation);
-        await mcp.CallAsync<DownloadResult>("download", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
+        await DownloadAsync(mcp, HandoffLink("3").AbsoluteUri);
+        await DownloadAsync(mcp, FileLink("1").AbsoluteUri);
 
         DownloadListing listed = await mcp.CallAsync<DownloadListing>("downloads_list", null, Cancellation);
 
@@ -231,7 +282,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     public async Task ChangesADownloadByItsIdOrItsStart()
     {
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
-        await mcp.CallAsync<DownloadResult>("download", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
+        await DownloadAsync(mcp, FileLink("1").AbsoluteUri);
         DownloadEntry waiting = await WaitForDownloadAsync(mcp, download => download.Status == nameof(DownloadJobStatus.AwaitingHandoff));
 
         DownloadResult cancelled = await mcp.CallAsync<DownloadResult>("downloads_cancel", Arguments(("id", waiting.Id[..8])), Cancellation);
@@ -264,10 +315,12 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     {
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
 
-        string refused = await mcp.CallFailingAsync("download", Arguments(("link", link)), Cancellation);
+        LinkDownloadResult refused = await DownloadAsync(mcp, link);
 
-        Assert.Contains(problem, refused, StringComparison.Ordinal);
-        Assert.DoesNotContain("Something went wrong", refused, StringComparison.Ordinal);
+        Assert.Contains(problem, refused.Problem, StringComparison.Ordinal);
+        Assert.Equal(refused.Problem, refused.Message);
+        Assert.DoesNotContain("Something went wrong", refused.Problem, StringComparison.Ordinal);
+        Assert.Equal((null, null, null), (refused.Download, refused.LibraryPath, refused.RunBy));
     }
 
     [Fact]
@@ -287,7 +340,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         _desktopApp.Reply = new QueueReply(QueueOutcome.Done, Job: job, LibraryPath: Path.Combine(ModFolder, FileNameOf("3")));
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
 
-        DownloadResult result = await mcp.CallAsync<DownloadResult>("download", Arguments(("link", HandoffLink("3").AbsoluteUri)), Cancellation);
+        LinkDownloadResult result = await DownloadAsync(mcp, HandoffLink("3").AbsoluteUri);
 
         Assert.Equal("desktop app", result.RunBy);
         Assert.Equal(job.Id.ToString(), result.Download?.Id);
@@ -317,9 +370,9 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         _desktopApp.Fails = new TimeoutException("No reply.");
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
 
-        string refused = await mcp.CallFailingAsync("download", Arguments(("link", HandoffLink("3").AbsoluteUri)), Cancellation);
+        LinkDownloadResult refused = await DownloadAsync(mcp, HandoffLink("3").AbsoluteUri);
 
-        Assert.Contains("didn't reply in time; it may have carried it out. downloads_list shows the queue.", refused, StringComparison.Ordinal);
+        Assert.Contains("didn't reply in time; it may have carried it out. downloads_list shows the queue.", refused.Problem, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -487,7 +540,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     {
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
         await DownloadAndWaitAsync(mcp, "1");
-        await mcp.CallAsync<DownloadResult>("download", Arguments(("link", FileLink("3").AbsoluteUri)), Cancellation);
+        await DownloadAsync(mcp, FileLink("3").AbsoluteUri);
 
         string refused = await mcp.CallFailingAsync("library_forget", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
 
@@ -665,7 +718,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         await using (McpSession mcp = await Cli.StartMcpAsync(Cancellation))
         {
             await DownloadAndWaitAsync(mcp, "3");
-            await mcp.CallFailingAsync("download", Arguments(("link", "https://handoff.example/locked/1?key=" + GoodKey)), Cancellation);
+            Assert.NotNull((await DownloadAsync(mcp, "https://handoff.example/locked/1?key=" + GoodKey)).Problem);
             await mcp.CloseAsync(Cancellation);
         }
 
@@ -712,9 +765,20 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
                 .Any(mod => mod.Source == FakeHandoffSource.SourceId.Value && mod.Files!.Any(file => file.FileId == fileId)),
             $"File {fileId} didn't come into the library.");
 
+    /// <summary>
+    /// Downloads one link, and returns its result.
+    /// </summary>
+    private static async Task<LinkDownloadResult> DownloadAsync(McpSession mcp, string link)
+    {
+        DownloadsResult downloaded = await mcp.CallAsync<DownloadsResult>("download", Arguments(("links", new[] { link })), Cancellation);
+        LinkDownloadResult result = Assert.Single(downloaded.Results);
+        Assert.Equal(result.Message, downloaded.Message);
+        return result;
+    }
+
     private static async Task DownloadAndWaitAsync(McpSession mcp, string fileId)
     {
-        await mcp.CallAsync<DownloadResult>("download", Arguments(("link", HandoffLink(fileId).AbsoluteUri)), Cancellation);
+        await DownloadAsync(mcp, HandoffLink(fileId).AbsoluteUri);
         await WaitForFileAsync(mcp, fileId);
     }
 }
