@@ -1,4 +1,5 @@
 using ModShelf.Application.Downloads;
+using ModShelf.Application.Library;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 
@@ -56,6 +57,36 @@ internal static class McpEntries
             file.DownloadedAt,
             string.Equals(Path.GetFileName(Path.GetDirectoryName(path)), ArchiveFolder, StringComparison.OrdinalIgnoreCase),
             !System.IO.File.Exists(path));
+    }
+
+    /// <summary>
+    /// The older version <paramref name="file"/> of <paramref name="mod"/> replaced when it was downloaded, and what
+    /// became of it, as <paramref name="history"/> and the library say; null when it replaced none, or the history doesn't
+    /// say.
+    /// </summary>
+    public static ReplacedFileEntry? Replaced(LibraryMod mod, LibraryFile file, IReadOnlyList<LibraryEvent> history, string root)
+    {
+        ArgumentNullException.ThrowIfNull(mod);
+        ArgumentNullException.ThrowIfNull(file);
+        ArgumentNullException.ThrowIfNull(history);
+
+        // The download that brought the file as it is: a file downloaded again replaces it, at a later time.
+        LibraryEvent? downloaded = history.FirstOrDefault(
+            happened => happened.Kind == LibraryEventKind.Downloaded && happened.File == file.File && happened.At == file.DownloadedAt);
+        if (downloaded?.Replaces is not { } replaced)
+        {
+            return null;
+        }
+
+        if (mod.Files.FirstOrDefault(other => other.File == replaced) is { } kept)
+        {
+            return new ReplacedFileEntry(
+                replaced.Id, kept.VersionLabel ?? downloaded.ReplacesVersion, kept.Name, File(kept, root).Archived ? "archived" : "kept");
+        }
+
+        bool deleted = history.Any(happened => happened.Kind == LibraryEventKind.Deleted && happened.File == replaced && happened.At >= downloaded.At);
+        string? name = history.FirstOrDefault(happened => happened.File == replaced && happened.FileName is not null)?.FileName;
+        return new ReplacedFileEntry(replaced.Id, downloaded.ReplacesVersion, name, deleted ? "deleted" : "gone");
     }
 
     public static LibraryUpdateEntry Update(LibraryUpdate update, LibraryMod mod, string root)

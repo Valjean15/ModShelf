@@ -419,6 +419,89 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         Assert.Equal(2, (await ChangesAsync(mcp, start)).Files.Count);
     }
 
+    [Fact]
+    public async Task SaysWhichVersionEachFileReplacedAndWhatBecameOfIt()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        DateTimeOffset start = DateTimeOffset.UtcNow.AddSeconds(-1);
+        await DownloadAndWaitAsync(mcp, "1");
+        await DownloadAndWaitAsync(mcp, "2");
+        await DownloadAndWaitAsync(mcp, "3");
+
+        LibraryChanges changes = await ChangesAsync(mcp, start);
+
+        // By default the newest two versions stay: 3 made 1 the third, deleted.
+        Assert.Equal(
+            [("2", new ReplacedFileEntry("1", "1.1", "File 1", "deleted")), ("3", new ReplacedFileEntry("2", "1.2", "File 2", "kept"))],
+            changes.Files.Select(file => (file.File.FileId, file.Replaces)));
+    }
+
+    [Fact]
+    public async Task SaysAReplacedVersionArchivedOrGoneFromTheLibrary()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await mcp.CallAsync<SettingResult>("settings_set", Arguments(("setting", "library.oldVersions"), ("value", "archive")), Cancellation);
+        DateTimeOffset start = DateTimeOffset.UtcNow.AddSeconds(-1);
+        await DownloadAndWaitAsync(mcp, "1");
+        await DownloadAndWaitAsync(mcp, "2");
+        await DownloadAndWaitAsync(mcp, "3");
+        ModRef mod = new(new GameRef(FakeHandoffSource.SourceId, "game"), "mod");
+        await Cli.InAppAsync(
+            services => services.GetRequiredService<ILibraryRepository>().UpdateAsync(mod, stored => stored!.WithoutFile(new ModFileRef(mod, "1")), Cancellation),
+            Cancellation);
+
+        LibraryChanges changes = await ChangesAsync(mcp, start);
+
+        Assert.Equal(
+            [("2", new ReplacedFileEntry("1", "1.1", "File 1", "gone")), ("3", new ReplacedFileEntry("2", "1.2", "File 2", "archived"))],
+            changes.Files.Select(file => (file.File.FileId, file.Replaces)));
+    }
+
+    [Fact]
+    public async Task SaysAVersionTheNewestKeptLeftOutDeletedAsItCame()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await mcp.CallAsync<SettingResult>("settings_set", Arguments(("setting", "library.oldVersions"), ("value", "1")), Cancellation);
+        DateTimeOffset start = DateTimeOffset.UtcNow.AddSeconds(-1);
+        await DownloadAndWaitAsync(mcp, "1");
+        await DownloadAndWaitAsync(mcp, "2");
+
+        LibraryChanges changes = await ChangesAsync(mcp, start);
+
+        NewLibraryFile two = Assert.Single(changes.Files);
+        Assert.Equal(new ReplacedFileEntry("1", "1.1", "File 1", "deleted"), two.Replaces);
+    }
+
+    [Fact]
+    public async Task AFileForgottenAndFoundAgainSaysNothingOfItsDownload()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        DateTimeOffset start = DateTimeOffset.UtcNow.AddSeconds(-1);
+        await DownloadAndWaitAsync(mcp, "1");
+        await DownloadAndWaitAsync(mcp, "2");
+        await mcp.CallAsync<ForgetResult>("library_forget", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
+        await mcp.CallAsync<RescanResult>("library_rescan", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
+
+        LibraryChanges changes = await ChangesAsync(mcp, start);
+
+        // The library has the files as the rescan found them, not as they were downloaded.
+        Assert.Equal([("1", (ReplacedFileEntry?)null), ("2", null)], changes.Files.Select(file => (file.File.FileId, file.Replaces)));
+    }
+
+    [Fact]
+    public async Task AFileFoundByARescanReplacesNothingItSays()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        DateTimeOffset start = DateTimeOffset.UtcNow.AddSeconds(-1);
+        await DownloadAndWaitAsync(mcp, "1");
+        await File.WriteAllBytesAsync(Path.Combine(ModFolder, FileNameOf("2")), Content, Cancellation);
+        await mcp.CallAsync<RescanResult>("library_rescan", null, Cancellation);
+
+        LibraryChanges changes = await ChangesAsync(mcp, start);
+
+        Assert.Equal([("1", (ReplacedFileEntry?)null), ("2", null)], changes.Files.Select(file => (file.File.FileId, file.Replaces)));
+    }
+
     [Theory]
     [InlineData("yesterday")]
     [InlineData("")]

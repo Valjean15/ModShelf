@@ -19,10 +19,20 @@ namespace ModShelf.Cli.Mcp;
 /// </summary>
 [McpServerToolType]
 internal sealed class LibraryTools(
-    IModLibrary library, ISettingsService settings, IUpdateChecker checker, IModLookup lookup, ILibraryRescan rescanner, TimeProvider time)
+    IModLibrary library,
+    ILibraryHistory history,
+    ISettingsService settings,
+    IUpdateChecker checker,
+    IModLookup lookup,
+    ILibraryRescan rescanner,
+    TimeProvider time)
 {
     // The most mods a page of the library lists.
     private const int MaxLimit = 200;
+
+    // The most of the library's history library_changes reads, the newest: a file downloaded before it says nothing of
+    // what it replaced.
+    private const int HistoryLimit = 1000;
 
     [McpServerTool(Name = "library_list", Title = "List the library", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
     [Description("Lists the mods in ModShelf's library, the ones watched for updates and the ones with downloaded files, by site, game and name, a page at a time: each with its files (their absolute paths, versions, whether they're old versions archived, and whether they're missing from disk) and the updates found for it. A large library reads best a game or a mod at a time, or compact first, which gives counts instead of files and updates.")]
@@ -72,7 +82,7 @@ internal sealed class LibraryTools(
         });
 
     [McpServerTool(Name = "library_changes", Title = "What's new in the library", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Lists the files downloaded into the library since a time, the oldest first, each with its mod's other files in the library: the versions it may replace, where they are, and whether they're archived. Ask again from the result's 'until' to see only what's newer. What library.oldVersions does decides whether old versions stay, are archived or are deleted.")]
+    [Description("Lists the files downloaded into the library since a time, the oldest first, each with the older version it replaced and what became of it (archived, deleted, kept, or gone from the library otherwise), and with its mod's other files in the library: where they are, and whether they're archived. Ask again from the result's 'until' to see only what's newer. What library.oldVersions does decides whether old versions stay, are archived or are deleted.")]
     public Task<LibraryChanges> ChangesAsync(
         [Description("From when, as an ISO 8601 date and time, such as 2026-11-01T09:00:00Z; one without an offset is UTC.")] string since,
         CancellationToken cancellationToken)
@@ -87,6 +97,7 @@ internal sealed class LibraryTools(
             string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
             AppSettings stored = await settings.GetAsync(cancellationToken).ConfigureAwait(false);
             IReadOnlyList<LibraryMod> mods = await library.ListAsync(cancellationToken).ConfigureAwait(false);
+            IReadOnlyList<LibraryEvent> happened = await history.ListAsync(from, HistoryLimit, cancellationToken).ConfigureAwait(false);
             NewLibraryFile[] files =
             [
                 .. mods
@@ -104,7 +115,8 @@ internal sealed class LibraryTools(
                                 .Where(file => file.File != found.File.File)
                                 .OrderByDescending(file => file.UploadedAt)
                                 .Select(file => McpEntries.File(file, root)),
-                        ])),
+                        ],
+                        McpEntries.Replaced(found.Mod, found.File, happened, root))),
             ];
             return new LibraryChanges(from, until, (stored.OldVersions ?? OldVersionRule.Default).ToString(), files);
         });
