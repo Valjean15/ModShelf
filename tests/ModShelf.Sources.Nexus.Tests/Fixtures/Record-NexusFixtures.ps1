@@ -65,6 +65,12 @@
     refuses one, its answer is saved anyway, the script says so and goes on, and the schema it recorded shows what to
     ask instead.
 
+.PARAMETER Covers
+    Records the game's artwork for the Library's game covers, leaving the other recordings as they are; with the other
+    modes, those too. The schema around games' artwork (GameArtworkSchema, GameArtwork, GamePage), then the game asked
+    for every field its artwork schema has, as the schema names them, and the artwork the API gives without a game. A
+    field that needs arguments is left out. Works with either account, and changes nothing on it.
+
 .PARAMETER RequiringModId
     With -Details: a mod of the game that needs other mods, such as Content Patcher, which needs SMAPI.
 
@@ -94,6 +100,9 @@
 
 .EXAMPLE
     ./Record-NexusFixtures.ps1 -Account Premium -Details
+
+.EXAMPLE
+    ./Record-NexusFixtures.ps1 -Account Premium -Covers
 #>
 
 #Requires -Version 7.2
@@ -126,6 +135,8 @@ param(
 
     [switch] $Details,
 
+    [switch] $Covers,
+
     [ValidateRange(1, [int]::MaxValue)]
     [int] $RequiringModId = 1915,
 
@@ -150,6 +161,10 @@ if ($Tracking -and ($NxmLink -or $ExpiredNxmLink)) {
 
 if ($Details -and ($NxmLink -or $ExpiredNxmLink)) {
     throw '-Details records only mods'' details; run the nxm:// links separately.'
+}
+
+if ($Covers -and ($NxmLink -or $ExpiredNxmLink)) {
+    throw '-Covers records only games'' artwork; run the nxm:// links separately.'
 }
 
 if ($Details -and $RequiringModId -eq $ModId) {
@@ -196,6 +211,26 @@ query DetailsSchema {
   game: __type(name: "Game") { fields { name args { name type { ...TypeRef } } type { ...TypeRef } } }
   gameExpansion: __type(name: "GameExpansion") { fields { name type { ...TypeRef } } }
   gamesFilter: __type(name: "GamesFilter") { inputFields { name type { ...TypeRef } } }
+}
+fragment TypeRef on __Type { kind name ofType { kind name ofType { kind name ofType { kind name } } } }
+'@
+
+# The parts of the v2 schema around games' artwork, for the Library's game covers. A type that doesn't exist comes back
+# as null.
+$ArtworkSchemaQuery = @'
+query ArtworkSchema {
+  gameArtworkSchema: __type(name: "GameArtworkSchema") { kind fields { name args { name type { ...TypeRef } } type { ...TypeRef } } }
+  gameArtwork: __type(name: "GameArtwork") { kind fields { name args { name type { ...TypeRef } } type { ...TypeRef } } }
+  gamePage: __type(name: "GamePage") { kind fields { name type { ...TypeRef } } }
+  gamesSearchFilter: __type(name: "GamesSearchFilter") { inputFields { name type { ...TypeRef } } }
+}
+fragment TypeRef on __Type { kind name ofType { kind name ofType { kind name ofType { kind name } } } }
+'@
+
+# A type's fields, asked for to build the artwork queries; not saved.
+$TypeFieldsQuery = @'
+query TypeFields($name: String!) {
+  type: __type(name: $name) { fields { name args { name type { kind } } type { ...TypeRef } } }
 }
 fragment TypeRef on __Type { kind name ofType { kind name ofType { kind name ofType { kind name } } } }
 '@
@@ -534,6 +569,74 @@ function Save-Details {
     Save-GraphQlFixture 'requirements-requiring-mod' (Invoke-NexusGraphQl $requirementsQuery 'ModRequirements' (New-ModVariables $RequiringModId))
 }
 
+# The game's artwork, for the Library's game covers: the schema around it, then the game with every field of its
+# artwork schema, and the artwork the API gives without a game, each asked for as the schema names its fields.
+function Save-Covers {
+    Save-GraphQlFixture 'graphql-artwork-schema' (Invoke-NexusGraphQl $ArtworkSchemaQuery 'ArtworkSchema')
+
+    $variables = [System.Text.Json.Nodes.JsonObject]::new()
+    $variables['domain'] = [System.Text.Json.Nodes.JsonValue]::Create($Game)
+    $schema = Get-Selection 'GameArtworkSchema' 3
+    $artworkSchema = if ($schema) { " artworkSchema $schema" } else { '' }
+    $coversQuery = "query GameCovers(`$domain: String) { game(domainName: `$domain) { id domainName name$artworkSchema } }"
+    Save-GraphQlFixture 'game-covers' (Invoke-NexusGraphQl $coversQuery 'GameCovers' $variables)
+
+    $artwork = Get-Selection 'GameArtwork' 3
+    if ($artwork) {
+        Save-GraphQlFixture 'game-artwork' (Invoke-NexusGraphQl "query GameArtwork { gameArtwork $artwork }" 'GameArtwork')
+    }
+    else {
+        Write-Warning 'The schema has no GameArtwork fields to ask for, so game-artwork wasn''t recorded; tell Claude.'
+    }
+}
+
+# The fields of a type to ask for, as the schema names them: each scalar and enum, and each object's own, down to
+# $Depth levels. A field that needs arguments is left out. Empty when the type has none, or doesn't exist.
+function Get-Selection([string] $TypeName, [int] $Depth) {
+    $variables = [System.Text.Json.Nodes.JsonObject]::new()
+    $variables['name'] = [System.Text.Json.Nodes.JsonValue]::Create($TypeName)
+    $answer = ConvertTo-Node (Invoke-NexusGraphQl $TypeFieldsQuery 'TypeFields' $variables).Text
+    $fields = $null
+    if ($answer -is [System.Text.Json.Nodes.JsonObject] -and $answer['data'] -is [System.Text.Json.Nodes.JsonObject] -and
+        $answer['data']['type'] -is [System.Text.Json.Nodes.JsonObject]) {
+        $fields = $answer['data']['type']['fields']
+    }
+
+    if ($fields -isnot [System.Text.Json.Nodes.JsonArray]) {
+        return ''
+    }
+
+    $parts = [System.Collections.Generic.List[string]]::new()
+    foreach ($field in $fields) {
+        $required = $false
+        foreach ($argument in @($field['args'])) {
+            if ($null -ne $argument -and (Get-Text $argument['type']['kind']) -eq 'NON_NULL') { $required = $true }
+        }
+
+        $named = $field['type']
+        while ($null -ne $named -and $null -eq $named['name']) { $named = $named['ofType'] }
+        if ($required -or $null -eq $named) {
+            continue
+        }
+
+        $name = Get-Text $field['name']
+        $kind = Get-Text $named['kind']
+        if ($kind -in 'SCALAR', 'ENUM') {
+            $parts.Add($name)
+        }
+        elseif ($kind -eq 'OBJECT' -and $Depth -gt 1) {
+            $inner = Get-Selection (Get-Text $named['name']) ($Depth - 1)
+            if ($inner) { $parts.Add("$name $inner") }
+        }
+    }
+
+    if ($parts.Count -eq 0) {
+        return ''
+    }
+
+    return '{ ' + ($parts -join ' ') + ' }'
+}
+
 # How Nexus Mods answers each way of tracking and untracking. The account's tracked mods end as they started, even
 # when something fails part-way.
 function Save-Tracking {
@@ -850,7 +953,7 @@ try {
     }
 
     Write-Host "Recording as a $Account account into $OutFolder"
-    if ($SearchOnly -or $Tracking -or $Details) {
+    if ($SearchOnly -or $Tracking -or $Details -or $Covers) {
         if ($SearchOnly) {
             Save-Searches
         }
@@ -861,6 +964,10 @@ try {
 
         if ($Details) {
             Save-Details
+        }
+
+        if ($Covers) {
+            Save-Covers
         }
 
         if ($Refused) {
