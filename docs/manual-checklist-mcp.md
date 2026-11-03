@@ -12,16 +12,18 @@ you should see.
 ## 1. The server
 
 - [ ] **1.1 Tools.** Start the agent's app, and ask it which ModShelf tools it has.
-  20 tools, from `library_list` to `diagnostics`. Claude Desktop's settings show the server as running.
-- [ ] **1.2 Reading.** Ask for the library, the updates and the settings.
-  The mods, their files' full paths in the test library, and the settings with their defaults marked.
+  24 tools, from `library_list` to `diagnostics`. Claude Desktop's settings show the server as running.
+- [ ] **1.2 Reading.** Ask for the library, the updates and the settings; then for the mods with files missing from disk.
+  The mods, their files' full paths in the test library, sizes and SHA-256s, and the settings with their defaults marked.
+  The missing ones come from one `library_list` with `missingOnly`; with none missing, none.
 - [ ] **1.3 Accounts.** Ask which accounts are linked.
   Nexus Mods linked, at its level, such as Premium; never the account's name or key.
 
 ## 2. Downloads
 
 - [ ] **2.1 Without the desktop app.** Quit the desktop app. Ask the agent to download an update from `library_updates`.
-  Premium: it says this MCP server downloads it, and the file comes into the library; `queue list` in a terminal shows it
+  Premium: it says this MCP server downloads it, or, for a file small enough to be done before the call ends, that
+  it's downloaded into the library, with `library_changes` for the version it replaced; the file comes into the library; `queue list` in a terminal shows it
   done. A few seconds after, `download` in a terminal runs: the server let the queue go. Free: the reply gives the page
   to start it on the site; start it there, with the mod manager download: the desktop app starts, and downloads it.
 - [ ] **2.2 With the desktop app.** Start the desktop app, and ask the agent to download another update.
@@ -44,7 +46,12 @@ you should see.
   optional file". Once it's downloaded, it leaves the list.
 - [ ] **2.6 Hashes.** Ask the agent for the SHA-256 of a file downloaded in 2.1, and compare it with
   `Get-FileHash -Algorithm SHA256 <its path>` in PowerShell.
-  They match (`Get-FileHash` writes it in capitals). A file from before 0.9.2 has none (`sha256` is null).
+  They match (`Get-FileHash` writes it in capitals). A file from before 0.9.2 has none (`sha256` is null) until
+  `library_rescan` reads it.
+
+- [ ] **2.6a What replaces what.** Ask the agent to show Dynamic Menu Overhaul (Dragon's Dogma 2, mod 1641) with all its
+  files, or SMAPI (Stardew Valley, mod 2400).
+  Each file's `replacedBy` is a file uploaded after it: no newest file says an older, archived one replaces it.
 
 - [ ] **2.7 Pins, skips and notes.** For a watched mod with an update, ask the agent to pin it, then for the updates;
   to unpin it and skip that update, then for the updates again; to offer it again; and to keep a note of the mod.
