@@ -72,8 +72,14 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
   The game box lists Nexus Mods' games. With nothing in the library yet, it starts with none chosen: "Choose a game to search its mods."
 - [ ] **3.2 Search.** Choose Stardew Valley (type to filter the list), type `smapi` in the search box, and **Search**.
   "*N* mods match." SMAPI is near the top, with its downloads, endorsements and last update.
+- [ ] **3.2a The game's rows.** Clear the search box.
+  The results give way to three rows: **Trending**, **Recently added** (each card says "Added *when*") and **Recently updated** ("Updated *when*"), each scrolling sideways, Trending's mods the ones the website's Stardew Valley page calls trending. **Show all** beside Recently added lists every mod, newest first, and the order box says **Newest**; clearing the search box again brings the rows back without them loading again. With **Off** under "Previews", the rows' cards have no pictures.
 - [ ] **3.3 Order and pages.** Choose **Newest** in the order box, then **Load more** at the bottom.
   The list starts over, newest first, and **Load more** adds the next mods below.
+- [ ] **3.3a Size, name and unique downloads.** Choose **Largest**, then **Name, A to Z**, then **Most unique downloads**.
+  Largest: each mod says its size, the biggest first (several GB at the top). Name, A to Z: names starting with quotes and digits first, then A. Most unique downloads: SMAPI and Content Patcher near the top.
+- [ ] **3.3b Time window, category and page size.** Choose **Updated in the last week**, then **Modding Tools** in the category box, then **50 per page**.
+  Each searches again: every mod listed was updated in the last week (open one to see its last update), then only Modding Tools, then 50 mods before **Load more**, which keeps all three. Choosing another game sets the category box back to **All categories**, with that game's categories.
 - [ ] **3.4 Author.** Type `Pathoschild` in the author box, and search again.
   Only Pathoschild's mods.
 - [ ] **3.5 A mod's page.** Clear the author box, search `smapi`, and click SMAPI.
@@ -311,7 +317,10 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 2.5 Check | | | |
 | 3.1 Games | | | |
 | 3.2 Search | | | |
+| 3.2a The game's rows | | | |
 | 3.3 Order and pages | | | |
+| 3.3a Size, name and unique downloads | | | |
+| 3.3b Time window, category and page size | | | |
 | 3.4 Author | | | |
 | 3.5 Mod's page | | | |
 | 3.6 Link in the search box | | | |
