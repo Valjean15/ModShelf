@@ -75,14 +75,20 @@ internal sealed partial class DiagnosticsReport(
             null => "asks",
         };
 
+        // A game's settings besides its folders, such as its own interval, are counted apart, when there are any.
+        int folders = stored.Games.Values.Count(game => game.Folders is not null);
+        int others = stored.Games.Values.Count(game => !(game with { Folders = null }).IsNone);
         return string.Join(
             ", ",
-            $"check for updates every {Describe(interval)}",
-            Describe(stored.OldVersions ?? OldVersionRule.Default),
-            $"theme {stored.Theme ?? AppTheme.System}",
-            $"notices {(stored.NotifyOfUpdates ?? true ? "on" : "off")}",
-            $"closing the window {close}",
-            $"folders for {Count(stored.GameFolders.Count, "game")} set apart");
+            [
+                $"check for updates every {Describe(interval)}",
+                Describe(stored.OldVersions ?? OldVersionRule.Default),
+                $"theme {stored.Theme ?? AppTheme.System}",
+                $"notices {(stored.NotifyOfUpdates ?? true ? "on" : "off")}",
+                $"closing the window {close}",
+                $"folders for {Count(folders, "game")} set apart",
+                .. others == 0 ? Array.Empty<string>() : [$"other settings for {Count(others, "game")} set apart"],
+            ]);
     }
 
     private static string Describe(TimeSpan interval) => interval switch

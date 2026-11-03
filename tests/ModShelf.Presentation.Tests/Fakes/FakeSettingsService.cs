@@ -28,6 +28,8 @@ internal sealed class FakeSettingsService : ISettingsService
 
     public Task SetLibraryFoldersAsync(string? game, FolderPattern? pattern, CancellationToken cancellationToken) => throw new NotSupportedException();
 
+    public Task SetGameAsync(string game, Func<GameSettings, GameSettings> change, CancellationToken cancellationToken) => throw new NotSupportedException();
+
     public Task SetOldVersionsAsync(OldVersionRule? rule, CancellationToken cancellationToken) => throw new NotSupportedException();
 
     public Task SetUpdateIntervalAsync(TimeSpan? interval, CancellationToken cancellationToken) => throw new NotSupportedException();

@@ -6,6 +6,7 @@ using ModShelf.Application.Settings;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Domain.Library;
 using ModShelf.Infrastructure.Settings;
+using ModShelf.Sources.Abstractions.Search;
 using ModShelf.Testing;
 
 namespace ModShelf.Infrastructure.Tests.Settings;
@@ -27,7 +28,7 @@ public sealed class JsonSettingsStoreTests : IDisposable
 
         Assert.Null(settings.LibraryRoot);
         Assert.Null(settings.LibraryFolders);
-        Assert.Empty(settings.GameFolders);
+        Assert.Empty(settings.Games);
         Assert.Null(settings.OldVersions);
         Assert.Equal(FilePath, Store().Location);
     }
@@ -57,9 +58,11 @@ public sealed class JsonSettingsStoreTests : IDisposable
             {
               "library": {
                 "root": {{System.Text.Json.JsonSerializer.Serialize(root)}},
-                "folders": "{source}/{game}/{mod} ({modid})/{file}",
-                "gameFolders": {
-                  "stardewvalley": "{mod}/{file}"
+                "folders": "{source}/{game}/{mod} ({modid})/{file}"
+              },
+              "games": {
+                "stardewvalley": {
+                  "folders": "{mod}/{file}"
                 }
               }
             }
@@ -531,6 +534,168 @@ public sealed class JsonSettingsStoreTests : IDisposable
     }
 
     [Fact]
+    public async Task KeepsEachGamesOwnSettings()
+    {
+        GameSettings stardew = new()
+        {
+            Folders = FolderPattern.Parse("{mod}/{file}"),
+            OldVersions = OldVersionRule.KeepLatest(3),
+            CheckUpdates = false,
+            UpdateInterval = TimeSpan.FromDays(1),
+            Notify = true,
+            Browse = new BrowseDefaults { Sort = SearchSort.UniqueDownloads, Direction = SearchDirection.Ascending, UpdatedWithin = TimeSpan.FromDays(30), PageSize = 100 },
+            Hidden = true,
+        };
+        GameSettings skyrim = new() { OldVersions = OldVersionRule.Archive, Browse = new BrowseDefaults { UpdatedWithin = TimeSpan.FromDays(1) } };
+        await Store().SaveAsync(new AppSettings { Games = Games(("StardewValley", stardew), ("skyrimspecialedition", skyrim)) }, Cancellation);
+
+        AppSettings settings = await Store().LoadAsync(Cancellation);
+
+        Assert.Equal((stardew, skyrim), (settings.GameFor("stardewvalley"), settings.GameFor("SkyrimSpecialEdition")));
+        string expected = """
+            {
+              "games": {
+                "skyrimspecialedition": {
+                  "oldVersions": "archive",
+                  "browse": {
+                    "window": "1d"
+                  }
+                },
+                "StardewValley": {
+                  "folders": "{mod}/{file}",
+                  "oldVersions": 3,
+                  "checkUpdates": false,
+                  "updateInterval": "1d",
+                  "notify": true,
+                  "browse": {
+                    "sort": "uniquedownloads",
+                    "direction": "ascending",
+                    "window": "30d",
+                    "pageSize": 100
+                  },
+                  "hidden": true
+                }
+              }
+            }
+            """;
+        Assert.Equal(expected.ReplaceLineEndings(), (await File.ReadAllTextAsync(FilePath, Cancellation)).TrimEnd().ReplaceLineEndings());
+    }
+
+    [Fact]
+    public async Task ReadsGamesFoldersAsTheyWereKeptAndMovesThemWhenSaving()
+    {
+        await WriteAsync("""
+            {
+              "library": { "folders": "{modid}/{file}", "gameFolders": { "skyrimspecialedition": "{mod}/{file}", "stardewvalley": "{file}" } },
+              "games": { "STARDEWVALLEY": { "folders": "{modid}/{file}", "hidden": true } }
+            }
+            """);
+
+        AppSettings settings = await Store().LoadAsync(Cancellation);
+        await Store().SaveAsync(settings, Cancellation);
+
+        Assert.Equal(new GameSettings { Folders = FolderPattern.Parse("{mod}/{file}") }, settings.GameFor("skyrimspecialedition"));
+        Assert.Equal(new GameSettings { Folders = FolderPattern.Parse("{modid}/{file}"), Hidden = true }, settings.GameFor("stardewvalley"));
+        string file = await File.ReadAllTextAsync(FilePath, Cancellation);
+        Assert.DoesNotContain("gameFolders", file, StringComparison.Ordinal);
+        Assert.Equal(settings.Games.Values, (await Store().LoadAsync(Cancellation)).Games.Values);
+    }
+
+    [Fact]
+    public async Task AGamesOldFoldersStayWhenItsNewSettingsHaveNone()
+    {
+        await WriteAsync("""{ "library": { "gameFolders": { "fallout4": "{mod}/{file}" } }, "games": { "fallout4": { "notify": false } } }""");
+
+        AppSettings settings = await Store().LoadAsync(Cancellation);
+
+        Assert.Equal(new GameSettings { Folders = FolderPattern.Parse("{mod}/{file}"), Notify = false }, settings.GameFor("fallout4"));
+    }
+
+    [Fact]
+    public async Task KeepsWhatElseAGameHoldsAndForgetsAGameWithNothingLeft()
+    {
+        await WriteAsync("""{ "games": { "fallout4": { "hidden": true, "colour": "teal" }, "stardewvalley": { "notify": false }, "skyrimspecialedition": { "browse": { "pageSize": 20, "view": "grid" } } } }""");
+
+        await Store().SaveAsync(new AppSettings(), Cancellation);
+
+        string file = await File.ReadAllTextAsync(FilePath, Cancellation);
+        Assert.Contains("\"colour\": \"teal\"", file, StringComparison.Ordinal);
+        Assert.Contains("\"view\": \"grid\"", file, StringComparison.Ordinal);
+        Assert.DoesNotContain("hidden", file, StringComparison.Ordinal);
+        Assert.DoesNotContain("stardewvalley", file, StringComparison.Ordinal);
+        Assert.DoesNotContain("pageSize", file, StringComparison.Ordinal);
+        Assert.Empty((await Store().LoadAsync(Cancellation)).Games);
+    }
+
+    [Fact]
+    public async Task ReadsAGamesSettingsWrittenByHandInAnyCase()
+    {
+        await WriteAsync("""{ "games": { "fallout4": { "browse": { "sort": "Updated", "direction": " DESCENDING ", "window": "7D" }, "oldVersions": "all", "folders": "" } } }""");
+
+        AppSettings settings = await Store().LoadAsync(Cancellation);
+
+        Assert.Equal(
+            new GameSettings
+            {
+                OldVersions = OldVersionRule.KeepAll,
+                Browse = new BrowseDefaults { Sort = SearchSort.Updated, Direction = SearchDirection.Descending, UpdatedWithin = TimeSpan.FromDays(7) },
+            },
+            settings.GameFor("fallout4"));
+    }
+
+    [Fact]
+    public async Task AGamesNewSettingsNameItAsTheyDo()
+    {
+        await WriteAsync("""{ "library": { "gameFolders": { "stardewvalley": "{mod}/{file}" } }, "games": { "STARDEWVALLEY": { "notify": false } } }""");
+
+        AppSettings settings = await Store().LoadAsync(Cancellation);
+
+        Assert.Equal("STARDEWVALLEY", Assert.Single(settings.Games).Key);
+    }
+
+    [Fact]
+    public async Task BrowseLeftAsBrowsesOwnIsLeftOut()
+    {
+        await WriteAsync("""{ "games": { "fallout4": { "hidden": true, "browse": { } } } }""");
+
+        Assert.Equal(new GameSettings { Hidden = true }, (await Store().LoadAsync(Cancellation)).GameFor("fallout4"));
+    }
+
+    [Fact]
+    public async Task AGameWithNoSettingIsLeftOut()
+    {
+        await WriteAsync("""{ "games": { "fallout4": { }, "stardewvalley": { "browse": { } } } }""");
+
+        Assert.Empty((await Store().LoadAsync(Cancellation)).Games);
+    }
+
+    [Theory]
+    [InlineData("""{ "games": [] }""", "games must hold each game's settings.")]
+    [InlineData("""{ "games": { "fallout4": true } }""", "games.fallout4 must hold the game's settings.")]
+    [InlineData("""{ "games": { "fallout4": { "folders": 3 } } }""", "games.fallout4.folders must be text.")]
+    [InlineData("""{ "games": { "fallout4": { "folders": "{mod}" } } }""", "")]
+    [InlineData("""{ "games": { "fallout4": { "oldVersions": true } } }""", "games.fallout4.oldVersions must be all, archive, or a number of versions to keep.")]
+    [InlineData("""{ "games": { "fallout4": { "checkUpdates": "no" } } }""", "games.fallout4.checkUpdates must be true or false.")]
+    [InlineData("""{ "games": { "fallout4": { "updateInterval": "1m" } } }""", "'1m' isn't an interval.")]
+    [InlineData("""{ "games": { "fallout4": { "notify": 1 } } }""", "games.fallout4.notify must be true or false.")]
+    [InlineData("""{ "games": { "fallout4": { "hidden": "yes" } } }""", "games.fallout4.hidden must be true or false.")]
+    [InlineData("""{ "games": { "fallout4": { "browse": 3 } } }""", "games.fallout4.browse must hold how Browse shows the game's mods.")]
+    [InlineData("""{ "games": { "fallout4": { "browse": { "sort": "best" } } } }""", "games.fallout4.browse.sort must be one of relevance, ")]
+    [InlineData("""{ "games": { "fallout4": { "browse": { "direction": "up" } } } }""", "games.fallout4.browse.direction must be ascending or descending.")]
+    [InlineData("""{ "games": { "fallout4": { "browse": { "window": "2d" } } } }""", "games.fallout4.browse.window must be 1d, 7d or 30d.")]
+    [InlineData("""{ "games": { "fallout4": { "browse": { "pageSize": 30 } } } }""", "games.fallout4.browse.pageSize must be 20, 50 or 100.")]
+    [InlineData("""{ "games": { "fallout4": { "browse": { "pageSize": "50" } } } }""", "games.fallout4.browse.pageSize must be 20, 50 or 100.")]
+    [InlineData("""{ "library": { "gameFolders": [] } }""", "library.gameFolders must hold a folder pattern for each game.")]
+    public async Task SaysWhenAGamesSettingIsWrong(string content, string message)
+    {
+        await WriteAsync(content);
+
+        InvalidDataException refused = await Assert.ThrowsAsync<InvalidDataException>(() => Store().LoadAsync(Cancellation));
+
+        Assert.StartsWith($"The settings in {FilePath} can't be read: {message}", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void RefusesARelativePath()
     {
         Assert.Throws<ArgumentException>(() => new JsonSettingsStore(Path.Combine("App Data", "settings.json")));
@@ -551,8 +716,11 @@ public sealed class JsonSettingsStoreTests : IDisposable
     {
         LibraryRoot = root,
         LibraryFolders = folders,
-        GameFolders = games.ToImmutableDictionary(game => game.Game, game => game.Pattern, StringComparer.OrdinalIgnoreCase),
+        Games = games.ToImmutableDictionary(game => game.Game, game => new GameSettings { Folders = game.Pattern }, StringComparer.OrdinalIgnoreCase),
     };
+
+    private static ImmutableDictionary<string, GameSettings> Games(params (string Game, GameSettings Settings)[] games)
+        => games.ToImmutableDictionary(game => game.Game, game => game.Settings, StringComparer.OrdinalIgnoreCase);
 
     private JsonSettingsStore Store() => new(FilePath);
 

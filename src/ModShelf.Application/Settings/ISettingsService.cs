@@ -48,6 +48,14 @@ public interface ISettingsService
     Task SetLibraryFoldersAsync(string? game, FolderPattern? pattern, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Changes <paramref name="game"/>'s own settings: <paramref name="change"/> takes those it has, or
+    /// <see cref="GameSettings.None"/>, and gives those it should have. A game left with no setting of its own is
+    /// forgotten.
+    /// </summary>
+    /// <exception cref="ArgumentException"><paramref name="game"/> is blank.</exception>
+    Task SetGameAsync(string game, Func<GameSettings, GameSettings> change, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Sets what happens to a library file's old versions when a newer one is downloaded, or sets it back to
     /// <see cref="OldVersionRule.Default"/> with null. Files downloaded already stay as they are.
     /// </summary>

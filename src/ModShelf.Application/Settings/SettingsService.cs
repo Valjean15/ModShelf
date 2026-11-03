@@ -69,28 +69,38 @@ internal sealed class SettingsService : ISettingsService, IDisposable
             .ConfigureAwait(false);
     }
 
-    public async Task SetLibraryFoldersAsync(string? game, FolderPattern? pattern, CancellationToken cancellationToken)
+    public Task SetLibraryFoldersAsync(string? game, FolderPattern? pattern, CancellationToken cancellationToken)
     {
-        if (game is not null)
+        if (game is null)
         {
-            ArgumentException.ThrowIfNullOrWhiteSpace(game);
+            return ChangeAsync((settings, _) => Task.FromResult(settings with { LibraryFolders = pattern }), cancellationToken);
         }
 
-        await ChangeAsync(
-                (settings, _) =>
-                {
-                    if (game is null)
-                    {
-                        return Task.FromResult(settings with { LibraryFolders = pattern });
-                    }
+        ArgumentException.ThrowIfNullOrWhiteSpace(game);
+        return SetGameAsync(game, settings => settings with { Folders = pattern }, cancellationToken);
+    }
 
-                    ImmutableDictionary<string, FolderPattern> games = settings.GameFolders
-                        .ToImmutableDictionary(StringComparer.OrdinalIgnoreCase)
-                        .Remove(game.Trim());
-                    return Task.FromResult(settings with { GameFolders = pattern is null ? games : games.Add(game.Trim(), pattern) });
-                },
-                cancellationToken)
-            .ConfigureAwait(false);
+    public Task SetGameAsync(string game, Func<GameSettings, GameSettings> change, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(game);
+        ArgumentNullException.ThrowIfNull(change);
+
+        string key = game.Trim();
+        return ChangeAsync(
+            (settings, _) =>
+            {
+                GameSettings changed = change(settings.GameFor(key)) ?? throw new InvalidOperationException("A game's changed settings can't be null.");
+                if (changed.Browse is { IsNone: true })
+                {
+                    changed = changed with { Browse = null };
+                }
+
+                // The game keeps the key it was stored under, in its case, rather than gaining a second.
+                ImmutableDictionary<string, GameSettings> games = settings.Games.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
+                string stored = games.Keys.FirstOrDefault(name => string.Equals(name, key, StringComparison.OrdinalIgnoreCase)) ?? key;
+                return Task.FromResult(settings with { Games = changed.IsNone ? games.Remove(stored) : games.SetItem(stored, changed) });
+            },
+            cancellationToken);
     }
 
     public Task SetOldVersionsAsync(OldVersionRule? rule, CancellationToken cancellationToken)

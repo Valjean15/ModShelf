@@ -87,6 +87,25 @@ public sealed class LibraryOldVersionsTests : IDisposable
     }
 
     [Fact]
+    public async Task AGamesOwnRuleComesBeforeEveryGames()
+    {
+        _store.Settings = new AppSettings
+        {
+            OldVersions = OldVersionRule.KeepAll,
+            Games = new Dictionary<string, GameSettings>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["SkyrimSpecialEdition"] = new() { OldVersions = OldVersionRule.KeepLatest(1) },
+                ["fallout4"] = new() { OldVersions = OldVersionRule.Archive },
+            },
+        };
+
+        LibraryRecord recorded = await RecordAsync();
+
+        Assert.Equal(["52", "51", "50"], recorded.Deleted.Select(file => file.File.Id));
+        Assert.Equal([$"{Folder}/SkyUI 5.3.7z"], LibraryPaths);
+    }
+
+    [Fact]
     public async Task KeepingAllChangesNothing()
     {
         _store.Settings = new AppSettings { OldVersions = OldVersionRule.KeepAll };

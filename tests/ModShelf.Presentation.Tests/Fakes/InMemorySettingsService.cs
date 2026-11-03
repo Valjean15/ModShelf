@@ -77,8 +77,25 @@ internal sealed class InMemorySettingsService : ISettingsService
                 }
 
                 ArgumentException.ThrowIfNullOrWhiteSpace(game);
-                ImmutableDictionary<string, FolderPattern> games = settings.GameFolders.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase).Remove(game);
-                return settings with { GameFolders = pattern is null ? games : games.Add(game, pattern) };
+                ImmutableDictionary<string, GameSettings> games = settings.Games.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
+                GameSettings own = settings.GameFor(game) with { Folders = pattern };
+                return settings with { Games = own.IsNone ? games.Remove(game) : games.SetItem(game, own) };
+            });
+
+    public Task SetGameAsync(string game, Func<GameSettings, GameSettings> change, CancellationToken cancellationToken)
+        => ChangeAsync(
+            $"game {game}",
+            settings =>
+            {
+                ArgumentException.ThrowIfNullOrWhiteSpace(game);
+                GameSettings own = change(settings.GameFor(game));
+                if (own.Browse is { IsNone: true })
+                {
+                    own = own with { Browse = null };
+                }
+
+                ImmutableDictionary<string, GameSettings> games = settings.Games.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
+                return settings with { Games = own.IsNone ? games.Remove(game) : games.SetItem(game, own) };
             });
 
     public Task SetOldVersionsAsync(OldVersionRule? rule, CancellationToken cancellationToken)

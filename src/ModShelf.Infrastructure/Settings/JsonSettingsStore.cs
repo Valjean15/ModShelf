@@ -8,6 +8,7 @@ using ModShelf.Application.Settings;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Updates;
+using ModShelf.Sources.Abstractions.Search;
 
 namespace ModShelf.Infrastructure.Settings;
 
@@ -18,8 +19,18 @@ namespace ModShelf.Infrastructure.Settings;
 ///   "library": {
 ///     "root": "D:\\Mods",
 ///     "folders": "{source}/{game}/{mod} ({modid})/{file}",
-///     "gameFolders": { "skyrimspecialedition": "{source}/{game}/{mod}/{file}" },
 ///     "oldVersions": 2
+///   },
+///   "games": {
+///     "skyrimspecialedition": {
+///       "folders": "{source}/{game}/{mod}/{file}",
+///       "oldVersions": "archive",
+///       "checkUpdates": true,
+///       "updateInterval": "1d",
+///       "notify": false,
+///       "browse": { "sort": "updated", "direction": "descending", "window": "7d", "pageSize": 50 },
+///       "hidden": true
+///     }
 ///   },
 ///   "updates": { "interval": "6h" },
 ///   "appearance": { "theme": "dark" },
@@ -34,7 +45,8 @@ namespace ModShelf.Infrastructure.Settings;
 /// </summary>
 /// <remarks>
 /// Settings left out take their defaults. Saving keeps whatever else the file holds, such as a newer version's settings,
-/// and replaces the file in one step, so it's never left half-written.
+/// and replaces the file in one step, so it's never left half-written. Games' folders in <c>library.gameFolders</c>, as
+/// 0.9.2 kept them, are read too, and move to <c>games</c> when the settings are next saved.
 /// </remarks>
 internal sealed class JsonSettingsStore : ISettingsStore
 {
@@ -60,6 +72,15 @@ internal sealed class JsonSettingsStore : ISettingsStore
     private const string Adult = "adult";
     private const string Details = "details";
     private const string MaxAge = "maxAge";
+    private const string Games = "games";
+    private const string CheckUpdates = "checkUpdates";
+    private const string UpdateIntervalName = "updateInterval";
+    private const string Browse = "browse";
+    private const string Sort = "sort";
+    private const string Direction = "direction";
+    private const string TimeWindow = "window";
+    private const string PageSize = "pageSize";
+    private const string Hidden = "hidden";
 
     private static readonly JsonDocumentOptions Reading = new() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
     private static readonly JsonSerializerOptions Writing = new() { WriteIndented = true };
@@ -103,21 +124,12 @@ internal sealed class JsonSettingsStore : ISettingsStore
                 throw new InvalidDataException($"library.root must be a full path, not '{root}'.");
             }
 
-            ImmutableDictionary<string, FolderPattern>.Builder games = ImmutableDictionary.CreateBuilder<string, FolderPattern>(StringComparer.OrdinalIgnoreCase);
-            if (library[GameFolders] is JsonObject gameFolders)
-            {
-                foreach ((string game, JsonNode? pattern) in gameFolders)
-                {
-                    games[game] = FolderPattern.Parse(pattern?.GetValue<string>() ?? throw new InvalidDataException($"library.gameFolders.{game} is empty."));
-                }
-            }
-
             string? folders = Text(library, Folders);
             return new AppSettings
             {
                 LibraryRoot = root,
                 LibraryFolders = folders is null ? null : FolderPattern.Parse(folders),
-                GameFolders = games.ToImmutable(),
+                Games = ReadGames(file?[Games], library[GameFolders]),
                 OldVersions = ReadOldVersions(library),
                 UpdateInterval = Text(updates, Interval, Updates) is { } interval ? UpdateInterval.Parse(interval) : null,
                 NotifyOfUpdates = Flag(updates, Notify, Updates),
@@ -154,34 +166,12 @@ internal sealed class JsonSettingsStore : ISettingsStore
 
         Set(library, Root, settings.LibraryRoot);
         Set(library, Folders, settings.LibraryFolders?.Text);
-        if (settings.GameFolders.Count == 0)
-        {
-            library.Remove(GameFolders);
-        }
-        else
-        {
-            JsonObject games = [];
-            foreach ((string game, FolderPattern pattern) in settings.GameFolders.OrderBy(entry => entry.Key, StringComparer.OrdinalIgnoreCase))
-            {
-                games[game] = pattern.Text;
-            }
 
-            library[GameFolders] = games;
-        }
+        // Games' folders moved to their own settings.
+        library.Remove(GameFolders);
+        WriteGames(file, settings.Games);
 
-        // A count as a number, the others as text: "oldVersions": 2, or "oldVersions": "archive".
-        switch (settings.OldVersions)
-        {
-            case null:
-                library.Remove(OldVersions);
-                break;
-            case { Action: OldVersionAction.KeepLatest } rule:
-                library[OldVersions] = rule.Count;
-                break;
-            case { } rule:
-                library[OldVersions] = rule.ToString();
-                break;
-        }
+        WriteOldVersions(library, settings.OldVersions);
 
         if (library.Count == 0)
         {
@@ -435,13 +425,210 @@ internal sealed class JsonSettingsStore : ISettingsStore
     /// <summary>
     /// The rule for old versions: a count, or text as <see cref="OldVersionRule.Parse"/> reads it.
     /// </summary>
-    private static OldVersionRule? ReadOldVersions(JsonObject library) => library[OldVersions] switch
+    private static OldVersionRule? ReadOldVersions(JsonObject section, string sectionName = Library) => section[OldVersions] switch
     {
         null => null,
         JsonValue value when value.TryGetValue(out int count) => OldVersionRule.Parse(count.ToString(CultureInfo.InvariantCulture)),
         JsonValue value when value.TryGetValue(out string? text) => OldVersionRule.Parse(text),
-        _ => throw new InvalidDataException($"library.{OldVersions} must be all, archive, or a number of versions to keep."),
+        _ => throw new InvalidDataException($"{sectionName}.{OldVersions} must be all, archive, or a number of versions to keep."),
     };
+
+    /// <summary>
+    /// Writes a rule for old versions as a count, or as text: "oldVersions": 2, or "oldVersions": "archive".
+    /// </summary>
+    private static void WriteOldVersions(JsonObject section, OldVersionRule? rule)
+    {
+        switch (rule)
+        {
+            case null:
+                section.Remove(OldVersions);
+                break;
+            case { Action: OldVersionAction.KeepLatest }:
+                section[OldVersions] = rule.Count;
+                break;
+            default:
+                section[OldVersions] = rule.ToString();
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Each game's own settings, from <c>games</c>, and the folders 0.9.2 kept in <c>library.gameFolders</c>, which a
+    /// game's own folders in <c>games</c> come before.
+    /// </summary>
+    private static ImmutableDictionary<string, GameSettings> ReadGames(JsonNode? section, JsonNode? oldFolders)
+    {
+        ImmutableDictionary<string, GameSettings>.Builder games = ImmutableDictionary.CreateBuilder<string, GameSettings>(StringComparer.OrdinalIgnoreCase);
+        switch (oldFolders)
+        {
+            case null:
+                break;
+            case JsonObject folders:
+                foreach ((string game, JsonNode? pattern) in folders)
+                {
+                    string text = pattern is JsonValue value && value.TryGetValue(out string? set) && !string.IsNullOrWhiteSpace(set)
+                        ? set
+                        : throw new InvalidDataException($"{Library}.{GameFolders}.{game} must be a folder pattern.");
+                    games[game] = new GameSettings { Folders = FolderPattern.Parse(text) };
+                }
+
+                break;
+            default:
+                throw new InvalidDataException($"{Library}.{GameFolders} must hold a folder pattern for each game.");
+        }
+
+        switch (section)
+        {
+            case null:
+                break;
+            case JsonObject read:
+                foreach ((string game, JsonNode? node) in read)
+                {
+                    string name = $"{Games}.{game}";
+                    if (node is not JsonObject settings)
+                    {
+                        throw new InvalidDataException($"{name} must hold the game's settings.");
+                    }
+
+                    GameSettings before = games.TryGetValue(game, out GameSettings? old) ? old : GameSettings.None;
+                    string? folders = Text(settings, Folders, name);
+                    GameSettings own = new()
+                    {
+                        Folders = folders is null ? before.Folders : FolderPattern.Parse(folders),
+                        OldVersions = ReadOldVersions(settings, name),
+                        CheckUpdates = Flag(settings, CheckUpdates, name),
+                        UpdateInterval = Text(settings, UpdateIntervalName, name) is { } interval ? UpdateInterval.Parse(interval) : null,
+                        Notify = Flag(settings, Notify, name),
+                        Browse = ReadBrowse(settings[Browse], $"{name}.{Browse}"),
+                        Hidden = Flag(settings, Hidden, name),
+                    };
+                    // Under the key the game has here, in place of its old folders' own.
+                    if (!own.IsNone)
+                    {
+                        games[game] = own;
+                    }
+                }
+
+                break;
+            default:
+                throw new InvalidDataException($"{Games} must hold each game's settings.");
+        }
+
+        return games.ToImmutable();
+    }
+
+    /// <summary>
+    /// How Browse shows a game's mods: an order by name, a direction, a window such as 7d, and a page size.
+    /// </summary>
+    private static BrowseDefaults? ReadBrowse(JsonNode? node, string name)
+    {
+        switch (node)
+        {
+            case null:
+                return null;
+            case JsonObject browse:
+                BrowseDefaults defaults = new()
+                {
+                    Sort = Text(browse, Sort, name) is { } sort
+                        ? Named<SearchSort>(sort) ?? throw new InvalidDataException($"{name}.{Sort} must be one of {string.Join(", ", Enum.GetValues<SearchSort>().Select(Name))}.")
+                        : null,
+                    Direction = Text(browse, Direction, name) is { } direction
+                        ? Named<SearchDirection>(direction) ?? throw new InvalidDataException($"{name}.{Direction} must be ascending or descending.")
+                        : null,
+                    UpdatedWithin = Text(browse, TimeWindow, name) is { } window
+                        ? WindowNamed(window) ?? throw new InvalidDataException($"{name}.{TimeWindow} must be 1d, 7d or 30d.")
+                        : null,
+                    PageSize = browse[PageSize] switch
+                    {
+                        null => null,
+                        JsonValue value when value.TryGetValue(out int size) && BrowseDefaults.PageSizes.Contains(size) => size,
+                        _ => throw new InvalidDataException($"{name}.{PageSize} must be 20, 50 or 100."),
+                    },
+                };
+                return defaults.IsNone ? null : defaults;
+            default:
+                throw new InvalidDataException($"{name} must hold how Browse shows the game's mods.");
+        }
+    }
+
+    /// <returns>The window written, such as 7d, when Browse offers it; null otherwise.</returns>
+    private static TimeSpan? WindowNamed(string text)
+    {
+        foreach (TimeSpan window in BrowseDefaults.Windows)
+        {
+            if (string.Equals(WindowText(window), text.Trim(), StringComparison.OrdinalIgnoreCase))
+            {
+                return window;
+            }
+        }
+
+        return null;
+    }
+
+    private static string WindowText(TimeSpan window) => $"{window.TotalDays.ToString(CultureInfo.InvariantCulture)}d";
+
+    /// <summary>
+    /// Writes each game's own settings to <c>games</c>, in the games' order, keeping in each game's what this version
+    /// doesn't know; a game with no setting left goes, unless it holds such settings.
+    /// </summary>
+    private static void WriteGames(JsonObject file, IReadOnlyDictionary<string, GameSettings> games)
+    {
+        JsonObject before = file[Games] as JsonObject ?? [];
+        JsonObject section = [];
+        IEnumerable<string> names = before.Select(entry => entry.Key)
+            .Concat(games.Keys)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Order(StringComparer.OrdinalIgnoreCase);
+        foreach (string name in names)
+        {
+            string? stored = before.Select(entry => entry.Key).FirstOrDefault(key => string.Equals(key, name, StringComparison.OrdinalIgnoreCase));
+            JsonObject game = stored is not null && before[stored] is JsonObject kept ? (JsonObject)kept.DeepClone() : [];
+            GameSettings settings = games.TryGetValue(name, out GameSettings? set) ? set : GameSettings.None;
+            Set(game, Folders, settings.Folders?.Text);
+            WriteOldVersions(game, settings.OldVersions);
+            SetFlag(game, CheckUpdates, settings.CheckUpdates);
+            Set(game, UpdateIntervalName, settings.UpdateInterval is { } interval ? UpdateInterval.Format(interval) : null);
+            SetFlag(game, Notify, settings.Notify);
+            WriteBrowse(game, settings.Browse);
+            SetFlag(game, Hidden, settings.Hidden);
+            if (game.Count > 0)
+            {
+                section[games.Keys.FirstOrDefault(key => string.Equals(key, name, StringComparison.OrdinalIgnoreCase)) ?? stored ?? name] = game;
+            }
+        }
+
+        Keep(file, Games, section);
+    }
+
+    private static void WriteBrowse(JsonObject game, BrowseDefaults? defaults)
+    {
+        JsonObject browse = game[Browse] as JsonObject ?? [];
+        Set(browse, Sort, defaults?.Sort is { } sort ? Name(sort) : null);
+        Set(browse, Direction, defaults?.Direction is { } direction ? Name(direction) : null);
+        Set(browse, TimeWindow, defaults?.UpdatedWithin is { } window ? WindowText(window) : null);
+        if (defaults?.PageSize is { } size)
+        {
+            browse[PageSize] = size;
+        }
+        else
+        {
+            browse.Remove(PageSize);
+        }
+
+        Keep(game, Browse, browse);
+    }
+
+    private static void SetFlag(JsonObject section, string name, bool? value)
+    {
+        if (value is { } flag)
+        {
+            section[name] = flag;
+        }
+        else
+        {
+            section.Remove(name);
+        }
+    }
 
     private static void Set(JsonObject section, string name, string? value)
     {

@@ -378,7 +378,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
         // changes, and moved back if it can't, and they leave it before they're deleted.
         OldVersionPlan plan = details is null || stored is null
             ? OldVersionPlan.None
-            : OldVersions.Plan(stored, job.File, details.Files, settings.OldVersions ?? OldVersionRule.Default);
+            : OldVersions.Plan(stored, job.File, details.Files, settings.OldVersionsFor(job.File.Mod.Game.Key));
         IReadOnlyList<(LibraryFile Before, LibraryFile After)> archived = plan.Archive.Count == 0
             ? []
             : Archive(root, await _library.ListAsync(cancellationToken).ConfigureAwait(false), plan.Archive);

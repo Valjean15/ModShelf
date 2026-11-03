@@ -42,10 +42,10 @@ public sealed record AppSettings
     public FolderPattern? LibraryFolders { get; init; }
 
     /// <summary>
-    /// Patterns of single games, by the game as its site names it, such as skyrimspecialedition, in any case.
+    /// Single games' own settings, by the game as its site names it, such as skyrimspecialedition, in any case.
     /// </summary>
-    public IReadOnlyDictionary<string, FolderPattern> GameFolders { get; init; }
-        = ImmutableDictionary.Create<string, FolderPattern>(StringComparer.OrdinalIgnoreCase);
+    public IReadOnlyDictionary<string, GameSettings> Games { get; init; }
+        = ImmutableDictionary.Create<string, GameSettings>(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// What happens to a library file's old versions when a newer one is downloaded; null for
@@ -126,12 +126,44 @@ public sealed record AppSettings
     };
 
     /// <summary>
-    /// The pattern files of <paramref name="game"/> go by.
+    /// The settings of <paramref name="game"/>'s own: <see cref="GameSettings.None"/> when it has none.
     /// </summary>
-    public FolderPattern FoldersFor(string game)
+    public GameSettings GameFor(string game)
     {
         ArgumentNullException.ThrowIfNull(game);
 
-        return GameFolders.TryGetValue(game, out FolderPattern? pattern) ? pattern : LibraryFolders ?? FolderPattern.Default;
+        return Games.TryGetValue(game, out GameSettings? settings) ? settings : GameSettings.None;
     }
+
+    /// <summary>
+    /// The pattern files of <paramref name="game"/> go by: its own, or every game's.
+    /// </summary>
+    public FolderPattern FoldersFor(string game) => GameFor(game).Folders ?? LibraryFolders ?? FolderPattern.Default;
+
+    /// <summary>
+    /// What happens to old versions of <paramref name="game"/>'s files: its own rule, or every game's.
+    /// </summary>
+    public OldVersionRule OldVersionsFor(string game) => GameFor(game).OldVersions ?? OldVersions ?? OldVersionRule.Default;
+
+    /// <summary>
+    /// How often <paramref name="game"/>'s watched mods are checked in the background: its own interval, or every
+    /// game's.
+    /// </summary>
+    public TimeSpan IntervalFor(string game) => GameFor(game).UpdateInterval ?? UpdateInterval ?? Domain.Updates.UpdateInterval.Default;
+
+    /// <summary>
+    /// Whether a background check that finds new updates of <paramref name="game"/>'s mods shows a notice: as the game
+    /// says, or as every game does.
+    /// </summary>
+    public bool NotifiesFor(string game) => GameFor(game).Notify ?? NotifyOfUpdates ?? true;
+
+    /// <summary>
+    /// Whether <paramref name="game"/>'s watched mods are checked for updates with every game's: yes unless it says not.
+    /// </summary>
+    public bool ChecksUpdatesOf(string game) => GameFor(game).CheckUpdates ?? true;
+
+    /// <summary>
+    /// Whether the desktop app's lists leave <paramref name="game"/> out.
+    /// </summary>
+    public bool IsHidden(string game) => GameFor(game).Hidden ?? false;
 }

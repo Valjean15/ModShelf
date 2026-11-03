@@ -76,9 +76,9 @@ public sealed class LibraryDownloadsTests : IDisposable
         {
             LibraryRoot = root,
             LibraryFolders = FolderPattern.Parse("everything/{file}"),
-            GameFolders = ImmutableDictionary.CreateRange(
+            Games = ImmutableDictionary.CreateRange(
                 StringComparer.OrdinalIgnoreCase,
-                [KeyValuePair.Create("SkyrimSpecialEdition", FolderPattern.Parse("Skyrim/{mod}/{file}"))]),
+                [KeyValuePair.Create("SkyrimSpecialEdition", new GameSettings { Folders = FolderPattern.Parse("Skyrim/{mod}/{file}") })]),
         };
         using LibraryDownloads library = Create();
 

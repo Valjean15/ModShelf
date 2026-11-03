@@ -151,9 +151,9 @@ public sealed class SettingsViewModelTests
         {
             LibraryRoot = Moved,
             LibraryFolders = ById,
-            GameFolders = ImmutableDictionary.CreateRange(
+            Games = ImmutableDictionary.CreateRange(
                 StringComparer.OrdinalIgnoreCase,
-                [new KeyValuePair<string, FolderPattern>("stardewvalley", Flat), new KeyValuePair<string, FolderPattern>("Fallout4", ById)]),
+                [new KeyValuePair<string, GameSettings>("stardewvalley", new() { Folders = Flat }), new KeyValuePair<string, GameSettings>("Fallout4", new() { Folders = ById })]),
             OldVersions = OldVersionRule.Archive,
             UpdateInterval = TimeSpan.FromMinutes(90),
             NotifyOfUpdates = false,
@@ -523,7 +523,7 @@ public sealed class SettingsViewModelTests
         await stardew.RemoveCommand.ExecuteAsync(null);
 
         Assert.Empty(Screen.GameFolders);
-        Assert.Empty(_harness.Settings.Stored.GameFolders);
+        Assert.Empty(_harness.Settings.Stored.Games);
         Assert.Equal(
             ["folders stardewvalley {source}/{game}/{modid}/{file}", "folders stardewvalley {mod}/{file}", "folders stardewvalley null"],
             _harness.Settings.Changes);
@@ -534,7 +534,7 @@ public sealed class SettingsViewModelTests
     {
         _harness.Settings.Stored = new AppSettings
         {
-            GameFolders = ImmutableDictionary.CreateRange(StringComparer.OrdinalIgnoreCase, [new KeyValuePair<string, FolderPattern>("stardewvalley", Flat)]),
+            Games = ImmutableDictionary.CreateRange(StringComparer.OrdinalIgnoreCase, [new KeyValuePair<string, GameSettings>("stardewvalley", new() { Folders = Flat })]),
         };
         await _harness.StartAsync();
         _harness.Dialogs.Answers.Enqueue("StardewValley");

@@ -410,7 +410,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
             return;
         }
 
-        if (_shown.GameFolders.ContainsKey(game))
+        if (_shown.GameFor(game).Folders is not null)
         {
             GameFoldersNote = Text.Format(Strings.SettingsGameHasFolders, game);
             return;

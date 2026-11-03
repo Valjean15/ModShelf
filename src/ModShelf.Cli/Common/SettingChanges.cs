@@ -76,9 +76,10 @@ internal static class SettingChanges
         [
             Of(LibraryRoot, stored.LibraryRoot, defaultLibraryRoot),
             Of(LibraryFolders, stored.LibraryFolders?.Text, FolderPattern.Default.Text),
-            .. stored.GameFolders
+            .. stored.Games
+                .Where(game => game.Value.Folders is not null)
                 .OrderBy(game => game.Key, StringComparer.OrdinalIgnoreCase)
-                .Select(game => new SettingValue(GamePrefix + game.Key, game.Value.Text, IsDefault: false)),
+                .Select(game => new SettingValue(GamePrefix + game.Key, game.Value.Folders!.Text, IsDefault: false)),
             Of(OldVersions, stored.OldVersions?.ToString(), OldVersionRule.Default.ToString()),
             Of(Interval, stored.UpdateInterval is { } every ? UpdateInterval.Format(every) : null, UpdateInterval.Format(UpdateInterval.Default)),
             Of(Notify, stored.NotifyOfUpdates is { } notify ? Text(notify) : null, Text(true)),

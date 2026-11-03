@@ -83,12 +83,31 @@ public sealed class DiagnosticsReportTests
             Theme = AppTheme.Dark,
             NotifyOfUpdates = false,
             CloseToTray = true,
-            GameFolders = new Dictionary<string, FolderPattern> { ["skyrimspecialedition"] = FolderPattern.Default },
+            Games = new Dictionary<string, GameSettings> { ["skyrimspecialedition"] = new() { Folders = FolderPattern.Default } },
         };
 
         Assert.Equal(
             "Settings: check for updates every 30 minutes, archive old versions, theme Dark, notices off, closing the window keeps running in the tray, folders for 1 game set apart",
             Line(await LinesAsync(), "Settings"));
+    }
+
+    [Fact]
+    public async Task CountsGamesWithOtherSettingsOfTheirOwn()
+    {
+        _store.Settings = new AppSettings
+        {
+            Games = new Dictionary<string, GameSettings>
+            {
+                ["skyrimspecialedition"] = new() { Folders = FolderPattern.Default, Hidden = true },
+                ["stardewvalley"] = new() { UpdateInterval = TimeSpan.FromDays(1) },
+                ["fallout4"] = new() { Folders = FolderPattern.Default },
+            },
+        };
+
+        Assert.EndsWith(
+            "closing the window asks, folders for 2 games set apart, other settings for 2 games set apart",
+            Line(await LinesAsync(), "Settings"),
+            StringComparison.Ordinal);
     }
 
     [Theory]

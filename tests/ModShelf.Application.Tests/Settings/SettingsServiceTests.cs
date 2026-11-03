@@ -343,7 +343,7 @@ public sealed class SettingsServiceTests : IDisposable
         await _settings.SetLibraryFoldersAsync(null, null, Cancellation);
 
         AppSettings settings = await _settings.GetAsync(Cancellation);
-        Assert.Empty(settings.GameFolders);
+        Assert.Empty(settings.Games);
         Assert.Equal(FolderPattern.Default, settings.FoldersFor("skyrimspecialedition"));
     }
 
@@ -355,13 +355,65 @@ public sealed class SettingsServiceTests : IDisposable
         await _settings.SetLibraryFoldersAsync("SkyrimSpecialEdition", FolderPattern.Parse("{modid}/{file}"), Cancellation);
 
         AppSettings settings = await _settings.GetAsync(Cancellation);
-        Assert.Equal("{modid}/{file}", Assert.Single(settings.GameFolders).Value.Text);
+        Assert.Equal("{modid}/{file}", Assert.Single(settings.Games).Value.Folders?.Text);
     }
 
     [Fact]
     public async Task RefusesABlankGame()
     {
         await Assert.ThrowsAsync<ArgumentException>(() => _settings.SetLibraryFoldersAsync(" ", FolderPattern.Default, Cancellation));
+    }
+
+    [Fact]
+    public async Task ChangesAGamesOwnSettingsAndKeepsTheOthers()
+    {
+        await _settings.SetLibraryFoldersAsync(" stardewvalley ", FolderPattern.Parse("{mod}/{file}"), Cancellation);
+
+        await _settings.SetGameAsync("StardewValley", game => game with { Hidden = true, UpdateInterval = TimeSpan.FromDays(1) }, Cancellation);
+        await _settings.SetGameAsync("STARDEWVALLEY", game => game with { Notify = false }, Cancellation);
+
+        (string key, GameSettings game) = Assert.Single((await _settings.GetAsync(Cancellation)).Games);
+        Assert.Equal("stardewvalley", key);
+        Assert.Equal(
+            new GameSettings { Folders = FolderPattern.Parse("{mod}/{file}"), Hidden = true, UpdateInterval = TimeSpan.FromDays(1), Notify = false },
+            game);
+    }
+
+    [Fact]
+    public async Task SettingAGamesPatternKeepsItsOtherSettings()
+    {
+        await _settings.SetGameAsync("stardewvalley", game => game with { CheckUpdates = false }, Cancellation);
+
+        await _settings.SetLibraryFoldersAsync("stardewvalley", FolderPattern.Parse("{mod}/{file}"), Cancellation);
+        await _settings.SetLibraryFoldersAsync("stardewvalley", null, Cancellation);
+
+        Assert.Equal(new GameSettings { CheckUpdates = false }, Assert.Single((await _settings.GetAsync(Cancellation)).Games).Value);
+    }
+
+    [Fact]
+    public async Task AGameLeftWithNoSettingOfItsOwnIsForgotten()
+    {
+        await _settings.SetGameAsync("stardewvalley", game => game with { Hidden = true, Browse = new BrowseDefaults { PageSize = 50 } }, Cancellation);
+
+        await _settings.SetGameAsync("stardewvalley", game => game with { Hidden = null, Browse = BrowseDefaults.None }, Cancellation);
+
+        Assert.Empty((await _settings.GetAsync(Cancellation)).Games);
+    }
+
+    [Fact]
+    public async Task BrowseDefaultsLeftAsBrowsesOwnAreLeftOut()
+    {
+        await _settings.SetGameAsync("stardewvalley", game => game with { Hidden = true, Browse = BrowseDefaults.None }, Cancellation);
+
+        Assert.Equal(new GameSettings { Hidden = true }, Assert.Single((await _settings.GetAsync(Cancellation)).Games).Value);
+    }
+
+    [Fact]
+    public async Task RefusesABlankGameOrNoChange()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() => _settings.SetGameAsync(" ", game => game, Cancellation));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => _settings.SetGameAsync("stardewvalley", null!, Cancellation));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _settings.SetGameAsync("stardewvalley", _ => null!, Cancellation));
     }
 
     private static ModRef Smapi() => new(new GameRef(new SourceId("nexus"), "stardewvalley"), "2400");
