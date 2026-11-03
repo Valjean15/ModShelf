@@ -18,4 +18,7 @@ internal sealed partial class UpdateChecker
 
     [LoggerMessage(EventId = 706, Level = LogLevel.Information, Message = "{Source}'s feed found the question about {Game} beyond its reach, so its mods are asked about one by one")]
     private static partial void LogFeedOutOfReach(ILogger logger, Exception exception, string game, string source);
+
+    [LoggerMessage(EventId = 707, Level = LogLevel.Warning, Message = "Couldn't read which games' updates to check, so every game's are checked")]
+    private static partial void LogSettingsUnreadable(ILogger logger, Exception exception);
 }

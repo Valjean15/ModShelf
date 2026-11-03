@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Library;
 using ModShelf.Application.Library.Ports;
+using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
@@ -31,6 +32,7 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
 
     private readonly ISourceRegistry _sources;
     private readonly ILibraryRepository _library;
+    private readonly ISettingsService _settings;
     private readonly LibraryChanges _changes;
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<UpdateChecker> _logger;
@@ -39,18 +41,21 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
     public UpdateChecker(
         ISourceRegistry sources,
         ILibraryRepository library,
+        ISettingsService settings,
         LibraryChanges changes,
         TimeProvider timeProvider,
         ILogger<UpdateChecker> logger)
     {
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(library);
+        ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(changes);
         ArgumentNullException.ThrowIfNull(timeProvider);
         ArgumentNullException.ThrowIfNull(logger);
 
         _sources = sources;
         _library = library;
+        _settings = settings;
         _changes = changes;
         _timeProvider = timeProvider;
         _logger = logger;
@@ -58,12 +63,41 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
 
     public async Task<UpdateCheck> CheckAsync(CancellationToken cancellationToken)
     {
+        AppSettings? settings;
+        try
+        {
+            settings = await _settings.GetAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (InvalidDataException exception)
+        {
+            LogSettingsUnreadable(_logger, exception);
+            settings = null;
+        }
+
+        return await CheckWhereAsync(game => settings?.ChecksUpdatesOf(game.Key) ?? true, cancellationToken).ConfigureAwait(false);
+    }
+
+    public Task<UpdateCheck> CheckAsync(IReadOnlyCollection<GameRef> games, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(games);
+
+        HashSet<GameRef> asked = [.. games];
+        return CheckWhereAsync(asked.Contains, cancellationToken);
+    }
+
+    public void Dispose() => _checking.Dispose();
+
+    /// <summary>
+    /// Checks the watched mods of the games <paramref name="checks"/> says to.
+    /// </summary>
+    private async Task<UpdateCheck> CheckWhereAsync(Func<GameRef, bool> checks, CancellationToken cancellationToken)
+    {
         await _checking.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
             Check check = new(_timeProvider.GetUtcNow());
             IReadOnlyList<LibraryMod> library = await _library.ListAsync(cancellationToken).ConfigureAwait(false);
-            foreach (IGrouping<GameRef, LibraryMod> game in library.Where(mod => mod.IsWatched).GroupBy(mod => mod.Mod.Game))
+            foreach (IGrouping<GameRef, LibraryMod> game in library.Where(mod => mod.IsWatched && checks(mod.Mod.Game)).GroupBy(mod => mod.Mod.Game))
             {
                 if (check.Stopped.TryGetValue(game.Key.Source, out string? stopped))
                 {
@@ -83,8 +117,6 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
             _checking.Release();
         }
     }
-
-    public void Dispose() => _checking.Dispose();
 
     /// <summary>
     /// Whether a failure means the site wants nothing more for now: it refused the account, or asked to slow down; or it

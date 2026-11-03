@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 using Microsoft.Extensions.Time.Testing;
 
 using ModShelf.Application.Notifications.Ports;
@@ -16,6 +18,8 @@ namespace ModShelf.Application.Tests.Updates;
 /// </summary>
 public sealed class UpdateCheckServiceTests : IDisposable
 {
+    private static readonly GameRef Fallout = new(FakeModSite.SourceId, "fallout4");
+
     private readonly FakeTimeProvider _time = new(TestData.Now);
     private readonly CountingChecker _checker = new();
     private readonly InMemorySettingsStore _store = new();
@@ -250,6 +254,162 @@ public sealed class UpdateCheckServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task AGameWithAnIntervalOfItsOwnIsCheckedApartOnIt()
+    {
+        _library.Add(Watched("1", checkedAt: TestData.Now.AddHours(-1)));
+        _library.Add(WatchedIn(Fallout, "5", checkedAt: TestData.Now.AddMinutes(-30)));
+        _store.Settings = new AppSettings { Games = OwnSettings(("fallout4", new GameSettings { UpdateInterval = TimeSpan.FromHours(1) })) };
+
+        await RunAsync(async () =>
+        {
+            await SettleAsync();
+            Assert.Equal(0, _checker.Checks);
+            await AdvanceAsync(TimeSpan.FromMinutes(30));
+            await WaitForChecksAsync(1);
+            await AdvanceAsync(TimeSpan.FromHours(1));
+            await WaitForChecksAsync(2);
+
+            // Every game's six hours from the other game's oldest check, then the game's own hour, overdue.
+            await AdvanceAsync(TimeSpan.FromHours(3.5));
+            await WaitForChecksAsync(4);
+        });
+
+        Assert.Equal([[Fallout], [Fallout], [FakeModSite.Game], [Fallout]], _checker.Asked);
+    }
+
+    [Fact]
+    public async Task AGameWhoseUpdatesArentCheckedIsLeftOut()
+    {
+        _library.Add(Watched("1", checkedAt: null));
+        _library.Add(WatchedIn(Fallout, "5", checkedAt: null));
+        _store.Settings = new AppSettings
+        {
+            Games = OwnSettings(
+                ("fallout4", new GameSettings { CheckUpdates = false, UpdateInterval = TimeSpan.FromHours(1) }),
+                ("stardewvalley", new GameSettings { UpdateInterval = TimeSpan.FromHours(1) })),
+        };
+
+        await RunAsync(async () =>
+        {
+            await WaitForChecksAsync(1);
+            await AdvanceAsync(TimeSpan.FromHours(2));
+            await SettleAsync();
+        });
+
+        Assert.Equal([[FakeModSite.Game]], _checker.Asked);
+    }
+
+    [Fact]
+    public async Task AGameWithAnIntervalOfItsOwnIsCheckedWhenItsDueNotAtTheNextSlice()
+    {
+        _library.Add(Watched("1", checkedAt: TestData.Now.AddHours(-1)));
+        _library.Add(WatchedIn(Fallout, "5", checkedAt: TestData.Now.AddMinutes(-55)));
+        _store.Settings = new AppSettings { Games = OwnSettings(("fallout4", new GameSettings { UpdateInterval = TimeSpan.FromHours(1) })) };
+
+        await RunAsync(async () =>
+        {
+            await AdvanceAsync(TimeSpan.FromMinutes(5));
+            await WaitForChecksAsync(1);
+        });
+
+        Assert.Equal([[Fallout]], _checker.Asked);
+    }
+
+    [Fact]
+    public async Task AGameWithAnIntervalOfItsOwnIsntCheckedAgainUntilItsDue()
+    {
+        _library.Add(Watched("1", checkedAt: TestData.Now.AddHours(-1)));
+        _library.Add(WatchedIn(Fallout, "5", checkedAt: TestData.Now.AddMinutes(-30)));
+        _store.Settings = new AppSettings { Games = OwnSettings(("fallout4", new GameSettings { UpdateInterval = TimeSpan.FromHours(1) })) };
+
+        await RunAsync(async () =>
+        {
+            await AdvanceAsync(TimeSpan.FromMinutes(30));
+            await WaitForChecksAsync(1);
+
+            // The library still says it was checked an hour ago: the check this run counts.
+            await AdvanceAsync(TimeSpan.FromMinutes(15));
+            await SettleAsync();
+            Assert.Equal(1, _checker.Checks);
+        });
+    }
+
+    [Fact]
+    public async Task AGameWithAnIntervalOfItsOwnIsCheckedAtOnceWhenOneOfItsModsNeverWas()
+    {
+        _library.Add(Watched("1", checkedAt: TestData.Now.AddHours(-1)));
+        _library.Add(WatchedIn(Fallout, "5", checkedAt: TestData.Now.AddMinutes(-5)));
+        _library.Add(WatchedIn(Fallout, "6", checkedAt: null));
+        _store.Settings = new AppSettings { Games = OwnSettings(("fallout4", new GameSettings { UpdateInterval = TimeSpan.FromDays(1) })) };
+
+        await RunAsync(async () => await WaitForChecksAsync(1));
+
+        Assert.Equal([[Fallout]], _checker.Asked);
+    }
+
+    [Fact]
+    public async Task AGameWhoseUpdatesArentCheckedIsLeftOutOfEveryGamesChecks()
+    {
+        _library.Add(Watched("1", checkedAt: null));
+        _library.Add(WatchedIn(Fallout, "5", checkedAt: null));
+        _store.Settings = new AppSettings
+        {
+            Games = OwnSettings(
+                ("fallout4", new GameSettings { CheckUpdates = false }),
+                ("stardewvalley", new GameSettings { UpdateInterval = TimeSpan.FromHours(1) })),
+        };
+
+        await RunAsync(async () => await WaitForChecksAsync(1));
+
+        Assert.Equal([[FakeModSite.Game]], _checker.Asked);
+    }
+
+    [Fact]
+    public async Task AGameWithAnIntervalOfItsOwnNeverCheckedIsCheckedAtOnce()
+    {
+        _library.Add(Watched("1", checkedAt: TestData.Now.AddHours(-1)));
+        _library.Add(WatchedIn(Fallout, "5", checkedAt: null));
+        _store.Settings = new AppSettings { Games = OwnSettings(("fallout4", new GameSettings { UpdateInterval = TimeSpan.FromDays(1) })) };
+
+        await RunAsync(async () => await WaitForChecksAsync(1));
+
+        Assert.Equal([[Fallout]], _checker.Asked);
+    }
+
+    [Fact]
+    public async Task ShowsANoticeOnlyOfTheGamesThatAskForOne()
+    {
+        _library.Add(Watched("1", checkedAt: null));
+        _library.Add(WatchedIn(Fallout, "5", checkedAt: null));
+        _store.Settings = new AppSettings { Games = OwnSettings(("Fallout4", new GameSettings { Notify = false })) };
+        _checker.Found = [Update("1", "10"), UpdateIn(Fallout, "5", "50")];
+
+        await RunAsync(async () =>
+        {
+            await WaitForChecksAsync(1);
+            await WaitForNoticesAsync(1);
+        });
+
+        Assert.Equal(new Notification("1 new update", "Mod 1"), Assert.Single(_notifications.Shown));
+    }
+
+    [Fact]
+    public async Task AGameThatAsksForANoticeGetsOneWhenTheOthersDont()
+    {
+        _library.Add(WatchedIn(Fallout, "5", checkedAt: null));
+        _store.Settings = new AppSettings { NotifyOfUpdates = false, Games = OwnSettings(("fallout4", new GameSettings { Notify = true })) };
+        _checker.Found = [Update("1", "10"), UpdateIn(Fallout, "5", "50")];
+
+        await RunAsync(async () =>
+        {
+            await WaitForChecksAsync(1);
+            await WaitForNoticesAsync(1);
+        });
+
+        Assert.Equal(new Notification("1 new update", "Mod 5"), Assert.Single(_notifications.Shown));
+    }
+
+    [Fact]
     public async Task ACheckWithoutNewUpdatesShowsNoNotice()
     {
         await RunAsync(async () =>
@@ -331,14 +491,24 @@ public sealed class UpdateCheckServiceTests : IDisposable
         Assert.Contains(_logger.Entries, entry => entry.StartsWith("Warning: Couldn't show the notice of new updates (1 found)", StringComparison.Ordinal));
     }
 
-    private static LibraryMod Watched(string mod, DateTimeOffset? checkedAt)
+    private static LibraryMod Watched(string mod, DateTimeOffset? checkedAt) => WatchedIn(FakeModSite.Game, mod, checkedAt);
+
+    private static LibraryMod WatchedIn(GameRef game, string mod, DateTimeOffset? checkedAt)
     {
-        LibraryMod watched = LibraryMod.Watch(FakeModSite.Mod(mod), $"Mod {mod}", null, null, TestData.Now.AddDays(-9));
+        LibraryMod watched = LibraryMod.Watch(new ModRef(game, mod), $"Mod {mod}", null, null, TestData.Now.AddDays(-9));
         return checkedAt is { } at ? watched.Checked(at) : watched;
     }
 
-    private static LibraryUpdate Update(string mod, string file)
-        => new(new ModFileRef(FakeModSite.Mod(mod), file), $"File {file}", $"{file}.7z", null, ModFileCategory.Main, TestData.Now, null, TestData.Now);
+    private static LibraryUpdate Update(string mod, string file) => UpdateIn(FakeModSite.Game, mod, file);
+
+    private static LibraryUpdate UpdateIn(GameRef game, string mod, string file)
+        => new(new ModFileRef(new ModRef(game, mod), file), $"File {file}", $"{file}.7z", null, ModFileCategory.Main, TestData.Now, null, TestData.Now);
+
+    /// <summary>
+    /// Games' own settings, by each game's name.
+    /// </summary>
+    private static Dictionary<string, GameSettings> OwnSettings(params (string Game, GameSettings Settings)[] games)
+        => games.ToDictionary(game => game.Game, game => game.Settings, StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Lets the service's loop run as far as it can on the current time.
@@ -419,11 +589,22 @@ public sealed class UpdateCheckServiceTests : IDisposable
         /// </summary>
         public Action<int>? OnCheck { get; set; }
 
+        /// <summary>
+        /// The games each check of some games was asked about, in order; a check of every game adds none.
+        /// </summary>
+        public ConcurrentQueue<GameRef[]> Asked { get; } = [];
+
         public Task<UpdateCheck> CheckAsync(CancellationToken cancellationToken)
         {
             OnCheck?.Invoke(Checks + 1);
             Interlocked.Increment(ref _checks);
             return Failure is { } failure ? Task.FromException<UpdateCheck>(failure) : Task.FromResult(new UpdateCheck(0, 0, Found, []));
+        }
+
+        public Task<UpdateCheck> CheckAsync(IReadOnlyCollection<GameRef> games, CancellationToken cancellationToken)
+        {
+            Asked.Enqueue([.. games.OrderBy(game => game.Key, StringComparer.Ordinal)]);
+            return CheckAsync(cancellationToken);
         }
     }
 

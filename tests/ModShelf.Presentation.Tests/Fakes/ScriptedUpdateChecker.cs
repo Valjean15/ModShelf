@@ -1,4 +1,5 @@
 using ModShelf.Application.Updates;
+using ModShelf.Domain.Mods;
 
 namespace ModShelf.Presentation.Tests.Fakes;
 
@@ -40,4 +41,7 @@ internal sealed class ScriptedUpdateChecker : IUpdateChecker
         During?.Invoke();
         return Refusal is null ? Answer : throw Refusal;
     }
+
+    public Task<UpdateCheck> CheckAsync(IReadOnlyCollection<GameRef> games, CancellationToken cancellationToken)
+        => throw new NotSupportedException("The screens check every game.");
 }

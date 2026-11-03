@@ -3,6 +3,7 @@ using System.Net;
 using Microsoft.Extensions.Time.Testing;
 
 using ModShelf.Application.Library;
+using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
 using ModShelf.Application.Tests.Common;
 using ModShelf.Application.Tests.Fakes;
@@ -31,11 +32,14 @@ public sealed class UpdateCheckerTests : IDisposable
     private readonly FakeModSiteWithFeed _feed;
     private readonly InMemoryLibraryRepository _library = new();
     private readonly LibraryChanges _changes = new();
+    private readonly InMemorySettingsStore _store = new();
+    private readonly SettingsService _settings;
     private readonly RecordingLogger<UpdateChecker> _logger = new();
 
     public UpdateCheckerTests()
     {
         _feed = new FakeModSiteWithFeed(_site, _time);
+        _settings = new SettingsService(_store, new FakeUserFolders(), _library, new InMemoryDownloadJobRepository([]));
         foreach (string mod in new[] { "1", "2" })
         {
             _site.AddMod(mod, $"Mod {mod}");
@@ -51,7 +55,11 @@ public sealed class UpdateCheckerTests : IDisposable
 
     private static CancellationToken Cancellation => TestContext.Current.CancellationToken;
 
-    public void Dispose() => _feed.Site.Hold?.TrySetResult();
+    public void Dispose()
+    {
+        _feed.Site.Hold?.TrySetResult();
+        _settings.Dispose();
+    }
 
     [Fact]
     public async Task AFirstCheckAsksAboutEachModAndKeepsWhatItFinds()
@@ -65,6 +73,49 @@ public sealed class UpdateCheckerTests : IDisposable
         Assert.Equal("10", Assert.Single(Mod("1").Updates).Replaces?.Id);
         Assert.All(_library.Mods, mod => Assert.Equal(TestData.Now, mod.CheckedAt));
         Assert.Contains(_logger.Entries, entry => entry.StartsWith("Information: Checked 3 watched mods for updates with 3 requests: 2 new updates, 0 failures", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task CheckingEveryGameLeavesOutAGameWhoseUpdatesArentChecked()
+    {
+        _library.Add(LibraryMod.Watch(new ModRef(Fallout, "5"), "Mod 5", null, null, TestData.Now.AddDays(-9)));
+        _store.Settings = new AppSettings
+        {
+            Games = new Dictionary<string, GameSettings>(StringComparer.OrdinalIgnoreCase) { ["SkyrimSpecialEdition"] = new() { CheckUpdates = false } },
+        };
+
+        await CheckAsync(_site);
+
+        Assert.Equal(["GetFilesAsync 5"], _site.AskedFor);
+        Assert.All(_library.Mods.Where(mod => mod.Mod.Game != Fallout), mod => Assert.Null(mod.CheckedAt));
+    }
+
+    [Fact]
+    public async Task ChecksTheGamesAskedForWhetherOrNotTheirUpdatesAreChecked()
+    {
+        _library.Add(LibraryMod.Watch(new ModRef(Fallout, "5"), "Mod 5", null, null, TestData.Now.AddDays(-9)));
+        _store.Settings = new AppSettings
+        {
+            Games = new Dictionary<string, GameSettings>(StringComparer.OrdinalIgnoreCase) { ["skyrimspecialedition"] = new() { CheckUpdates = false } },
+        };
+        using UpdateChecker checker = Checker(_site);
+
+        UpdateCheck check = await checker.CheckAsync([Mod("1").Mod.Game], Cancellation);
+
+        Assert.Equal(3, check.Checked);
+        Assert.Equal(["1 11", "2 11"], check.Found.Select(update => $"{update.File.Mod.Id} {update.File.Id}"));
+        Assert.Null(Assert.Single(_library.Mods, mod => mod.Mod.Game == Fallout).CheckedAt);
+    }
+
+    [Fact]
+    public async Task SettingsThatCantBeReadMeanEveryGameIsChecked()
+    {
+        _store.Failure = new InvalidDataException("Not JSON.");
+
+        UpdateCheck check = await CheckAsync(_site);
+
+        Assert.Equal(3, check.Checked);
+        Assert.Contains(_logger.Entries, entry => entry.StartsWith("Warning: Couldn't read which games' updates to check, so every game's are checked", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -519,5 +570,6 @@ public sealed class UpdateCheckerTests : IDisposable
         return await checker.CheckAsync(Cancellation);
     }
 
-    private UpdateChecker Checker(IModSource source) => new(new SourceRegistry([source]), _library, _changes, _time, _logger);
+    private UpdateChecker Checker(IModSource source)
+        => new(new SourceRegistry([source]), _library, _settings, _changes, _time, _logger);
 }
