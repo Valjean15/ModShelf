@@ -174,9 +174,13 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     [Fact]
     public async Task DownloadsIntoTheLibraryItselfWhileNoDesktopAppRunsThenLetsTheQueueGo()
     {
+        // Held part-way, so the result finds it under way.
+        _server.HoldAt(1024);
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
 
         LinkDownloadResult result = await DownloadAsync(mcp, HandoffLink("3").AbsoluteUri);
+        _server.SendEverything();
+        _server.DropHeldConnections();
 
         Assert.Equal("this MCP server", result.RunBy);
         Assert.Equal(Path.Combine(ModFolder, FileNameOf("3")), result.LibraryPath);
@@ -197,10 +201,14 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
         await DownloadAndWaitAsync(mcp, "2");
 
+        // File 3 is held part-way, so it's still under way when the call ends.
+        _server.HoldAt(1024);
         DownloadsResult downloaded = await mcp.CallAsync<DownloadsResult>(
             "download",
             Arguments(("links", new[] { HandoffLink("3").AbsoluteUri, "mods/2400", FileLink("1").AbsoluteUri, HandoffLink("2").AbsoluteUri })),
             Cancellation);
+        _server.SendEverything();
+        _server.DropHeldConnections();
 
         Assert.Equal(
             [
@@ -362,6 +370,49 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         Assert.DoesNotContain("this MCP server", result.Message, StringComparison.Ordinal);
         Assert.Equal(QueueRequest.Download(HandoffLink("3")), Assert.Single(_desktopApp.Requests));
         Assert.Empty(_server.Ranges);
+    }
+
+    [Theory]
+    [InlineData(DownloadJobStatus.Completed, null, "The file is downloaded into the library. library_changes says what became of the version it replaced, as library.oldVersions says.")]
+    [InlineData(DownloadJobStatus.Failed, DownloadFailureReason.Network, "The download failed (Network). downloads_retry tries it again.")]
+    [InlineData(DownloadJobStatus.Paused, null, "The download is paused. downloads_resume goes on with it.")]
+    [InlineData(DownloadJobStatus.Downloading, null, "The file is downloading into the library. downloads_list shows how it goes, and the page to open when the site needs the user to start it there.")]
+    public async Task SaysWhatADownloadIsWhenTheCallEndsNotWhenItWasAskedFor(DownloadJobStatus status, DownloadFailureReason? failure, string message)
+    {
+        // The desktop app took it as queued; by the time the call ends, the queue has it further along.
+        await DesktopAppHasAsync(status, failure);
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        LinkDownloadResult result = await DownloadAsync(mcp, HandoffLink("3").AbsoluteUri);
+
+        Assert.Equal((status.ToString(), failure?.ToString(), message), (result.Download?.Status, result.Download?.Failure, result.Message));
+    }
+
+    [Fact]
+    public async Task AFileDownloadedOutsideTheLibraryIsSaidToBe()
+    {
+        await DesktopAppHasAsync(DownloadJobStatus.Completed, null, inLibrary: false);
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        LinkDownloadResult result = await DownloadAsync(mcp, HandoffLink("3").AbsoluteUri);
+
+        Assert.Equal("The file is downloaded, outside the library, at the download's path.", result.Message);
+    }
+
+    [Theory]
+    [InlineData(DownloadJobStatus.Completed, "2 are downloaded")]
+    [InlineData(DownloadJobStatus.Failed, "2 failed")]
+    public async Task SeveralLinksSayHowManyAreDownloadedOrFailedWhenTheCallEnds(DownloadJobStatus status, string said)
+    {
+        await DesktopAppHasAsync(status, status == DownloadJobStatus.Failed ? DownloadFailureReason.Network : null);
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        DownloadsResult downloaded = await mcp.CallAsync<DownloadsResult>(
+            "download", Arguments(("links", new[] { HandoffLink("3").AbsoluteUri, HandoffLink("3").AbsoluteUri, "a" })), Cancellation);
+
+        Assert.Equal(
+            $"Of 3 links, {said}, and 1 couldn't be downloaded; each result says more, in the order the links were given.",
+            downloaded.Message);
     }
 
     [Theory]
@@ -980,6 +1031,31 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
             async () => (await mcp.CallAsync<LibraryListing>("library_list", null, Cancellation)).Mods
                 .Any(mod => mod.Source == FakeHandoffSource.SourceId.Value && mod.Files!.Any(file => file.FileId == fileId)),
             $"File {fileId} didn't come into the library.");
+
+    /// <summary>
+    /// Stands in a desktop app that runs the queue, and replies to a download of file 3 that it's queued, while the queue
+    /// has it as <paramref name="status"/> already.
+    /// </summary>
+    /// <param name="inLibrary">False for a download the queue had already, of the same file to a folder outside the
+    /// library, which the request goes on with.</param>
+    private async Task DesktopAppHasAsync(DownloadJobStatus status, DownloadFailureReason? failure, bool inLibrary = true)
+    {
+        _desktopApp.Runs = true;
+        DownloadJob stored = DownloadJob.Restore(
+            DownloadJobId.New(), new ModFileRef(new ModRef(new GameRef(FakeHandoffSource.SourceId, "game"), "mod"), "3"), ModFolder, FileNameOf("3"), DateTimeOffset.UnixEpoch, status, 0, null, failure);
+        await Cli.InAppAsync(
+            async services =>
+            {
+                await services.GetRequiredService<IDownloadJobRepository>().AddAsync(stored, Cancellation);
+                return stored;
+            },
+            Cancellation);
+        _desktopApp.Reply = new QueueReply(
+            QueueOutcome.Done,
+            Job: new DownloadJobSnapshot(stored.Id, stored.File, ModFolder, FileNameOf("3"), DownloadJobStatus.Queued, 0, null, null, DateTimeOffset.UnixEpoch),
+            LibraryPath: inLibrary ? Path.Combine(ModFolder, FileNameOf("3")) : null,
+            AlreadyQueued: !inLibrary);
+    }
 
     /// <summary>
     /// Downloads one link, and returns its result.

@@ -55,6 +55,7 @@ internal sealed class DownloadTools(McpQueue queue, IDownloadService downloads)
                 results.Add(await DownloadOneAsync(link, cancellationToken).ConfigureAwait(false));
             }
 
+            results = await AsTheyAreNowAsync(results, cancellationToken).ConfigureAwait(false);
             return new DownloadsResult(results, Summarize(results));
         });
 
@@ -86,7 +87,9 @@ internal sealed class DownloadTools(McpQueue queue, IDownloadService downloads)
     {
         int refused = results.Count(result => result.Problem is not null);
         int saved = results.Count(result => result.AlreadySaved);
-        int going = results.Count - refused - saved;
+        int done = results.Count(result => result.Download?.Status == nameof(DownloadJobStatus.Completed));
+        int failed = results.Count(result => result.Download?.Status == nameof(DownloadJobStatus.Failed));
+        int going = results.Count - refused - saved - done - failed;
         if (results.Count == 1)
         {
             return results[0].Message;
@@ -96,6 +99,16 @@ internal sealed class DownloadTools(McpQueue queue, IDownloadService downloads)
         if (going > 0)
         {
             parts.Add(going == 1 ? "1 is downloading or waiting for the user" : $"{going} are downloading or waiting for the user");
+        }
+
+        if (done > 0)
+        {
+            parts.Add(done == 1 ? "1 is downloaded" : $"{done} are downloaded");
+        }
+
+        if (failed > 0)
+        {
+            parts.Add($"{failed} failed");
         }
 
         if (saved > 0)
@@ -136,24 +149,81 @@ internal sealed class DownloadTools(McpQueue queue, IDownloadService downloads)
         }
 
         DownloadEntry? job = reply.Job is { } snapshot ? McpEntries.Download(snapshot) : null;
-        string message = (reply, job) switch
+        return Described(new LinkDownloadResult(
+            job, reply.LibraryPath, reply.AlreadySaved, reply.AlreadyQueued, ranHere ? ThisServer : DesktopApp, null, string.Empty));
+    }
+
+    /// <summary>
+    /// The results with their downloads as the queue has them now, rather than as each request left them: a small file
+    /// may be downloaded, or a download failed, while the next links were asked about. When the queue can't be read, the
+    /// results stay as they are.
+    /// </summary>
+    private async Task<List<LinkDownloadResult>> AsTheyAreNowAsync(List<LinkDownloadResult> results, CancellationToken cancellationToken)
+    {
+        if (results.All(result => result.Download is null))
         {
-            ({ AlreadySaved: true }, _) => "The library has this file already, so nothing downloads.",
-            (_, { Status: nameof(DownloadJobStatus.AwaitingHandoff) }) =>
+            return results;
+        }
+
+        IReadOnlyList<DownloadJobSnapshot> jobs;
+        try
+        {
+            jobs = await queue.ListHereAsync(cancellationToken).ConfigureAwait(false)
+                ?? await downloads.ListAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            // The downloads were asked for already: what each request left still holds.
+            return results;
+        }
+
+        Dictionary<string, DownloadEntry> now = [];
+        foreach (DownloadJobSnapshot job in jobs)
+        {
+            now[job.Id.ToString()] = McpEntries.Download(job);
+        }
+
+        return [.. results.Select(result => result.Download is { } asked && now.TryGetValue(asked.Id, out DownloadEntry? current)
+            ? Described(result with { Download = current })
+            : result)];
+    }
+
+    /// <summary>
+    /// The result, with what happened to the link and what to expect said as its download is.
+    /// </summary>
+    private static LinkDownloadResult Described(LinkDownloadResult result)
+    {
+        string message = result switch
+        {
+            { AlreadySaved: true } => "The library has this file already, so nothing downloads.",
+            { Download: { Status: nameof(DownloadJobStatus.Completed) }, LibraryPath: null } => "The file is downloaded, outside the library, at the download's path.",
+            { Download.Status: nameof(DownloadJobStatus.Completed) } =>
+                "The file is downloaded into the library. library_changes says what became of the version it replaced, as "
+                + "library.oldVersions says.",
+            { Download: { Status: nameof(DownloadJobStatus.Failed), Failure: var failure } } =>
+                $"The download failed ({failure}). downloads_retry tries it again.",
+            { Download.Status: nameof(DownloadJobStatus.Cancelled) } => "The download was cancelled.",
+            { Download.Status: nameof(DownloadJobStatus.Paused) } => "The download is paused. downloads_resume goes on with it.",
+            { Download.Status: nameof(DownloadJobStatus.AwaitingHandoff) } =>
                 "The site needs the user to start this download on its website: the download's handoffPage is where, with "
                 + "its mod manager download. ModShelf's desktop app gets the link the site hands over, and the download goes on.",
-            ({ AlreadyQueued: true }, _) => "A download of this file was in the queue already, and goes on.",
-            _ when reply.LibraryPath is null => "A download of this file to a folder outside the library goes on with this link.",
+            { AlreadyQueued: true } => "A download of this file was in the queue already, and goes on.",
+            { LibraryPath: null } => "A download of this file to a folder outside the library goes on with this link.",
             _ => "The file is downloading into the library. downloads_list shows how it goes, and the page to open when the "
                 + "site needs the user to start it there.",
         };
-        if (ranHere && job is { Status: not nameof(DownloadJobStatus.AwaitingHandoff) })
+        if (result is
+            {
+                RunBy: ThisServer,
+                Download.Status: nameof(DownloadJobStatus.Queued) or nameof(DownloadJobStatus.Resolving)
+                    or nameof(DownloadJobStatus.Downloading) or nameof(DownloadJobStatus.Verifying),
+            })
         {
             message += " No desktop app is running, so this MCP server downloads it, until no download is under way; closing "
                 + "the MCP server pauses what's left, which goes on the next time ModShelf runs its downloads.";
         }
 
-        return new LinkDownloadResult(job, reply.LibraryPath, reply.AlreadySaved, reply.AlreadyQueued, ranHere ? ThisServer : DesktopApp, null, message);
+        return result with { Message = message };
     }
 
     private Task<DownloadResult> ChangeAsync(Func<DownloadJobId, QueueRequest> request, string id, string done, CancellationToken cancellationToken)
