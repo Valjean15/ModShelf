@@ -56,7 +56,8 @@ public static class NexusServiceCollectionExtensions
             provider.GetRequiredService<NexusApiClient>(),
             Strategies(settings, provider),
             provider.GetRequiredService<NexusQuota>(),
-            provider.GetRequiredService<TimeProvider>())));
+            provider.GetRequiredService<TimeProvider>(),
+            provider.GetRequiredService<ILogger<NexusSource>>())));
 
         IHttpClientBuilder client = services.AddHttpClient(NexusApiClient.ClientName, http =>
         {

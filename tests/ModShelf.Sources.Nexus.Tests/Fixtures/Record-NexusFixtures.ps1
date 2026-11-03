@@ -68,8 +68,9 @@
 .PARAMETER Covers
     Records the game's artwork for the Library's game covers, leaving the other recordings as they are; with the other
     modes, those too. The schema around games' artwork (GameArtworkSchema, GameArtwork, GamePage), then the game asked
-    for every field its artwork schema has, as the schema names them, and the artwork the API gives without a game. A
-    field that needs arguments is left out. Works with either account, and changes nothing on it.
+    for every field its artwork schema has, as the schema names them (a field that needs arguments is left out), and
+    where games' pictures are, with the Nexus source's own query, Catalog/GameArtwork.graphql. Works with either
+    account, and changes nothing on it.
 
 .PARAMETER RequiringModId
     With -Details: a mod of the game that needs other mods, such as Content Patcher, which needs SMAPI.
@@ -570,8 +571,13 @@ function Save-Details {
 }
 
 # The game's artwork, for the Library's game covers: the schema around it, then the game with every field of its
-# artwork schema, and the artwork the API gives without a game, each asked for as the schema names its fields.
+# artwork schema, as the schema names them, and where games' pictures are, asked with the source's own query.
 function Save-Covers {
+    $artworkFile = Join-Path $CatalogFolder 'GameArtwork.graphql'
+    if (-not (Test-Path $artworkFile)) {
+        throw "The query isn't at $artworkFile. Run the script from its place in the repository."
+    }
+
     Save-GraphQlFixture 'graphql-artwork-schema' (Invoke-NexusGraphQl $ArtworkSchemaQuery 'ArtworkSchema')
 
     $variables = [System.Text.Json.Nodes.JsonObject]::new()
@@ -581,13 +587,7 @@ function Save-Covers {
     $coversQuery = "query GameCovers(`$domain: String) { game(domainName: `$domain) { id domainName name$artworkSchema } }"
     Save-GraphQlFixture 'game-covers' (Invoke-NexusGraphQl $coversQuery 'GameCovers' $variables)
 
-    $artwork = Get-Selection 'GameArtwork' 3
-    if ($artwork) {
-        Save-GraphQlFixture 'game-artwork' (Invoke-NexusGraphQl "query GameArtwork { gameArtwork $artwork }" 'GameArtwork')
-    }
-    else {
-        Write-Warning 'The schema has no GameArtwork fields to ask for, so game-artwork wasn''t recorded; tell Claude.'
-    }
+    Save-GraphQlFixture 'game-artwork' (Invoke-NexusGraphQl (Get-Content -Raw $artworkFile) 'GameArtwork')
 }
 
 # The fields of a type to ask for, as the schema names them: each scalar and enum, and each object's own, down to

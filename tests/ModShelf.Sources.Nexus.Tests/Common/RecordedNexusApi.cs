@@ -64,7 +64,8 @@ internal sealed class RecordedNexusApi : IDisposable
     /// </summary>
     /// <remarks>
     /// A form, such as <c>mod_id=2400</c>, is matched exactly. A GraphQL query is matched by its operation's name, in
-    /// its text, and its variables: the recording keeps those, not the text.
+    /// its text, and its variables: the recording keeps those, not the text. A query without variables, such as
+    /// <c>GameArtwork</c>, has its name followed by its selection.
     /// </remarks>
     public void Serve(string account, string name)
     {
@@ -85,8 +86,10 @@ internal sealed class RecordedNexusApi : IDisposable
             JsonValue form => match.WithBody(new ExactMatcher(form.GetValue<string>())),
             JsonObject query => match.WithBody(new JsonPartialWildcardMatcher(new JsonObject
             {
-                ["query"] = $"*query {query["operationName"]!.GetValue<string>()}(*",
-                ["variables"] = query["variables"]!.DeepClone(),
+                ["query"] = query["variables"] is null
+                    ? $"*query {query["operationName"]!.GetValue<string>()} {{*"
+                    : $"*query {query["operationName"]!.GetValue<string>()}(*",
+                ["variables"] = query["variables"]?.DeepClone() ?? new JsonObject(),
             }.ToJsonString())),
             _ => match,
         };

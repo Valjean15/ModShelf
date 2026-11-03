@@ -1,5 +1,7 @@
 using System.Collections.Concurrent;
 
+using Microsoft.Extensions.Logging;
+
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Nexus.Api;
@@ -21,6 +23,7 @@ public sealed partial class NexusSource : IAccountLinker
     private readonly NexusApiClient _api;
     private readonly NexusQuota _quota;
     private readonly TimeProvider _timeProvider;
+    private readonly ILogger<NexusSource> _logger;
 
     // Each game's mod categories by ID, once read: they rarely change, and a mod names only its category's ID.
     private readonly ConcurrentDictionary<string, IReadOnlyDictionary<long, string>> _categories = new(StringComparer.Ordinal);
@@ -33,17 +36,19 @@ public sealed partial class NexusSource : IAccountLinker
 
     /// <param name="strategies">The ways to link an account, in the order to offer them.</param>
     /// <param name="quota">The account's rate limit, as the API client's last response reported it.</param>
-    internal NexusSource(NexusApiClient api, IReadOnlyList<IAuthStrategy> strategies, NexusQuota quota, TimeProvider timeProvider)
+    internal NexusSource(NexusApiClient api, IReadOnlyList<IAuthStrategy> strategies, NexusQuota quota, TimeProvider timeProvider, ILogger<NexusSource> logger)
     {
         ArgumentNullException.ThrowIfNull(api);
         ArgumentNullException.ThrowIfNull(strategies);
         ArgumentNullException.ThrowIfNull(quota);
         ArgumentNullException.ThrowIfNull(timeProvider);
+        ArgumentNullException.ThrowIfNull(logger);
 
         _api = api;
         Strategies = strategies;
         _quota = quota;
         _timeProvider = timeProvider;
+        _logger = logger;
     }
 
     public SourceId Id => NexusId;

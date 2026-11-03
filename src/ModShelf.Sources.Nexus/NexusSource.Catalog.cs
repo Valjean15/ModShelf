@@ -29,6 +29,7 @@ public sealed partial class NexusSource : IModCatalog
     public async Task<IReadOnlyList<GameInfo>> GetGamesAsync(CancellationToken cancellationToken)
     {
         NexusGame?[] found = await _api.GetAsync<NexusGame?[]>("v1/games.json", cancellationToken).ConfigureAwait(false);
+        NexusGameArtwork.SchemaV2? artwork = await ArtworkAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
         HashSet<string> listed = new(StringComparer.Ordinal);
         List<GameInfo> games = [];
         foreach (NexusGame? game in found)
@@ -40,7 +41,7 @@ public sealed partial class NexusSource : IModCatalog
                     _gameDomains[number] = domain;
                 }
 
-                games.Add(ToGameInfo(new GameRef(NexusId, domain), domain, game));
+                games.Add(ToGameInfo(new GameRef(NexusId, domain), domain, game, artwork));
             }
         }
 
@@ -55,7 +56,8 @@ public sealed partial class NexusSource : IModCatalog
         string domain = NexusLink.ForGame(game);
         NexusGame found = await _api.GetAsync<NexusGame>($"{NexusLink.GameApiPath(domain)}.json", cancellationToken).ConfigureAwait(false);
         Remember(domain, found);
-        return ToGameInfo(game, domain, found);
+        NexusGameArtwork.SchemaV2? artwork = await ArtworkAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
+        return ToGameInfo(game, domain, found, artwork);
     }
 
     /// <summary>
@@ -146,10 +148,17 @@ public sealed partial class NexusSource : IModCatalog
     /// The game by its name, or its domain name if it has none, with its page, or the page its domain name gives, and
     /// its categories' names.
     /// </summary>
-    private static GameInfo ToGameInfo(GameRef game, string domain, NexusGame found)
+    /// <param name="artwork">Where games' pictures are; null when that isn't known, for a game without pictures.</param>
+    private static GameInfo ToGameInfo(GameRef game, string domain, NexusGame found, NexusGameArtwork.SchemaV2? artwork)
     {
         string name = string.IsNullOrWhiteSpace(found.Name) ? domain : found.Name;
-        return new GameInfo(game, name, WebLink(found.NexusmodsUrl) ?? NexusLink.GamePage(domain), CategoryNamesOf(found, name));
+        return new GameInfo(
+            game,
+            name,
+            WebLink(found.NexusmodsUrl) ?? NexusLink.GamePage(domain),
+            CategoryNamesOf(found, name),
+            PictureOf(artwork?.Hero, found.Id),
+            PictureOf(artwork?.Thumbnail, found.Id));
     }
 
     /// <summary>

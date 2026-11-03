@@ -18,6 +18,21 @@ public sealed class GameInfoTests
         Assert.Equal("Stardew Valley", game.Name);
         Assert.Same(page, game.PageUrl);
         Assert.Empty(game.Categories);
+        Assert.Equal(((Uri?)null, (Uri?)null), (game.CoverUrl, game.IconUrl));
+    }
+
+    [Fact]
+    public void KeepsItsPictures()
+    {
+        Uri cover = new("https://images.nexusmods.com/images/games/v2/1303/hero.jpg");
+        Uri icon = new("https://images.nexusmods.com/images/games/v2/1303/thumbnail.jpg");
+
+        GameInfo game = new(StardewValley, "Stardew Valley", coverUrl: cover, iconUrl: icon);
+
+        Assert.Equal((cover, icon), (game.CoverUrl, game.IconUrl));
+        Assert.Equal(game, new GameInfo(StardewValley, "Stardew Valley", coverUrl: cover, iconUrl: icon));
+        Assert.NotEqual(game, new GameInfo(StardewValley, "Stardew Valley", coverUrl: cover));
+        Assert.NotEqual(game, new GameInfo(StardewValley, "Stardew Valley", iconUrl: icon));
     }
 
     [Fact]
@@ -55,5 +70,7 @@ public sealed class GameInfoTests
     public void RefusesAPageThatIsntAWebLink(string page)
     {
         Assert.Throws<ArgumentException>(() => new GameInfo(StardewValley, "Stardew Valley", new Uri(page)));
+        Assert.Equal("coverUrl", Assert.Throws<ArgumentException>(() => new GameInfo(StardewValley, "Stardew Valley", coverUrl: new Uri(page))).ParamName);
+        Assert.Equal("iconUrl", Assert.Throws<ArgumentException>(() => new GameInfo(StardewValley, "Stardew Valley", iconUrl: new Uri(page))).ParamName);
     }
 }

@@ -1,0 +1,16 @@
+# Games' pictures, for the Nexus source's games: the address of each kind of picture, with {gameId} for the game's
+# number, which the games ModShelf reads give. Asked once a run. The recording script reads this file too, so the
+# recorded answer is to this exact query.
+query GameArtwork {
+  gameArtwork {
+    schemaV1 {
+      tile
+      tileBlurred
+    }
+    schemaV2 {
+      hero
+      thumbnail
+      tile
+    }
+  }
+}

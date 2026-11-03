@@ -125,7 +125,9 @@ public sealed class NexusSourceCatalogTests : IDisposable
                 new GameInfo(new GameRef(new SourceId("nexus"), "skyrimspecialedition"), "Skyrim Special Edition", new Uri("https://www.nexusmods.com/skyrimspecialedition"), ["Armour"]),
             ],
             games);
-        Assert.Equal("/v1/games.json", Assert.Single(_api.Requests).RequestMessage!.Path);
+
+        // One request for the games, and one for where their pictures are, unanswered here.
+        Assert.Equal(["/v1/games.json", "/v2/graphql"], _api.Requests.Select(request => request.RequestMessage!.Path));
     }
 
     [Fact]

@@ -8,17 +8,25 @@ namespace ModShelf.Sources.Abstractions.Catalog;
 /// </summary>
 public sealed record GameInfo
 {
-    /// <exception cref="ArgumentException">The name is blank, or the page isn't an absolute HTTP or HTTPS URL.</exception>
+    /// <exception cref="ArgumentException">
+    /// The name is blank, or the page or a picture isn't an absolute HTTP or HTTPS URL.
+    /// </exception>
     /// <param name="categories">The game's mod categories by name; blank and repeated ones are left out.</param>
-    public GameInfo(GameRef game, string name, Uri? pageUrl = null, IEnumerable<string>? categories = null)
+    /// <param name="coverUrl">The game's wide picture, such as a banner.</param>
+    /// <param name="iconUrl">The game's small square picture.</param>
+    public GameInfo(GameRef game, string name, Uri? pageUrl = null, IEnumerable<string>? categories = null, Uri? coverUrl = null, Uri? iconUrl = null)
     {
         ArgumentNullException.ThrowIfNull(game);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         CatalogUrls.EnsureWebUrl(pageUrl);
+        CatalogUrls.EnsureWebUrl(coverUrl);
+        CatalogUrls.EnsureWebUrl(iconUrl);
 
         Game = game;
         Name = name;
         PageUrl = pageUrl;
+        CoverUrl = coverUrl;
+        IconUrl = iconUrl;
         Categories =
         [
             .. (categories ?? [])
@@ -47,6 +55,16 @@ public sealed record GameInfo
     public IReadOnlyList<string> Categories { get; }
 
     /// <summary>
+    /// The game's wide picture, such as the banner at the top of its page on the site; null when the site gives none.
+    /// </summary>
+    public Uri? CoverUrl { get; }
+
+    /// <summary>
+    /// The game's small square picture; null when the site gives none.
+    /// </summary>
+    public Uri? IconUrl { get; }
+
+    /// <summary>
     /// Whether both describe the same game the same way, the categories compared one by one rather than as lists.
     /// </summary>
     public bool Equals(GameInfo? other)
@@ -54,6 +72,8 @@ public sealed record GameInfo
             && Game == other.Game
             && Name == other.Name
             && PageUrl == other.PageUrl
+            && CoverUrl == other.CoverUrl
+            && IconUrl == other.IconUrl
             && Categories.SequenceEqual(other.Categories, StringComparer.Ordinal);
 
     public override int GetHashCode() => HashCode.Combine(Game, Name, PageUrl, Categories.Count);
