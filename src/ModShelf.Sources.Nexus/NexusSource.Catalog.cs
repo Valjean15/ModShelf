@@ -88,11 +88,19 @@ public sealed partial class NexusSource : IModCatalog
         NexusLink mod = NexusLink.ForMod(modRef);
         NexusModFiles found = await _api.GetAsync<NexusModFiles>($"{mod.ModApiPath}/files.json", cancellationToken).ConfigureAwait(false);
 
-        // A later link for the same file wins, though Nexus Mods lists each file once.
+        // A later link for the same file wins, though Nexus Mods lists each file once. Some links go back in time, to a
+        // file uploaded before the one they say it replaced, such as from a mod's newest file to an archived one: they
+        // aren't replacements, so they're left out.
+        Dictionary<long, long> uploaded = [];
+        foreach (NexusFile file in found.Files)
+        {
+            uploaded.TryAdd(file.FileId, file.UploadedTimestamp);
+        }
+
         Dictionary<long, long> replacedBy = [];
         foreach (NexusFileUpdate update in found.FileUpdates ?? [])
         {
-            if (update.OldFileId > 0 && update.NewFileId > 0 && update.OldFileId != update.NewFileId)
+            if (update.OldFileId > 0 && update.NewFileId > 0 && update.OldFileId != update.NewFileId && !GoesBack(update, uploaded))
             {
                 replacedBy[update.OldFileId] = update.NewFileId;
             }
@@ -169,6 +177,14 @@ public sealed partial class NexusSource : IModCatalog
         => (game.Categories ?? [])
             .Where(category => category is { Name: not null } && !(category.IsTop && string.Equals(category.Name.Trim(), gameName.Trim(), StringComparison.OrdinalIgnoreCase)))
             .Select(category => category!.Name!);
+
+    /// <summary>
+    /// Whether <paramref name="update"/> links a file to one uploaded before it, both listed with their times.
+    /// </summary>
+    private static bool GoesBack(NexusFileUpdate update, Dictionary<long, long> uploaded)
+        => uploaded.TryGetValue(update.OldFileId, out long old)
+            && uploaded.TryGetValue(update.NewFileId, out long newer)
+            && newer < old;
 
     /// <param name="replacedBy">The ID of the file Nexus Mods says replaced this one, if any.</param>
     private static ModFile ToModFile(ModRef modRef, NexusLink mod, NexusFile file, long? replacedBy)

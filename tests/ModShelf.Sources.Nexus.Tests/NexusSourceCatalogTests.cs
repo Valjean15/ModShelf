@@ -378,8 +378,52 @@ public sealed class NexusSourceCatalogTests : IDisposable
         Dictionary<string, ModFile> byId = files.ToDictionary(file => file.Reference.Id);
         Assert.Equal(new ModFileRef(Smapi, "11997"), byId["11397"].ReplacedBy);
         Assert.Null(byId["160380"].ReplacedBy);
-        Assert.Equal(294, files.Count(file => file.ReplacedBy is not null));
+        // Of the 294 links Nexus Mods lists, 13 go back in time, which are left out.
+        Assert.Equal(281, files.Count(file => file.ReplacedBy is not null));
         Assert.Equal(82, files.Count(file => NewestOf(file, byId) == "160380"));
+    }
+
+    [Fact]
+    public async Task LeavesOutTheRecordedLinksThatGoBackInTime()
+    {
+        _api.Serve(RecordedNexusApi.Premium, "files");
+
+        IReadOnlyList<ModFile> files = await Source.GetFilesAsync(Smapi, Cancellation);
+
+        // Nexus Mods links 4.1.0-beta.1 for developers to the 4.1.0-beta.1 uploaded 83 seconds before it, and 2.6 beta
+        // 20.1 to 2.6 beta 20, then on back to 2.6 beta 19.
+        Dictionary<string, ModFile> byId = files.ToDictionary(file => file.Reference.Id);
+        Assert.Equal(((ModFileRef?)null, (ModFileRef?)null, new ModFileRef(Smapi, "110769")), (byId["109557"].ReplacedBy, byId["10060"].ReplacedBy, byId["109556"].ReplacedBy));
+        Assert.All(
+            files.Where(file => file.ReplacedBy is not null),
+            file => Assert.False(byId.TryGetValue(file.ReplacedBy!.Id, out ModFile? next) && next.UploadedAt < file.UploadedAt, file.Reference.Id));
+    }
+
+    [Fact]
+    public async Task ALinkToAFileUploadedBeforeIsntAReplacement()
+    {
+        _api.Answer(FilesPath, response => response.WithStatusCode(200).WithBody("""
+            {"files": [
+              {"file_id": 1, "category_id": 1, "uploaded_timestamp": 5},
+              {"file_id": 2, "category_id": 4, "uploaded_timestamp": 3},
+              {"file_id": 3, "category_id": 4, "uploaded_timestamp": 5},
+              {"file_id": 4, "category_id": 1, "uploaded_timestamp": 6},
+              {"file_id": 5, "category_id": 4, "uploaded_timestamp": 1}
+            ],
+            "file_updates": [
+              {"old_file_id": 1, "new_file_id": 2, "uploaded_timestamp": 3},
+              {"old_file_id": 2, "new_file_id": 4, "uploaded_timestamp": 6},
+              {"old_file_id": 2, "new_file_id": 5, "uploaded_timestamp": 1},
+              {"old_file_id": 3, "new_file_id": 1, "uploaded_timestamp": 5},
+              {"old_file_id": 4, "new_file_id": 9, "uploaded_timestamp": 7}
+            ]}
+            """));
+
+        IReadOnlyList<ModFile> files = await Source.GetFilesAsync(Smapi, Cancellation);
+
+        // Back in time: left out, without undoing a link of the same file forward. At the same time, or to a file not
+        // listed: kept.
+        Assert.Equal([null, "4", "1", "9", null], files.Select(file => file.ReplacedBy?.Id));
     }
 
     [Fact]

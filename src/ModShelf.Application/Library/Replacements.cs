@@ -8,7 +8,8 @@ namespace ModShelf.Application.Library;
 /// </summary>
 /// <remarks>
 /// Nexus Mods lists links that go back in time, from a mod's newest file to an archived older one. Followed, they made the
-/// older file an update of the newest, and the newest an old version of the older one, to archive or delete.
+/// older file an update of the newest, and the newest an old version of the older one, to archive or delete. The Nexus
+/// source leaves them out now; this keeps the library from following one from any site.
 /// </remarks>
 internal static class Replacements
 {
