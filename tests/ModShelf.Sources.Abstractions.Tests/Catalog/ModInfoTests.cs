@@ -45,6 +45,18 @@ public sealed class ModInfoTests
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => new ModInfo(Smapi, "SMAPI", downloads: -1));
         Assert.Throws<ArgumentOutOfRangeException>(() => new ModInfo(Smapi, "SMAPI", endorsements: -1));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new ModInfo(Smapi, "SMAPI", size: -1));
+    }
+
+    [Fact]
+    public void KeepsItsSizeAndWhenItWasPublished()
+    {
+        DateTimeOffset published = new(2018, 6, 16, 18, 25, 39, TimeSpan.Zero);
+
+        ModInfo mod = new(Smapi, "SMAPI", size: 41_888_768, publishedAt: published);
+
+        Assert.Equal((41_888_768L, published), (mod.Size!.Value, mod.PublishedAt!.Value));
+        Assert.Equal(((long?)null, (DateTimeOffset?)null), (new ModInfo(Smapi, "SMAPI").Size, new ModInfo(Smapi, "SMAPI").PublishedAt));
     }
 
     [Fact]

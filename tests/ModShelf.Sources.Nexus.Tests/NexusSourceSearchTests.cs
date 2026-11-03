@@ -102,6 +102,17 @@ public sealed class NexusSourceSearchTests : IDisposable
     }
 
     [Fact]
+    public async Task ARecordedModHasItsSizeAndWhenItWasPublished()
+    {
+        _api.Serve(RecordedNexusApi.Premium, "search-unique-downloads");
+
+        ModInfo smapi = (await Source.SearchAsync(StardewValley, new SearchQuery(sort: SearchSort.UniqueDownloads, count: 5), Cancellation)).Mods[0];
+
+        // Its main file's 40,907 KiB.
+        Assert.Equal((40_907L * 1024, new DateTimeOffset(2018, 6, 16, 18, 25, 39, TimeSpan.Zero)), (smapi.Size!.Value, smapi.PublishedAt!.Value));
+    }
+
+    [Fact]
     public async Task ASearchNexusModsFindsNothingForHasNoMods()
     {
         _api.Serve(RecordedNexusApi.Premium, "search-no-results");
@@ -272,7 +283,7 @@ public sealed class NexusSourceSearchTests : IDisposable
     {
         _api.AnswerPost(GraphQlPath, Page(
             total: 1,
-            """{"modId": 7, "pictureUrl": "javascript:alert(1)", "thumbnailUrl": "file:///etc/passwd", "thumbnailBlurredUrl": "", "status": "hidden", "adultContent": true, "downloads": -1}"""));
+            """{"modId": 7, "pictureUrl": "javascript:alert(1)", "thumbnailUrl": "file:///etc/passwd", "thumbnailBlurredUrl": "", "status": "hidden", "adultContent": true, "downloads": -1, "fileSize": -1}"""));
 
         ModInfo mod = Assert.Single((await Source.SearchAsync(StardewValley, new SearchQuery(), Cancellation)).Mods);
 
@@ -280,6 +291,7 @@ public sealed class NexusSourceSearchTests : IDisposable
         Assert.Null(mod.PictureUrl);
         Assert.Equal((null, null), (mod.ThumbnailUrl, mod.ThumbnailBlurredUrl));
         Assert.Null(mod.Downloads);
+        Assert.Equal(((long?)null, (DateTimeOffset?)null), (mod.Size, mod.PublishedAt));
         Assert.False(mod.IsAvailable);
         Assert.True(mod.HasAdultContent);
     }

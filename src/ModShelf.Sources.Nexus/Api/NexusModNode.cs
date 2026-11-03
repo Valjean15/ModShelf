@@ -6,6 +6,8 @@ namespace ModShelf.Sources.Nexus.Api;
 /// <param name="Status">Such as <c>published</c>.</param>
 /// <param name="Category">The name of the mod's category; the search doesn't ask for it.</param>
 /// <param name="ModCategory">The mod's category, with its name; the search doesn't ask for it.</param>
+/// <param name="CreatedAt">When the mod was published; the mod's details don't ask for it.</param>
+/// <param name="FileSize">Its main file's size, in KiB; the mod's details don't ask for it.</param>
 internal sealed record NexusModNode(
     long ModId,
     string? Name,
@@ -22,7 +24,9 @@ internal sealed record NexusModNode(
     string? Status,
     NexusModNode.GameNode? Game,
     string? Category = null,
-    NexusModNode.CategoryNode? ModCategory = null)
+    NexusModNode.CategoryNode? ModCategory = null,
+    DateTimeOffset? CreatedAt = null,
+    long? FileSize = null)
 {
     internal sealed record GameNode(string? DomainName);
 

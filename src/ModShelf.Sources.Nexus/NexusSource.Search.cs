@@ -61,7 +61,9 @@ public sealed partial class NexusSource : IModSearch
             endorsements: Count(node.Endorsements),
             thumbnailUrl: WebLink(node.ThumbnailUrl),
             thumbnailBlurredUrl: WebLink(node.ThumbnailBlurredUrl),
-            category: node.ModCategory?.Name ?? node.Category);
+            category: node.ModCategory?.Name ?? node.Category,
+            size: node.FileSize is >= 0 and <= long.MaxValue / 1024 ? node.FileSize * 1024 : null,
+            publishedAt: node.CreatedAt);
     }
 
     /// <summary>

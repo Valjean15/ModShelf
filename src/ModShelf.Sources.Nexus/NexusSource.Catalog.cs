@@ -76,20 +76,7 @@ public sealed partial class NexusSource : IModCatalog
 
         NexusMod found = await _api.GetAsync<NexusMod>($"{mod.ModApiPath}.json", cancellationToken).ConfigureAwait(false);
         string? category = found.CategoryId is { } id ? await CategoryAsync(mod.Game, id, cancellationToken).ConfigureAwait(false) : null;
-        return new ModInfo(
-            modRef,
-            string.IsNullOrWhiteSpace(found.Name) ? $"Mod {mod.ModId}" : found.Name,
-            found.Summary,
-            found.Author,
-            found.Version,
-            pageUrl: mod.PageUrl,
-            pictureUrl: WebLink(found.PictureUrl),
-            updatedAt: found.UpdatedTimestamp is { } updated ? FromUnixSeconds(updated) : null,
-            isAvailable: IsAvailable(found.Available, found.Status),
-            hasAdultContent: found.ContainsAdultContent == true,
-            downloads: Count(found.ModDownloads),
-            endorsements: Count(found.EndorsementCount),
-            category: category);
+        return ToModInfo(modRef, mod, found, category);
     }
 
     /// <exception cref="ArgumentException">The mod isn't Nexus Mods'.</exception>
@@ -205,6 +192,26 @@ public sealed partial class NexusSource : IModCatalog
         },
         _ => ModFileCategory.Unknown,
     };
+
+    /// <summary>
+    /// A mod as the v1 API describes it: without thumbnails or a size.
+    /// </summary>
+    private static ModInfo ToModInfo(ModRef modRef, NexusLink mod, NexusMod found, string? category)
+        => new(
+            modRef,
+            string.IsNullOrWhiteSpace(found.Name) ? $"Mod {mod.ModId}" : found.Name,
+            found.Summary,
+            found.Author,
+            found.Version,
+            pageUrl: mod.PageUrl,
+            pictureUrl: WebLink(found.PictureUrl),
+            updatedAt: found.UpdatedTimestamp is { } updated ? FromUnixSeconds(updated) : null,
+            isAvailable: IsAvailable(found.Available, found.Status),
+            hasAdultContent: found.ContainsAdultContent == true,
+            downloads: Count(found.ModDownloads),
+            endorsements: Count(found.EndorsementCount),
+            category: category,
+            publishedAt: found.CreatedTimestamp is { } published ? FromUnixSeconds(published) : null);
 
     private static DateTimeOffset FromUnixSeconds(long seconds)
         => seconds >= 0 && seconds <= DateTimeOffset.MaxValue.ToUnixTimeSeconds()

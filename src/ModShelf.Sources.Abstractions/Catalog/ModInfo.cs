@@ -8,7 +8,7 @@ namespace ModShelf.Sources.Abstractions.Catalog;
 public sealed record ModInfo
 {
     /// <exception cref="ArgumentException">The name is blank, or a link isn't an absolute HTTP or HTTPS URL.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">A count is negative.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">A count or the size is negative.</exception>
     public ModInfo(
         ModRef mod,
         string name,
@@ -24,7 +24,9 @@ public sealed record ModInfo
         long? endorsements = null,
         Uri? thumbnailUrl = null,
         Uri? thumbnailBlurredUrl = null,
-        string? category = null)
+        string? category = null,
+        long? size = null,
+        DateTimeOffset? publishedAt = null)
     {
         ArgumentNullException.ThrowIfNull(mod);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -42,6 +44,11 @@ public sealed record ModInfo
             throw new ArgumentOutOfRangeException(nameof(endorsements), endorsements, "A count can't be negative.");
         }
 
+        if (size < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(size), size, "A size can't be negative.");
+        }
+
         Mod = mod;
         Name = name;
         Summary = Blank(summary);
@@ -57,6 +64,8 @@ public sealed record ModInfo
         ThumbnailUrl = thumbnailUrl;
         ThumbnailBlurredUrl = thumbnailBlurredUrl;
         Category = Blank(category);
+        Size = size;
+        PublishedAt = publishedAt;
     }
 
     public ModRef Mod { get; }
@@ -123,6 +132,16 @@ public sealed record ModInfo
     /// The name of the mod's category on its site, such as "Gameplay", or null when it doesn't say.
     /// </summary>
     public string? Category { get; }
+
+    /// <summary>
+    /// The mod's size in bytes, as the site counts it, such as its main file's, or null when it doesn't say.
+    /// </summary>
+    public long? Size { get; }
+
+    /// <summary>
+    /// When the mod was first published on the site, or null when it doesn't say.
+    /// </summary>
+    public DateTimeOffset? PublishedAt { get; }
 
     private static string? Blank(string? text) => string.IsNullOrWhiteSpace(text) ? null : text.Trim();
 }
