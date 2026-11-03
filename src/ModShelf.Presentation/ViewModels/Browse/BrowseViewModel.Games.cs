@@ -16,11 +16,15 @@ namespace ModShelf.Presentation.ViewModels.Browse;
 /// </summary>
 public sealed partial class BrowseViewModel
 {
+    /// <summary>
+    /// Shows the game's rows in place of the list, and reads its categories.
+    /// </summary>
     partial void OnGameChanged(GameChoice? value)
     {
         if (value is not null)
         {
-            Listing = SearchListingAsync();
+            ShowRows(value.Game, closeMod: true);
+            CategoriesWork = ReadCategoriesAsync(value.Game);
         }
     }
 

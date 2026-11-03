@@ -12,4 +12,10 @@ public sealed partial class BrowseViewModel
 
     [LoggerMessage(EventId = 911, Level = LogLevel.Error, Message = "Listing or opening mods failed")]
     private static partial void LogListingFailed(ILogger logger, Exception exception);
+
+    [LoggerMessage(EventId = 945, Level = LogLevel.Error, Message = "Listing the {Row} row failed")]
+    private static partial void LogRowFailed(ILogger logger, Exception exception, string row);
+
+    [LoggerMessage(EventId = 946, Level = LogLevel.Warning, Message = "Reading the categories of game {Game} from {Source} failed")]
+    private static partial void LogCategoriesFailed(ILogger logger, Exception exception, string game, string source);
 }

@@ -2233,4 +2233,76 @@
     <value>Download selected ({0:N0})</value>
     <comment>Downloads the newest main file of each mod selected. {0} counts the mods.</comment>
   </data>
+  <data name="BrowseSortNameAToZ" xml:space="preserve">
+    <value>Name, A to Z</value>
+    <comment>A sort: by name, A first.</comment>
+  </data>
+  <data name="BrowseSortNameZToA" xml:space="preserve">
+    <value>Name, Z to A</value>
+    <comment>A sort: by name, Z first.</comment>
+  </data>
+  <data name="BrowseSortLargest" xml:space="preserve">
+    <value>Largest</value>
+    <comment>A sort: the biggest mods first.</comment>
+  </data>
+  <data name="BrowseSortSmallest" xml:space="preserve">
+    <value>Smallest</value>
+    <comment>A sort: the smallest mods first.</comment>
+  </data>
+  <data name="BrowseSortMostUniqueDownloads" xml:space="preserve">
+    <value>Most unique downloads</value>
+    <comment>A sort: the most downloaded first, each user counted once.</comment>
+  </data>
+  <data name="BrowseUpdatedAnyTime" xml:space="preserve">
+    <value>Updated any time</value>
+    <comment>The time window: no limit on when mods were last updated.</comment>
+  </data>
+  <data name="BrowseUpdatedDay" xml:space="preserve">
+    <value>Updated in the last 24 hours</value>
+    <comment>The time window.</comment>
+  </data>
+  <data name="BrowseUpdatedWeek" xml:space="preserve">
+    <value>Updated in the last week</value>
+    <comment>The time window.</comment>
+  </data>
+  <data name="BrowseUpdatedMonth" xml:space="preserve">
+    <value>Updated in the last month</value>
+    <comment>The time window: 30 days.</comment>
+  </data>
+  <data name="BrowseAllCategories" xml:space="preserve">
+    <value>All categories</value>
+    <comment>The category box: no category chosen.</comment>
+  </data>
+  <data name="BrowsePerPage" xml:space="preserve">
+    <value>{0:N0} per page</value>
+    <comment>The page size box. {0} is how many mods a page lists.</comment>
+  </data>
+  <data name="BrowseTrending" xml:space="preserve">
+    <value>Trending</value>
+    <comment>A row on a game's Browse page: the mods its site says are trending.</comment>
+  </data>
+  <data name="BrowseRecentlyAdded" xml:space="preserve">
+    <value>Recently added</value>
+    <comment>A row on a game's Browse page: the newest mods.</comment>
+  </data>
+  <data name="BrowseRecentlyUpdated" xml:space="preserve">
+    <value>Recently updated</value>
+    <comment>A row on a game's Browse page: the mods updated last.</comment>
+  </data>
+  <data name="BrowseRowShowAll" xml:space="preserve">
+    <value>Show all</value>
+    <comment>Beside a row's title: lists every mod in that row's order.</comment>
+  </data>
+  <data name="BrowseRowEmpty" xml:space="preserve">
+    <value>No mods here yet.</value>
+    <comment>A row with no mods.</comment>
+  </data>
+  <data name="BrowseRowFailed" xml:space="preserve">
+    <value>{0} couldn't list them: {1}</value>
+    <comment>A row that couldn't be read. {0} is the site, {1} why.</comment>
+  </data>
+  <data name="BrowseAdded" xml:space="preserve">
+    <value>Added {0}</value>
+    <comment>{0} is when the mod was first published, such as "3 days ago".</comment>
+  </data>
 </root>

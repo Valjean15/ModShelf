@@ -26,16 +26,23 @@ using ModShelf.Sources.Abstractions.Search;
 namespace ModShelf.Presentation.ViewModels.Browse;
 
 /// <summary>
-/// Searching a game's mods, a page at a time, or listing the ones the account tracks; and opening one, from the list or
-/// from a link, to see its files and changelog, download them, watch it and track it. The games are read from the sites
-/// the first time the screen is shown. What the library has of each mod follows the library's changes.
+/// A game's mods: rows of its trending, newest and recently updated mods until a search; searching them, by words,
+/// author, category and how recently updated, in an order and a page at a time; or listing the ones the account tracks.
+/// Opening one, from a list or from a link, shows its files and changelog, to download them, watch it and track it. The
+/// games are read from the sites the first time the screen is shown. What the library has of each mod follows the
+/// library's changes.
 /// </summary>
 public sealed partial class BrowseViewModel : ScreenViewModel
 {
     /// <summary>
-    /// How many mods a page lists.
+    /// How many mods a page lists, unless the user chooses otherwise.
     /// </summary>
     internal const int PageSize = 20;
+
+    /// <summary>
+    /// How many mods a row of a game's page lists at most.
+    /// </summary>
+    internal const int RowSize = 10;
 
     /// <summary>
     /// How many tracked mods' details are read from their site at once.
@@ -59,6 +66,9 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     private SourceId? _trackedSource;
     private bool _gamesRead;
     private bool _picturesShown;
+
+    // While the screen changes a choice itself, such as the category when the game changes, that's no search.
+    private bool _choosingQuietly;
 
     public BrowseViewModel(
         IModLookup lookup,
@@ -110,6 +120,16 @@ public sealed partial class BrowseViewModel : ScreenViewModel
             timeProvider,
             logger);
         SelectedSort = Sorts[0];
+        SelectedTimeWindow = TimeWindows[0];
+        SelectedPageSize = PageSizes[0];
+        Categories = [_allCategories];
+        SelectedCategory = _allCategories;
+        Rows =
+        [
+            new BrowseRowViewModel(BrowseRowKind.Trending, Strings.BrowseTrending, showAll: null),
+            new BrowseRowViewModel(BrowseRowKind.RecentlyAdded, Strings.BrowseRecentlyAdded, ShowAllAsync),
+            new BrowseRowViewModel(BrowseRowKind.RecentlyUpdated, Strings.BrowseRecentlyUpdated, ShowAllAsync),
+        ];
         Results.CollectionChanged += (_, _) => ShowSelection();
         Previews = new PreviewsViewModel(PreviewScreen.Browse, pictures);
         Previews.PropertyChanged += (_, changed) =>
@@ -174,13 +194,59 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         new(SearchSort.Updated, SearchDirection.Ascending, Strings.BrowseSortLongestSinceUpdated),
         new(SearchSort.Newest, SearchDirection.Descending, Strings.BrowseSortNewest),
         new(SearchSort.Newest, SearchDirection.Ascending, Strings.BrowseSortOldest),
+        new(SearchSort.UniqueDownloads, SearchDirection.Descending, Strings.BrowseSortMostUniqueDownloads),
+        new(SearchSort.Size, SearchDirection.Descending, Strings.BrowseSortLargest),
+        new(SearchSort.Size, SearchDirection.Ascending, Strings.BrowseSortSmallest),
+        new(SearchSort.Name, SearchDirection.Ascending, Strings.BrowseSortNameAToZ),
+        new(SearchSort.Name, SearchDirection.Descending, Strings.BrowseSortNameZToA),
     ];
 
     /// <summary>
-    /// The order of the results. Changing it searches again.
+    /// The order of the results. Changing it searches again, or searches in place of the rows.
     /// </summary>
     [ObservableProperty]
     public partial SortChoice SelectedSort { get; set; }
+
+    /// <summary>
+    /// How recently the mods a search finds were updated: any time, or in the last day, week or month.
+    /// </summary>
+    public IReadOnlyList<TimeWindowChoice> TimeWindows { get; } =
+    [
+        new(null, Strings.BrowseUpdatedAnyTime),
+        new(TimeSpan.FromDays(1), Strings.BrowseUpdatedDay),
+        new(TimeSpan.FromDays(7), Strings.BrowseUpdatedWeek),
+        new(TimeSpan.FromDays(30), Strings.BrowseUpdatedMonth),
+    ];
+
+    /// <summary>
+    /// How recently the mods found were updated. Changing it searches again, or searches in place of the rows.
+    /// </summary>
+    [ObservableProperty]
+    public partial TimeWindowChoice SelectedTimeWindow { get; set; }
+
+    /// <summary>
+    /// Every category, then the chosen game's, by name, once its site says them.
+    /// </summary>
+    public ObservableCollection<CategoryChoice> Categories { get; }
+
+    /// <summary>
+    /// The category of the mods found; null, or the first, for every category. Changing it searches again, or searches
+    /// in place of the rows. Choosing another game chooses every category.
+    /// </summary>
+    [ObservableProperty]
+    public partial CategoryChoice? SelectedCategory { get; set; }
+
+    /// <summary>
+    /// How many mods a page can list.
+    /// </summary>
+    public IReadOnlyList<PageSizeChoice> PageSizes { get; } =
+        [.. new[] { PageSize, 50, SearchQuery.MaxCount }.Select(count => new PageSizeChoice(count, Text.Format(Strings.BrowsePerPage, count)))];
+
+    /// <summary>
+    /// How many mods a page lists. Changing it searches again, or searches in place of the rows.
+    /// </summary>
+    [ObservableProperty]
+    public partial PageSizeChoice SelectedPageSize { get; set; }
 
     /// <summary>
     /// Whether searches include mods with adult content. Changing it searches again.
@@ -302,7 +368,26 @@ public sealed partial class BrowseViewModel : ScreenViewModel
 
     partial void OnSelectedSortChanged(SortChoice value) => SearchAgain();
 
-    partial void OnIncludeAdultContentChanged(bool value) => SearchAgain();
+    partial void OnSelectedTimeWindowChanged(TimeWindowChoice value) => SearchAgain();
+
+    partial void OnSelectedCategoryChanged(CategoryChoice? value) => SearchAgain();
+
+    partial void OnSelectedPageSizeChanged(PageSizeChoice value) => SearchAgain();
+
+    /// <summary>
+    /// Searches again with adult content or without it, or lists the rows again.
+    /// </summary>
+    partial void OnIncludeAdultContentChanged(bool value)
+    {
+        if (IsShowingRows && Game is { } game)
+        {
+            RowsWork = ListRowsAsync(game.Game);
+        }
+        else
+        {
+            SearchAgain();
+        }
+    }
 
     /// <summary>
     /// Closes the mod, back to the list.
@@ -323,7 +408,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     private void ShowPictures()
     {
         bool shown = Previews.ShowsPictures;
-        foreach (BrowseModViewModel row in Results)
+        foreach (BrowseModViewModel row in Results.Concat(Rows.SelectMany(listed => listed.Mods)))
         {
             if (!shown)
             {
@@ -348,7 +433,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     private void ShowLibrary(LibraryChange change)
     {
         _inLibrary.Apply(change);
-        foreach (BrowseModViewModel row in Results.Where(row => row.Mod == change.Mod))
+        foreach (BrowseModViewModel row in Results.Concat(Rows.SelectMany(listed => listed.Mods)).Where(row => row.Mod == change.Mod))
         {
             row.ShowLibrary(change.After);
         }

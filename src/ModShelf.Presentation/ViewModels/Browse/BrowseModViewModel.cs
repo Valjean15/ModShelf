@@ -23,6 +23,7 @@ public sealed partial class BrowseModViewModel : ObservableObject
     /// <param name="problem">Why the mod's details couldn't be read, for a tracked mod; null when they were.</param>
     /// <param name="open">Opens the mod on the screen.</param>
     /// <param name="selectionChanged">Tells the screen the mod was selected, or no longer is.</param>
+    /// <param name="fact">What it says besides what it always says, as fits the order it's listed in.</param>
     internal BrowseModViewModel(
         ModInfo mod,
         string? problem,
@@ -30,7 +31,8 @@ public sealed partial class BrowseModViewModel : ObservableObject
         ModPictures pictures,
         TimeProvider timeProvider,
         Func<ModRef, CancellationToken, Task> open,
-        Action selectionChanged)
+        Action selectionChanged,
+        BrowseFact fact = BrowseFact.None)
     {
         ArgumentNullException.ThrowIfNull(mod);
         ArgumentNullException.ThrowIfNull(pictures);
@@ -51,6 +53,13 @@ public sealed partial class BrowseModViewModel : ObservableObject
         UpdatedText = text.Updated;
         DownloadsText = text.Downloads;
         EndorsementsText = text.Endorsements;
+        FactText = fact switch
+        {
+            BrowseFact.Size when mod.Size is { } size => Sizes.Format(size),
+            BrowseFact.Published when mod.PublishedAt is { } published => Text.Format(Strings.BrowseAdded, Dates.Ago(published, timeProvider)),
+            BrowseFact.Updated when mod.UpdatedAt is { } updated => Text.Format(Strings.BrowseUpdated, Dates.Ago(updated, timeProvider)),
+            _ => string.Empty,
+        };
         HasAdultContent = mod.HasAdultContent;
         IsHidden = !mod.IsAvailable;
         Problem = problem;
@@ -97,6 +106,13 @@ public sealed partial class BrowseModViewModel : ObservableObject
     /// Such as "98,765 endorsements"; empty when the site doesn't count them.
     /// </summary>
     public string EndorsementsText { get; }
+
+    /// <summary>
+    /// What it says besides, as fits the order it's listed in: such as "40.0 MB" in a search by size, "Added 3 days
+    /// ago" among the newest, or "Updated 2 hours ago" among the recently updated; empty for none, or when the site
+    /// doesn't say.
+    /// </summary>
+    public string FactText { get; }
 
     public bool HasAdultContent { get; }
 

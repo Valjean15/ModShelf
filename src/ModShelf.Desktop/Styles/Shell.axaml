@@ -535,6 +535,12 @@
         <Setter Property="VerticalAlignment" Value="Top" />
     </Style>
 
+    <!-- A card in a row of a game's Browse page: narrower, side by side in one line. -->
+    <Style Selector="Button.modCard.rowCard">
+        <Setter Property="Width" Value="220" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+
     <!-- A mod as a card: its picture on top, then its name and what's known of it. -->
     <Style Selector="Border.modCard">
         <Setter Property="CornerRadius" Value="10" />

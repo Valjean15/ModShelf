@@ -56,7 +56,9 @@ public sealed partial class BrowseViewModel
         }
         else if (_query is { } query && _searched is { } game)
         {
-            SearchQuery next = new(query.Text, query.Sort, _nextOffset, query.Count, query.Author, query.IncludeAdultContent, query.Direction);
+            // The same search, from the same moment for the time window, so the pages follow on.
+            SearchQuery next = new(
+                query.Text, query.Sort, _nextOffset, query.Count, query.Author, query.IncludeAdultContent, query.Direction, query.Category, query.UpdatedSince);
             Listing = ListingAsync(game.Source, Strings.BrowseSearchFailed, token => ShowSearchAsync(game, next, token));
         }
 
@@ -97,6 +99,7 @@ public sealed partial class BrowseViewModel
                 ];
                 Mod = null;
                 Results.Clear();
+                IsShowingRows = false;
                 IsShowingTracked = true;
                 string site = _services.Sources.SiteName(source);
                 ResultsText = _trackedToShow.Count switch
@@ -114,11 +117,12 @@ public sealed partial class BrowseViewModel
     private bool CanShowTracked() => Game is { } game && _services.Tracked.CanTrack(game.Game.Source);
 
     /// <summary>
-    /// Searches the chosen game again with the order and content asked for, when the list holds a search.
+    /// Searches the chosen game again with the order, filters and page size asked for, when the list holds a search; or
+    /// searches it in place of its rows.
     /// </summary>
     private void SearchAgain()
     {
-        if (_query is not null && Game is not null)
+        if (!_choosingQuietly && Game is not null && (_query is not null || IsShowingRows))
         {
             Listing = SearchListingAsync();
         }
@@ -136,7 +140,17 @@ public sealed partial class BrowseViewModel
         }
 
         string? words = AsLink(SearchText) is null ? SearchText : null;
-        SearchQuery query = new(words, SelectedSort.Sort, 0, PageSize, Author, IncludeAdultContent, SelectedSort.Direction);
+        DateTimeOffset? since = SelectedTimeWindow.Within is { } within ? _services.TimeProvider.GetUtcNow() - within : null;
+        SearchQuery query = new(
+            words,
+            SelectedSort.Sort,
+            0,
+            SelectedPageSize.Count,
+            Author,
+            IncludeAdultContent,
+            SelectedSort.Direction,
+            SelectedCategory?.Category,
+            since);
         return ListingAsync(game.Game.Source, Strings.BrowseSearchFailed, token => ShowSearchAsync(game.Game, query, token));
     }
 
@@ -152,6 +166,7 @@ public sealed partial class BrowseViewModel
         if (query.Offset == 0)
         {
             Results.Clear();
+            IsShowingRows = false;
             IsShowingTracked = false;
             _trackedSource = null;
             Mod = null;
@@ -160,9 +175,16 @@ public sealed partial class BrowseViewModel
         }
 
         HashSet<ModRef> listed = [.. Results.Select(row => row.Mod)];
+        BrowseFact fact = query.Sort switch
+        {
+            SearchSort.Size => BrowseFact.Size,
+            SearchSort.Newest => BrowseFact.Published,
+            SearchSort.Updated => BrowseFact.Updated,
+            _ => BrowseFact.None,
+        };
         foreach (ModInfo mod in page.Mods.Where(mod => listed.Add(mod.Mod)))
         {
-            Results.Add(Row(mod, problem: null));
+            Results.Add(Row(mod, problem: null, fact));
         }
 
         _nextOffset = page.Offset + page.Mods.Count;
@@ -176,7 +198,7 @@ public sealed partial class BrowseViewModel
     /// </summary>
     private async Task ShowTrackedPageAsync(SourceId source, CancellationToken cancellationToken)
     {
-        ModRef[] page = [.. _trackedToShow.Skip(Results.Count).Take(PageSize)];
+        ModRef[] page = [.. _trackedToShow.Skip(Results.Count).Take(SelectedPageSize.Count)];
         (ModInfo Mod, string? Problem)[] read = new (ModInfo, string?)[page.Length];
         IModCatalog? catalog = _services.Sources.Find<IModCatalog>(source);
         await Parallel.ForEachAsync(
@@ -205,9 +227,9 @@ public sealed partial class BrowseViewModel
         HasMore = Results.Count < _trackedToShow.Count;
     }
 
-    private BrowseModViewModel Row(ModInfo mod, string? problem)
+    private BrowseModViewModel Row(ModInfo mod, string? problem, BrowseFact fact = BrowseFact.None)
     {
-        BrowseModViewModel row = new(mod, problem, _inLibrary.GetValueOrDefault(mod.Mod), _pictures, _services.TimeProvider, OpenAsync, ShowSelection);
+        BrowseModViewModel row = new(mod, problem, _inLibrary.GetValueOrDefault(mod.Mod), _pictures, _services.TimeProvider, OpenAsync, ShowSelection, fact);
         if (_picturesShown)
         {
             row.Picture.Show(mod, _stopping);

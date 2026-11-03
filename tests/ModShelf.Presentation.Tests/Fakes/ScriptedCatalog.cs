@@ -24,6 +24,11 @@ internal sealed class ScriptedCatalog(SourceId id, string displayName) : IModCat
     public ConcurrentDictionary<string, string> GameNames { get; } = new(StringComparer.Ordinal);
 
     /// <summary>
+    /// Each named game's categories by its key; a game not here has none.
+    /// </summary>
+    public ConcurrentDictionary<string, IReadOnlyList<string>> GameCategories { get; } = new(StringComparer.Ordinal);
+
+    /// <summary>
     /// Each mod's changelog by its ID; a mod not here has an empty one.
     /// </summary>
     public ConcurrentDictionary<string, IReadOnlyList<ModChangelog>> Changelogs { get; } = new(StringComparer.Ordinal);
@@ -100,7 +105,7 @@ internal sealed class ScriptedCatalog(SourceId id, string displayName) : IModCat
 
     private Task<GameInfo> Name(GameRef game)
         => GameNames.TryGetValue(game.Key, out string? name)
-            ? Task.FromResult(new GameInfo(game, name))
+            ? Task.FromResult(new GameInfo(game, name, categories: GameCategories.GetValueOrDefault(game.Key)))
             : Task.FromException<GameInfo>(new HttpRequestException("No such game.", null, System.Net.HttpStatusCode.NotFound));
 
     private async Task<IReadOnlyList<ModChangelog>> ChangelogsAfterAsync(Task hold, IReadOnlyList<ModChangelog> changelogs)

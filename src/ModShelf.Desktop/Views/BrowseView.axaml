@@ -34,6 +34,9 @@
         <!-- How to search, and the tracked mods instead. -->
         <WrapPanel DockPanel.Dock="Top" Margin="0,8,0,0" ItemSpacing="8" LineSpacing="8">
             <ComboBox MinWidth="200" ItemsSource="{Binding Sorts}" SelectedItem="{Binding SelectedSort}" />
+            <ComboBox MinWidth="230" ItemsSource="{Binding TimeWindows}" SelectedItem="{Binding SelectedTimeWindow}" />
+            <ComboBox MinWidth="180" MaxWidth="260" ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" />
+            <ComboBox ItemsSource="{Binding PageSizes}" SelectedItem="{Binding SelectedPageSize}" />
             <TextBox Width="200" Text="{Binding Author}" PlaceholderText="{x:Static res:Strings.BrowseAuthorHint}">
                 <TextBox.KeyBindings>
                     <KeyBinding Gesture="Enter" Command="{Binding SearchCommand}" />
@@ -68,8 +71,95 @@
         </Border>
 
         <Panel Margin="0,12,0,0">
+            <!-- A game's rows before a search: its trending, newest and recently updated mods. Clicking a mod opens it. -->
+            <ScrollViewer>
+                <ScrollViewer.IsVisible>
+                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                        <Binding Path="IsShowingRows" />
+                        <Binding Path="!IsModOpen" />
+                    </MultiBinding>
+                </ScrollViewer.IsVisible>
+                <ItemsControl ItemsSource="{Binding Rows}" Margin="0,0,16,16">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="20" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:BrowseRowViewModel">
+                            <StackPanel Spacing="8" IsVisible="{Binding IsShown}">
+                                <DockPanel>
+                                    <Button DockPanel.Dock="Right"
+                                            Classes="quiet"
+                                            Content="{x:Static res:Strings.BrowseRowShowAll}"
+                                            Command="{Binding ShowAllCommand}"
+                                            IsVisible="{Binding CanShowAll}" />
+                                    <TextBlock Classes="subheading" VerticalAlignment="Center" Text="{Binding Title}" />
+                                </DockPanel>
+                                <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsLoading}" />
+                                <TextBlock Classes="problem"
+                                           TextWrapping="Wrap"
+                                           Text="{Binding Problem}"
+                                           IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                <TextBlock Classes="note" Text="{x:Static res:Strings.BrowseRowEmpty}" IsVisible="{Binding IsEmpty}" />
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                    <ItemsControl ItemsSource="{Binding Mods}" Margin="0,0,0,12">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="14" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:BrowseModViewModel">
+                                                <Button Classes="modCard rowCard" Command="{Binding OpenCommand}">
+                                                    <DockPanel>
+                                                        <Panel DockPanel.Dock="Top" IsVisible="{Binding Picture.IsShown}">
+                                                            <pictures:ModCardPicture DataContext="{Binding Picture}" />
+                                                        </Panel>
+                                                        <StackPanel Margin="12,10,12,12" Spacing="3">
+                                                            <TextBlock FontWeight="SemiBold"
+                                                                       TextWrapping="Wrap"
+                                                                       MaxLines="2"
+                                                                       TextTrimming="CharacterEllipsis"
+                                                                       Text="{Binding Name}" />
+                                                            <TextBlock Classes="note"
+                                                                       TextTrimming="CharacterEllipsis"
+                                                                       Text="{Binding AuthorText}"
+                                                                       IsVisible="{Binding AuthorText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                                            <TextBlock Classes="note" Text="{Binding FactText}" IsVisible="{Binding FactText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                                            <TextBlock Classes="note" Text="{Binding EndorsementsText}" />
+                                                            <WrapPanel ItemSpacing="6" LineSpacing="6" Margin="0,2,0,0">
+                                                                <Border Classes="tag good" IsVisible="{Binding IsDownloaded}">
+                                                                    <TextBlock Text="{x:Static res:Strings.BrowseDownloadedTag}" />
+                                                                </Border>
+                                                                <Border Classes="tag" IsVisible="{Binding IsWatched}">
+                                                                    <TextBlock Text="{x:Static res:Strings.BrowseWatchedTag}" />
+                                                                </Border>
+                                                                <Border Classes="tag" IsVisible="{Binding IsHidden}">
+                                                                    <TextBlock Text="{x:Static res:Strings.BrowseHiddenTag}" />
+                                                                </Border>
+                                                            </WrapPanel>
+                                                        </StackPanel>
+                                                    </DockPanel>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
             <!-- The search's results, or the tracked mods. Clicking a mod opens it. -->
-            <DockPanel IsVisible="{Binding !IsModOpen}">
+            <DockPanel>
+                <DockPanel.IsVisible>
+                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                        <Binding Path="!IsShowingRows" />
+                        <Binding Path="!IsModOpen" />
+                    </MultiBinding>
+                </DockPanel.IsVisible>
                 <!-- How many match; selecting the mods listed, and what to do with those selected. -->
                 <WrapPanel DockPanel.Dock="Top" ItemSpacing="12" LineSpacing="8">
                     <CheckBox Classes="selectAll"
@@ -141,6 +231,7 @@
                                                            Text="{Binding Summary}"
                                                            IsVisible="{Binding Summary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                                                 <WrapPanel ItemSpacing="16">
+                                                    <TextBlock Classes="note" Text="{Binding FactText}" IsVisible="{Binding FactText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                                                     <TextBlock Classes="note" Text="{Binding VersionText}" />
                                                     <TextBlock Classes="note" Text="{Binding UpdatedText}" />
                                                     <TextBlock Classes="note" Text="{Binding DownloadsText}" />
@@ -194,6 +285,7 @@
                                                            TextTrimming="CharacterEllipsis"
                                                            Text="{Binding Summary}"
                                                            IsVisible="{Binding Summary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                                <TextBlock Classes="note" Text="{Binding FactText}" IsVisible="{Binding FactText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                                                 <WrapPanel ItemSpacing="12">
                                                     <TextBlock Classes="note" Text="{Binding EndorsementsText}" />
                                                     <TextBlock Classes="note" Text="{Binding DownloadsText}" />

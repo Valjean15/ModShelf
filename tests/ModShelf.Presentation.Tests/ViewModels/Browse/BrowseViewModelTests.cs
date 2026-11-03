@@ -51,7 +51,7 @@ public sealed class BrowseViewModelTests : IDisposable
     }
 
     [Fact]
-    public async Task ChoosesTheGameTheLibraryHasTheMostModsOfAndSearchesIt()
+    public async Task ChoosesTheGameTheLibraryHasTheMostModsOfAndShowsItsRows()
     {
         _harness.Searchable(BrowseHarness.Stardew, 3);
         await _harness.StartAsync(
@@ -62,11 +62,16 @@ public sealed class BrowseViewModelTests : IDisposable
         await _harness.ShowAsync();
 
         Assert.Equal(BrowseHarness.Stardew.Game, Screen.Game?.Game);
-        (GameRef game, SearchQuery query) = Assert.Single(_harness.Lookup.Searches);
-        Assert.Equal(BrowseHarness.Stardew.Game, game);
-        Assert.Equal(new SearchQuery(count: BrowseViewModel.PageSize), query);
-        Assert.Equal(["Mod 1", "Mod 2", "Mod 3"], _harness.Names());
-        Assert.Equal("3 mods match.", Screen.ResultsText);
+        Assert.True(Screen.IsShowingRows);
+        Assert.Equal(
+            [
+                (BrowseHarness.Stardew.Game, new SearchQuery(sort: SearchSort.Updated, count: BrowseViewModel.RowSize)),
+                (BrowseHarness.Stardew.Game, new SearchQuery(sort: SearchSort.Newest, count: BrowseViewModel.RowSize)),
+            ],
+            _harness.Lookup.Searches.OrderBy(search => search.Query.Sort));
+        Assert.Equal(["Mod 1", "Mod 2", "Mod 3"], Screen.Rows[1].Mods.Select(mod => mod.Name));
+        Assert.Empty(Screen.Results);
+        Assert.Equal(string.Empty, Screen.ResultsText);
         Assert.False(Screen.HasMore);
     }
 
@@ -98,15 +103,20 @@ public sealed class BrowseViewModelTests : IDisposable
     }
 
     [Fact]
-    public async Task ChoosingAGameSearchesIt()
+    public async Task ChoosingAGameShowsItsRowsAndSearchingItShowsWhatMatches()
     {
         _harness.Searchable(BrowseHarness.Skyrim, 1);
         await _harness.StartAsync();
         await _harness.ShowAsync();
 
-        Screen.Game = Screen.Games[1];
-        await Screen.Listing;
+        await _harness.ChooseAsync(BrowseHarness.Skyrim);
+        bool rows = Screen.IsShowingRows;
+        string[] updated = [.. Screen.Rows[2].Mods.Select(mod => mod.Name)];
+        await Screen.SearchCommand.ExecuteAsync(null);
 
+        Assert.True(rows);
+        Assert.Equal(["Mod 1"], updated);
+        Assert.False(Screen.IsShowingRows);
         Assert.Equal(["Mod 1"], _harness.Names());
         Assert.Equal("1 mod matches.", Screen.ResultsText);
     }
@@ -133,7 +143,7 @@ public sealed class BrowseViewModelTests : IDisposable
     {
         await _harness.StartAsync();
 
-        Assert.Equal(9, Screen.Sorts.Select(sort => (sort.Sort, sort.Direction)).Distinct().Count());
+        Assert.Equal(14, Screen.Sorts.Select(sort => (sort.Sort, sort.Direction)).Distinct().Count());
         Assert.Equal(("Best match", SearchSort.Relevance), (Screen.SelectedSort.Name, Screen.SelectedSort.Sort));
         Assert.Equal("Least downloaded", Screen.Sorts[4].ToString());
     }
@@ -414,12 +424,13 @@ public sealed class BrowseViewModelTests : IDisposable
     }
 
     [Fact]
-    public async Task AGameChosenWithALinkInTheBoxIsSearchedWithoutWords()
+    public async Task AGameSearchedAgainWithALinkInTheBoxIsSearchedWithoutWords()
     {
         await ChooseAsync(BrowseHarness.Skyrim, 0);
         await _harness.OpenAsync(BrowseHarness.Page(BrowseHarness.Info(TestData.Mod("12604"), "SkyUI")));
 
-        Screen.Game = Assert.Single(Screen.Games, game => game.Game == BrowseHarness.Stardew.Game);
+        await _harness.ChooseAsync(BrowseHarness.Stardew);
+        Screen.SelectedSort = Screen.Sorts[1];
         await Screen.Listing;
 
         Assert.Equal((BrowseHarness.Stardew.Game, (string?)null), (_harness.Lookup.Searches[^1].Game, _harness.Lookup.Searches[^1].Query.Text));
@@ -577,6 +588,7 @@ public sealed class BrowseViewModelTests : IDisposable
         _harness.Searchable(BrowseHarness.Skyrim, 2);
         await _harness.StartAsync(TestData.LibraryMod(first, "Mod 1", watched: false, TestData.LibraryFile(first, "10", "a.7z")));
         await _harness.ShowAsync();
+        await Screen.SearchCommand.ExecuteAsync(null);
         (bool, bool)[] before = [.. Screen.Results.Select(row => (row.IsDownloaded, row.IsWatched))];
 
         _harness.Library.Change(second, TestData.LibraryMod(second, "Mod 2"));
@@ -623,16 +635,15 @@ public sealed class BrowseViewModelTests : IDisposable
     }
 
     /// <summary>
-    /// Starts the screen, shows it, and chooses the game, which <paramref name="mods"/> mods are found for; or, when
-    /// negative, the mods the test set up already.
+    /// Starts the screen, shows it, chooses the game, which <paramref name="mods"/> mods are found for, or, when
+    /// negative, the mods the test set up already; and searches it with nothing in the boxes.
     /// </summary>
     private async Task<List<ModInfo>> ChooseAsync(GameInfo game, int mods)
     {
         List<ModInfo> found = mods < 0 ? _harness.Lookup.Mods[game.Game] : _harness.Searchable(game, mods);
         await _harness.StartAsync();
         await _harness.ShowAsync();
-        Screen.Game = Assert.Single(Screen.Games, choice => choice.Game == game.Game);
-        await Screen.Listing;
+        await _harness.ChooseAndSearchAsync(game);
         return found;
     }
 }

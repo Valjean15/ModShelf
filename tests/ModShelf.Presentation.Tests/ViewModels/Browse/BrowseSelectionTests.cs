@@ -152,8 +152,7 @@ public sealed class BrowseSelectionTests : IDisposable
     {
         await _harness.StartAsync();
         await _harness.ShowAsync();
-        Screen.Game = Assert.Single(Screen.Games, choice => choice.Game == BrowseHarness.Skyrim.Game);
-        await Screen.Listing;
+        await _harness.ChooseAndSearchAsync(BrowseHarness.Skyrim);
     }
 
     private static LibraryDownload Queued()

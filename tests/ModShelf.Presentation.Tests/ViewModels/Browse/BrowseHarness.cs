@@ -27,7 +27,8 @@ internal sealed class BrowseHarness : IDisposable
     private readonly CancellationTokenSource _stopping = new();
     private bool _disposed;
 
-    public BrowseHarness()
+    /// <param name="trending">Whether Nexus Mods lists its games' trending mods.</param>
+    public BrowseHarness(bool trending = true)
     {
         Time.SetLocalTimeZone(TimeZoneInfo.Utc);
         Lookup.Searchable.Add(TestData.Nexus);
@@ -42,7 +43,7 @@ internal sealed class BrowseHarness : IDisposable
             Rescan,
             Storage,
             Settings,
-            new FakeSourceRegistry(Catalog),
+            trending ? new FakeSourceRegistry(Catalog, Trending) : new FakeSourceRegistry(Catalog),
             Browser,
             Folders,
             Clipboard,
@@ -73,6 +74,8 @@ internal sealed class BrowseHarness : IDisposable
     public ScriptedFolders Folders { get; } = new();
 
     public ScriptedCatalog Catalog { get; } = new(TestData.Nexus, "Nexus Mods");
+
+    public ScriptedTrending Trending { get; } = new(TestData.Nexus, "Nexus Mods");
 
     public ScriptedBrowser Browser { get; } = new();
 
@@ -155,13 +158,41 @@ internal sealed class BrowseHarness : IDisposable
     }
 
     /// <summary>
-    /// Shows the screen, as the sidebar does, and waits for the games and the search they start.
+    /// Shows the screen, as the sidebar does, and waits for the games, and the rows and categories of the game they
+    /// choose.
     /// </summary>
     public async Task ShowAsync()
     {
         Navigation.NavigateTo(Presentation.Services.Screen.Browse);
         await Screen.GamesWork;
         await Screen.Listing;
+        await Screen.RowsWork;
+        await Screen.CategoriesWork;
+    }
+
+    /// <summary>
+    /// Chooses the game, as the game box does, and waits for its rows and categories.
+    /// </summary>
+    public async Task ChooseAsync(GameInfo game)
+    {
+        Screen.Game = Screen.Games.Single(choice => choice.Game == game.Game);
+        await Screen.RowsWork;
+        await Screen.CategoriesWork;
+    }
+
+    /// <summary>
+    /// Chooses the game, then searches it, as Search does, with what's in the boxes. Only the search is kept in
+    /// <see cref="ScriptedLookup.Searches"/>, not the rows' searches.
+    /// </summary>
+    public async Task ChooseAndSearchAsync(GameInfo game)
+    {
+        await ChooseAsync(game);
+        lock (Lookup.Searches)
+        {
+            Lookup.Searches.Clear();
+        }
+
+        await Screen.SearchCommand.ExecuteAsync(null);
     }
 
     /// <summary>

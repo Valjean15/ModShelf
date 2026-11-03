@@ -63,8 +63,7 @@ public sealed class BrowsePreviewsTests : IDisposable
     {
         await _harness.StartAsync();
         await _harness.ShowAsync();
-        Screen.Game = Screen.Games[1];
-        await Screen.Listing;
+        await _harness.ChooseAndSearchAsync(BrowseHarness.Skyrim);
         await PicturesShownAsync();
     }
 
