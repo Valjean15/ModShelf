@@ -2305,4 +2305,68 @@
     <value>Added {0}</value>
     <comment>{0} is when the mod was first published, such as "3 days ago".</comment>
   </data>
+  <data name="SettingsCategoryGeneral" xml:space="preserve">
+    <value>General</value>
+    <comment>A category of settings: the theme, the window, pictures and mod details.</comment>
+  </data>
+  <data name="SettingsCategoryLibrary" xml:space="preserve">
+    <value>Library</value>
+    <comment>A category of settings: the library's folder, folder pattern, old versions and rescan.</comment>
+  </data>
+  <data name="SettingsCategoryUpdates" xml:space="preserve">
+    <value>Updates</value>
+    <comment>A category of settings: checking for updates, and notices.</comment>
+  </data>
+  <data name="SettingsCategoryLinks" xml:space="preserve">
+    <value>Links</value>
+    <comment>A category of settings: the links websites hand downloads over with.</comment>
+  </data>
+  <data name="SettingsCategoryGames" xml:space="preserve">
+    <value>Games</value>
+    <comment>A category of settings: single games' own settings.</comment>
+  </data>
+  <data name="SettingsCategoryAbout" xml:space="preserve">
+    <value>About</value>
+    <comment>A category of settings: this ModShelf, its updates and diagnostics.</comment>
+  </data>
+  <data name="SettingsCategories" xml:space="preserve">
+    <value>Settings categories</value>
+    <comment>For screen readers: the list of categories.</comment>
+  </data>
+  <data name="SettingsSearchHint" xml:space="preserve">
+    <value>Search settings</value>
+    <comment>The search box's placeholder.</comment>
+  </data>
+  <data name="SettingsNothingMatches" xml:space="preserve">
+    <value>No setting matches “{0}”.</value>
+    <comment>A search that found nothing. {0} is what was typed.</comment>
+  </data>
+  <data name="SettingsMatches" xml:space="preserve">
+    <value>Settings that match “{0}”</value>
+    <comment>Above a search's results. {0} is what was typed.</comment>
+  </data>
+  <data name="SettingsFolderPatternHeading" xml:space="preserve">
+    <value>Folder pattern</value>
+    <comment>The Library category's folder pattern, for every game without its own.</comment>
+  </data>
+  <data name="SettingsGamesHeading" xml:space="preserve">
+    <value>Games' own folder patterns</value>
+    <comment>The Games category's heading.</comment>
+  </data>
+  <data name="SettingsGamesNote" xml:space="preserve">
+    <value>Each game uses the folder pattern from Library until you give it one of its own.</value>
+    <comment>Under the Games category's heading.</comment>
+  </data>
+  <data name="SettingsRescanHeading" xml:space="preserve">
+    <value>Rescan</value>
+    <comment>The Library category's rescan.</comment>
+  </data>
+  <data name="SettingsRescanNote" xml:space="preserve">
+    <value>Looks for files placed in the mods' folders by hand, and reads the SHA-256 of files without one. Nothing is moved or deleted.</value>
+    <comment>What a rescan does.</comment>
+  </data>
+  <data name="SettingsRescanButton" xml:space="preserve">
+    <value>Rescan the library</value>
+    <comment>Rescans every mod.</comment>
+  </data>
 </root>

@@ -22,7 +22,7 @@ internal sealed class SettingsHarness
         AppUpdate = new AppUpdateViewModel(Releases, Exit, UiThread, AppUpdateLogger);
         Pictures = new TestPictures(Settings);
         PicturesCard = new PicturesViewModel(Settings, Pictures.Pictures, PicturesLogger);
-        Screen = new SettingsViewModel(Settings, Library, Mover, new FixedSecretStore(protectedByOs), Themes, Tray, Dialogs, PicturesCard, Links, About, AppUpdate, Logger);
+        Screen = new SettingsViewModel(Settings, Library, Mover, Rescan, new FixedSecretStore(protectedByOs), Themes, Tray, Dialogs, PicturesCard, Links, About, AppUpdate, Logger);
     }
 
     public InMemorySettingsService Settings { get; } = new();
@@ -36,6 +36,8 @@ internal sealed class SettingsHarness
     public InMemoryModLibrary Library { get; } = new();
 
     public ScriptedLibraryMover Mover { get; }
+
+    public ScriptedRescan Rescan { get; } = new();
 
     public RecordingThemeSwitcher Themes { get; } = new();
 

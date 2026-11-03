@@ -12,4 +12,7 @@ public sealed partial class SettingsViewModel
 
     [LoggerMessage(EventId = 922, Level = LogLevel.Error, Message = "Changing the library's folder failed")]
     private static partial void LogMoveFailed(ILogger logger, Exception exception);
+
+    [LoggerMessage(EventId = 947, Level = LogLevel.Error, Message = "Rescanning the library from the Settings screen failed")]
+    private static partial void LogRescanFailed(ILogger logger, Exception exception);
 }

@@ -18,13 +18,14 @@ using ModShelf.Presentation.Services;
 namespace ModShelf.Presentation.ViewModels.Settings;
 
 /// <summary>
-/// The settings: where the library is, moving its files when it has some; how its folders are named, for every game and
-/// for single games; what happens to old versions; how often to check for updates and whether to say so; whether the
-/// app is light or dark; what closing its window does; saved pictures and mod details, and how adult mods' pictures show;
-/// which apps open the links websites hand downloads over with; and, at its end, about this ModShelf, with its own
-/// updates. Choices are saved as they're made, folder patterns when
-/// the user saves them, and each change shows the settings as stored after it. The theme is applied at start and as
-/// it's chosen. The screen's badge says a newer ModShelf waits for the user.
+/// The settings, by category: General, whether the app is light or dark, what closing its window does, saved pictures
+/// and mod details, and how adult mods' pictures show; Library, where the library is, moving its files when it has
+/// some, how its folders are named, what happens to old versions, and rescanning it; Updates, how often to check for
+/// them and whether to say so; Links, which apps open the links websites hand downloads over with; Games, single games'
+/// folder patterns; and About, this ModShelf, with its own updates. A search shows the settings that match from every
+/// category. Choices are saved as they're made, folder patterns when the user saves them, and each change shows the
+/// settings as stored after it. The theme is applied at start and as it's chosen. The screen's badge says a newer
+/// ModShelf waits for the user.
 /// </summary>
 public sealed partial class SettingsViewModel : ScreenViewModel
 {
@@ -46,6 +47,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     private readonly ISettingsService _settings;
     private readonly IModLibrary _library;
     private readonly ILibraryMover _mover;
+    private readonly ILibraryRescan _rescan;
     private readonly IThemeSwitcher _themes;
     private readonly ITrayHost _tray;
     private readonly IDialogService _dialogs;
@@ -58,6 +60,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         ISettingsService settings,
         IModLibrary library,
         ILibraryMover mover,
+        ILibraryRescan rescan,
         ISecretStore secrets,
         IThemeSwitcher themes,
         ITrayHost tray,
@@ -71,6 +74,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(library);
         ArgumentNullException.ThrowIfNull(mover);
+        ArgumentNullException.ThrowIfNull(rescan);
         ArgumentNullException.ThrowIfNull(secrets);
         ArgumentNullException.ThrowIfNull(themes);
         ArgumentNullException.ThrowIfNull(tray);
@@ -84,6 +88,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         _settings = settings;
         _library = library;
         _mover = mover;
+        _rescan = rescan;
         _themes = themes;
         _tray = tray;
         _dialogs = dialogs;
@@ -104,6 +109,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         IsStoreUnprotected = !secrets.IsProtectedByOs;
         LibraryRoot = settings.DefaultLibraryRoot;
         Folders = new FolderPatternViewModel(null, FolderPattern.Default, settings.DefaultLibraryRoot, SaveFoldersAsync);
+        SelectedCategory = Categories[0];
     }
 
     public override Screen Screen => Screen.Settings;
@@ -377,6 +383,17 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         _themes.Apply(value);
         Save(token => _settings.SetThemeAsync(value == AppTheme.System ? null : value, token));
     }
+
+    /// <summary>
+    /// Rescans the whole library, as the Library screen's Rescan does, then says what it found.
+    /// </summary>
+    [RelayCommand]
+    private Task RescanAsync(CancellationToken cancellationToken)
+        => UserCommands.RunAsync(
+            () => Rescans.RunAsync(_rescan, _library, _dialogs, null, cancellationToken),
+            _dialogs,
+            exception => LogRescanFailed(_logger, exception),
+            cancellationToken);
 
     /// <summary>
     /// Gives a game a folder pattern of its own, starting as every game's.

@@ -650,6 +650,37 @@
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
+    <!-- The Settings screen's categories: a quiet list, the chosen one raised. -->
+    <Style Selector="ListBox.categories">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <Style Selector="ListBox.categories ListBoxItem">
+        <Setter Property="Padding" Value="12,8" />
+        <Setter Property="Margin" Value="0,1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfMutedBrush}" />
+    </Style>
+
+    <Style Selector="ListBox.categories ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfTextBrush}" />
+    </Style>
+
+    <Style Selector="ListBox.categories ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter, ListBox.categories ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter, ListBox.categories ListBoxItem:selected:pressed /template/ ContentPresenter#PART_ContentPresenter, ListBox.categories ListBoxItem:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfTextBrush}" />
+    </Style>
+
+    <Style Selector="ListBox.categories ListBoxItem:selected">
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <!-- A category without a setting the search finds. -->
+    <Style Selector="ListBox.categories TextBlock.noMatches">
+        <Setter Property="Opacity" Value="0.45" />
+    </Style>
+
     <Style Selector="PathIcon">
         <Setter Property="Width" Value="20" />
         <Setter Property="Height" Value="20" />
