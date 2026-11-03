@@ -2,6 +2,7 @@ using Microsoft.Extensions.Time.Testing;
 
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
+using ModShelf.Presentation.Services;
 using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.ViewModels.Updates;
 using ModShelf.Testing;
@@ -34,6 +35,7 @@ internal sealed class UpdatesHarness : IDisposable
             AppLookup.Over(sources),
             Dialogs,
             Settings,
+            Hidden,
             Pictures.Pictures,
             UiThread,
             Time,
@@ -41,6 +43,8 @@ internal sealed class UpdatesHarness : IDisposable
     }
 
     public InMemoryModLibrary Library { get; } = new();
+
+    public HiddenGames Hidden { get; } = new();
 
     public ScriptedUpdateChecker Checker { get; } = new();
 

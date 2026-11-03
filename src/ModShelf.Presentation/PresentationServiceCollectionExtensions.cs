@@ -31,6 +31,8 @@ public static class PresentationServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(services);
 
         services.TryAddSingleton<INavigationService, NavigationService>();
+        services.TryAddSingleton<IHiddenGames, HiddenGames>();
+        services.TryAddSingleton<IGameSettingsOpener, GameSettingsOpener>();
         services.TryAddSingleton<ModPictures>();
         services.TryAddEnumerable(
         [

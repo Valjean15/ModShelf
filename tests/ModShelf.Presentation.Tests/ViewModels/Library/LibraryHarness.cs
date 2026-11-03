@@ -2,6 +2,7 @@ using Microsoft.Extensions.Time.Testing;
 
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
+using ModShelf.Presentation.Services;
 using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.ViewModels.Library;
 using ModShelf.Testing;
@@ -35,6 +36,8 @@ internal sealed class LibraryHarness : IDisposable
             Clipboard,
             Dialogs,
             new FakeSourceRegistry(Catalog),
+            Hidden,
+            GameSettings,
             Pictures.Pictures,
             UiThread,
             Time,
@@ -42,6 +45,10 @@ internal sealed class LibraryHarness : IDisposable
     }
 
     public InMemoryModLibrary Library { get; } = new();
+
+    public HiddenGames Hidden { get; } = new();
+
+    public RecordingGameSettingsOpener GameSettings { get; } = new();
 
     public ScriptedRescan Rescan { get; } = new();
 

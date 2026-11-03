@@ -88,6 +88,11 @@ internal sealed class InMemoryModLibrary : IModLibrary
     /// </summary>
     public TaskCompletionSource? ListingHeld { get; init; }
 
+    /// <summary>
+    /// What listing the library throws, such as an <see cref="InvalidDataException"/>; null for nothing.
+    /// </summary>
+    public Exception? ListRefusal { get; set; }
+
     public async Task<IReadOnlyList<LibraryMod>> ListAsync(CancellationToken cancellationToken)
     {
         if (ListingHeld is { } held)
@@ -95,7 +100,7 @@ internal sealed class InMemoryModLibrary : IModLibrary
             await held.Task.WaitAsync(cancellationToken);
         }
 
-        return Mods;
+        return ListRefusal is null ? Mods : throw ListRefusal;
     }
 
     public Task<LibraryMod?> FindAsync(ModRef modRef, CancellationToken cancellationToken)

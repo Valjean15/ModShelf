@@ -9,7 +9,8 @@ namespace ModShelf.Presentation.ViewModels.Settings;
 /// </summary>
 public sealed record IntervalChoice
 {
-    internal IntervalChoice(TimeSpan interval)
+    /// <param name="markDefault">Whether the default interval says it's the default.</param>
+    internal IntervalChoice(TimeSpan interval, bool markDefault = true)
     {
         Interval = interval;
         string label = interval.Ticks switch
@@ -20,7 +21,7 @@ public sealed record IntervalChoice
             long ticks when ticks % TimeSpan.TicksPerHour == 0 => Text.Format(Strings.IntervalEveryHours, ticks / TimeSpan.TicksPerHour),
             _ => Text.Format(Strings.IntervalEveryMinutes, (long)interval.TotalMinutes),
         };
-        Label = interval == UpdateInterval.Default ? Text.Format(Strings.IntervalDefault, label) : label;
+        Label = markDefault && interval == UpdateInterval.Default ? Text.Format(Strings.IntervalDefault, label) : label;
     }
 
     public TimeSpan Interval { get; }

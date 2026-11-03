@@ -62,7 +62,8 @@ public sealed class SettingsCategoriesTests
     {
         Screen.SearchText = "notice updatés";
 
-        Assert.Equal(["Updates"], Shown());
+        // Every game's notices, and a game's own.
+        Assert.Equal(["Updates", "Games"], Shown());
     }
 
     [Fact]

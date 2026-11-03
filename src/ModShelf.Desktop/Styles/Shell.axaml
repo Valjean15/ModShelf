@@ -677,6 +677,72 @@
     </Style>
 
     <!-- A category without a setting the search finds. -->
+    <!-- The Games category's games: a cover, a name and what's set, the chosen one raised. -->
+    <Style Selector="ListBox.games">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <Style Selector="ListBox.games ListBoxItem">
+        <Setter Property="Padding" Value="8,6" />
+        <Setter Property="Margin" Value="0,1" />
+        <Setter Property="CornerRadius" Value="8" />
+    </Style>
+
+    <Style Selector="ListBox.games ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfTextBrush}" />
+    </Style>
+
+    <Style Selector="ListBox.games ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter, ListBox.games ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter, ListBox.games ListBoxItem:selected:pressed /template/ ContentPresenter#PART_ContentPresenter, ListBox.games ListBoxItem:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfAccentSoftBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfTextBrush}" />
+    </Style>
+
+    <Style Selector="ListBox.games TextBlock.gameName">
+        <Setter Property="FontWeight" Value="Medium" />
+    </Style>
+
+    <Style Selector="ListBox.games ListBoxItem:selected TextBlock.gameName">
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <!-- A game's own settings, framed beside the games. -->
+    <Style Selector="Border.gamePage">
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="16" />
+    </Style>
+
+    <Style Selector="TextBlock.settingName">
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- Whether a game's setting is every game's or its own: a small pill, soft accent when its own. -->
+    <Style Selector="Border.pill">
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="8,1" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Border.pill TextBlock">
+        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfFaintBrush}" />
+    </Style>
+
+    <Style Selector="Border.pill.own">
+        <Setter Property="Background" Value="{DynamicResource ShelfAccentSoftBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+
+    <Style Selector="Border.pill.own TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource ShelfAccentTextBrush}" />
+    </Style>
+
     <Style Selector="ListBox.categories TextBlock.noMatches">
         <Setter Property="Opacity" Value="0.45" />
     </Style>

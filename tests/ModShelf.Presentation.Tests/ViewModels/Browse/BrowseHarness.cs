@@ -49,6 +49,7 @@ internal sealed class BrowseHarness : IDisposable
             Clipboard,
             Dialogs,
             Navigation,
+            Hidden,
             Pictures.Pictures,
             UiThread,
             Time,
@@ -58,6 +59,8 @@ internal sealed class BrowseHarness : IDisposable
     public ScriptedLookup Lookup { get; } = new();
 
     public InMemoryModLibrary Library { get; } = new();
+
+    public HiddenGames Hidden { get; } = new();
 
     public ScriptedLibraryDownloads LibraryDownloads { get; } = new();
 
@@ -158,8 +161,8 @@ internal sealed class BrowseHarness : IDisposable
     }
 
     /// <summary>
-    /// Shows the screen, as the sidebar does, and waits for the games, and the rows and categories of the game they
-    /// choose.
+    /// Shows the screen, as the sidebar does, and waits for the games, and the rows, categories and settings of the game
+    /// they choose.
     /// </summary>
     public async Task ShowAsync()
     {
@@ -168,16 +171,18 @@ internal sealed class BrowseHarness : IDisposable
         await Screen.Listing;
         await Screen.RowsWork;
         await Screen.CategoriesWork;
+        await Screen.DefaultsWork;
     }
 
     /// <summary>
-    /// Chooses the game, as the game box does, and waits for its rows and categories.
+    /// Chooses the game, as the game box does, and waits for its rows, its categories and its own settings.
     /// </summary>
     public async Task ChooseAsync(GameInfo game)
     {
         Screen.Game = Screen.Games.Single(choice => choice.Game == game.Game);
         await Screen.RowsWork;
         await Screen.CategoriesWork;
+        await Screen.DefaultsWork;
     }
 
     /// <summary>

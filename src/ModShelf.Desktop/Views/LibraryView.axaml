@@ -88,6 +88,10 @@
                         <TextBlock Classes="note" VerticalAlignment="Center" Text="{x:Static res:Strings.LibrarySortLabel}" />
                         <ComboBox MinWidth="150" ItemsSource="{Binding GameOrders}" SelectedItem="{Binding SelectedGameOrder}" />
                     </StackPanel>
+                    <ToggleButton Classes="chip"
+                                  Content="{Binding ShowHiddenGamesText}"
+                                  IsChecked="{Binding ShowHiddenGames}"
+                                  IsVisible="{Binding HasHiddenGames}" />
                     <pictures:PreviewsPicker DataContext="{Binding Previews}" />
                 </WrapPanel>
             </Grid>
@@ -229,6 +233,15 @@
                                Text="{Binding OpenGame.UpdateNote, FallbackValue={x:Null}}" />
                 </StackPanel>
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Top">
+                    <Button Classes="icon"
+                            Width="34"
+                            Height="34"
+                            Padding="8"
+                            Command="{Binding OpenGameSettingsCommand}"
+                            ToolTip.Tip="{x:Static res:Strings.LibraryGameSettings}"
+                            AutomationProperties.Name="{x:Static res:Strings.LibraryGameSettings}">
+                        <PathIcon Data="{StaticResource SettingsIcon}" />
+                    </Button>
                     <Button Content="{x:Static res:Strings.LibraryRescan}" Command="{Binding RescanCommand}" />
                     <Button Classes="accent"
                             Content="{Binding OpenGame.UpdateAllText, FallbackValue=''}"

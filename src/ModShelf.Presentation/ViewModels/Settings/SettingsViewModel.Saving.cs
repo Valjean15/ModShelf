@@ -106,19 +106,8 @@ public sealed partial class SettingsViewModel
             IsDefaultRoot = FilePaths.Same(LibraryRoot, _settings.DefaultLibraryRoot);
 
             Folders.Show(settings.LibraryFolders ?? FolderPattern.Default, LibraryRoot);
-            List<FolderPatternViewModel> games = [];
-            foreach ((string game, FolderPattern pattern) in settings.Games
-                .Where(entry => entry.Value.Folders is not null)
-                .Select(entry => (entry.Key, entry.Value.Folders!))
-                .OrderBy(entry => entry.Key, StringComparer.OrdinalIgnoreCase))
-            {
-                FolderPatternViewModel row = GameFolders.FirstOrDefault(shown => string.Equals(shown.Game, game, StringComparison.OrdinalIgnoreCase))
-                    ?? new FolderPatternViewModel(game, pattern, LibraryRoot, SaveFoldersAsync);
-                row.Show(pattern, LibraryRoot);
-                games.Add(row);
-            }
-
-            GameFolders.SyncWith(games);
+            ShowGames();
+            _hiddenGames.Show(settings);
 
             OldVersionRule rule = settings.OldVersions ?? OldVersionRule.Default;
             OldVersionAction = rule.Action;

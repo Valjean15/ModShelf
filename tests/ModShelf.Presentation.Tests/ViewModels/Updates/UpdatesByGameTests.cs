@@ -44,6 +44,40 @@ public sealed class UpdatesByGameTests : IDisposable
     }
 
     [Fact]
+    public async Task AHiddenGamesUpdatesAreLeftOutAndNotCounted()
+    {
+        _harness.Settings.Stored = new AppSettings
+        {
+            Games = new Dictionary<string, GameSettings>(StringComparer.OrdinalIgnoreCase) { ["StardewValley"] = new() { Hidden = true } },
+        };
+
+        await _harness.StartAsync(
+            UpdatesHarness.ModWithUpdates(Smapi, "SMAPI", TestData.Now, "9"),
+            UpdatesHarness.ModWithUpdates(SkyUi, "SkyUI", TestData.Now, "52", "53"));
+
+        Assert.Equal(["Skyrim Special Edition"], Screen.Games.Select(game => game.Name));
+        Assert.Equal(["53", "52"], Screen.Updates.Select(update => update.File.Id));
+        Assert.Equal((2, "Update all (2)"), (Screen.Badge, Screen.UpdateAllText));
+    }
+
+    [Fact]
+    public async Task HidingAGameOnTheSettingsScreenLeavesItsUpdatesOutAtOnce()
+    {
+        await _harness.StartAsync(
+            UpdatesHarness.ModWithUpdates(Smapi, "SMAPI", TestData.Now, "9"),
+            UpdatesHarness.ModWithUpdates(SkyUi, "SkyUI", TestData.Now, "53"));
+
+        _harness.Hidden.Show(new AppSettings { Games = new Dictionary<string, GameSettings> { ["skyrimspecialedition"] = new() { Hidden = true } } });
+
+        Assert.Equal("Stardew Valley", Assert.Single(Screen.Games).Name);
+        Assert.Equal(1, Screen.Badge);
+
+        _harness.Hidden.Show(new AppSettings());
+
+        Assert.Equal(2, Screen.Badge);
+    }
+
+    [Fact]
     public async Task AGameItsSiteCantNameGoesByItsKey()
     {
         ModRef plain = new(new GameRef(UpdatesHarness.Plain, "agame"), "1");

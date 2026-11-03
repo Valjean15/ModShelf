@@ -152,13 +152,20 @@ public sealed partial class SettingsViewModel
         Strings.LinksTake);
 
     /// <summary>
-    /// Single games' folder patterns: Games.
+    /// Single games' own settings: Games.
     /// </summary>
     public SettingsSectionViewModel GamesSection { get; } = new(
         SettingsCategory.Games,
         Strings.SettingsGamesHeading,
         Strings.SettingsGamesNote,
-        Strings.SettingsAddGame);
+        Strings.SettingsAddGame,
+        Strings.SettingsFolderPatternHeading,
+        Strings.SettingsOldVersionsHeading,
+        Strings.GameChecksHeading,
+        Strings.GameNoticesHeading,
+        Strings.GameBrowseHeading,
+        Strings.GameHideHeading,
+        Strings.GameHideNote);
 
     /// <summary>
     /// This ModShelf, its updates, its diagnostics and where its settings are: About.

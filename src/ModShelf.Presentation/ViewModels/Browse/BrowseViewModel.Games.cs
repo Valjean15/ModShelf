@@ -2,6 +2,7 @@ using System.Globalization;
 
 using CommunityToolkit.Mvvm.Input;
 
+using ModShelf.Application.Settings;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
@@ -19,12 +20,21 @@ public sealed partial class BrowseViewModel
     /// <summary>
     /// Shows the game's rows in place of the list, and reads its categories.
     /// </summary>
+    /// <summary>
+    /// The last reading of the chosen game's own settings, for tests to wait on.
+    /// </summary>
+    internal Task DefaultsWork { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
+    /// Shows the chosen game's rows, reads its categories, and starts the toolbar as the game's own settings say.
+    /// </summary>
     partial void OnGameChanged(GameChoice? value)
     {
         if (value is not null)
         {
             ShowRows(value.Game, closeMod: true);
             CategoriesWork = ReadCategoriesAsync(value.Game);
+            DefaultsWork = StartAsTheGameSaysAsync(value.Game);
         }
     }
 
@@ -105,11 +115,76 @@ public sealed partial class BrowseViewModel
         }
 
         _gamesRead = !GamesFailed;
-        StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
-        Games.SyncWith([.. games.OrderBy(game => game.Name, byName)]);
+        _allGames = games;
+        ShowGameChoices();
         if (Game is null && Favourite(games) is { } favourite)
         {
             Game = favourite;
+        }
+    }
+
+    /// <summary>
+    /// Lists the sites' games by name, but those the settings hide.
+    /// </summary>
+    private void ShowGameChoices()
+    {
+        StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
+        Games.SyncWith([.. _allGames.Where(game => !_hiddenGames.IsHidden(game.Game.Key)).OrderBy(game => game.Name, byName)]);
+    }
+
+    /// <summary>
+    /// Starts the toolbar as the game's own settings say, when it has some: its order, how recently its mods were
+    /// updated, and its page size, Browse's own for any it leaves out. Left as it is for a game without, once a search
+    /// replaced the rows, or once another game was chosen.
+    /// </summary>
+    private async Task StartAsTheGameSaysAsync(GameRef game)
+    {
+        AppSettings settings;
+        try
+        {
+            settings = await _services.Settings.GetAsync(_stopping);
+        }
+        catch (InvalidDataException)
+        {
+            // The Settings screen says what's wrong.
+            return;
+        }
+        catch (OperationCanceledException) when (_stopping.IsCancellationRequested)
+        {
+            return;
+        }
+
+        _hiddenGames.Show(settings);
+        if (Game?.Game != game || !IsShowingRows || settings.GameFor(game.Key).Browse is not { } defaults)
+        {
+            return;
+        }
+
+        _choosingQuietly = true;
+        try
+        {
+            SelectedSort = defaults.Sort is { } sort ? BrowseChoices.SortOf(sort, defaults.Direction) ?? Sorts[0] : Sorts[0];
+            SelectedTimeWindow = TimeWindows.FirstOrDefault(window => window.Within == defaults.UpdatedWithin) ?? TimeWindows[0];
+            SelectedPageSize = PageSizes.FirstOrDefault(size => size.Count == defaults.PageSize) ?? PageSizes[0];
+        }
+        finally
+        {
+            _choosingQuietly = false;
+        }
+    }
+
+    /// <summary>
+    /// Reads which games the settings hide; settings that can't be read hide none, and the Settings screen says why.
+    /// </summary>
+    private async Task ReadHiddenGamesAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            _hiddenGames.Show(await _services.Settings.GetAsync(cancellationToken));
+        }
+        catch (InvalidDataException)
+        {
+            // The Settings screen says what's wrong.
         }
     }
 
@@ -120,7 +195,7 @@ public sealed partial class BrowseViewModel
     {
         Dictionary<GameRef, int> counts = _inLibrary.Keys.GroupBy(mod => mod.Game).ToDictionary(game => game.Key, game => game.Count());
         return games
-            .Where(game => counts.ContainsKey(game.Game))
+            .Where(game => counts.ContainsKey(game.Game) && !_hiddenGames.IsHidden(game.Game.Key))
             .OrderByDescending(game => counts[game.Game])
             .ThenBy(game => game.Name, StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true))
             .FirstOrDefault();

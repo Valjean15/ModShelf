@@ -22,7 +22,24 @@ internal sealed class SettingsHarness
         AppUpdate = new AppUpdateViewModel(Releases, Exit, UiThread, AppUpdateLogger);
         Pictures = new TestPictures(Settings);
         PicturesCard = new PicturesViewModel(Settings, Pictures.Pictures, PicturesLogger);
-        Screen = new SettingsViewModel(Settings, Library, Mover, Rescan, new FixedSecretStore(protectedByOs), Themes, Tray, Dialogs, PicturesCard, Links, About, AppUpdate, Logger);
+        GameSettings = new GameSettingsOpener(Navigation);
+        Screen = new SettingsViewModel(
+            Settings,
+            Library,
+            Mover,
+            Rescan,
+            new FixedSecretStore(protectedByOs),
+            Themes,
+            Tray,
+            Dialogs,
+            new FakeSourceRegistry(Catalog),
+            Hidden,
+            GameSettings,
+            PicturesCard,
+            Links,
+            About,
+            AppUpdate,
+            Logger);
     }
 
     public InMemorySettingsService Settings { get; } = new();
@@ -34,6 +51,12 @@ internal sealed class SettingsHarness
     public PicturesViewModel PicturesCard { get; }
 
     public InMemoryModLibrary Library { get; } = new();
+
+    public ScriptedCatalog Catalog { get; } = new(TestData.Nexus, "Nexus Mods");
+
+    public HiddenGames Hidden { get; } = new();
+
+    public GameSettingsOpener GameSettings { get; }
 
     public ScriptedLibraryMover Mover { get; }
 

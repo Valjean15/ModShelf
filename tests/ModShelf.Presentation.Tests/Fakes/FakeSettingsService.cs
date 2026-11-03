@@ -4,7 +4,8 @@ using ModShelf.Domain.Library;
 namespace ModShelf.Presentation.Tests.Fakes;
 
 /// <summary>
-/// Settings with a library root, which is all the Downloads screen reads.
+/// Settings with a library root, which is all the Downloads screen reads, and settings stored as the test says, which
+/// the Library and Browse read for the hidden games and a game's own settings.
 /// </summary>
 internal sealed class FakeSettingsService : ISettingsService
 {
@@ -19,7 +20,30 @@ internal sealed class FakeSettingsService : ISettingsService
     /// </summary>
     public Exception? Refusal { get; set; }
 
-    public Task<AppSettings> GetAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
+    /// <summary>
+    /// The settings stored.
+    /// </summary>
+    public AppSettings Stored { get; set; } = new();
+
+    /// <summary>
+    /// What reading every setting throws, such as an <see cref="InvalidDataException"/>; null for nothing.
+    /// </summary>
+    public Exception? ReadRefusal { get; set; }
+
+    /// <summary>
+    /// When set, reading every setting waits for it.
+    /// </summary>
+    public TaskCompletionSource? ReadHeld { get; set; }
+
+    public async Task<AppSettings> GetAsync(CancellationToken cancellationToken)
+    {
+        if (ReadHeld is { } held)
+        {
+            await held.Task.WaitAsync(cancellationToken);
+        }
+
+        return ReadRefusal is null ? Stored : throw ReadRefusal;
+    }
 
     public Task<string> GetLibraryRootAsync(CancellationToken cancellationToken)
         => Refusal is null ? Task.FromResult(LibraryRoot) : Task.FromException<string>(Refusal);

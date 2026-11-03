@@ -52,6 +52,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     private readonly IModLookup _lookup;
     private readonly IModLibrary _library;
     private readonly INavigationService _navigation;
+    private readonly IHiddenGames _hiddenGames;
     private readonly ModPictures _pictures;
     private readonly IUiThread _uiThread;
     private readonly ILogger<BrowseViewModel> _logger;
@@ -65,6 +66,9 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     private IReadOnlyList<ModRef> _trackedToShow = [];
     private SourceId? _trackedSource;
     private bool _gamesRead;
+
+    // Every game the sites listed, the hidden ones too.
+    private List<GameChoice> _allGames = [];
     private bool _picturesShown;
 
     // While the screen changes a choice itself, such as the category when the game changes, that's no search.
@@ -85,6 +89,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         IClipboard clipboard,
         IDialogService dialogs,
         INavigationService navigation,
+        IHiddenGames hiddenGames,
         ModPictures pictures,
         IUiThread uiThread,
         TimeProvider timeProvider,
@@ -93,6 +98,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(lookup);
         ArgumentNullException.ThrowIfNull(library);
         ArgumentNullException.ThrowIfNull(navigation);
+        ArgumentNullException.ThrowIfNull(hiddenGames);
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(logger);
@@ -100,6 +106,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         _lookup = lookup;
         _library = library;
         _navigation = navigation;
+        _hiddenGames = hiddenGames;
         _pictures = pictures;
         _uiThread = uiThread;
         _logger = logger;
@@ -183,23 +190,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     /// <summary>
     /// The orders a search's results can come in.
     /// </summary>
-    public IReadOnlyList<SortChoice> Sorts { get; } =
-    [
-        new(SearchSort.Relevance, SearchDirection.Descending, Strings.BrowseSortBestMatch),
-        new(SearchSort.Endorsements, SearchDirection.Descending, Strings.BrowseSortMostEndorsed),
-        new(SearchSort.Endorsements, SearchDirection.Ascending, Strings.BrowseSortLeastEndorsed),
-        new(SearchSort.Downloads, SearchDirection.Descending, Strings.BrowseSortMostDownloaded),
-        new(SearchSort.Downloads, SearchDirection.Ascending, Strings.BrowseSortLeastDownloaded),
-        new(SearchSort.Updated, SearchDirection.Descending, Strings.BrowseSortRecentlyUpdated),
-        new(SearchSort.Updated, SearchDirection.Ascending, Strings.BrowseSortLongestSinceUpdated),
-        new(SearchSort.Newest, SearchDirection.Descending, Strings.BrowseSortNewest),
-        new(SearchSort.Newest, SearchDirection.Ascending, Strings.BrowseSortOldest),
-        new(SearchSort.UniqueDownloads, SearchDirection.Descending, Strings.BrowseSortMostUniqueDownloads),
-        new(SearchSort.Size, SearchDirection.Descending, Strings.BrowseSortLargest),
-        new(SearchSort.Size, SearchDirection.Ascending, Strings.BrowseSortSmallest),
-        new(SearchSort.Name, SearchDirection.Ascending, Strings.BrowseSortNameAToZ),
-        new(SearchSort.Name, SearchDirection.Descending, Strings.BrowseSortNameZToA),
-    ];
+    public IReadOnlyList<SortChoice> Sorts { get; } = BrowseChoices.Sorts;
 
     /// <summary>
     /// The order of the results. Changing it searches again, or searches in place of the rows.
@@ -210,13 +201,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     /// <summary>
     /// How recently the mods a search finds were updated: any time, or in the last day, week or month.
     /// </summary>
-    public IReadOnlyList<TimeWindowChoice> TimeWindows { get; } =
-    [
-        new(null, Strings.BrowseUpdatedAnyTime),
-        new(TimeSpan.FromDays(1), Strings.BrowseUpdatedDay),
-        new(TimeSpan.FromDays(7), Strings.BrowseUpdatedWeek),
-        new(TimeSpan.FromDays(30), Strings.BrowseUpdatedMonth),
-    ];
+    public IReadOnlyList<TimeWindowChoice> TimeWindows { get; } = BrowseChoices.TimeWindows;
 
     /// <summary>
     /// How recently the mods found were updated. Changing it searches again, or searches in place of the rows.
@@ -239,8 +224,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     /// <summary>
     /// How many mods a page can list.
     /// </summary>
-    public IReadOnlyList<PageSizeChoice> PageSizes { get; } =
-        [.. new[] { PageSize, 50, SearchQuery.MaxCount }.Select(count => new PageSizeChoice(count, Text.Format(Strings.BrowsePerPage, count)))];
+    public IReadOnlyList<PageSizeChoice> PageSizes { get; } = BrowseChoices.PageSizes;
 
     /// <summary>
     /// How many mods a page lists. Changing it searches again, or searches in place of the rows.
@@ -335,6 +319,8 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
         _stopping = cancellationToken;
+        await ReadHiddenGamesAsync(cancellationToken);
+        _hiddenGames.Changed += (_, _) => _uiThread.Post(ShowGameChoices);
         await _pictures.LoadAsync();
         Previews.Refresh();
         ShowPictures();

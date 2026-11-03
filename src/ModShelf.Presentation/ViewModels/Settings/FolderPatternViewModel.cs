@@ -146,6 +146,12 @@ public sealed partial class FolderPatternViewModel : ObservableObject
     /// <summary>
     /// Saves the pattern as typed.
     /// </summary>
+    /// <summary>
+    /// Saves <paramref name="pattern"/> as the pattern, such as every game's as a game's own.
+    /// </summary>
+    /// <returns>What went wrong; null when nothing did.</returns>
+    internal Task<string?> SaveAsAsync(FolderPattern pattern) => _save(Game, pattern);
+
     [RelayCommand(CanExecute = nameof(CanSave))]
     private async Task SaveAsync()
     {

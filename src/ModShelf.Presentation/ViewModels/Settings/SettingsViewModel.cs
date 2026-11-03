@@ -9,6 +9,7 @@ using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Desktop.Ports;
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
+using ModShelf.Application.Sources;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Updates;
 using ModShelf.Presentation.Common;
@@ -29,8 +30,8 @@ namespace ModShelf.Presentation.ViewModels.Settings;
 /// </summary>
 public sealed partial class SettingsViewModel : ScreenViewModel
 {
-    // The intervals offered, besides the one set when it's another.
-    private static readonly TimeSpan[] OfferedIntervals =
+    // The intervals offered, besides the one set when it's another; a game's too.
+    internal static readonly TimeSpan[] OfferedIntervals =
     [
         TimeSpan.FromMinutes(15),
         TimeSpan.FromMinutes(30),
@@ -51,6 +52,8 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     private readonly IThemeSwitcher _themes;
     private readonly ITrayHost _tray;
     private readonly IDialogService _dialogs;
+    private readonly ISourceRegistry _sources;
+    private readonly IHiddenGames _hiddenGames;
     private readonly ILogger<SettingsViewModel> _logger;
     private AppSettings _shown = new();
     private Task _saving = Task.CompletedTask;
@@ -65,6 +68,9 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         IThemeSwitcher themes,
         ITrayHost tray,
         IDialogService dialogs,
+        ISourceRegistry sources,
+        IHiddenGames hiddenGames,
+        IGameSettingsOpener gameSettings,
         PicturesViewModel pictures,
         LinksViewModel links,
         AboutViewModel about,
@@ -79,6 +85,9 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(themes);
         ArgumentNullException.ThrowIfNull(tray);
         ArgumentNullException.ThrowIfNull(dialogs);
+        ArgumentNullException.ThrowIfNull(sources);
+        ArgumentNullException.ThrowIfNull(hiddenGames);
+        ArgumentNullException.ThrowIfNull(gameSettings);
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(links);
         ArgumentNullException.ThrowIfNull(about);
@@ -92,6 +101,8 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         _themes = themes;
         _tray = tray;
         _dialogs = dialogs;
+        _sources = sources;
+        _hiddenGames = hiddenGames;
         _logger = logger;
         Pictures = pictures;
         Links = links;
@@ -110,6 +121,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         LibraryRoot = settings.DefaultLibraryRoot;
         Folders = new FolderPatternViewModel(null, FolderPattern.Default, settings.DefaultLibraryRoot, SaveFoldersAsync);
         SelectedCategory = Categories[0];
+        gameSettings.Opening += OnGameSettingsOpening;
     }
 
     public override Screen Screen => Screen.Settings;
@@ -197,17 +209,6 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     /// The folder pattern for every game without one of its own.
     /// </summary>
     public FolderPatternViewModel Folders { get; }
-
-    /// <summary>
-    /// The games with folder patterns of their own, by name.
-    /// </summary>
-    public ObservableCollection<FolderPatternViewModel> GameFolders { get; } = [];
-
-    /// <summary>
-    /// Why a game couldn't be added; null for nothing.
-    /// </summary>
-    [ObservableProperty]
-    public partial string? GameFoldersNote { get; private set; }
 
     /// <summary>
     /// What happens to a file's old versions when a newer one is downloaded.
@@ -405,18 +406,10 @@ public sealed partial class SettingsViewModel : ScreenViewModel
                 new TextQuestion(Strings.SettingsAddGameTitle, Strings.SettingsAddGameMessage, Strings.SettingsAddGameHint, Strings.SettingsAddGameConfirm),
                 cancellationToken))
             ?.Trim();
-        if (string.IsNullOrEmpty(game))
+        if (!string.IsNullOrEmpty(game))
         {
-            return;
+            AddGame(game);
         }
-
-        if (_shown.GameFor(game).Folders is not null)
-        {
-            GameFoldersNote = Text.Format(Strings.SettingsGameHasFolders, game);
-            return;
-        }
-
-        GameFoldersNote = await SaveFoldersAsync(game, _shown.LibraryFolders ?? FolderPattern.Default);
     }
 
     /// <summary>

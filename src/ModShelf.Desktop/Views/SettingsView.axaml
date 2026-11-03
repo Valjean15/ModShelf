@@ -20,8 +20,7 @@
                 <TextBox Grid.Column="1" FontFamily="{DynamicResource ShelfMonoFont}" FontSize="13" Text="{Binding Text}" />
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4">
                     <Button Content="{x:Static res:Strings.SettingsSave}" Command="{Binding SaveCommand}" />
-                    <Button Classes="quiet" Content="{x:Static res:Strings.SettingsUseDefault}" Command="{Binding UseDefaultCommand}" IsVisible="{Binding !IsGame}" />
-                    <Button Classes="quiet" Content="{x:Static res:Strings.SettingsRemoveGame}" Command="{Binding RemoveCommand}" IsVisible="{Binding IsGame}" />
+                    <Button Classes="quiet" Content="{x:Static res:Strings.SettingsUseDefault}" Command="{Binding UseDefaultCommand}" />
                 </StackPanel>
                 <TextBlock Grid.Row="1"
                            Grid.Column="1"
@@ -53,6 +52,22 @@
             <Setter Property="Grid.Column" Value="1" />
             <Setter Property="Grid.RowSpan" Value="2" />
         </Style>
+        <Style Selector="StackPanel.gameList">
+            <Setter Property="Grid.Column" Value="0" />
+        </Style>
+        <Style Selector="Panel.gamePage">
+            <Setter Property="Grid.Column" Value="1" />
+        </Style>
+        <ContainerQuery Name="GamesCard" Query="max-width:600">
+            <Style Selector="StackPanel.gameList">
+                <Setter Property="Grid.ColumnSpan" Value="2" />
+            </Style>
+            <Style Selector="Panel.gamePage">
+                <Setter Property="Grid.Row" Value="1" />
+                <Setter Property="Grid.Column" Value="0" />
+                <Setter Property="Grid.ColumnSpan" Value="2" />
+            </Style>
+        </ContainerQuery>
         <ContainerQuery Name="SettingsScreen" Query="max-width:640">
             <Style Selector="TextBox.search">
                 <Setter Property="Width" Value="200" />
@@ -232,8 +247,11 @@
                                 <RadioButton GroupName="OldVersions" IsChecked="{Binding IsArchive}">
                                     <TextBlock Text="{x:Static res:Strings.SettingsArchive}" />
                                 </RadioButton>
-                                <StackPanel Orientation="Horizontal" Spacing="12">
-                                    <RadioButton GroupName="OldVersions" Content="{x:Static res:Strings.SettingsKeepLatest}" IsChecked="{Binding IsKeepLatest}" />
+                                <!-- In a narrow window, the count goes under the choice, which wraps. -->
+                                <WrapPanel ItemSpacing="12" LineSpacing="4">
+                                    <RadioButton GroupName="OldVersions" IsChecked="{Binding IsKeepLatest}">
+                                        <TextBlock TextWrapping="Wrap" Text="{x:Static res:Strings.SettingsKeepLatest}" />
+                                    </RadioButton>
                                     <NumericUpDown Minimum="1"
                                                    Maximum="{Binding MaxKeepCount}"
                                                    Increment="1"
@@ -241,7 +259,7 @@
                                                    Width="120"
                                                    Value="{Binding KeepCount}"
                                                    IsEnabled="{Binding IsKeepLatest}" />
-                                </StackPanel>
+                                </WrapPanel>
                             </StackPanel>
                         </Border>
 
@@ -286,22 +304,186 @@
                             </Border>
                         </Panel>
 
-                        <Border Classes="card" IsVisible="{Binding GamesSection.IsShown}">
-                            <StackPanel Spacing="8" Grid.IsSharedSizeScope="True">
-                                <TextBlock Classes="subheading" Text="{x:Static res:Strings.SettingsGamesHeading}" />
-                                <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.SettingsGamesNote}" />
-                                <ItemsControl ItemsSource="{Binding GameFolders}" ItemTemplate="{StaticResource FolderPattern}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Spacing="8" />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                </ItemsControl>
-                                <Button Content="{x:Static res:Strings.SettingsAddGame}" Command="{Binding AddGameCommand}" />
-                                <TextBlock Classes="problem"
-                                           TextWrapping="Wrap"
-                                           Text="{Binding GameFoldersNote}"
-                                           IsVisible="{Binding GameFoldersNote, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        <!-- The games, and the chosen one's own settings beside them; in a narrow card, below them. -->
+                        <Border Classes="card" IsVisible="{Binding GamesSection.IsShown}" Container.Name="GamesCard" Container.Sizing="Width">
+                            <StackPanel Spacing="12">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Classes="subheading" Text="{x:Static res:Strings.SettingsGamesHeading}" />
+                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.SettingsGamesNote}" />
+                                </StackPanel>
+                                <Grid ColumnDefinitions="220,*" RowDefinitions="Auto,Auto" ColumnSpacing="20" RowSpacing="16">
+                                    <StackPanel Classes="gameList" Spacing="8">
+                                        <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.SettingsGamesNone}" IsVisible="{Binding HasNoGames}" />
+                                        <ListBox Classes="games"
+                                                 ItemsSource="{Binding Games}"
+                                                 SelectedItem="{Binding SelectedGame}"
+                                                 IsVisible="{Binding !HasNoGames}"
+                                                 AutomationProperties.Name="{x:Static res:Strings.SettingsCategoryGames}">
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:GameRowViewModel">
+                                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                                        <Border Classes="cover"
+                                                                Width="44"
+                                                                Height="26"
+                                                                CornerRadius="4"
+                                                                VerticalAlignment="Center"
+                                                                Background="{Binding CoverHue, Converter={x:Static views:CoverBrushConverter.Instance}}">
+                                                            <TextBlock FontSize="13" Text="{Binding Initial}" />
+                                                        </Border>
+                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                            <TextBlock Classes="gameName" TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
+                                                            <TextBlock Classes="note" FontSize="12.5" TextTrimming="CharacterEllipsis" Text="{Binding Note}" />
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                        <Button Content="{x:Static res:Strings.SettingsAddGame}" Command="{Binding AddGameCommand}" />
+                                    </StackPanel>
+
+                                    <Panel Classes="gamePage" IsVisible="{Binding Game, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                        <Border Classes="gamePage" DataContext="{Binding Game}">
+                                            <StackPanel x:DataType="vm:GameSettingsViewModel" Spacing="18">
+                                                <TextBlock Classes="subheading" Margin="0,0,0,4" TextWrapping="Wrap" Text="{Binding Name}" />
+                                                <TextBlock Classes="problem" TextWrapping="Wrap" Text="{Binding Problem}" IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+                                                <!-- Folder pattern. -->
+                                                <StackPanel Spacing="4">
+                                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                                        <WrapPanel ItemSpacing="8" LineSpacing="4">
+                                                            <TextBlock Classes="settingName" Text="{x:Static res:Strings.SettingsFolderPatternHeading}" />
+                                                            <Border Classes="pill" IsVisible="{Binding !HasOwnFolders}"><TextBlock Text="{x:Static res:Strings.SettingUsesDefault}" /></Border>
+                                                            <Border Classes="pill own" IsVisible="{Binding HasOwnFolders}"><TextBlock Text="{x:Static res:Strings.SettingOverridden}" /></Border>
+                                                        </WrapPanel>
+                                                        <Button Grid.Column="1" VerticalAlignment="Center" Content="{x:Static res:Strings.SettingOverride}" Command="{Binding OverrideFoldersCommand}" IsVisible="{Binding !HasOwnFolders}" />
+                                                        <Button Grid.Column="1" VerticalAlignment="Center" Classes="quiet" Content="{x:Static res:Strings.SettingUseDefault}" Command="{Binding Folders.RemoveCommand}" IsVisible="{Binding HasOwnFolders}" />
+                                                    </Grid>
+                                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.GameFoldersNote}" />
+                                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding EveryGamesFolders}" />
+                                                    <Panel IsVisible="{Binding HasOwnFolders}">
+                                                        <Grid DataContext="{Binding Folders}" x:DataType="vm:FolderPatternViewModel" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="4" Margin="0,4,0,0">
+                                                            <TextBox FontFamily="{DynamicResource ShelfMonoFont}" FontSize="13" Text="{Binding Text}" />
+                                                            <Button Grid.Column="1" Content="{x:Static res:Strings.SettingsSave}" Command="{Binding SaveCommand}" />
+                                                            <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Classes="note" TextWrapping="Wrap" Text="{Binding Preview}" IsVisible="{Binding Preview, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                                            <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Classes="problem" TextWrapping="Wrap" Text="{Binding Problem}" IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                                        </Grid>
+                                                    </Panel>
+                                                </StackPanel>
+
+                                                <!-- Old versions. -->
+                                                <StackPanel Spacing="4">
+                                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                                        <WrapPanel ItemSpacing="8" LineSpacing="4">
+                                                            <TextBlock Classes="settingName" Text="{x:Static res:Strings.SettingsOldVersionsHeading}" />
+                                                            <Border Classes="pill" IsVisible="{Binding !HasOwnOldVersions}"><TextBlock Text="{x:Static res:Strings.SettingUsesDefault}" /></Border>
+                                                            <Border Classes="pill own" IsVisible="{Binding HasOwnOldVersions}"><TextBlock Text="{x:Static res:Strings.SettingOverridden}" /></Border>
+                                                        </WrapPanel>
+                                                        <Button Grid.Column="1" VerticalAlignment="Center" Content="{x:Static res:Strings.SettingOverride}" Command="{Binding OverrideOldVersionsCommand}" IsVisible="{Binding !HasOwnOldVersions}" />
+                                                        <Button Grid.Column="1" VerticalAlignment="Center" Classes="quiet" Content="{x:Static res:Strings.SettingUseDefault}" Command="{Binding UseDefaultOldVersionsCommand}" IsVisible="{Binding HasOwnOldVersions}" />
+                                                    </Grid>
+                                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.GameOldVersionsNote}" />
+                                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding EveryGamesOldVersions}" />
+                                                    <StackPanel Spacing="4" Margin="0,4,0,0" IsVisible="{Binding HasOwnOldVersions}">
+                                                        <RadioButton GroupName="GameOldVersions" IsChecked="{Binding IsKeepAll}">
+                                                            <TextBlock TextWrapping="Wrap" Text="{x:Static res:Strings.SettingsKeepAll}" />
+                                                        </RadioButton>
+                                                        <!-- In a TextBlock, so the _ of _archive shows rather than marking an access key. -->
+                                                        <RadioButton GroupName="GameOldVersions" IsChecked="{Binding IsArchive}">
+                                                            <TextBlock TextWrapping="Wrap" Text="{x:Static res:Strings.SettingsArchive}" />
+                                                        </RadioButton>
+                                                        <WrapPanel ItemSpacing="12" LineSpacing="4">
+                                                            <RadioButton GroupName="GameOldVersions" IsChecked="{Binding IsKeepLatest}">
+                                                                <TextBlock TextWrapping="Wrap" Text="{x:Static res:Strings.SettingsKeepLatest}" />
+                                                            </RadioButton>
+                                                            <NumericUpDown Minimum="1"
+                                                                           Maximum="{Binding MaxKeepCount}"
+                                                                           Increment="1"
+                                                                           FormatString="0"
+                                                                           Width="120"
+                                                                           Value="{Binding KeepCount}"
+                                                                           IsEnabled="{Binding IsKeepLatest}" />
+                                                        </WrapPanel>
+                                                    </StackPanel>
+                                                </StackPanel>
+
+                                                <!-- Update checks. -->
+                                                <StackPanel Spacing="4">
+                                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                                        <WrapPanel ItemSpacing="8" LineSpacing="4">
+                                                            <TextBlock Classes="settingName" Text="{x:Static res:Strings.GameChecksHeading}" />
+                                                            <Border Classes="pill" IsVisible="{Binding !HasOwnChecks}"><TextBlock Text="{x:Static res:Strings.SettingUsesDefault}" /></Border>
+                                                            <Border Classes="pill own" IsVisible="{Binding HasOwnChecks}"><TextBlock Text="{x:Static res:Strings.SettingOverridden}" /></Border>
+                                                        </WrapPanel>
+                                                        <Button Grid.Column="1" VerticalAlignment="Center" Content="{x:Static res:Strings.SettingOverride}" Command="{Binding OverrideChecksCommand}" IsVisible="{Binding !HasOwnChecks}" />
+                                                        <Button Grid.Column="1" VerticalAlignment="Center" Classes="quiet" Content="{x:Static res:Strings.SettingUseDefault}" Command="{Binding UseDefaultChecksCommand}" IsVisible="{Binding HasOwnChecks}" />
+                                                    </Grid>
+                                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding EveryGamesChecks}" />
+                                                    <StackPanel Spacing="8" Margin="0,4,0,0" IsVisible="{Binding HasOwnChecks}">
+                                                        <CheckBox Content="{x:Static res:Strings.GameChecksOn}" IsChecked="{Binding ChecksUpdates}" />
+                                                        <WrapPanel ItemSpacing="12" LineSpacing="4" IsVisible="{Binding ChecksUpdates}">
+                                                            <TextBlock VerticalAlignment="Center" Text="{x:Static res:Strings.GameIntervalLabel}" />
+                                                            <ComboBox MinWidth="240" ItemsSource="{Binding IntervalChoices}" SelectedItem="{Binding SelectedInterval}" />
+                                                        </WrapPanel>
+                                                        <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.GameChecksOffNote}" IsVisible="{Binding !ChecksUpdates}" />
+                                                    </StackPanel>
+                                                </StackPanel>
+
+                                                <!-- Notices. -->
+                                                <StackPanel Spacing="4">
+                                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                                        <WrapPanel ItemSpacing="8" LineSpacing="4">
+                                                            <TextBlock Classes="settingName" Text="{x:Static res:Strings.GameNoticesHeading}" />
+                                                            <Border Classes="pill" IsVisible="{Binding !HasOwnNotices}"><TextBlock Text="{x:Static res:Strings.SettingUsesDefault}" /></Border>
+                                                            <Border Classes="pill own" IsVisible="{Binding HasOwnNotices}"><TextBlock Text="{x:Static res:Strings.SettingOverridden}" /></Border>
+                                                        </WrapPanel>
+                                                        <Button Grid.Column="1" VerticalAlignment="Center" Content="{x:Static res:Strings.SettingOverride}" Command="{Binding OverrideNoticesCommand}" IsVisible="{Binding !HasOwnNotices}" />
+                                                        <Button Grid.Column="1" VerticalAlignment="Center" Classes="quiet" Content="{x:Static res:Strings.SettingUseDefault}" Command="{Binding UseDefaultNoticesCommand}" IsVisible="{Binding HasOwnNotices}" />
+                                                    </Grid>
+                                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding EveryGamesNotices}" />
+                                                    <CheckBox Margin="0,4,0,0" Content="{x:Static res:Strings.GameNoticesOn}" IsChecked="{Binding Notify}" IsVisible="{Binding HasOwnNotices}" />
+                                                </StackPanel>
+
+                                                <!-- How Browse starts. -->
+                                                <StackPanel Spacing="4">
+                                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                                        <WrapPanel ItemSpacing="8" LineSpacing="4">
+                                                            <TextBlock Classes="settingName" Text="{x:Static res:Strings.GameBrowseHeading}" />
+                                                            <Border Classes="pill" IsVisible="{Binding !HasOwnBrowse}"><TextBlock Text="{x:Static res:Strings.SettingUsesDefault}" /></Border>
+                                                            <Border Classes="pill own" IsVisible="{Binding HasOwnBrowse}"><TextBlock Text="{x:Static res:Strings.SettingOverridden}" /></Border>
+                                                        </WrapPanel>
+                                                        <Button Grid.Column="1" VerticalAlignment="Center" Content="{x:Static res:Strings.SettingOverride}" Command="{Binding OverrideBrowseCommand}" IsVisible="{Binding !HasOwnBrowse}" />
+                                                        <Button Grid.Column="1" VerticalAlignment="Center" Classes="quiet" Content="{x:Static res:Strings.SettingUseDefault}" Command="{Binding UseDefaultBrowseCommand}" IsVisible="{Binding HasOwnBrowse}" />
+                                                    </Grid>
+                                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.GameBrowseNote}" />
+                                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding EveryGamesBrowse}" />
+                                                    <WrapPanel ItemSpacing="16" LineSpacing="8" Margin="0,4,0,0" IsVisible="{Binding HasOwnBrowse}">
+                                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                                            <TextBlock VerticalAlignment="Center" Text="{x:Static res:Strings.GameBrowseOrder}" />
+                                                            <ComboBox MinWidth="200" ItemsSource="{Binding Sorts}" SelectedItem="{Binding SelectedSort}" />
+                                                        </StackPanel>
+                                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                                            <TextBlock VerticalAlignment="Center" Text="{x:Static res:Strings.GameBrowseUpdated}" />
+                                                            <ComboBox MinWidth="180" ItemsSource="{Binding TimeWindows}" SelectedItem="{Binding SelectedTimeWindow}" />
+                                                        </StackPanel>
+                                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                                            <TextBlock VerticalAlignment="Center" Text="{x:Static res:Strings.GameBrowsePageSize}" />
+                                                            <ComboBox MinWidth="120" ItemsSource="{Binding PageSizes}" SelectedItem="{Binding SelectedPageSize}" />
+                                                        </StackPanel>
+                                                    </WrapPanel>
+                                                </StackPanel>
+
+                                                <!-- Hiding the game. -->
+                                                <StackPanel Spacing="4">
+                                                    <TextBlock Classes="settingName" Text="{x:Static res:Strings.GameHideHeading}" />
+                                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.GameHideNote}" />
+                                                    <CheckBox Margin="0,4,0,0" IsChecked="{Binding IsHidden}">
+                                                        <TextBlock TextWrapping="Wrap" Text="{Binding HideText}" />
+                                                    </CheckBox>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+                                    </Panel>
+                                </Grid>
                             </StackPanel>
                         </Border>
 

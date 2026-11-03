@@ -40,6 +40,7 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<UpdatesViewModel> _logger;
     private readonly ISettingsService _settings;
+    private readonly IHiddenGames _hiddenGames;
     private readonly UpdatesServices _services;
     private readonly Dictionary<ModRef, LibraryMod> _mods = [];
     private readonly Dictionary<ModFileRef, UpdateViewModel> _shown = [];
@@ -58,6 +59,7 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
         IModLookup lookup,
         IDialogService dialogs,
         ISettingsService settings,
+        IHiddenGames hiddenGames,
         ModPictures pictures,
         IUiThread uiThread,
         TimeProvider timeProvider,
@@ -67,6 +69,7 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
         ArgumentNullException.ThrowIfNull(checker);
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(settings);
+        ArgumentNullException.ThrowIfNull(hiddenGames);
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(timeProvider);
@@ -76,6 +79,7 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
         _checker = checker;
         _sources = sources;
         _settings = settings;
+        _hiddenGames = hiddenGames;
         _pictures = pictures;
         _uiThread = uiThread;
         _timeProvider = timeProvider;
@@ -187,6 +191,7 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
     {
         _stopping = cancellationToken;
         _interval = await ReadIntervalAsync(cancellationToken);
+        _hiddenGames.Changed += (_, _) => _uiThread.Post(Arrange);
         await _pictures.LoadAsync();
         Previews.Refresh();
         ShowPictures();
@@ -316,13 +321,15 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
     }
 
     /// <summary>
-    /// The interval between background checks; null when the settings can't be read.
+    /// The interval between background checks; null when the settings can't be read. Takes the hidden games from them
+    /// too.
     /// </summary>
     private async Task<TimeSpan?> ReadIntervalAsync(CancellationToken cancellationToken)
     {
         try
         {
             AppSettings settings = await _settings.GetAsync(cancellationToken);
+            _hiddenGames.Show(settings);
             return settings.UpdateInterval ?? UpdateInterval.Default;
         }
         catch (InvalidDataException)
@@ -388,14 +395,16 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
     }
 
     /// <summary>
-    /// Shows every update the library has, by game, then by its mod's name, then the newest first, keeping the rows of
-    /// those shown already; and says how many there are, and when the watched mods were checked.
+    /// Shows every update the library has but hidden games', by game, then by its mod's name, then the newest first,
+    /// keeping the rows of those shown already; and says how many there are, and when the watched mods were checked.
     /// </summary>
     private void Arrange()
     {
         StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
         List<UpdateGameViewModel> games = [];
-        foreach (IGrouping<GameRef, LibraryMod> game in _mods.Values.Where(mod => mod.Updates.Count > 0).GroupBy(mod => mod.Mod.Game))
+        foreach (IGrouping<GameRef, LibraryMod> game in _mods.Values
+            .Where(mod => mod.Updates.Count > 0 && !_hiddenGames.IsHidden(mod.Mod.Game.Key))
+            .GroupBy(mod => mod.Mod.Game))
         {
             List<UpdateViewModel> rows = [];
             foreach (LibraryMod mod in game.OrderBy(mod => mod.Name, byName))

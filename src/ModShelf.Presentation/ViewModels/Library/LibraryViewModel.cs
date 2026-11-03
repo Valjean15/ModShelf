@@ -39,6 +39,8 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     private readonly IModLibrary _library;
     private readonly IModLookup _lookup;
     private readonly ISourceRegistry _sources;
+    private readonly IHiddenGames _hiddenGames;
+    private readonly IGameSettingsOpener _gameSettings;
     private readonly ModPictures _pictures;
     private readonly IUiThread _uiThread;
     private readonly TimeProvider _timeProvider;
@@ -71,6 +73,8 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         IClipboard clipboard,
         IDialogService dialogs,
         ISourceRegistry sources,
+        IHiddenGames hiddenGames,
+        IGameSettingsOpener gameSettings,
         ModPictures pictures,
         IUiThread uiThread,
         TimeProvider timeProvider,
@@ -79,6 +83,8 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(library);
         ArgumentNullException.ThrowIfNull(lookup);
         ArgumentNullException.ThrowIfNull(sources);
+        ArgumentNullException.ThrowIfNull(hiddenGames);
+        ArgumentNullException.ThrowIfNull(gameSettings);
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(timeProvider);
@@ -87,6 +93,8 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         _library = library;
         _lookup = lookup;
         _sources = sources;
+        _hiddenGames = hiddenGames;
+        _gameSettings = gameSettings;
         _pictures = pictures;
         _uiThread = uiThread;
         _logger = logger;
@@ -152,9 +160,28 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     public PreviewsViewModel Previews { get; }
 
     /// <summary>
-    /// The games with mods in the library whose names have <see cref="GamesFilter"/>, in <see cref="SelectedGameOrder"/>.
+    /// The games with mods in the library whose names have <see cref="GamesFilter"/>, in <see cref="SelectedGameOrder"/>;
+    /// the hidden ones only with <see cref="ShowHiddenGames"/>.
     /// </summary>
     public ObservableCollection<LibraryGameViewModel> Games { get; } = [];
+
+    /// <summary>
+    /// Whether the games the settings hide show too.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool ShowHiddenGames { get; set; }
+
+    /// <summary>
+    /// Whether any of the library's games is hidden, so <see cref="ShowHiddenGames"/> shows.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool HasHiddenGames { get; private set; }
+
+    /// <summary>
+    /// Such as "Show hidden games (2)".
+    /// </summary>
+    [ObservableProperty]
+    public partial string ShowHiddenGamesText { get; private set; } = string.Empty;
 
     /// <summary>
     /// What the games' names must have to show; empty for every game.
@@ -300,6 +327,8 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
         _stopping = cancellationToken;
+        await ReadHiddenGamesAsync(cancellationToken);
+        _hiddenGames.Changed += (_, _) => _uiThread.Post(Arrange);
         await _pictures.LoadAsync();
         Previews.Refresh();
         ShowPictures();
@@ -326,6 +355,8 @@ public sealed partial class LibraryViewModel : ScreenViewModel
 
     partial void OnGamesFilterChanged(string value) => Arrange();
 
+    partial void OnShowHiddenGamesChanged(bool value) => Arrange();
+
     partial void OnSelectedGameOrderChanged(LibraryChoice<GameOrder> value) => Arrange();
 
     partial void OnModsFilterChanged(string value) => ArrangeMods();
@@ -333,6 +364,33 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     partial void OnSelectedModOrderChanged(LibraryChoice<ModOrder> value) => ArrangeMods();
 
     private bool CanShowGames() => IsGameOpen || IsModOpen;
+
+    /// <summary>
+    /// Opens the open game's own settings, on the Settings screen.
+    /// </summary>
+    [RelayCommand]
+    private void OpenGameSettings()
+    {
+        if (OpenGame is { } game)
+        {
+            _gameSettings.Open(game.Game);
+        }
+    }
+
+    /// <summary>
+    /// Reads which games the settings hide; settings that can't be read hide none, and the Settings screen says why.
+    /// </summary>
+    private async Task ReadHiddenGamesAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            _hiddenGames.Show(await _pageServices.Settings.GetAsync(cancellationToken));
+        }
+        catch (InvalidDataException)
+        {
+            // The Settings screen says what's wrong.
+        }
+    }
 
     /// <summary>
     /// Closes the mod and the game, back to the games.
@@ -751,7 +809,13 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         }
 
         string filter = GamesFilter.Trim();
-        IEnumerable<LibraryGameViewModel> shown = byGame.Keys.Select(game => _games[game]).Where(game => Has(game.Name, filter));
+        int hidden = byGame.Keys.Count(game => _hiddenGames.IsHidden(game.Key));
+        HasHiddenGames = hidden > 0;
+        ShowHiddenGamesText = Text.Format(Strings.LibraryShowHidden, hidden);
+        IEnumerable<LibraryGameViewModel> shown = byGame.Keys
+            .Where(game => ShowHiddenGames || !_hiddenGames.IsHidden(game.Key))
+            .Select(game => _games[game])
+            .Where(game => Has(game.Name, filter));
         IOrderedEnumerable<LibraryGameViewModel> ordered = SelectedGameOrder.Value switch
         {
             GameOrder.MostMods => shown.OrderByDescending(game => game.ModCount),

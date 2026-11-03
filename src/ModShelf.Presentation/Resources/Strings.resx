@@ -1246,16 +1246,12 @@
     <value>Add a game…</value>
     <comment>Gives a game a folder pattern of its own.</comment>
   </data>
-  <data name="SettingsRemoveGame" xml:space="preserve">
-    <value>Remove</value>
-    <comment>Removes a game's own folder pattern; its files go by the pattern for every game again.</comment>
-  </data>
   <data name="SettingsAddGameTitle" xml:space="preserve">
-    <value>Add a game's folders</value>
+    <value>Add a game</value>
     <comment>The title of the dialog that asks for a game.</comment>
   </data>
   <data name="SettingsAddGameMessage" xml:space="preserve">
-    <value>Enter the game as its site names it in links, such as skyrimspecialedition for Skyrim Special Edition on Nexus Mods. Its files then go by a pattern of their own.</value>
+    <value>Enter the game as its site names it in links, such as skyrimspecialedition for Skyrim Special Edition on Nexus Mods. It can then have settings of its own.</value>
     <comment>Asks for a game to give its own folder pattern.</comment>
   </data>
   <data name="SettingsAddGameHint" xml:space="preserve">
@@ -1265,10 +1261,6 @@
   <data name="SettingsAddGameConfirm" xml:space="preserve">
     <value>Add</value>
     <comment>Adds the game's folder pattern.</comment>
-  </data>
-  <data name="SettingsGameHasFolders" xml:space="preserve">
-    <value>{0} has a pattern of its own already.</value>
-    <comment>{0} is the game.</comment>
   </data>
   <data name="SettingsOldVersionsHeading" xml:space="preserve">
     <value>Old versions</value>
@@ -2350,11 +2342,11 @@
     <comment>The Library category's folder pattern, for every game without its own.</comment>
   </data>
   <data name="SettingsGamesHeading" xml:space="preserve">
-    <value>Games' own folder patterns</value>
+    <value>Games' own settings</value>
     <comment>The Games category's heading.</comment>
   </data>
   <data name="SettingsGamesNote" xml:space="preserve">
-    <value>Each game uses the folder pattern from Library until you give it one of its own.</value>
+    <value>Each game uses the settings from Library and Updates until you override one for it.</value>
     <comment>Under the Games category's heading.</comment>
   </data>
   <data name="SettingsRescanHeading" xml:space="preserve">
@@ -2368,5 +2360,144 @@
   <data name="SettingsRescanButton" xml:space="preserve">
     <value>Rescan the library</value>
     <comment>Rescans every mod.</comment>
+  </data>
+  <data name="SettingsGamesNone" xml:space="preserve">
+    <value>No games yet. A game shows here once the library has one of its mods, or when you add it.</value>
+    <comment>The Games category's list, empty.</comment>
+  </data>
+  <data name="GameUsesDefaults" xml:space="preserve">
+    <value>Uses the defaults</value>
+    <comment>A game in the Games category's list, with no setting of its own.</comment>
+  </data>
+  <data name="GameOneOverride" xml:space="preserve">
+    <value>1 setting overridden</value>
+    <comment>A game in the Games category's list, with one setting of its own.</comment>
+  </data>
+  <data name="GameOverrides" xml:space="preserve">
+    <value>{0} settings overridden</value>
+    <comment>A game in the Games category's list. {0}: how many settings of its own it has, such as 2.</comment>
+  </data>
+  <data name="GameHiddenNote" xml:space="preserve">
+    <value>Hidden</value>
+    <comment>A game in the Games category's list, hidden from the lists.</comment>
+  </data>
+  <data name="GameHiddenAndOverrides" xml:space="preserve">
+    <value>Hidden · {0}</value>
+    <comment>A hidden game in the Games category's list. {0}: GameOneOverride or GameOverrides.</comment>
+  </data>
+  <data name="SettingUsesDefault" xml:space="preserve">
+    <value>Uses default</value>
+    <comment>A pill beside one of a game's settings: the game uses every game's.</comment>
+  </data>
+  <data name="SettingOverridden" xml:space="preserve">
+    <value>Overridden</value>
+    <comment>A pill beside one of a game's settings: the game has its own.</comment>
+  </data>
+  <data name="SettingOverride" xml:space="preserve">
+    <value>Override</value>
+    <comment>Button: gives the game a setting of its own, starting from every game's.</comment>
+  </data>
+  <data name="SettingUseDefault" xml:space="preserve">
+    <value>Use default</value>
+    <comment>Button: the game goes back to every game's setting.</comment>
+  </data>
+  <data name="GameFoldersNote" xml:space="preserve">
+    <value>Where new files of this game's mods go in the library.</value>
+  </data>
+  <data name="GameEveryGames" xml:space="preserve">
+    <value>Every game's: {0}</value>
+    <comment>What every game's setting is, under one of a game's settings. {0}: the setting, such as a folder pattern.</comment>
+  </data>
+  <data name="GameOldVersionsNote" xml:space="preserve">
+    <value>What happens to a file when a newer version of it is downloaded.</value>
+  </data>
+  <data name="OldVersionsKeepAllShort" xml:space="preserve">
+    <value>keep every version</value>
+    <comment>Every game's rule for old versions, in GameEveryGames.</comment>
+  </data>
+  <data name="OldVersionsArchiveShort" xml:space="preserve">
+    <value>move them to an _archive folder</value>
+    <comment>Every game's rule for old versions, in GameEveryGames.</comment>
+  </data>
+  <data name="OldVersionsKeepLatestShort" xml:space="preserve">
+    <value>keep the newest {0}</value>
+    <comment>Every game's rule for old versions, in GameEveryGames. {0}: how many, such as 2.</comment>
+  </data>
+  <data name="GameChecksHeading" xml:space="preserve">
+    <value>Update checks</value>
+  </data>
+  <data name="GameChecksDefault" xml:space="preserve">
+    <value>Checked with the other games, {0}.</value>
+    <comment>{0}: every game's interval, such as every 6 hours.</comment>
+  </data>
+  <data name="GameChecksOn" xml:space="preserve">
+    <value>Check this game's mods for updates</value>
+    <comment>A check box.</comment>
+  </data>
+  <data name="GameChecksOffNote" xml:space="preserve">
+    <value>Its mods are checked only when you check the game in the Library.</value>
+    <comment>Under GameChecksOn when it's off.</comment>
+  </data>
+  <data name="GameIntervalLabel" xml:space="preserve">
+    <value>How often</value>
+    <comment>Beside the box of a game's update interval.</comment>
+  </data>
+  <data name="GameIntervalEveryGames" xml:space="preserve">
+    <value>With the other games ({0})</value>
+    <comment>The first choice of a game's update interval. {0}: every game's, such as every 6 hours.</comment>
+  </data>
+  <data name="GameNoticesHeading" xml:space="preserve">
+    <value>Notices</value>
+  </data>
+  <data name="GameNoticesOnDefault" xml:space="preserve">
+    <value>Every game's: a notice when a check finds new updates.</value>
+  </data>
+  <data name="GameNoticesOffDefault" xml:space="preserve">
+    <value>Every game's: no notice.</value>
+  </data>
+  <data name="GameNoticesOn" xml:space="preserve">
+    <value>Show a notice for this game's updates</value>
+    <comment>A check box.</comment>
+  </data>
+  <data name="GameBrowseHeading" xml:space="preserve">
+    <value>Browse</value>
+    <comment>The heading of how Browse starts for a game.</comment>
+  </data>
+  <data name="GameBrowseNote" xml:space="preserve">
+    <value>How Browse starts when you choose this game. Its toolbar still changes them.</value>
+  </data>
+  <data name="GameBrowseDefault" xml:space="preserve">
+    <value>Browse's own: {0} · {1} · {2}</value>
+    <comment>{0}: an order, such as Best match. {1}: a time, such as Updated any time. {2}: a page size, such as 20 a page.</comment>
+  </data>
+  <data name="GameBrowseOrder" xml:space="preserve">
+    <value>Order</value>
+    <comment>Beside the box of a game's Browse order.</comment>
+  </data>
+  <data name="GameBrowseUpdated" xml:space="preserve">
+    <value>Updated</value>
+    <comment>Beside the box of a game's Browse time window.</comment>
+  </data>
+  <data name="GameBrowsePageSize" xml:space="preserve">
+    <value>Page size</value>
+    <comment>Beside the box of a game's Browse page size.</comment>
+  </data>
+  <data name="GameHideHeading" xml:space="preserve">
+    <value>Hide this game</value>
+  </data>
+  <data name="GameHideNote" xml:space="preserve">
+    <value>Its mods stay in the library, and are still checked for updates unless its update checks say not.</value>
+  </data>
+  <data name="GameHideCheck" xml:space="preserve">
+    <value>Hide {0} in the Library, Updates and Browse</value>
+    <comment>A check box. {0}: the game's name.</comment>
+  </data>
+  <data name="LibraryShowHidden" xml:space="preserve">
+    <value>Show hidden games ({0})</value>
+    <comment>A toggle on the Library's games. {0}: how many games are hidden.</comment>
+  </data>
+  <data name="LibraryGameSettings" xml:space="preserve">
+    <value>This game's settings</value>
+    <comment>The tooltip of the gear beside an open game's name in the Library.</comment>
   </data>
 </root>

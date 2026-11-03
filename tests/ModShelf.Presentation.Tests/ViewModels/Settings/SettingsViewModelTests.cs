@@ -124,7 +124,8 @@ public sealed class SettingsViewModelTests
             "For example: " + Path.Combine(TestData.LibraryRoot, "nexus", "skyrimspecialedition", "SkyUI (12604)", "SkyUI_5_2_SE.7z"),
             Screen.Folders.Preview);
         Assert.Equal(("Every game", false, false, false), (Screen.Folders.Name, Screen.Folders.IsGame, Screen.Folders.IsChanged, Screen.Folders.IsNotDefault));
-        Assert.Empty(Screen.GameFolders);
+        Assert.Empty(Screen.Games);
+        Assert.Null(Screen.Game);
         Assert.Equal((false, false, true, 2), (Screen.IsKeepAll, Screen.IsArchive, Screen.IsKeepLatest, Screen.KeepCount));
         Assert.Equal(
             [
@@ -165,17 +166,19 @@ public sealed class SettingsViewModelTests
         Assert.Equal((Moved, false), (Screen.LibraryRoot, Screen.IsDefaultRoot));
         Assert.True(Screen.UseDefaultRootCommand.CanExecute(null));
         Assert.Equal((ById.Text, true), (Screen.Folders.Text, Screen.Folders.IsNotDefault));
-        Assert.Equal(["Fallout4", "stardewvalley"], Screen.GameFolders.Select(row => row.Game));
-        FolderPatternViewModel stardew = Screen.GameFolders[1];
-        Assert.Equal((Flat.Text, true, "stardewvalley"), (stardew.Text, stardew.IsGame, stardew.Name));
+        Assert.Equal(["Fallout4", "stardewvalley"], Screen.Games.Select(row => row.Game));
+        Assert.Equal("Fallout4", Screen.Game?.Game);
+        Assert.Equal(
+            "For example: " + Path.Combine(Moved, "nexus", "Fallout4", "12604", "SkyUI_5_2_SE.7z"),
+            Screen.Game?.Folders.Preview);
+        Screen.SelectedGame = Screen.Games[1];
+        FolderPatternViewModel stardew = Screen.Game!.Folders;
+        Assert.Equal((Flat.Text, true, "stardewvalley", true), (stardew.Text, stardew.IsGame, stardew.Name, Screen.Game.HasOwnFolders));
 
         // A game's pattern is removed rather than set back.
         Assert.False(stardew.IsNotDefault);
         Assert.False(stardew.UseDefaultCommand.CanExecute(null));
         Assert.Equal("For example: " + Path.Combine(Moved, "SkyUI", "SkyUI_5_2_SE.7z"), stardew.Preview);
-        Assert.Equal(
-            "For example: " + Path.Combine(Moved, "nexus", "Fallout4", "12604", "SkyUI_5_2_SE.7z"),
-            Screen.GameFolders[0].Preview);
         Assert.Equal((false, true, false), (Screen.IsKeepAll, Screen.IsArchive, Screen.IsKeepLatest));
         Assert.Equal("Every 90 minutes", Screen.SelectedInterval?.Label);
         Assert.Equal("Every 90 minutes", Screen.IntervalChoices[3].Label);
@@ -503,26 +506,34 @@ public sealed class SettingsViewModelTests
 
         Assert.Equal(
             new TextQuestion(
-                "Add a game's folders",
-                "Enter the game as its site names it in links, such as skyrimspecialedition for Skyrim Special Edition on Nexus Mods. Its files then go by a pattern of their own.",
+                "Add a game",
+                "Enter the game as its site names it in links, such as skyrimspecialedition for Skyrim Special Edition on Nexus Mods. It can then have settings of its own.",
                 "skyrimspecialedition",
                 "Add"),
             Assert.Single(_harness.Dialogs.Questions));
-        FolderPatternViewModel stardew = Assert.Single(Screen.GameFolders);
-        Assert.Equal(("stardewvalley", ById.Text), (stardew.Game, stardew.Text));
+        GameSettingsViewModel game = Assert.IsType<GameSettingsViewModel>(Screen.Game);
+        Assert.Equal(("stardewvalley", "Uses the defaults"), (Assert.Single(Screen.Games).Game, Screen.Games[0].Note));
+        Assert.Equal(("stardewvalley", false, "Every game's: {source}/{game}/{modid}/{file}"), (game.Game, game.HasOwnFolders, game.EveryGamesFolders));
+        Assert.Empty(_harness.Settings.Changes);
+
+        await game.OverrideFoldersCommand.ExecuteAsync(null);
+
+        FolderPatternViewModel stardew = game.Folders;
+        Assert.Equal((true, ById.Text), (game.HasOwnFolders, stardew.Text));
         Assert.Equal(ById, _harness.Settings.Stored.FoldersFor("stardewvalley"));
-        Assert.Null(Screen.GameFoldersNote);
+        Assert.Equal("1 setting overridden", Screen.Games[0].Note);
 
         stardew.Text = Flat.Text;
         await stardew.SaveCommand.ExecuteAsync(null);
 
         Assert.Equal(Flat, _harness.Settings.Stored.FoldersFor("StardewValley"));
-        Assert.Same(stardew, Assert.Single(Screen.GameFolders));
+        Assert.Same(game, Screen.Game);
         Assert.False(stardew.IsChanged);
 
         await stardew.RemoveCommand.ExecuteAsync(null);
 
-        Assert.Empty(Screen.GameFolders);
+        // The game stays listed, using every game's pattern again.
+        Assert.Equal(("stardewvalley", false), (Assert.Single(Screen.Games).Game, game.HasOwnFolders));
         Assert.Empty(_harness.Settings.Stored.Games);
         Assert.Equal(
             ["folders stardewvalley {source}/{game}/{modid}/{file}", "folders stardewvalley {mod}/{file}", "folders stardewvalley null"],
@@ -530,18 +541,22 @@ public sealed class SettingsViewModelTests
     }
 
     [Fact]
-    public async Task AGameWithAPatternAlreadyIsntAddedAgain()
+    public async Task AGameListedAlreadyIsChosenRatherThanAddedAgain()
     {
         _harness.Settings.Stored = new AppSettings
         {
-            Games = ImmutableDictionary.CreateRange(StringComparer.OrdinalIgnoreCase, [new KeyValuePair<string, GameSettings>("stardewvalley", new() { Folders = Flat })]),
+            Games = ImmutableDictionary.CreateRange(
+                StringComparer.OrdinalIgnoreCase,
+                [new KeyValuePair<string, GameSettings>("stardewvalley", new() { Folders = Flat }), new KeyValuePair<string, GameSettings>("fallout4", new() { Hidden = true })]),
         };
         await _harness.StartAsync();
         _harness.Dialogs.Answers.Enqueue("StardewValley");
 
         await Screen.AddGameCommand.ExecuteAsync(null);
 
-        Assert.Equal("StardewValley has a pattern of its own already.", Screen.GameFoldersNote);
+        Assert.Equal(["fallout4", "stardewvalley"], Screen.Games.Select(row => row.Game));
+        Assert.Same(Screen.Games[1], Screen.SelectedGame);
+        Assert.Equal("stardewvalley", Screen.Game?.Game);
         Assert.Empty(_harness.Settings.Changes);
     }
 
@@ -555,7 +570,7 @@ public sealed class SettingsViewModelTests
 
         await Screen.AddGameCommand.ExecuteAsync(null);
 
-        Assert.Empty(Screen.GameFolders);
+        Assert.Empty(Screen.Games);
         Assert.Empty(_harness.Settings.Changes);
     }
 
