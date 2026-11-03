@@ -35,13 +35,14 @@ internal sealed class LibraryTools(
     private const int HistoryLimit = 1000;
 
     [McpServerTool(Name = "library_list", Title = "List the library", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Lists the mods in ModShelf's library, the ones watched for updates and the ones with downloaded files, by site, game and name, a page at a time: each with its files (their absolute paths, versions, whether they're old versions archived, and whether they're missing from disk), the updates found for it (each saying whether it's skipped), whether it's pinned, and its note. A large library reads best a game or a mod at a time, or compact first, which gives counts instead of files and updates.")]
+    [Description("Lists the mods in ModShelf's library, the ones watched for updates and the ones with downloaded files, by site, game and name, a page at a time (offset and limit; hasMore says whether there's another page): each with its files (their absolute paths, versions, sizes, SHA-256, whether they're old versions archived, and whether they're missing from disk), the updates found for it (each saying whether it's skipped), whether it's pinned, and its note. A large library reads best a game or a mod at a time, or compact first, which gives counts instead of files and updates; watchedOnly, updatesOnly and missingOnly narrow it. A file without a SHA-256 was recorded before ModShelf kept them: library_rescan reads it.")]
     public Task<LibraryListing> ListAsync(
         [Description("Only this game's mods, as the site names it in its links, such as stardewvalley.")] string? game = null,
         [Description("Only this site's mods, such as nexus.")] string? source = null,
         [Description("Only the mod with this ID, as in its link.")] string? mod = null,
         [Description("Only the mods watched for updates.")] bool watchedOnly = false,
         [Description("Only the mods with updates offered: found, and neither pinned nor skipped.")] bool updatesOnly = false,
+        [Description("Only the mods with files missing from disk, which library_forget can take out of the library.")] bool missingOnly = false,
         [Description("Leave out each mod's files and updates, and give how many there are.")] bool compact = false,
         [Description("How many mods to skip: the offset of the page.")] int offset = 0,
         [Description("How many mods a page lists, from 1 to 200.")] int limit = 50,
@@ -68,6 +69,7 @@ internal sealed class LibraryTools(
                     .Where(found => mod is null || string.Equals(found.Mod.Id, mod.Trim(), StringComparison.OrdinalIgnoreCase))
                     .Where(found => !watchedOnly || found.IsWatched)
                     .Where(found => !updatesOnly || found.OfferedUpdates.Count > 0)
+                    .Where(found => !missingOnly || found.Files.Any(file => McpEntries.File(file, root).Missing))
                     .OrderBy(found => found.Mod.Game.Source.Value, StringComparer.Ordinal)
                     .ThenBy(found => found.Mod.Game.Key, StringComparer.Ordinal)
                     .ThenBy(found => found.Name, StringComparer.OrdinalIgnoreCase)

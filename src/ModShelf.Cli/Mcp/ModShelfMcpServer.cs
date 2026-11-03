@@ -30,6 +30,8 @@ internal static partial class ModShelfMcpServer
     internal const string Instructions =
         "ModShelf downloads mods' files from sites such as Nexus Mods into a library folder, keeps their versions, and "
         + "checks the watched mods for updates. It never installs mods: a mod manager installs the files from the library.\n"
+        + "- library_list lists the library a page at a time, each file with its path, size and SHA-256; compact, a game or "
+        + "a mod, and watchedOnly, updatesOnly or missingOnly keep a page small.\n"
         + "- library_updates lists the updates the checks found, each with its link and the library file it replaces; "
         + "library_check checks the sites now.\n"
         + "- download takes a file's or a mod's link, such as an update's, and downloads the file into the library. "

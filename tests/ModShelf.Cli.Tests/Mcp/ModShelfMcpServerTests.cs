@@ -843,8 +843,10 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         await DownloadAndWaitAsync(mcp, "2");
         await DownloadAndWaitAsync(mcp, "3");
         File.Delete(Path.Combine(ModFolder, FileNameOf("3")));
+        await mcp.CallAsync<WatchResult>("library_watch", Arguments(("link", FakeCatalogSite.ModLink("1").AbsoluteUri)), Cancellation);
 
         LibraryListing library = await mcp.CallAsync<LibraryListing>("library_list", Arguments(("source", "fake-handoff")), Cancellation);
+        LibraryListing missing = await mcp.CallAsync<LibraryListing>("library_list", Arguments(("missingOnly", true)), Cancellation);
         ModDetails mod = await mcp.CallAsync<ModDetails>("mod_show", Arguments(("link", FileLink("3").AbsoluteUri)), Cancellation);
         LibraryChanges changes = await ChangesAsync(mcp, start);
 
@@ -853,6 +855,9 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         Assert.Equal([("3", true), ("2", false), ("1", false)], entry.Files!.Select(file => (file.FileId, file.Missing)));
         Assert.Equal([("3", true), ("2", false), ("1", false)], mod.Files.Select(file => (file.FileId, file.Missing)));
         Assert.Equal([("1", false), ("2", false), ("3", true)], changes.Files.Select(file => (file.File.FileId, file.File.Missing)));
+
+        // The watched mod without files has none missing.
+        Assert.Equal(("mod", 1), (Assert.Single(missing.Mods).ModId, missing.Total));
     }
 
     [Fact]
@@ -876,6 +881,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         LibraryListing elsewhere = await mcp.CallAsync<LibraryListing>("library_list", Arguments(("game", "elsewhere")), Cancellation);
         LibraryListing one = await mcp.CallAsync<LibraryListing>("library_list", Arguments(("mod", "3")), Cancellation);
         LibraryListing updated = await mcp.CallAsync<LibraryListing>("library_list", Arguments(("updatesOnly", true)), Cancellation);
+        LibraryListing missing = await mcp.CallAsync<LibraryListing>("library_list", Arguments(("missingOnly", true)), Cancellation);
         await mcp.CallAsync<WatchResult>("library_unwatch", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
         LibraryListing watched = await mcp.CallAsync<LibraryListing>("library_list", Arguments(("watchedOnly", true)), Cancellation);
 
@@ -891,6 +897,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         Assert.Equal("3", Assert.Single(one.Mods).ModId);
         Assert.Equal(["1", "3"], watched.Mods.Select(mod => mod.ModId));
         Assert.Equal(("mod", "3"), (Assert.Single(updated.Mods).ModId, Assert.Single(updated.Mods[0].Updates!).FileId));
+        Assert.Equal((0, false), (missing.Total, missing.HasMore));
     }
 
     [Theory]
