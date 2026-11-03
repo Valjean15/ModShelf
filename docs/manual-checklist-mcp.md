@@ -33,8 +33,11 @@ you should see.
   as `https://www.nexusmods.com/stardewvalley`).
   One call to `download` with three links: two downloading or waiting for you, and the third's result says why it
   couldn't be downloaded. The summary says "Of 3 links, …".
-- [ ] **2.4 What came in.** Ask the agent what came into the library since this morning.
-  The new files, each with the mod's other files: the old version, archived when `library.oldVersions` is `archive`.
+- [ ] **2.4 What came in.** Ask the agent what came into the library since this morning, and which versions they
+  replaced.
+  The new files, each with the version it replaced and what became of it (`replaces`: archived when
+  `library.oldVersions` is `archive`, deleted when the newest versions kept leave it out, kept otherwise), and the mod's
+  other files. A file whose mod had none before replaces nothing (`replaces` is null).
 - [ ] **2.5 New optional files.** For a watched mod you have files of whose author has added an optional file since its
   last check, such as Bestiary, ask the agent to check for updates.
   The optional file is listed with kind `newFile`, replacing nothing; the desktop app's Updates screen says "New

@@ -116,6 +116,8 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
   The file says "Missing from disk". Name it back, **Rescan** on the page: "Rescan finished", and the file no longer says so.
 - [ ] **4.9 Offline.** Turn the network off, open the Library screen's SMAPI again.
   A strip says "Nexus Mods couldn't give the mod, so its saved details show: …", with **Try again**. The page shows SMAPI's saved name and picture, and your files; "Files on Nexus Mods" and "Changelog" say "Shown once Nexus Mods gives the mod." Turn the network on and **Try again**: the strip goes, and the whole page shows.
+- [ ] **4.10 Recent activity.** On the Library screen's games, **Recent activity**.
+  "Library › Recent activity", then today's heading "Today", with, newest first: the old version deleted in 4.5, "Deleted … from disk and the library."; the old version downloaded in 4.4; and SMAPI downloaded in 4.1, each with its time, a tag (Downloaded, Deleted), SMAPI's name and "Stardew Valley". **Show** **Deleted files** leaves the deletion alone; **Removed mods**: "Nothing of that kind happened in the last year."; **Everything** again. Click SMAPI's name: its page opens under "Library › Recent activity › SMAPI", and **Recent activity** goes back to the list. **Library** goes back to the games. A library from before 0.9.3 starts its activity with what happens after the update.
 
 ## 5. Download through the website (free only)
 
@@ -345,6 +347,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 4.7 A library mod's page | | – | |
 | 4.8 A file missing from disk | | – | |
 | 4.9 Offline | | – | |
+| 4.10 Recent activity | | – | |
 | 5.1 It waits for you | – | | |
 | 5.2 The page | – | | |
 | 5.3 Not a link | – | | |
