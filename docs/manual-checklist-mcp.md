@@ -46,6 +46,12 @@ you should see.
   `Get-FileHash -Algorithm SHA256 <its path>` in PowerShell.
   They match (`Get-FileHash` writes it in capitals). A file from before 0.9.2 has none (`sha256` is null).
 
+- [ ] **2.7 Pins, skips and notes.** For a watched mod with an update, ask the agent to pin it, then for the updates;
+  to unpin it and skip that update, then for the updates again; to offer it again; and to keep a note of the mod.
+  The pinned mod's update, then the skipped one, is left out of `library_updates`; `library_list` says `pinned`, the
+  note, and the update's `skipped`, and `mod_show` too. A desktop app running meanwhile shows the changes once it starts
+  again.
+
 ## 3. Settings and refusals
 
 - [ ] **3.1 A setting.** Ask the agent to set `library.oldVersions` to `archive`, then to reset it.
@@ -85,6 +91,7 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 2.4 What came in | | |
 | 2.5 New optional files | | |
 | 2.6 Hashes | | |
+| 2.7 Pins, skips and notes | | |
 | 3.1 A setting | | |
 | 3.2 What it can't do | | |
 | 3.3 The logs | | |

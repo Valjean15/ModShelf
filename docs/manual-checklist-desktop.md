@@ -176,6 +176,8 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
   "1 selected" with **Update selected (0)** greyed out, then "2 selected" with **Update selected (1)**, and **Select all shown** goes from half ticked to ticked. "content" in the filter hides SMAPI and unselects it: "1 selected". Clear the filter; **Select all shown** selects both, and **Clear selection** neither. With **Cards**, each card has its box at the top left, and clicking it doesn't open the mod. Don't update them here: 8.4 does.
 - [ ] **8.3 Changes.** Look under the update, without clicking anything.
   "What changed in *version*" and its entry in Content Patcher's changelog, or "The changelog says nothing about this version." Going to another screen and back doesn't read it again (the log has no new request).
+- [ ] **8.3a Pin, skip and a note.** On the Library screen, open Stardew Valley, and in Content Patcher's **…** menu, **Pin at this version**.
+  Its status says "Pinned at *version*", the heading says "Up to date" without **Update all**, and the Updates screen lists nothing, its badge gone. In the menu, **Add a note…**: type two lines (Enter starts the second) and **Save**. Content Patcher's page shows "Pinned at *version*: its updates aren't offered." and the note above "Your files", and its newest main file no longer says "Update for your …". The menu's **Edit the note…** starts with it; emptied and saved, it's gone. **Unpin**: the update is back. On the Updates screen, **Skip** on it: it leaves, and Content Patcher's status says "1 update skipped"; **Offer skipped updates again** in its menu brings it back. While it's pinned, `library list` in a terminal says "yes, pinned", and lists the note under "Notes:".
 - [ ] **8.4 Download the update.** **Update all (1)** at the top of the Updates screen.
   "Downloading into …", Content Patcher's folder, under the update. On the free account, the Downloads screen says "1 file waits for you on Nexus Mods. …": **Open the next page** opens the file's page; start it there and paste the link as in 5.4. Once done, the update leaves the list and the badge goes. The Library's Content Patcher has both files: the default rule keeps the newest 2 versions.
 
@@ -369,6 +371,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 8.2c A game's mods | | | |
 | 8.2d Select mods | | | |
 | 8.3 Changes | | | |
+| 8.3a Pin, skip and a note | | | |
 | 8.4 Download the update | | | |
 | 9.1 Unwatch | | | |
 | 9.2 Watch from Browse | | | |
