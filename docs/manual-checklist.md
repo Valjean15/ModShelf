@@ -116,6 +116,8 @@ Use a file of a few hundred MB, so there's time to stop it: for example a textur
   "Nexus Mods lists the mods updated in the last 28 days only." Exit code 2.
 - [ ] **7.4 A game Nexus Mods doesn't have.** `ms mod updates --game notagame`.
   Write down what it says. "The site has no game 'notagame'." is expected, but Nexus Mods doesn't document this answer.
+- [ ] **7.5 A game's own settings.** `ms library watch "https://www.nexusmods.com/stardewvalley/mods/2400"`, then `ms settings set games.stardewvalley.checkUpdates false` and `ms library check`. Then `ms settings set games.stardewvalley.updateInterval 1d`, `ms settings set games.stardewvalley.browse.window 7d`, `ms settings show`, and `ms settings reset` for each of the three. Last, `ms library unwatch "https://www.nexusmods.com/stardewvalley/mods/2400"`.
+  With `checkUpdates` false, `library check` says "Checked 0 mods with 0 requests." `settings show` lists `games.stardewvalley.checkUpdates false`, `games.stardewvalley.updateInterval 1d` and `games.stardewvalley.browse.window 7d`, and `settings.json` holds them under `"games"`. Each reset says the game goes by every game's setting again, or Browse's own, and `settings show` lists none of them afterwards.
 
 ## 8. Tracked mods (Premium only)
 
@@ -252,6 +254,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 7.2 7 and 28 days | | | |
 | 7.3 Too far back | | | |
 | 7.4 Unknown game | | | |
+| 7.5 A game's own settings | | | |
 | 8.1 Tracked list | | – | |
 | 8.2 Track | | – | |
 | 8.3 Track again | | – | |

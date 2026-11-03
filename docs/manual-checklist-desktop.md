@@ -199,11 +199,17 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
 ## 10. Settings
 
 - [ ] **10.0 Categories and search.** Open the Settings screen, then each category in its list.
-  It opens on **General**: the theme, closing the window, and pictures and mod details. **Library**: the library folder, the folder pattern, old versions and **Rescan the library**. **Updates**, **Links**, **Games** (the games' own folder patterns) and **About** show theirs. Type `folder` in **Search settings**: the library folder, the folder pattern, old versions (the _archive folder), the rescan, the games' patterns and About (the log folder), under "Settings that match “folder”", and General, Updates and Links fade in the list. `zzz`: "No setting matches “zzz”." Escape, or choosing a category, ends the search. **Rescan the library** says what it found, as on the Library screen. Make the window narrow: the categories move above the settings, side by side.
+  It opens on **General**: the theme, closing the window, and pictures and mod details. **Library**: the library folder, the folder pattern, old versions and **Rescan the library**. **Updates**, **Links**, **Games** (each game's own settings) and **About** show theirs. Type `folder` in **Search settings**: the library folder, the folder pattern, old versions (the _archive folder), the rescan, the games' patterns and About (the log folder), under "Settings that match “folder”", and General, Updates and Links fade in the list. `zzz`: "No setting matches “zzz”." Escape, or choosing a category, ends the search. **Rescan the library** says what it found, as on the Library screen. Make the window narrow: the categories move above the settings, side by side.
 - [ ] **10.1 Folder patterns.** In **Library**, under "Folder pattern", change every game's pattern to `{source}/{game}/{modid}/{file}`.
   The example under it changes as you type. `{mod}/{file}x` says what's wrong, and **Save** is disabled. With the right pattern, **Save**: a mod the library doesn't have yet then downloads to `nexus\<game>\<mod's ID>\…`. Mods in the library keep their folders, and files downloaded already stay where they are.
-- [ ] **10.2 A game's own pattern.** In **Games**, **Add a game…**, type `stardewvalley`, then change its pattern and **Save**; then **Remove** it.
-  The row's example shows the game. Once removed, the game goes by every game's pattern again.
+- [ ] **10.2 A game's own settings.** In **Games**, **Add a game…**, type `stardewvalley`. On its page, **Override** each setting in turn: under "Folder pattern" change its pattern and **Save**; under "Old versions" choose the _archive folder; under "Update checks" choose **Every day**; under "Notices" untick the box; under "Browse" choose **Recently updated**, **Updated in the last week** and **50 per page**. Then **Use default** for each.
+  Every setting says **Uses default** and what every game's is, until **Override** shows it, set as every game's, with **Overridden**. The pattern's example shows the game. The game's row counts the settings overridden, and the settings file holds each under `"games": { "stardewvalley": … }`. Each **Use default** takes it out; with none left, the row says "Uses the defaults" and the file holds no `games`.
+- [ ] **10.2a Browse as a game says.** Override stardewvalley's Browse as in 10.2, then choose Stardew Valley on the Browse screen, and **Search**.
+  The toolbar starts on **Recently updated**, **Updated in the last week** and **50 per page**, and the search lists 50 mods updated in the last week, the most recent first. Choosing another game without its own leaves the toolbar as it is.
+- [ ] **10.2b Hidden games.** On stardewvalley's page, tick "Hide Stardew Valley in the Library, Updates and Browse". Then look at the Library, Updates and Browse screens, and tick **Show hidden games (1)** on the Library's games. Untick the hide box afterwards.
+  The row says "Hidden". The Library's games leave Stardew Valley out until **Show hidden games (1)** is on; Updates leaves out its updates, and its badge doesn't count them; Browse's game box doesn't offer it. Its mods are still checked by **Check now**. Unticked, it's everywhere again.
+- [ ] **10.2c A game's gear.** On the Library screen, open a game, then click the gear beside its name.
+  The Settings screen opens on **Games**, at that game's page.
 - [ ] **10.3 Old versions.** Choose **Move the old versions to an _archive folder beside it**, then **Keep the newest versions** with 3.
   Each is kept at once: the settings file (10.7) holds `"oldVersions": 3`. The rule applies when a newer version of a file is downloaded from then on.
 - [ ] **10.4 Updates.** Choose **Every hour**, and untick **Show a notice when a check finds new updates**.
@@ -371,7 +377,10 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 9.7 Download selected | | | |
 | 10.0 Categories and search | | | |
 | 10.1 Folder patterns | | | |
-| 10.2 A game's own pattern | | | |
+| 10.2 A game's own settings | | | |
+| 10.2a Browse as a game says | | | |
+| 10.2b Hidden games | | | |
+| 10.2c A game's gear | | | |
 | 10.3 Old versions | | | |
 | 10.4 Updates | | | |
 | 10.5 Theme | | | |
