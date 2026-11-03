@@ -14,7 +14,8 @@ namespace ModShelf.Cli.Commands;
 /// <summary>
 /// <c>library list</c>, <c>library watch &lt;link&gt;</c>, <c>library unwatch &lt;link&gt;</c>,
 /// <c>library forget &lt;link&gt;</c> and <c>library move &lt;folder&gt;</c>: the mods ModShelf watches for updates or
-/// has downloaded files of, and where their files are. Checking for updates and rescanning are in files of their own.
+/// has downloaded files of, and where their files are. Checking for updates, rescanning, and pins, skipped updates and
+/// notes are in files of their own.
 /// </summary>
 internal static partial class LibraryCommand
 {
@@ -40,11 +41,15 @@ internal static partial class LibraryCommand
         };
         move.SetAction((parsed, cancellationToken) => MoveAsync(environment, parsed.GetValue(folder)!, cancellationToken));
 
-        return new Command("library", "Shows the library of watched and downloaded mods, watches mods and checks them for updates, forgets and rescans mods, and moves the library.")
+        return new Command("library", "Shows the library of watched and downloaded mods, watches mods and checks them for updates, pins mods, skips updates, keeps notes, forgets and rescans mods, and moves the library.")
         {
             list,
             CreateWatch(environment, watch: true),
             CreateWatch(environment, watch: false),
+            CreatePin(environment, pin: true),
+            CreatePin(environment, pin: false),
+            CreateSkip(environment),
+            CreateNote(environment),
             CreateForget(environment),
             CreateRescan(environment),
             CreateCheck(environment),
@@ -171,12 +176,19 @@ internal static partial class LibraryCommand
                                 mod.Mod.Game.Key,
                                 mod.Mod.Id,
                                 mod.Name,
-                                mod.IsWatched ? "yes" : "no",
+                                (mod.IsWatched, mod.IsPinned) switch
+                                {
+                                    (true, true) => "yes, pinned",
+                                    (false, true) => "no, pinned",
+                                    (true, false) => "yes",
+                                    _ => "no",
+                                },
                                 mod.Files.Count.ToString(CultureInfo.CurrentCulture),
                                 mod.PageUrl?.AbsoluteUri ?? "-",
                             }),
                     ];
                     TextTable.Write(environment.Output, rows);
+                    WriteNotes(environment.Output, mods);
                     if (files)
                     {
                         string root;
@@ -197,6 +209,32 @@ internal static partial class LibraryCommand
                 },
                 cancellationToken)
             .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// The mods' notes, by mod as the mods are listed; nothing when no mod has one.
+    /// </summary>
+    private static void WriteNotes(TextWriter output, IReadOnlyList<LibraryMod> mods)
+    {
+        LibraryMod[] noted =
+        [
+            .. mods
+                .Where(mod => mod.Note is not null)
+                .OrderBy(mod => mod.Mod.Game.Source.Value, StringComparer.Ordinal)
+                .ThenBy(mod => mod.Mod.Game.Key, StringComparer.Ordinal)
+                .ThenBy(mod => mod.Name, StringComparer.CurrentCultureIgnoreCase),
+        ];
+        if (noted.Length == 0)
+        {
+            return;
+        }
+
+        output.WriteLine();
+        output.WriteLine("Notes:");
+        foreach (LibraryMod mod in noted)
+        {
+            output.WriteLine($"{mod.Name} ({mod.Mod.Game.Key} {mod.Mod.Id}): {mod.Note!.ReplaceLineEndings(" / ")}");
+        }
     }
 
     /// <summary>

@@ -100,13 +100,19 @@ internal static partial class LibraryCommand
                     async services =>
                     {
                         IReadOnlyList<LibraryMod> library = await services.GetRequiredService<IModLibrary>().ListAsync(cancellationToken).ConfigureAwait(false);
-                        LibraryUpdate[] updates = [.. library.SelectMany(mod => mod.Updates)];
+                        LibraryUpdate[] updates = [.. library.SelectMany(mod => mod.OfferedUpdates)];
+                        string? leftOut = LeftOut(library);
                         if (updates.Length == 0)
                         {
                             DateTimeOffset? checkedAt = library.Where(mod => mod.IsWatched).Min(mod => mod.CheckedAt);
                             environment.Output.WriteLine(checkedAt is { } at
                                 ? $"There are no updates. The watched mods were checked {CliText.Time(at)} or later; to check now: library check"
                                 : "There are no updates. To check the watched mods now: library check");
+                            if (leftOut is not null)
+                            {
+                                environment.Output.WriteLine(leftOut);
+                            }
+
                             return ExitCodes.Done;
                         }
 
@@ -116,6 +122,11 @@ internal static partial class LibraryCommand
                             $"{CliText.Count(updates.Length, "update", "updates")} for {CliText.Count(mods, "mod", "mods")}:"));
                         WriteUpdates(environment.Output, library, updates);
                         environment.Output.WriteLine("To download one: download \"<its link>\"");
+                        if (leftOut is not null)
+                        {
+                            environment.Output.WriteLine(leftOut);
+                        }
+
                         if (changelog)
                         {
                             await WriteChangelogsAsync(environment, services.GetRequiredService<IModLookup>(), updates, cancellationToken).ConfigureAwait(false);
@@ -210,5 +221,19 @@ internal static partial class LibraryCommand
         }
     }
 
-
+    /// <summary>
+    /// What the list leaves out: the updates of pinned mods, and the ones skipped; null for none.
+    /// </summary>
+    private static string? LeftOut(IReadOnlyList<LibraryMod> library)
+    {
+        int pinned = library.Where(mod => mod.IsPinned).Sum(mod => mod.Updates.Count);
+        int skipped = library.Where(mod => !mod.IsPinned).Sum(mod => mod.SkippedUpdates.Count);
+        return (pinned, skipped) switch
+        {
+            (0, 0) => null,
+            (_, 0) => $"Left out: {CliText.Count(pinned, "update", "updates")} of pinned mods. To offer them: library unpin \"<the mod's link>\"",
+            (0, _) => $"Left out: {CliText.Count(skipped, "skipped update", "skipped updates")}. To offer one again: library skip \"<its link>\" --undo",
+            _ => $"Left out: {CliText.Count(pinned, "update", "updates")} of pinned mods, and {CliText.Count(skipped, "skipped update", "skipped updates")}.",
+        };
+    }
 }
