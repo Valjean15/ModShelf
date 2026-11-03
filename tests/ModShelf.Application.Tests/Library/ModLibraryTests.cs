@@ -22,6 +22,7 @@ public sealed class ModLibraryTests : IDisposable
     private static readonly Uri Link = new("https://www.nexusmods.com/skyrimspecialedition/mods/12604");
 
     private readonly FakeTimeProvider _time = new(TestData.Now);
+    private readonly InMemoryLibraryHistory _history = new();
     private readonly InMemoryLibraryRepository _repository = new();
     private readonly FakeCatalogSource _site = new(TestData.Nexus);
     private readonly FakeLibraryStorage _storage = new();
@@ -560,11 +561,97 @@ public sealed class ModLibraryTests : IDisposable
         Assert.Equal([new LibraryChange(SkyUi, null, watched)], await changes.ToListAsync(Cancellation));
     }
 
+    [Fact]
+    public async Task DeletingAFileKeepsItInTheHistory()
+    {
+        LibraryFile kept = File("35407", "nexus/skyrimspecialedition/SkyUI (12604)/SkyUI_5_2_SE.7z");
+        LibraryFile deleted = File("35408", "nexus/skyrimspecialedition/SkyUI (12604)/SkyUI_5_3_SE.7z");
+        Stored(watched: false, kept, deleted);
+        _time.Advance(TimeSpan.FromHours(1));
+
+        await Library(_site).DeleteFileAsync(deleted.File, Cancellation);
+
+        LibraryEvent happened = Assert.Single(_history.Events);
+        Assert.Equal(
+            new LibraryEvent(
+                TestData.Now.AddHours(1),
+                LibraryEventKind.Deleted,
+                SkyUi,
+                "SkyUI",
+                deleted.File,
+                "SkyUI 5.2",
+                "5.2",
+                "nexus/skyrimspecialedition/SkyUI (12604)/SkyUI_5_3_SE.7z"),
+            happened);
+    }
+
+    [Fact]
+    public async Task DeletingTheLastFileOfAModNotWatchedKeepsItInTheHistory()
+    {
+        Stored(watched: false, File("35407"));
+
+        await Library(_site).DeleteFileAsync(File("35407").File, Cancellation);
+
+        Assert.Equal((LibraryEventKind.Deleted, "SkyUI"), (Assert.Single(_history.Events).Kind, _history.Events[0].ModName));
+    }
+
+    [Fact]
+    public async Task AFileThatCantBeDeletedIsntInTheHistory()
+    {
+        LibraryMod before = Stored(watched: false, File("35407"));
+        _storage.Failures[LibraryPaths.Resolve(Root, before.Files[0].RelativePath)] = new IOException("The file is open in another program.");
+
+        await Assert.ThrowsAsync<IOException>(() => Library(_site).DeleteFileAsync(before.Files[0].File, Cancellation));
+
+        Assert.Empty(_history.Events);
+    }
+
+    [Fact]
+    public async Task AHistoryThatCantKeepADeletionLeavesTheFileDeleted()
+    {
+        Stored(watched: true, File("35407"));
+        _history.Failure = new InvalidDataException("The database is locked.");
+
+        LibraryChange change = await Library(_site).DeleteFileAsync(File("35407").File, Cancellation);
+
+        Assert.Empty(change.After!.Files);
+        Assert.Empty(_storage.Files);
+    }
+
+    [Fact]
+    public async Task ForgettingAModKeepsItInTheHistory()
+    {
+        Stored(watched: true, File("35407"));
+
+        await Library(_site).ForgetAsync(SkyUi, Cancellation);
+
+        Assert.Equal(new LibraryEvent(TestData.Now, LibraryEventKind.Removed, SkyUi, "SkyUI"), Assert.Single(_history.Events));
+    }
+
+    [Fact]
+    public async Task ForgettingAModNotInTheLibraryKeepsNothing()
+    {
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => Library(_site).ForgetAsync(SkyUi, Cancellation));
+
+        Assert.Empty(_history.Events);
+    }
+
+    [Fact]
+    public async Task WatchingAndUnwatchingArentInTheHistory()
+    {
+        ModLibrary library = Library(_site);
+
+        await library.WatchAsync(Link, Cancellation);
+        await library.SetWatchedAsync(SkyUi, false, Cancellation);
+
+        Assert.Empty(_history.Events);
+    }
+
     private static LibraryFile File(string id, string relativePath = "SkyUI_5_2_SE.7z")
         => new(new ModFileRef(TestData.File(TestData.Nexus, id).Mod, id), "SkyUI 5.2", "5.2", ModFileCategory.Main, TestData.Now, relativePath, 1, TestData.Now);
 
     private ModLibrary Library(params IModSource[] sources)
-        => new(new SourceRegistry(sources), _repository, _settings, _storage, _downloads, _downloads, _changes, _time, _logger);
+        => new(new SourceRegistry(sources), _repository, _settings, _storage, _downloads, _downloads, _changes, _history.History(_time), _time, _logger);
 
     /// <summary>
     /// SkyUI in the library, watched or not, with its files on disk.

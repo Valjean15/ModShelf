@@ -118,6 +118,7 @@ public sealed class ApplicationServiceCollectionExtensionsTests
             settings,
             new FakeLibraryStorage(),
             new LibraryChanges(),
+            new InMemoryLibraryHistory().History(TimeProvider.System),
             TimeProvider.System,
             NullLogger<LibraryDownloads>.Instance);
         OneServiceProvider provider = new(downloads);
@@ -127,6 +128,23 @@ public sealed class ApplicationServiceCollectionExtensionsTests
         Assert.Same(downloads, Single<ILibraryDownloads>(services).ImplementationFactory!(provider));
         Assert.Same(downloads, Single<ILibraryHold>(services).ImplementationFactory!(provider));
         Assert.Equal(typeof(SourceRegistry), Single<ISourceRegistry>(services).ImplementationType);
+        Assert.Single(services, descriptor => descriptor.ServiceType == typeof(TimeProvider));
+        Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
+    }
+
+    [Fact]
+    public void TheLibraryAndItsDownloadsKeepOneHistory()
+    {
+        ServiceCollection services = new();
+        services.AddLibrary();
+        services.AddLibraryDownloads();
+        services.AddLibraryHistory();
+        LibraryHistory history = new InMemoryLibraryHistory().History(TimeProvider.System);
+        OneServiceProvider provider = new(history);
+
+        // One instance is both, so what the library's services keep is what it lists.
+        Assert.Equal(typeof(LibraryHistory), Single<LibraryHistory>(services).ImplementationType);
+        Assert.Same(history, Single<ILibraryHistory>(services).ImplementationFactory!(provider));
         Assert.Single(services, descriptor => descriptor.ServiceType == typeof(TimeProvider));
         Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
     }

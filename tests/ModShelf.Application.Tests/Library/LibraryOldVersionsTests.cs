@@ -26,6 +26,7 @@ public sealed class LibraryOldVersionsTests : IDisposable
     private static readonly string[] OldIds = ["50", "51", "52"];
 
     private readonly FakeTimeProvider _time = new(TestData.Now);
+    private readonly InMemoryLibraryHistory _history = new();
     private readonly FakeModSite _site = new();
     private readonly RecordingDownloadService _downloads = new();
     private readonly InMemoryLibraryRepository _library = new();
@@ -365,8 +366,132 @@ public sealed class LibraryOldVersionsTests : IDisposable
         Assert.Empty(_site.Asked);
     }
 
-    private static LibraryFile Stored(string id)
-        => new(File(SkyUi, id), $"SkyUI {id}", null, ModFileCategory.Main, TestData.Now, $"{Folder}/SkyUI {id[0]}.{id[1]}.7z", 100, TestData.Now, Sha256Of(id));
+    [Fact]
+    public async Task TheHistoryKeepsTheDownloadWithTheVersionItReplacedAndTheOldVersionsTheRuleDeleted()
+    {
+        await _library.UpdateAsync(Mod(SkyUi), stored => stored!.WithFile(Stored("52", "5.2")), Cancellation);
+
+        await RecordAsync();
+
+        Assert.Equal(
+            [
+                (LibraryEventKind.Downloaded, "53", $"{Folder}/SkyUI 5.3.7z", false),
+                (LibraryEventKind.Deleted, "51", $"{Folder}/SkyUI 5.1.7z", true),
+                (LibraryEventKind.Deleted, "50", $"{Folder}/SkyUI 5.0.7z", true),
+            ],
+            _history.Events.Select(happened => (happened.Kind, happened.File!.Id, happened.RelativePath, happened.ByRule)));
+        LibraryEvent downloaded = _history.Events[0];
+        Assert.Equal(
+            (TestData.Now, Mod(SkyUi), "SkyUI", "Main file", "1.0", File(SkyUi, "52"), "5.2"),
+            (downloaded.At, downloaded.Mod, downloaded.ModName, downloaded.FileName, downloaded.VersionLabel, downloaded.Replaces, downloaded.ReplacesVersion));
+        Assert.All(_history.Events.Skip(1), happened => Assert.Equal((TestData.Now, (ModFileRef?)null), (happened.At, happened.Replaces)));
+    }
+
+    [Fact]
+    public async Task TheHistoryKeepsTheOldVersionsArchivedWhereTheyWent()
+    {
+        _store.Settings = new AppSettings { OldVersions = OldVersionRule.Archive };
+
+        await RecordAsync();
+
+        Assert.Equal(
+            [
+                (LibraryEventKind.Downloaded, "53", $"{Folder}/SkyUI 5.3.7z"),
+                (LibraryEventKind.Archived, "52", $"{Folder}/_archive/SkyUI 5.2.7z"),
+                (LibraryEventKind.Archived, "51", $"{Folder}/_archive/SkyUI 5.1.7z"),
+                (LibraryEventKind.Archived, "50", $"{Folder}/_archive/SkyUI 5.0.7z"),
+            ],
+            _history.Events.Select(happened => (happened.Kind, happened.File!.Id, happened.RelativePath)));
+        Assert.Equal(File(SkyUi, "52"), _history.Events[0].Replaces);
+        Assert.DoesNotContain(_history.Events, happened => happened.ByRule);
+    }
+
+    [Fact]
+    public async Task KeepingAllKeepsOnlyTheDownloadInTheHistory()
+    {
+        _store.Settings = new AppSettings { OldVersions = OldVersionRule.KeepAll };
+
+        await RecordAsync();
+
+        LibraryEvent downloaded = Assert.Single(_history.Events);
+        Assert.Equal((LibraryEventKind.Downloaded, File(SkyUi, "52"), (string?)null), (downloaded.Kind, downloaded.Replaces, downloaded.ReplacesVersion));
+    }
+
+    [Fact]
+    public async Task AnOldVersionThatCantBeDeletedIsntInTheHistory()
+    {
+        _storage.Failures[InRoot($"{Folder}/SkyUI 5.1.7z")] = new UnauthorizedAccessException("Read-only.");
+
+        await RecordAsync();
+
+        Assert.Equal(
+            [(LibraryEventKind.Downloaded, "53"), (LibraryEventKind.Deleted, "50")],
+            _history.Events.Select(happened => (happened.Kind, happened.File!.Id)));
+    }
+
+    [Fact]
+    public async Task ADownloadOfAnOlderVersionReplacesNothing()
+    {
+        _site.AddFile(SkyUi, "49", "SkyUI 4.9.7z", replacedBy: "50");
+        _storage.Add(InRoot($"{Folder}/SkyUI 4.9.7z"));
+        using LibraryDownloads library = Create();
+
+        await library.RecordAsync(Done("49", "SkyUI 4.9.7z"), Cancellation);
+
+        LibraryEvent downloaded = Assert.Single(_history.Events);
+        Assert.Equal(("49", (ModFileRef?)null), (downloaded.File!.Id, downloaded.Replaces));
+    }
+
+    [Fact]
+    public async Task ADownloadAgainOfAFileTheLibraryHasIsKeptAgain()
+    {
+        _time.Advance(TimeSpan.FromDays(1));
+        DownloadJobSnapshot again = Done("52", "SkyUI 5.2.7z") with { CreatedAt = _time.GetUtcNow() };
+        using LibraryDownloads library = Create();
+
+        await library.RecordAsync(again, Cancellation);
+
+        LibraryEvent downloaded = Assert.Single(_history.Events);
+        Assert.Equal(
+            (LibraryEventKind.Downloaded, "52", "SkyUI 52", _time.GetUtcNow(), (ModFileRef?)null),
+            (downloaded.Kind, downloaded.File!.Id, downloaded.FileName, downloaded.At, downloaded.Replaces));
+    }
+
+    [Fact]
+    public async Task RecordingTheSameDownloadAgainKeepsItOnce()
+    {
+        DownloadJobSnapshot done = Done("53", "SkyUI 5.3.7z");
+        using LibraryDownloads library = Create();
+        await library.RecordAsync(done, Cancellation);
+
+        await library.RecordAsync(done, Cancellation);
+
+        Assert.Equal(3, _history.Events.Count);
+    }
+
+    [Fact]
+    public async Task TheHistoryKeepsNothingWhenTheLibraryRefusesTheChange()
+    {
+        _library.UpdateFailure = new InvalidDataException("The database is locked.");
+
+        await Assert.ThrowsAsync<InvalidDataException>(RecordAsync);
+
+        Assert.Empty(_history.Events);
+    }
+
+    [Fact]
+    public async Task AHistoryThatCantKeepTheDownloadLeavesItRecorded()
+    {
+        _history.Failure = new InvalidDataException("The database is locked.");
+
+        LibraryRecord recorded = await RecordAsync();
+
+        Assert.Equal(["51", "50"], recorded.Deleted.Select(file => file.File.Id));
+        Assert.Equal([$"{Folder}/SkyUI 5.2.7z", $"{Folder}/SkyUI 5.3.7z"], LibraryPaths);
+    }
+
+    private static LibraryFile Stored(string id, string? version = null)
+        => new(File(SkyUi, id), $"SkyUI {id}", version, ModFileCategory.Main, TestData.Now, $"{Folder}/SkyUI {id[0]}.{id[1]}.7z", 100, TestData.Now, Sha256Of(id));
 
     private static string Sha256Of(string id) => new(id[^1], 64);
 
@@ -382,5 +507,5 @@ public sealed class LibraryOldVersionsTests : IDisposable
     private string InRoot(string relativePath) => Domain.Library.LibraryPaths.Resolve(Root, relativePath);
 
     private LibraryDownloads Create(LibraryChanges? changes = null)
-        => new(new SourceRegistry([_site]), _downloads, _library, _settings, _storage, changes ?? new LibraryChanges(), _time, _logger);
+        => new(new SourceRegistry([_site]), _downloads, _library, _settings, _storage, changes ?? new LibraryChanges(), _history.History(_time), _time, _logger);
 }

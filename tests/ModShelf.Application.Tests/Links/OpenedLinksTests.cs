@@ -41,6 +41,7 @@ public sealed class OpenedLinksTests : IDisposable
             _settings,
             _storage,
             new LibraryChanges(),
+            new InMemoryLibraryHistory().History(TimeProvider.System),
             new FakeTimeProvider(TestData.Now),
             new RecordingLogger<LibraryDownloads>());
         _site.AddMod(SkyUi, "SkyUI");

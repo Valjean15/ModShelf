@@ -26,6 +26,7 @@ public sealed class LibraryDownloadsTests : IDisposable
     private const string SkyUi53 = "35408";
 
     private readonly FakeTimeProvider _time = new(TestData.Now);
+    private readonly InMemoryLibraryHistory _history = new();
     private readonly FakeModSite _site = new();
     private readonly RecordingDownloadService _downloads = new();
     private readonly InMemoryLibraryRepository _library = new();
@@ -587,7 +588,7 @@ public sealed class LibraryDownloadsTests : IDisposable
         }
 
         ModLibrary mods = new(
-            new SourceRegistry([_site]), _library, _settings, _storage, _downloads, _downloads, _changes, _time, new RecordingLogger<ModLibrary>());
+            new SourceRegistry([_site]), _library, _settings, _storage, _downloads, _downloads, _changes, _history.History(_time), _time, new RecordingLogger<ModLibrary>());
         await mods.ForgetAsync(Assert.Single(_library.Mods).Mod, Cancellation);
         using LibraryDownloads library = Create();
 
@@ -764,5 +765,5 @@ public sealed class LibraryDownloadsTests : IDisposable
     }
 
     private LibraryDownloads Create(FakeLibraryStorage? storage = null, IModSource[]? sources = null)
-        => new(new SourceRegistry([_site, .. sources ?? []]), _downloads, _library, _settings, storage ?? _storage, _changes, _time, _logger);
+        => new(new SourceRegistry([_site, .. sources ?? []]), _downloads, _library, _settings, storage ?? _storage, _changes, _history.History(_time), _time, _logger);
 }

@@ -33,6 +33,7 @@ public sealed class LibraryRecorderTests : IDisposable
             _settings,
             _storage,
             new LibraryChanges(),
+            new InMemoryLibraryHistory().History(TimeProvider.System),
             TimeProvider.System,
             new RecordingLogger<LibraryDownloads>());
         _site.AddMod("1", "First");

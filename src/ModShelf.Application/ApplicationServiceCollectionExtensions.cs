@@ -90,7 +90,7 @@ public static class ApplicationServiceCollectionExtensions
 
     /// <summary>
     /// Registers <see cref="IModLibrary"/>, the library of watched and downloaded mods, and <see cref="ILibraryRescan"/>,
-    /// which rescans its folders. Needs the download engine
+    /// which rescans its folders, with their history (<see cref="AddLibraryHistory"/>). Needs the download engine
     /// (<see cref="AddDownloadEngine"/>), the settings (<see cref="AddSettings"/>), and Infrastructure's
     /// <see cref="Library.Ports.ILibraryRepository"/>, which <c>AddLibraryFiles()</c> registers, and
     /// <see cref="Library.Ports.ILibraryStorage"/>.
@@ -102,6 +102,7 @@ public static class ApplicationServiceCollectionExtensions
         services.TryAddSingleton(TimeProvider.System);
         services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
         services.TryAddSingleton<LibraryChanges>();
+        services.AddLibraryHistory();
         services.TryAddSingleton<IModLibrary, ModLibrary>();
         services.TryAddSingleton<ILibraryRescan, LibraryRescanner>();
 
@@ -109,9 +110,25 @@ public static class ApplicationServiceCollectionExtensions
     }
 
     /// <summary>
+    /// Registers <see cref="ILibraryHistory"/>, what happened in the library, which the library's services keep. Needs
+    /// Infrastructure's <see cref="Library.Ports.ILibraryHistoryRepository"/>.
+    /// </summary>
+    public static IServiceCollection AddLibraryHistory(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton(TimeProvider.System);
+        services.TryAddSingleton<LibraryHistory>();
+        services.TryAddSingleton<ILibraryHistory>(provider => provider.GetRequiredService<LibraryHistory>());
+
+        return services;
+    }
+
+    /// <summary>
     /// Registers <see cref="ILibraryDownloads"/>, which downloads files into the library and records them there. Needs
     /// the download engine (<see cref="AddDownloadEngine"/>) and the settings (<see cref="AddSettings"/>), and
-    /// Infrastructure's <see cref="Library.Ports.ILibraryRepository"/> and <see cref="Library.Ports.ILibraryStorage"/>.
+    /// Infrastructure's <see cref="Library.Ports.ILibraryRepository"/>, <see cref="Library.Ports.ILibraryStorage"/> and
+    /// <see cref="Library.Ports.ILibraryHistoryRepository"/>.
     /// </summary>
     public static IServiceCollection AddLibraryDownloads(this IServiceCollection services)
     {
@@ -120,6 +137,7 @@ public static class ApplicationServiceCollectionExtensions
         services.TryAddSingleton(TimeProvider.System);
         services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
         services.TryAddSingleton<LibraryChanges>();
+        services.AddLibraryHistory();
 
         // One instance, whose lock the mover holds too.
         services.TryAddSingleton<LibraryDownloads>();

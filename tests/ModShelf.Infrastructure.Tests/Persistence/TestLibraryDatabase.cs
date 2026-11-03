@@ -44,6 +44,8 @@ internal sealed class TestLibraryDatabase : IAsyncDisposable
 
     public IModDetailsRepository ModDetails => _services.GetRequiredService<IModDetailsRepository>();
 
+    public ILibraryHistoryRepository History => _services.GetRequiredService<ILibraryHistoryRepository>();
+
     public IServiceProvider Services => _services;
 
     /// <summary>

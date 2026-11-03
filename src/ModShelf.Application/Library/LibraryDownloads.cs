@@ -42,6 +42,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
     private readonly ISettingsService _settings;
     private readonly ILibraryStorage _storage;
     private readonly LibraryChanges _changes;
+    private readonly LibraryHistory _history;
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<LibraryDownloads> _logger;
     private readonly ConcurrentDictionary<DownloadJobId, SiteDetails> _details = new();
@@ -58,6 +59,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
         ISettingsService settings,
         ILibraryStorage storage,
         LibraryChanges changes,
+        LibraryHistory history,
         TimeProvider timeProvider,
         ILogger<LibraryDownloads> logger)
     {
@@ -67,6 +69,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(storage);
         ArgumentNullException.ThrowIfNull(changes);
+        ArgumentNullException.ThrowIfNull(history);
         ArgumentNullException.ThrowIfNull(timeProvider);
         ArgumentNullException.ThrowIfNull(logger);
 
@@ -76,6 +79,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
         _settings = settings;
         _storage = storage;
         _changes = changes;
+        _history = history;
         _timeProvider = timeProvider;
         _logger = logger;
     }
@@ -379,6 +383,10 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
         OldVersionPlan plan = details is null || stored is null
             ? OldVersionPlan.None
             : OldVersions.Plan(stored, job.File, details.Files, settings.OldVersionsFor(job.File.Mod.Game.Key));
+
+        // The version it replaces: the nearest older one in its update chain.
+        IReadOnlyList<LibraryFile> older = details is null || stored is null ? [] : OldVersions.ReplacedBy(stored, job.File, details.Files);
+        LibraryFile? replaced = older.Count > 0 ? older[0] : null;
         IReadOnlyList<(LibraryFile Before, LibraryFile After)> archived = plan.Archive.Count == 0
             ? []
             : Archive(root, await _library.ListAsync(cancellationToken).ConfigureAwait(false), plan.Archive);
@@ -422,6 +430,19 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
         LogRecorded(_logger, recorded.FileName, mod.Id, mod.Game.Key);
         IReadOnlyList<LibraryFile> deleted = await DeleteAsync(root, mod, plan.Delete).ConfigureAwait(false);
         LibraryRecord record = new(recorded, [.. archived.Select(moved => moved.After)], deleted);
+        LibraryMod named = change.After ?? change.Before!;
+        await _history.RecordAsync(
+                [
+                    LibraryEvent.Of(now, LibraryEventKind.Downloaded, named, recorded) with
+                    {
+                        Replaces = replaced?.File,
+                        ReplacesVersion = replaced?.VersionLabel,
+                    },
+                    .. record.Archived.Select(file => LibraryEvent.Of(now, LibraryEventKind.Archived, named, file)),
+                    .. deleted.Select(file => LibraryEvent.Of(now, LibraryEventKind.Deleted, named, file, byRule: true)),
+                ],
+                CancellationToken.None)
+            .ConfigureAwait(false);
         Remember(job.Id, record);
         return record;
     }

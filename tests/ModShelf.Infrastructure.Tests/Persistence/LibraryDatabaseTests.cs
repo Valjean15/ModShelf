@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Diagnostics.Ports;
 using ModShelf.Application.Downloads.Ports;
+using ModShelf.Application.Library;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Library;
@@ -25,6 +26,7 @@ public sealed class LibraryDatabaseTests
     private const string InitialCreate = "20261023144452_InitialCreate";
     private const string AddLinkedAccounts = "20261023202312_AddLinkedAccounts";
     private const string AddNeedsFullCheck = "20261029231706_AddNeedsFullCheck";
+    private const string AddModDetails = "20261102162731_AddModDetails";
 
     [Fact]
     public async Task StartingCreatesTheFolderAndTheSchema()
@@ -216,6 +218,30 @@ public sealed class LibraryDatabaseTests
     }
 
     [Fact]
+    public async Task ADatabaseFromBeforeTheHistoryKeepsItsLibraryAndStartsAHistory()
+    {
+        await using TestLibraryDatabase database = new();
+        await using (ModShelfDbContext context = await database.CreateContextAsync())
+        {
+            // The schema 0.9.2 shipped with.
+            await context.GetService<IMigrator>().MigrateAsync(AddModDetails, TestContext.Current.CancellationToken);
+            await context.Database.ExecuteSqlRawAsync(
+                "INSERT INTO LibraryMods (SourceId, GameKey, ModId, Name, IsWatched, AddedAt, NeedsFullCheck) "
+                + "VALUES ('nexus', 'stardewvalley', '2400', 'SMAPI', 1, '2026-10-27 12:00:00+00:00', 0);",
+                TestContext.Current.CancellationToken);
+        }
+
+        await database.StartAsync();
+
+        ModRef mod = new(new GameRef(new SourceId("nexus"), "stardewvalley"), "2400");
+        Assert.Equal("SMAPI", Assert.Single(await database.Library.ListAsync(TestContext.Current.CancellationToken)).Name);
+        Assert.Empty(await database.History.ListAsync(null, 10, TestContext.Current.CancellationToken));
+        LibraryEvent removed = new(DateTimeOffset.UnixEpoch.AddYears(57), LibraryEventKind.Removed, mod, "SMAPI");
+        await database.History.AddAsync([removed], DateTimeOffset.UnixEpoch, TestContext.Current.CancellationToken);
+        Assert.Equal(removed, Assert.Single(await database.History.ListAsync(null, 10, TestContext.Current.CancellationToken)));
+    }
+
+    [Fact]
     public async Task AnUpdateThatStoppedPartWayDoesntHoldTheNextOneUp()
     {
         await using TestLibraryDatabase database = new();
@@ -380,6 +406,14 @@ public sealed class LibraryDatabaseTests
         await using TestLibraryDatabase database = new();
 
         Assert.IsType<LibraryRepository>(database.Services.GetRequiredService<ILibraryRepository>());
+    }
+
+    [Fact]
+    public async Task RegistersTheLibraryHistoryRepository()
+    {
+        await using TestLibraryDatabase database = new();
+
+        Assert.IsType<LibraryHistoryRepository>(database.Services.GetRequiredService<ILibraryHistoryRepository>());
     }
 
     [Fact]

@@ -26,6 +26,7 @@ internal sealed partial class ModLibrary : IModLibrary
     private readonly IDownloadService _downloads;
     private readonly ICompletedDownloads _completed;
     private readonly LibraryChanges _changes;
+    private readonly LibraryHistory _history;
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<ModLibrary> _logger;
 
@@ -37,6 +38,7 @@ internal sealed partial class ModLibrary : IModLibrary
         IDownloadService downloads,
         ICompletedDownloads completed,
         LibraryChanges changes,
+        LibraryHistory history,
         TimeProvider timeProvider,
         ILogger<ModLibrary> logger)
     {
@@ -47,6 +49,7 @@ internal sealed partial class ModLibrary : IModLibrary
         ArgumentNullException.ThrowIfNull(downloads);
         ArgumentNullException.ThrowIfNull(completed);
         ArgumentNullException.ThrowIfNull(changes);
+        ArgumentNullException.ThrowIfNull(history);
         ArgumentNullException.ThrowIfNull(timeProvider);
         ArgumentNullException.ThrowIfNull(logger);
 
@@ -57,6 +60,7 @@ internal sealed partial class ModLibrary : IModLibrary
         _downloads = downloads;
         _completed = completed;
         _changes = changes;
+        _history = history;
         _timeProvider = timeProvider;
         _logger = logger;
     }
@@ -119,6 +123,12 @@ internal sealed partial class ModLibrary : IModLibrary
         _storage.DeleteFile(path);
         LibraryChange change = await UpdateAsync(file.Mod, stored => stored?.WithoutFile(file), cancellationToken).ConfigureAwait(false);
         LogDeletedFile(_logger, kept.FileName, file.Mod.Id, file.Mod.Game.Key);
+        if (change.Before is { } before)
+        {
+            await _history.RecordAsync([LibraryEvent.Of(_timeProvider.GetUtcNow(), LibraryEventKind.Deleted, before, kept)], CancellationToken.None)
+                .ConfigureAwait(false);
+        }
+
         RemoveEmptiedFolders(root, path);
         return change;
     }
@@ -153,6 +163,8 @@ internal sealed partial class ModLibrary : IModLibrary
         LibraryChange change = await UpdateAsync(modRef, current => current is null ? throw NotInLibrary(modRef) : null, cancellationToken)
             .ConfigureAwait(false);
         LogForgot(_logger, modRef.Id, modRef.Game.Key, change.Before!.Files.Count, cleared);
+        await _history.RecordAsync([new LibraryEvent(_timeProvider.GetUtcNow(), LibraryEventKind.Removed, modRef, change.Before.Name)], CancellationToken.None)
+            .ConfigureAwait(false);
         return change;
     }
 

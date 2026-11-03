@@ -27,6 +27,7 @@ internal sealed partial class LibraryRescanner : ILibraryRescan
     private readonly ISettingsService _settings;
     private readonly ILibraryStorage _storage;
     private readonly LibraryChanges _changes;
+    private readonly LibraryHistory _history;
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<LibraryRescanner> _logger;
 
@@ -36,6 +37,7 @@ internal sealed partial class LibraryRescanner : ILibraryRescan
         ISettingsService settings,
         ILibraryStorage storage,
         LibraryChanges changes,
+        LibraryHistory history,
         TimeProvider timeProvider,
         ILogger<LibraryRescanner> logger)
     {
@@ -44,6 +46,7 @@ internal sealed partial class LibraryRescanner : ILibraryRescan
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(storage);
         ArgumentNullException.ThrowIfNull(changes);
+        ArgumentNullException.ThrowIfNull(history);
         ArgumentNullException.ThrowIfNull(timeProvider);
         ArgumentNullException.ThrowIfNull(logger);
 
@@ -52,6 +55,7 @@ internal sealed partial class LibraryRescanner : ILibraryRescan
         _settings = settings;
         _storage = storage;
         _changes = changes;
+        _history = history;
         _timeProvider = timeProvider;
         _logger = logger;
     }
@@ -194,11 +198,15 @@ internal sealed partial class LibraryRescanner : ILibraryRescan
 
         IReadOnlyList<LibraryFile> after = change.After?.Files ?? [];
         scan.Hashed.AddRange(hashed.Where(file => after.Any(kept => kept.File == file.File && kept.Sha256 == file.Sha256)));
+        List<LibraryEvent> found = [];
         foreach (LibraryFile file in added.Where(file => after.Any(kept => kept.File == file.File && kept.RelativePath == file.RelativePath)))
         {
             scan.Added.Add(file);
             LogAdded(_logger, file.FileName, mod.Id, mod.Game.Key);
+            found.Add(LibraryEvent.Of(file.DownloadedAt, LibraryEventKind.Found, change.After!, file));
         }
+
+        await _history.RecordAsync(found, CancellationToken.None).ConfigureAwait(false);
     }
 
     /// <summary>

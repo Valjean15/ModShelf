@@ -73,6 +73,63 @@ namespace ModShelf.Infrastructure.Persistence.Migrations
                     b.ToTable("DownloadJobs", (string)null);
                 });
 
+            modelBuilder.Entity("ModShelf.Infrastructure.Persistence.Tables.LibraryEventRecord", b =>
+                {
+                    b.Property<long>("Sequence")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("At")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ByRule")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("FileId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("GameKey")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ModId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ModName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RelativePath")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ReplacesFileId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ReplacesVersion")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SourceId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("VersionLabel")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Sequence");
+
+                    b.HasIndex("At");
+
+                    b.ToTable("LibraryEvents", (string)null);
+                });
+
             modelBuilder.Entity("ModShelf.Infrastructure.Persistence.Tables.LibraryFileRecord", b =>
                 {
                     b.Property<long>("Sequence")

@@ -25,6 +25,7 @@ public sealed class LibraryRescannerTests : IDisposable
     private const string Survival = "3863";
 
     private readonly FakeTimeProvider _time = new(TestData.Now);
+    private readonly InMemoryLibraryHistory _history = new();
     private readonly FakeModSite _site = new();
     private readonly InMemoryLibraryRepository _library = new();
     private readonly InMemorySettingsStore _store = new();
@@ -331,6 +332,69 @@ public sealed class LibraryRescannerTests : IDisposable
         Assert.Empty(_site.Asked);
     }
 
+    [Fact]
+    public async Task AFileFoundOnDiskIsKeptInTheHistory()
+    {
+        Have(SkyUi, Stored("35407", "fake-mods/skyrimspecialedition/SkyUI (12604)/SkyUI_5_2_SE.7z", new string('a', 64)));
+        _storage.Add(Path.Combine(SkyUiFolder, "SkyUI_5_3_SE.7z"));
+        _time.Advance(TimeSpan.FromMinutes(5));
+
+        await Rescanner().RescanAsync(null, Cancellation);
+
+        Assert.Equal(
+            new LibraryEvent(
+                TestData.Now.AddMinutes(5),
+                LibraryEventKind.Found,
+                Mod(SkyUi),
+                "SkyUI",
+                new ModFileRef(Mod(SkyUi), "35408"),
+                "SkyUI 5.3",
+                "5.3",
+                "fake-mods/skyrimspecialedition/SkyUI (12604)/SkyUI_5_3_SE.7z"),
+            Assert.Single(_history.Events));
+    }
+
+    [Fact]
+    public async Task AModBroughtInByItsLinkIsKeptInTheHistoryByItsFilesFound()
+    {
+        _storage.Add(Path.Combine(SkyUiFolder, "SkyUI_5_2_SE.7z"));
+        _storage.Add(Path.Combine(SkyUiFolder, "SkyUI_5_3_SE.7z"));
+
+        await Rescanner().RescanAsync(Link(SkyUi, "35407"), Cancellation);
+
+        Assert.Equal(
+            [(LibraryEventKind.Found, "35407", "SkyUI"), (LibraryEventKind.Found, "35408", "SkyUI")],
+            _history.Events.Select(happened => (happened.Kind, happened.File!.Id, happened.ModName)).Order());
+    }
+
+    [Fact]
+    public async Task HashingAndMissingFilesArentInTheHistory()
+    {
+        Have(
+            SkyUi,
+            Stored("35407", "fake-mods/skyrimspecialedition/SkyUI (12604)/SkyUI_5_2_SE.7z"),
+            Stored("35408", "fake-mods/skyrimspecialedition/SkyUI (12604)/SkyUI_5_3_SE.7z"));
+        _storage.Remove(Path.Combine(SkyUiFolder, "SkyUI_5_3_SE.7z"));
+
+        LibraryRescan rescan = await Rescanner().RescanAsync(null, Cancellation);
+
+        Assert.Equal((1, 1), (rescan.Hashed.Count, rescan.Missing.Count));
+        Assert.Empty(_history.Events);
+    }
+
+    [Fact]
+    public async Task AHistoryThatCantKeepWhatWasFoundLeavesItAdded()
+    {
+        Have(SkyUi, Stored("35407", "fake-mods/skyrimspecialedition/SkyUI (12604)/SkyUI_5_2_SE.7z", new string('a', 64)));
+        _storage.Add(Path.Combine(SkyUiFolder, "SkyUI_5_3_SE.7z"));
+        _history.Failure = new InvalidDataException("The database is locked.");
+
+        LibraryRescan rescan = await Rescanner().RescanAsync(null, Cancellation);
+
+        Assert.Equal("35408", Assert.Single(rescan.Added).File.Id);
+        Assert.Equal(2, Assert.Single(_library.Mods).Files.Count);
+    }
+
     private static LibraryFile Stored(string fileId, string relativePath, string? sha256 = null)
         => new(File(SkyUi, fileId), $"File {fileId}", null, ModFileCategory.Main, TestData.Now.AddDays(-9), relativePath, 100, TestData.Now.AddDays(-2), sha256);
 
@@ -351,5 +415,5 @@ public sealed class LibraryRescannerTests : IDisposable
 
     private string InRoot(string relativePath) => LibraryPaths.Resolve(Root, relativePath);
 
-    private LibraryRescanner Rescanner() => new(new SourceRegistry([_site]), _library, _settings, _storage, _changes, _time, _logger);
+    private LibraryRescanner Rescanner() => new(new SourceRegistry([_site]), _library, _settings, _storage, _changes, _history.History(_time), _time, _logger);
 }
