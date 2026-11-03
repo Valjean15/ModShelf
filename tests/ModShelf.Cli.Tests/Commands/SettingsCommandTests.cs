@@ -24,6 +24,14 @@ public sealed class SettingsCommandTests : IAsyncDisposable
 
     private static readonly string[] PreviewScreens = ["library", "updates", "browse", "downloads"];
 
+    // A game's own settings as listed: its folders by their older name.
+    private static readonly string[] StardewSettings =
+    [
+        "library.folders.StardewValley", "games.StardewValley.oldVersions", "games.StardewValley.checkUpdates", "games.StardewValley.updateInterval",
+        "games.StardewValley.notify", "games.StardewValley.hidden", "games.StardewValley.browse.sort", "games.StardewValley.browse.direction",
+        "games.StardewValley.browse.window", "games.StardewValley.browse.pageSize",
+    ];
+
     private readonly FakeAccountSite _site = new();
     private readonly ScriptedBrowser _browser = new();
     private readonly InProcessCli _cli;
@@ -96,6 +104,76 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task SetsAGamesOwnSettings()
+    {
+        string[] said =
+        [
+            (await RunAsync("set", "Games.StardewValley.Folders", "{mod}/{file}")).Output.Trim(),
+            (await RunAsync("set", "games.stardewvalley.oldVersions", "archive")).Output.Trim(),
+            (await RunAsync("set", "games.stardewvalley.checkUpdates", "false")).Output.Trim(),
+            (await RunAsync("set", "games.stardewvalley.updateInterval", "1d")).Output.Trim(),
+            (await RunAsync("set", "games.stardewvalley.notify", "true")).Output.Trim(),
+            (await RunAsync("set", "games.stardewvalley.hidden", "true")).Output.Trim(),
+            (await RunAsync("set", "games.stardewvalley.browse.sort", "UniqueDownloads")).Output.Trim(),
+            (await RunAsync("set", "games.stardewvalley.browse.direction", "ascending")).Output.Trim(),
+            (await RunAsync("set", "games.stardewvalley.browse.window", "7d")).Output.Trim(),
+            (await RunAsync("set", "games.stardewvalley.browse.pageSize", "50")).Output.Trim(),
+        ];
+
+        Assert.Equal(
+            [
+                "Games.StardewValley.Folders is now {mod}/{file}.",
+                "games.stardewvalley.oldVersions is now archive: when a newer version of a file is downloaded, the old ones move to an _archive folder.",
+                "games.stardewvalley.checkUpdates is now false: stardewvalley's watched mods are checked for updates only when the game alone is checked.",
+                "games.stardewvalley.updateInterval is now 1d: the desktop app checks stardewvalley's watched mods for updates that often.",
+                "games.stardewvalley.notify is now true: the desktop app shows a notice when a background check finds new updates of stardewvalley's mods.",
+                "games.stardewvalley.hidden is now true: the desktop app's lists leave stardewvalley out, and its mods are still checked for updates.",
+                "games.stardewvalley.browse.sort is now uniquedownloads: the desktop app's Browse screen starts so when stardewvalley is chosen.",
+                "games.stardewvalley.browse.direction is now ascending: the desktop app's Browse screen starts so when stardewvalley is chosen.",
+                "games.stardewvalley.browse.window is now 7d: the desktop app's Browse screen starts so when stardewvalley is chosen.",
+                "games.stardewvalley.browse.pageSize is now 50: the desktop app's Browse screen starts so when stardewvalley is chosen.",
+            ],
+            said);
+        CliResult shown = await RunAsync("show");
+        Assert.Equal(
+            ["{mod}/{file}", "archive", "false", "1d", "true", "true", "uniquedownloads", "ascending", "7d", "50"],
+            StardewSettings.Select(name => Value(shown, name)));
+        Assert.Contains("\"games\"", await File.ReadAllTextAsync(SettingsFile, Cancellation), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ResetsAGamesOwnSettingsBackToEveryGames()
+    {
+        await RunAsync("set", "games.fallout4.hidden", "true");
+        await RunAsync("set", "games.fallout4.browse.pageSize", "100");
+
+        string[] said =
+        [
+            (await RunAsync("reset", "games.fallout4.hidden")).Output.Trim(),
+            (await RunAsync("reset", "games.fallout4.browse.pageSize")).Output.Trim(),
+            (await RunAsync("reset", "games.fallout4.updateInterval")).Output.Trim(),
+            (await RunAsync("reset", "games.fallout4.checkUpdates")).Output.Trim(),
+            (await RunAsync("reset", "games.fallout4.notify")).Output.Trim(),
+            (await RunAsync("reset", "games.fallout4.oldVersions")).Output.Trim(),
+            (await RunAsync("reset", "games.fallout4.folders")).Output.Trim(),
+        ];
+
+        Assert.Equal(
+            [
+                "games.fallout4.hidden is gone, so the desktop app's lists show fallout4.",
+                "games.fallout4.browse.pageSize is gone, so the desktop app's Browse screen shows fallout4's mods as it would any game's.",
+                "games.fallout4.updateInterval is gone, so fallout4 goes by updates.interval again.",
+                "games.fallout4.checkUpdates is gone, so fallout4's watched mods are checked for updates with every game's.",
+                "games.fallout4.notify is gone, so fallout4 goes by updates.notify again.",
+                "games.fallout4.oldVersions is gone, so fallout4 goes by library.oldVersions again.",
+                "games.fallout4.folders is gone, so fallout4's files go by library.folders again.",
+            ],
+            said);
+        Assert.DoesNotContain("fallout4", (await RunAsync("show")).Output, StringComparison.Ordinal);
+        Assert.DoesNotContain("games", await File.ReadAllTextAsync(SettingsFile, Cancellation), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task ResetsSettingsToTheirDefaults()
     {
         await RunAsync("set", "library.root", Mods);
@@ -145,7 +223,7 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     [InlineData("set", "library.root", "Mods", "isn't a full path")]
     [InlineData("set", "library.folders", "{mod}", "The last part must be exactly {file}.")]
     [InlineData("set", "library.folders.skyrimspecialedition", "{name}/{file}", "{name} isn't a folder's part.")]
-    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<game>, library.oldVersions, updates.interval, updates.notify, appearance.theme, window.closeToTray, setup.done, app.checkForUpdates, previews.library, previews.updates, previews.browse, previews.downloads, pictures.maxSize, pictures.adult, details.maxAge.")]
+    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<game>, library.oldVersions, updates.interval, updates.notify, appearance.theme, window.closeToTray, setup.done, app.checkForUpdates, previews.library, previews.updates, previews.browse, previews.downloads, pictures.maxSize, pictures.adult, details.maxAge, games.<game>.folders, games.<game>.oldVersions, games.<game>.checkUpdates, games.<game>.updateInterval, games.<game>.notify, games.<game>.hidden, games.<game>.browse.sort, games.<game>.browse.direction, games.<game>.browse.window, games.<game>.browse.pageSize.")]
     [InlineData("reset", "library.folders.", null, "There's no setting called library.folders.")]
     [InlineData("set", "library.oldVersions", "0", "'0' isn't a rule for old versions. Use all, archive, or how many versions to keep, from 1 to 99, such as 2.")]
     [InlineData("set", "appearance.theme", "blue", "'blue' isn't system, light or dark.")]
@@ -156,6 +234,16 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     [InlineData("set", "pictures.maxSize", "1GB", "'1GB' isn't a number of megabytes from 64 to 8192.")]
     [InlineData("set", "pictures.adult", "maybe", "'maybe' isn't hidden, blurred or shown.")]
     [InlineData("set", "details.maxAge", "8d", "'8d' isn't an interval.")]
+    [InlineData("set", "games.fallout4.hidden", "yes", "'yes' isn't true or false.")]
+    [InlineData("set", "games.fallout4.updateInterval", "10m", "'10m' isn't an interval.")]
+    [InlineData("set", "games.fallout4.oldVersions", "none", "'none' isn't a rule for old versions.")]
+    [InlineData("set", "games.fallout4.browse.sort", "best", "'best' isn't relevance, endorsements, downloads, updated, newest, name, size or uniquedownloads.")]
+    [InlineData("set", "games.fallout4.browse.direction", "up", "'up' isn't ascending or descending.")]
+    [InlineData("set", "games.fallout4.browse.window", "2d", "'2d' isn't 1d, 7d or 30d.")]
+    [InlineData("set", "games.fallout4.browse.pageSize", "30", "'30' isn't 20, 50 or 100.")]
+    [InlineData("set", "games.fallout4.colour", "teal", "There's no setting called games.fallout4.colour.")]
+    [InlineData("set", "games..hidden", "true", "There's no setting called games..hidden.")]
+    [InlineData("set", "games.a.b.hidden", "true", "There's no setting called games.a.b.hidden.")]
     public async Task SaysWhatsWrongWithASetting(string command, string name, string? value, string message)
     {
         CliResult refused = await RunAsync([command, name, .. value is null ? Array.Empty<string>() : [value]]);

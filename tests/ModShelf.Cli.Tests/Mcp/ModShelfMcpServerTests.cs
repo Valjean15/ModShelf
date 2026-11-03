@@ -129,6 +129,21 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         Assert.Contains("archive", (await Cli.RunAsync(["settings", "show"], Cancellation)).Output, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task ShowsChangesAndResetsAGamesOwnSettings()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        SettingResult changed = await mcp.CallAsync<SettingResult>("settings_set", Arguments(("setting", "games.stardewvalley.updateInterval"), ("value", "2d")), Cancellation);
+        SettingsListing shown = await mcp.CallAsync<SettingsListing>("settings_show", null, Cancellation);
+        SettingResult reset = await mcp.CallAsync<SettingResult>("settings_reset", Arguments(("setting", "games.stardewvalley.updateInterval")), Cancellation);
+
+        Assert.Equal("games.stardewvalley.updateInterval is now 2d: the desktop app checks stardewvalley's watched mods for updates that often.", changed.Message);
+        Assert.Contains(shown.Settings, setting => setting is { Name: "games.stardewvalley.updateInterval", Value: "2d", IsDefault: false });
+        Assert.Contains("games.<game>.browse.pageSize", shown.Values, StringComparison.Ordinal);
+        Assert.Equal("games.stardewvalley.updateInterval is gone, so stardewvalley goes by updates.interval again.", reset.Message);
+    }
+
     [Theory]
     [InlineData("library.everything", "1", "There's no setting called library.everything.")]
     [InlineData("updates.interval", "soon", "soon")]

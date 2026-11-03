@@ -3,6 +3,7 @@ using System.Globalization;
 using ModShelf.Application.Settings;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Updates;
+using ModShelf.Sources.Abstractions.Search;
 
 namespace ModShelf.Cli.Common;
 
@@ -26,7 +27,27 @@ internal static class SettingChanges
     public const string PicturesMaxSize = "pictures.maxSize";
     public const string AdultPictures = "pictures.adult";
     public const string DetailsMaxAge = "details.maxAge";
-    public const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<game>, {OldVersions}, {Interval}, {Notify}, {Theme}, {CloseToTray}, {SetupDone}, {CheckForAppUpdates}, {PreviewsPrefix}library, {PreviewsPrefix}updates, {PreviewsPrefix}browse, {PreviewsPrefix}downloads, {PicturesMaxSize}, {AdultPictures}, {DetailsMaxAge}";
+    public const string GamesPrefix = "games.";
+    public const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<game>, {OldVersions}, {Interval}, {Notify}, {Theme}, {CloseToTray}, {SetupDone}, {CheckForAppUpdates}, {PreviewsPrefix}library, {PreviewsPrefix}updates, {PreviewsPrefix}browse, {PreviewsPrefix}downloads, {PicturesMaxSize}, {AdultPictures}, {DetailsMaxAge}, "
+        + $"{GamesPrefix}<game>.{GameFolders}, {GamesPrefix}<game>.{GameOldVersions}, {GamesPrefix}<game>.{GameCheckUpdates}, {GamesPrefix}<game>.{GameInterval}, {GamesPrefix}<game>.{GameNotify}, {GamesPrefix}<game>.{GameHidden}, "
+        + $"{GamesPrefix}<game>.{BrowseSort}, {GamesPrefix}<game>.{BrowseDirection}, {GamesPrefix}<game>.{BrowseWindow}, {GamesPrefix}<game>.{BrowsePageSize}";
+
+    private const string GameFolders = "folders";
+    private const string GameOldVersions = "oldVersions";
+    private const string GameCheckUpdates = "checkUpdates";
+    private const string GameInterval = "updateInterval";
+    private const string GameNotify = "notify";
+    private const string GameHidden = "hidden";
+    private const string BrowseSort = "browse.sort";
+    private const string BrowseDirection = "browse.direction";
+    private const string BrowseWindow = "browse.window";
+    private const string BrowsePageSize = "browse.pageSize";
+
+    /// <summary>
+    /// The settings a game can have of its own, by the names that follow <c>games.&lt;game&gt;.</c>.
+    /// </summary>
+    private static readonly string[] GameSettingNames =
+        [GameFolders, GameOldVersions, GameCheckUpdates, GameInterval, GameNotify, GameHidden, BrowseSort, BrowseDirection, BrowseWindow, BrowsePageSize];
 
     /// <summary>
     /// What each setting's value is.
@@ -36,8 +57,11 @@ internal static class SettingChanges
         + "library.oldVersions; minutes, hours or days, such as 30m, 6h or 1d, for updates.interval and details.maxAge; true or false for "
         + "updates.notify, window.closeToTray, setup.done and app.checkForUpdates; system, light or dark for appearance.theme; "
         + "off, thumbnails or cards for previews.<screen>; a number of megabytes from 64 to 8192 for pictures.maxSize; "
-        + "hidden, blurred or shown for pictures.adult; a folder pattern, "
-        + "such as \"{source}/{game}/{mod} ({modid})/{file}\", for the others";
+        + "hidden, blurred or shown for pictures.adult; for a game of its own, as every game's for games.<game>.oldVersions, "
+        + "games.<game>.updateInterval and games.<game>.notify, true or false for games.<game>.checkUpdates and games.<game>.hidden, "
+        + "relevance, endorsements, downloads, updated, newest, name, size or uniquedownloads for games.<game>.browse.sort, ascending or descending "
+        + "for games.<game>.browse.direction, 1d, 7d or 30d for games.<game>.browse.window, and 20, 50 or 100 for games.<game>.browse.pageSize; "
+        + "a folder pattern, such as \"{source}/{game}/{mod} ({modid})/{file}\", for the others";
 
     /// <summary>
     /// Whether <paramref name="name"/> is a setting's, in any case, as a game's folder pattern is by its game.
@@ -54,7 +78,8 @@ internal static class SettingChanges
             || setting.Equals(CloseToTray, StringComparison.OrdinalIgnoreCase)
             || setting.Equals(CheckForAppUpdates, StringComparison.OrdinalIgnoreCase)
             || setting.Equals(OldVersions, StringComparison.OrdinalIgnoreCase)
-            || (setting.StartsWith(GamePrefix, StringComparison.Ordinal) && !string.IsNullOrWhiteSpace(name.Trim()[GamePrefix.Length..]));
+            || (setting.StartsWith(GamePrefix, StringComparison.Ordinal) && !string.IsNullOrWhiteSpace(name.Trim()[GamePrefix.Length..]))
+            || GameSettingOf(name) is not null;
     }
 
     public static bool IsLibraryRoot(string name)
@@ -64,8 +89,8 @@ internal static class SettingChanges
     }
 
     /// <summary>
-    /// Every setting, the ones left at their defaults too, with the default's value; a game's folder pattern only when
-    /// it's set.
+    /// Every setting, the ones left at their defaults too, with the default's value; a game's own settings only when
+    /// they're set, its folder pattern by its older name, <c>library.folders.&lt;game&gt;</c>.
     /// </summary>
     /// <param name="defaultLibraryRoot">Where the library is when <see cref="LibraryRoot"/> isn't set.</param>
     public static IReadOnlyList<SettingValue> List(AppSettings stored, string defaultLibraryRoot)
@@ -94,6 +119,9 @@ internal static class SettingChanges
             Of(PicturesMaxSize, stored.PicturesMegabytes?.ToString(CultureInfo.InvariantCulture), AppSettings.DefaultPicturesMegabytes.ToString(CultureInfo.InvariantCulture)),
             Of(AdultPictures, stored.AdultPictures is { } adult ? Name(adult) : null, Name(Application.Settings.AdultPictures.Blurred)),
             Of(DetailsMaxAge, stored.DetailsMaxAge is { } age ? UpdateInterval.Format(age) : null, UpdateInterval.Format(AppSettings.DefaultDetailsMaxAge)),
+            .. stored.Games
+                .OrderBy(game => game.Key, StringComparer.OrdinalIgnoreCase)
+                .SelectMany(game => GameValues(game.Key, game.Value)),
         ];
     }
 
@@ -113,6 +141,11 @@ internal static class SettingChanges
         if (!IsSetting(name))
         {
             throw new ArgumentException($"There's no setting called {name}. Settings: {Names}.", nameof(name));
+        }
+
+        if (GameSettingOf(name) is { } own)
+        {
+            return await ChangeGameAsync(settings, name.Trim(), own.Game, own.Setting, value, cancellationToken).ConfigureAwait(false);
         }
 
         string setting = name.Trim().ToLowerInvariant();
@@ -243,6 +276,180 @@ internal static class SettingChanges
 
     private static SettingValue Of(string name, string? value, string defaultValue)
         => new(name, value ?? defaultValue, IsDefault: value is null);
+
+    /// <summary>
+    /// The game and the name of its setting in <c>games.&lt;game&gt;.&lt;setting&gt;</c>, in any case; null for another
+    /// setting.
+    /// </summary>
+    private static (string Game, string Setting)? GameSettingOf(string name)
+    {
+        string trimmed = name.Trim();
+        if (!trimmed.StartsWith(GamesPrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        string rest = trimmed[GamesPrefix.Length..];
+        foreach (string setting in GameSettingNames)
+        {
+            if (rest.EndsWith("." + setting, StringComparison.OrdinalIgnoreCase)
+                && rest[..^(setting.Length + 1)] is { } game
+                && !string.IsNullOrWhiteSpace(game)
+                && !game.Contains('.', StringComparison.Ordinal))
+            {
+                return (game.Trim(), setting);
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// A game's own settings but its folder pattern, as <c>games.&lt;game&gt;.&lt;setting&gt;</c>.
+    /// </summary>
+    private static IEnumerable<SettingValue> GameValues(string game, GameSettings own)
+    {
+        string prefix = $"{GamesPrefix}{game}.";
+        (string Name, string? Value)[] values =
+        [
+            (GameOldVersions, own.OldVersions?.ToString()),
+            (GameCheckUpdates, own.CheckUpdates is { } check ? Text(check) : null),
+            (GameInterval, own.UpdateInterval is { } interval ? UpdateInterval.Format(interval) : null),
+            (GameNotify, own.Notify is { } notify ? Text(notify) : null),
+            (GameHidden, own.Hidden is { } hidden ? Text(hidden) : null),
+            (BrowseSort, own.Browse?.Sort is { } sort ? Name(sort) : null),
+            (BrowseDirection, own.Browse?.Direction is { } direction ? Name(direction) : null),
+            (BrowseWindow, own.Browse?.UpdatedWithin is { } window ? WindowText(window) : null),
+            (BrowsePageSize, own.Browse?.PageSize?.ToString(CultureInfo.InvariantCulture)),
+        ];
+        return values.Where(value => value.Value is not null).Select(value => new SettingValue(prefix + value.Name, value.Value!, IsDefault: false));
+    }
+
+    /// <summary>
+    /// Names as a choice, such as "a, b or c".
+    /// </summary>
+    private static string OneOf(IEnumerable<string> names)
+    {
+        string[] all = [.. names];
+        return all.Length < 2 ? string.Concat(all) : $"{string.Join(", ", all[..^1])} or {all[^1]}";
+    }
+
+    private static string WindowText(TimeSpan window) => $"{window.TotalDays.ToString(CultureInfo.InvariantCulture)}d";
+
+    /// <summary>
+    /// Changes one of <paramref name="game"/>'s own settings, <paramref name="setting"/>; null sets it back to every
+    /// game's.
+    /// </summary>
+    private static async Task<string> ChangeGameAsync(
+        ISettingsService settings,
+        string named,
+        string game,
+        string setting,
+        string? value,
+        CancellationToken cancellationToken)
+    {
+        if (setting == GameFolders)
+        {
+            FolderPattern? pattern = value is null ? null : FolderPattern.Parse(value);
+            await settings.SetLibraryFoldersAsync(game, pattern, cancellationToken).ConfigureAwait(false);
+            return pattern is null ? $"{named} is gone, so {game}'s files go by {LibraryFolders} again." : $"{named} is now {pattern.Text}.";
+        }
+
+        if (setting == GameOldVersions)
+        {
+            OldVersionRule? rule = value is null ? null : OldVersionRule.Parse(value);
+            await settings.SetGameAsync(game, own => own with { OldVersions = rule }, cancellationToken).ConfigureAwait(false);
+            return rule is null ? $"{named} is gone, so {game} goes by {OldVersions} again." : $"{named} is now {rule}: {Describe(rule)}";
+        }
+
+        if (setting == GameInterval)
+        {
+            TimeSpan? interval = value is null ? null : UpdateInterval.Parse(value);
+            await settings.SetGameAsync(game, own => own with { UpdateInterval = interval }, cancellationToken).ConfigureAwait(false);
+            return interval is { } every
+                ? $"{named} is now {UpdateInterval.Format(every)}: the desktop app checks {game}'s watched mods for updates that often."
+                : $"{named} is gone, so {game} goes by {Interval} again.";
+        }
+
+        if (setting is BrowseSort or BrowseDirection or BrowseWindow or BrowsePageSize)
+        {
+            return await ChangeBrowseAsync(settings, named, game, setting, value, cancellationToken).ConfigureAwait(false);
+        }
+
+        bool? flag = value is null ? null : ParseBool(value);
+        await settings.SetGameAsync(
+                game,
+                own => setting switch
+                {
+                    GameCheckUpdates => own with { CheckUpdates = flag },
+                    GameNotify => own with { Notify = flag },
+                    _ => own with { Hidden = flag },
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
+        return (setting, flag) switch
+        {
+            (GameCheckUpdates, true) => $"{named} is now true: {game}'s watched mods are checked for updates with every game's.",
+            (GameCheckUpdates, false) => $"{named} is now false: {game}'s watched mods are checked for updates only when the game alone is checked.",
+            (GameCheckUpdates, null) => $"{named} is gone, so {game}'s watched mods are checked for updates with every game's.",
+            (GameNotify, true) => $"{named} is now true: the desktop app shows a notice when a background check finds new updates of {game}'s mods.",
+            (GameNotify, false) => $"{named} is now false: the desktop app shows no notice when a background check finds new updates of {game}'s mods.",
+            (GameNotify, null) => $"{named} is gone, so {game} goes by {Notify} again.",
+            (_, true) => $"{named} is now true: the desktop app's lists leave {game} out, and its mods are still checked for updates.",
+            (_, false) => $"{named} is now false: the desktop app's lists show {game}.",
+            _ => $"{named} is gone, so the desktop app's lists show {game}.",
+        };
+    }
+
+    /// <summary>
+    /// Changes how Browse shows <paramref name="game"/>'s mods; null sets it back to Browse's own.
+    /// </summary>
+    private static async Task<string> ChangeBrowseAsync(
+        ISettingsService settings,
+        string named,
+        string game,
+        string setting,
+        string? value,
+        CancellationToken cancellationToken)
+    {
+        string? text = null;
+        Func<BrowseDefaults, BrowseDefaults> change;
+        switch (setting)
+        {
+            case BrowseSort:
+                SearchSort? sort = value is null ? null : Parse<SearchSort>(value, OneOf(Enum.GetValues<SearchSort>().Select(Name)));
+                text = sort is { } sorted ? Name(sorted) : null;
+                change = browse => browse with { Sort = sort };
+                break;
+            case BrowseDirection:
+                SearchDirection? direction = value is null ? null : Parse<SearchDirection>(value, "ascending or descending");
+                text = direction is { } going ? Name(going) : null;
+                change = browse => browse with { Direction = direction };
+                break;
+            case BrowseWindow:
+                TimeSpan? window = value is null
+                    ? null
+                    : BrowseDefaults.Windows.Cast<TimeSpan?>().FirstOrDefault(each => WindowText(each!.Value).Equals(value.Trim(), StringComparison.OrdinalIgnoreCase))
+                        ?? throw new ArgumentException($"'{value}' isn't 1d, 7d or 30d.", nameof(value));
+                text = window is { } within ? WindowText(within) : null;
+                change = browse => browse with { UpdatedWithin = window };
+                break;
+            default:
+                int? size = value is null
+                    ? null
+                    : int.TryParse(value.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out int parsed) && BrowseDefaults.PageSizes.Contains(parsed)
+                        ? parsed
+                        : throw new ArgumentException($"'{value}' isn't 20, 50 or 100.", nameof(value));
+                text = size?.ToString(CultureInfo.InvariantCulture);
+                change = browse => browse with { PageSize = size };
+                break;
+        }
+
+        await settings.SetGameAsync(game, own => own with { Browse = change(own.Browse ?? BrowseDefaults.None) }, cancellationToken).ConfigureAwait(false);
+        return text is null
+            ? $"{named} is gone, so the desktop app's Browse screen shows {game}'s mods as it would any game's."
+            : $"{named} is now {text}: the desktop app's Browse screen starts so when {game} is chosen.";
+    }
 
     private static string Text(bool value) => value ? "true" : "false";
 

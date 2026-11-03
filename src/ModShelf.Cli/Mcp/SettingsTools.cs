@@ -15,7 +15,7 @@ namespace ModShelf.Cli.Mcp;
 internal sealed class SettingsTools(ISettingsService settings)
 {
     [McpServerTool(Name = "settings_show", Title = "Show the settings", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Shows every setting, the ones left at their defaults too, where they're kept, and what each one's value can be. library.root is where the library is; library.folders, and library.folders.<game> for a game of its own, how its folders are named; library.oldVersions whether a file's old versions stay (all), move to an _archive folder (archive), or are deleted down to a number; updates.interval how often the desktop app checks for updates.")]
+    [Description("Shows every setting, the ones left at their defaults too, where they're kept, and what each one's value can be. library.root is where the library is; library.folders, and library.folders.<game> for a game of its own, how its folders are named; library.oldVersions whether a file's old versions stay (all), move to an _archive folder (archive), or are deleted down to a number; updates.interval how often the desktop app checks for updates; games.<game>.<setting> a game's own settings in place of every game's: oldVersions, checkUpdates (false: its mods are checked only when the game alone is), updateInterval, notify, hidden (left out of the desktop app's lists, still checked), and browse.sort, browse.direction, browse.window and browse.pageSize (how the desktop app's Browse screen starts for it).")]
     public Task<SettingsListing> ShowAsync(CancellationToken cancellationToken)
         => McpProblems.GuardAsync(async () =>
         {
@@ -32,7 +32,7 @@ internal sealed class SettingsTools(ISettingsService settings)
         => ChangeAsync(setting, value, cancellationToken);
 
     [McpServerTool(Name = "settings_reset", Title = "Reset a setting", Idempotent = true, Destructive = false, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Sets a setting back to its default; for library.folders.<game>, the game's files go by library.folders again.")]
+    [Description("Sets a setting back to its default; for library.folders.<game> and games.<game>.<setting>, the game goes by every game's setting again.")]
     public Task<SettingResult> ResetAsync(
         [Description($"The setting: {SettingChanges.Names}.")] string setting,
         CancellationToken cancellationToken)
