@@ -198,9 +198,11 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
 
 ## 10. Settings
 
-- [ ] **10.1 Folder patterns.** Under "Folders in the library", change every game's pattern to `{source}/{game}/{modid}/{file}`.
+- [ ] **10.0 Categories and search.** Open the Settings screen, then each category in its list.
+  It opens on **General**: the theme, closing the window, and pictures and mod details. **Library**: the library folder, the folder pattern, old versions and **Rescan the library**. **Updates**, **Links**, **Games** (the games' own folder patterns) and **About** show theirs. Type `folder` in **Search settings**: the library folder, the folder pattern, old versions (the _archive folder), the rescan, the games' patterns and About (the log folder), under "Settings that match “folder”", and General, Updates and Links fade in the list. `zzz`: "No setting matches “zzz”." Escape, or choosing a category, ends the search. **Rescan the library** says what it found, as on the Library screen. Make the window narrow: the categories move above the settings, side by side.
+- [ ] **10.1 Folder patterns.** In **Library**, under "Folder pattern", change every game's pattern to `{source}/{game}/{modid}/{file}`.
   The example under it changes as you type. `{mod}/{file}x` says what's wrong, and **Save** is disabled. With the right pattern, **Save**: a mod the library doesn't have yet then downloads to `nexus\<game>\<mod's ID>\…`. Mods in the library keep their folders, and files downloaded already stay where they are.
-- [ ] **10.2 A game's own pattern.** **Add a game…**, type `stardewvalley`, then change its pattern and **Save**; then **Remove** it.
+- [ ] **10.2 A game's own pattern.** In **Games**, **Add a game…**, type `stardewvalley`, then change its pattern and **Save**; then **Remove** it.
   The row's example shows the game. Once removed, the game goes by every game's pattern again.
 - [ ] **10.3 Old versions.** Choose **Move the old versions to an _archive folder beside it**, then **Keep the newest versions** with 3.
   Each is kept at once: the settings file (10.7) holds `"oldVersions": 3`. The rule applies when a newer version of a file is downloaded from then on.
@@ -212,9 +214,9 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
   "Move the library?" says how many files move, from where to where. **Move**: "The library is in … now." The files are in the new folder, in the same folders, and gone from the old one. **Open folder** in a mod's **…** menu on the Library screen opens the new place.
 - [ ] **10.6a Pictures and mod details.** The "Pictures and mod details" card.
   "Saved pictures": "*size* of 512 MB. The oldest go first when it's full.", with a bar. **Clear** empties the test folder's `pictures` folder, and the size says 0 B; the screens download the pictures they show again. Choose **1 GB**, **1 week** under "Mod details" and **Hidden** under "Adult content": the settings file holds `"pictures": { "maxSize": 1024, "adult": "hidden" }` and `"details": { "maxAge": "7d" }`. On Browse (3.9), the adult mods show a struck-through eye instead of a picture. **Shown** shows their pictures as they are. Choose **Blurred (the default)** again.
-- [ ] **10.7 Where they're kept.** The bottom of the Settings screen.
+- [ ] **10.7 Where they're kept.** The bottom of **About**.
   "Settings are kept in …\settings.json." in the test folder. The file holds what you chose.
-- [ ] **10.8 The version.** "About ModShelf", the last card of the Settings screen.
+- [ ] **10.8 The version.** "About ModShelf", in **About**.
   "ModShelf 0.9.0-alpha.0.N (…)", where the part in brackets is the commit you built, as `git rev-parse --short=7 HEAD` shows it. Once a version is tagged, such as `v0.9.0`, a build of that commit shows "ModShelf 0.9.0 (…)".
 - [ ] **10.9 Copy diagnostics.** **Copy diagnostics**, then paste into a text editor.
   "The diagnostics are on the clipboard. Paste them into your bug report." The report's first line is the version from 10.8. Then the system, the folders with your home folder as `~`, the settings from 10.1 to 10.5, the library's counts, the downloads by what they're doing, and "nexus linked (ApiKey, Premium)" (Free for the free account). Nowhere does it hold your account's name, a mod's or file's name, a key or an `nxm://` link.
@@ -367,6 +369,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 9.5 Remove from the library | | | |
 | 9.6 Rescan | | | |
 | 9.7 Download selected | | | |
+| 10.0 Categories and search | | | |
 | 10.1 Folder patterns | | | |
 | 10.2 A game's own pattern | | | |
 | 10.3 Old versions | | | |
