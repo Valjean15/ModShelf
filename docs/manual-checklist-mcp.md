@@ -37,6 +37,10 @@ you should see.
   as `https://www.nexusmods.com/stardewvalley`).
   One call to `download` with three links: two downloading or waiting for you, and the third's result says why it
   couldn't be downloaded. The summary says "Of 3 links, …".
+- [ ] **2.3b The old `link`.** Ask the agent to call `download` with `link` set to one update's link, not `links`.
+  It downloads; the result's message starts "Note: 'link' is the old way to call download and will stop working", and
+  `deprecated` says `DL_LINK_ARG`, with the call as it should be made. The log has a warning starting `DL_LINK_ARG`,
+  without the link. With both `link` and `links`: "Pass only 'links'; 'link' is the old name for a single link."
 - [ ] **2.4 What came in.** Ask the agent what came into the library since this morning, and which versions they
   replaced.
   The new files, each with the version it replaced and what became of it (`replaces`: archived when
