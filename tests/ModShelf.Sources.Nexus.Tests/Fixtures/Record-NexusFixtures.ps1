@@ -36,10 +36,10 @@
     v2 GraphQL API, in each order and with each filter Browse offers, the parts of its schema they rely on, and the
     game's trending mods from the older API. Works with either account. A full Premium run records them too.
 
-    A random order and a time window are partly a guess at the schema. A random order gets a fixed seed when the schema
-    has one, and is asked for twice and for its second page, to show whether the same seed gives the same order. A
-    filter by date is tried as ISO 8601 first, then as seconds since 1970, and the first that the answer honours is
-    kept. When Nexus Mods refuses one, its answer is saved anyway, and the script says so and goes on.
+    The schema doesn't say how a filter writes a date, so the time window is tried as ISO 8601 first, then as seconds
+    since 1970, and the first that the answer honours is kept: in November 2026, seconds. When Nexus Mods refuses a
+    search, its answer is saved anyway, and the script says so and goes on. A random order isn't recorded: Nexus Mods
+    ignores its seed, so Browse doesn't offer it.
 
 .PARAMETER SearchWords
     Words to search the game's mods for. Their best match should be the mod given to -ModId.
@@ -346,11 +346,11 @@ function Invoke-NexusGraphQl {
 }
 
 # The variables the Nexus source sends for a search: the same as NexusSearchVariables builds. -UpdatedSince is a date
-# as the filter takes it; -RandomValue is what a random order takes, such as its seed.
+# as the filter takes it.
 function New-SearchVariables {
     param(
         [string] $Text, [string] $Sort = 'Relevance', [int] $Offset = 0, [int] $Count = 5, [string] $Author, [switch] $IncludeAdult,
-        [switch] $Ascending, [string] $Category, [string] $UpdatedSince, [System.Text.Json.Nodes.JsonObject] $RandomValue)
+        [switch] $Ascending, [string] $Category, [string] $UpdatedSince)
 
     function Condition([string] $Value, [string] $Operator) {
         $condition = [System.Text.Json.Nodes.JsonObject]::new()
@@ -385,23 +385,13 @@ function New-SearchVariables {
         'Name' { 'name' }
         'Size' { 'size' }
         'UniqueDownloads' { 'uniqueDownloads' }
-        'Random' { 'random' }
         default { throw "Unknown sort $Sort." }
     }
 
-    # Plain assignments only: an if statement's output would unroll a JSON object into its properties.
+    $direction = [System.Text.Json.Nodes.JsonObject]::new()
+    $direction['direction'] = [System.Text.Json.Nodes.JsonValue]::Create($(if ($Ascending) { 'ASC' } else { 'DESC' }))
     $order = [System.Text.Json.Nodes.JsonObject]::new()
-    if ($Sort -eq 'Random') {
-        $value = [System.Text.Json.Nodes.JsonObject]::new()
-        if ($RandomValue) { $value = $RandomValue.DeepClone() }
-        $order[$field] = $value
-    }
-    else {
-        $direction = [System.Text.Json.Nodes.JsonObject]::new()
-        $direction['direction'] = [System.Text.Json.Nodes.JsonValue]::Create($(if ($Ascending) { 'ASC' } else { 'DESC' }))
-        $order[$field] = $direction
-    }
-
+    $order[$field] = $direction
     $sorts = [System.Text.Json.Nodes.JsonArray]::new()
     $sorts.Add($order)
 
@@ -420,8 +410,7 @@ function Save-Searches {
     }
 
     $query = Get-Content -Raw $SearchQueryFile
-    $schema = Invoke-NexusGraphQl $SchemaQuery 'Schema'
-    Save-Fixture 'graphql-schema' $schema { param($body) Limit-Schema $body }
+    Save-Fixture 'graphql-schema' (Invoke-NexusGraphQl $SchemaQuery 'Schema') { param($body) Limit-Schema $body }
     Save-Fixture 'search-words' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Text $SearchWords))
     Save-Fixture 'search-endorsed-page-2' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort Endorsements -Offset 5))
     Save-Fixture 'search-author-updated' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Author $SearchAuthor -Sort Updated))
@@ -434,44 +423,9 @@ function Save-Searches {
     Save-GraphQlFixture 'search-name' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort Name -Ascending))
     Save-GraphQlFixture 'search-size' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort Size))
     Save-GraphQlFixture 'search-unique-downloads' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort UniqueDownloads))
-    $random = New-RandomValue (ConvertTo-Node $schema.Text)
-    Save-GraphQlFixture 'search-random' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort Random -RandomValue $random))
-    Save-GraphQlFixture 'search-random-again' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort Random -RandomValue $random))
-    Save-GraphQlFixture 'search-random-page-2' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort Random -RandomValue $random -Offset 5))
     Save-GraphQlFixture 'search-category' (Invoke-NexusGraphQl $query 'SearchMods' (New-SearchVariables -Sort Endorsements -Category $SearchCategory))
     Save-UpdatedWithin $query
     Save-Fixture 'trending' (Invoke-Nexus "v1/games/$Game/mods/trending.json") { param($body) Limit-Array $body 5 }
-}
-
-# What a random order takes, as the schema says: a number field, such as a seed, gets a fixed number, so the same
-# order can be asked for again. Without the schema, nothing.
-function New-RandomValue($Schema) {
-    $value = [System.Text.Json.Nodes.JsonObject]::new()
-    $fields = $null
-    if ($Schema -is [System.Text.Json.Nodes.JsonObject] -and $Schema['data'] -is [System.Text.Json.Nodes.JsonObject] -and
-        $Schema['data']['randomSortValue'] -is [System.Text.Json.Nodes.JsonObject]) {
-        $fields = $Schema['data']['randomSortValue']['inputFields']
-    }
-
-    if ($fields -isnot [System.Text.Json.Nodes.JsonArray]) {
-        return , $value
-    }
-
-    foreach ($field in $fields) {
-        $named = $field['type']
-        while ($null -ne $named -and $null -eq $named['name']) { $named = $named['ofType'] }
-        $scalar = $null
-        if ($null -ne $named) { $scalar = Get-Text $named['name'] }
-        $name = Get-Text $field['name']
-        if ($scalar -in 'Int', 'Float') {
-            $value[$name] = [System.Text.Json.Nodes.JsonValue]::Create(4242)
-        }
-        elseif ($scalar -eq 'String' -and $name -match '(?i)seed') {
-            $value[$name] = [System.Text.Json.Nodes.JsonValue]::Create('4242')
-        }
-    }
-
-    return , $value
 }
 
 # The mods updated in the last week, as Browse's time window asks for them: since the start of this hour in UTC, seven

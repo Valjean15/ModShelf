@@ -1,0 +1,150 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/v2/graphql",
+    "query": "",
+    "body": {
+      "operationName": "SearchMods",
+      "variables": {
+        "filter": {
+          "gameDomainName": [
+            {
+              "value": "stardewvalley",
+              "op": "EQUALS"
+            }
+          ],
+          "adultContent": [
+            {
+              "value": false,
+              "op": "EQUALS"
+            }
+          ]
+        },
+        "sort": [
+          {
+            "name": {
+              "direction": "ASC"
+            }
+          }
+        ],
+        "offset": 0,
+        "count": 5
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": {
+        "mods": {
+          "totalCount": 33797,
+          "nodes": [
+            {
+              "modId": 23014,
+              "name": "'Another' Igor's Anime Portrait for Leah",
+              "summary": "A simple HD anime portrait for Leah, Vanilla NPC from SDV.AI-generated.",
+              "author": "Igor",
+              "version": "1.0",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/23014/23014-1713786406-915641297.png",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/23014/23014-1713786406-915641297.png",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/23/23014/23014-1713786406-915641297.png",
+              "updatedAt": "2024-04-22T11:49:19Z",
+              "createdAt": "2024-04-22T11:49:19Z",
+              "endorsements": 21,
+              "downloads": 1306,
+              "fileSize": 3187,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 20377,
+              "name": "'Another' Igor's Anime Portrait for Sebastian",
+              "summary": "A simple HD anime portrait for Sebastian, Vanilla NPC from SDV.AI-generated.",
+              "author": "Igor",
+              "version": "1.0",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/20377/20377-1709114314-1483903681.png",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/20377/20377-1709114314-1483903681.png",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/20/20377/20377-1709114314-1483903681.png",
+              "updatedAt": "2024-02-28T11:05:18Z",
+              "createdAt": "2024-02-28T11:05:18Z",
+              "endorsements": 88,
+              "downloads": 3220,
+              "fileSize": 137,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 5883,
+              "name": "'Dragon to Ride'  Dragon wing audio",
+              "summary": "This mod adds wing audio for 'Dragon to Ride' by Kyuya258369",
+              "author": "BlueCynder",
+              "version": "1.1",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/5883/5883-1587630038-710736694.png",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/5883/5883-1587630038-710736694.png",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/58/5883/5883-1587630038-710736694.png",
+              "updatedAt": "2020-04-24T10:32:29Z",
+              "createdAt": "2020-04-23T08:48:50Z",
+              "endorsements": 147,
+              "downloads": 3470,
+              "fileSize": 38,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 19476,
+              "name": "'Older' Jas Anime Portrait",
+              "summary": "A simple HD anime portrait for Shane, Vanilla NPC from SDV.AI-generated.",
+              "author": "Igor",
+              "version": "1.0",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/19476/19476-1709111852-1436967310.png",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/19476/19476-1709111852-1436967310.png",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/19/19476/19476-1709111852-1436967310.png",
+              "updatedAt": "2024-02-28T09:26:44Z",
+              "createdAt": "2023-12-10T07:27:19Z",
+              "endorsements": 15,
+              "downloads": 961,
+              "fileSize": 130,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 6462,
+              "name": "'Prophet' Wellwick",
+              "summary": "A suspicious visitor to the Mage Tower.Today, she draws strange prophecies and tells the whispers of the stars.\"You are coming today.\"Your footsteps from the wizard's letter approach the door.welcome. To the home of these suspicious and",
+              "author": "Jyangnam",
+              "version": "1.1",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/6462/6462-1594683706-1991740088.jpeg",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/6462/6462-1594683706-1991740088.jpeg",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/64/6462/6462-1594683706-1991740088.jpeg",
+              "updatedAt": "2022-10-13T09:32:13Z",
+              "createdAt": "2020-07-14T00:28:28Z",
+              "endorsements": 406,
+              "downloads": 17096,
+              "fileSize": 165,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

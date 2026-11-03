@@ -1079,6 +1079,58 @@
             }
           ]
         },
+        "intFilterValue": {
+          "inputFields": [
+            {
+              "name": "value",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "op",
+              "type": {
+                "kind": "ENUM",
+                "name": "FilterComparisonOperator",
+                "ofType": null
+              }
+            }
+          ]
+        },
+        "baseSortValue": {
+          "inputFields": [
+            {
+              "name": "direction",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "SortDirection",
+                  "ofType": null
+                }
+              }
+            }
+          ]
+        },
+        "randomSortValue": {
+          "inputFields": [
+            {
+              "name": "seed",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            }
+          ]
+        },
         "comparison": {
           "enumValues": [
             {

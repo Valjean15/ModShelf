@@ -1,0 +1,150 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/v2/graphql",
+    "query": "",
+    "body": {
+      "operationName": "SearchMods",
+      "variables": {
+        "filter": {
+          "gameDomainName": [
+            {
+              "value": "stardewvalley",
+              "op": "EQUALS"
+            }
+          ],
+          "adultContent": [
+            {
+              "value": false,
+              "op": "EQUALS"
+            }
+          ]
+        },
+        "sort": [
+          {
+            "size": {
+              "direction": "DESC"
+            }
+          }
+        ],
+        "offset": 0,
+        "count": 5
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": {
+        "mods": {
+          "totalCount": 33797,
+          "nodes": [
+            {
+              "modId": 46663,
+              "name": "Sweetinsanity9's Animated Portraits",
+              "summary": "Animated version of my portrait mod using the Animated Portrait Framework (APF)",
+              "author": "sweetinsanity9",
+              "version": "7",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/46663/46663-1779683858-74485669.png",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/46663/46663-1779683858-74485669.png",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/46/46663/46663-1779683858-74485669.png",
+              "updatedAt": "2026-07-23T18:41:17Z",
+              "createdAt": "2026-05-25T04:59:35Z",
+              "endorsements": 6,
+              "downloads": 983,
+              "fileSize": 5396460,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 52730,
+              "name": "Stardew Voices 2.0.3.5 - Bug Fix Patch",
+              "summary": "Original mod and audio: Stardew Voices by Shannon Hobby https://www.nexusmods.com/stardewvalley/mods/22550 This is an unofficial complete distribution of Stardew Voices 2.0.3 with verified bug fixes. The complete audio assets are included",
+              "author": "HawaiianGamer",
+              "version": "1.0.4",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/52730/52730-1790105261-284069899.png",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/52730/52730-1790105261-284069899.png",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/52/52730/52730-1790105261-284069899.png",
+              "updatedAt": "2026-09-25T09:42:22Z",
+              "createdAt": "2026-09-22T19:48:52Z",
+              "endorsements": 1,
+              "downloads": 632,
+              "fileSize": 2432890,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 22550,
+              "name": "Stardew Voices - A Voice Over Mod For Stardew Valley - All Love Interests",
+              "summary": "Stardew Voices adds support for adding voice over to the many wonderful characters in Stardew Valley! The base mod includes voices for all of the love interests as of the 1.6 update. Since releasing, Stardew Voices has pivoted from being",
+              "author": "Shannon Hobby",
+              "version": "3.0.0",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/22550/22550-1767292191-1665860019.png",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/22550/22550-1767292191-1665860019.png",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/22/22550/22550-1767292191-1665860019.png",
+              "updatedAt": "2026-10-15T19:39:05Z",
+              "createdAt": "2024-04-15T13:32:56Z",
+              "endorsements": 2295,
+              "downloads": 147353,
+              "fileSize": 2394540,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 30613,
+              "name": "Stardew IRL - A Realistic Seasonal Portrait Mod - BASE GAME COMPLETE",
+              "summary": "A set of hand drawn portraits for stardew. Comment with characters you'd like added! This is only a file of PNG portrait sheets- add them to the game using any method you'd like. Currently contains all base game characters.",
+              "author": "-M-",
+              "version": "3.4.0",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/30613/30613-1738729343-1008995577.png",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/30613/30613-1738729343-1008995577.png",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/30/30613/30613-1738729343-1008995577.png",
+              "updatedAt": "2025-02-05T09:25:48Z",
+              "createdAt": "2025-01-05T01:40:12Z",
+              "endorsements": 3,
+              "downloads": 118,
+              "fileSize": 1718810,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 8331,
+              "name": "Animated ohodavi's anime portraits",
+              "summary": "Makes ohodavi portraits come to live",
+              "author": "ohodavi and akai",
+              "version": "1.0",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/8331/8331-1616596757-1168287583.gif",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/8331/8331-1616596757-1168287583.gif",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/83/8331/8331-1616596757-1168287583.gif",
+              "updatedAt": "2021-03-23T21:43:51Z",
+              "createdAt": "2021-03-23T21:43:51Z",
+              "endorsements": 134,
+              "downloads": 3248,
+              "fileSize": 1517110,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

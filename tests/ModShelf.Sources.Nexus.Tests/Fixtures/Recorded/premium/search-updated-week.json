@@ -1,0 +1,156 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/v2/graphql",
+    "query": "",
+    "body": {
+      "operationName": "SearchMods",
+      "variables": {
+        "filter": {
+          "gameDomainName": [
+            {
+              "value": "stardewvalley",
+              "op": "EQUALS"
+            }
+          ],
+          "updatedAt": [
+            {
+              "value": "1793062800",
+              "op": "GTE"
+            }
+          ],
+          "adultContent": [
+            {
+              "value": false,
+              "op": "EQUALS"
+            }
+          ]
+        },
+        "sort": [
+          {
+            "endorsements": {
+              "direction": "DESC"
+            }
+          }
+        ],
+        "offset": 0,
+        "count": 5
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": {
+        "mods": {
+          "totalCount": 463,
+          "nodes": [
+            {
+              "modId": 4736,
+              "name": "DaisyNiko's Tilesheets",
+              "summary": "just the tilesheets",
+              "author": "DaisyNiko",
+              "version": "2.0.2",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/4736/4736-1792219097-572429071.png",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/4736/4736-1792219097-572429071.png",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/47/4736/4736-1792219097-572429071.png",
+              "updatedAt": "2026-10-30T04:41:49Z",
+              "createdAt": "2019-12-16T08:02:04Z",
+              "endorsements": 43355,
+              "downloads": 3050546,
+              "fileSize": 5419,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 10029,
+              "name": "Custom Spouse Rooms",
+              "summary": "Lets you move and customize your farmhouse's spouse room, and enables multiple spouse rooms for Free Love mod.",
+              "author": "aedenthorn",
+              "version": "0.9.7",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/10029/10029-1635739833-1960160845.png",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/10029/10029-1635739833-1960160845.png",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/10/10029/10029-1635739833-1960160845.png",
+              "updatedAt": "2026-10-30T02:24:09Z",
+              "createdAt": "2021-11-01T04:14:18Z",
+              "endorsements": 13954,
+              "downloads": 554713,
+              "fileSize": 38,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 19675,
+              "name": "Happy Home Designer",
+              "summary": "A feature-rich Furniture / Wallpaper catalogue overhaul, with Alternative Textures integration and more!",
+              "author": "tlitookilakin",
+              "version": "2.7.0",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/19675/19675-1704227335-960217023.png",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/19675/19675-1704227335-960217023.png",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/19/19675/19675-1704227335-960217023.png",
+              "updatedAt": "2026-11-01T01:59:37Z",
+              "createdAt": "2024-01-02T21:41:43Z",
+              "endorsements": 11133,
+              "downloads": 1007130,
+              "fileSize": 262,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 21090,
+              "name": "Clear Glasses - HD Graphics Depixelation and Filters",
+              "summary": "Enhance your gaming experience with Clear Glasses. This versatile mod offers configurable visual upgrades. Enjoy faster loading times making it an essential addition for heavily modded gameplay. Optional visual enhancements using smooth",
+              "author": "aurpine",
+              "version": "1",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/21090/21090-1711431293-574664454.jpeg",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/21090/21090-1711431293-574664454.jpeg",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/21/21090/21090-1711431293-574664454.jpeg",
+              "updatedAt": "2026-11-01T07:09:54Z",
+              "createdAt": "2024-03-26T05:55:43Z",
+              "endorsements": 2420,
+              "downloads": 170290,
+              "fileSize": 1419,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 43127,
+              "name": "UI Info Suite 2 Alternative",
+              "summary": "This is an alternative fork of UI Info Suite 2 with additional features and bug fixes.",
+              "author": "dazuki - Abs0rbed - tqdv - Annosz",
+              "version": "2.9.3",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/43127/43127-1775629082-1305822875.png",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/43127/43127-1775629082-1305822875.png",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/43/43127/43127-1775629082-1305822875.png",
+              "updatedAt": "2026-10-28T17:33:22Z",
+              "createdAt": "2026-03-03T17:35:55Z",
+              "endorsements": 2336,
+              "downloads": 394651,
+              "fileSize": 470,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

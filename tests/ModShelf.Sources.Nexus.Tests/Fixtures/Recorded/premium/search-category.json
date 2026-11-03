@@ -1,0 +1,156 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/v2/graphql",
+    "query": "",
+    "body": {
+      "operationName": "SearchMods",
+      "variables": {
+        "filter": {
+          "gameDomainName": [
+            {
+              "value": "stardewvalley",
+              "op": "EQUALS"
+            }
+          ],
+          "categoryName": [
+            {
+              "value": "Modding Tools",
+              "op": "EQUALS"
+            }
+          ],
+          "adultContent": [
+            {
+              "value": false,
+              "op": "EQUALS"
+            }
+          ]
+        },
+        "sort": [
+          {
+            "endorsements": {
+              "direction": "DESC"
+            }
+          }
+        ],
+        "offset": 0,
+        "count": 5
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": {
+        "mods": {
+          "totalCount": 596,
+          "nodes": [
+            {
+              "modId": 1915,
+              "name": "Content Patcher",
+              "summary": "Loads content packs that change the game's data, images, and maps without replacing XNB files.",
+              "author": "Pathoschild",
+              "version": "2.9.1",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/1915/1915-1519967846-411398257.png",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/1915/1915-1519967846-411398257.png",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/19/1915/1915-1519967846-411398257.png",
+              "updatedAt": "2026-04-16T11:18:42Z",
+              "createdAt": "2018-02-25T23:23:18Z",
+              "endorsements": 495132,
+              "downloads": 24951065,
+              "fileSize": 381,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 2400,
+              "name": "SMAPI - Stardew Modding API",
+              "summary": "The mod loader for Stardew Valley.",
+              "author": "Pathoschild",
+              "version": "4.5.2",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/2400/2400-1739896414-1995424095.png",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/2400/2400-1739896414-1995424095.png",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/24/2400/2400-1739896414-1995424095.png",
+              "updatedAt": "2026-03-14T19:07:23Z",
+              "createdAt": "2018-06-16T18:25:39Z",
+              "endorsements": 388571,
+              "downloads": 30409809,
+              "fileSize": 40907,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 5098,
+              "name": "Generic Mod Config Menu (GMCM)",
+              "summary": "Adds an in-game UI to edit other mods' config options.",
+              "author": "spacechase0",
+              "version": "1.16.0",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/5098/5098-1578097159-913064158.png",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/5098/5098-1578097159-913064158.png",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/50/5098/5098-1578097159-913064158.png",
+              "updatedAt": "2025-10-18T19:48:57Z",
+              "createdAt": "2020-01-04T00:26:06Z",
+              "endorsements": 287061,
+              "downloads": 13889272,
+              "fileSize": 106,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 1348,
+              "name": "SpaceCore",
+              "summary": "A framework mod used by some of my other mods.",
+              "author": "spacechase0",
+              "version": "1.28.4",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/1348/1348-1757873504-1684389719.png",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/1348/1348-1757873504-1684389719.png",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/13/1348/1348-1757873504-1684389719.png",
+              "updatedAt": "2025-10-19T14:27:21Z",
+              "createdAt": "2017-07-19T22:06:44Z",
+              "endorsements": 236081,
+              "downloads": 12461657,
+              "fileSize": 358,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            },
+            {
+              "modId": 3231,
+              "name": "Farm Type Manager (FTM)",
+              "summary": "Farm Type Manager (FTM) is a framework that lets other mods spawn objects and monsters anywhere in the game, with various controls and customization options.",
+              "author": "Esca-MMC",
+              "version": "1.26.1",
+              "pictureUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/3231/3231-1549594226-514724928.png",
+              "thumbnailUrl": "https://staticdelivery.nexusmods.com/mods/1303/images/thumbnails/3231/3231-1549594226-514724928.png",
+              "thumbnailBlurredUrl": "https://images.nexusmods.com/mod-images/1303/tb/med/32/3231/3231-1549594226-514724928.png",
+              "updatedAt": "2025-11-14T17:55:30Z",
+              "createdAt": "2019-01-08T01:14:04Z",
+              "endorsements": 213953,
+              "downloads": 11255989,
+              "fileSize": 131,
+              "adultContent": false,
+              "status": "published",
+              "game": {
+                "domainName": "stardewvalley"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

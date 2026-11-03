@@ -43,10 +43,10 @@ public sealed class NexusSourceSearchTests : IDisposable
     [Theory]
     [InlineData("search-words", "SMAPI", SearchSort.Relevance, 0, null, false, SearchDirection.Descending, 33, "2367", "SMAPI Templates")]
     [InlineData("search-downloads", "SMAPI", SearchSort.Downloads, 0, null, false, SearchDirection.Descending, 33, "2400", "SMAPI - Stardew Modding API")]
-    [InlineData("search-endorsed-page-2", null, SearchSort.Endorsements, 5, null, false, SearchDirection.Descending, 33710, "4", "CJB Cheats Menu")]
+    [InlineData("search-endorsed-page-2", null, SearchSort.Endorsements, 5, null, false, SearchDirection.Descending, 33797, "4", "CJB Cheats Menu")]
     [InlineData("search-author-updated", null, SearchSort.Updated, 0, "Pathoschild", false, SearchDirection.Descending, 42, "53956", "The Neighborly Collection - Tractor Garage")]
-    [InlineData("search-newest-with-adult", null, SearchSort.Newest, 0, null, true, SearchDirection.Descending, 35063, "54840", "SoulCovenant")]
-    [InlineData("search-oldest-first", null, SearchSort.Newest, 0, null, false, SearchDirection.Ascending, 33710, "3", "Rise and Shine - Configurable wake-up time")]
+    [InlineData("search-newest-with-adult", null, SearchSort.Newest, 0, null, true, SearchDirection.Descending, 35153, "54973", "Millionarie    Linus")]
+    [InlineData("search-oldest-first", null, SearchSort.Newest, 0, null, false, SearchDirection.Ascending, 33797, "3", "Rise and Shine - Configurable wake-up time")]
     public async Task SearchesAsNexusModsAnsweredThem(
         string recording,
         string? text,

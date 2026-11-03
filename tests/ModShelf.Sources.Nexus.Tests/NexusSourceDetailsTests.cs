@@ -55,7 +55,7 @@ public sealed class NexusSourceDetailsTests : IDisposable
         Assert.Equal(new Uri(recorded["thumbnailBlurredUrl"]!.GetValue<string>()), mod.ThumbnailBlurredUrl);
         Assert.Equal(new Uri(recorded["pictureUrl"]!.GetValue<string>()), mod.PictureUrl);
         Assert.Equal(new Uri("https://www.nexusmods.com/stardewvalley/mods/2400"), mod.PageUrl);
-        Assert.Equal((30407540L, 388540L), (mod.Downloads, mod.Endorsements));
+        Assert.Equal((30409809L, 388571L), (mod.Downloads, mod.Endorsements));
         Assert.Equal(DateTimeOffset.Parse("2026-03-14T19:07:23Z", System.Globalization.CultureInfo.InvariantCulture), mod.UpdatedAt);
         Assert.True(mod.IsAvailable);
         Assert.False(mod.HasAdultContent);
