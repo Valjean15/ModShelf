@@ -95,6 +95,7 @@ internal static partial class ModShelfMcpServer
                     ServerInstructions = Instructions,
                     ToolCollection = Tools(services, queue),
                 };
+                options.Filters.Request.CallToolFilters.Add(ToolArguments.Explained);
 
                 StreamServerTransport transport = new(streams.Input, streams.Output, "modshelf", sdkLogging);
                 await using (transport.ConfigureAwait(false))

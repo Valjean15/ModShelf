@@ -237,6 +237,51 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         Assert.Equal("Of 2 links, 2 couldn't be downloaded; each result says more, in the order the links were given.", downloaded.Message);
     }
 
+    [Fact]
+    public async Task ArgumentsThatDontFitAToolSayWhatItTakes()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        // As an agent's app that read the tools from an older ModShelf, whose download took one link.
+        string refused = await mcp.CallFailingAsync("download", Arguments(("link", HandoffLink("3").AbsoluteUri)), Cancellation);
+
+        Assert.EndsWith(
+            "download doesn't take these arguments: it needs links. "
+            + "It takes links (required). It was given link, which it doesn't take. The agent's list of ModShelf's tools may be "
+            + "older than this MCP server: restarting the agent's app, then starting a new conversation, reads it again.",
+            refused,
+            StringComparison.Ordinal);
+        Assert.Empty(_server.Ranges);
+    }
+
+    [Theory]
+    [InlineData("download", "links", "\"https://www.nexusmods.com/stardewvalley/mods/2400\"", "links is a list of strings, not a string. It takes links (required).")]
+    [InlineData("download", "links", "[\"https://www.nexusmods.com/stardewvalley/mods/2400\", 3]", "links is a list of strings, not a list. It takes links (required).")]
+    [InlineData("library_list", "limit", "\"many\"", "limit is an integer, not a string. It takes game, source, mod, watchedOnly, updatesOnly, missingOnly, compact, offset, limit.")]
+    [InlineData("library_list", "limit", "2.5", "limit is an integer, not a number. It takes game, source, mod, watchedOnly, updatesOnly, missingOnly, compact, offset, limit.")]
+    [InlineData("library_list", "compact", "\"yes\"", "compact is true or false, not a string. It takes game, source, mod, watchedOnly, updatesOnly, missingOnly, compact, offset, limit.")]
+    [InlineData("library_changes", "since", "null", "since is a string, not null. It takes since (required).")]
+    public async Task AnArgumentOfAnotherTypeSaysWhatTheToolTakes(string tool, string name, string json, string said)
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        string refused = await mcp.CallFailingAsync(tool, new Dictionary<string, object?> { [name] = System.Text.Json.JsonDocument.Parse(json).RootElement.Clone() }, Cancellation);
+
+        Assert.Contains($"{tool} doesn't take these arguments: {said} The agent's list of ModShelf's tools", refused, StringComparison.Ordinal);
+        Assert.Empty(_server.Ranges);
+    }
+
+    [Fact]
+    public async Task ArgumentsThatFitStillReachTheTool()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        // A nullable argument given as null, and an argument the tool doesn't take, which is left aside.
+        LibraryListing listed = await mcp.CallAsync<LibraryListing>("library_list", Arguments(("game", null), ("limit", 5), ("extra", true)), Cancellation);
+
+        Assert.Equal((0, false), (listed.Total, listed.HasMore));
+    }
+
     [Theory]
     [InlineData(0)]
     [InlineData(51)]
