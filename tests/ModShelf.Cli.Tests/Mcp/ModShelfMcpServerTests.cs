@@ -84,8 +84,8 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
             [
                 "accounts_status", "diagnostics", "download", "downloads_cancel", "downloads_list", "downloads_pause",
                 "downloads_resume", "downloads_retry", "library_changes", "library_check", "library_forget", "library_list",
-                "library_rescan", "library_unwatch", "library_updates", "library_watch", "mod_search", "mod_show", "settings_reset",
-                "settings_set", "settings_show",
+                "library_note", "library_pin", "library_rescan", "library_skip", "library_unwatch", "library_updates", "library_watch",
+                "mod_search", "mod_show", "settings_reset", "settings_set", "settings_show",
             ],
             tools.Select(tool => tool.Name).Order(StringComparer.Ordinal));
         Assert.Equal(ModShelfMcpServer.Instructions, mcp.Client.ServerInstructions);
@@ -564,6 +564,98 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task PinsAModWhoseUpdatesAreThenLeftOut()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await DownloadAndWaitAsync(mcp, "1");
+        await StoreUpdatesAsync("2", "7");
+
+        PinResult pinned = await mcp.CallAsync<PinResult>("library_pin", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
+        PinResult again = await mcp.CallAsync<PinResult>("library_pin", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
+        UpdateListing updates = await mcp.CallAsync<UpdateListing>("library_updates", null, Cancellation);
+        LibraryListing listed = await mcp.CallAsync<LibraryListing>("library_list", Arguments(("updatesOnly", true)), Cancellation);
+        LibraryModEntry mod = Assert.Single((await mcp.CallAsync<LibraryListing>("library_list", null, Cancellation)).Mods);
+        PinResult unpinned = await mcp.CallAsync<PinResult>("library_pin", Arguments(("link", FileLink("1").AbsoluteUri), ("pinned", false)), Cancellation);
+
+        Assert.Equal((true, $"Pinned {ModName}: its updates are still found, but aren't offered."), (pinned.Pinned, pinned.Message));
+        Assert.Equal($"{ModName} is pinned already.", again.Message);
+        Assert.Empty(updates.Updates);
+        Assert.Empty(listed.Mods);
+        Assert.Equal((true, 0, 2), (mod.Pinned, mod.UpdateCount, mod.Updates!.Count));
+        Assert.Equal((false, $"Unpinned {ModName}: its updates are offered again.", 2), (unpinned.Pinned, unpinned.Message, unpinned.Mod.UpdateCount));
+        Assert.Equal(2, (await mcp.CallAsync<UpdateListing>("library_updates", null, Cancellation)).Updates.Count);
+    }
+
+    [Fact]
+    public async Task SkipsAnUpdateByItsLinkUntilANewerOneComes()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await DownloadAndWaitAsync(mcp, "1");
+        await StoreUpdatesAsync("2", "7");
+
+        SkipResult skipped = await mcp.CallAsync<SkipResult>("library_skip", Arguments(("link", FileLink("2").AbsoluteUri)), Cancellation);
+        SkipResult again = await mcp.CallAsync<SkipResult>("library_skip", Arguments(("link", FileLink("2").AbsoluteUri)), Cancellation);
+        UpdateListing updates = await mcp.CallAsync<UpdateListing>("library_updates", null, Cancellation);
+        LibraryModEntry mod = Assert.Single((await mcp.CallAsync<LibraryListing>("library_list", null, Cancellation)).Mods);
+        ModDetails shown = await mcp.CallAsync<ModDetails>("mod_show", Arguments(("link", FileLink("2").AbsoluteUri)), Cancellation);
+        SkipResult offered = await mcp.CallAsync<SkipResult>("library_skip", Arguments(("link", FileLink("2").AbsoluteUri), ("skip", false)), Cancellation);
+
+        Assert.Equal((true, $"Skipped Update 2 of {ModName} until a newer update comes.", "2", true), (skipped.Skip, skipped.Message, skipped.Update?.FileId, skipped.Update?.Skipped));
+        Assert.Equal(($"That update of {ModName} is skipped already.", (LibraryUpdateEntry?)null), (again.Message, again.Update));
+        Assert.Equal(["7"], updates.Updates.Select(found => found.Update.FileId));
+        Assert.Equal(1, mod.UpdateCount);
+        Assert.Equal([("2", true), ("7", false)], mod.Updates!.Select(update => (update.FileId, update.Skipped)).Order());
+        Assert.Equal([("3", false), ("2", true), ("1", false)], shown.Files.Select(file => (file.FileId, file.Skipped)));
+        Assert.Equal(($"Update 2 of {ModName} is offered again.", false), (offered.Message, offered.Update!.Skipped));
+    }
+
+    [Fact]
+    public async Task SkippingAFileThatIsntAnUpdateIsRefused()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await DownloadAndWaitAsync(mcp, "1");
+
+        Assert.Contains(
+            "File 1 isn't an update of the mod.",
+            await mcp.CallFailingAsync("library_skip", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation),
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task KeepsANoteThatTheListAndTheModShow()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await DownloadAndWaitAsync(mcp, "1");
+
+        NoteResult noted = await mcp.CallAsync<NoteResult>("library_note", Arguments(("link", FileLink("1").AbsoluteUri), ("note", "Stay on 1.1.")), Cancellation);
+        LibraryModEntry listed = Assert.Single((await mcp.CallAsync<LibraryListing>("library_list", null, Cancellation)).Mods);
+        ModDetails shown = await mcp.CallAsync<ModDetails>("mod_show", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
+        NoteResult removed = await mcp.CallAsync<NoteResult>("library_note", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
+
+        Assert.Equal(("Stay on 1.1.", $"Kept the note of {ModName}."), (noted.Note, noted.Message));
+        Assert.Equal(("Stay on 1.1.", false), (listed.Note, listed.Pinned));
+        Assert.Equal(("Stay on 1.1.", false), (shown.Note, shown.Pinned));
+        Assert.Equal(((string?)null, $"Removed the note of {ModName}.", (string?)null), (removed.Note, removed.Message, removed.Mod.Note));
+        Assert.Contains(
+            "A note holds at most 2,000 characters",
+            await mcp.CallFailingAsync("library_note", Arguments(("link", FileLink("1").AbsoluteUri), ("note", new string('a', 2001))), Cancellation),
+            StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("library_pin")]
+    [InlineData("library_note")]
+    public async Task PinningOrNotingAModNotInTheLibraryIsRefused(string tool)
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        Assert.Contains(
+            "Mod mod of game on fake-handoff isn't in the library.",
+            await mcp.CallFailingAsync(tool, Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation),
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task ChecksTheWatchedModsAndListsTheUpdatesWithWhatTheyReplace()
     {
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
@@ -820,7 +912,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
             await mcp.CloseAsync(Cancellation);
         }
 
-        Assert.Contains(Cli.Logs.Entries, entry => entry.Contains("The MCP server started, with 21 tools", StringComparison.Ordinal));
+        Assert.Contains(Cli.Logs.Entries, entry => entry.Contains("The MCP server started, with 24 tools", StringComparison.Ordinal));
         Assert.DoesNotContain(Cli.Logs.Entries, entry => entry.Contains(GoodKey, StringComparison.Ordinal));
         Assert.DoesNotContain(Cli.Logs.Entries, entry => entry.Contains("handoff.example", StringComparison.Ordinal));
     }
@@ -843,6 +935,32 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
                 Assert.Fail(otherwise);
             }
         }
+    }
+
+    /// <summary>
+    /// Gives the mod updates, as a check would: Update 2, which replaces file 1, and the rest new optional files.
+    /// </summary>
+    private Task<Application.Library.LibraryChange> StoreUpdatesAsync(params string[] files)
+    {
+        ModRef mod = new(new GameRef(FakeHandoffSource.SourceId, "game"), "mod");
+        return Cli.InAppAsync(
+            services => services.GetRequiredService<ILibraryRepository>().UpdateAsync(
+                mod,
+                stored => stored!.WithUpdates(
+                [
+                    .. files.Select(file => new LibraryUpdate(
+                        new ModFileRef(mod, file),
+                        $"Update {file}",
+                        $"update-{file}.zip",
+                        $"1.{file}",
+                        file == "2" ? ModFileCategory.Main : ModFileCategory.Optional,
+                        DateTimeOffset.UtcNow,
+                        file == "2" ? new ModFileRef(mod, "1") : null,
+                        DateTimeOffset.UtcNow,
+                        FileLink(file))),
+                ]),
+                Cancellation),
+            Cancellation);
     }
 
     private static Task<LibraryChanges> ChangesAsync(McpSession mcp, DateTimeOffset since)

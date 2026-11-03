@@ -30,11 +30,13 @@ internal static class McpEntries
             mod.Author,
             mod.PageUrl?.AbsoluteUri,
             mod.IsWatched,
+            mod.IsPinned,
+            mod.Note,
             mod.AddedAt,
             mod.CheckedAt,
             files.Length,
             files.Count(file => file.Missing),
-            mod.Updates.Count,
+            mod.OfferedUpdates.Count,
             compact ? null : files,
             compact ? null : [.. mod.Updates.OrderByDescending(update => update.UploadedAt).Select(update => Update(update, mod, root))]);
     }
@@ -105,7 +107,8 @@ internal static class McpEntries
             update.UploadedAt,
             update.FoundAt,
             update.PageUrl?.AbsoluteUri,
-            replaces is null ? null : File(replaces, root));
+            replaces is null ? null : File(replaces, root),
+            mod.SkippedUpdates.Contains(update.File));
     }
 
     /// <param name="library">The library, for the update's mod.</param>
@@ -160,5 +163,6 @@ internal static class McpEntries
             update.UploadedAt,
             update.FoundAt,
             update.PageUrl?.AbsoluteUri,
-            null);
+            null,
+            false);
 }

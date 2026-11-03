@@ -9,6 +9,7 @@ namespace ModShelf.Cli.Mcp;
 /// </param>
 /// <param name="Link">The file's page on its site, which <c>download</c> takes.</param>
 /// <param name="Replaces">The library's file this one replaces, by the site's word; null when it has none.</param>
+/// <param name="Skipped">Whether the user skipped it until a newer update comes, so it isn't offered.</param>
 internal sealed record LibraryUpdateEntry(
     string FileId,
     string Name,
@@ -19,4 +20,5 @@ internal sealed record LibraryUpdateEntry(
     DateTimeOffset UploadedAt,
     DateTimeOffset FoundAt,
     string? Link,
-    LibraryFileEntry? Replaces);
+    LibraryFileEntry? Replaces,
+    bool Skipped);

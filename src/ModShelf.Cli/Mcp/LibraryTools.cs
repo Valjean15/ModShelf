@@ -35,13 +35,13 @@ internal sealed class LibraryTools(
     private const int HistoryLimit = 1000;
 
     [McpServerTool(Name = "library_list", Title = "List the library", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Lists the mods in ModShelf's library, the ones watched for updates and the ones with downloaded files, by site, game and name, a page at a time: each with its files (their absolute paths, versions, whether they're old versions archived, and whether they're missing from disk) and the updates found for it. A large library reads best a game or a mod at a time, or compact first, which gives counts instead of files and updates.")]
+    [Description("Lists the mods in ModShelf's library, the ones watched for updates and the ones with downloaded files, by site, game and name, a page at a time: each with its files (their absolute paths, versions, whether they're old versions archived, and whether they're missing from disk), the updates found for it (each saying whether it's skipped), whether it's pinned, and its note. A large library reads best a game or a mod at a time, or compact first, which gives counts instead of files and updates.")]
     public Task<LibraryListing> ListAsync(
         [Description("Only this game's mods, as the site names it in its links, such as stardewvalley.")] string? game = null,
         [Description("Only this site's mods, such as nexus.")] string? source = null,
         [Description("Only the mod with this ID, as in its link.")] string? mod = null,
         [Description("Only the mods watched for updates.")] bool watchedOnly = false,
-        [Description("Only the mods with updates found.")] bool updatesOnly = false,
+        [Description("Only the mods with updates offered: found, and neither pinned nor skipped.")] bool updatesOnly = false,
         [Description("Leave out each mod's files and updates, and give how many there are.")] bool compact = false,
         [Description("How many mods to skip: the offset of the page.")] int offset = 0,
         [Description("How many mods a page lists, from 1 to 200.")] int limit = 50,
@@ -67,7 +67,7 @@ internal sealed class LibraryTools(
                     .Where(found => source is null || string.Equals(found.Mod.Game.Source.Value, source.Trim(), StringComparison.OrdinalIgnoreCase))
                     .Where(found => mod is null || string.Equals(found.Mod.Id, mod.Trim(), StringComparison.OrdinalIgnoreCase))
                     .Where(found => !watchedOnly || found.IsWatched)
-                    .Where(found => !updatesOnly || found.Updates.Count > 0)
+                    .Where(found => !updatesOnly || found.OfferedUpdates.Count > 0)
                     .OrderBy(found => found.Mod.Game.Source.Value, StringComparer.Ordinal)
                     .ThenBy(found => found.Mod.Game.Key, StringComparer.Ordinal)
                     .ThenBy(found => found.Name, StringComparer.OrdinalIgnoreCase)
@@ -122,7 +122,7 @@ internal sealed class LibraryTools(
         });
 
     [McpServerTool(Name = "library_updates", Title = "List the updates", ReadOnly = true, Idempotent = true, OpenWorld = true, UseStructuredContent = true)]
-    [Description("Lists the updates the last checks found for the watched mods, each with the link to download it and the library file it replaces, by mod name and the newest first. An update's kind is update for a newer version of a library file, or newFile for a file that replaces none, such as an optional file the mod's author added. With changelog, also what each update's version changes, from its mod's changelog, which asks each mod's site.")]
+    [Description("Lists the updates the last checks found for the watched mods, each with the link to download it and the library file it replaces, by mod name and the newest first. A pinned mod's updates and skipped updates aren't offered, so they're left out (library_list lists them). An update's kind is update for a newer version of a library file, or newFile for a file that replaces none, such as an optional file the mod's author added. With changelog, also what each update's version changes, from its mod's changelog, which asks each mod's site.")]
     public Task<UpdateListing> UpdatesAsync(
         [Description("Also read each update's changes from its mod's changelog.")] bool changelog = false,
         CancellationToken cancellationToken = default)
@@ -134,7 +134,7 @@ internal sealed class LibraryTools(
             List<UpdateFound> updates = [];
             foreach (LibraryMod mod in mods.OrderBy(mod => mod.Name, StringComparer.OrdinalIgnoreCase))
             {
-                foreach (LibraryUpdate update in mod.Updates.OrderByDescending(update => update.UploadedAt))
+                foreach (LibraryUpdate update in mod.OfferedUpdates.OrderByDescending(update => update.UploadedAt))
                 {
                     IReadOnlyList<string>? changes = changelog ? await ChangesOfAsync(update, cancellationToken).ConfigureAwait(false) : null;
                     updates.Add(McpEntries.Found(update, byRef, root, changes));
@@ -190,6 +190,73 @@ internal sealed class LibraryTools(
                 _ => $"Stopped watching {change.Before.Name}. Its downloaded files stay in the library.",
             };
             return new WatchResult(false, message, change.After is { } after ? McpEntries.Mod(after, root) : null);
+        });
+
+    [McpServerTool(Name = "library_pin", Title = "Pin a mod", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
+    [Description("Pins a library mod at the version it has, or unpins it: a pinned mod's updates are still found, but aren't offered, so library_updates, library_check and the desktop app leave them out. Nothing is downloaded or deleted.")]
+    public Task<PinResult> PinAsync(
+        [Description("A link to the mod or one of its files, such as its page on Nexus Mods.")] string link,
+        [Description("False to unpin it.")] bool pinned = true,
+        CancellationToken cancellationToken = default)
+        => McpProblems.GuardAsync(async () =>
+        {
+            LibraryChange change = await InLibraryAsync(() => library.SetPinnedAsync(McpProblems.Link(link), pinned, cancellationToken)).ConfigureAwait(false);
+            string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+            LibraryMod mod = change.After!;
+            string message = (pinned, change.Before!.IsPinned) switch
+            {
+                (true, true) => $"{mod.Name} is pinned already.",
+                (true, false) => $"Pinned {mod.Name}: its updates are still found, but aren't offered.",
+                (false, false) => $"{mod.Name} isn't pinned.",
+                _ => $"Unpinned {mod.Name}: its updates are offered again.",
+            };
+            return new PinResult(mod.IsPinned, message, McpEntries.Mod(mod, root));
+        });
+
+    [McpServerTool(Name = "library_skip", Title = "Skip an update", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
+    [Description("Skips one of a library mod's updates until a newer one comes, so it isn't offered, or offers it again. Nothing is downloaded or deleted.")]
+    public Task<SkipResult> SkipAsync(
+        [Description("The update's link, as library_updates gives it.")] string link,
+        [Description("False to offer it again.")] bool skip = true,
+        CancellationToken cancellationToken = default)
+        => McpProblems.GuardAsync(async () =>
+        {
+            LibraryChange change = await InLibraryAsync(() => library.SkipUpdateAsync(McpProblems.Link(link), skip, cancellationToken)).ConfigureAwait(false);
+            string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+            LibraryMod before = change.Before!;
+            LibraryMod mod = change.After!;
+            ModFileRef? changed = skip
+                ? mod.SkippedUpdates.FirstOrDefault(file => !before.SkippedUpdates.Contains(file))
+                : before.SkippedUpdates.FirstOrDefault(file => !mod.SkippedUpdates.Contains(file));
+            LibraryUpdate? update = changed is null ? null : mod.Updates.First(found => found.File == changed);
+            string message = (skip, update) switch
+            {
+                (true, null) => $"That update of {mod.Name} is skipped already.",
+                (false, null) => $"That update of {mod.Name} isn't skipped.",
+                (true, _) => $"Skipped {update.Name} of {mod.Name} until a newer update comes.",
+                _ => $"{update.Name} of {mod.Name} is offered again.",
+            };
+            return new SkipResult(skip, message, update is null ? null : McpEntries.Update(update, mod, root), McpEntries.Mod(mod, root));
+        });
+
+    [McpServerTool(Name = "library_note", Title = "Keep a note of a mod", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
+    [Description("Keeps the user's note of a library mod, such as why it's pinned, in place of the one it has; no note removes it. library_list and mod_show give the notes.")]
+    public Task<NoteResult> NoteAsync(
+        [Description("A link to the mod or one of its files, such as its page on Nexus Mods.")] string link,
+        [Description("The note, up to 2,000 characters; none, or blank, to remove the mod's note.")] string? note = null,
+        CancellationToken cancellationToken = default)
+        => McpProblems.GuardAsync(async () =>
+        {
+            LibraryChange change = await InLibraryAsync(() => library.SetNoteAsync(McpProblems.Link(link), note, cancellationToken)).ConfigureAwait(false);
+            string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+            LibraryMod mod = change.After!;
+            string message = (change.Before!.Note, mod.Note) switch
+            {
+                (null, null) => $"{mod.Name} has no note.",
+                (_, null) => $"Removed the note of {mod.Name}.",
+                _ => $"Kept the note of {mod.Name}.",
+            };
+            return new NoteResult(mod.Note, message, McpEntries.Mod(mod, root));
         });
 
     [McpServerTool(Name = "library_forget", Title = "Forget a mod", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
@@ -256,6 +323,21 @@ internal sealed class LibraryTools(
         });
 
     private static string Describe(ModRef mod) => $"mod {mod.Id} of {mod.Game.Key} on {mod.Game.Source}";
+
+    /// <summary>
+    /// Changes a mod in the library, saying so when it isn't in it.
+    /// </summary>
+    private static async Task<LibraryChange> InLibraryAsync(Func<Task<LibraryChange>> change)
+    {
+        try
+        {
+            return await change().ConfigureAwait(false);
+        }
+        catch (KeyNotFoundException exception)
+        {
+            throw new McpException(exception.Message, exception);
+        }
+    }
 
     /// <summary>
     /// What the mod's changelog says of the update's version; null when it can't be read, or the update has no version.

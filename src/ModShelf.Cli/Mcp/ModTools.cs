@@ -25,7 +25,7 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
         [ModFileCategory.Main, ModFileCategory.Update, ModFileCategory.Optional, ModFileCategory.Miscellaneous];
 
     [McpServerTool(Name = "mod_show", Title = "Show a mod", ReadOnly = true, Idempotent = true, OpenWorld = true, UseStructuredContent = true)]
-    [Description("Shows a mod as its site describes it, with its files, each with the link to download it, what replaces it, and where the library has it, if it does. Old versions, archived files and files in no section are left out unless allFiles is set, but for the one the link points to. The library's files that the site no longer lists, such as a pulled file, are in libraryOnly; newerInLibrary says when one of them is newer than everything the site lists.")]
+    [Description("Shows a mod as its site describes it, with its files, each with the link to download it, what replaces it, where the library has it, if it does, and whether it's an update skipped; and whether the library has the mod pinned, and its note. Old versions, archived files and files in no section are left out unless allFiles is set, but for the one the link points to. The library's files that the site no longer lists, such as a pulled file, are in libraryOnly; newerInLibrary says when one of them is newer than everything the site lists.")]
     public Task<ModDetails> ShowAsync(
         [Description("A link to the mod or one of its files, such as its page on Nexus Mods.")] string link,
         [Description("Also list old versions, archived files and files in no section.")] bool allFiles = false,
@@ -70,6 +70,8 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
                 mod.Downloads,
                 mod.Endorsements,
                 known?.IsWatched ?? false,
+                known?.IsPinned ?? false,
+                known?.Note,
                 [
                     .. listed.Select(file =>
                     {
@@ -89,7 +91,8 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
                             file.Reference == page.LinkedFile,
                             path,
                             have?.Sha256,
-                            path is not null && !File.Exists(path));
+                            path is not null && !File.Exists(path),
+                            known?.SkippedUpdates.Contains(file.Reference) ?? false);
                     }),
                 ],
                 page.Files.Count - listed.Length,

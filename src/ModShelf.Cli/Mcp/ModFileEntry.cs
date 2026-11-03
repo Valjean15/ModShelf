@@ -16,6 +16,7 @@ namespace ModShelf.Cli.Mcp;
 /// a hash, as one recorded before ModShelf kept hashes.
 /// </param>
 /// <param name="Missing">Whether the library has it, but it's gone from disk.</param>
+/// <param name="Skipped">Whether it's an update the user skipped until a newer one comes.</param>
 internal sealed record ModFileEntry(
     string FileId,
     string Name,
@@ -30,4 +31,5 @@ internal sealed record ModFileEntry(
     bool Linked,
     string? LibraryPath,
     string? LibrarySha256,
-    bool Missing);
+    bool Missing,
+    bool Skipped);
