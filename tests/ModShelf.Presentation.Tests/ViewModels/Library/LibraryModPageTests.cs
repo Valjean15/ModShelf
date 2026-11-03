@@ -37,7 +37,7 @@ public sealed class LibraryModPageTests : IDisposable
         Assert.Equal("SkyUI from the site", mod.Name);
         Assert.True(Screen.IsModOpen);
         Assert.False(Screen.IsOpening);
-        Assert.Equal("Skyrim Special Edition", Screen.OpenGameName);
+        Assert.Equal("Skyrim Special Edition", Screen.BackText);
         Assert.Null(Screen.PageProblem);
         Assert.False(Screen.RetryCommand.CanExecute(null));
         Assert.True(mod.IsInLibrary);
@@ -97,7 +97,7 @@ public sealed class LibraryModPageTests : IDisposable
 
         ModPageViewModel mod = Assert.IsType<ModPageViewModel>(Screen.Mod);
         Assert.Equal(("SkyUI", "by An Author"), (mod.Name, mod.AuthorText));
-        Assert.Equal("Skyrim Special Edition", Screen.OpenGameName);
+        Assert.Equal("Skyrim Special Edition", Screen.BackText);
         Assert.NotNull(Screen.PageProblem);
     }
 

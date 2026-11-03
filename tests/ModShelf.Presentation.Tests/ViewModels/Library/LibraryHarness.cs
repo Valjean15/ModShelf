@@ -24,6 +24,7 @@ internal sealed class LibraryHarness : IDisposable
         Time.SetLocalTimeZone(TimeZoneInfo.Utc);
         Screen = new LibraryViewModel(
             Library,
+            History,
             Lookup,
             Rescan,
             LibraryDownloads,
@@ -45,6 +46,8 @@ internal sealed class LibraryHarness : IDisposable
     }
 
     public InMemoryModLibrary Library { get; } = new();
+
+    public ScriptedLibraryHistory History { get; } = new();
 
     public HiddenGames Hidden { get; } = new();
 

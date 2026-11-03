@@ -2500,4 +2500,120 @@
     <value>This game's settings</value>
     <comment>The tooltip of the gear beside an open game's name in the Library.</comment>
   </data>
+  <data name="LibraryActivity" xml:space="preserve">
+    <value>Recent activity</value>
+    <comment>Button, page heading and crumb on the Library screen: what happened to the library's files lately.</comment>
+  </data>
+  <data name="LibraryActivityNote" xml:space="preserve">
+    <value>What happened to the library's files over the last year, the newest first.</value>
+    <comment>Below the Recent activity heading.</comment>
+  </data>
+  <data name="ActivityKindLabel" xml:space="preserve">
+    <value>Show</value>
+    <comment>Label before the list that narrows the recent activity to one kind.</comment>
+  </data>
+  <data name="ActivityKindAll" xml:space="preserve">
+    <value>Everything</value>
+    <comment>Recent activity filter: every kind.</comment>
+  </data>
+  <data name="ActivityKindDownloaded" xml:space="preserve">
+    <value>Downloads</value>
+    <comment>Recent activity filter: files downloaded.</comment>
+  </data>
+  <data name="ActivityKindArchived" xml:space="preserve">
+    <value>Archived versions</value>
+    <comment>Recent activity filter: old versions moved to an _archive folder.</comment>
+  </data>
+  <data name="ActivityKindDeleted" xml:space="preserve">
+    <value>Deleted files</value>
+    <comment>Recent activity filter: files deleted, by the user or by the setting for old versions.</comment>
+  </data>
+  <data name="ActivityKindFound" xml:space="preserve">
+    <value>Found by rescans</value>
+    <comment>Recent activity filter: files a rescan found in a mod's folder and added.</comment>
+  </data>
+  <data name="ActivityKindRemoved" xml:space="preserve">
+    <value>Removed mods</value>
+    <comment>Recent activity filter: mods taken out of the library.</comment>
+  </data>
+  <data name="ActivityTagDownloaded" xml:space="preserve">
+    <value>Downloaded</value>
+    <comment>Tag on a recent activity row.</comment>
+  </data>
+  <data name="ActivityTagArchived" xml:space="preserve">
+    <value>Archived</value>
+    <comment>Tag on a recent activity row.</comment>
+  </data>
+  <data name="ActivityTagDeleted" xml:space="preserve">
+    <value>Deleted</value>
+    <comment>Tag on a recent activity row.</comment>
+  </data>
+  <data name="ActivityTagFound" xml:space="preserve">
+    <value>Found</value>
+    <comment>Tag on a recent activity row.</comment>
+  </data>
+  <data name="ActivityTagRemoved" xml:space="preserve">
+    <value>Removed</value>
+    <comment>Tag on a recent activity row.</comment>
+  </data>
+  <data name="ActivityFileVersion" xml:space="preserve">
+    <value>{0} ({1})</value>
+    <comment>A file in the recent activity: {0} its name on its site, {1} its version.</comment>
+  </data>
+  <data name="ActivityDownloaded" xml:space="preserve">
+    <value>Downloaded {0}.</value>
+    <comment>{0} the file, such as SkyUI 5.3 (5.3).</comment>
+  </data>
+  <data name="ActivityDownloadedReplacing" xml:space="preserve">
+    <value>Downloaded {0}, replacing {1}.</value>
+    <comment>{0} the file; {1} the version it replaced, such as 5.2, or 'an older version'.</comment>
+  </data>
+  <data name="ActivityAnOlderVersion" xml:space="preserve">
+    <value>an older version</value>
+    <comment>In 'Downloaded {0}, replacing {1}.' when the version replaced is unknown.</comment>
+  </data>
+  <data name="ActivityArchived" xml:space="preserve">
+    <value>Moved {0} to its _archive folder.</value>
+    <comment>{0} the old version; _archive is the folder's name.</comment>
+  </data>
+  <data name="ActivityDeleted" xml:space="preserve">
+    <value>Deleted {0} from disk and the library.</value>
+    <comment>{0} the file the user deleted.</comment>
+  </data>
+  <data name="ActivityDeletedByRule" xml:space="preserve">
+    <value>Deleted {0}, an old version, as the setting for old versions says.</value>
+    <comment>{0} the file the setting for old versions deleted.</comment>
+  </data>
+  <data name="ActivityFound" xml:space="preserve">
+    <value>Found {0} on disk in a rescan, and added it.</value>
+    <comment>{0} the file found.</comment>
+  </data>
+  <data name="ActivityRemoved" xml:space="preserve">
+    <value>Removed from the library; its files stayed on disk.</value>
+    <comment>A mod taken out of the library.</comment>
+  </data>
+  <data name="ActivityEmpty" xml:space="preserve">
+    <value>Nothing has happened in the library yet. Downloads, old versions archived or deleted, and files found by rescans show here.</value>
+    <comment>Recent activity with nothing in it.</comment>
+  </data>
+  <data name="ActivityNothingOfKind" xml:space="preserve">
+    <value>Nothing of that kind happened in the last year.</value>
+    <comment>Recent activity narrowed to a kind with nothing in it.</comment>
+  </data>
+  <data name="ActivityCantRead" xml:space="preserve">
+    <value>The library's history can't be read right now. The log has the details.</value>
+    <comment>Recent activity when its history can't be read.</comment>
+  </data>
+  <data name="ActivityCapped" xml:space="preserve">
+    <value>The newest {0:N0} are shown.</value>
+    <comment>Below the recent activity when it has more than it shows.</comment>
+  </data>
+  <data name="DayToday" xml:space="preserve">
+    <value>Today</value>
+    <comment>Heading of today's part of a list by day.</comment>
+  </data>
+  <data name="DayYesterday" xml:space="preserve">
+    <value>Yesterday</value>
+    <comment>Heading of yesterday's part of a list by day.</comment>
+  </data>
 </root>

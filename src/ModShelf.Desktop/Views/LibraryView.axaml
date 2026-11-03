@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:ModShelf.Presentation.ViewModels.Library"
+             xmlns:app="using:ModShelf.Application.Library"
              xmlns:res="using:ModShelf.Presentation.Resources"
              xmlns:views="using:ModShelf.Desktop.Views"
              xmlns:pictures="using:ModShelf.Desktop.Views.Pictures"
@@ -9,14 +10,17 @@
              x:DataType="vm:LibraryViewModel">
 
     <!--
-      The order and previews at the end of the filter's row, or the previews at the end of the way back from a mod; in a
-      narrow window, below them. In a table, a narrow window drops the columns of numbers: a mod's go under its author,
+      The order and previews at the end of the filter's row, the previews at the end of the way back from a mod, or the
+      kind of activity shown beside its heading; in a narrow window, below them. In a table, a narrow window drops the columns of numbers: a mod's go under its author,
       a game's mods and updates under its name, and the time it was checked goes. Places and columns are set here rather than on what they place, so the narrow window's
       can replace them.
     -->
     <UserControl.Styles>
         <Style Selector="WrapPanel.tools">
             <Setter Property="Grid.Column" Value="2" />
+        </Style>
+        <Style Selector="StackPanel.activityKind">
+            <Setter Property="Grid.Column" Value="1" />
         </Style>
         <Style Selector="pictures|PreviewsPicker#PagePreviews">
             <Setter Property="Grid.Column" Value="1" />
@@ -28,7 +32,7 @@
             <Setter Property="IsVisible" Value="False" />
         </Style>
         <ContainerQuery Name="LibraryScreen" Query="max-width:760">
-            <Style Selector="WrapPanel.tools, pictures|PreviewsPicker#PagePreviews">
+            <Style Selector="WrapPanel.tools, pictures|PreviewsPicker#PagePreviews, StackPanel.activityKind">
                 <Setter Property="Grid.Row" Value="1" />
                 <Setter Property="Grid.Column" Value="0" />
                 <Setter Property="Grid.ColumnSpan" Value="3" />
@@ -61,6 +65,7 @@
                 <MultiBinding Converter="{x:Static BoolConverters.And}">
                     <Binding Path="!IsGameOpen" />
                     <Binding Path="!IsModOpen" />
+                    <Binding Path="!IsShowingActivity" />
                 </MultiBinding>
             </DockPanel.IsVisible>
             <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
@@ -68,11 +73,10 @@
                     <TextBlock Classes="heading" Margin="0" Text="{Binding Title}" />
                     <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding SummaryText}" IsVisible="{Binding !IsEmpty}" />
                 </StackPanel>
-                <Button Grid.Column="1"
-                        VerticalAlignment="Top"
-                        Content="{x:Static res:Strings.LibraryRescan}"
-                        Command="{Binding RescanCommand}"
-                        IsVisible="{Binding !IsEmpty}" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Top">
+                    <Button Content="{x:Static res:Strings.LibraryActivity}" Command="{Binding ShowActivityCommand}" />
+                    <Button Content="{x:Static res:Strings.LibraryRescan}" Command="{Binding RescanCommand}" IsVisible="{Binding !IsEmpty}" />
+                </StackPanel>
             </Grid>
 
             <!-- The filter as wide as the screen allows, up to a comfortable width; the order and previews at the end. -->
@@ -195,6 +199,94 @@
                         </ListBox>
                     </DockPanel>
                 </Border>
+            </Panel>
+        </DockPanel>
+
+        <!-- The recent activity, in place of the games: the way back, its heading and the kind shown, then the days. -->
+        <DockPanel>
+            <DockPanel.IsVisible>
+                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                    <Binding Path="IsShowingActivity" />
+                    <Binding Path="!IsModOpen" />
+                </MultiBinding>
+            </DockPanel.IsVisible>
+            <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,12" ItemSpacing="4" LineSpacing="4">
+                <Button Classes="crumb" Content="{Binding Title}" Command="{Binding ShowGamesCommand}" />
+                <TextBlock Classes="note" VerticalAlignment="Center" Text="›" />
+                <TextBlock Classes="note" VerticalAlignment="Center" Margin="4,0,0,0" Text="{x:Static res:Strings.LibraryActivity}" />
+            </WrapPanel>
+
+            <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12" Margin="0,0,0,16">
+                <StackPanel Spacing="2">
+                    <TextBlock Classes="heading" Margin="0" Text="{x:Static res:Strings.LibraryActivity}" />
+                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.LibraryActivityNote}" />
+                </StackPanel>
+                <StackPanel Classes="activityKind" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
+                    <TextBlock Classes="note" VerticalAlignment="Center" Text="{x:Static res:Strings.ActivityKindLabel}" />
+                    <ComboBox MinWidth="170" ItemsSource="{Binding Activity.Kinds}" SelectedItem="{Binding Activity.SelectedKind}" />
+                </StackPanel>
+            </Grid>
+
+            <Border DockPanel.Dock="Top"
+                    Classes="strip"
+                    Margin="0,0,0,16"
+                    IsVisible="{Binding Activity.Problem, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <TextBlock Text="{Binding Activity.Problem}" />
+            </Border>
+
+            <Panel>
+                <TextBlock Classes="note empty"
+                           TextWrapping="Wrap"
+                           Text="{Binding Activity.EmptyText}"
+                           IsVisible="{Binding Activity.EmptyText, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <ScrollViewer>
+                    <StackPanel Margin="0,0,16,16" Spacing="20">
+                        <ItemsControl ItemsSource="{Binding Activity.Days}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Spacing="20" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ActivityDayViewModel">
+                                    <StackPanel Spacing="8">
+                                        <TextBlock Classes="subheading" Text="{Binding Heading}" />
+                                        <Border Classes="list">
+                                            <ListBox Classes="rows" ItemsSource="{Binding Entries}">
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:ActivityEntryViewModel">
+                                                        <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="14">
+                                                            <TextBlock Classes="note" Width="64" VerticalAlignment="Top" Margin="0,2,0,0" Text="{Binding TimeText}" />
+                                                            <Border Grid.Column="1"
+                                                                    Classes="tag"
+                                                                    Width="96"
+                                                                    VerticalAlignment="Top"
+                                                                    Classes.accent="{Binding Kind, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static app:LibraryEventKind.Downloaded}}">
+                                                                <TextBlock HorizontalAlignment="Center" Text="{Binding KindText}" />
+                                                            </Border>
+                                                            <StackPanel Grid.Column="2" Spacing="2">
+                                                                <WrapPanel ItemSpacing="8" LineSpacing="2">
+                                                                    <Button Classes="name" Command="{Binding OpenCommand}">
+                                                                        <TextBlock TextTrimming="CharacterEllipsis" Text="{Binding ModName}" />
+                                                                    </Button>
+                                                                    <TextBlock Classes="note" FontSize="12.5" VerticalAlignment="Center" Text="{Binding GameName}" />
+                                                                </WrapPanel>
+                                                                <TextBlock TextWrapping="Wrap" Text="{Binding Text}" />
+                                                            </StackPanel>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
+                                        </Border>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Classes="note"
+                                   Text="{Binding Activity.CappedText}"
+                                   IsVisible="{Binding Activity.CappedText, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                    </StackPanel>
+                </ScrollViewer>
             </Panel>
         </DockPanel>
 
@@ -473,7 +565,7 @@
                 <WrapPanel VerticalAlignment="Center" ItemSpacing="4" LineSpacing="4">
                     <Button Classes="crumb" Content="{Binding Title}" Command="{Binding ShowGamesCommand}" />
                     <TextBlock Classes="note" VerticalAlignment="Center" Text="›" />
-                    <Button Classes="crumb" Content="{Binding OpenGameName}" Command="{Binding BackCommand}" />
+                    <Button Classes="crumb" Content="{Binding BackText}" Command="{Binding BackCommand}" />
                     <TextBlock Classes="note" VerticalAlignment="Center" Text="›" />
                     <TextBlock Classes="note" VerticalAlignment="Center" Margin="4,0,0,0" TextWrapping="Wrap" Text="{Binding Mod.Name, FallbackValue=''}" />
                 </WrapPanel>

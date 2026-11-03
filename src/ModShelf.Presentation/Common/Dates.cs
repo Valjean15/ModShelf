@@ -57,6 +57,26 @@ internal static class Dates
     }
 
     /// <summary>
+    /// The day of a moment in the user's time zone.
+    /// </summary>
+    public static DateOnly LocalDay(DateTimeOffset moment, TimeProvider timeProvider)
+    {
+        ArgumentNullException.ThrowIfNull(timeProvider);
+        return DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(moment, timeProvider.LocalTimeZone).DateTime);
+    }
+
+    /// <summary>
+    /// A day as a heading: "Today", "Yesterday", or the long date, such as "Monday, November 2, 2026".
+    /// </summary>
+    public static string DayHeading(DateOnly day, TimeProvider timeProvider)
+    {
+        DateOnly today = LocalDay(timeProvider.GetUtcNow(), timeProvider);
+        return day == today ? Strings.DayToday
+            : day == today.AddDays(-1) ? Strings.DayYesterday
+            : day.ToString("D", CultureInfo.CurrentCulture);
+    }
+
+    /// <summary>
     /// The short time, such as "4:40 PM".
     /// </summary>
     public static string Time(DateTimeOffset moment, TimeProvider timeProvider) => Write(moment, timeProvider, "t");

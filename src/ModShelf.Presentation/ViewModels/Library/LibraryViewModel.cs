@@ -32,7 +32,8 @@ namespace ModShelf.Presentation.ViewModels.Library;
 /// them. A game opens on its mods, as rows or cards, which a box filters by name or author, toggles narrow to those with
 /// updates, watched, with archived versions or with files missing from disk, and a list orders; with previews, each
 /// shows its picture, from its saved details. A mod opens on its page in place of its game's mods, read from its site,
-/// or from its saved details when the site can't give it. It follows the library's changes while the app runs.
+/// or from its saved details when the site can't give it. The recent activity shows in place of the games what happened
+/// to the library's files lately, each opening its mod's page. It follows the library's changes while the app runs.
 /// </summary>
 public sealed partial class LibraryViewModel : ScreenViewModel
 {
@@ -61,6 +62,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
 
     public LibraryViewModel(
         IModLibrary library,
+        ILibraryHistory history,
         IModLookup lookup,
         ILibraryRescan rescan,
         ILibraryDownloads libraryDownloads,
@@ -81,6 +83,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         ILogger<LibraryViewModel> logger)
     {
         ArgumentNullException.ThrowIfNull(library);
+        ArgumentNullException.ThrowIfNull(history);
         ArgumentNullException.ThrowIfNull(lookup);
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(hiddenGames);
@@ -140,6 +143,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             new(ModFilterKind.Archived, Strings.ModFilterArchived, ArrangeMods),
             new(ModFilterKind.Missing, Strings.ModFilterMissing, ArrangeMods),
         ];
+        Activity = new LibraryActivityViewModel(history, OpenAsync, GameNameOf, timeProvider, logger);
         Previews = new PreviewsViewModel(PreviewScreen.Library, pictures);
         Previews.PropertyChanged += (_, changed) =>
         {
@@ -292,10 +296,23 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     public bool IsModOpen => Mod is not null;
 
     /// <summary>
-    /// The name of the game of the mod opened, for the way back to its mods.
+    /// The way back from the mod opened: its game's name, back to its mods; or the recent activity's, when it was opened
+    /// from there.
     /// </summary>
     [ObservableProperty]
-    public partial string OpenGameName { get; private set; } = string.Empty;
+    public partial string BackText { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// What happened to the library's files lately.
+    /// </summary>
+    public LibraryActivityViewModel Activity { get; }
+
+    /// <summary>
+    /// Whether the recent activity shows, in place of the games.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ShowGamesCommand))]
+    public partial bool IsShowingActivity { get; private set; }
 
     /// <summary>
     /// Whether a mod is being read from its site, to open it.
@@ -363,7 +380,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
 
     partial void OnSelectedModOrderChanged(LibraryChoice<ModOrder> value) => ArrangeMods();
 
-    private bool CanShowGames() => IsGameOpen || IsModOpen;
+    private bool CanShowGames() => IsGameOpen || IsModOpen || IsShowingActivity;
 
     /// <summary>
     /// Opens the open game's own settings, on the Settings screen.
@@ -393,27 +410,38 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     }
 
     /// <summary>
-    /// Closes the mod and the game, back to the games.
+    /// Shows the library's recent activity in place of the games, read again.
+    /// </summary>
+    [RelayCommand]
+    private Task ShowActivityAsync()
+    {
+        IsShowingActivity = true;
+        return Activity.LoadAsync(_stopping);
+    }
+
+    /// <summary>
+    /// Closes the mod and the game, or the recent activity, back to the games.
     /// </summary>
     [RelayCommand(CanExecute = nameof(CanShowGames))]
     private void ShowGames()
     {
         CloseMod();
         _checking?.Cancel();
+        IsShowingActivity = false;
         OpenGame = null;
         ArrangeMods();
         ShowPictures();
     }
 
     /// <summary>
-    /// Closes the mod, back to its game's mods.
+    /// Closes the mod, back to its game's mods, or to the recent activity it was opened from.
     /// </summary>
     [RelayCommand(CanExecute = nameof(IsModOpen))]
     private void Back()
     {
         ModRef? closed = _openedMod;
         CloseMod();
-        if (closed is { } mod && OpenGame?.Game != mod.Game && Games.FirstOrDefault(game => game.Game == mod.Game) is { } its)
+        if (!IsShowingActivity && closed is { } mod && OpenGame?.Game != mod.Game && Games.FirstOrDefault(game => game.Game == mod.Game) is { } its)
         {
             Open(its);
         }
@@ -468,7 +496,9 @@ public sealed partial class LibraryViewModel : ScreenViewModel
                 IsOffline = problem is not null,
             };
             _openedMod = mod;
-            OpenGameName = _games.TryGetValue(mod.Game, out LibraryGameViewModel? game) ? game.Name : page.Game.Name;
+            BackText = IsShowingActivity ? Strings.LibraryActivity
+                : _games.TryGetValue(mod.Game, out LibraryGameViewModel? game) ? game.Name
+                : page.Game.Name;
             Mod = opened;
             PageProblem = problem;
             await opened.LoadAsync(token);
@@ -725,6 +755,11 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         ShowPictures();
         Checking = CheckAsync([.. _shown.Values.Where(mod => mod.Mod.Game == game.Game)], _checking.Token);
     }
+
+    /// <summary>
+    /// The game's name, as its site says it; its key until then, or for a game the library no longer has.
+    /// </summary>
+    private string GameNameOf(GameRef game) => _games.TryGetValue(game, out LibraryGameViewModel? shown) ? shown.Name : game.Key;
 
     private void CloseMod()
     {

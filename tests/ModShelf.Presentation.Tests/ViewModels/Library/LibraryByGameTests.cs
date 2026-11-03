@@ -146,7 +146,7 @@ public sealed class LibraryByGameTests : IDisposable
         await _harness.Row(TestData.LibraryMod(SkyUi, "SkyUI")).OpenCommand.ExecuteAsync(null);
 
         await Screen.Mod!.Requirements[0].OpenCommand.ExecuteAsync(null);
-        string crumb = Screen.OpenGameName;
+        string crumb = Screen.BackText;
         Screen.BackCommand.Execute(null);
 
         Assert.Equal("Stardew Valley", crumb);
