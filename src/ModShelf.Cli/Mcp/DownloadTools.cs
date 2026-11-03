@@ -1,5 +1,7 @@
 using System.ComponentModel;
 
+using Microsoft.Extensions.Logging;
+
 using ModelContextProtocol;
 using ModelContextProtocol.Server;
 
@@ -13,7 +15,7 @@ namespace ModShelf.Cli.Mcp;
 /// cancelling a download. The desktop app runs the queue when it runs; otherwise this server does (<see cref="McpQueue"/>).
 /// </summary>
 [McpServerToolType]
-internal sealed class DownloadTools(McpQueue queue, IDownloadService downloads)
+internal sealed partial class DownloadTools(McpQueue queue, IDownloadService downloads, ILogger<DownloadTools> logger)
 {
     private const string DesktopApp = "desktop app";
     private const string ThisServer = "this MCP server";
@@ -25,6 +27,9 @@ internal sealed class DownloadTools(McpQueue queue, IDownloadService downloads)
 
     // The most links one call to download takes.
     private const int MostLinks = 50;
+
+    // The code of a call to download with the old link, in the result and the log's warning.
+    private const string LinkArgumentCode = "DL_LINK_ARG";
 
     [McpServerTool(Name = "downloads_list", Title = "List the downloads", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
     [Description("Lists the downloads in the queue, the oldest first: each one's status, progress and where the file goes. For one waiting for the user to start it on the site, the page to open, while this server runs the downloads; the desktop app, when it runs them, shows the user that page itself.")]
@@ -40,23 +45,50 @@ internal sealed class DownloadTools(McpQueue queue, IDownloadService downloads)
     [McpServerTool(Name = "download", Title = "Download into the library", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
     [Description("Downloads mods' files into the library, where library.folders says, as ModShelf's links do: a file's link, such as an update's, gets that file; a mod's link, its main file. Give one link, or several, up to 50: they're downloaded in the order given, and one that can't be still lets the others go on, with its problem said in its result. A file the library has already isn't downloaded again, and an unfinished download of it goes on. Nothing is installed. With a free Nexus Mods account, the user starts each download on the site: the download waits, with the page to open.")]
     public Task<DownloadsResult> DownloadAsync(
-        [Description("Links to files or mods, from 1 to 50, such as updates' links from library_updates, files' from mod_show, or nxm:// links the site handed over.")] string[] links,
-        CancellationToken cancellationToken)
+        McpServer server,
+        [Description("Links to files or mods, one or more, up to 50, such as updates' links from library_updates, files' from mod_show, or nxm:// links the site handed over. (link, a single link, still works but is deprecated.)")] string[]? links = null,
+        [Description("Deprecated: one link, as download took before 0.9.3. Pass links, a list, instead.")] string? link = null,
+        CancellationToken cancellationToken = default)
         => McpProblems.GuardAsync(async () =>
         {
-            if (links is not { Length: > 0 and <= MostLinks })
+            DeprecatedArgument? deprecated = null;
+            if (link is not null)
+            {
+                if (links is not null)
+                {
+                    throw new McpException("Pass only 'links'; 'link' is the old name for a single link.");
+                }
+
+                links = [link];
+                deprecated = new DeprecatedArgument(LinkArgumentCode, "link", "links", new DownloadLinks(links));
+                LogLegacyLink(logger, LinkArgumentCode, links.Length, server?.ClientInfo?.Name ?? "unknown");
+            }
+
+            if (links is not { Length: > 0 })
+            {
+                throw new McpException("'links' needs at least one link.");
+            }
+
+            if (links.Length > MostLinks)
             {
                 throw new McpException($"Give from 1 to {MostLinks} links.");
             }
 
             List<LinkDownloadResult> results = [];
-            foreach (string link in links)
+            foreach (string each in links)
             {
-                results.Add(await DownloadOneAsync(link, cancellationToken).ConfigureAwait(false));
+                results.Add(await DownloadOneAsync(each, cancellationToken).ConfigureAwait(false));
             }
 
             results = await AsTheyAreNowAsync(results, cancellationToken).ConfigureAwait(false);
-            return new DownloadsResult(results, Summarize(results));
+            string message = Summarize(results);
+            return new DownloadsResult(
+                results,
+                deprecated,
+                deprecated is null
+                    ? message
+                    : "Note: 'link' is the old way to call download and will stop working; pass 'links' as a list instead, as in "
+                        + $"the example. {message}");
         });
 
     [McpServerTool(Name = "downloads_pause", Title = "Pause a download", Idempotent = true, Destructive = false, OpenWorld = false, UseStructuredContent = true)]

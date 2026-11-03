@@ -141,7 +141,7 @@ internal static class ToolArguments
             "boolean" => "true or false",
             "null" => "null",
             "object" => "an object",
-            "array" when schema.TryGetProperty("items", out JsonElement items) && TypesOf(items) is ["string"] => "a list of strings",
+            "array" when schema.TryGetProperty("items", out JsonElement items) && TypesOf(items).Where(item => item != "null").SequenceEqual(["string"]) => "a list of strings",
             "array" => "a list",
             _ => type,
         }));

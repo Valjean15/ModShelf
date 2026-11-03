@@ -242,21 +242,21 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     {
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
 
-        // As an agent's app that read the tools from an older ModShelf, whose download took one link.
-        string refused = await mcp.CallFailingAsync("download", Arguments(("link", HandoffLink("3").AbsoluteUri)), Cancellation);
+        // As an agent's app that read the tools from another ModShelf, calling library_changes with from.
+        string refused = await mcp.CallFailingAsync("library_changes", Arguments(("from", "2026-11-01T09:00:00Z")), Cancellation);
 
         Assert.EndsWith(
-            "download doesn't take these arguments: it needs links. "
-            + "It takes links (required). It was given link, which it doesn't take. The agent's list of ModShelf's tools may be "
+            "library_changes doesn't take these arguments: it needs since. "
+            + "It takes since (required). It was given from, which it doesn't take. The agent's list of ModShelf's tools may be "
             + "older than this MCP server: restarting the agent's app, then starting a new conversation, reads it again.",
             refused,
             StringComparison.Ordinal);
-        Assert.Empty(_server.Ranges);
     }
 
     [Theory]
-    [InlineData("download", "links", "\"https://www.nexusmods.com/stardewvalley/mods/2400\"", "links is a list of strings, not a string. It takes links (required).")]
-    [InlineData("download", "links", "[\"https://www.nexusmods.com/stardewvalley/mods/2400\", 3]", "links is a list of strings, not a list. It takes links (required).")]
+    [InlineData("download", "links", "\"https://www.nexusmods.com/stardewvalley/mods/2400\"", "links is a list of strings or null, not a string. It takes links, link.")]
+    [InlineData("download", "links", "[\"https://www.nexusmods.com/stardewvalley/mods/2400\", 3]", "links is a list of strings or null, not a list. It takes links, link.")]
+    [InlineData("download", "link", "[\"https://www.nexusmods.com/stardewvalley/mods/2400\"]", "link is a string or null, not a list. It takes links, link.")]
     [InlineData("library_list", "limit", "\"many\"", "limit is an integer, not a string. It takes game, source, mod, watchedOnly, updatesOnly, missingOnly, compact, offset, limit.")]
     [InlineData("library_list", "limit", "2.5", "limit is an integer, not a number. It takes game, source, mod, watchedOnly, updatesOnly, missingOnly, compact, offset, limit.")]
     [InlineData("library_list", "compact", "\"yes\"", "compact is true or false, not a string. It takes game, source, mod, watchedOnly, updatesOnly, missingOnly, compact, offset, limit.")]
@@ -283,16 +283,76 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     }
 
     [Theory]
-    [InlineData(0)]
-    [InlineData(51)]
-    public async Task NoLinksOrTooManyAreRefused(int count)
+    [InlineData(0, "'links' needs at least one link.")]
+    [InlineData(51, "Give from 1 to 50 links.")]
+    public async Task NoLinksOrTooManyAreRefused(int count, string problem)
     {
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
 
         string refused = await mcp.CallFailingAsync("download", Arguments(("links", Enumerable.Repeat(HandoffLink("3").AbsoluteUri, count).ToArray())), Cancellation);
 
-        Assert.Contains("Give from 1 to 50 links.", refused, StringComparison.Ordinal);
+        Assert.EndsWith(problem, refused, StringComparison.Ordinal);
         Assert.Empty(_server.Ranges);
+    }
+
+    [Fact]
+    public async Task ACallWithNoLinkAtAllIsRefused()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        string refused = await mcp.CallFailingAsync("download", null, Cancellation);
+
+        Assert.EndsWith("'links' needs at least one link.", refused, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task TheOldLinkStillDownloadsAndSaysItsDeprecated()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await DownloadAndWaitAsync(mcp, "3");
+        string link = HandoffLink("3").AbsoluteUri;
+
+        DownloadsResult downloaded = await mcp.CallAsync<DownloadsResult>("download", Arguments(("link", link)), Cancellation);
+
+        Assert.True(Assert.Single(downloaded.Results).AlreadySaved);
+        DeprecatedArgument deprecated = Assert.IsType<DeprecatedArgument>(downloaded.Deprecated);
+        Assert.Equal(("DL_LINK_ARG", "link", "links"), (deprecated.Code, deprecated.Argument, deprecated.Use));
+        Assert.Equal([link], deprecated.Example.Links);
+        Assert.Equal(
+            "Note: 'link' is the old way to call download and will stop working; pass 'links' as a list instead, as in the example. "
+            + "The library has this file already, so nothing downloads.",
+            downloaded.Message);
+        string warning = Assert.Single(Cli.Logs.Entries, entry => entry.Contains("DL_LINK_ARG", StringComparison.Ordinal));
+        Assert.StartsWith(
+            $"[ModShelf.Cli.Mcp.DownloadTools] DL_LINK_ARG download called with legacy 'link'; normalized to links=[1 link] (client: {McpSession.ClientName}) |",
+            warning,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(link, warning, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task TheOldLinkAndLinksTogetherAreRefused()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        string refused = await mcp.CallFailingAsync(
+            "download", Arguments(("link", HandoffLink("3").AbsoluteUri), ("links", new[] { HandoffLink("3").AbsoluteUri })), Cancellation);
+
+        Assert.EndsWith("Pass only 'links'; 'link' is the old name for a single link.", refused, StringComparison.Ordinal);
+        Assert.Empty(_server.Ranges);
+    }
+
+    [Fact]
+    public async Task DownloadTakesLinksOrTheDeprecatedLinkAndNothingElse()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        McpClientTool download = Assert.Single(await mcp.Client.ListToolsAsync(cancellationToken: Cancellation), tool => tool.Name == "download");
+
+        System.Text.Json.JsonElement schema = download.ProtocolTool.InputSchema;
+        Assert.Equal(["link", "links"], schema.GetProperty("properties").EnumerateObject().Select(property => property.Name).Order(StringComparer.Ordinal));
+        Assert.False(schema.TryGetProperty("required", out System.Text.Json.JsonElement required) && required.GetArrayLength() > 0);
+        Assert.EndsWith("(link, a single link, still works but is deprecated.)", schema.GetProperty("properties").GetProperty("links").GetProperty("description").GetString(), StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1117,6 +1177,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         DownloadsResult downloaded = await mcp.CallAsync<DownloadsResult>("download", Arguments(("links", new[] { link })), Cancellation);
         LinkDownloadResult result = Assert.Single(downloaded.Results);
         Assert.Equal(result.Message, downloaded.Message);
+        Assert.Null(downloaded.Deprecated);
         return result;
     }
 

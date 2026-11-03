@@ -34,13 +34,21 @@ internal sealed class McpSession : IAsyncDisposable
 
     public McpClient Client => _client ?? throw new InvalidOperationException("The client isn't connected.");
 
+    /// <summary>
+    /// The name the test's client gives the server, as an agent's app gives its own.
+    /// </summary>
+    public const string ClientName = "modshelf-tests";
+
     public static async Task<McpSession> StartAsync(Func<bool, IHost> buildHost, CancellationToken cancellationToken)
     {
         McpSession session = new(buildHost);
         try
         {
             session._client = await McpClient
-                .CreateAsync(new StreamClientTransport(session._toServer.Writer.AsStream(), session._fromServer.Reader.AsStream()), cancellationToken: cancellationToken)
+                .CreateAsync(
+                    new StreamClientTransport(session._toServer.Writer.AsStream(), session._fromServer.Reader.AsStream()),
+                    new McpClientOptions { ClientInfo = new Implementation { Name = ClientName, Version = "1.0" } },
+                    cancellationToken: cancellationToken)
                 .WaitAsync(Timeout, cancellationToken)
                 .ConfigureAwait(false);
             return session;
