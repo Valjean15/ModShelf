@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json.Nodes;
 
 using ModShelf.Sources.Abstractions.Search;
@@ -12,6 +13,7 @@ internal static class NexusSearchVariables
 {
     private const string MatchingOperator = "MATCHES";
     private const string EqualOperator = "EQUALS";
+    private const string SinceOperator = "GTE";
 
     /// <param name="game">The game's domain name, already checked.</param>
     public static JsonObject For(string game, SearchQuery query)
@@ -29,6 +31,17 @@ internal static class NexusSearchVariables
         if (query.Author is { } author)
         {
             filter["author"] = Condition(author, MatchingOperator);
+        }
+
+        if (query.Category is { } category)
+        {
+            filter["categoryName"] = Condition(category, EqualOperator);
+        }
+
+        // A date in a filter is written in seconds since 1970, as text: the API ignores ISO 8601 there.
+        if (query.UpdatedSince is { } since)
+        {
+            filter["updatedAt"] = Condition(since.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture), SinceOperator);
         }
 
         if (!query.IncludeAdultContent)
@@ -61,6 +74,9 @@ internal static class NexusSearchVariables
         SearchSort.Downloads => "downloads",
         SearchSort.Updated => "updatedAt",
         SearchSort.Newest => "createdAt",
+        SearchSort.Name => "name",
+        SearchSort.Size => "size",
+        SearchSort.UniqueDownloads => "uniqueDownloads",
         _ => throw new ArgumentOutOfRangeException(nameof(query), query.Sort, "Unknown sort."),
     };
 }

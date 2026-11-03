@@ -680,7 +680,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     }
 
     [Theory]
-    [InlineData("sort", "Popularity", "sort must be one of Relevance, Endorsements, Downloads, Updated, Newest.")]
+    [InlineData("sort", "Popularity", "sort must be one of Relevance, Endorsements, Downloads, Updated, Newest, Name, Size, UniqueDownloads.")]
     [InlineData("sort", "9", "sort must be one of")]
     [InlineData("pageSize", 0, "pageSize must be from 1 to 100.")]
     [InlineData("page", 0, "page must be 1 or more")]

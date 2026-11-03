@@ -20,7 +20,9 @@ public sealed record SearchQuery
         int count = 20,
         string? author = null,
         bool includeAdultContent = false,
-        SearchDirection direction = SearchDirection.Descending)
+        SearchDirection direction = SearchDirection.Descending,
+        string? category = null,
+        DateTimeOffset? updatedSince = null)
     {
         if (!Enum.IsDefined(sort))
         {
@@ -43,6 +45,8 @@ public sealed record SearchQuery
         Author = Blank(author);
         IncludeAdultContent = includeAdultContent;
         Direction = direction;
+        Category = Blank(category);
+        UpdatedSince = updatedSince;
     }
 
     /// <summary>
@@ -76,6 +80,18 @@ public sealed record SearchQuery
     /// Whether mods with adult content are included. They're left out unless asked for.
     /// </summary>
     public bool IncludeAdultContent { get; }
+
+    /// <summary>
+    /// Only mods in this category, by its name on the site, as <see cref="Catalog.GameInfo.Categories"/> lists them; or
+    /// null for any category.
+    /// </summary>
+    public string? Category { get; }
+
+    /// <summary>
+    /// Only mods updated since then, or null for any time. A date rather than a span of time, so each page of the same
+    /// search asks for the same mods.
+    /// </summary>
+    public DateTimeOffset? UpdatedSince { get; }
 
     private static string? Blank(string? text) => string.IsNullOrWhiteSpace(text) ? null : text.Trim();
 }

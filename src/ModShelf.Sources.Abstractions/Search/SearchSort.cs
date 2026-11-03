@@ -30,4 +30,19 @@ public enum SearchSort
     /// The most recently published first.
     /// </summary>
     Newest = 4,
+
+    /// <summary>
+    /// By name, from Z to A, as the other orders put the most first; <see cref="SearchDirection.Ascending"/> gives A to Z.
+    /// </summary>
+    Name = 5,
+
+    /// <summary>
+    /// The largest first, by the size the site gives the mod, such as its main file's.
+    /// </summary>
+    Size = 6,
+
+    /// <summary>
+    /// The most downloaded first, counting each user once.
+    /// </summary>
+    UniqueDownloads = 7,
 }

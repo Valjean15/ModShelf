@@ -13,7 +13,7 @@ using WireMock.ResponseBuilders;
 namespace ModShelf.Sources.Nexus.Tests;
 
 /// <summary>
-/// Searching a game's mods through the v2 GraphQL API: seven searches recorded from Nexus Mods, each answered only when
+/// Searching a game's mods through the v2 GraphQL API: twelve searches recorded from Nexus Mods, each answered only when
 /// the source asks what was recorded, and answers written by hand for what the recordings don't show.
 /// </summary>
 public sealed class NexusSourceSearchTests : IDisposable
@@ -47,6 +47,9 @@ public sealed class NexusSourceSearchTests : IDisposable
     [InlineData("search-author-updated", null, SearchSort.Updated, 0, "Pathoschild", false, SearchDirection.Descending, 42, "53956", "The Neighborly Collection - Tractor Garage")]
     [InlineData("search-newest-with-adult", null, SearchSort.Newest, 0, null, true, SearchDirection.Descending, 35153, "54973", "Millionarie    Linus")]
     [InlineData("search-oldest-first", null, SearchSort.Newest, 0, null, false, SearchDirection.Ascending, 33797, "3", "Rise and Shine - Configurable wake-up time")]
+    [InlineData("search-name", null, SearchSort.Name, 0, null, false, SearchDirection.Ascending, 33797, "23014", "'Another' Igor's Anime Portrait for Leah")]
+    [InlineData("search-size", null, SearchSort.Size, 0, null, false, SearchDirection.Descending, 33797, "46663", "Sweetinsanity9's Animated Portraits")]
+    [InlineData("search-unique-downloads", null, SearchSort.UniqueDownloads, 0, null, false, SearchDirection.Descending, 33797, "2400", "SMAPI - Stardew Modding API")]
     public async Task SearchesAsNexusModsAnsweredThem(
         string recording,
         string? text,
@@ -71,6 +74,31 @@ public sealed class NexusSourceSearchTests : IDisposable
         Assert.Equal(5, page.Mods.Count);
         Assert.Equal((firstId, firstName), (page.Mods[0].Mod.Id, page.Mods[0].Name));
         Assert.All(page.Mods, mod => Assert.Same(StardewValley, mod.Mod.Game));
+    }
+
+    [Fact]
+    public async Task SearchesACategoryAsNexusModsAnsweredIt()
+    {
+        _api.Serve(RecordedNexusApi.Premium, "search-category");
+
+        SearchPage page = await Source.SearchAsync(
+            StardewValley, new SearchQuery(sort: SearchSort.Endorsements, count: 5, category: "Modding Tools"), Cancellation);
+
+        Assert.Equal((596, "1915", "Content Patcher"), (page.TotalCount, page.Mods[0].Mod.Id, page.Mods[0].Name));
+    }
+
+    [Fact]
+    public async Task SearchesTheModsUpdatedSinceADateAsNexusModsAnsweredThem()
+    {
+        // The start of the hour a week before the recording, as the recording script asked.
+        DateTimeOffset since = DateTimeOffset.FromUnixTimeSeconds(1793062800);
+        _api.Serve(RecordedNexusApi.Premium, "search-updated-week");
+
+        SearchPage page = await Source.SearchAsync(
+            StardewValley, new SearchQuery(sort: SearchSort.Endorsements, count: 5, updatedSince: since), Cancellation);
+
+        Assert.Equal((463, "4736"), (page.TotalCount, page.Mods[0].Mod.Id));
+        Assert.All(page.Mods, mod => Assert.True(mod.UpdatedAt >= since, $"{mod.Name} was updated {mod.UpdatedAt}."));
     }
 
     [Fact]
@@ -155,6 +183,9 @@ public sealed class NexusSourceSearchTests : IDisposable
     [InlineData("smapi", SearchSort.Downloads, "downloads")]
     [InlineData(null, SearchSort.Updated, "updatedAt")]
     [InlineData(null, SearchSort.Newest, "createdAt")]
+    [InlineData("smapi", SearchSort.Name, "name")]
+    [InlineData(null, SearchSort.Size, "size")]
+    [InlineData(null, SearchSort.UniqueDownloads, "uniqueDownloads")]
     public async Task SortsTheWayAsked(string? text, SearchSort sort, string field)
     {
         _api.AnswerPost(GraphQlPath, Page(total: 0));
@@ -164,6 +195,30 @@ public sealed class NexusSourceSearchTests : IDisposable
         JsonObject order = Assert.Single(SentBody()["variables"]!["sort"]!.AsArray())!.AsObject();
         Assert.Equal(field, Assert.Single(order).Key);
         Assert.Equal("DESC", order[field]!["direction"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public async Task FiltersByCategoryAndUpdatedSinceInSecondsSince1970()
+    {
+        _api.AnswerPost(GraphQlPath, Page(total: 0));
+
+        await Source.SearchAsync(
+            StardewValley,
+            new SearchQuery(category: "Modding Tools", updatedSince: new DateTimeOffset(2026, 10, 27, 1, 0, 0, TimeSpan.FromHours(-6))),
+            Cancellation);
+
+        JsonNode variables = SentBody()["variables"]!;
+        Assert.True(JsonNode.DeepEquals(
+            JsonNode.Parse("""
+                {
+                  "gameDomainName": [{"value": "stardewvalley", "op": "EQUALS"}],
+                  "categoryName": [{"value": "Modding Tools", "op": "EQUALS"}],
+                  "updatedAt": [{"value": "1793084400", "op": "GTE"}],
+                  "adultContent": [{"value": false, "op": "EQUALS"}]
+                }
+                """),
+            variables["filter"]),
+            variables["filter"]!.ToJsonString());
     }
 
     [Fact]

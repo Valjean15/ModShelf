@@ -105,7 +105,7 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
         [Description("Words to look for in the mods' names; none to list every mod of the game.")] string? words = null,
         [Description("Only mods by this author.")] string? author = null,
         [Description("Include mods with adult content.")] bool adult = false,
-        [Description("The order: Relevance (the default; the most endorsed without words), Endorsements, Downloads, Updated or Newest. The most comes first.")] string sort = "Relevance",
+        [Description("The order: Relevance (the default; the most endorsed without words), Endorsements, Downloads, UniqueDownloads, Updated, Newest, Size or Name. The most comes first; by Name, Z first.")] string sort = "Relevance",
         [Description("Turn the order around, so the least comes first.")] bool ascending = false,
         [Description("Which page of results, from 1.")] int page = 1,
         [Description("How many mods a page lists, from 1 to 100.")] int pageSize = 20,

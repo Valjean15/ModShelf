@@ -102,6 +102,12 @@ public sealed class ModCommandSearchTests : IAsyncDisposable
     [InlineData("--sort", "downloads", ", least downloaded first.", SearchDirection.Ascending)]
     [InlineData("--sort", "updated", ", longest since updated first.", SearchDirection.Ascending)]
     [InlineData("--sort", "relevance", ", least endorsed first.", SearchDirection.Ascending)]
+    [InlineData("--sort", "name", ", by name from Z to A.", SearchDirection.Descending)]
+    [InlineData("--sort", "name", ", by name from A to Z.", SearchDirection.Ascending)]
+    [InlineData("--sort", "size", ", largest first.", SearchDirection.Descending)]
+    [InlineData("--sort", "size", ", smallest first.", SearchDirection.Ascending)]
+    [InlineData("--sort", "uniquedownloads", ", most downloaded by different users first.", SearchDirection.Descending)]
+    [InlineData("--sort", "uniquedownloads", ", least downloaded by different users first.", SearchDirection.Ascending)]
     public async Task AscendingTurnsTheOrderAround(string option, string sort, string described, SearchDirection direction)
     {
         CliResult found = await SearchAsync(direction == SearchDirection.Ascending ? [option, sort, "--ascending"] : [option, sort]);
@@ -131,7 +137,7 @@ public sealed class ModCommandSearchTests : IAsyncDisposable
     [InlineData(BadInput, "--page must be 1 or more", "--page", "0")]
     [InlineData(BadInput, "--page-size must be from 1 to 100", "--page-size", "0")]
     [InlineData(BadInput, "--page-size must be from 1 to 100", "--page-size", "101")]
-    [InlineData(BadInput, "--sort must be one of Relevance, Endorsements, Downloads, Updated, Newest.", "--sort", "9")]
+    [InlineData(BadInput, "--sort must be one of Relevance, Endorsements, Downloads, Updated, Newest, Name, Size, UniqueDownloads.", "--sort", "9")]
     [InlineData(Failed, "couldn't search: Field 'nameStemmed' is not defined.", "broken")]
     [InlineData(Failed, "account link", "locked")]
     public async Task SaysWhyItCantSearch(int exitCode, string message, params string[] arguments)

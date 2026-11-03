@@ -45,7 +45,7 @@ internal static partial class ModCommand
         };
         Option<SearchSort> sort = new("--sort")
         {
-            Description = "The order: Relevance (the default; the most endorsed without words), Endorsements, Downloads, Updated or Newest. The most comes first.",
+            Description = "The order: Relevance (the default; the most endorsed without words), Endorsements, Downloads, UniqueDownloads, Updated, Newest, Size or Name. The most comes first; by Name, Z first.",
             DefaultValueFactory = _ => SearchSort.Relevance,
         };
         sort.Validators.Add(result =>
@@ -246,6 +246,12 @@ internal static partial class ModCommand
         (SearchSort.Updated, SearchDirection.Ascending) => ", longest since updated first",
         (SearchSort.Newest, SearchDirection.Descending) => ", newest first",
         (SearchSort.Newest, SearchDirection.Ascending) => ", oldest first",
+        (SearchSort.Name, SearchDirection.Descending) => ", by name from Z to A",
+        (SearchSort.Name, SearchDirection.Ascending) => ", by name from A to Z",
+        (SearchSort.Size, SearchDirection.Descending) => ", largest first",
+        (SearchSort.Size, SearchDirection.Ascending) => ", smallest first",
+        (SearchSort.UniqueDownloads, SearchDirection.Descending) => ", most downloaded by different users first",
+        (SearchSort.UniqueDownloads, SearchDirection.Ascending) => ", least downloaded by different users first",
         _ => string.Empty,
     };
 

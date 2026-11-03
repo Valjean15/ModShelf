@@ -13,6 +13,7 @@ public sealed class SearchQueryTests
             ((string?)null, SearchSort.Relevance, 0, 20, (string?)null, false),
             (query.Text, query.Sort, query.Offset, query.Count, query.Author, query.IncludeAdultContent));
         Assert.Equal(SearchDirection.Descending, query.Direction);
+        Assert.Equal(((string?)null, (DateTimeOffset?)null), (query.Category, query.UpdatedSince));
     }
 
     [Fact]
@@ -27,12 +28,23 @@ public sealed class SearchQueryTests
     }
 
     [Fact]
+    public void KeepsTheCategoryTrimmedAndWhenSince()
+    {
+        DateTimeOffset since = new(2026, 10, 27, 1, 0, 0, TimeSpan.Zero);
+
+        SearchQuery query = new(category: " Modding Tools ", updatedSince: since);
+
+        Assert.Equal(("Modding Tools", since), (query.Category, query.UpdatedSince!.Value));
+    }
+
+    [Fact]
     public void TreatsBlankTextAndAuthorAsNone()
     {
-        SearchQuery query = new(" ", author: "");
+        SearchQuery query = new(" ", author: "", category: " ");
 
         Assert.Null(query.Text);
         Assert.Null(query.Author);
+        Assert.Null(query.Category);
     }
 
     [Theory]
