@@ -1,0 +1,195 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/v2/graphql",
+    "query": "",
+    "body": {
+      "operationName": "ArtworkSchema"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": {
+        "gameArtworkSchema": {
+          "kind": "ENUM",
+          "fields": null
+        },
+        "gameArtwork": {
+          "kind": "OBJECT",
+          "fields": [
+            {
+              "name": "schemaV1",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "ArtworkSchemaV1",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "schemaV2",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "ArtworkSchemaV2",
+                  "ofType": null
+                }
+              }
+            }
+          ]
+        },
+        "gamePage": {
+          "kind": "OBJECT",
+          "fields": [
+            {
+              "name": "facets",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "NodesFacet",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "facetsData",
+              "type": {
+                "kind": "SCALAR",
+                "name": "JSON",
+                "ofType": null
+              }
+            },
+            {
+              "name": "nodes",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "OBJECT",
+                      "name": "Game"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "nodesCount",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              }
+            },
+            {
+              "name": "nodesFacets",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "NodesFacet",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "nodesFilter",
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            {
+              "name": "totalCount",
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              }
+            }
+          ]
+        },
+        "gamesSearchFilter": {
+          "inputFields": [
+            {
+              "name": "filter",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "GamesSearchFilter",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            {
+              "name": "op",
+              "type": {
+                "kind": "ENUM",
+                "name": "FilterLogicalOperator",
+                "ofType": null
+              }
+            },
+            {
+              "name": "name",
+              "type": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "GameNameFieldFilterValue",
+                    "ofType": null
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

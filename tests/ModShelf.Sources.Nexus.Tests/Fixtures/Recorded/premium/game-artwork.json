@@ -1,0 +1,31 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/v2/graphql",
+    "query": "",
+    "body": {
+      "operationName": "GameArtwork"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": {
+        "gameArtwork": {
+          "schemaV1": {
+            "tile": "https://images.nexusmods.com/images/games/4_3/tile_{gameId}.jpg",
+            "tileBlurred": "https://images.nexusmods.com/images/games/4_3/b/tile_{gameId}.jpg"
+          },
+          "schemaV2": {
+            "hero": "https://images.nexusmods.com/images/games/v2/{gameId}/hero.jpg",
+            "thumbnail": "https://images.nexusmods.com/images/games/v2/{gameId}/thumbnail.jpg",
+            "tile": "https://images.nexusmods.com/images/games/v2/{gameId}/tile.jpg"
+          }
+        }
+      }
+    }
+  }
+}
