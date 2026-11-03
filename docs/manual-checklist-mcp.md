@@ -12,7 +12,9 @@ you should see.
 ## 1. The server
 
 - [ ] **1.1 Tools.** Start the agent's app, and ask it which ModShelf tools it has.
-  24 tools, from `library_list` to `diagnostics`. Claude Desktop's settings show the server as running.
+  24 tools, from `library_list` to `diagnostics`. Claude Desktop's settings show the server as running. After ModShelf
+  is updated, quit Claude Desktop completely, start it again and begin a new conversation: an older list of the tools
+  makes calls such as `download` with `link` fail with "download doesn't take these arguments: it needs links. …".
 - [ ] **1.2 Reading.** Ask for the library, the updates and the settings; then for the mods with files missing from disk.
   The mods, their files' full paths in the test library, sizes and SHA-256s, and the settings with their defaults marked.
   The missing ones come from one `library_list` with `missingOnly`; with none missing, none.
