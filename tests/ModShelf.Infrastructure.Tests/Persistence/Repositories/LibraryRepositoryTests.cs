@@ -263,6 +263,69 @@ public sealed class LibraryRepositoryTests : IAsyncLifetime
         Assert.Contains("Mod 2400 of stardewvalley on nexus", exception.Message, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task APinANoteAndSkippedUpdatesSurviveARestart()
+    {
+        string note = "Stay on 4.5.1: Ünïcode,\nand a second line.";
+        await StoreAsync(Watched(Smapi)
+            .WithUpdates([Update(Smapi, "1"), Update(Smapi, "2"), Update(Smapi, "3")])
+            .WithUpdateSkipped(new ModFileRef(Smapi, "3"), true)
+            .WithUpdateSkipped(new ModFileRef(Smapi, "1"), true)
+            .WithPinned(true)
+            .WithNote(note));
+        await StoreAsync(Watched(ContentPatcher));
+
+        await _database.RestartAsync();
+        IReadOnlyList<LibraryMod> listed = await _database.Library.ListAsync(Cancellation);
+        LibraryMod found = (await _database.Library.FindAsync(Smapi, Cancellation))!;
+
+        Assert.Equal((true, note), (found.IsPinned, found.Note));
+        Assert.Equal(["1", "3"], found.SkippedUpdates.Select(file => file.Id));
+        Assert.Equal(["1", "3"], listed[0].SkippedUpdates.Select(file => file.Id));
+        Assert.Equal((false, (string?)null, 0), (listed[1].IsPinned, listed[1].Note, listed[1].SkippedUpdates.Count));
+    }
+
+    [Fact]
+    public async Task SkippedUpdatesAreChangedInPlaceAddedAndRemoved()
+    {
+        await StoreAsync(Watched(Smapi).WithUpdates([Update(Smapi, "1"), Update(Smapi, "2")]).WithUpdateSkipped(new ModFileRef(Smapi, "1"), true));
+
+        await _database.Library.UpdateAsync(
+            Smapi,
+            mod => mod!.WithUpdateSkipped(new ModFileRef(Smapi, "1"), false).WithUpdateSkipped(new ModFileRef(Smapi, "2"), true).WithPinned(true).WithNote("A note."),
+            Cancellation);
+        await _database.Library.UpdateAsync(Smapi, mod => mod!.WithPinned(false).WithNote(null), Cancellation);
+
+        LibraryMod found = (await _database.Library.FindAsync(Smapi, Cancellation))!;
+        Assert.Equal(["2"], found.SkippedUpdates.Select(file => file.Id));
+        Assert.Equal((false, (string?)null), (found.IsPinned, found.Note));
+        Assert.Equal(1L, await _database.QueryAsync("SELECT COUNT(*) FROM SkippedUpdates"));
+    }
+
+    [Fact]
+    public async Task AModsSkippedUpdatesGoWithItAndWithTheirUpdates()
+    {
+        await StoreAsync(Watched(Smapi).WithUpdates([Update(Smapi, "1"), Update(Smapi, "2")]).WithUpdateSkipped(new ModFileRef(Smapi, "1"), true));
+        await StoreAsync(Watched(ContentPatcher).WithUpdates([Update(ContentPatcher, "5")]).WithUpdateSkipped(new ModFileRef(ContentPatcher, "5"), true));
+
+        await _database.Library.UpdateAsync(Smapi, mod => mod!.WithUpdates([Update(Smapi, "2")]), Cancellation);
+        Assert.Equal(1L, await _database.QueryAsync("SELECT COUNT(*) FROM SkippedUpdates"));
+
+        await _database.Library.UpdateAsync(ContentPatcher, _ => null, Cancellation);
+        Assert.Equal(0L, await _database.QueryAsync("SELECT COUNT(*) FROM SkippedUpdates"));
+    }
+
+    [Fact]
+    public async Task ASkippedUpdateNoLibraryCanHaveStopsTheLoad()
+    {
+        await StoreAsync(Watched(Smapi).WithUpdates([Update(Smapi, "1")]));
+        await _database.QueryAsync("INSERT INTO SkippedUpdates (ModSequence, FileId) VALUES (1, '99')");
+
+        InvalidDataException exception = await Assert.ThrowsAsync<InvalidDataException>(() => _database.Library.FindAsync(Smapi, Cancellation));
+
+        Assert.Contains("Mod 2400 of stardewvalley on nexus", exception.Message, StringComparison.Ordinal);
+    }
+
     private static string Count(string name, int add = 0)
         => (int.Parse(name, System.Globalization.CultureInfo.InvariantCulture) + add).ToString(System.Globalization.CultureInfo.InvariantCulture);
 

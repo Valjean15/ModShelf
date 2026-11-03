@@ -647,6 +647,145 @@ public sealed class ModLibraryTests : IDisposable
         Assert.Empty(_history.Events);
     }
 
+    [Fact]
+    public async Task PinsAModWithoutAskingItsSite()
+    {
+        Stored(watched: true, File("35407"));
+        using WatchedChanges seen = new(_changes);
+
+        LibraryChange change = await Library(_site).SetPinnedAsync(SkyUi, true, Cancellation);
+
+        Assert.True(change.After!.IsPinned);
+        Assert.False(change.Before!.IsPinned);
+        Assert.Same(change.After, Assert.Single(_repository.Mods));
+        Assert.Equal([change], await seen.StopAsync());
+        Assert.Empty(_site.Asked);
+
+        LibraryChange unpinned = await Library(_site).SetPinnedAsync(SkyUi, false, Cancellation);
+
+        Assert.False(unpinned.After!.IsPinned);
+    }
+
+    [Fact]
+    public async Task PinsAndKeepsANoteOfAModByItsPageWithoutAskingItsSite()
+    {
+        _repository.Add(LibraryMod.Watch(SkyUi, "SkyUI", null, Link, TestData.Now).WithFile(File("35407")));
+        Uri onItsPage = new("http://NexusMods.com/skyrimspecialedition/mods/12604/?tab=files&file_id=35407");
+
+        await Library(_site).SetPinnedAsync(onItsPage, true, Cancellation);
+        await Library(_site).SetNoteAsync(onItsPage, "Stay on 5.2.", Cancellation);
+
+        LibraryMod mod = Assert.Single(_repository.Mods);
+        Assert.Equal((true, "Stay on 5.2."), (mod.IsPinned, mod.Note));
+        Assert.Empty(_site.Asked);
+    }
+
+    [Fact]
+    public async Task PinningSkippingOrNotingAModNotInTheLibraryIsRefused()
+    {
+        ModLibrary library = Library(_site);
+
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => library.SetPinnedAsync(SkyUi, true, Cancellation));
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => library.SetPinnedAsync(Link, true, Cancellation));
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => library.SkipUpdateAsync(File("35408").File, true, Cancellation));
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => library.SetNoteAsync(SkyUi, "A note.", Cancellation));
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => library.SetNoteAsync(Link, "A note.", Cancellation));
+        Assert.Empty(_repository.Mods);
+    }
+
+    [Fact]
+    public async Task SkipsAnUpdateByItsOwnLinkWithoutAskingItsSite()
+    {
+        Stored(watched: true, File("35407"));
+        Uri page = new("https://www.nexusmods.com/skyrimspecialedition/mods/12604?tab=files&file_id=35408");
+        await _repository.UpdateAsync(SkyUi, stored => stored!.WithUpdates([Update("35408", page)]), Cancellation);
+        using WatchedChanges seen = new(_changes);
+
+        LibraryChange change = await Library(_site).SkipUpdateAsync(
+            new Uri("http://nexusmods.com/skyrimspecialedition/mods/12604/?tab=files&file_id=35408"), true, Cancellation);
+
+        Assert.Equal([new ModFileRef(SkyUi, "35408")], change.After!.SkippedUpdates);
+        Assert.Empty(change.After.OfferedUpdates);
+        Assert.Single(await seen.StopAsync());
+        Assert.Empty(_site.Asked);
+
+        LibraryChange offered = await Library(_site).SkipUpdateAsync(new ModFileRef(SkyUi, "35408"), false, Cancellation);
+
+        Assert.Empty(offered.After!.SkippedUpdates);
+    }
+
+    [Fact]
+    public async Task SkipsTheUpdateWhoseLinkNamesItsFile()
+    {
+        Stored(watched: true, File("35407"));
+        await _repository.UpdateAsync(
+            SkyUi,
+            stored => stored!.WithUpdates(
+            [
+                Update("35408", new Uri("https://www.nexusmods.com/skyrimspecialedition/mods/12604?tab=files&file_id=35408")),
+                Update("35409", new Uri("https://www.nexusmods.com/skyrimspecialedition/mods/12604?tab=files&file_id=35409")),
+            ]),
+            Cancellation);
+
+        LibraryChange change = await Library(_site).SkipUpdateAsync(
+            new Uri("https://www.nexusmods.com/skyrimspecialedition/mods/12604?tab=files&file_id=35409"), true, Cancellation);
+
+        Assert.Equal([new ModFileRef(SkyUi, "35409")], change.After!.SkippedUpdates);
+        Assert.Empty(_site.Asked);
+    }
+
+    [Fact]
+    public async Task SkipsAnUpdateOfAnotherFilesLinkAsItsSiteSays()
+    {
+        // The site says the link is to file 35407, which the library doesn't have: a new main file of a mod only watched.
+        _repository.Add(LibraryMod.Watch(SkyUi, "SkyUI", null, null, TestData.Now));
+        await _repository.UpdateAsync(SkyUi, stored => stored!.WithUpdates([Update("35407", null)]), Cancellation);
+
+        LibraryChange change = await Library(_site).SkipUpdateAsync(Link, true, Cancellation);
+
+        Assert.Equal([new ModFileRef(SkyUi, "35407")], change.After!.SkippedUpdates);
+        Assert.Equal(["RecognizeAsync"], _site.Asked);
+    }
+
+    [Fact]
+    public async Task SkippingAFileThatIsntAnUpdateIsRefused()
+    {
+        LibraryMod before = Stored(watched: true, File("35407"));
+        ModLibrary library = Library(_site);
+
+        await Assert.ThrowsAsync<ArgumentException>(() => library.SkipUpdateAsync(File("35407").File, true, Cancellation));
+        await Assert.ThrowsAsync<ArgumentException>(() => library.SkipUpdateAsync(Link, true, Cancellation));
+        Assert.Same(before, Assert.Single(_repository.Mods));
+    }
+
+    [Fact]
+    public async Task KeepsANoteAndTakesItAway()
+    {
+        Stored(watched: false, File("35407"));
+        ModLibrary library = Library(_site);
+
+        LibraryChange noted = await library.SetNoteAsync(SkyUi, "  Stay on 5.2: 5.3 breaks the map.  ", Cancellation);
+        LibraryChange removed = await library.SetNoteAsync(SkyUi, " ", Cancellation);
+
+        Assert.Equal("Stay on 5.2: 5.3 breaks the map.", noted.After!.Note);
+        Assert.Null(removed.After!.Note);
+        Assert.Null(Assert.Single(_repository.Mods).Note);
+        Assert.Empty(_site.Asked);
+    }
+
+    [Fact]
+    public async Task ANoteTooLongIsRefused()
+    {
+        LibraryMod before = Stored(watched: true, File("35407"));
+
+        await Assert.ThrowsAsync<ArgumentException>(() => Library(_site).SetNoteAsync(SkyUi, new string('a', 2001), Cancellation));
+
+        Assert.Same(before, Assert.Single(_repository.Mods));
+    }
+
+    private LibraryUpdate Update(string id, Uri? page)
+        => new(new ModFileRef(SkyUi, id), $"SkyUI {id}", $"SkyUI_{id}.7z", "5.3", ModFileCategory.Main, TestData.Now, page is null ? null : new ModFileRef(SkyUi, "35407"), TestData.Now, page);
+
     private static LibraryFile File(string id, string relativePath = "SkyUI_5_2_SE.7z")
         => new(new ModFileRef(TestData.File(TestData.Nexus, id).Mod, id), "SkyUI 5.2", "5.2", ModFileCategory.Main, TestData.Now, relativePath, 1, TestData.Now);
 

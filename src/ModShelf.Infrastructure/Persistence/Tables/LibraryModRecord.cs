@@ -4,7 +4,7 @@ using ModShelf.Domain.Mods;
 namespace ModShelf.Infrastructure.Persistence.Tables;
 
 /// <summary>
-/// A row of the <c>LibraryMods</c> table, with its files and updates. The repository maps it to and from
+/// A row of the <c>LibraryMods</c> table, with its files, updates and updates skipped. The repository maps it to and from
 /// <see cref="LibraryMod"/>.
 /// </summary>
 /// <remarks>A mutable class rather than a record, because EF Core tracks entities by reference.</remarks>
@@ -38,9 +38,15 @@ internal sealed class LibraryModRecord
     /// </summary>
     public bool NeedsFullCheck { get; set; }
 
+    public bool IsPinned { get; set; }
+
+    public string? Note { get; set; }
+
     public List<LibraryFileRecord> Files { get; set; } = [];
 
     public List<LibraryUpdateRecord> Updates { get; set; } = [];
+
+    public List<SkippedUpdateRecord> SkippedUpdates { get; set; } = [];
 
     public static LibraryModRecord From(LibraryMod mod)
     {
@@ -56,8 +62,8 @@ internal sealed class LibraryModRecord
     }
 
     /// <summary>
-    /// Takes over everything but the key from <paramref name="mod"/>. Files and updates are matched by their file's ID,
-    /// so one that stays keeps its row; files also keep their place.
+    /// Takes over everything but the key from <paramref name="mod"/>. Files, updates and updates skipped are matched by
+    /// their file's ID, so one that stays keeps its row; files also keep their place.
     /// </summary>
     public void CopyFrom(LibraryMod mod)
     {
@@ -68,6 +74,8 @@ internal sealed class LibraryModRecord
         AddedAt = mod.AddedAt;
         CheckedAt = mod.CheckedAt;
         NeedsFullCheck = mod.NeedsFullCheck;
+        IsPinned = mod.IsPinned;
+        Note = mod.Note;
 
         Files.RemoveAll(record => mod.Files.All(file => file.File.Id != record.FileId));
         foreach (LibraryFile file in mod.Files)
@@ -95,6 +103,12 @@ internal sealed class LibraryModRecord
                 Updates.Add(LibraryUpdateRecord.From(update, position));
             }
         }
+
+        SkippedUpdates.RemoveAll(record => mod.SkippedUpdates.All(skipped => skipped.Id != record.FileId));
+        foreach (ModFileRef skipped in mod.SkippedUpdates.Where(skipped => SkippedUpdates.TrueForAll(record => record.FileId != skipped.Id)))
+        {
+            SkippedUpdates.Add(new SkippedUpdateRecord { FileId = skipped.Id });
+        }
     }
 
     /// <summary>
@@ -116,7 +130,10 @@ internal sealed class LibraryModRecord
                 CheckedAt,
                 Files.OrderBy(file => file.Sequence).Select(file => file.ToFile(mod)),
                 Updates.OrderBy(update => update.Position).Select(update => update.ToUpdate(mod)),
-                NeedsFullCheck);
+                NeedsFullCheck,
+                IsPinned,
+                Note,
+                SkippedUpdates.OrderBy(skipped => skipped.FileId, StringComparer.Ordinal).Select(skipped => new ModFileRef(mod, skipped.FileId)));
         }
         catch (Exception exception) when (exception is ArgumentException or UriFormatException)
         {

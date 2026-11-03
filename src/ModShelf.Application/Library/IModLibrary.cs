@@ -93,6 +93,63 @@ public interface IModLibrary
     Task<LibraryChange> ForgetAsync(ModRef modRef, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Pins a mod in the library at the version it has, or unpins it, without asking its site. A pinned mod's updates are
+    /// still found, but aren't offered: <see cref="LibraryMod.OfferedUpdates"/> leaves them out. Asking for what the mod
+    /// is already changes nothing.
+    /// </summary>
+    /// <exception cref="KeyNotFoundException">The mod isn't in the library.</exception>
+    Task<LibraryChange> SetPinnedAsync(ModRef modRef, bool pinned, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Pins the mod a link is to, or on whose page it is, or unpins it, as <see cref="SetPinnedAsync(ModRef, bool,
+    /// CancellationToken)"/> does. A link to a library mod's page, or to one of its files there, is matched without
+    /// asking its site.
+    /// </summary>
+    /// <exception cref="Downloads.UnsupportedLinkException">No source knows the link.</exception>
+    /// <exception cref="ArgumentException">The link is malformed, or is the site's but not to a mod or a file.</exception>
+    /// <exception cref="KeyNotFoundException">The mod isn't in the library.</exception>
+    Task<LibraryChange> SetPinnedAsync(Uri link, bool pinned, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Skips one of a library mod's updates until a newer one comes, so it isn't offered, or offers it again, without
+    /// asking its site. Skipping an update skipped already, or offering one that isn't, changes nothing.
+    /// </summary>
+    /// <exception cref="KeyNotFoundException">The mod isn't in the library.</exception>
+    /// <exception cref="ArgumentException">Skipping a file that isn't one of the mod's updates.</exception>
+    Task<LibraryChange> SkipUpdateAsync(ModFileRef update, bool skip, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Skips the update a link is to, such as the link <c>library_updates</c> gives, or offers it again, as
+    /// <see cref="SkipUpdateAsync(ModFileRef, bool, CancellationToken)"/> does. A link to one of the library's updates is
+    /// matched without asking its site.
+    /// </summary>
+    /// <exception cref="Downloads.UnsupportedLinkException">No source knows the link.</exception>
+    /// <exception cref="ArgumentException">
+    /// The link is malformed, or is the site's but not to a file; or skipping a file that isn't one of the mod's updates.
+    /// </exception>
+    /// <exception cref="KeyNotFoundException">The mod isn't in the library.</exception>
+    Task<LibraryChange> SkipUpdateAsync(Uri link, bool skip, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Keeps a note of a library mod, its ends trimmed, in place of the one it had; a null or blank note removes it.
+    /// </summary>
+    /// <exception cref="KeyNotFoundException">The mod isn't in the library.</exception>
+    /// <exception cref="ArgumentException">The note is longer than <see cref="LibraryMod.MaxNoteLength"/>.</exception>
+    Task<LibraryChange> SetNoteAsync(ModRef modRef, string? note, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Keeps a note of the mod a link is to, or on whose page it is, as <see cref="SetNoteAsync(ModRef, string?,
+    /// CancellationToken)"/> does. A link to a library mod's page, or to one of its files there, is matched without
+    /// asking its site.
+    /// </summary>
+    /// <exception cref="Downloads.UnsupportedLinkException">No source knows the link.</exception>
+    /// <exception cref="ArgumentException">
+    /// The link is malformed, or is the site's but not to a mod or a file; or the note is too long.
+    /// </exception>
+    /// <exception cref="KeyNotFoundException">The mod isn't in the library.</exception>
+    Task<LibraryChange> SetNoteAsync(Uri link, string? note, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Every change to the library from now on, made by anything in this app: watching and unwatching, downloads recorded
     /// and their old versions, update checks, deleted files, and forgotten mods. A change that leaves a mod as it was isn't
     /// listed. The stream ends when <paramref name="cancellationToken"/> is cancelled.

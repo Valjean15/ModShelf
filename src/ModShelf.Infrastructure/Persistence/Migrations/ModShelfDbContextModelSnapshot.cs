@@ -196,6 +196,9 @@ namespace ModShelf.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsPinned")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("IsWatched")
                         .HasColumnType("INTEGER");
 
@@ -209,6 +212,10 @@ namespace ModShelf.Infrastructure.Persistence.Migrations
 
                     b.Property<bool>("NeedsFullCheck")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("PageUrl")
                         .HasColumnType("TEXT");
@@ -360,6 +367,19 @@ namespace ModShelf.Infrastructure.Persistence.Migrations
                     b.ToTable("ModDetails", (string)null);
                 });
 
+            modelBuilder.Entity("ModShelf.Infrastructure.Persistence.Tables.SkippedUpdateRecord", b =>
+                {
+                    b.Property<long>("ModSequence")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("FileId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ModSequence", "FileId");
+
+                    b.ToTable("SkippedUpdates", (string)null);
+                });
+
             modelBuilder.Entity("ModShelf.Infrastructure.Persistence.Tables.LibraryFileRecord", b =>
                 {
                     b.HasOne("ModShelf.Infrastructure.Persistence.Tables.LibraryModRecord", null)
@@ -378,9 +398,20 @@ namespace ModShelf.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ModShelf.Infrastructure.Persistence.Tables.SkippedUpdateRecord", b =>
+                {
+                    b.HasOne("ModShelf.Infrastructure.Persistence.Tables.LibraryModRecord", null)
+                        .WithMany("SkippedUpdates")
+                        .HasForeignKey("ModSequence")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("ModShelf.Infrastructure.Persistence.Tables.LibraryModRecord", b =>
                 {
                     b.Navigation("Files");
+
+                    b.Navigation("SkippedUpdates");
 
                     b.Navigation("Updates");
                 });

@@ -32,5 +32,17 @@ internal sealed class ListedLibrary : IModLibrary
 
     public Task<LibraryChange> ForgetAsync(ModRef modRef, CancellationToken cancellationToken) => throw new NotSupportedException();
 
+    public Task<LibraryChange> SetPinnedAsync(ModRef modRef, bool pinned, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    public Task<LibraryChange> SetPinnedAsync(Uri link, bool pinned, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    public Task<LibraryChange> SkipUpdateAsync(ModFileRef update, bool skip, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    public Task<LibraryChange> SkipUpdateAsync(Uri link, bool skip, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    public Task<LibraryChange> SetNoteAsync(ModRef modRef, string? note, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    public Task<LibraryChange> SetNoteAsync(Uri link, string? note, CancellationToken cancellationToken) => throw new NotSupportedException();
+
     public IAsyncEnumerable<LibraryChange> ChangesAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
 }

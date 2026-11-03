@@ -76,6 +76,18 @@ public sealed class UpdateCheckerTests : IDisposable
     }
 
     [Fact]
+    public async Task APinnedModsUpdatesAreKeptButNotFound()
+    {
+        await _library.UpdateAsync(Mod("1").Mod, stored => stored!.WithPinned(true), Cancellation);
+
+        UpdateCheck check = await CheckAsync(_feed);
+
+        Assert.Equal(["2 11"], check.Found.Select(update => $"{update.File.Mod.Id} {update.File.Id}"));
+        Assert.Equal("11", Assert.Single(Mod("1").Updates).File.Id);
+        Assert.Contains(_logger.Entries, entry => entry.StartsWith("Information: Checked 3 watched mods for updates with 3 requests: 1 new updates", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public async Task CheckingEveryGameLeavesOutAGameWhoseUpdatesArentChecked()
     {
         _library.Add(LibraryMod.Watch(new ModRef(Fallout, "5"), "Mod 5", null, null, TestData.Now.AddDays(-9)));

@@ -27,6 +27,7 @@ public sealed class LibraryDatabaseTests
     private const string AddLinkedAccounts = "20261023202312_AddLinkedAccounts";
     private const string AddNeedsFullCheck = "20261029231706_AddNeedsFullCheck";
     private const string AddModDetails = "20261102162731_AddModDetails";
+    private const string AddLibraryHistory = "20261103155321_AddLibraryHistory";
 
     [Fact]
     public async Task StartingCreatesTheFolderAndTheSchema()
@@ -239,6 +240,25 @@ public sealed class LibraryDatabaseTests
         LibraryEvent removed = new(DateTimeOffset.UnixEpoch.AddYears(57), LibraryEventKind.Removed, mod, "SMAPI");
         await database.History.AddAsync([removed], DateTimeOffset.UnixEpoch, TestContext.Current.CancellationToken);
         Assert.Equal(removed, Assert.Single(await database.History.ListAsync(null, 10, TestContext.Current.CancellationToken)));
+    }
+
+    [Fact]
+    public async Task ADatabaseFromBeforePinsKeepsItsModsUnpinnedWithoutNotes()
+    {
+        await using TestLibraryDatabase database = new();
+        await using (ModShelfDbContext context = await database.CreateContextAsync())
+        {
+            await context.GetService<IMigrator>().MigrateAsync(AddLibraryHistory, TestContext.Current.CancellationToken);
+            await context.Database.ExecuteSqlRawAsync(
+                "INSERT INTO LibraryMods (SourceId, GameKey, ModId, Name, IsWatched, AddedAt, NeedsFullCheck) "
+                + "VALUES ('nexus', 'stardewvalley', '2400', 'SMAPI', 1, '2026-10-27 12:00:00+00:00', 0);",
+                TestContext.Current.CancellationToken);
+        }
+
+        await database.StartAsync();
+
+        LibraryMod mod = Assert.Single(await database.Library.ListAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(("SMAPI", false, (string?)null, 0), (mod.Name, mod.IsPinned, mod.Note, mod.SkippedUpdates.Count));
     }
 
     [Fact]

@@ -5,7 +5,8 @@ namespace ModShelf.Infrastructure.Persistence.Tables;
 
 /// <summary>
 /// Maps <see cref="LibraryModRecord"/> to the <c>LibraryMods</c> table, one row per mod, its files to
-/// <c>LibraryFiles</c> and its updates to <c>LibraryUpdates</c>, which go with their mod when it's deleted.
+/// <c>LibraryFiles</c>, its updates to <c>LibraryUpdates</c> and the updates skipped to <c>SkippedUpdates</c>, which go
+/// with their mod when it's deleted.
 /// </summary>
 /// <remarks>
 /// Text columns compare case-sensitively, SQLite's default, like the download jobs' references.
@@ -30,5 +31,12 @@ internal sealed class LibraryModRecordConfiguration : IEntityTypeConfiguration<L
             .WithOne()
             .HasForeignKey(update => update.ModSequence)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(record => record.SkippedUpdates)
+            .WithOne()
+            .HasForeignKey(skipped => skipped.ModSequence)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Property(record => record.Note).HasMaxLength(Domain.Library.LibraryMod.MaxNoteLength);
     }
 }

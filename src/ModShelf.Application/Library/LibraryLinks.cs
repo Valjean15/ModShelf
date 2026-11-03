@@ -4,7 +4,7 @@ using ModShelf.Domain.Mods;
 namespace ModShelf.Application.Library;
 
 /// <summary>
-/// Finds the library's mods by their links, without asking their sites, which may have removed them.
+/// Finds the library's mods and updates by their links, without asking their sites, which may have removed them.
 /// </summary>
 internal static class LibraryLinks
 {
@@ -19,6 +19,22 @@ internal static class LibraryLinks
 
         return IsWebLink(link)
             ? library.FirstOrDefault(mod => mod.PageUrl is { } page && IsWebLink(page) && SamePage(page, link))?.Mod
+            : null;
+    }
+
+    /// <summary>
+    /// The update in <paramref name="library"/> whose own link <paramref name="link"/> is, such as the link
+    /// <c>library_updates</c> gives; or null when there's none. Scheme, the host's case, a <c>www.</c> and an ending
+    /// slash don't count; the query does, since it may name the file.
+    /// </summary>
+    public static ModFileRef? UpdateAt(IEnumerable<LibraryMod> library, Uri link)
+    {
+        ArgumentNullException.ThrowIfNull(library);
+        ArgumentNullException.ThrowIfNull(link);
+
+        return IsWebLink(link)
+            ? library.SelectMany(mod => mod.Updates)
+                .FirstOrDefault(update => update.PageUrl is { } page && IsWebLink(page) && SamePage(page, link) && page.Query == link.Query)?.File
             : null;
     }
 

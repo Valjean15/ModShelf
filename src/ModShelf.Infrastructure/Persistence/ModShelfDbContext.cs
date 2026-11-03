@@ -32,6 +32,7 @@ internal sealed class ModShelfDbContext(DbContextOptions<ModShelfDbContext> opti
         modelBuilder.ApplyConfiguration(new LibraryModRecordConfiguration());
         modelBuilder.ApplyConfiguration(new LibraryFileRecordConfiguration());
         modelBuilder.ApplyConfiguration(new LibraryUpdateRecordConfiguration());
+        modelBuilder.ApplyConfiguration(new SkippedUpdateRecordConfiguration());
         modelBuilder.ApplyConfiguration(new ModDetailsRecordConfiguration());
         modelBuilder.ApplyConfiguration(new LibraryEventRecordConfiguration());
     }

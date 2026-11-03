@@ -166,5 +166,42 @@ internal sealed class InMemoryModLibrary : IModLibrary
         return Task.FromResult(Change(modRef, null));
     }
 
+    public Task<LibraryChange> SetPinnedAsync(ModRef modRef, bool pinned, CancellationToken cancellationToken)
+    {
+        Asked.Add($"{(pinned ? "Pin" : "Unpin")} {modRef.Id}");
+        return Task.FromResult(Change(modRef, Find(modRef).WithPinned(pinned)));
+    }
+
+    public Task<LibraryChange> SetPinnedAsync(Uri link, bool pinned, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    public Task<LibraryChange> SkipUpdateAsync(ModFileRef update, bool skip, CancellationToken cancellationToken)
+    {
+        Asked.Add($"{(skip ? "Skip" : "Offer")} {update.Id}");
+        return Task.FromResult(Change(update.Mod, Find(update.Mod).WithUpdateSkipped(update, skip)));
+    }
+
+    public Task<LibraryChange> SkipUpdateAsync(Uri link, bool skip, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    public Task<LibraryChange> SetNoteAsync(ModRef modRef, string? note, CancellationToken cancellationToken)
+    {
+        Asked.Add($"Note {modRef.Id}: {note}");
+        return Task.FromResult(Change(modRef, Find(modRef).WithNote(note)));
+    }
+
+    public Task<LibraryChange> SetNoteAsync(Uri link, string? note, CancellationToken cancellationToken) => throw new NotSupportedException();
+
     public IAsyncEnumerable<LibraryChange> ChangesAsync(CancellationToken cancellationToken) => _watchers.Watch(cancellationToken);
+
+    /// <summary>
+    /// The mod, unless the library refuses the change or doesn't have it.
+    /// </summary>
+    private LibraryMod Find(ModRef modRef)
+    {
+        if (Refusal is not null)
+        {
+            throw Refusal;
+        }
+
+        return Mods.FirstOrDefault(listed => listed.Mod == modRef) ?? throw new KeyNotFoundException($"No mod {modRef.Id}.");
+    }
 }

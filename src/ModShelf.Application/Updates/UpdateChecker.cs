@@ -244,7 +244,8 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
             if (change.After is { IsWatched: true } after)
             {
                 check.Checked++;
-                check.Found.AddRange(after.Updates.Where(update => change.Before?.Updates.All(earlier => earlier.File != update.File) ?? true));
+                // A pinned mod's are kept, but not offered.
+                check.Found.AddRange(after.OfferedUpdates.Where(update => change.Before?.Updates.All(earlier => earlier.File != update.File) ?? true));
             }
         }
     }

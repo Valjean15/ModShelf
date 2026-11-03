@@ -33,6 +33,7 @@ internal sealed class LibraryRepository : ILibraryRepository
                 .AsNoTracking()
                 .Include(record => record.Files)
                 .Include(record => record.Updates)
+                .Include(record => record.SkippedUpdates)
                 .AsSplitQuery()
                 .OrderBy(record => record.Sequence)
                 .ToListAsync(cancellationToken)
@@ -114,6 +115,7 @@ internal sealed class LibraryRepository : ILibraryRepository
         return context.LibraryMods
             .Include(record => record.Files)
             .Include(record => record.Updates)
+            .Include(record => record.SkippedUpdates)
             .AsSplitQuery()
             .Where(record => record.SourceId == source && record.GameKey == game && record.ModId == mod);
     }

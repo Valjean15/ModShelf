@@ -10,10 +10,17 @@ namespace ModShelf.Domain.Library;
 /// the mod neither watched nor with files returns null, since nothing keeps it in the library any more.
 /// <para/>
 /// A watched mod also has the updates its last check found: newer files of the mod that the library doesn't have. One
-/// leaves when its file comes into the library, and they all leave when the mod is unwatched.
+/// leaves when its file comes into the library, and they all leave when the mod is unwatched. The user may pin the mod
+/// at the version the library has, or skip one update until a newer one comes, so it isn't offered; and keep a note of
+/// it.
 /// </remarks>
 public sealed class LibraryMod
 {
+    /// <summary>
+    /// The most characters a note holds.
+    /// </summary>
+    public const int MaxNoteLength = 2000;
+
     private LibraryMod(
         ModRef mod,
         string name,
@@ -24,7 +31,10 @@ public sealed class LibraryMod
         DateTimeOffset? checkedAt,
         LibraryFile[] files,
         LibraryUpdate[] updates,
-        bool needsFullCheck)
+        bool needsFullCheck,
+        bool isPinned,
+        string? note,
+        ModFileRef[] skippedUpdates)
     {
         Mod = mod;
         Name = name;
@@ -36,6 +46,9 @@ public sealed class LibraryMod
         Files = Array.AsReadOnly(files);
         Updates = Array.AsReadOnly(updates);
         NeedsFullCheck = needsFullCheck;
+        IsPinned = isPinned;
+        Note = note;
+        SkippedUpdates = Array.AsReadOnly(skippedUpdates);
     }
 
     public ModRef Mod { get; }
@@ -82,6 +95,28 @@ public sealed class LibraryMod
     public bool NeedsFullCheck { get; }
 
     /// <summary>
+    /// Whether the user pinned the mod at the version the library has: its updates are still found, but not offered.
+    /// </summary>
+    public bool IsPinned { get; }
+
+    /// <summary>
+    /// The user's note of the mod, such as why it's pinned; null for none.
+    /// </summary>
+    public string? Note { get; }
+
+    /// <summary>
+    /// The updates the user skipped, each until a newer one comes: then the skipped one leaves the updates, and with
+    /// them, this list.
+    /// </summary>
+    public IReadOnlyList<ModFileRef> SkippedUpdates { get; }
+
+    /// <summary>
+    /// The updates offered to the user: none for a pinned mod, and none skipped.
+    /// </summary>
+    public IReadOnlyList<LibraryUpdate> OfferedUpdates
+        => IsPinned ? [] : [.. Updates.Where(update => !SkippedUpdates.Contains(update.File))];
+
+    /// <summary>
     /// A mod the user starts watching, without any files yet.
     /// </summary>
     /// <exception cref="ArgumentException">The name is blank, or the page isn't an absolute HTTP or HTTPS URL.</exception>
@@ -90,7 +125,9 @@ public sealed class LibraryMod
         ArgumentNullException.ThrowIfNull(mod);
         EnsureDetails(name, pageUrl);
 
-        return new LibraryMod(mod, name, Blank(author), pageUrl, isWatched: true, addedAt, checkedAt: null, [], [], needsFullCheck: false);
+        return new LibraryMod(
+            mod, name, Blank(author), pageUrl, isWatched: true, addedAt, checkedAt: null,
+            [], [], needsFullCheck: false, isPinned: false, note: null, []);
     }
 
     /// <summary>
@@ -98,7 +135,8 @@ public sealed class LibraryMod
     /// </summary>
     /// <exception cref="ArgumentException">
     /// The details are invalid; a file isn't the mod's, or two files are the same file or at the same path; the mod is
-    /// neither watched nor has files; or an update isn't one the mod can have.
+    /// neither watched nor has files; an update isn't one the mod can have; the note is too long; or an update skipped
+    /// isn't one of its updates, or is listed twice.
     /// </exception>
     public static LibraryMod Restore(
         ModRef mod,
@@ -110,7 +148,10 @@ public sealed class LibraryMod
         DateTimeOffset? checkedAt,
         IEnumerable<LibraryFile> files,
         IEnumerable<LibraryUpdate>? updates = null,
-        bool needsFullCheck = false)
+        bool needsFullCheck = false,
+        bool isPinned = false,
+        string? note = null,
+        IEnumerable<ModFileRef>? skippedUpdates = null)
     {
         ArgumentNullException.ThrowIfNull(mod);
         EnsureDetails(name, pageUrl);
@@ -129,7 +170,24 @@ public sealed class LibraryMod
 
         LibraryUpdate[] updateList = [.. updates ?? []];
         EnsureUpdates(mod, isWatched, fileList, updateList, nameof(updates));
-        return new LibraryMod(mod, name, Blank(author), pageUrl, isWatched, addedAt, checkedAt, fileList, updateList, needsFullCheck);
+        ModFileRef[] skipped = [.. skippedUpdates ?? []];
+        for (int index = 0; index < skipped.Length; index++)
+        {
+            ModFileRef update = skipped[index] ?? throw new ArgumentException("The updates skipped can't include null.", nameof(skippedUpdates));
+            if (!Array.Exists(updateList, found => found.File == update))
+            {
+                throw new ArgumentException($"Update {update.Id} is skipped, but isn't one of the mod's updates.", nameof(skippedUpdates));
+            }
+
+            if (Array.IndexOf(skipped, update) < index)
+            {
+                throw new ArgumentException($"Update {update.Id} is skipped twice.", nameof(skippedUpdates));
+            }
+        }
+
+        return new LibraryMod(
+            mod, name, Blank(author), pageUrl, isWatched, addedAt, checkedAt,
+            fileList, updateList, needsFullCheck, isPinned, NoteOf(note, nameof(note)), skipped);
     }
 
     /// <summary>
@@ -142,7 +200,9 @@ public sealed class LibraryMod
     /// The mod, no longer watched and without updates; or null when it has no files, so nothing keeps it in the library.
     /// </summary>
     public LibraryMod? Unwatched()
-        => Files.Count == 0 ? null : new LibraryMod(Mod, Name, Author, PageUrl, isWatched: false, AddedAt, CheckedAt, [.. Files], [], NeedsFullCheck);
+        => Files.Count == 0
+            ? null
+            : new LibraryMod(Mod, Name, Author, PageUrl, isWatched: false, AddedAt, CheckedAt, [.. Files], [], NeedsFullCheck, IsPinned, Note, []);
 
     /// <summary>
     /// The mod with its details as its site gives them now.
@@ -152,17 +212,22 @@ public sealed class LibraryMod
     {
         EnsureDetails(name, pageUrl);
 
-        return new LibraryMod(Mod, name, Blank(author), pageUrl, IsWatched, AddedAt, CheckedAt, [.. Files], [.. Updates], NeedsFullCheck);
+        return new LibraryMod(
+            Mod, name, Blank(author), pageUrl, IsWatched, AddedAt, CheckedAt,
+            [.. Files], [.. Updates], NeedsFullCheck, IsPinned, Note, [.. SkippedUpdates]);
     }
 
     /// <summary>
     /// The mod, last checked for updates at <paramref name="at"/>, with no full check needed.
     /// </summary>
-    public LibraryMod Checked(DateTimeOffset at) => new(Mod, Name, Author, PageUrl, IsWatched, AddedAt, at, [.. Files], [.. Updates], needsFullCheck: false);
+    public LibraryMod Checked(DateTimeOffset at)
+        => new(
+            Mod, Name, Author, PageUrl, IsWatched, AddedAt, at,
+            [.. Files], [.. Updates], needsFullCheck: false, IsPinned, Note, [.. SkippedUpdates]);
 
     /// <summary>
     /// The mod with the updates a check found, in place of the ones it had. An update of a file it had already keeps
-    /// when it was first found.
+    /// when it was first found, and stays skipped if it was.
     /// </summary>
     /// <exception cref="ArgumentException">
     /// The mod isn't watched; or an update is of another mod, of a file the library has, of a file it doesn't have, or
@@ -182,7 +247,52 @@ public sealed class LibraryMod
         }
 
         EnsureUpdates(Mod, IsWatched, [.. Files], updateList, nameof(updates));
-        return new LibraryMod(Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt, [.. Files], updateList, NeedsFullCheck);
+        return new LibraryMod(
+            Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt,
+            [.. Files], updateList, NeedsFullCheck, IsPinned, Note, SkippedAmong(updateList));
+    }
+
+    /// <summary>
+    /// The mod pinned at the version the library has, or no longer.
+    /// </summary>
+    public LibraryMod WithPinned(bool pinned)
+        => pinned == IsPinned
+            ? this
+            : new LibraryMod(
+                Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt,
+                [.. Files], [.. Updates], NeedsFullCheck, pinned, Note, [.. SkippedUpdates]);
+
+    /// <summary>
+    /// The mod with <paramref name="note"/>, its ends trimmed; with none when it's null or blank.
+    /// </summary>
+    /// <exception cref="ArgumentException">The note is longer than <see cref="MaxNoteLength"/>.</exception>
+    public LibraryMod WithNote(string? note)
+        => new(
+            Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt,
+            [.. Files], [.. Updates], NeedsFullCheck, IsPinned, NoteOf(note, nameof(note)), [.. SkippedUpdates]);
+
+    /// <summary>
+    /// The mod with <paramref name="update"/> skipped, until a newer one comes; or offered again.
+    /// </summary>
+    /// <exception cref="ArgumentException">Skipping an update that isn't one of the mod's.</exception>
+    public LibraryMod WithUpdateSkipped(ModFileRef update, bool skipped)
+    {
+        ArgumentNullException.ThrowIfNull(update);
+
+        if (skipped && !Updates.Any(found => found.File == update))
+        {
+            throw new ArgumentException($"File {update.Id} isn't an update of the mod.", nameof(update));
+        }
+
+        if (skipped == SkippedUpdates.Contains(update))
+        {
+            return this;
+        }
+
+        ModFileRef[] skippedUpdates = skipped ? [.. SkippedUpdates, update] : [.. SkippedUpdates.Where(other => other != update)];
+        return new LibraryMod(
+            Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt,
+            [.. Files], [.. Updates], NeedsFullCheck, IsPinned, Note, skippedUpdates);
     }
 
     /// <summary>
@@ -198,8 +308,10 @@ public sealed class LibraryMod
         int index = Files.ToList().FindIndex(other => other.File == file.File);
         LibraryFile[] files = index < 0 ? [.. Files, file] : [.. Files.Take(index), file, .. Files.Skip(index + 1)];
         // Another file, unlike the same one moved, may have updates of its own, or be older than the ones found.
+        LibraryUpdate[] updates = [.. Updates.Where(update => update.File != file.File)];
         return new LibraryMod(
-            Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt, files, [.. Updates.Where(update => update.File != file.File)], NeedsFullCheck || index < 0);
+            Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt,
+            files, updates, NeedsFullCheck || index < 0, IsPinned, Note, SkippedAmong(updates));
     }
 
     /// <summary>
@@ -210,10 +322,12 @@ public sealed class LibraryMod
         ArgumentNullException.ThrowIfNull(file);
 
         LibraryFile[] files = [.. Files.Where(other => other.File != file)];
+        LibraryUpdate[] updates = [.. Updates.Where(update => update.Replaces != file)];
         return !IsWatched && files.Length == 0
             ? null
             : new LibraryMod(
-                Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt, files, [.. Updates.Where(update => update.Replaces != file)], needsFullCheck: true);
+                Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt,
+                files, updates, needsFullCheck: true, IsPinned, Note, SkippedAmong(updates));
     }
 
     private static void EnsureDetails(string name, Uri? pageUrl)
@@ -299,6 +413,22 @@ public sealed class LibraryMod
 
     private static string? Blank(string? text) => string.IsNullOrWhiteSpace(text) ? null : text;
 
+    private static string? NoteOf(string? note, string paramName)
+    {
+        string? trimmed = Blank(note)?.Trim();
+        return trimmed is { Length: > MaxNoteLength }
+            ? throw new ArgumentException($"A note holds at most {MaxNoteLength:N0} characters; this one has {trimmed.Length:N0}.", paramName)
+            : trimmed;
+    }
+
+    /// <summary>
+    /// The updates skipped that are still among <paramref name="updates"/>.
+    /// </summary>
+    private ModFileRef[] SkippedAmong(LibraryUpdate[] updates)
+        => [.. SkippedUpdates.Where(skipped => Array.Exists(updates, update => update.File == skipped))];
+
     private LibraryMod With(bool isWatched, bool needsFullCheck)
-        => new(Mod, Name, Author, PageUrl, isWatched, AddedAt, CheckedAt, [.. Files], [.. Updates], needsFullCheck);
+        => new(
+            Mod, Name, Author, PageUrl, isWatched, AddedAt, CheckedAt,
+            [.. Files], [.. Updates], needsFullCheck, IsPinned, Note, [.. SkippedUpdates]);
 }

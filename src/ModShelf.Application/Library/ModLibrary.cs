@@ -195,6 +195,48 @@ internal sealed partial class ModLibrary : IModLibrary
     /// The mod a link is to: a library mod by its page there, so one its site removed is found, or else as its site
     /// says.
     /// </summary>
+    public Task<LibraryChange> SetPinnedAsync(ModRef modRef, bool pinned, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(modRef);
+
+        return UpdateAsync(modRef, stored => (stored ?? throw NotInLibrary(modRef)).WithPinned(pinned), cancellationToken);
+    }
+
+    public async Task<LibraryChange> SetPinnedAsync(Uri link, bool pinned, CancellationToken cancellationToken)
+    {
+        ModRef mod = await ModAtAsync(link, cancellationToken).ConfigureAwait(false);
+        return await SetPinnedAsync(mod, pinned, cancellationToken).ConfigureAwait(false);
+    }
+
+    public Task<LibraryChange> SkipUpdateAsync(ModFileRef update, bool skip, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(update);
+
+        return UpdateAsync(update.Mod, stored => (stored ?? throw NotInLibrary(update.Mod)).WithUpdateSkipped(update, skip), cancellationToken);
+    }
+
+    public async Task<LibraryChange> SkipUpdateAsync(Uri link, bool skip, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(link);
+
+        ModFileRef update = LibraryLinks.UpdateAt(await _repository.ListAsync(cancellationToken).ConfigureAwait(false), link)
+            ?? (await _sources.RecognizeLinkAsync(link, cancellationToken).ConfigureAwait(false)).File;
+        return await SkipUpdateAsync(update, skip, cancellationToken).ConfigureAwait(false);
+    }
+
+    public Task<LibraryChange> SetNoteAsync(ModRef modRef, string? note, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(modRef);
+
+        return UpdateAsync(modRef, stored => (stored ?? throw NotInLibrary(modRef)).WithNote(note), cancellationToken);
+    }
+
+    public async Task<LibraryChange> SetNoteAsync(Uri link, string? note, CancellationToken cancellationToken)
+    {
+        ModRef mod = await ModAtAsync(link, cancellationToken).ConfigureAwait(false);
+        return await SetNoteAsync(mod, note, cancellationToken).ConfigureAwait(false);
+    }
+
     private async Task<ModRef> ModAtAsync(Uri link, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(link);
