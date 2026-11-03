@@ -51,6 +51,33 @@ public sealed class NexusSourceCatalogTests : IDisposable
         Assert.Same(StardewValley, game.Game);
         Assert.Equal("Stardew Valley", game.Name);
         Assert.Equal(new Uri("https://www.nexusmods.com/stardewvalley"), game.PageUrl);
+
+        // The site's 27 categories, but the top one named after the game, which the others sit in.
+        Assert.Equal(26, game.Categories.Count);
+        Assert.Equal(["Miscellaneous", "Gameplay Mechanics", "Player"], game.Categories.Take(3));
+        Assert.Contains("Modding Tools", game.Categories);
+        Assert.Contains("New Characters", game.Categories);
+        Assert.DoesNotContain("Stardew Valley", game.Categories);
+    }
+
+    [Fact]
+    public async Task KeepsATopCategoryNotNamedAfterTheGameAndOneNamedAfterItInAnother()
+    {
+        _api.Answer("/v1/games/stardewvalley.json", response => response.WithStatusCode(200).WithBody(
+            """
+            {"id": 1303, "name": "Stardew Valley", "categories": [
+              {"category_id": 1, "name": "Stardew Valley", "parent_category": false},
+              {"category_id": 2, "name": "Tools", "parent_category": false},
+              {"category_id": 3, "name": "stardew valley", "parent_category": 2},
+              {"category_id": 4, "name": null, "parent_category": 1},
+              {"category_id": 5, "name": "Maps"},
+              {"category_id": 6, "name": "Stardew Valley", "parent_category": null}
+            ]}
+            """));
+
+        GameInfo game = await Source.GetGameAsync(StardewValley, Cancellation);
+
+        Assert.Equal(["Tools", "stardew valley", "Maps"], game.Categories);
     }
 
     [Fact]
@@ -84,14 +111,18 @@ public sealed class NexusSourceCatalogTests : IDisposable
         skyrim["name"] = "Skyrim Special Edition";
         skyrim["domain_name"] = "skyrimspecialedition";
         skyrim["nexusmods_url"] = "https://www.nexusmods.com/skyrimspecialedition";
+        skyrim["categories"] = new JsonArray(JsonNode.Parse("""{"category_id": 1, "name": "Skyrim Special Edition", "parent_category": false}"""), JsonNode.Parse("""{"category_id": 2, "name": "Armour", "parent_category": 1}"""));
         AnswerGames(stardew, skyrim);
 
         IReadOnlyList<GameInfo> games = await Source.GetGamesAsync(Cancellation);
 
+        // Each list's categories, but the top one named after its game.
+        string[] stardewCategories = [.. stardew["categories"]!.AsArray().Select(category => category!["name"]!.GetValue<string>()).Skip(1)];
+        Assert.Equal(26, stardewCategories.Length);
         Assert.Equal(
             [
-                new GameInfo(StardewValley, "Stardew Valley", new Uri("https://www.nexusmods.com/stardewvalley")),
-                new GameInfo(new GameRef(new SourceId("nexus"), "skyrimspecialedition"), "Skyrim Special Edition", new Uri("https://www.nexusmods.com/skyrimspecialedition")),
+                new GameInfo(StardewValley, "Stardew Valley", new Uri("https://www.nexusmods.com/stardewvalley"), stardewCategories),
+                new GameInfo(new GameRef(new SourceId("nexus"), "skyrimspecialedition"), "Skyrim Special Edition", new Uri("https://www.nexusmods.com/skyrimspecialedition"), ["Armour"]),
             ],
             games);
         Assert.Equal("/v1/games.json", Assert.Single(_api.Requests).RequestMessage!.Path);

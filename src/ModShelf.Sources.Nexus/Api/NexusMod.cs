@@ -7,6 +7,7 @@ namespace ModShelf.Sources.Nexus.Api;
 /// <param name="UpdatedTimestamp">When the mod last changed, in seconds since 1970.</param>
 /// <param name="ModDownloads">How many times the mod's files were downloaded.</param>
 /// <param name="CreatedTimestamp">When the mod was published, in seconds since 1970.</param>
+/// <param name="DomainName">The mod's game, which a list of mods gives with each.</param>
 internal sealed record NexusMod(
     long ModId,
     string? Name,
@@ -21,4 +22,5 @@ internal sealed record NexusMod(
     long? ModDownloads = null,
     long? EndorsementCount = null,
     long? CategoryId = null,
-    long? CreatedTimestamp = null);
+    long? CreatedTimestamp = null,
+    string? DomainName = null);

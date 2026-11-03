@@ -143,13 +143,23 @@ public sealed partial class NexusSource : IModCatalog
     }
 
     /// <summary>
-    /// The game by its name, or its domain name if it has none, with its page, or the page its domain name gives.
+    /// The game by its name, or its domain name if it has none, with its page, or the page its domain name gives, and
+    /// its categories' names.
     /// </summary>
     private static GameInfo ToGameInfo(GameRef game, string domain, NexusGame found)
-        => new(
-            game,
-            string.IsNullOrWhiteSpace(found.Name) ? domain : found.Name,
-            WebLink(found.NexusmodsUrl) ?? NexusLink.GamePage(domain));
+    {
+        string name = string.IsNullOrWhiteSpace(found.Name) ? domain : found.Name;
+        return new GameInfo(game, name, WebLink(found.NexusmodsUrl) ?? NexusLink.GamePage(domain), CategoryNamesOf(found, name));
+    }
+
+    /// <summary>
+    /// The names of the game's categories, in the site's order, but the top one named after the game, which the others
+    /// sit in: a search by it finds next to nothing.
+    /// </summary>
+    private static IEnumerable<string> CategoryNamesOf(NexusGame game, string gameName)
+        => (game.Categories ?? [])
+            .Where(category => category is { Name: not null } && !(category.IsTop && string.Equals(category.Name.Trim(), gameName.Trim(), StringComparison.OrdinalIgnoreCase)))
+            .Select(category => category!.Name!);
 
     /// <param name="replacedBy">The ID of the file Nexus Mods says replaced this one, if any.</param>
     private static ModFile ToModFile(ModRef modRef, NexusLink mod, NexusFile file, long? replacedBy)

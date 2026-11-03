@@ -229,6 +229,15 @@ public abstract class SourceContractTests<TSource>
     }
 
     [Fact]
+    public async Task RefusesTrendingModsOfAnotherSourcesGame()
+    {
+        ITrendingMods trending = Capability<ITrendingMods>();
+
+        await Assert.ThrowsAsync<ArgumentException>(() => trending.GetTrendingAsync(
+            new GameRef(new SourceId("someone-else"), "game"), TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task RefusesUpdatesOfAnotherSourcesGame()
     {
         IUpdateFeed feed = Capability<IUpdateFeed>();
