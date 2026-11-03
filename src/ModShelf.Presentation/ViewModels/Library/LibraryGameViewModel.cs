@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
+using ModShelf.Presentation.ViewModels.Pictures;
 
 namespace ModShelf.Presentation.ViewModels.Library;
 
@@ -20,7 +21,8 @@ public sealed partial class LibraryGameViewModel : ObservableObject
 
     /// <param name="open">Opens the game, showing its mods in place of the games.</param>
     /// <param name="updateAll">Downloads its mods' updates into the library, one after the other.</param>
-    internal LibraryGameViewModel(GameRef game, Action<LibraryGameViewModel> open, Func<LibraryGameViewModel, CancellationToken, Task> updateAll, TimeProvider timeProvider)
+    internal LibraryGameViewModel(
+        GameRef game, Action<LibraryGameViewModel> open, Func<LibraryGameViewModel, CancellationToken, Task> updateAll, TimeProvider timeProvider, ModPictures pictures)
     {
         ArgumentNullException.ThrowIfNull(game);
         ArgumentNullException.ThrowIfNull(open);
@@ -33,6 +35,7 @@ public sealed partial class LibraryGameViewModel : ObservableObject
         _timeProvider = timeProvider;
         CoverHue = Covers.HueOf(game.Key);
         Name = game.Key;
+        Cover = new GamePictureViewModel(pictures);
     }
 
     public GameRef Game { get; }
@@ -53,6 +56,11 @@ public sealed partial class LibraryGameViewModel : ObservableObject
     /// The hue of its cover, from 0 to 359, the same for the game every time.
     /// </summary>
     public int CoverHue { get; }
+
+    /// <summary>
+    /// Its wide picture on its site, such as the banner at the top of its page, on its cover in place of its initial.
+    /// </summary>
+    public GamePictureViewModel Cover { get; }
 
     /// <summary>
     /// How many mods it has in the library.

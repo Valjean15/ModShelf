@@ -22,6 +22,11 @@ internal sealed class ScriptedPictureCache : IPictureCache
     /// </summary>
     public TaskCompletionSource? Held { get; set; }
 
+    /// <summary>
+    /// What asking for a picture throws while set, such as a bug.
+    /// </summary>
+    public Exception? Failure { get; set; }
+
     public long Size { get; set; }
 
     public int Clears { get; private set; }
@@ -44,6 +49,11 @@ internal sealed class ScriptedPictureCache : IPictureCache
         if (Held is { } held)
         {
             await held.Task.WaitAsync(cancellationToken);
+        }
+
+        if (Failure is { } failure)
+        {
+            throw failure;
         }
 
         return Missing.ContainsKey(picture) ? null : FileOf(picture);

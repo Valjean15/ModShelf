@@ -120,7 +120,13 @@
                                     <DockPanel>
                                         <pictures:SixteenByNine DockPanel.Dock="Top">
                                             <Border Classes="cover" Background="{Binding CoverHue, Converter={x:Static views:CoverBrushConverter.Instance}}">
-                                                <TextBlock FontSize="44" Text="{Binding Initial}" />
+                                                <Panel>
+                                                    <TextBlock FontSize="44" Text="{Binding Initial}" IsVisible="{Binding !Cover.HasFile}" />
+                                                    <pictures:ModImage File="{Binding Cover.File}"
+                                                                       DecodeWidth="1280"
+                                                                       Stretch="UniformToFill"
+                                                                       RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                                </Panel>
                                             </Border>
                                         </pictures:SixteenByNine>
                                         <StackPanel Margin="14,10,14,14" Spacing="4">
@@ -168,7 +174,13 @@
                                                     CornerRadius="6"
                                                     Background="{Binding CoverHue, Converter={x:Static views:CoverBrushConverter.Instance}}"
                                                     IsVisible="{Binding $parent[ListBox].((vm:LibraryViewModel)DataContext).Previews.IsThumbnails, FallbackValue=False}">
-                                                <TextBlock FontSize="18" Text="{Binding Initial}" />
+                                                <Panel>
+                                                    <TextBlock FontSize="18" Text="{Binding Initial}" IsVisible="{Binding !Cover.HasFile}" />
+                                                    <pictures:ModImage File="{Binding Cover.File}"
+                                                                       DecodeWidth="260"
+                                                                       Stretch="UniformToFill"
+                                                                       RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                                </Panel>
                                             </Border>
                                             <StackPanel Grid.Column="1" Classes="modCell" VerticalAlignment="Center" Spacing="2">
                                                 <TextBlock FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
@@ -313,7 +325,13 @@
                         VerticalAlignment="Top"
                         Background="{Binding OpenGame.CoverHue, Converter={x:Static views:CoverBrushConverter.Instance}, FallbackValue={x:Null}}"
                         IsVisible="{Binding Previews.ShowsPictures}">
-                    <TextBlock FontSize="24" Text="{Binding OpenGame.Initial, FallbackValue=''}" />
+                    <Panel>
+                        <TextBlock FontSize="24" Text="{Binding OpenGame.Initial, FallbackValue=''}" IsVisible="{Binding !OpenGame.Cover.HasFile, FallbackValue=True}" />
+                        <pictures:ModImage File="{Binding OpenGame.Cover.File, FallbackValue={x:Null}}"
+                                           DecodeWidth="360"
+                                           Stretch="UniformToFill"
+                                           RenderOptions.BitmapInterpolationMode="HighQuality" />
+                    </Panel>
                 </Border>
                 <StackPanel Grid.Column="1" Spacing="2">
                     <TextBlock Classes="heading" Margin="0" TextWrapping="Wrap" Text="{Binding OpenGame.Name, FallbackValue=''}" />

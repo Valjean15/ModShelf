@@ -4,6 +4,7 @@ using ModShelf.Application.Settings;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Services;
+using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.ViewModels.Settings;
 using ModShelf.Sources.Abstractions.Search;
 
@@ -45,6 +46,32 @@ public sealed class SettingsGamesTests
         Assert.False(Screen.HasNoGames);
         Assert.Same(Screen.Games[0], Screen.SelectedGame);
         Assert.Equal("fallout4", Game.Game);
+    }
+
+    [Fact]
+    public async Task EachLibraryGameShowsTheCoverItsSiteGives()
+    {
+        Uri skyrimCover = new("https://images.nexusmods.com/images/games/v2/1704/skyrim-hero.jpg");
+        Uri stardewCover = new("https://images.nexusmods.com/images/games/v2/1303/stardew-hero.jpg");
+        _harness.Catalog.GameCovers["skyrimspecialedition"] = skyrimCover;
+        _harness.Catalog.GameCovers["stardewvalley"] = stardewCover;
+        _harness.Catalog.GameNames.TryRemove("stardewvalley", out _);
+        _harness.Library.Add(TestData.LibraryMod(TestData.Mod("12604"), "SkyUI"), TestData.LibraryMod(TestData.Mod("2400", "stardewvalley"), "SMAPI"));
+        Store(("fallout4", new GameSettings { Hidden = true }));
+
+        await StartAsync();
+        await CoversShownAsync();
+        GameRowViewModel skyrim = Screen.Games.Single(row => row.Game == "skyrimspecialedition");
+        Screen.OnShown();
+        await Screen.GamesWork;
+        await CoversShownAsync();
+
+        // Stardew Valley's site can't name it, so it has no cover; and a game only the settings have isn't asked.
+        Assert.Equal(
+            [("fallout4", null), ("skyrimspecialedition", ScriptedPictureCache.FileOf(skyrimCover)), ("stardewvalley", null)],
+            Screen.Games.Select(row => (row.Game, row.Cover.File)));
+        Assert.Same(skyrim, Screen.Games[1]);
+        Assert.Equal([skyrimCover], _harness.Pictures.Cache.Asked);
     }
 
     [Fact]
@@ -302,6 +329,10 @@ public sealed class SettingsGamesTests
     /// <summary>
     /// Starts the screen, as the main window does, then shows it, as the sidebar does, and waits for its games.
     /// </summary>
+    private Task CoversShownAsync()
+        => Task.WhenAll(Screen.Games.Select(row => row.Cover.Showing))
+            .WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+
     private async Task StartAsync()
     {
         await _harness.StartAsync();

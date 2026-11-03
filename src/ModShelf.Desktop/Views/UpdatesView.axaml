@@ -96,7 +96,13 @@
                                             Height="40"
                                             CornerRadius="8"
                                             Background="{Binding CoverHue, Converter={x:Static views:CoverBrushConverter.Instance}}">
-                                        <TextBlock FontSize="17" Text="{Binding Initial}" />
+                                        <Panel>
+                                            <TextBlock FontSize="17" Text="{Binding Initial}" IsVisible="{Binding !Icon.HasFile}" />
+                                            <pictures:ModImage File="{Binding Icon.File}"
+                                                               DecodeWidth="80"
+                                                               Stretch="UniformToFill"
+                                                               RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                        </Panel>
                                     </Border>
                                     <WrapPanel Grid.Column="1" VerticalAlignment="Center" ItemSpacing="8">
                                         <TextBlock Classes="subheading" Text="{Binding Name}" />

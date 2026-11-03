@@ -6,8 +6,8 @@ using ModShelf.Sources.Abstractions.Catalog;
 namespace ModShelf.Presentation.Tests.Fakes;
 
 /// <summary>
-/// A mod site that names its games, and gives its mods' details and changelogs, as the test says, recording what it was
-/// asked.
+/// A mod site that names its games and gives their pictures, and gives its mods' details and changelogs, as the test
+/// says, recording what it was asked.
 /// </summary>
 internal sealed class ScriptedCatalog(SourceId id, string displayName) : IModCatalog
 {
@@ -27,6 +27,16 @@ internal sealed class ScriptedCatalog(SourceId id, string displayName) : IModCat
     /// Each named game's categories by its key; a game not here has none.
     /// </summary>
     public ConcurrentDictionary<string, IReadOnlyList<string>> GameCategories { get; } = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// Each named game's wide picture by its key; a game not here has none.
+    /// </summary>
+    public ConcurrentDictionary<string, Uri> GameCovers { get; } = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// Each named game's small square picture by its key; a game not here has none.
+    /// </summary>
+    public ConcurrentDictionary<string, Uri> GameIcons { get; } = new(StringComparer.Ordinal);
 
     /// <summary>
     /// Each mod's changelog by its ID; a mod not here has an empty one.
@@ -105,7 +115,12 @@ internal sealed class ScriptedCatalog(SourceId id, string displayName) : IModCat
 
     private Task<GameInfo> Name(GameRef game)
         => GameNames.TryGetValue(game.Key, out string? name)
-            ? Task.FromResult(new GameInfo(game, name, categories: GameCategories.GetValueOrDefault(game.Key)))
+            ? Task.FromResult(new GameInfo(
+                game,
+                name,
+                categories: GameCategories.GetValueOrDefault(game.Key),
+                coverUrl: GameCovers.GetValueOrDefault(game.Key),
+                iconUrl: GameIcons.GetValueOrDefault(game.Key)))
             : Task.FromException<GameInfo>(new HttpRequestException("No such game.", null, System.Net.HttpStatusCode.NotFound));
 
     private async Task<IReadOnlyList<ModChangelog>> ChangelogsAfterAsync(Task hold, IReadOnlyList<ModChangelog> changelogs)

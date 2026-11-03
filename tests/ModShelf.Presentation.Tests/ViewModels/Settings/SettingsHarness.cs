@@ -36,6 +36,7 @@ internal sealed class SettingsHarness
             Hidden,
             GameSettings,
             PicturesCard,
+            Pictures.Pictures,
             Links,
             About,
             AppUpdate,

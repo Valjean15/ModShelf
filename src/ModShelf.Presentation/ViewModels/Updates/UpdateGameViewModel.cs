@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
+using ModShelf.Presentation.ViewModels.Pictures;
 
 namespace ModShelf.Presentation.ViewModels.Updates;
 
@@ -17,7 +18,7 @@ public sealed partial class UpdateGameViewModel : ObservableObject
     private readonly Func<UpdateGameViewModel, CancellationToken, Task> _updateAll;
 
     /// <param name="updateAll">Downloads the game's updates into the library, one after the other.</param>
-    internal UpdateGameViewModel(GameRef game, Func<UpdateGameViewModel, CancellationToken, Task> updateAll)
+    internal UpdateGameViewModel(GameRef game, Func<UpdateGameViewModel, CancellationToken, Task> updateAll, ModPictures pictures)
     {
         ArgumentNullException.ThrowIfNull(game);
         ArgumentNullException.ThrowIfNull(updateAll);
@@ -26,6 +27,7 @@ public sealed partial class UpdateGameViewModel : ObservableObject
         _updateAll = updateAll;
         CoverHue = Covers.HueOf(game.Key);
         Name = game.Key;
+        Icon = new GamePictureViewModel(pictures);
     }
 
     public GameRef Game { get; }
@@ -46,6 +48,11 @@ public sealed partial class UpdateGameViewModel : ObservableObject
     /// The hue of its cover, from 0 to 359, the same for the game every time.
     /// </summary>
     public int CoverHue { get; }
+
+    /// <summary>
+    /// Its small square picture on its site, on its cover in place of its initial.
+    /// </summary>
+    public GamePictureViewModel Icon { get; }
 
     /// <summary>
     /// Its mods' updates, by mod name, then the newest first.

@@ -8,6 +8,7 @@ using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
+using ModShelf.Sources.Abstractions.Catalog;
 
 namespace ModShelf.Presentation.ViewModels.Settings;
 
@@ -17,9 +18,10 @@ namespace ModShelf.Presentation.ViewModels.Settings;
 /// </summary>
 public sealed partial class SettingsViewModel
 {
-    // The library's games, by key, with the source to ask their names of; their names once read; and the games added.
+    // The library's games, by key, with the source to ask their names of; their names and pictures once read; and the
+    // games added.
     private readonly Dictionary<string, GameRef> _libraryGames = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<string, string> _gameNames = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, GameInfo> _gameInfos = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _addedGames = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
@@ -164,20 +166,20 @@ public sealed partial class SettingsViewModel
     }
 
     /// <summary>
-    /// Asks a game's site for its name, then shows it.
+    /// Asks a game's site for its name and its picture, then shows them.
     /// </summary>
     private async Task ReadNameAsync(GameRef game)
     {
-        if (await GameNames.ReadAsync(_sources, game, _logger, CancellationToken.None) is { } name)
+        if (await GameNames.ReadAsync(_sources, game, _logger, CancellationToken.None) is { } info)
         {
-            _gameNames[game.Key] = name;
+            _gameInfos[game.Key] = info;
             ShowGames();
         }
     }
 
     /// <summary>
-    /// Lists the games by name, each saying whether it has settings of its own, and shows the chosen one's, or the
-    /// first's.
+    /// Lists the games by name, each with its picture once its site gives one, and saying whether it has settings of its
+    /// own, and shows the chosen one's, or the first's.
     /// </summary>
     private void ShowGames()
     {
@@ -186,8 +188,9 @@ public sealed partial class SettingsViewModel
         foreach (string game in _libraryGames.Keys.Concat(_shown.Games.Keys).Concat(_addedGames).Distinct(StringComparer.OrdinalIgnoreCase))
         {
             GameRowViewModel row = Games.FirstOrDefault(shown => string.Equals(shown.Game, game, StringComparison.OrdinalIgnoreCase))
-                ?? new GameRowViewModel(game, NameOf(game));
+                ?? NewRow(game);
             row.Name = NameOf(game);
+            row.Cover.Place(_gameInfos.GetValueOrDefault(game)?.CoverUrl, CancellationToken.None);
             row.Note = NoteOf(_shown.GameFor(game));
             rows.Add(row);
         }
@@ -206,5 +209,12 @@ public sealed partial class SettingsViewModel
         }
     }
 
-    private string NameOf(string game) => _gameNames.TryGetValue(game, out string? name) ? name : game;
+    private string NameOf(string game) => _gameInfos.GetValueOrDefault(game)?.Name ?? game;
+
+    private GameRowViewModel NewRow(string game)
+    {
+        GameRowViewModel row = new(game, NameOf(game), _covers);
+        row.Cover.Show(CancellationToken.None);
+        return row;
+    }
 }

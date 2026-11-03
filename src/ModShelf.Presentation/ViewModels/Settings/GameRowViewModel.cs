@@ -1,22 +1,23 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 
 using ModShelf.Presentation.Common;
+using ModShelf.Presentation.ViewModels.Pictures;
 
 namespace ModShelf.Presentation.ViewModels.Settings;
 
 /// <summary>
-/// A game in the Settings screen's Games category: its cover's colour and initial, its name, and whether it has settings
-/// of its own.
+/// A game in the Settings screen's Games category: its cover, its name, and whether it has settings of its own.
 /// </summary>
 public sealed partial class GameRowViewModel : ObservableObject
 {
-    internal GameRowViewModel(string game, string name)
+    internal GameRowViewModel(string game, string name, ModPictures pictures)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(game);
 
         Game = game;
         CoverHue = Covers.HueOf(game);
         Name = name;
+        Cover = new GamePictureViewModel(pictures);
     }
 
     /// <summary>
@@ -30,6 +31,11 @@ public sealed partial class GameRowViewModel : ObservableObject
     public int CoverHue { get; }
 
     /// <summary>
+    /// The game's wide picture on its site, on its cover in place of its initial.
+    /// </summary>
+    public GamePictureViewModel Cover { get; }
+
+    /// <summary>
     /// The game's name, once its site says it; its key until then.
     /// </summary>
     [ObservableProperty]
@@ -37,7 +43,7 @@ public sealed partial class GameRowViewModel : ObservableObject
     public partial string Name { get; internal set; }
 
     /// <summary>
-    /// The first letter of the game's name, on its cover.
+    /// The first letter of the game's name, on its cover until the game has a picture of its own.
     /// </summary>
     public string Initial => Covers.InitialOf(Name);
 

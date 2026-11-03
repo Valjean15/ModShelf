@@ -4,6 +4,7 @@ using ModShelf.Application.Settings;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Tests.Common;
+using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.ViewModels.Updates;
 using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Catalog;
@@ -106,6 +107,27 @@ public sealed class UpdatesByGameTests : IDisposable
         Assert.True(left);
         Assert.Equal("Stardew Valley", Assert.Single(Screen.Games).Name);
         Assert.Equal(["GetGameAsync stardewvalley"], _harness.Catalog.Asked);
+    }
+
+    [Fact]
+    public async Task EachGamesHeadingShowsTheIconItsSiteGivesWhateverThePreviews()
+    {
+        Uri skyrimIcon = new("https://images.nexusmods.com/images/games/v2/1704/skyrim-thumbnail.jpg");
+        Uri stardewIcon = new("https://images.nexusmods.com/images/games/v2/1303/stardew-thumbnail.jpg");
+        _harness.Catalog.GameIcons["skyrimspecialedition"] = skyrimIcon;
+        _harness.Catalog.GameIcons["zgame"] = stardewIcon;
+        _harness.Catalog.GameCovers["skyrimspecialedition"] = new Uri("https://images.nexusmods.com/images/games/v2/1704/skyrim-hero.jpg");
+
+        await _harness.StartAsync(
+            UpdatesHarness.ModWithUpdates(SkyUi, "SkyUI", TestData.Now, "53"),
+            UpdatesHarness.ModWithUpdates(TestData.Mod("1", "zgame"), "Unknown", TestData.Now, "2"));
+        await Task.WhenAll(Screen.Games.Select(game => game.Icon.Showing)).WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+
+        Assert.True(Screen.Previews.IsOff);
+        Assert.Equal(
+            [("Skyrim Special Edition", ScriptedPictureCache.FileOf(skyrimIcon)), ("zgame", null)],
+            Screen.Games.Select(game => (game.Name, game.Icon.File)));
+        Assert.Equal([skyrimIcon], _harness.Pictures.Cache.Asked);
     }
 
     [Fact]

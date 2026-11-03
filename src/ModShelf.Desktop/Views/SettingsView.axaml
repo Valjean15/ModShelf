@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:ModShelf.Presentation.ViewModels.Settings"
              xmlns:views="using:ModShelf.Desktop.Views"
+             xmlns:pictures="using:ModShelf.Desktop.Views.Pictures"
              xmlns:res="using:ModShelf.Presentation.Resources"
              x:Class="ModShelf.Desktop.Views.SettingsView"
              x:DataType="vm:SettingsViewModel">
@@ -328,7 +329,13 @@
                                                                 CornerRadius="4"
                                                                 VerticalAlignment="Center"
                                                                 Background="{Binding CoverHue, Converter={x:Static views:CoverBrushConverter.Instance}}">
-                                                            <TextBlock FontSize="13" Text="{Binding Initial}" />
+                                                            <Panel>
+                                                                <TextBlock FontSize="13" Text="{Binding Initial}" IsVisible="{Binding !Cover.HasFile}" />
+                                                                <pictures:ModImage File="{Binding Cover.File}"
+                                                                                   DecodeWidth="180"
+                                                                                   Stretch="UniformToFill"
+                                                                                   RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                                            </Panel>
                                                         </Border>
                                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                                             <TextBlock Classes="gameName" TextTrimming="CharacterEllipsis" Text="{Binding Name}" />

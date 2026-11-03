@@ -7,16 +7,16 @@ using ModShelf.Sources.Abstractions.Catalog;
 namespace ModShelf.Presentation.Common;
 
 /// <summary>
-/// Games' names from their sites, for the screens that list mods by game. Until a site names a game, or when it can't,
-/// the game goes by its key, such as skyrimspecialedition.
+/// Games' names and pictures from their sites, for the screens that list mods by game. Until a site names a game, or when
+/// it can't, the game goes by its key, such as skyrimspecialedition, with its initial for a cover.
 /// </summary>
 internal static partial class GameNames
 {
     /// <summary>
-    /// Asks the game's site for its name. Null when its source doesn't name games, when the site can't say, which is
-    /// logged as the caller's, or when <paramref name="cancellationToken"/> stops it.
+    /// Asks the game's site for its name and where its pictures are. Null when its source doesn't name games, when the
+    /// site can't say, which is logged as the caller's, or when <paramref name="cancellationToken"/> stops it.
     /// </summary>
-    public static async Task<string?> ReadAsync(ISourceRegistry sources, GameRef game, ILogger logger, CancellationToken cancellationToken)
+    public static async Task<GameInfo?> ReadAsync(ISourceRegistry sources, GameRef game, ILogger logger, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(game);
@@ -29,8 +29,7 @@ internal static partial class GameNames
 
         try
         {
-            GameInfo info = await catalog.GetGameAsync(game, cancellationToken);
-            return info.Name;
+            return await catalog.GetGameAsync(game, cancellationToken);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {

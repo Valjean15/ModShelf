@@ -339,18 +339,21 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
     }
 
     /// <summary>
-    /// Asks the game's site for its name, once; until it answers, the game goes by its key.
+    /// Asks the game's site for its name and its icon, once; until it answers, the game goes by its key, its initial on
+    /// its cover.
     /// </summary>
     private async Task NameAsync(GameRef game)
     {
-        if (await GameNames.ReadAsync(_sources, game, _logger, _stopping) is not { } name)
+        if (await GameNames.ReadAsync(_sources, game, _logger, _stopping) is not { } info)
         {
             return;
         }
 
         _uiThread.Post(() =>
         {
-            _games[game].Name = name;
+            UpdateGameViewModel heading = _games[game];
+            heading.Name = info.Name;
+            heading.Icon.Place(info.IconUrl, _stopping);
             Arrange();
         });
     }
@@ -458,14 +461,17 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
 
     /// <summary>
     /// The game's heading, made the first time one of its mods has an update. A game is kept once made, so its site is
-    /// asked for its name once.
+    /// asked for its name and icon once.
     /// </summary>
     private UpdateGameViewModel GameFor(GameRef game)
     {
         if (!_games.TryGetValue(game, out UpdateGameViewModel? heading))
         {
-            heading = new UpdateGameViewModel(game, UpdateGameAsync);
+            heading = new UpdateGameViewModel(game, UpdateGameAsync, _pictures);
             _games.Add(game, heading);
+
+            // Its cover shows whatever the previews, so its icon does too.
+            heading.Icon.Show(_stopping);
             _ = NameAsync(game);
         }
 

@@ -606,7 +606,13 @@ public sealed partial class LibraryViewModel : ScreenViewModel
 
         if (!_games.ContainsKey(mod.Mod.Game))
         {
-            _games.Add(mod.Mod.Game, new LibraryGameViewModel(mod.Mod.Game, Open, UpdateGameAsync, _timeProvider));
+            LibraryGameViewModel game = new(mod.Mod.Game, Open, UpdateGameAsync, _timeProvider, _pictures);
+            _games.Add(mod.Mod.Game, game);
+            if (Previews.ShowsPictures)
+            {
+                game.Cover.Show(_stopping);
+            }
+
             _ = NameAsync(mod.Mod.Game);
         }
     }
@@ -941,11 +947,23 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     };
 
     /// <summary>
-    /// Shows the open game's mods' pictures while the screen shows pictures, as adult mods' pictures should look now;
-    /// hides every picture otherwise. A picture already shown isn't read again.
+    /// Shows the games' covers and the open game's mods' pictures while the screen shows pictures, as adult mods'
+    /// pictures should look now; hides every picture otherwise. A picture already shown isn't read again.
     /// </summary>
     private void ShowPictures()
     {
+        foreach (LibraryGameViewModel game in _games.Values)
+        {
+            if (Previews.ShowsPictures)
+            {
+                game.Cover.Show(_stopping);
+            }
+            else
+            {
+                game.Cover.Hide();
+            }
+        }
+
         if (!Previews.ShowsPictures)
         {
             foreach (ModRef mod in _picturesShown)
@@ -972,11 +990,12 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     }
 
     /// <summary>
-    /// Asks the game's site for its name, once. Until it answers, or when it can't, the game goes by its key.
+    /// Asks the game's site for its name and its picture, once. Until it answers, or when it can't, the game goes by its
+    /// key, its initial on its cover.
     /// </summary>
     private async Task NameAsync(GameRef game)
     {
-        if (await GameNames.ReadAsync(_sources, game, _logger, _stopping) is not { } name)
+        if (await GameNames.ReadAsync(_sources, game, _logger, _stopping) is not { } info)
         {
             return;
         }
@@ -985,7 +1004,8 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         {
             if (_games.TryGetValue(game, out LibraryGameViewModel? heading))
             {
-                heading.Name = name;
+                heading.Name = info.Name;
+                heading.Cover.Place(info.CoverUrl, _stopping);
                 Arrange();
             }
         });

@@ -15,6 +15,7 @@ using ModShelf.Domain.Updates;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
+using ModShelf.Presentation.ViewModels.Pictures;
 
 namespace ModShelf.Presentation.ViewModels.Settings;
 
@@ -54,6 +55,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     private readonly IDialogService _dialogs;
     private readonly ISourceRegistry _sources;
     private readonly IHiddenGames _hiddenGames;
+    private readonly ModPictures _covers;
     private readonly ILogger<SettingsViewModel> _logger;
     private AppSettings _shown = new();
     private Task _saving = Task.CompletedTask;
@@ -72,6 +74,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         IHiddenGames hiddenGames,
         IGameSettingsOpener gameSettings,
         PicturesViewModel pictures,
+        ModPictures covers,
         LinksViewModel links,
         AboutViewModel about,
         AppUpdateViewModel appUpdate,
@@ -89,6 +92,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(hiddenGames);
         ArgumentNullException.ThrowIfNull(gameSettings);
         ArgumentNullException.ThrowIfNull(pictures);
+        ArgumentNullException.ThrowIfNull(covers);
         ArgumentNullException.ThrowIfNull(links);
         ArgumentNullException.ThrowIfNull(about);
         ArgumentNullException.ThrowIfNull(appUpdate);
@@ -103,6 +107,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         _dialogs = dialogs;
         _sources = sources;
         _hiddenGames = hiddenGames;
+        _covers = covers;
         _logger = logger;
         Pictures = pictures;
         Links = links;
