@@ -27,6 +27,17 @@ public sealed class TextQuestionViewModelTests
             (asked.Title, asked.Message, asked.Hint, asked.ConfirmLabel, asked.CancelLabel, asked.IsSecret, asked.HasHelpPage, asked.HelpPageLabel));
         Assert.Equal(string.Empty, asked.Text);
         Assert.Null(asked.HelpPageProblem);
+        Assert.Equal((false, 0), (asked.IsMultiline, asked.MaxLength));
+    }
+
+    [Fact]
+    public void ANoteStartsWithTheOneTheModHasOnSeveralLinesUpToItsLimit()
+    {
+        TextQuestionViewModel asked = new(
+            new TextQuestion("Note", "A note of SkyUI.", "Your note", "Save") { Text = "Stay on 5.1.", IsMultiline = true, MaxLength = 2000 },
+            _browser);
+
+        Assert.Equal(("Stay on 5.1.", true, 2000, false), (asked.Text, asked.IsMultiline, asked.MaxLength, asked.IsSecret));
     }
 
     [Theory]

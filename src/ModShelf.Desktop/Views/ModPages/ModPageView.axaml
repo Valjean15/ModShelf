@@ -153,6 +153,16 @@
         <TextBlock Classes="problem" TextWrapping="Wrap" Text="{x:Static res:Strings.BrowseUnavailable}" IsVisible="{Binding IsUnavailable}" />
         <TextBlock Classes="note message" Classes.problem="{Binding IsNoteAProblem}" Text="{Binding Note}" />
 
+        <!-- What the user keeps of the mod in the library: that it's pinned, and their note. -->
+        <Border Classes="strip info" IsVisible="{Binding HasKept}">
+            <StackPanel Spacing="4">
+                <TextBlock FontWeight="SemiBold" Text="{Binding PinnedText}" IsVisible="{Binding IsPinned}" />
+                <SelectableTextBlock TextWrapping="Wrap"
+                                     Text="{Binding UserNote}"
+                                     IsVisible="{Binding UserNote, Converter={x:Static ObjectConverters.IsNotNull}}" />
+            </StackPanel>
+        </Border>
+
         <Grid ColumnDefinitions="2*,*" RowDefinitions="Auto,Auto" ColumnSpacing="20">
             <StackPanel Name="Main" Spacing="20">
                 <!-- The library's files of the mod, where they are, and whether they're still there. -->

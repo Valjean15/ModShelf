@@ -9,14 +9,14 @@
              x:DataType="vm:UpdatesViewModel">
 
     <!--
-      The previews and buttons beside the heading, and an update's Download beside what it says; in a narrow window,
-      below them. Their places are set here rather than on them, so the narrow window's can replace them.
+      The previews and buttons beside the heading, and an update's Skip and Download beside what it says; in a narrow
+      window, below them. Their places are set here rather than on them, so the narrow window's can replace them.
     -->
     <UserControl.Styles>
         <Style Selector="StackPanel.tools">
             <Setter Property="Grid.Column" Value="1" />
         </Style>
-        <Style Selector="Button.download">
+        <Style Selector="StackPanel.updateButtons">
             <Setter Property="Grid.Column" Value="2" />
         </Style>
         <ContainerQuery Name="UpdatesScreen" Query="max-width:620">
@@ -25,7 +25,7 @@
                 <Setter Property="Grid.Column" Value="0" />
                 <Setter Property="Margin" Value="0,0,0,16" />
             </Style>
-            <Style Selector="Button.download">
+            <Style Selector="StackPanel.updateButtons">
                 <Setter Property="Grid.Row" Value="1" />
                 <Setter Property="Grid.Column" Value="1" />
                 <Setter Property="HorizontalAlignment" Value="Left" />
@@ -154,10 +154,13 @@
                                                                        Text="{Binding Note}" />
                                                         </StackPanel>
 
-                                                        <Button Classes="download"
-                                                                VerticalAlignment="Top"
-                                                                Content="{x:Static res:Strings.FileDownload}"
-                                                                Command="{Binding DownloadCommand}" />
+                                                        <StackPanel Classes="updateButtons" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
+                                                            <Button Classes="quiet"
+                                                                    Content="{x:Static res:Strings.UpdateSkip}"
+                                                                    Command="{Binding SkipCommand}"
+                                                                    ToolTip.Tip="{x:Static res:Strings.UpdateSkipHint}" />
+                                                            <Button Content="{x:Static res:Strings.FileDownload}" Command="{Binding DownloadCommand}" />
+                                                        </StackPanel>
                                                     </Grid>
                                                 </Border>
                                             </DataTemplate>

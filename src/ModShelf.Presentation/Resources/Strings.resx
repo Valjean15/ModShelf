@@ -2616,4 +2616,72 @@
     <value>Yesterday</value>
     <comment>Heading of yesterday's part of a list by day.</comment>
   </data>
+  <data name="ModPin" xml:space="preserve">
+    <value>Pin at this version</value>
+    <comment>Menu item: pin a library mod at the version it has, so its updates aren't offered.</comment>
+  </data>
+  <data name="ModUnpin" xml:space="preserve">
+    <value>Unpin</value>
+    <comment>Menu item: unpin a library mod, so its updates are offered again.</comment>
+  </data>
+  <data name="ModAddNote" xml:space="preserve">
+    <value>Add a note…</value>
+    <comment>Menu item: keep a note of a library mod.</comment>
+  </data>
+  <data name="ModEditNote" xml:space="preserve">
+    <value>Edit the note…</value>
+    <comment>Menu item: change a library mod's note.</comment>
+  </data>
+  <data name="ModNoteTitle" xml:space="preserve">
+    <value>Note</value>
+    <comment>Title of the dialog that asks for a mod's note.</comment>
+  </data>
+  <data name="ModNoteMessage" xml:space="preserve">
+    <value>A note of {0}, such as why it's pinned. Leave it empty to remove it.</value>
+    <comment>{0} the mod's name.</comment>
+  </data>
+  <data name="ModNoteHint" xml:space="preserve">
+    <value>Your note</value>
+    <comment>Shown in the empty note box.</comment>
+  </data>
+  <data name="ModNoteSave" xml:space="preserve">
+    <value>Save</value>
+    <comment>The button that keeps the note.</comment>
+  </data>
+  <data name="ModStatusPinned" xml:space="preserve">
+    <value>Pinned</value>
+    <comment>Status of a pinned mod whose version isn't known.</comment>
+  </data>
+  <data name="ModStatusPinnedAt" xml:space="preserve">
+    <value>Pinned at {0}</value>
+    <comment>Status of a pinned mod: {0} its version, such as 2.7.</comment>
+  </data>
+  <data name="ModPagePinned" xml:space="preserve">
+    <value>Pinned: its updates aren't offered.</value>
+    <comment>On a pinned mod's page, when its version isn't known.</comment>
+  </data>
+  <data name="ModPagePinnedAt" xml:space="preserve">
+    <value>Pinned at {0}: its updates aren't offered.</value>
+    <comment>On a pinned mod's page: {0} its version, such as 2.7.</comment>
+  </data>
+  <data name="UpdateSkip" xml:space="preserve">
+    <value>Skip</value>
+    <comment>Button on an update: skip it until a newer one comes.</comment>
+  </data>
+  <data name="UpdateSkipHint" xml:space="preserve">
+    <value>Skip this update until a newer one comes</value>
+    <comment>Tooltip of an update's Skip button.</comment>
+  </data>
+  <data name="ModStatusOneSkipped" xml:space="preserve">
+    <value>1 update skipped</value>
+    <comment>Status of a library mod with one update the user skipped.</comment>
+  </data>
+  <data name="ModStatusSkipped" xml:space="preserve">
+    <value>{0:N0} updates skipped</value>
+    <comment>Status of a library mod with updates the user skipped: {0} how many.</comment>
+  </data>
+  <data name="ModOfferSkipped" xml:space="preserve">
+    <value>Offer skipped updates again</value>
+    <comment>Menu item: offer again the updates the user skipped of a library mod.</comment>
+  </data>
 </root>

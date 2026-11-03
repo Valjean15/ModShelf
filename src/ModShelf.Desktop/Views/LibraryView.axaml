@@ -467,6 +467,10 @@
                                                     <MenuItem Header="{x:Static res:Strings.LibraryOpenFolder}" Command="{Binding OpenFolderCommand}" />
                                                     <MenuItem Header="{x:Static res:Strings.ModWatch}" Command="{Binding WatchCommand}" IsVisible="{Binding !IsWatched}" />
                                                     <MenuItem Header="{x:Static res:Strings.ModUnwatch}" Command="{Binding UnwatchCommand}" IsVisible="{Binding IsWatched}" />
+                                                    <MenuItem Header="{x:Static res:Strings.ModPin}" Command="{Binding PinCommand}" IsVisible="{Binding !IsPinned}" />
+                                                    <MenuItem Header="{x:Static res:Strings.ModUnpin}" Command="{Binding UnpinCommand}" IsVisible="{Binding IsPinned}" />
+                                                    <MenuItem Header="{Binding EditNoteText}" Command="{Binding EditNoteCommand}" />
+                                                    <MenuItem Header="{x:Static res:Strings.ModOfferSkipped}" Command="{Binding OfferSkippedCommand}" IsVisible="{Binding HasSkipped}" />
                                                     <MenuItem Header="{x:Static res:Strings.LibraryRescan}" Command="{Binding RescanCommand}" />
                                                     <Separator />
                                                     <MenuItem Header="{x:Static res:Strings.LibraryRemoveMod}" Command="{Binding RemoveCommand}" />
@@ -520,6 +524,10 @@
                                                             <MenuItem Header="{x:Static res:Strings.LibraryOpenFolder}" Command="{Binding OpenFolderCommand}" />
                                                             <MenuItem Header="{x:Static res:Strings.ModWatch}" Command="{Binding WatchCommand}" IsVisible="{Binding !IsWatched}" />
                                                             <MenuItem Header="{x:Static res:Strings.ModUnwatch}" Command="{Binding UnwatchCommand}" IsVisible="{Binding IsWatched}" />
+                                                            <MenuItem Header="{x:Static res:Strings.ModPin}" Command="{Binding PinCommand}" IsVisible="{Binding !IsPinned}" />
+                                                            <MenuItem Header="{x:Static res:Strings.ModUnpin}" Command="{Binding UnpinCommand}" IsVisible="{Binding IsPinned}" />
+                                                            <MenuItem Header="{Binding EditNoteText}" Command="{Binding EditNoteCommand}" />
+                                                            <MenuItem Header="{x:Static res:Strings.ModOfferSkipped}" Command="{Binding OfferSkippedCommand}" IsVisible="{Binding HasSkipped}" />
                                                             <MenuItem Header="{x:Static res:Strings.LibraryRescan}" Command="{Binding RescanCommand}" />
                                                             <Separator />
                                                             <MenuItem Header="{x:Static res:Strings.LibraryRemoveMod}" Command="{Binding RemoveCommand}" />

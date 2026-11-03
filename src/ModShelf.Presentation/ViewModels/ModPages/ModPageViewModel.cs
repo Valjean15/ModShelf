@@ -344,6 +344,31 @@ public sealed partial class ModPageViewModel : ObservableObject
     public partial bool IsWatched { get; private set; }
 
     /// <summary>
+    /// Whether the user pinned it at the version the library has, so its updates aren't offered.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasKept))]
+    public partial bool IsPinned { get; private set; }
+
+    /// <summary>
+    /// Such as "Pinned at 2.7: its updates aren't offered."; empty when it isn't pinned.
+    /// </summary>
+    [ObservableProperty]
+    public partial string PinnedText { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// The user's note of it in the library; null for none.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasKept))]
+    public partial string? UserNote { get; private set; }
+
+    /// <summary>
+    /// Whether it's pinned or has a note, which show above its files.
+    /// </summary>
+    public bool HasKept => IsPinned || UserNote is not null;
+
+    /// <summary>
     /// Whether its site keeps a list of tracked mods.
     /// </summary>
     public bool CanTrack { get; }
@@ -453,11 +478,11 @@ public sealed partial class ModPageViewModel : ObservableObject
 
     /// <summary>
     /// What a file on the site is to the library: an update of one of its files, such as "Update for your 1.3", a new
-    /// optional file, or another update; null for none.
+    /// optional file, or another update; null for none, or for one not offered, of a pinned mod or skipped.
     /// </summary>
     private static string? UpdateNote(LibraryMod? inLibrary, ModFileRef file)
     {
-        if (inLibrary?.Updates.FirstOrDefault(update => update.File == file) is not { } update)
+        if (inLibrary?.OfferedUpdates.FirstOrDefault(update => update.File == file) is not { } update)
         {
             return null;
         }
@@ -695,6 +720,16 @@ public sealed partial class ModPageViewModel : ObservableObject
         IsDownloaded = inLibrary?.Files.Count > 0;
         IsWatched = inLibrary?.IsWatched == true;
         IsInLibrary = inLibrary is not null;
+        IsPinned = inLibrary?.IsPinned == true;
+        UserNote = inLibrary?.Note;
+        string? version = inLibrary?.Files
+            .Where(file => !OwnFileViewModel.IsInArchive(file.RelativePath))
+            .OrderByDescending(file => file.Category == ModFileCategory.Main)
+            .ThenByDescending(file => file.DownloadedAt)
+            .FirstOrDefault()?.VersionLabel;
+        PinnedText = !IsPinned ? string.Empty
+            : version is null ? Strings.ModPagePinned
+            : Text.Format(Strings.ModPagePinnedAt, version);
         HashSet<ModFileRef> kept = [.. inLibrary?.Files.Select(file => file.File) ?? []];
         foreach (ModFileViewModel file in _files)
         {

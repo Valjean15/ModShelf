@@ -42,6 +42,7 @@ public sealed partial class UpdateViewModel : ObservableObject
     {
         Download,
         Changes,
+        Skip,
     }
 
     public ModFileRef File { get; }
@@ -211,6 +212,26 @@ public sealed partial class UpdateViewModel : ObservableObject
                 if (_update.PageUrl is { } link)
                 {
                     await DownloadNotes.AddToLibraryAsync(_services.Downloads, link, Tell, cancellationToken);
+                }
+            },
+            cancellationToken);
+
+    /// <summary>
+    /// Skips the update until a newer one comes. Once the library has skipped it, it leaves the screen.
+    /// </summary>
+    [RelayCommand]
+    private Task SkipAsync(CancellationToken cancellationToken)
+        => RunAsync(
+            UpdateAction.Skip,
+            async () =>
+            {
+                try
+                {
+                    await _services.Library.SkipUpdateAsync(File, true, cancellationToken);
+                }
+                catch (Exception exception) when (exception is KeyNotFoundException or ArgumentException)
+                {
+                    // The mod left the library, or the update did, meanwhile.
                 }
             },
             cancellationToken);

@@ -5,6 +5,7 @@ using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
+using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.ModPages;
 using ModShelf.Presentation.ViewModels.Pictures;
 
@@ -44,6 +45,10 @@ public sealed partial class LibraryModViewModel : ObservableObject
         Unwatch,
         Remove,
         Rescan,
+        Pin,
+        Unpin,
+        Note,
+        OfferSkipped,
     }
 
     public ModRef Mod { get; }
@@ -66,6 +71,34 @@ public sealed partial class LibraryModViewModel : ObservableObject
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(WatchCommand), nameof(UnwatchCommand))]
     public partial bool IsWatched { get; private set; }
+
+    /// <summary>
+    /// Whether the user pinned it at the version the library has, so its updates aren't offered.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(PinCommand), nameof(UnpinCommand))]
+    public partial bool IsPinned { get; private set; }
+
+    /// <summary>
+    /// The user's note of it; null for none.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNote), nameof(EditNoteText))]
+    public partial string? Note { get; private set; }
+
+    public bool HasNote => Note is not null;
+
+    /// <summary>
+    /// Whether the user skipped some of its updates, which can be offered again.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(OfferSkippedCommand))]
+    public partial bool HasSkipped { get; private set; }
+
+    /// <summary>
+    /// "Add a note…", or "Edit the note…" when it has one.
+    /// </summary>
+    public string EditNoteText => HasNote ? Strings.ModEditNote : Strings.ModAddNote;
 
     /// <summary>
     /// "Watched for updates" or "Not watched".
@@ -197,10 +230,15 @@ public sealed partial class LibraryModViewModel : ObservableObject
         string filesText = Counts.Of(current, Strings.LibraryNoFiles, Strings.LibraryOneFile, Strings.LibraryFiles);
         FilesText = archived.Length > 0 ? Text.Format(Strings.LibraryFilesArchived, filesText, archived.Length) : filesText;
         HasFiles = mod.Files.Count > 0;
-        UpdateCount = mod.Updates.Count;
-        DownloadableUpdates = [.. mod.Updates.Where(update => update.PageUrl is not null).OrderByDescending(update => update.UploadedAt)];
-        UpdatesText = Counts.Of(mod.Updates.Count, string.Empty, Strings.LibraryOneUpdate, Strings.LibraryUpdates);
-        HasUpdates = mod.Updates.Count > 0;
+        // A pinned mod's updates, and the ones skipped, aren't offered: not counted, shown, or downloaded with the others.
+        IReadOnlyList<LibraryUpdate> offered = mod.OfferedUpdates;
+        UpdateCount = offered.Count;
+        DownloadableUpdates = [.. offered.Where(update => update.PageUrl is not null).OrderByDescending(update => update.UploadedAt)];
+        UpdatesText = Counts.Of(offered.Count, string.Empty, Strings.LibraryOneUpdate, Strings.LibraryUpdates);
+        HasUpdates = offered.Count > 0;
+        IsPinned = mod.IsPinned;
+        Note = mod.Note;
+        HasSkipped = mod.SkippedUpdates.Count > 0;
         HasPage = mod.PageUrl is not null;
         ArchivedCount = archived.Length;
         ArchivedSize = archived.Sum(file => file.SizeInBytes);
@@ -288,6 +326,71 @@ public sealed partial class LibraryModViewModel : ObservableObject
             },
             cancellationToken);
 
+    /// <summary>
+    /// Pins the mod at the version the library has, so its updates aren't offered.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanPin))]
+    private Task PinAsync(CancellationToken cancellationToken) => SetPinnedAsync(ModAction.Pin, true, cancellationToken);
+
+    [RelayCommand(CanExecute = nameof(IsPinned))]
+    private Task UnpinAsync(CancellationToken cancellationToken) => SetPinnedAsync(ModAction.Unpin, false, cancellationToken);
+
+    /// <summary>
+    /// Asks for the mod's note, starting with the one it has; an empty one removes it. The screen shows the change once
+    /// the library makes it.
+    /// </summary>
+    [RelayCommand]
+    private Task EditNoteAsync(CancellationToken cancellationToken)
+        => RunAsync(
+            ModAction.Note,
+            async () =>
+            {
+                TextQuestion question = new(Strings.ModNoteTitle, Text.Format(Strings.ModNoteMessage, Name), Strings.ModNoteHint, Strings.ModNoteSave)
+                {
+                    Text = Note ?? string.Empty,
+                    IsMultiline = true,
+                    MaxLength = LibraryMod.MaxNoteLength,
+                };
+                if (await _services.Dialogs.AskTextAsync(question, cancellationToken) is not { } note)
+                {
+                    return;
+                }
+
+                try
+                {
+                    await _services.Library.SetNoteAsync(Mod, note, cancellationToken);
+                }
+                catch (KeyNotFoundException)
+                {
+                    // It left the library meanwhile.
+                }
+            },
+            cancellationToken);
+
+    /// <summary>
+    /// Offers again the updates the user skipped.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(HasSkipped))]
+    private Task OfferSkippedAsync(CancellationToken cancellationToken)
+        => RunAsync(
+            ModAction.OfferSkipped,
+            async () =>
+            {
+                foreach (ModFileRef skipped in _mod.SkippedUpdates)
+                {
+                    try
+                    {
+                        await _services.Library.SkipUpdateAsync(skipped, false, cancellationToken);
+                    }
+                    catch (KeyNotFoundException)
+                    {
+                        // It left the library meanwhile.
+                        return;
+                    }
+                }
+            },
+            cancellationToken);
+
     [RelayCommand(CanExecute = nameof(CanWatch))]
     private Task WatchAsync(CancellationToken cancellationToken) => SetWatchedAsync(ModAction.Watch, true, cancellationToken);
 
@@ -336,6 +439,27 @@ public sealed partial class LibraryModViewModel : ObservableObject
 
     private bool CanWatch() => !IsWatched;
 
+    private bool CanPin() => !IsPinned;
+
+    /// <summary>
+    /// Pins or unpins the mod. The screen shows the change once the library makes it.
+    /// </summary>
+    private Task SetPinnedAsync(ModAction action, bool pinned, CancellationToken cancellationToken)
+        => RunAsync(
+            action,
+            async () =>
+            {
+                try
+                {
+                    await _services.Library.SetPinnedAsync(Mod, pinned, cancellationToken);
+                }
+                catch (KeyNotFoundException)
+                {
+                    // It left the library meanwhile.
+                }
+            },
+            cancellationToken);
+
     /// <summary>
     /// Watches or unwatches the mod. The screen shows the change once the library makes it; a mod unwatched without
     /// files leaves it.
@@ -357,22 +481,35 @@ public sealed partial class LibraryModViewModel : ObservableObject
             cancellationToken);
 
     /// <summary>
-    /// Its updates: "Update to" the new version when one replaces a file, a new optional file, or how many; then the
-    /// files missing from disk; then whether it's watched only, or not watched.
+    /// Whether it's pinned, such as "Pinned at 2.7"; its updates offered: "Update to" the new version when one replaces a
+    /// file, a new optional file, or how many; how many it skipped; then the files missing from disk; then whether it's
+    /// watched only, or not watched.
     /// </summary>
     private void ShowStatuses()
     {
         List<ModStatus> statuses = [];
-        if (_mod.Updates is [LibraryUpdate update])
+        if (_mod.IsPinned)
+        {
+            string text = VersionText == Strings.NoValue ? Strings.ModStatusPinned : Text.Format(Strings.ModStatusPinnedAt, VersionText);
+            statuses.Add(new ModStatus(text, ModStatusKind.Note));
+        }
+
+        IReadOnlyList<LibraryUpdate> offered = _mod.OfferedUpdates;
+        if (offered is [LibraryUpdate update])
         {
             string text = update.Replaces is not null
                 ? Text.Format(Strings.ModStatusUpdateTo, update.VersionLabel ?? update.Name)
                 : update.Category == ModFileCategory.Optional ? Strings.ModPageNewOptionalFile : Strings.ModPageUpdate;
             statuses.Add(new ModStatus(text, ModStatusKind.Update));
         }
-        else if (_mod.Updates.Count > 1)
+        else if (offered.Count > 1)
         {
-            statuses.Add(new ModStatus(Text.Format(Strings.ModStatusUpdates, _mod.Updates.Count), ModStatusKind.Update));
+            statuses.Add(new ModStatus(Text.Format(Strings.ModStatusUpdates, offered.Count), ModStatusKind.Update));
+        }
+
+        if (!_mod.IsPinned && _mod.SkippedUpdates.Count > 0)
+        {
+            statuses.Add(new ModStatus(Counts.Of(_mod.SkippedUpdates.Count, Strings.ModStatusOneSkipped, Strings.ModStatusSkipped), ModStatusKind.Note));
         }
 
         if (MissingCount > 0)

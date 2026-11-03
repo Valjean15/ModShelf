@@ -11,6 +11,7 @@ namespace ModShelf.Presentation.ViewModels.Updates;
 /// What each update on the Updates screen uses, handed over by the screen as one.
 /// </summary>
 internal sealed class UpdatesServices(
+    IModLibrary library,
     ILibraryDownloads downloads,
     ISourceRegistry sources,
     IModLookup lookup,
@@ -18,6 +19,8 @@ internal sealed class UpdatesServices(
     TimeProvider timeProvider,
     ILogger logger)
 {
+    public IModLibrary Library { get; } = library ?? throw new ArgumentNullException(nameof(library));
+
     public ILibraryDownloads Downloads { get; } = downloads ?? throw new ArgumentNullException(nameof(downloads));
 
     public ISourceRegistry Sources { get; } = sources ?? throw new ArgumentNullException(nameof(sources));

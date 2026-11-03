@@ -21,4 +21,19 @@ public sealed record TextQuestion(string Title, string Message, string Hint, str
     /// The button that opens <see cref="HelpPage"/>, saying what it opens, such as "Open the API key page".
     /// </summary>
     public string? HelpPageLabel { get; init; }
+
+    /// <summary>
+    /// The answer as it starts, such as a note to change; empty for none.
+    /// </summary>
+    public string Text { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Whether the answer may take several lines, such as a note, so Enter starts a new line.
+    /// </summary>
+    public bool IsMultiline { get; init; }
+
+    /// <summary>
+    /// The most characters the answer may have; 0 for no limit.
+    /// </summary>
+    public int MaxLength { get; init; }
 }

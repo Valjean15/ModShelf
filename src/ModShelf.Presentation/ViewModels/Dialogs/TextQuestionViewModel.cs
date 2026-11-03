@@ -29,6 +29,9 @@ public sealed partial class TextQuestionViewModel : ObservableObject
         IsSecret = question.IsSecret;
         HelpPage = question.HelpPage;
         HelpPageLabel = question.HelpPageLabel;
+        Text = question.Text;
+        IsMultiline = question.IsMultiline;
+        MaxLength = question.MaxLength;
     }
 
     public string Title { get; }
@@ -48,6 +51,16 @@ public sealed partial class TextQuestionViewModel : ObservableObject
     /// Whether the answer is a secret, such as an API key, which isn't shown as it's typed.
     /// </summary>
     public bool IsSecret { get; }
+
+    /// <summary>
+    /// Whether the answer may take several lines.
+    /// </summary>
+    public bool IsMultiline { get; }
+
+    /// <summary>
+    /// The most characters the answer may have; 0 for no limit.
+    /// </summary>
+    public int MaxLength { get; }
 
     /// <summary>
     /// A web page that helps the user answer; null for none.

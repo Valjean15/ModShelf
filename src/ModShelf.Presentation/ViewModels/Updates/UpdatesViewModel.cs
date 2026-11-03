@@ -84,7 +84,7 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
         _uiThread = uiThread;
         _timeProvider = timeProvider;
         _logger = logger;
-        _services = new UpdatesServices(downloads, sources, lookup, dialogs, timeProvider, logger);
+        _services = new UpdatesServices(library, downloads, sources, lookup, dialogs, timeProvider, logger);
         Previews = new PreviewsViewModel(PreviewScreen.Updates, pictures);
         Previews.PropertyChanged += (_, changed) =>
         {
@@ -395,7 +395,7 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
     }
 
     /// <summary>
-    /// Shows every update the library has but hidden games', by game, then by its mod's name, then the newest first,
+    /// Shows every update the library offers but hidden games', by game, then by its mod's name, then the newest first,
     /// keeping the rows of those shown already; and says how many there are, and when the watched mods were checked.
     /// </summary>
     private void Arrange()
@@ -403,13 +403,13 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
         StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
         List<UpdateGameViewModel> games = [];
         foreach (IGrouping<GameRef, LibraryMod> game in _mods.Values
-            .Where(mod => mod.Updates.Count > 0 && !_hiddenGames.IsHidden(mod.Mod.Game.Key))
+            .Where(mod => mod.OfferedUpdates.Count > 0 && !_hiddenGames.IsHidden(mod.Mod.Game.Key))
             .GroupBy(mod => mod.Mod.Game))
         {
             List<UpdateViewModel> rows = [];
             foreach (LibraryMod mod in game.OrderBy(mod => mod.Name, byName))
             {
-                foreach (LibraryUpdate update in mod.Updates.OrderByDescending(update => update.UploadedAt))
+                foreach (LibraryUpdate update in mod.OfferedUpdates.OrderByDescending(update => update.UploadedAt))
                 {
                     rows.Add(RowFor(update, mod));
                 }

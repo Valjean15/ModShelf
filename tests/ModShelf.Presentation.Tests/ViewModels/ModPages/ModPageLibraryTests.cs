@@ -179,6 +179,52 @@ public sealed class ModPageLibraryTests : IDisposable
     }
 
     [Fact]
+    public async Task AnUpdateNotOfferedIsntSaidToBeOne()
+    {
+        LibraryFile yours = TestData.LibraryFile(SkyUi, "1", "SkyUI_5_1.7z", version: "5.1");
+        LibraryMod inLibrary = LibraryMod.Restore(
+            SkyUi,
+            "SkyUI",
+            null,
+            null,
+            isWatched: true,
+            TestData.Now.AddDays(-30),
+            TestData.Now,
+            [yours],
+            [
+                new LibraryUpdate(new ModFileRef(SkyUi, "2"), "SkyUI 5.2", "SkyUI_5_2.7z", "5.2", ModFileCategory.Main, TestData.Now, yours.File, TestData.Now, null),
+                new LibraryUpdate(new ModFileRef(SkyUi, "3"), "Fonts", "Fonts.7z", "1.0", ModFileCategory.Optional, TestData.Now, null, TestData.Now, null),
+            ],
+            skippedUpdates: [new ModFileRef(SkyUi, "3")]);
+        await _harness.StartAsync(inLibrary);
+
+        ModPageViewModel mod = await OpenAsync(BrowseHarness.File(SkyUi, "1"), BrowseHarness.File(SkyUi, "2"), BrowseHarness.File(SkyUi, "3", ModFileCategory.Optional));
+
+        Assert.Equal(["2: Update for your 5.1", "3: "], mod.Files.Where(file => file.File.Id != "1").Select(file => $"{file.File.Id}: {file.UpdateNote}"));
+        Assert.Equal((false, false, string.Empty, (string?)null), (mod.HasKept, mod.IsPinned, mod.PinnedText, mod.UserNote));
+
+        await _harness.Library.SetPinnedAsync(SkyUi, true, TestContext.Current.CancellationToken);
+        await _harness.Library.SetNoteAsync(SkyUi, "Stay on 5.1.", TestContext.Current.CancellationToken);
+
+        Assert.Equal(["2: ", "3: "], mod.Files.Where(file => file.File.Id != "1").Select(file => $"{file.File.Id}: {file.UpdateNote}"));
+        Assert.Equal((true, true, "Pinned at 5.1: its updates aren't offered.", "Stay on 5.1."), (mod.HasKept, mod.IsPinned, mod.PinnedText, mod.UserNote));
+    }
+
+    [Fact]
+    public async Task APinnedModWithoutAVersionSaysPinnedAndANoteAloneShows()
+    {
+        await _harness.StartAsync(LibraryMod.Watch(SkyUi, "SkyUI", null, null, TestData.Now).WithPinned(true));
+        ModPageViewModel mod = await OpenAsync(BrowseHarness.File(SkyUi, "1"));
+
+        Assert.Equal("Pinned: its updates aren't offered.", mod.PinnedText);
+
+        await _harness.Library.SetPinnedAsync(SkyUi, false, TestContext.Current.CancellationToken);
+        await _harness.Library.SetNoteAsync(SkyUi, "Waiting for 2.0.", TestContext.Current.CancellationToken);
+
+        Assert.Equal((true, false, string.Empty, "Waiting for 2.0."), (mod.HasKept, mod.IsPinned, mod.PinnedText, mod.UserNote));
+    }
+
+    [Fact]
     public async Task SaysTheModsDetailsAndWhenItCameIntoTheLibrary()
     {
         using CultureScope culture = new("en-US");
