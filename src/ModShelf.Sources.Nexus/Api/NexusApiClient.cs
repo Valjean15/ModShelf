@@ -8,8 +8,6 @@ using System.Text.RegularExpressions;
 using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Http;
 
-using Polly.Timeout;
-
 namespace ModShelf.Sources.Nexus.Api;
 
 /// <summary>
@@ -195,9 +193,9 @@ internal sealed partial class NexusApiClient(IHttpClientFactory clients)
         {
             return await clients.CreateClient(ClientName).SendAsync(request, cancellationToken).ConfigureAwait(false);
         }
-        catch (TimeoutRejectedException exception)
+        catch (HttpRequestException exception) when (exception is { StatusCode: null, InnerException: TimeoutException late })
         {
-            throw new HttpRequestException("Nexus Mods didn't answer in time.", exception);
+            throw new HttpRequestException("Nexus Mods didn't answer in time.", late);
         }
     }
 

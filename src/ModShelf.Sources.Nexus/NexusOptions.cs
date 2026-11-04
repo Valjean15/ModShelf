@@ -30,20 +30,4 @@ public sealed record NexusOptions
     /// offered only when it's set; until then, accounts link with a personal API key. Never commit one.
     /// </summary>
     public string? OAuthClientId { get; init; }
-
-    /// <summary>
-    /// How many more times a request is sent when it failed for a passing reason: a server error, a timeout or a
-    /// broken connection. A refusal or the rate limit is never retried.
-    /// </summary>
-    public int MaxRetryAttempts { get; init; } = 3;
-
-    /// <summary>
-    /// The wait before the first retry. It doubles for each retry after that, with some randomness.
-    /// </summary>
-    public TimeSpan RetryDelay { get; init; } = TimeSpan.FromSeconds(1);
-
-    /// <summary>
-    /// How long one attempt may take before it counts as failed.
-    /// </summary>
-    public TimeSpan AttemptTimeout { get; init; } = TimeSpan.FromSeconds(30);
 }

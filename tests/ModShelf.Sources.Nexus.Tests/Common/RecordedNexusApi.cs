@@ -4,6 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Time.Testing;
 
+using ModShelf.Application.Accounts;
+using ModShelf.Infrastructure;
+using ModShelf.Infrastructure.Sources;
 using ModShelf.Sources.Nexus.Api;
 using ModShelf.Testing;
 
@@ -150,8 +153,10 @@ internal sealed class RecordedNexusApi : IDisposable
     }
 
     /// <summary>
-    /// The source's services, as <c>AddNexusSource()</c> registers them, calling this API. Retries don't wait.
+    /// The source's services, as the hosts register them, calling this API: <c>AddSourceHttpClients()</c>, with no account
+    /// linked, then <c>AddNexusSource()</c>. Retries don't wait.
     /// </summary>
+    /// <param name="http">Changes the retries and time limits every source's client gets.</param>
     /// <param name="realClock">
     /// Whether they run on the system's clock rather than <see cref="Time"/>. Timeouts need it: the retry pipeline
     /// waits on the registered clock.
@@ -160,6 +165,7 @@ internal sealed class RecordedNexusApi : IDisposable
     /// <param name="before">Registers what the host does before the source, such as a primary handler of its own.</param>
     public ServiceProvider BuildServices(
         Func<NexusOptions, NexusOptions>? configure = null,
+        Func<SourceHttpOptions, SourceHttpOptions>? http = null,
         bool realClock = false,
         Func<HttpMessageHandler>? primaryHandler = null,
         Action<IServiceCollection>? before = null)
@@ -169,6 +175,9 @@ internal sealed class RecordedNexusApi : IDisposable
         {
             ApiBaseAddress = BaseAddress,
             UsersBaseAddress = BaseAddress,
+        };
+        SourceHttpOptions sourceHttp = new()
+        {
             RetryDelay = TimeSpan.Zero,
             AttemptTimeout = TimeSpan.FromSeconds(10),
         };
@@ -176,6 +185,8 @@ internal sealed class RecordedNexusApi : IDisposable
         ServiceCollection services = new();
         services.AddLogging(logging => logging.SetMinimumLevel(LogLevel.Trace).AddProvider(Logs));
         services.AddSingleton(realClock ? TimeProvider.System : Time);
+        services.AddSingleton<ICredentialProvider, NoLinkedAccount>();
+        services.AddSourceHttpClients(http?.Invoke(sourceHttp) ?? sourceHttp);
         before?.Invoke(services);
         services.AddNexusSource(configure?.Invoke(options) ?? options);
         if (primaryHandler is not null)

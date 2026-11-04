@@ -1,4 +1,4 @@
-namespace ModShelf.Sources.Nexus.Api;
+namespace ModShelf.Infrastructure.Sources;
 
 /// <summary>
 /// Reads each answer's body in full before handing the answer on, so the attempt's timeout covers the body as well as

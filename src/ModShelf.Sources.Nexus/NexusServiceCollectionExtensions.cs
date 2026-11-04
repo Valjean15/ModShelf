@@ -1,18 +1,14 @@
-using System.Net;
 using System.Net.Http.Headers;
 using System.Reflection;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Logging;
 
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Nexus.Accounts;
 using ModShelf.Sources.Nexus.Api;
-
-using Polly;
 
 namespace ModShelf.Sources.Nexus;
 
@@ -31,12 +27,12 @@ public static class NexusServiceCollectionExtensions
     /// <summary>
     /// Adds <see cref="NexusSource"/> as an <see cref="IModSource"/>. It links accounts with a personal API key, and
     /// through the browser too when <see cref="NexusOptions.OAuthClientId"/> is set. Its API client names the app and
-    /// its version on every request, as Nexus Mods asks; retries requests that fail for a passing reason, with backoff;
-    /// and holds requests back while the account's rate limit is used up. Calling this again changes nothing.
+    /// its version on every request, as Nexus Mods asks, and holds requests back while the account's rate limit is used
+    /// up. Calling this again changes nothing.
     /// </summary>
     /// <remarks>
     /// The client is the one named for the source in <c>SourceHttpClients</c>, so the host's <c>AddSourceHttpClients()</c>
-    /// adds the linked account to its requests.
+    /// adds the linked account to its requests, retries them, limits each attempt's time and refuses redirects.
     /// </remarks>
     public static IServiceCollection AddNexusSource(this IServiceCollection services, NexusOptions? options = null)
     {
@@ -71,53 +67,10 @@ public static class NexusServiceCollectionExtensions
             http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         });
 
-        // The API answers where it's asked. A redirect is a failure: followed, it would carry the account's key to
-        // wherever it pointed, and turn a POST into a GET that succeeds.
-        client.ConfigurePrimaryHttpMessageHandler((handler, _) =>
-        {
-            switch (handler)
-            {
-                case SocketsHttpHandler sockets:
-                    sockets.AllowAutoRedirect = false;
-                    break;
-                case HttpClientHandler classic:
-                    classic.AllowAutoRedirect = false;
-                    break;
-            }
-        });
-
-        client.AddResilienceHandler("nexus", pipeline =>
-        {
-            if (settings.MaxRetryAttempts > 0)
-            {
-                // Server errors, 408, timeouts and broken connections. Not 429: the rate limit resets on the hour
-                // at the earliest, so retrying within seconds only spends what's left of it.
-                pipeline.AddRetry(new HttpRetryStrategyOptions
-                {
-                    MaxRetryAttempts = settings.MaxRetryAttempts,
-                    Delay = settings.RetryDelay,
-                    BackoffType = DelayBackoffType.Exponential,
-                    UseJitter = true,
-
-                    // A server error's Retry-After, such as a maintenance page's hour, would hold the call that long
-                    // between attempts; the retries keep to their own short waits instead.
-                    ShouldRetryAfterHeader = false,
-                    ShouldHandle = arguments => ValueTask.FromResult(
-                        arguments.Outcome.Result?.StatusCode != HttpStatusCode.TooManyRequests
-                        && HttpClientResiliencePredicates.IsTransient(arguments.Outcome)),
-                });
-            }
-
-            pipeline.AddTimeout(settings.AttemptTimeout);
-        });
-
-        // Inside the retries, so it sees every attempt.
+        // Inside the retries the host adds, so it sees every attempt.
         client.AddHttpMessageHandler(provider => new NexusQuotaHandler(
             provider.GetRequiredService<NexusQuota>(),
             provider.GetRequiredService<ILogger<NexusQuotaHandler>>()));
-
-        // Inside each attempt's timeout, which otherwise ends once the headers arrive.
-        client.AddHttpMessageHandler(() => new WholeAnswerHandler());
 
         return services;
     }
@@ -151,10 +104,6 @@ public static class NexusServiceCollectionExtensions
         {
             throw new ArgumentException("The OAuth client ID can't be blank; leave it out to offer only the API key.", nameof(settings));
         }
-
-        ArgumentOutOfRangeException.ThrowIfNegative(settings.MaxRetryAttempts, nameof(settings));
-        ArgumentOutOfRangeException.ThrowIfLessThan(settings.RetryDelay, TimeSpan.Zero, nameof(settings));
-        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(settings.AttemptTimeout, TimeSpan.Zero, nameof(settings));
     }
 
     private static bool IsBaseAddress(Uri address)

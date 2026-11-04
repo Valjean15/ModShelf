@@ -6,8 +6,9 @@
   </PropertyGroup>
 
   <!--
-    The API client: IHttpClientFactory, retries and timeouts, logging, and AddNexusSource() for the hosts. The
-    client's name comes from Sources.Abstractions, so the app adds the linked account to its requests.
+    The API client: IHttpClientFactory, logging, and AddNexusSource() for the hosts, from the package that brings them.
+    The client's name comes from Sources.Abstractions, so the app adds the linked account, the retries and the time
+    limits to its requests.
   -->
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" />

@@ -106,13 +106,22 @@ public static class InfrastructureServiceCollectionExtensions
     /// <summary>
     /// Sets up the HTTP client each source asks for by <see cref="SourceHttpClients.NameFor"/>: every request gets the
     /// source's linked account through <see cref="ICredentialProvider"/>, and a request refused with a 401 is sent
-    /// once more with refreshed credentials. Needs the provider, which Application's <c>AddAccounts()</c> registers.
+    /// once more with refreshed credentials. A request that fails for a passing reason is retried with backoff, but
+    /// never one the site refused or held back for its rate limit; each attempt has a time limit, its answer read in
+    /// full within it, and a timed-out request is an <see cref="HttpRequestException"/>; redirects aren't followed.
+    /// Needs the provider, which Application's <c>AddAccounts()</c> registers. Calling this again changes nothing.
     /// </summary>
-    public static IServiceCollection AddSourceHttpClients(this IServiceCollection services)
+    /// <exception cref="ArgumentOutOfRangeException">The retries are negative, or a wait or the timeout can't work.</exception>
+    public static IServiceCollection AddSourceHttpClients(this IServiceCollection services, SourceHttpOptions? options = null)
     {
         ArgumentNullException.ThrowIfNull(services);
+        SourceHttpOptions settings = options ?? new SourceHttpOptions();
+        ArgumentOutOfRangeException.ThrowIfNegative(settings.MaxRetryAttempts, nameof(options));
+        ArgumentOutOfRangeException.ThrowIfLessThan(settings.RetryDelay, TimeSpan.Zero, nameof(options));
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(settings.AttemptTimeout, TimeSpan.Zero, nameof(options));
 
         services.AddHttpClient();
+        services.TryAddSingleton(settings);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, SourceHttpClientFilter>());
         return services;
     }

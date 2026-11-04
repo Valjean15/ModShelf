@@ -164,7 +164,8 @@ public sealed partial class NexusApiClientTests : IDisposable
         HttpRequestException failed = await Assert.ThrowsAsync<HttpRequestException>(
             () => GetAsync<ModSummary>(FlakyPath, retries: 1, attemptTimeout: TimeSpan.FromMilliseconds(200)));
 
-        Assert.IsType<TimeoutRejectedException>(failed.InnerException);
+        Assert.Equal("Nexus Mods didn't answer in time.", failed.Message);
+        Assert.IsType<TimeoutRejectedException>(Assert.IsType<TimeoutException>(failed.InnerException).InnerException);
         Assert.Null(failed.StatusCode);
 
         // WireMock logs a request once it has answered it, after its delay.
@@ -183,7 +184,7 @@ public sealed partial class NexusApiClientTests : IDisposable
         // The headers arrive, then nothing more: a connection that dropped without saying so.
         StallingHandler stalling = new();
         await using ServiceProvider services = _api.BuildServices(
-            options => options with { MaxRetryAttempts = 1, AttemptTimeout = TimeSpan.FromMilliseconds(300) },
+            http: options => options with { MaxRetryAttempts = 1, AttemptTimeout = TimeSpan.FromMilliseconds(300) },
             realClock: true,
             primaryHandler: () => stalling);
 
@@ -192,7 +193,8 @@ public sealed partial class NexusApiClientTests : IDisposable
                 .GetAsync<ModSummary>(FlakyPath.TrimStart('/'), Cancellation)
                 .WaitAsync(TimeSpan.FromSeconds(20), Cancellation));
 
-        Assert.IsType<TimeoutRejectedException>(failed.InnerException);
+        Assert.Equal("Nexus Mods didn't answer in time.", failed.Message);
+        Assert.IsType<TimeoutRejectedException>(Assert.IsType<TimeoutException>(failed.InnerException).InnerException);
         Assert.Equal(2, stalling.Requests);
     }
 
@@ -350,7 +352,7 @@ public sealed partial class NexusApiClientTests : IDisposable
     private async Task<T> GetAsync<T>(string path, int retries = 3, TimeSpan? attemptTimeout = null)
     {
         await using ServiceProvider services = _api.BuildServices(
-            options => options with
+            http: options => options with
             {
                 MaxRetryAttempts = retries,
                 AttemptTimeout = attemptTimeout ?? options.AttemptTimeout,

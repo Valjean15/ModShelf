@@ -1,5 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 
+using ModShelf.Application.Accounts;
+using ModShelf.Infrastructure;
+using ModShelf.Infrastructure.Sources;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Nexus.Api;
 using ModShelf.Sources.Nexus.Tests.Common;
@@ -34,7 +37,10 @@ public sealed class NexusServiceCollectionExtensionsTests : IDisposable
         _api.Answer("/v1/down.json", response => response.WithStatusCode(503));
         ServiceCollection services = new();
         services.AddLogging();
-        NexusOptions options = new() { ApiBaseAddress = _api.BaseAddress, MaxRetryAttempts = 2, RetryDelay = TimeSpan.Zero };
+        services.AddSingleton<ICredentialProvider, NoLinkedAccount>();
+        SourceHttpOptions http = new() { MaxRetryAttempts = 2, RetryDelay = TimeSpan.Zero };
+        services.AddSourceHttpClients(http);
+        NexusOptions options = new() { ApiBaseAddress = _api.BaseAddress };
         services.AddNexusSource(options);
         services.AddNexusSource(options);
 
@@ -43,8 +49,18 @@ public sealed class NexusServiceCollectionExtensionsTests : IDisposable
             () => provider.GetRequiredService<NexusApiClient>().GetAsync<object>("v1/down.json", TestContext.Current.CancellationToken));
 
         Assert.Single(provider.GetServices<IModSource>());
-        Assert.Equal(1 + options.MaxRetryAttempts, _api.Requests.Count);
+        Assert.Equal(1 + http.MaxRetryAttempts, _api.Requests.Count);
         Assert.All(_api.Requests, request => Assert.Equal("ModShelf", Assert.Single(request.RequestMessage!.Headers!["Application-Name"])));
+    }
+
+    [Fact]
+    public async Task ItsClientHasNoOverallTimeLimitSinceEachAttemptHasOne()
+    {
+        await using ServiceProvider services = _api.BuildServices();
+
+        using HttpClient client = services.GetRequiredService<IHttpClientFactory>().CreateClient(NexusApiClient.ClientName);
+
+        Assert.Equal(Timeout.InfiniteTimeSpan, client.Timeout);
     }
 
     public static TheoryData<NexusOptions> BrokenOptions() =>
@@ -54,9 +70,6 @@ public sealed class NexusServiceCollectionExtensionsTests : IDisposable
         new NexusOptions { ApiBaseAddress = new Uri("ftp://api.nexusmods.com/") },
         new NexusOptions { UsersBaseAddress = new Uri("https://users.nexusmods.com/oauth") },
         new NexusOptions { OAuthClientId = " " },
-        new NexusOptions { MaxRetryAttempts = -1 },
-        new NexusOptions { RetryDelay = TimeSpan.FromSeconds(-1) },
-        new NexusOptions { AttemptTimeout = TimeSpan.Zero },
     ];
 
     [Theory]
