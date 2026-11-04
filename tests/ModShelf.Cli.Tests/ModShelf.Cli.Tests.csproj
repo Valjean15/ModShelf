@@ -13,6 +13,7 @@
     <Compile Include="..\Shared\MemorySchemeRegistration.cs" Link="Shared\MemorySchemeRegistration.cs" />
     <Compile Include="..\Shared\RecordingLoggerProvider.cs" Link="Shared\RecordingLoggerProvider.cs" />
     <Compile Include="..\Shared\TempFolder.cs" Link="Shared\TempFolder.cs" />
+    <Compile Include="..\Shared\ExampleSite\*.cs" Link="Shared\ExampleSite\%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>

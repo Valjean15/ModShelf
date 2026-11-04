@@ -10,6 +10,7 @@ namespace ModShelf.Presentation.Tests.Fakes;
 
 /// <summary>
 /// Mod sites that list their games, search their mods and describe them as the test says, recording what each was asked.
+/// The sites of <see cref="Others"/> answer as the app's own lookup has them answer.
 /// </summary>
 internal sealed class ScriptedLookup : IModLookup
 {
@@ -17,7 +18,12 @@ internal sealed class ScriptedLookup : IModLookup
 
     public List<SourceId> Searchable { get; } = [];
 
-    public IReadOnlyList<SourceId> SearchableSources => [.. Searchable];
+    /// <summary>
+    /// Sites the test doesn't script, such as the example site: asked through the app's own lookup, which asks them.
+    /// </summary>
+    public IModLookup? Others { get; init; }
+
+    public IReadOnlyList<SourceId> SearchableSources => [.. Searchable, .. Others?.SearchableSources ?? []];
 
     /// <summary>
     /// Each site's games.
@@ -65,6 +71,11 @@ internal sealed class ScriptedLookup : IModLookup
     public Task<ModPage> LookUpAsync(Uri link, CancellationToken cancellationToken)
     {
         _asked.Enqueue($"LookUpAsync {link}");
+        if (Others is not null && !LinkedPages.ContainsKey(link))
+        {
+            return Others.LookUpAsync(link, cancellationToken);
+        }
+
         return Answer(nameof(LookUpAsync), () => LinkedPages.TryGetValue(link, out ModPage? page)
             ? page
             : throw new UnsupportedLinkException("No source knows this link."));
@@ -73,6 +84,11 @@ internal sealed class ScriptedLookup : IModLookup
     public Task<ModPage> LookUpAsync(ModRef modRef, CancellationToken cancellationToken)
     {
         _asked.Enqueue($"LookUpAsync {modRef.Id}");
+        if (IsOthers(modRef.Game.Source))
+        {
+            return Others!.LookUpAsync(modRef, cancellationToken);
+        }
+
         return Answer(nameof(LookUpAsync), () => Pages.TryGetValue(modRef, out ModPage? page)
             ? page
             : throw new HttpRequestException("No Mod Found", null, System.Net.HttpStatusCode.NotFound));
@@ -81,12 +97,22 @@ internal sealed class ScriptedLookup : IModLookup
     public Task<IReadOnlyList<string>?> GetChangesAsync(ModRef modRef, string version, CancellationToken cancellationToken)
     {
         _asked.Enqueue($"GetChangesAsync {modRef.Id} {version}");
+        if (IsOthers(modRef.Game.Source))
+        {
+            return Others!.GetChangesAsync(modRef, version, cancellationToken);
+        }
+
         return Answer(nameof(GetChangesAsync), () => (IReadOnlyList<string>?)(Changes.GetValueOrDefault((modRef, version)) ?? []));
     }
 
     public Task<IReadOnlyList<GameInfo>> GetGamesAsync(SourceId source, CancellationToken cancellationToken)
     {
         _asked.Enqueue($"GetGamesAsync {source}");
+        if (IsOthers(source))
+        {
+            return Others!.GetGamesAsync(source, cancellationToken);
+        }
+
         return Answer(nameof(GetGamesAsync), () => Games.GetValueOrDefault(source) ?? []);
     }
 
@@ -96,6 +122,11 @@ internal sealed class ScriptedLookup : IModLookup
         lock (Searches)
         {
             Searches.Add((game, query));
+        }
+
+        if (IsOthers(game.Source))
+        {
+            return await Others!.SearchAsync(game, query, cancellationToken);
         }
 
         if (HeldSearches.TryDequeue(out TaskCompletionSource? hold))
@@ -109,6 +140,8 @@ internal sealed class ScriptedLookup : IModLookup
         ];
         return await Answer(nameof(SearchAsync), () => new SearchPage(mods.Skip(query.Offset).Take(query.Count), mods.Count, query.Offset));
     }
+
+    private bool IsOthers(SourceId source) => Others?.SearchableSources.Contains(source) == true && !Searchable.Contains(source);
 
     private Task<T> Answer<T>(string method, Func<T> answer)
     {

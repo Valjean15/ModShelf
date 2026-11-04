@@ -18,8 +18,11 @@ internal sealed class LibraryHarness : IDisposable
     private readonly CancellationTokenSource _stopping = new();
     private bool _disposed;
 
-    public LibraryHarness()
+    /// <param name="example">The example site, beside Nexus Mods, asked as the app asks it.</param>
+    public LibraryHarness(ExampleSite? example = null)
     {
+        FakeSourceRegistry sources = example is null ? new(Catalog) : new(Catalog, example);
+        Lookup = new ScriptedLookup { Others = example is null ? null : AppLookup.Over(new FakeSourceRegistry(example)) };
         Catalog.GameNames["skyrimspecialedition"] = "Skyrim Special Edition";
         Time.SetLocalTimeZone(TimeZoneInfo.Utc);
         Screen = new LibraryViewModel(
@@ -36,7 +39,7 @@ internal sealed class LibraryHarness : IDisposable
             Folders,
             Clipboard,
             Dialogs,
-            new FakeSourceRegistry(Catalog),
+            sources,
             Hidden,
             GameSettings,
             Pictures.Pictures,
@@ -55,7 +58,7 @@ internal sealed class LibraryHarness : IDisposable
 
     public ScriptedRescan Rescan { get; } = new();
 
-    public ScriptedLookup Lookup { get; } = new();
+    public ScriptedLookup Lookup { get; }
 
     public ScriptedLibraryDownloads LibraryDownloads { get; } = new();
 

@@ -21,12 +21,15 @@ internal sealed class UpdatesHarness : IDisposable
     private readonly CancellationTokenSource _stopping = new();
     private bool _disposed;
 
-    public UpdatesHarness()
+    /// <param name="example">The example site, beside Nexus Mods and the plain site.</param>
+    public UpdatesHarness(ExampleSite? example = null)
     {
         Time.SetLocalTimeZone(TimeZoneInfo.Utc);
         Catalog.GameNames["skyrimspecialedition"] = "Skyrim Special Edition";
         Catalog.GameNames["stardewvalley"] = "Stardew Valley";
-        FakeSourceRegistry sources = new(Catalog, new FakeSource(Plain, "Plain Site"));
+        FakeSourceRegistry sources = example is null
+            ? new(Catalog, new FakeSource(Plain, "Plain Site"))
+            : new(Catalog, new FakeSource(Plain, "Plain Site"), example);
         Screen = new UpdatesViewModel(
             Library,
             Checker,

@@ -7,6 +7,7 @@ using ModShelf.Presentation.Services;
 using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.ViewModels.Browse;
 using ModShelf.Presentation.ViewModels.ModPages;
+using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Testing;
 
@@ -28,8 +29,11 @@ internal sealed class BrowseHarness : IDisposable
     private bool _disposed;
 
     /// <param name="trending">Whether Nexus Mods lists its games' trending mods.</param>
-    public BrowseHarness(bool trending = true)
+    /// <param name="example">The example site, beside Nexus Mods, asked as the app asks it.</param>
+    public BrowseHarness(bool trending = true, ExampleSite? example = null)
     {
+        FakeSourceRegistry others = example is null ? new FakeSourceRegistry() : new FakeSourceRegistry(example);
+        Lookup = new ScriptedLookup { Others = example is null ? null : AppLookup.Over(others) };
         Time.SetLocalTimeZone(TimeZoneInfo.Utc);
         Lookup.Searchable.Add(TestData.Nexus);
         Lookup.Games[TestData.Nexus] = [Stardew, Skyrim, Fallout];
@@ -43,7 +47,7 @@ internal sealed class BrowseHarness : IDisposable
             Rescan,
             Storage,
             Settings,
-            trending ? new FakeSourceRegistry(Catalog, Trending) : new FakeSourceRegistry(Catalog),
+            new FakeSourceRegistry([.. trending ? [Catalog, Trending] : new IModSource[] { Catalog }, .. others.All<IModSource>()]),
             Browser,
             Folders,
             Clipboard,
@@ -56,7 +60,7 @@ internal sealed class BrowseHarness : IDisposable
             Logger);
     }
 
-    public ScriptedLookup Lookup { get; } = new();
+    public ScriptedLookup Lookup { get; }
 
     public InMemoryModLibrary Library { get; } = new();
 
