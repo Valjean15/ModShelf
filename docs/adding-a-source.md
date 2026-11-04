@@ -49,12 +49,13 @@ once is kept for good.
 | ID | What it is | Rules |
 |---|---|---|
 | `SourceId` | The site, such as `nexus` | Lowercase letters, digits and inner hyphens. Documented in the source and checked by the contract tests. |
-| `GameRef.Key` | A game on the site | The site's own permanent key for the game. Prefer a readable one, such as a slug the site promises to keep (`stardewvalley`), since it shows in folder names (`{game}`) and setting keys; otherwise its number. |
+| `GameRef.Key` | A game on the site | The site's own permanent key for the game. Prefer a readable one, such as a slug the site promises to keep (`stardewvalley`), since it shows in folder names (`{game}`) and in the settings, after the site's ID (`games.nexus/stardewvalley`); otherwise its number. |
 | `ModRef.Id` | A mod of that game | The site's permanent ID, not a slug its author can rename. |
 | `ModFileRef.Id` | A file of that mod | The site's permanent ID. Keep it short: it goes into file names, as `SkyUI (1234).7z`, when two files share a name. |
 
-Games are kept apart per site. The same game on two sites is two games, each with its site's chip; ModShelf may point
-out that they share a name, and offer to copy settings, but never merges or links them.
+Games are kept apart per site. The same game on two sites is two games, each with settings of its own and its site's
+name beside it; ModShelf points out that they share a name ("Also on …") and offers to copy one's settings to the other,
+but never merges, links or changes them by itself.
 
 ## 4. The capabilities
 
