@@ -148,6 +148,21 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task ChangesAGamesOwnPreviews()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        SettingResult changed = await mcp.CallAsync<SettingResult>("settings_set", Arguments(("setting", "games.nexus/stardewvalley.previews"), ("value", "cards")), Cancellation);
+        SettingsListing shown = await mcp.CallAsync<SettingsListing>("settings_show", null, Cancellation);
+        string refused = await mcp.CallFailingAsync("settings_set", Arguments(("setting", "games.nexus/stardewvalley.previews"), ("value", "grid")), Cancellation);
+
+        Assert.StartsWith("games.nexus/stardewvalley.previews is now cards: ", changed.Message, StringComparison.Ordinal);
+        Assert.Contains(shown.Settings, setting => setting is { Name: "games.nexus/stardewvalley.previews", Value: "cards", IsDefault: false });
+        Assert.Contains("games.<site>/<game>.previews", shown.Values, StringComparison.Ordinal);
+        Assert.Contains("'grid' isn't off, thumbnails or cards.", refused, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task AGamesKeyAloneThatMoreThanOneSiteMayHaveIsRefusedNamingThem()
     {
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);

@@ -143,6 +143,37 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task SetsAGamesOwnPreviewsAndSetsThemBack()
+    {
+        string[] said =
+        [
+            (await RunAsync("set", "games.stardewvalley.previews", "Cards")).Output.Trim(),
+            (await RunAsync("set", "games.nexus/stardewvalley.previews", " off ")).Output.Trim(),
+            (await RunAsync("set", "games.stardewvalley.previews", "thumbnails")).Output.Trim(),
+        ];
+        CliResult shown = await RunAsync("show");
+        string file = await File.ReadAllTextAsync(SettingsFile, Cancellation);
+        CliResult refused = await RunAsync("set", "games.stardewvalley.previews", "big");
+        CliResult reset = await RunAsync("reset", "games.stardewvalley.previews");
+
+        Assert.Equal(
+            [
+                "games.nexus/stardewvalley.previews is now cards: on nexus/stardewvalley's page in the desktop app's Library, and in Browse while it's chosen, its mods show as cards, with large pictures.",
+                "games.nexus/stardewvalley.previews is now off: on nexus/stardewvalley's page in the desktop app's Library, and in Browse while it's chosen, its mods show no pictures.",
+                "games.nexus/stardewvalley.previews is now thumbnails: on nexus/stardewvalley's page in the desktop app's Library, and in Browse while it's chosen, each row of its mods starts with a small picture.",
+            ],
+            said);
+        Assert.Equal("thumbnails", Value(shown, "games.nexus/stardewvalley.previews"));
+        Assert.Contains("\"previews\": \"thumbnails\"", file, StringComparison.Ordinal);
+        Assert.Equal(BadInput, refused.ExitCode);
+        Assert.Contains("'big' isn't off, thumbnails or cards.", refused.Errors, StringComparison.Ordinal);
+        Assert.Equal(
+            "games.nexus/stardewvalley.previews is gone, so nexus/stardewvalley's mods show as previews.library and previews.browse say.",
+            reset.Output.Trim());
+        Assert.DoesNotContain("stardewvalley", (await RunAsync("show")).Output, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task ResetsAGamesOwnSettingsBackToEveryGames()
     {
         await RunAsync("set", "games.fallout4.hidden", "true");
@@ -224,7 +255,7 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     [InlineData("set", "library.root", "Mods", "isn't a full path")]
     [InlineData("set", "library.folders", "{mod}", "The last part must be exactly {file}.")]
     [InlineData("set", "library.folders.skyrimspecialedition", "{name}/{file}", "{name} isn't a folder's part.")]
-    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<site>/<game>, library.oldVersions, updates.interval, updates.notify, appearance.theme, window.closeToTray, setup.done, app.checkForUpdates, previews.library, previews.updates, previews.browse, previews.downloads, pictures.maxSize, pictures.adult, details.maxAge, games.<site>/<game>.folders, games.<site>/<game>.oldVersions, games.<site>/<game>.checkUpdates, games.<site>/<game>.updateInterval, games.<site>/<game>.notify, games.<site>/<game>.hidden, games.<site>/<game>.browse.sort, games.<site>/<game>.browse.direction, games.<site>/<game>.browse.window, games.<site>/<game>.browse.pageSize, such as games.nexus/stardewvalley.notify; a game's key alone, as games.stardewvalley.notify, does while only one site's game has it.")]
+    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<site>/<game>, library.oldVersions, updates.interval, updates.notify, appearance.theme, window.closeToTray, setup.done, app.checkForUpdates, previews.library, previews.updates, previews.browse, previews.downloads, pictures.maxSize, pictures.adult, details.maxAge, games.<site>/<game>.folders, games.<site>/<game>.oldVersions, games.<site>/<game>.checkUpdates, games.<site>/<game>.updateInterval, games.<site>/<game>.notify, games.<site>/<game>.previews, games.<site>/<game>.hidden, games.<site>/<game>.browse.sort, games.<site>/<game>.browse.direction, games.<site>/<game>.browse.window, games.<site>/<game>.browse.pageSize, such as games.nexus/stardewvalley.notify; a game's key alone, as games.stardewvalley.notify, does while only one site's game has it.")]
     [InlineData("reset", "library.folders.", null, "There's no setting called library.folders.")]
     [InlineData("set", "library.oldVersions", "0", "'0' isn't a rule for old versions. Use all, archive, or how many versions to keep, from 1 to 99, such as 2.")]
     [InlineData("set", "appearance.theme", "blue", "'blue' isn't system, light or dark.")]

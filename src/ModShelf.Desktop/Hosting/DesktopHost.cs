@@ -60,6 +60,10 @@ internal static class DesktopHost
         // Other processes of this user, such as the CLI's MCP server, ask this app to change its queue (ADR 0040).
         builder.Services.AddQueueListener(folder);
 
+        // What the app remembers for the user, such as where its window was, in ui-state.json beside the settings.
+        builder.Services.AddUiStateFile(Path.Combine(folder, "ui-state.json"));
+        builder.Services.AddUiState();
+
         builder.Services.AddPictureCache();
         builder.Services.AddPresentation();
         builder.Services.AddSingleton<IUiThread, AvaloniaUiThread>();

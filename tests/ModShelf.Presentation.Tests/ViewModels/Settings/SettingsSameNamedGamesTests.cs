@@ -130,6 +130,23 @@ public sealed class SettingsSameNamedGamesTests
     }
 
     [Fact]
+    public async Task CopyingTakesTheOtherGamesPreviewsWhichItsPagesShowAtOnce()
+    {
+        Store((ExampleStardew, new GameSettings { Previews = PreviewLevel.Cards }));
+        await StartWithLibraryAsync();
+        Choose(NexusStardew);
+        _harness.Dialogs.Confirm.Enqueue(true);
+
+        await Assert.Single(Game.CopyChoices).CopyCommand.ExecuteAsync(null);
+
+        Assert.Equal(
+            "Stardew Valley (Nexus Mods) will take the settings of Stardew Valley (Example Mods) in place of its own: previews.",
+            Assert.Single(_harness.Dialogs.Confirmations).Message);
+        Assert.Equal((true, PreviewLevel.Cards), (Game.HasOwnPreviews, Game.Previews));
+        Assert.Equal(PreviewLevel.Cards, _harness.Pictures.Pictures.LevelOf(PreviewScreen.Library, NexusStardew));
+    }
+
+    [Fact]
     public async Task NotCopyingChangesNothing()
     {
         Store((ExampleStardew, new GameSettings { Hidden = true }));

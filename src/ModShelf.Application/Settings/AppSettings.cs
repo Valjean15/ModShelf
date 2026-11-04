@@ -118,6 +118,13 @@ public sealed record AppSettings
         => Previews.TryGetValue(screen, out PreviewLevel level) ? level : DefaultPreview(screen);
 
     /// <summary>
+    /// The previews <paramref name="screen"/> shows <paramref name="game"/>'s mods with: the game's own, on the Library
+    /// screen and Browse, or the screen's.
+    /// </summary>
+    public PreviewLevel PreviewFor(PreviewScreen screen, GameRef game)
+        => screen is PreviewScreen.Library or PreviewScreen.Browse && GameFor(game).Previews is { } own ? own : PreviewFor(screen);
+
+    /// <summary>
     /// The previews <paramref name="screen"/> shows when it's not set.
     /// </summary>
     public static PreviewLevel DefaultPreview(PreviewScreen screen) => screen switch

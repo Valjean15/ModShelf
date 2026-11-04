@@ -159,4 +159,31 @@ public sealed class GameSettingsTests
         Assert.Throws<ArgumentOutOfRangeException>(() => new BrowseDefaults { UpdatedWithin = TimeSpan.FromDays(3) });
         Assert.Throws<ArgumentOutOfRangeException>(() => new BrowseDefaults { PageSize = 10 });
     }
+
+    [Theory]
+    [InlineData(PreviewScreen.Library, PreviewLevel.Off)]
+    [InlineData(PreviewScreen.Browse, PreviewLevel.Off)]
+    [InlineData(PreviewScreen.Updates, PreviewLevel.Thumbnails)]
+    [InlineData(PreviewScreen.Downloads, PreviewLevel.Off)]
+    public void AGamesOwnPreviewsAreUsedWhereItsModsShowAsItsOwn(PreviewScreen screen, PreviewLevel previews)
+    {
+        AppSettings settings = new()
+        {
+            Previews = new Dictionary<PreviewScreen, PreviewLevel> { [PreviewScreen.Updates] = PreviewLevel.Thumbnails },
+            Games = new Dictionary<GameRef, GameSettings>(AppSettings.GameComparer)
+            {
+                [new GameRef(new SourceId("nexus"), "StardewValley")] = new GameSettings { Previews = PreviewLevel.Off },
+            },
+        };
+
+        Assert.Equal(previews, settings.PreviewFor(screen, Stardew));
+        Assert.Equal(settings.PreviewFor(screen), settings.PreviewFor(screen, Skyrim));
+    }
+
+    [Fact]
+    public void AGamesPreviewsAreOneOfTheScreens()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new GameSettings { Previews = (PreviewLevel)3 });
+        Assert.False(new GameSettings { Previews = PreviewLevel.Off }.IsNone);
+    }
 }

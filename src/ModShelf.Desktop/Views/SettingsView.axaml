@@ -467,6 +467,28 @@
                                                     <CheckBox Margin="0,4,0,0" Content="{x:Static res:Strings.GameNoticesOn}" IsChecked="{Binding Notify}" IsVisible="{Binding HasOwnNotices}" />
                                                 </StackPanel>
 
+                                                <!-- Previews on the game's Library page and in Browse. -->
+                                                <StackPanel Spacing="4">
+                                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                                        <WrapPanel ItemSpacing="8" LineSpacing="4">
+                                                            <TextBlock Classes="settingName" Text="{x:Static res:Strings.GamePreviewsHeading}" />
+                                                            <Border Classes="pill" IsVisible="{Binding !HasOwnPreviews}"><TextBlock Text="{x:Static res:Strings.SettingUsesDefault}" /></Border>
+                                                            <Border Classes="pill own" IsVisible="{Binding HasOwnPreviews}"><TextBlock Text="{x:Static res:Strings.SettingOverridden}" /></Border>
+                                                        </WrapPanel>
+                                                        <Button Grid.Column="1" VerticalAlignment="Center" Content="{x:Static res:Strings.SettingOverride}" Command="{Binding OverridePreviewsCommand}" IsVisible="{Binding !HasOwnPreviews}" />
+                                                        <Button Grid.Column="1" VerticalAlignment="Center" Classes="quiet" Content="{x:Static res:Strings.SettingUseDefault}" Command="{Binding UseDefaultPreviewsCommand}" IsVisible="{Binding HasOwnPreviews}" />
+                                                    </Grid>
+                                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.GamePreviewsNote}" />
+                                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding EveryGamesPreviews}" />
+                                                    <Border Classes="segments" HorizontalAlignment="Left" Margin="0,4,0,0" IsVisible="{Binding HasOwnPreviews}">
+                                                        <StackPanel Orientation="Horizontal" Spacing="2" AutomationProperties.Name="{x:Static res:Strings.GamePreviewsHeading}">
+                                                            <RadioButton Classes="segment" GroupName="GamePreviews" Content="{x:Static res:Strings.PreviewsOff}" IsChecked="{Binding IsPreviewsOff}" />
+                                                            <RadioButton Classes="segment" GroupName="GamePreviews" Content="{x:Static res:Strings.PreviewsThumbnails}" IsChecked="{Binding IsPreviewsThumbnails}" />
+                                                            <RadioButton Classes="segment" GroupName="GamePreviews" Content="{x:Static res:Strings.PreviewsCards}" IsChecked="{Binding IsPreviewsCards}" />
+                                                        </StackPanel>
+                                                    </Border>
+                                                </StackPanel>
+
                                                 <!-- How Browse starts. -->
                                                 <StackPanel Spacing="4">
                                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">

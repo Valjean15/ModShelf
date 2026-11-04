@@ -583,6 +583,48 @@ public sealed class JsonSettingsStoreTests : IDisposable
     }
 
     [Fact]
+    public async Task KeepsAGamesOwnPreviews()
+    {
+        GameSettings stardew = new() { Notify = false, Previews = PreviewLevel.Cards, Hidden = true };
+        GameSettings skyrim = new() { Previews = PreviewLevel.Off };
+        await Store().SaveAsync(new AppSettings { Games = Games(("nexus/stardewvalley", stardew), ("nexus/skyrimspecialedition", skyrim)) }, Cancellation);
+
+        AppSettings settings = await Store().LoadAsync(Cancellation);
+
+        Assert.Equal((stardew, skyrim), (settings.GameFor(Nexus("stardewvalley")), settings.GameFor(Nexus("skyrimspecialedition"))));
+        Assert.Equal(PreviewLevel.Cards, settings.PreviewFor(PreviewScreen.Browse, Nexus("stardewvalley")));
+        string expected = """
+            {
+              "games": {
+                "nexus/skyrimspecialedition": {
+                  "previews": "off"
+                },
+                "nexus/stardewvalley": {
+                  "notify": false,
+                  "previews": "cards",
+                  "hidden": true
+                }
+              }
+            }
+            """;
+        Assert.Equal(expected.ReplaceLineEndings(), (await File.ReadAllTextAsync(FilePath, Cancellation)).TrimEnd().ReplaceLineEndings());
+    }
+
+    [Fact]
+    public async Task ReadsAGamesPreviewsWrittenByHandAndForgetsThemWhenGone()
+    {
+        await WriteAsync("""{ "games": { "fallout4": { "previews": " Thumbnails ", "colour": "teal" } } }""");
+
+        AppSettings settings = await Store().LoadAsync(Cancellation);
+        await Store().SaveAsync(settings with { Games = Games(("nexus/fallout4", new GameSettings { Notify = true })) }, Cancellation);
+
+        Assert.Equal(new GameSettings { Previews = PreviewLevel.Thumbnails }, settings.GameFor(Nexus("fallout4")));
+        string file = await File.ReadAllTextAsync(FilePath, Cancellation);
+        Assert.DoesNotContain("previews", file, StringComparison.Ordinal);
+        Assert.Contains("\"colour\": \"teal\"", file, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task ReadsGamesFoldersAsTheyWereKeptAndMovesThemWhenSaving()
     {
         await WriteAsync("""
@@ -729,6 +771,8 @@ public sealed class JsonSettingsStoreTests : IDisposable
     [InlineData("""{ "games": { "fallout4": { "updateInterval": "1m" } } }""", "'1m' isn't an interval.")]
     [InlineData("""{ "games": { "fallout4": { "notify": 1 } } }""", "games.fallout4.notify must be true or false.")]
     [InlineData("""{ "games": { "fallout4": { "hidden": "yes" } } }""", "games.fallout4.hidden must be true or false.")]
+    [InlineData("""{ "games": { "fallout4": { "previews": "big" } } }""", "games.fallout4.previews must be off, thumbnails or cards.")]
+    [InlineData("""{ "games": { "fallout4": { "previews": 2 } } }""", "games.fallout4.previews must be text.")]
     [InlineData("""{ "games": { "fallout4": { "browse": 3 } } }""", "games.fallout4.browse must hold how Browse shows the game's mods.")]
     [InlineData("""{ "games": { "fallout4": { "browse": { "sort": "best" } } } }""", "games.fallout4.browse.sort must be one of relevance, ")]
     [InlineData("""{ "games": { "fallout4": { "browse": { "direction": "up" } } } }""", "games.fallout4.browse.direction must be ascending or descending.")]

@@ -26,6 +26,16 @@ public sealed partial class SettingsViewModel
     }
 
     /// <summary>
+    /// The last reading of the settings as the screen showed, for tests to wait on.
+    /// </summary>
+    internal Task ShownWork { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
+    /// Shows the settings as stored, once the changes before, and the previews other screens chose, are saved.
+    /// </summary>
+    private Task<string?> ShowStoredAsync() => ChangeAsync(_ => _covers.SavedAsync(), sayProblem: true);
+
+    /// <summary>
     /// Saves a game's folder pattern, or every game's with a null game; a null pattern sets it back.
     /// </summary>
     /// <returns>What went wrong; null when it's saved.</returns>
@@ -95,7 +105,7 @@ public sealed partial class SettingsViewModel
     }
 
     /// <summary>
-    /// Shows the settings as stored, without saving them back, and applies their theme.
+    /// Shows the settings as stored, without saving them back, and applies their theme and the games' previews.
     /// </summary>
     private void Show(AppSettings settings)
     {
@@ -103,6 +113,7 @@ public sealed partial class SettingsViewModel
         try
         {
             _shown = settings;
+            _covers.ShowGames(settings);
             LibraryRoot = settings.LibraryRoot ?? _settings.DefaultLibraryRoot;
             IsDefaultRoot = FilePaths.Same(LibraryRoot, _settings.DefaultLibraryRoot);
 

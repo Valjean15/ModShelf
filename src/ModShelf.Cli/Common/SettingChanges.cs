@@ -34,7 +34,7 @@ internal static class SettingChanges
     public const string DetailsMaxAge = "details.maxAge";
     public const string GamesPrefix = "games.";
     public const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<site>/<game>, {OldVersions}, {Interval}, {Notify}, {Theme}, {CloseToTray}, {SetupDone}, {CheckForAppUpdates}, {PreviewsPrefix}library, {PreviewsPrefix}updates, {PreviewsPrefix}browse, {PreviewsPrefix}downloads, {PicturesMaxSize}, {AdultPictures}, {DetailsMaxAge}, "
-        + $"{GamesPrefix}<site>/<game>.{GameFolders}, {GamesPrefix}<site>/<game>.{GameOldVersions}, {GamesPrefix}<site>/<game>.{GameCheckUpdates}, {GamesPrefix}<site>/<game>.{GameInterval}, {GamesPrefix}<site>/<game>.{GameNotify}, {GamesPrefix}<site>/<game>.{GameHidden}, "
+        + $"{GamesPrefix}<site>/<game>.{GameFolders}, {GamesPrefix}<site>/<game>.{GameOldVersions}, {GamesPrefix}<site>/<game>.{GameCheckUpdates}, {GamesPrefix}<site>/<game>.{GameInterval}, {GamesPrefix}<site>/<game>.{GameNotify}, {GamesPrefix}<site>/<game>.{GamePreviews}, {GamesPrefix}<site>/<game>.{GameHidden}, "
         + $"{GamesPrefix}<site>/<game>.{BrowseSort}, {GamesPrefix}<site>/<game>.{BrowseDirection}, {GamesPrefix}<site>/<game>.{BrowseWindow}, {GamesPrefix}<site>/<game>.{BrowsePageSize}, "
         + "such as games.nexus/stardewvalley.notify; a game's key alone, as games.stardewvalley.notify, does while only one site's game has it";
 
@@ -43,6 +43,7 @@ internal static class SettingChanges
     private const string GameCheckUpdates = "checkUpdates";
     private const string GameInterval = "updateInterval";
     private const string GameNotify = "notify";
+    private const string GamePreviews = "previews";
     private const string GameHidden = "hidden";
     private const string BrowseSort = "browse.sort";
     private const string BrowseDirection = "browse.direction";
@@ -53,7 +54,7 @@ internal static class SettingChanges
     /// The settings a game can have of its own, by the names that follow <c>games.&lt;site&gt;/&lt;game&gt;.</c>.
     /// </summary>
     private static readonly string[] GameSettingNames =
-        [GameFolders, GameOldVersions, GameCheckUpdates, GameInterval, GameNotify, GameHidden, BrowseSort, BrowseDirection, BrowseWindow, BrowsePageSize];
+        [GameFolders, GameOldVersions, GameCheckUpdates, GameInterval, GameNotify, GamePreviews, GameHidden, BrowseSort, BrowseDirection, BrowseWindow, BrowsePageSize];
 
     /// <summary>
     /// What each setting's value is.
@@ -62,7 +63,7 @@ internal static class SettingChanges
         "a full path for library.root; all, archive or how many versions to keep for "
         + "library.oldVersions; minutes, hours or days, such as 30m, 6h or 1d, for updates.interval and details.maxAge; true or false for "
         + "updates.notify, window.closeToTray, setup.done and app.checkForUpdates; system, light or dark for appearance.theme; "
-        + "off, thumbnails or cards for previews.<screen>; a number of megabytes from 64 to 8192 for pictures.maxSize; "
+        + "off, thumbnails or cards for previews.<screen> and games.<site>/<game>.previews; a number of megabytes from 64 to 8192 for pictures.maxSize; "
         + "hidden, blurred or shown for pictures.adult; for a game of its own, as every game's for games.<site>/<game>.oldVersions, "
         + "games.<site>/<game>.updateInterval and games.<site>/<game>.notify, true or false for games.<site>/<game>.checkUpdates and games.<site>/<game>.hidden, "
         + "relevance, endorsements, downloads, updated, newest, name, size or uniquedownloads for games.<site>/<game>.browse.sort, ascending or descending "
@@ -376,6 +377,7 @@ internal static class SettingChanges
             (GameCheckUpdates, own.CheckUpdates is { } check ? Text(check) : null),
             (GameInterval, own.UpdateInterval is { } interval ? UpdateInterval.Format(interval) : null),
             (GameNotify, own.Notify is { } notify ? Text(notify) : null),
+            (GamePreviews, own.Previews is { } previews ? Name(previews) : null),
             (GameHidden, own.Hidden is { } hidden ? Text(hidden) : null),
             (BrowseSort, own.Browse?.Sort is { } sort ? Name(sort) : null),
             (BrowseDirection, own.Browse?.Direction is { } direction ? Name(direction) : null),
@@ -430,6 +432,20 @@ internal static class SettingChanges
             return interval is { } every
                 ? $"{named} is now {UpdateInterval.Format(every)}: the desktop app checks {game}'s watched mods for updates that often."
                 : $"{named} is gone, so {game} goes by {Interval} again.";
+        }
+
+        if (setting == GamePreviews)
+        {
+            PreviewLevel? level = value is null ? null : Parse<PreviewLevel>(value, "off, thumbnails or cards");
+            await settings.SetGameAsync(game, own => own with { Previews = level }, cancellationToken).ConfigureAwait(false);
+            string where = $"on {game}'s page in the desktop app's Library, and in Browse while it's chosen,";
+            return level switch
+            {
+                PreviewLevel.Thumbnails => $"{named} is now thumbnails: {where} each row of its mods starts with a small picture.",
+                PreviewLevel.Cards => $"{named} is now cards: {where} its mods show as cards, with large pictures.",
+                PreviewLevel.Off => $"{named} is now off: {where} its mods show no pictures.",
+                _ => $"{named} is gone, so {game}'s mods show as {PreviewsPrefix}{Name(PreviewScreen.Library)} and {PreviewsPrefix}{Name(PreviewScreen.Browse)} say.",
+            };
         }
 
         if (setting is BrowseSort or BrowseDirection or BrowseWindow or BrowsePageSize)

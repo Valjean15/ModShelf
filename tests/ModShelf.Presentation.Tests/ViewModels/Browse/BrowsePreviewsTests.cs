@@ -59,6 +59,28 @@ public sealed class BrowsePreviewsTests : IDisposable
         Assert.Equal(["preview Browse Thumbnails"], _harness.Pictures.Settings.Changes);
     }
 
+    [Fact]
+    public async Task AChosenGamesOwnPreviewsShowAndAChoiceChangesThem()
+    {
+        _harness.Pictures.Settings.Stored = new AppSettings
+        {
+            Games = ImmutableDictionary.Create<GameRef, GameSettings>(AppSettings.GameComparer)
+                .Add(BrowseHarness.Skyrim.Game, new GameSettings { Previews = PreviewLevel.Off }),
+        };
+        await SearchAsync();
+        (bool, bool, string?) off = (Screen.Previews.IsOff, Screen.Previews.IsGamesOwn, Screen.Results[0].Picture.File);
+
+        Screen.Previews.IsThumbnails = true;
+        await PicturesShownAsync();
+        await _harness.Pictures.Pictures.SavedAsync();
+
+        Assert.Equal((true, true, (string?)null), off);
+        Assert.Equal(ScriptedPictureCache.FileOf(Thumbnail), Screen.Results[0].Picture.File);
+        Assert.Equal([$"game {BrowseHarness.Skyrim.Game}"], _harness.Pictures.Settings.Changes);
+        Assert.Equal(PreviewLevel.Thumbnails, _harness.Pictures.Settings.Stored.GameFor(BrowseHarness.Skyrim.Game).Previews);
+        Assert.Equal(PreviewLevel.Cards, _harness.Pictures.Pictures.LevelOf(PreviewScreen.Browse));
+    }
+
     private async Task SearchAsync()
     {
         await _harness.StartAsync();

@@ -59,6 +59,25 @@ public sealed record GameSettings
     public BrowseDefaults? Browse { get; init; }
 
     /// <summary>
+    /// The previews its mods show with where they show as its own: its page on the Library screen, and Browse once it's
+    /// chosen. Null for each screen's (<see cref="AppSettings.PreviewFor(PreviewScreen)"/>).
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">The level is unknown.</exception>
+    public PreviewLevel? Previews
+    {
+        get;
+        init
+        {
+            if (value is { } level && !Enum.IsDefined(level))
+            {
+                throw new ArgumentOutOfRangeException(nameof(Previews), level, "The previews must be Off, Thumbnails or Cards.");
+            }
+
+            field = value;
+        }
+    }
+
+    /// <summary>
     /// Whether the desktop app's lists leave it out: the Library's games, the Updates screen and its count, and Browse's
     /// games. Its mods are still checked unless <see cref="CheckUpdates"/> is false. Null for no.
     /// </summary>

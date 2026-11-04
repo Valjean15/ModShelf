@@ -56,9 +56,14 @@ public sealed partial class SettingsViewModel
     internal Task GamesWork { get; private set; } = Task.CompletedTask;
 
     /// <summary>
-    /// Reads the library's games again, which may have changed while another screen showed.
+    /// Reads the library's games again, and the settings, which may have changed while another screen showed: a game's
+    /// own previews, chosen in the Library or Browse, or a change made from the command line.
     /// </summary>
-    public override void OnShown() => GamesWork = ReadGamesAsync();
+    public override void OnShown()
+    {
+        GamesWork = ReadGamesAsync();
+        ShownWork = ShowStoredAsync();
+    }
 
     /// <summary>
     /// Shows the chosen game's own settings.
@@ -101,6 +106,7 @@ public sealed partial class SettingsViewModel
             own.OldVersions is not null,
             own.CheckUpdates is not null || own.UpdateInterval is not null,
             own.Notify is not null,
+            own.Previews is not null,
             own.Browse is not null,
         }.Count(set => set);
         string count = overridden == 1 ? Strings.GameOneOverride : Text.Format(Strings.GameOverrides, overridden);
@@ -194,6 +200,7 @@ public sealed partial class SettingsViewModel
                 (copied.OldVersions is not null, Strings.GameCopyOldVersions),
                 (copied.CheckUpdates is not null || copied.UpdateInterval is not null, Strings.GameCopyUpdates),
                 (copied.Notify is not null, Strings.GameCopyNotices),
+                (copied.Previews is not null, Strings.GameCopyPreviews),
                 (copied.Browse is not null, Strings.GameCopyBrowse),
                 (copied.Hidden == true, Strings.GameCopyHidden),
             }.Where(setting => setting.Set).Select(setting => setting.Name),

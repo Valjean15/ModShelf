@@ -1598,6 +1598,14 @@
     <value>Previews</value>
     <comment>Label of the buttons that choose how a screen shows its mods' pictures.</comment>
   </data>
+  <data name="PreviewsGamesOwn" xml:space="preserve">
+    <value>This game's previews</value>
+    <comment>Label of the previews buttons while the game shown has previews of its own, from its settings.</comment>
+  </data>
+  <data name="PreviewsGamesOwnHint" xml:space="preserve">
+    <value>This game has previews of its own, so a choice here changes them. Its settings, in Settings › Games, can set it back to the screen's.</value>
+    <comment>Tooltip of the previews buttons while the game shown has previews of its own.</comment>
+  </data>
   <data name="PreviewsOff" xml:space="preserve">
     <value>Off</value>
     <comment>Previews button: no pictures.</comment>
@@ -2446,6 +2454,29 @@
     <value>With the other games ({0})</value>
     <comment>The first choice of a game's update interval. {0}: every game's, such as every 6 hours.</comment>
   </data>
+  <data name="GamePreviewsHeading" xml:space="preserve">
+    <value>Previews</value>
+    <comment>Heading of a game's previews setting.</comment>
+  </data>
+  <data name="GamePreviewsNote" xml:space="preserve">
+    <value>How the game's mods show on its page in the Library and in Browse. The previews buttons there change them while it has its own.</value>
+  </data>
+  <data name="GamePreviewsDefault" xml:space="preserve">
+    <value>The screens' own: {0} in the Library, {1} in Browse.</value>
+    <comment>{0} and {1} are each previews in a word or two, such as "thumbnails" or "no pictures".</comment>
+  </data>
+  <data name="GamePreviewsOffShort" xml:space="preserve">
+    <value>no pictures</value>
+    <comment>Previews in a few words, in a sentence.</comment>
+  </data>
+  <data name="GamePreviewsThumbnailsShort" xml:space="preserve">
+    <value>thumbnails</value>
+    <comment>Previews in a few words, in a sentence.</comment>
+  </data>
+  <data name="GamePreviewsCardsShort" xml:space="preserve">
+    <value>cards</value>
+    <comment>Previews in a few words, in a sentence.</comment>
+  </data>
   <data name="GameNoticesHeading" xml:space="preserve">
     <value>Notices</value>
   </data>
@@ -2726,6 +2757,10 @@
   </data>
   <data name="GameCopyNotices" xml:space="preserve">
     <value>notices</value>
+    <comment>In the list of settings a copy takes.</comment>
+  </data>
+  <data name="GameCopyPreviews" xml:space="preserve">
+    <value>previews</value>
     <comment>In the list of settings a copy takes.</comment>
   </data>
   <data name="GameCopyBrowse" xml:space="preserve">

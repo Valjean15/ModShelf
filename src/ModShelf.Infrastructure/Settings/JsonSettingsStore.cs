@@ -30,6 +30,7 @@ namespace ModShelf.Infrastructure.Settings;
 ///       "updateInterval": "1d",
 ///       "notify": false,
 ///       "browse": { "sort": "updated", "direction": "descending", "window": "7d", "pageSize": 50 },
+///       "previews": "thumbnails",
 ///       "hidden": true
 ///     }
 ///   },
@@ -509,6 +510,9 @@ internal sealed class JsonSettingsStore : ISettingsStore
                         UpdateInterval = Text(settings, UpdateIntervalName, name) is { } interval ? UpdateInterval.Parse(interval) : null,
                         Notify = Flag(settings, Notify, name),
                         Browse = ReadBrowse(settings[Browse], $"{name}.{Browse}"),
+                        Previews = Text(settings, Previews, name) is { } previews
+                            ? Named<PreviewLevel>(previews) ?? throw new InvalidDataException($"{name}.{Previews} must be off, thumbnails or cards.")
+                            : null,
                         Hidden = Flag(settings, Hidden, name),
                     };
                     // Under the key the game has here, in place of its old folders' own.
@@ -650,6 +654,7 @@ internal sealed class JsonSettingsStore : ISettingsStore
             Set(game, UpdateIntervalName, settings.UpdateInterval is { } interval ? UpdateInterval.Format(interval) : null);
             SetFlag(game, Notify, settings.Notify);
             WriteBrowse(game, settings.Browse);
+            Set(game, Previews, settings.Previews is { } previews ? Name(previews) : null);
             SetFlag(game, Hidden, settings.Hidden);
             if (game.Count > 0)
             {

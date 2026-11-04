@@ -31,11 +31,12 @@ public sealed partial class BrowseViewModel
     internal Task DefaultsWork { get; private set; } = Task.CompletedTask;
 
     /// <summary>
-    /// Offers what the chosen game's site can search by, shows its rows, reads its categories, and starts the toolbar as
-    /// the game's own settings say.
+    /// Shows the chosen game's previews, offers what its site can search by, shows its rows, reads its categories, and
+    /// starts the toolbar as the game's own settings say.
     /// </summary>
     partial void OnGameChanged(GameChoice? value)
     {
+        Previews.ShowFor(value?.Game);
         if (value is not null)
         {
             Offer(value.Game);

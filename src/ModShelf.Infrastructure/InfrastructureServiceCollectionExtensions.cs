@@ -16,6 +16,7 @@ using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Pictures;
 using ModShelf.Application.Settings.Ports;
+using ModShelf.Application.State.Ports;
 using ModShelf.Infrastructure.Downloads;
 using ModShelf.Infrastructure.Library;
 using ModShelf.Infrastructure.Logging;
@@ -24,6 +25,7 @@ using ModShelf.Infrastructure.Persistence.Repositories;
 using ModShelf.Infrastructure.Pictures;
 using ModShelf.Infrastructure.Settings;
 using ModShelf.Infrastructure.Sources;
+using ModShelf.Infrastructure.State;
 using ModShelf.Sources.Abstractions.Http;
 
 using Polly;
@@ -165,6 +167,24 @@ public static class InfrastructureServiceCollectionExtensions
         }
 
         services.AddSingleton<ISettingsStore>(new JsonSettingsStore(path));
+
+        return services;
+    }
+
+    /// <summary>
+    /// Keeps the desktop app's UI state in the JSON file at <paramref name="path"/>, an absolute path, as the
+    /// <see cref="IUiStateStore"/>. The file and its folder are created when the state is first saved.
+    /// </summary>
+    public static IServiceCollection AddUiStateFile(this IServiceCollection services, string path)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        if (!Path.IsPathFullyQualified(path))
+        {
+            throw new ArgumentException($"'{path}' is not an absolute path.", nameof(path));
+        }
+
+        services.AddSingleton<IUiStateStore>(provider => new JsonUiStateStore(path, provider.GetRequiredService<ILogger<JsonUiStateStore>>()));
 
         return services;
     }

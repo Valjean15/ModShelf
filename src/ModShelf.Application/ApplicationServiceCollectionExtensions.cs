@@ -9,6 +9,7 @@ using ModShelf.Application.Library;
 using ModShelf.Application.Links;
 using ModShelf.Application.Releases;
 using ModShelf.Application.Settings;
+using ModShelf.Application.State;
 using ModShelf.Application.Sources;
 using ModShelf.Application.Updates;
 using ModShelf.Application.Watchlist;
@@ -185,6 +186,19 @@ public static class ApplicationServiceCollectionExtensions
 
         services.TryAddSingleton<SettingsService>();
         services.TryAddSingleton<ISettingsService>(provider => provider.GetRequiredService<SettingsService>());
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers <see cref="IUiState"/>, what the desktop app remembers for the user. Needs Infrastructure's
+    /// <see cref="State.Ports.IUiStateStore"/>.
+    /// </summary>
+    public static IServiceCollection AddUiState(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton<IUiState, UiStateService>();
 
         return services;
     }

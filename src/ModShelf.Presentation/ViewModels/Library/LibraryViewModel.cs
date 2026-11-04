@@ -382,6 +382,11 @@ public sealed partial class LibraryViewModel : ScreenViewModel
 
     partial void OnSelectedModOrderChanged(LibraryChoice<ModOrder> value) => ArrangeMods();
 
+    /// <summary>
+    /// Shows the open game's own previews, when it has some, or else the screen's.
+    /// </summary>
+    partial void OnOpenGameChanged(LibraryGameViewModel? value) => Previews.ShowFor(value?.Game);
+
     private bool CanShowGames() => IsGameOpen || IsModOpen || IsShowingActivity;
 
     /// <summary>

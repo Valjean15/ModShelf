@@ -16,8 +16,8 @@ namespace ModShelf.Presentation.ViewModels.Settings;
 
 /// <summary>
 /// One game's own settings, in the Settings screen's Games category: its folder pattern, old versions, update checks,
-/// notices and how Browse starts for it, each using every game's, which it says, until it's overridden, which shows it
-/// to change; and whether the lists hide the game. Each is saved as it's chosen, a folder pattern when the user saves
+/// notices, previews and how Browse starts for it, each using every game's, or the screens', which it says, until it's
+/// overridden, which shows it to change; and whether the lists hide the game. Each is saved as it's chosen, a folder pattern when the user saves
 /// it, and the page then shows the settings as stored.
 /// </summary>
 public sealed partial class GameSettingsViewModel : ObservableObject
@@ -210,6 +210,43 @@ public sealed partial class GameSettingsViewModel : ObservableObject
     public partial bool Notify { get; set; } = true;
 
     /// <summary>
+    /// Whether the game has previews of its own, which its page in the Library and Browse show in place of the screens'.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool HasOwnPreviews { get; private set; }
+
+    /// <summary>
+    /// Such as "The screens' own: thumbnails in the Library, cards in Browse."
+    /// </summary>
+    [ObservableProperty]
+    public partial string EveryGamesPreviews { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// The game's own previews.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsPreviewsOff), nameof(IsPreviewsThumbnails), nameof(IsPreviewsCards))]
+    public partial PreviewLevel Previews { get; set; } = AppSettings.DefaultPreview(PreviewScreen.Library);
+
+    public bool IsPreviewsOff
+    {
+        get => Previews == PreviewLevel.Off;
+        set => ChoosePreviews(value, PreviewLevel.Off);
+    }
+
+    public bool IsPreviewsThumbnails
+    {
+        get => Previews == PreviewLevel.Thumbnails;
+        set => ChoosePreviews(value, PreviewLevel.Thumbnails);
+    }
+
+    public bool IsPreviewsCards
+    {
+        get => Previews == PreviewLevel.Cards;
+        set => ChoosePreviews(value, PreviewLevel.Cards);
+    }
+
+    /// <summary>
     /// Whether the game says how Browse starts for it.
     /// </summary>
     [ObservableProperty]
@@ -309,6 +346,11 @@ public sealed partial class GameSettingsViewModel : ObservableObject
             EveryGamesNotices = everyGamesNotify ? Strings.GameNoticesOnDefault : Strings.GameNoticesOffDefault;
             Notify = own.Notify ?? everyGamesNotify;
 
+            PreviewLevel library = settings.PreviewFor(PreviewScreen.Library);
+            HasOwnPreviews = own.Previews is not null;
+            EveryGamesPreviews = Text.Format(Strings.GamePreviewsDefault, Describe(library), Describe(settings.PreviewFor(PreviewScreen.Browse)));
+            Previews = own.Previews ?? library;
+
             BrowseDefaults browse = own.Browse ?? BrowseDefaults.None;
             HasOwnBrowse = own.Browse is not null;
             SelectedSort = browse.Sort is { } sort ? _browse.SortOf(sort, browse.Direction) ?? _browse.Default : _browse.Default;
@@ -377,6 +419,8 @@ public sealed partial class GameSettingsViewModel : ObservableObject
 
     partial void OnNotifyChanged(bool value) => Save(own => own with { Notify = value });
 
+    partial void OnPreviewsChanged(PreviewLevel value) => Save(own => own with { Previews = value });
+
     partial void OnSelectedSortChanged(SortChoice? value) => SaveBrowse();
 
     partial void OnSelectedTimeWindowChanged(TimeWindowChoice? value) => SaveBrowse();
@@ -420,6 +464,15 @@ public sealed partial class GameSettingsViewModel : ObservableObject
     private Task UseDefaultNoticesAsync() => ChangeAsync(own => own with { Notify = null });
 
     /// <summary>
+    /// Gives the game previews of its own: the Library's, to change.
+    /// </summary>
+    [RelayCommand]
+    private Task OverridePreviewsAsync() => ChangeAsync(own => own with { Previews = _shown.PreviewFor(PreviewScreen.Library) });
+
+    [RelayCommand]
+    private Task UseDefaultPreviewsAsync() => ChangeAsync(own => own with { Previews = null });
+
+    /// <summary>
     /// Says how Browse starts for the game: as Browse's own does, to change.
     /// </summary>
     [RelayCommand]
@@ -427,6 +480,16 @@ public sealed partial class GameSettingsViewModel : ObservableObject
 
     [RelayCommand]
     private Task UseDefaultBrowseAsync() => ChangeAsync(own => own with { Browse = null });
+
+    /// <summary>
+    /// Previews in a word or two, such as "thumbnails".
+    /// </summary>
+    private static string Describe(PreviewLevel level) => level switch
+    {
+        PreviewLevel.Off => Strings.GamePreviewsOffShort,
+        PreviewLevel.Cards => Strings.GamePreviewsCardsShort,
+        _ => Strings.GamePreviewsThumbnailsShort,
+    };
 
     private static BrowseDefaults BrowseOf(SortChoice sort, TimeWindowChoice window, PageSizeChoice size)
         => new() { Sort = sort.Sort, Direction = sort.Direction, UpdatedWithin = window.Within, PageSize = size.Count };
@@ -441,6 +504,14 @@ public sealed partial class GameSettingsViewModel : ObservableObject
         if (chosen)
         {
             OldVersionAction = action;
+        }
+    }
+
+    private void ChoosePreviews(bool chosen, PreviewLevel level)
+    {
+        if (chosen)
+        {
+            Previews = level;
         }
     }
 

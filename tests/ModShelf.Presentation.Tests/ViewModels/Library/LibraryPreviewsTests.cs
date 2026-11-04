@@ -137,6 +137,51 @@ public sealed class LibraryPreviewsTests : IDisposable
         Assert.Single(Pictures.Cache.Asked, asked => asked == SkyUiPicture);
     }
 
+    [Fact]
+    public async Task AGamesOwnPreviewsShowOnItsPage()
+    {
+        Pictures.Settings.Stored = new AppSettings { Games = Own(Smapi.Mod.Game, PreviewLevel.Off) };
+        await _harness.StartAsync(SkyUi, Smapi);
+        await ShownAsync(SkyUi);
+        (bool, bool) onSkyrim = (Screen.Previews.IsThumbnails, Screen.Previews.IsGamesOwn);
+
+        LibraryModViewModel smapi = await ShownAsync(Smapi);
+        (bool, bool) onStardew = (Screen.Previews.IsOff, Screen.Previews.IsGamesOwn);
+        Screen.ShowGamesCommand.Execute(null);
+
+        Assert.Equal((true, false), onSkyrim);
+        Assert.Equal((true, true), onStardew);
+        Assert.Null(smapi.Picture.File);
+        Assert.DoesNotContain(SmapiPicture, Pictures.Cache.Asked);
+        Assert.Equal((true, false), (Screen.Previews.IsThumbnails, Screen.Previews.IsGamesOwn));
+    }
+
+    [Fact]
+    public async Task AChoiceOnAGamesPageWithItsOwnPreviewsChangesThemAndNotTheScreens()
+    {
+        Pictures.Settings.Stored = new AppSettings
+        {
+            Previews = ImmutableDictionary<PreviewScreen, PreviewLevel>.Empty.Add(PreviewScreen.Library, PreviewLevel.Cards),
+            Games = Own(Smapi.Mod.Game, PreviewLevel.Off),
+        };
+        await _harness.StartAsync(SkyUi, Smapi);
+        await ShownAsync(Smapi);
+
+        Screen.Previews.IsThumbnails = true;
+        await PicturesShownAsync();
+        string? shown = _harness.Row(Smapi).Picture.File;
+        await Pictures.Pictures.SavedAsync();
+        await ShownAsync(SkyUi);
+
+        Assert.Equal(ScriptedPictureCache.FileOf(SmapiPicture), shown);
+        Assert.Equal(["game nexus/stardewvalley"], Pictures.Settings.Changes);
+        Assert.Equal(PreviewLevel.Thumbnails, Pictures.Settings.Stored.GameFor(Smapi.Mod.Game).Previews);
+        Assert.Equal((true, false), (Screen.Previews.IsCards, Screen.Previews.IsGamesOwn));
+    }
+
+    private static ImmutableDictionary<GameRef, GameSettings> Own(GameRef game, PreviewLevel previews)
+        => ImmutableDictionary.Create<GameRef, GameSettings>(AppSettings.GameComparer).Add(game, new GameSettings { Previews = previews });
+
     /// <summary>
     /// The mod's row, its game opened, once the open game's pictures show.
     /// </summary>
