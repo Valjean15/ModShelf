@@ -5,6 +5,7 @@ using System.Web;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Downloads;
 using ModShelf.Sources.Abstractions.Links;
 
@@ -37,6 +38,9 @@ internal sealed class FakeHandoffSource(Uri fileUrl) : ILinkRecognizer, IDownloa
     public SourceId Id => SourceId;
 
     public string DisplayName => "Fake handoff site";
+
+
+    public SiteWords Words => SiteWords.None;
 
     /// <summary>
     /// The handoff link of every resolve so far, in order.

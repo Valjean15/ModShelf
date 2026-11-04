@@ -1,3 +1,6 @@
+using System.Collections.Immutable;
+
+using ModShelf.Application.Settings;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.ViewModels.Browse;
 using ModShelf.Presentation.ViewModels.ModPages;
@@ -65,19 +68,104 @@ public sealed class BrowseExampleSiteTests : IDisposable
     }
 
     [Fact]
-    public async Task AnOrderTheSiteRefusesSaysWhyAndKeepsTheList()
+    public async Task ItsGameOffersOnlyTheOrdersFiltersAndPageSizesItsSiteHas()
     {
         await _harness.StartAsync();
         await _harness.ShowAsync();
+
+        await _harness.ChooseAsync(ExampleSite.StardewValley);
+
+        Assert.Equal(
+            [
+                "Best match",
+                "Most downloaded",
+                "Least downloaded",
+                "Recently updated",
+                "Longest since updated",
+                "Newest",
+                "Oldest",
+                "Name, A to Z",
+                "Name, Z to A",
+            ],
+            Screen.Sorts.Select(sort => sort.Name));
+        Assert.Equal([20, 50], Screen.PageSizes.Select(size => size.Count));
+        Assert.Equal(4, Screen.TimeWindows.Count);
+        Assert.Equal(
+            (true, false, false, false, false, string.Empty),
+            (Screen.CanSearchByUpdated, Screen.CanSearchByAuthor, Screen.CanSearchByCategory, Screen.CanIncludeAdult, Screen.CanFollow, Screen.ShowFollowedText));
+    }
+
+    [Fact]
+    public async Task NexusModsGameOffersEverythingAgainInItsWords()
+    {
+        await _harness.StartAsync();
+        await _harness.ShowAsync();
+        await _harness.ChooseAsync(ExampleSite.StardewValley);
+
+        await _harness.ChooseAsync(BrowseHarness.Skyrim);
+
+        Assert.Equal(14, Screen.Sorts.Count);
+        Assert.Equal(["Most endorsements", "Fewest endorsements"], Screen.Sorts.Where(sort => sort.Sort == SearchSort.Endorsements).Select(sort => sort.Name));
+        Assert.Equal([20, 50, 100], Screen.PageSizes.Select(size => size.Count));
+        Assert.Equal(
+            (true, true, true, true, true, "Tracked mods"),
+            (Screen.CanSearchByUpdated, Screen.CanSearchByAuthor, Screen.CanSearchByCategory, Screen.CanIncludeAdult, Screen.CanFollow, Screen.ShowFollowedText));
+    }
+
+    [Fact]
+    public async Task AnOrderAndPageSizeItsSiteLacksBecomeItsOwnAndOnesItHasAreKept()
+    {
+        await _harness.StartAsync();
+        await _harness.ShowAsync();
+        await _harness.ChooseAsync(BrowseHarness.Skyrim);
+        Screen.SelectedSort = Screen.Sorts.Single(sort => sort.Name == "Largest");
+        Screen.SelectedPageSize = Screen.PageSizes.Single(size => size.Count == 100);
+
+        await _harness.ChooseAsync(ExampleSite.StardewValley);
+
+        Assert.Equal(("Best match", 20), (Screen.SelectedSort.Name, Screen.SelectedPageSize.Count));
+        Assert.Same(Screen.Sorts[0], Screen.SelectedSort);
+
+        Screen.SelectedSort = Screen.Sorts.Single(sort => sort.Name == "Oldest");
+        Screen.SelectedPageSize = Screen.PageSizes.Single(size => size.Count == 50);
+        await _harness.ChooseAsync(BrowseHarness.Skyrim);
+
+        Assert.Equal(("Oldest", 50), (Screen.SelectedSort.Name, Screen.SelectedPageSize.Count));
+        Assert.Contains(Screen.SelectedSort, Screen.Sorts);
+    }
+
+    [Fact]
+    public async Task ItsGamesSavedOrderAndPageSizeItLacksStartOnItsOwn()
+    {
+        _harness.Settings.Stored = new AppSettings
+        {
+            Games = ImmutableDictionary.Create<GameRef, GameSettings>(AppSettings.GameComparer).Add(
+                ExampleSite.StardewValley.Game,
+                new GameSettings { Browse = new BrowseDefaults { Sort = SearchSort.Size, PageSize = 100, UpdatedWithin = TimeSpan.FromDays(7) } }),
+        };
+        await _harness.StartAsync();
+        await _harness.ShowAsync();
+
+        await _harness.ChooseAsync(ExampleSite.StardewValley);
+
+        Assert.Equal(("Best match", 20, TimeSpan.FromDays(7)), (Screen.SelectedSort.Name, Screen.SelectedPageSize.Count, Screen.SelectedTimeWindow.Within));
+    }
+
+    [Fact]
+    public async Task AnAuthorTypedForAnotherSitesGameIsLeftOutOfItsSearch()
+    {
+        await _harness.StartAsync();
+        await _harness.ShowAsync();
+        await _harness.ChooseAsync(BrowseHarness.Skyrim);
+        Screen.Author = "Ana";
         Screen.SearchText = "crops";
+
         await _harness.ChooseAndSearchAsync(ExampleSite.StardewValley);
 
-        Screen.SelectedSort = Screen.Sorts.First(sort => sort.Sort == SearchSort.Endorsements);
-        await Screen.Listing;
-
-        Assert.Equal("Example Mods can't sort by Endorsements.", Screen.Problem);
+        Assert.Null(Screen.Problem);
         Assert.Equal(["Better Crops"], _harness.Names());
-        Assert.Empty(_harness.Logger.Entries);
+        Assert.Null(Assert.Single(_harness.Lookup.Searches).Query.Author);
+        Assert.Equal("Ana", Screen.Author);
     }
 
     [Fact]

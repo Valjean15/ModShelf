@@ -4,6 +4,7 @@ using System.Web;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Links;
 using ModShelf.Sources.Abstractions.Search;
 
@@ -34,6 +35,20 @@ internal sealed partial class FakeCatalogSite : ILinkRecognizer, IModCatalog, IM
     public SourceId Id => SourceId;
 
     public string DisplayName => "Fake catalog site";
+
+
+    /// <summary>
+    /// Its words are Nexus Mods'.
+    /// </summary>
+    public SiteWords Words { get; set; } = new() { Follow = "track", Unfollow = "untrack", Followed = "tracked", Approval = "endorsement", Approvals = "endorsements" };
+
+    /// <summary>
+    /// Every order either way round, by relevance first; every filter; 100 mods a page.
+    /// </summary>
+    public SearchCapabilities Capabilities { get; set; } = new(
+        Enum.GetValues<SearchSort>().SelectMany(SearchOrder.BothWays),
+        SearchFilters.Text | SearchFilters.Author | SearchFilters.Category | SearchFilters.UpdatedSince | SearchFilters.AdultContent,
+        SearchQuery.MaxCount);
 
     public static Uri ModLink(string mod) => new($"https://{Host}/game/mods/{mod}");
 

@@ -2,6 +2,7 @@ using ModShelf.Application.Downloads;
 using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
+using ModShelf.Sources.Abstractions.Common;
 
 namespace ModShelf.Presentation.Tests;
 
@@ -15,6 +16,18 @@ internal static class TestData
     public static readonly DateTimeOffset Now = new(2026, 10, 27, 12, 0, 0, TimeSpan.Zero);
 
     public static readonly SourceId Nexus = new("nexus");
+
+    /// <summary>
+    /// Nexus Mods' words: it tracks mods, and counts endorsements.
+    /// </summary>
+    public static readonly SiteWords NexusWords = new()
+    {
+        Follow = "track",
+        Unfollow = "untrack",
+        Followed = "tracked",
+        Approval = "endorsement",
+        Approvals = "endorsements",
+    };
 
     public static readonly Uri ModPage = new("https://www.nexusmods.com/skyrimspecialedition/mods/12604");
 

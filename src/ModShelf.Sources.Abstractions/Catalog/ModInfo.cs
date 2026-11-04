@@ -114,6 +114,7 @@ public sealed record ModInfo
 
     /// <summary>
     /// How many users endorsed, liked or followed the mod, whatever the site counts as approval, or null when it doesn't say.
+    /// A site that counts it names it in <see cref="Common.SiteWords.Approvals"/>.
     /// </summary>
     public long? Endorsements { get; }
 

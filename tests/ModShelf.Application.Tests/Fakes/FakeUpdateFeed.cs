@@ -1,4 +1,5 @@
 using ModShelf.Domain.Mods;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Updates;
 
 namespace ModShelf.Application.Tests.Fakes;
@@ -12,6 +13,9 @@ internal sealed class FakeUpdateFeed(SourceId id, params ModUpdate[] updates) : 
     public SourceId Id { get; } = id;
 
     public string DisplayName => Id.Value;
+
+
+    public SiteWords Words => SiteWords.None;
 
     public TimeSpan Reach => TimeSpan.FromDays(28);
 

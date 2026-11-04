@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Updates;
 
 namespace ModShelf.Application.Tests.Fakes;
@@ -18,6 +19,9 @@ internal sealed class FakeModSiteWithFeed(FakeModSite site, TimeProvider timePro
     public SourceId Id => site.Id;
 
     public string DisplayName => site.DisplayName;
+
+
+    public SiteWords Words => site.Words;
 
     public TimeSpan Reach => TimeSpan.FromDays(28);
 

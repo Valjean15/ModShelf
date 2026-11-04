@@ -6,6 +6,7 @@ using ModShelf.Application.Sources;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Domain.Updates;
+using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Search;
 
@@ -159,7 +160,7 @@ internal static class SettingChanges
         if (GameSettingOf(name) is { } own)
         {
             GameRef ownGame = await GameNamedAsync(own.Game, settings, library, sources, cancellationToken).ConfigureAwait(false);
-            return await ChangeGameAsync(settings, $"{GamesPrefix}{ownGame}.{own.Setting}", ownGame, own.Setting, value, cancellationToken).ConfigureAwait(false);
+            return await ChangeGameAsync(settings, sources, $"{GamesPrefix}{ownGame}.{own.Setting}", ownGame, own.Setting, value, cancellationToken).ConfigureAwait(false);
         }
 
         string setting = name.Trim().ToLowerInvariant();
@@ -401,6 +402,7 @@ internal static class SettingChanges
     /// </summary>
     private static async Task<string> ChangeGameAsync(
         ISettingsService settings,
+        ISourceRegistry sources,
         string named,
         GameRef game,
         string setting,
@@ -432,7 +434,7 @@ internal static class SettingChanges
 
         if (setting is BrowseSort or BrowseDirection or BrowseWindow or BrowsePageSize)
         {
-            return await ChangeBrowseAsync(settings, named, game, setting, value, cancellationToken).ConfigureAwait(false);
+            return await ChangeBrowseAsync(settings, sources, named, game, setting, value, cancellationToken).ConfigureAwait(false);
         }
 
         bool? flag = value is null ? null : ParseBool(value);
@@ -461,10 +463,12 @@ internal static class SettingChanges
     }
 
     /// <summary>
-    /// Changes how Browse shows <paramref name="game"/>'s mods; null sets it back to Browse's own.
+    /// Changes how Browse shows <paramref name="game"/>'s mods; null sets it back to Browse's own. What the game's site's
+    /// search can't do is refused, as Browse wouldn't offer it.
     /// </summary>
     private static async Task<string> ChangeBrowseAsync(
         ISettingsService settings,
+        ISourceRegistry sources,
         string named,
         GameRef game,
         string setting,
@@ -504,10 +508,50 @@ internal static class SettingChanges
                 break;
         }
 
-        await settings.SetGameAsync(game, own => own with { Browse = change(own.Browse ?? BrowseDefaults.None) }, cancellationToken).ConfigureAwait(false);
+        SearchCapabilities? capabilities = sources.Find<IModSearch>(game.Source)?.Capabilities;
+        string site = sources.Find<IModSource>(game.Source)?.DisplayName ?? game.Source.Value;
+        await settings.SetGameAsync(
+                game,
+                own =>
+                {
+                    BrowseDefaults browse = change(own.Browse ?? BrowseDefaults.None);
+                    if (value is not null && capabilities is not null)
+                    {
+                        EnsureSiteCan(capabilities, site, setting, browse);
+                    }
+
+                    return own with { Browse = browse };
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
         return text is null
             ? $"{named} is gone, so the desktop app's Browse screen shows {game}'s mods as it would any game's."
             : $"{named} is now {text}: the desktop app's Browse screen starts so when {game} is chosen.";
+    }
+
+    /// <summary>
+    /// Throws unless the site's search can start Browse as <paramref name="browse"/> says, in the setting changed: an
+    /// order, with its direction when set; when mods were updated; or how many a page lists.
+    /// </summary>
+    /// <exception cref="ArgumentException">It can't.</exception>
+    private static void EnsureSiteCan(SearchCapabilities capabilities, string site, string setting, BrowseDefaults browse)
+    {
+        string? problem = setting switch
+        {
+            BrowseSort or BrowseDirection when browse.Sort is { } sort && !capabilities.Has(sort)
+                => $"{site} can't sort by {Name(sort)}. It can sort by {string.Join(", ", capabilities.Orders.Select(order => Name(order.Sort)).Distinct())}.",
+            BrowseSort or BrowseDirection when browse.Sort is { } sort && browse.Direction is { } direction && !capabilities.Has(new SearchOrder(sort, direction))
+                => $"{site} can sort by {Name(sort)} only {(direction == SearchDirection.Ascending ? "descending" : "ascending")}.",
+            BrowseWindow when browse.UpdatedWithin is not null && !capabilities.Has(SearchFilters.UpdatedSince)
+                => $"{site} can't search by when mods were updated.",
+            BrowsePageSize when browse.PageSize > capabilities.MaxCount
+                => $"{site} lists at most {capabilities.MaxCount} mods a page.",
+            _ => null,
+        };
+        if (problem is not null)
+        {
+            throw new ArgumentException(problem, nameof(browse));
+        }
     }
 
     private static string Text(bool value) => value ? "true" : "false";

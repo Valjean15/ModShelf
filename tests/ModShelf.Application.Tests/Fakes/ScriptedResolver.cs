@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 
 using ModShelf.Domain.Mods;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Downloads;
 
 namespace ModShelf.Application.Tests.Fakes;
@@ -22,6 +23,9 @@ internal sealed class ScriptedResolver(SourceId id) : IDownloadResolver
     public SourceId Id { get; } = id;
 
     public string DisplayName => Id.Value;
+
+
+    public SiteWords Words => SiteWords.None;
 
     public int Calls => _calls.Count;
 

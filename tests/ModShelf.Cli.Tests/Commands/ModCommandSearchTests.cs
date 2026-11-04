@@ -1,5 +1,6 @@
 using ModShelf.Cli.Tests.Common;
 using ModShelf.Cli.Tests.Fakes;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Search;
 
 using static ModShelf.Cli.Tests.Fakes.FakeCatalogSite;
@@ -41,7 +42,7 @@ public sealed class ModCommandSearchTests : IAsyncDisposable
         CliResult found = await SearchAsync();
 
         Assert.Equal(Done, found.ExitCode);
-        Assert.Contains("44 mods match, most endorsed first. These are 1 to 20.", found.Output, StringComparison.Ordinal);
+        Assert.Contains("44 mods match, in the site's own order. These are 1 to 20.", found.Output, StringComparison.Ordinal);
         Assert.Contains(ModLink("101").AbsoluteUri, found.Output, StringComparison.Ordinal);
         Assert.Contains(ModLink("121").AbsoluteUri, found.Output, StringComparison.Ordinal);
         Assert.DoesNotContain(ModLink("122").AbsoluteUri, found.Output, StringComparison.Ordinal);
@@ -77,7 +78,7 @@ public sealed class ModCommandSearchTests : IAsyncDisposable
     {
         CliResult found = await SearchAsync("--page-size", "5", "--page", "2");
 
-        Assert.Contains("44 mods match, most endorsed first. These are 6 to 10.", found.Output, StringComparison.Ordinal);
+        Assert.Contains("44 mods match, in the site's own order. These are 6 to 10.", found.Output, StringComparison.Ordinal);
         // Mod 103 has adult content, so the sixth to tenth mods are 107 to 111.
         Assert.DoesNotContain(ModLink("106").AbsoluteUri, found.Output, StringComparison.Ordinal);
         Assert.Contains(ModLink("107").AbsoluteUri, found.Output, StringComparison.Ordinal);
@@ -101,7 +102,9 @@ public sealed class ModCommandSearchTests : IAsyncDisposable
     [InlineData("--sort", "newest", ", oldest first.", SearchDirection.Ascending)]
     [InlineData("--sort", "downloads", ", least downloaded first.", SearchDirection.Ascending)]
     [InlineData("--sort", "updated", ", longest since updated first.", SearchDirection.Ascending)]
-    [InlineData("--sort", "relevance", ", least endorsed first.", SearchDirection.Ascending)]
+    [InlineData("--sort", "relevance", ", in the site's own order turned around.", SearchDirection.Ascending)]
+    [InlineData("--sort", "endorsements", ", most endorsements first.", SearchDirection.Descending)]
+    [InlineData("--sort", "endorsements", ", fewest endorsements first.", SearchDirection.Ascending)]
     [InlineData("--sort", "name", ", by name from Z to A.", SearchDirection.Descending)]
     [InlineData("--sort", "name", ", by name from A to Z.", SearchDirection.Ascending)]
     [InlineData("--sort", "size", ", largest first.", SearchDirection.Descending)]
@@ -146,6 +149,80 @@ public sealed class ModCommandSearchTests : IAsyncDisposable
 
         Assert.Equal(exitCode, refused.ExitCode);
         Assert.Contains(message, refused.Errors, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SearchesInTheSitesOwnOrderAndPageSizeUnlessAsked()
+    {
+        _catalog.Capabilities = new([.. SearchOrder.BothWays(SearchSort.Newest), .. SearchOrder.BothWays(SearchSort.Name)], SearchFilters.Text, 10);
+
+        CliResult found = await SearchAsync();
+        SearchQuery own = _catalog.LastQuery!;
+        await SearchAsync("--ascending");
+        SearchQuery turned = _catalog.LastQuery!;
+        await SearchAsync("--sort", "name", "--page-size", "5");
+        SearchQuery asked = _catalog.LastQuery!;
+
+        Assert.Contains("44 mods match, newest first. These are 1 to 10.", found.Output, StringComparison.Ordinal);
+        Assert.Equal((SearchSort.Newest, SearchDirection.Descending, 10), (own.Sort, own.Direction, own.Count));
+        Assert.Equal((SearchSort.Newest, SearchDirection.Ascending, 10), (turned.Sort, turned.Direction, turned.Count));
+        Assert.Equal((SearchSort.Name, SearchDirection.Descending, 5), (asked.Sort, asked.Direction, asked.Count));
+    }
+
+    [Fact]
+    public async Task TheSitesOwnOrderGoesItsOwnWayAndAscendingTurnsItAround()
+    {
+        _catalog.Capabilities = new([new(SearchSort.Name, SearchDirection.Ascending), new(SearchSort.Name, SearchDirection.Descending)], SearchFilters.Text, 100);
+
+        CliResult found = await SearchAsync();
+        SearchQuery own = _catalog.LastQuery!;
+        await SearchAsync("--ascending");
+        SearchQuery turned = _catalog.LastQuery!;
+
+        Assert.Contains("44 mods match, by name from A to Z.", found.Output, StringComparison.Ordinal);
+        Assert.Equal((SearchSort.Name, SearchDirection.Ascending), (own.Sort, own.Direction));
+        Assert.Equal((SearchSort.Name, SearchDirection.Descending), (turned.Sort, turned.Direction));
+    }
+
+    [Fact]
+    public async Task RefusesAnOrderTheSiteHasOnlyTheOtherWayRound()
+    {
+        _catalog.Capabilities = new([new(SearchSort.Relevance, SearchDirection.Descending), new(SearchSort.Name, SearchDirection.Ascending)], SearchFilters.Text, 100);
+
+        CliResult refused = await SearchAsync("--sort", "name");
+        CliResult found = await SearchAsync("--sort", "name", "--ascending");
+
+        Assert.Equal((BadInput, "Fake catalog site can sort by Name only with the least first."), (refused.ExitCode, refused.Errors.Trim()));
+        Assert.Equal(Done, found.ExitCode);
+        Assert.Contains(", by name from A to Z.", found.Output, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task RefusesAGamesBrowseSettingsTheSiteCantDo()
+    {
+        _catalog.Capabilities = new([new(SearchSort.Relevance, SearchDirection.Descending), new(SearchSort.Name, SearchDirection.Ascending)], SearchFilters.Text, 100);
+
+        CliResult sorted = await _cli.RunAsync(["settings", "set", "games.fake-catalog/game.browse.sort", "name"], Cancellation);
+        CliResult wrongWay = await _cli.RunAsync(["settings", "set", "games.fake-catalog/game.browse.direction", "descending"], Cancellation);
+        CliResult rightWay = await _cli.RunAsync(["settings", "set", "games.fake-catalog/game.browse.direction", "ascending"], Cancellation);
+        CliResult window = await _cli.RunAsync(["settings", "set", "games.fake-catalog/game.browse.window", "7d"], Cancellation);
+
+        Assert.Equal((Done, Done), (sorted.ExitCode, rightWay.ExitCode));
+        Assert.Equal((BadInput, "Fake catalog site can sort by name only ascending."), (wrongWay.ExitCode, wrongWay.Errors.Trim()));
+        Assert.Equal((BadInput, "Fake catalog site can't search by when mods were updated."), (window.ExitCode, window.Errors.Trim()));
+    }
+
+    [Fact]
+    public async Task NamesApprovalInTheSitesWords()
+    {
+        _catalog.Words = new() { Approval = "like", Approvals = "likes" };
+
+        CliResult most = await SearchAsync("--sort", "endorsements");
+        CliResult fewest = await SearchAsync("--sort", "endorsements", "--ascending");
+
+        Assert.Contains("44 mods match, most likes first.", most.Output, StringComparison.Ordinal);
+        Assert.Contains("44 mods match, fewest likes first.", fewest.Output, StringComparison.Ordinal);
+        Assert.Equal(["ID", "Name", "Author", "Likes", "Downloads", "Updated", "Link"], most.Output.ReplaceLineEndings("\n").Split('\n')[1].Split(' ', StringSplitOptions.RemoveEmptyEntries));
     }
 
     [Fact]

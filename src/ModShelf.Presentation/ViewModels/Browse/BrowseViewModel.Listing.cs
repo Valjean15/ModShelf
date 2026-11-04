@@ -52,7 +52,7 @@ public sealed partial class BrowseViewModel
     {
         if (IsShowingTracked && _trackedSource is { } source)
         {
-            Listing = ListingAsync(source, Strings.BrowseTrackedFailed, token => ShowTrackedPageAsync(source, token));
+            Listing = ListingAsync(source, FollowedFailed(source), token => ShowTrackedPageAsync(source, token));
         }
         else if (_query is { } query && _searched is { } game)
         {
@@ -80,9 +80,10 @@ public sealed partial class BrowseViewModel
         }
 
         SourceId source = game.Game.Source;
+        string followed = _services.Sources.Words(source).Followed ?? string.Empty;
         Listing = ListingAsync(
             source,
-            Strings.BrowseTrackedFailed,
+            FollowedFailed(source),
             async token =>
             {
                 IReadOnlyList<ModRef> tracked = await _services.Tracked.ReadAsync(source, token);
@@ -104,9 +105,9 @@ public sealed partial class BrowseViewModel
                 string site = _services.Sources.SiteName(source);
                 ResultsText = _trackedToShow.Count switch
                 {
-                    0 => Text.Format(Strings.BrowseTrackedNone, game.Name, site),
-                    1 => Text.Format(Strings.BrowseTrackedOne, game.Name, site),
-                    int count => Text.Format(Strings.BrowseTracked, count, game.Name, site),
+                    0 => Text.Format(Strings.BrowseFollowedNone, followed, game.Name, site),
+                    1 => Text.Format(Strings.BrowseFollowedOne, followed, game.Name, site),
+                    int count => Text.Format(Strings.BrowseFollowed, count, followed, game.Name, site),
                 };
                 HasMore = false;
                 await ShowTrackedPageAsync(source, token);
@@ -115,6 +116,12 @@ public sealed partial class BrowseViewModel
     }
 
     private bool CanShowTracked() => Game is { } game && _services.Tracked.CanTrack(game.Game.Source);
+
+    /// <summary>
+    /// Such as "{0} couldn't list your tracked mods: {1}", in the site's words.
+    /// </summary>
+    private string FollowedFailed(SourceId source)
+        => SiteProblems.InWords(Strings.BrowseFollowedFailed, _services.Sources.Words(source).Followed ?? string.Empty);
 
     /// <summary>
     /// Searches the chosen game again with the order, filters and page size asked for, when the list holds a search; or
@@ -139,17 +146,18 @@ public sealed partial class BrowseViewModel
             return Task.CompletedTask;
         }
 
+        // Only what the site can search by, as the toolbar shows: an author typed for another site's game is kept for it.
         string? words = AsLink(SearchText) is null ? SearchText : null;
-        DateTimeOffset? since = SelectedTimeWindow.Within is { } within ? _services.TimeProvider.GetUtcNow() - within : null;
+        DateTimeOffset? since = SelectedTimeWindow.Within is { } within && CanSearchByUpdated ? _services.TimeProvider.GetUtcNow() - within : null;
         SearchQuery query = new(
             words,
             SelectedSort.Sort,
             0,
             SelectedPageSize.Count,
-            Author,
+            CanSearchByAuthor ? Author : null,
             IncludeAdultContent,
             SelectedSort.Direction,
-            SelectedCategory?.Category,
+            CanSearchByCategory ? SelectedCategory?.Category : null,
             since);
         return ListingAsync(game.Game.Source, Strings.BrowseSearchFailed, token => ShowSearchAsync(game.Game, query, token));
     }
@@ -229,7 +237,16 @@ public sealed partial class BrowseViewModel
 
     private BrowseModViewModel Row(ModInfo mod, string? problem, BrowseFact fact = BrowseFact.None)
     {
-        BrowseModViewModel row = new(mod, problem, _inLibrary.GetValueOrDefault(mod.Mod), _pictures, _services.TimeProvider, OpenAsync, ShowSelection, fact);
+        BrowseModViewModel row = new(
+            mod,
+            problem,
+            _inLibrary.GetValueOrDefault(mod.Mod),
+            _pictures,
+            _services.Sources.Words(mod.Mod.Game.Source),
+            _services.TimeProvider,
+            OpenAsync,
+            ShowSelection,
+            fact);
         if (_picturesShown)
         {
             row.Picture.Show(mod, _stopping);

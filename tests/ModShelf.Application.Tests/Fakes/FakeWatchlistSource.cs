@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 
 using ModShelf.Domain.Mods;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Links;
 using ModShelf.Sources.Abstractions.Watchlist;
 
@@ -18,6 +19,9 @@ internal sealed class FakeWatchlistSource(SourceId id, bool recognizesLinks = tr
     public SourceId Id { get; } = id;
 
     public string DisplayName => Id.Value;
+
+
+    public SiteWords Words { get; } = new() { Follow = "follow", Unfollow = "unfollow", Followed = "followed" };
 
     public ModRef LinkedMod => TestData.File(Id, "35407").Mod;
 

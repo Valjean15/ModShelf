@@ -9,6 +9,7 @@ using ModShelf.Presentation.ViewModels.Browse;
 using ModShelf.Presentation.ViewModels.ModPages;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Search;
 using ModShelf.Testing;
 
 namespace ModShelf.Presentation.Tests.ViewModels.Browse;
@@ -30,7 +31,8 @@ internal sealed class BrowseHarness : IDisposable
 
     /// <param name="trending">Whether Nexus Mods lists its games' trending mods.</param>
     /// <param name="example">The example site, beside Nexus Mods, asked as the app asks it.</param>
-    public BrowseHarness(bool trending = true, ExampleSite? example = null)
+    /// <param name="nexusSearch">What Nexus Mods' search can do; every order and filter unless said.</param>
+    public BrowseHarness(bool trending = true, ExampleSite? example = null, SearchCapabilities? nexusSearch = null)
     {
         FakeSourceRegistry others = example is null ? new FakeSourceRegistry() : new FakeSourceRegistry(example);
         Lookup = new ScriptedLookup { Others = example is null ? null : AppLookup.Over(others) };
@@ -47,7 +49,12 @@ internal sealed class BrowseHarness : IDisposable
             Rescan,
             Storage,
             Settings,
-            new FakeSourceRegistry([.. trending ? [Catalog, Trending] : new IModSource[] { Catalog }, .. others.All<IModSource>()]),
+            new FakeSourceRegistry(
+            [
+                .. trending ? [Catalog, Trending] : new IModSource[] { Catalog },
+                .. nexusSearch is null ? [] : new IModSource[] { new CapabilitiesOnlySearch(TestData.Nexus, nexusSearch) },
+                .. others.All<IModSource>(),
+            ]),
             Browser,
             Folders,
             Clipboard,

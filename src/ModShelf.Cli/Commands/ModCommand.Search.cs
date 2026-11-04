@@ -3,10 +3,12 @@ using System.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 
 using ModShelf.Application.Catalog;
+using ModShelf.Application.Sources;
 using ModShelf.Cli.Hosting;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Search;
 
 namespace ModShelf.Cli.Commands;
@@ -17,7 +19,7 @@ namespace ModShelf.Cli.Commands;
 internal static partial class ModCommand
 {
     /// <summary>
-    /// How many mods a page lists unless --page-size says otherwise.
+    /// How many mods a page lists unless --page-size says otherwise, or fewer when the site's pages hold fewer.
     /// </summary>
     private const int DefaultPageSize = 20;
 
@@ -43,33 +45,31 @@ internal static partial class ModCommand
         {
             Description = "Include mods with adult content, which are left out otherwise.",
         };
-        Option<SearchSort> sort = new("--sort")
+        Option<SearchSort?> sort = new("--sort")
         {
-            Description = "The order: Relevance (the default; the most endorsed without words), Endorsements, Downloads, UniqueDownloads, Updated, Newest, Size or Name. The most comes first; by Name, Z first.",
-            DefaultValueFactory = _ => SearchSort.Relevance,
+            Description = "The order, as far as the site has it: Relevance, Endorsements (whatever the site counts as approval), Downloads, UniqueDownloads, Updated, Newest, Size or Name. The site's own unless set: Relevance on Nexus Mods, which without words is the site's own order. The most comes first; by Name, Z first.",
         };
         sort.Validators.Add(result =>
         {
             // An enum option reads a number too, such as 9, which needn't be one of the orders.
-            if (!Enum.IsDefined(result.GetValueOrDefault<SearchSort>()))
+            if (result.GetValueOrDefault<SearchSort?>() is { } value && !Enum.IsDefined(value))
             {
                 result.AddError($"--sort must be one of {string.Join(", ", Enum.GetNames<SearchSort>())}.");
             }
         });
         Option<bool> ascending = new("--ascending")
         {
-            Description = "Turn the order around, so the least comes first: the least endorsed or downloaded, the longest since updated, the oldest.",
+            Description = "Turn the order around, so the least comes first: the least approved or downloaded, the longest since updated, the oldest.",
         };
         Option<int> page = new("--page")
         {
             Description = "Which page of results to show.",
             DefaultValueFactory = _ => 1,
         };
-        Option<int> pageSize = new("--page-size")
+        Option<int?> pageSize = new("--page-size")
         {
-            Description = $"How many mods a page lists, from 1 to {SearchQuery.MaxCount}. {DefaultPageSize} unless set.",
+            Description = $"How many mods a page lists, from 1 to {SearchQuery.MaxCount}, as many as the site's pages hold at most. {DefaultPageSize} unless set, or fewer when the site's pages hold fewer.",
             HelpName = "count",
-            DefaultValueFactory = _ => DefaultPageSize,
         };
         Option<string?> source = new("--source")
         {
@@ -91,43 +91,52 @@ internal static partial class ModCommand
         };
         search.SetAction((parsed, cancellationToken) =>
         {
-            int size = parsed.GetValue(pageSize);
+            int? size = parsed.GetValue(pageSize);
             if (size is < 1 or > SearchQuery.MaxCount)
             {
                 environment.Error.WriteLine($"--page-size must be from 1 to {SearchQuery.MaxCount}.");
                 return Task.FromResult(ExitCodes.BadInput);
             }
 
-            SearchQuery query;
-            try
+            int pageNumber = parsed.GetValue(page);
+            string text = string.Join(' ', parsed.GetValue(words) ?? []);
+            SearchSort? sortBy = parsed.GetValue(sort);
+            bool reversed = parsed.GetValue(ascending);
+            string? by = parsed.GetValue(author);
+            bool withAdult = parsed.GetValue(adult);
+
+            // The site's own order and page size unless asked otherwise, once the site is known; a whole number of pages
+            // in, so each page starts where the last ended.
+            SearchQuery QueryFor(SearchCapabilities? capabilities)
             {
-                int pageNumber = parsed.GetValue(page);
                 ArgumentOutOfRangeException.ThrowIfLessThan(pageNumber, 1, "--page");
-                query = new SearchQuery(
-                    string.Join(' ', parsed.GetValue(words) ?? []),
-                    parsed.GetValue(sort),
-                    checked((pageNumber - 1) * size),
-                    size,
-                    parsed.GetValue(author),
-                    parsed.GetValue(adult),
-                    parsed.GetValue(ascending) ? SearchDirection.Ascending : SearchDirection.Descending);
-            }
-            catch (Exception exception) when (exception is ArgumentOutOfRangeException or OverflowException)
-            {
-                environment.Error.WriteLine("--page must be 1 or more, and not that many pages in.");
-                return Task.FromResult(ExitCodes.BadInput);
+                SearchOrder own = capabilities?.Orders[0] ?? new SearchOrder(SearchSort.Relevance, SearchDirection.Descending);
+                int count = size ?? Math.Min(DefaultPageSize, capabilities?.MaxCount ?? DefaultPageSize);
+                SearchDirection direction = sortBy is null ? own.Direction : SearchDirection.Descending;
+                return new SearchQuery(
+                    text,
+                    sortBy ?? own.Sort,
+                    checked((pageNumber - 1) * count),
+                    count,
+                    by,
+                    withAdult,
+                    reversed ? Reverse(direction) : direction);
             }
 
-            return SearchAsync(environment, parsed.GetValue(game)!, parsed.GetValue(source), query, cancellationToken);
+            return SearchAsync(environment, parsed.GetValue(game)!, parsed.GetValue(source), QueryFor, cancellationToken);
         });
         return search;
     }
 
+    private static SearchDirection Reverse(SearchDirection direction)
+        => direction == SearchDirection.Ascending ? SearchDirection.Descending : SearchDirection.Ascending;
+
+    /// <param name="queryFor">The search to make, for what the chosen site's search can do.</param>
     private static async Task<int> SearchAsync(
         CliEnvironment environment,
         string gameKey,
         string? sourceText,
-        SearchQuery query,
+        Func<SearchCapabilities?, SearchQuery> queryFor,
         CancellationToken cancellationToken)
     {
         return await CommandHost.RunAsync(
@@ -139,6 +148,18 @@ internal static partial class ModCommand
                     if (ChooseSource(lookup.SearchableSources, sourceText) is not { } source)
                     {
                         await environment.Error.WriteLineAsync(SourceProblem(lookup.SearchableSources, sourceText, "search")).ConfigureAwait(false);
+                        return ExitCodes.BadInput;
+                    }
+
+                    ISourceRegistry sources = services.GetRequiredService<ISourceRegistry>();
+                    SearchQuery query;
+                    try
+                    {
+                        query = queryFor(sources.Find<IModSearch>(source)?.Capabilities);
+                    }
+                    catch (Exception exception) when (exception is ArgumentOutOfRangeException or OverflowException)
+                    {
+                        await environment.Error.WriteLineAsync("--page must be 1 or more, and not that many pages in.").ConfigureAwait(false);
                         return ExitCodes.BadInput;
                     }
 
@@ -154,7 +175,7 @@ internal static partial class ModCommand
                         return problem.ExitCode;
                     }
 
-                    WriteResults(environment.Output, found, query);
+                    WriteResults(environment.Output, found, query, CliText.Words(sources, source));
                     return ExitCodes.Done;
                 },
                 cancellationToken)
@@ -193,7 +214,8 @@ internal static partial class ModCommand
         _ => null,
     };
 
-    private static void WriteResults(TextWriter output, SearchPage found, SearchQuery query)
+    /// <param name="words">The site's words, for what it counts as approval; without them, there's no column for it.</param>
+    private static void WriteResults(TextWriter output, SearchPage found, SearchQuery query, SiteWords words)
     {
         if (found.Mods.Count == 0)
         {
@@ -207,22 +229,23 @@ internal static partial class ModCommand
         int last = found.Offset + found.Mods.Count;
         string matches = found.TotalCount == 1 ? "1 mod matches" : $"{CliText.Count(found.TotalCount)} mods match";
         output.WriteLine(found.Mods.Count == 1 && first == found.TotalCount
-            ? $"{matches}{SortedBy(query)}."
-            : $"{matches}{SortedBy(query)}. These are {CliText.Count(first)} to {CliText.Count(last)}.");
+            ? $"{matches}{SortedBy(query, words)}."
+            : $"{matches}{SortedBy(query, words)}. These are {CliText.Count(first)} to {CliText.Count(last)}.");
 
+        string? approvals = words.Approvals;
         string[][] rows =
         [
-            ["ID", "Name", "Author", "Endorsements", "Downloads", "Updated", "Link"],
-            .. found.Mods.Select(mod => new[]
-            {
+            ["ID", "Name", "Author", .. approvals is null ? [] : new[] { CliText.Capitalized(approvals) }, "Downloads", "Updated", "Link"],
+            .. found.Mods.Select<ModInfo, string[]>(mod =>
+            [
                 mod.Mod.Id,
                 Label(mod),
                 mod.Author ?? "-",
-                mod.Endorsements is { } endorsements ? CliText.Count(endorsements) : "-",
+                .. approvals is null ? [] : new[] { mod.Endorsements is { } endorsements ? CliText.Count(endorsements) : "-" },
                 mod.Downloads is { } downloads ? CliText.Count(downloads) : "-",
                 mod.UpdatedAt is { } updated ? CliText.Date(updated) : "-",
                 mod.PageUrl?.AbsoluteUri ?? "-",
-            }),
+            ]),
         ];
         TextTable.Write(output, rows);
 
@@ -234,12 +257,18 @@ internal static partial class ModCommand
         output.WriteLine("To see a mod's files: mod show \"<its link>\"");
     }
 
-    private static string SortedBy(SearchQuery query) => (query.Sort, query.Direction) switch
+    /// <summary>
+    /// Such as ", most downloaded first"; approval in the site's words. Relevance without words is the site's own order,
+    /// which isn't said.
+    /// </summary>
+    private static string SortedBy(SearchQuery query, SiteWords words) => (query.Sort, query.Direction) switch
     {
         (SearchSort.Relevance, SearchDirection.Descending) when query.Text is not null => ", best matches first",
         (SearchSort.Relevance, SearchDirection.Ascending) when query.Text is not null => ", weakest matches first",
-        (SearchSort.Relevance or SearchSort.Endorsements, SearchDirection.Descending) => ", most endorsed first",
-        (SearchSort.Relevance or SearchSort.Endorsements, SearchDirection.Ascending) => ", least endorsed first",
+        (SearchSort.Relevance, SearchDirection.Descending) => ", in the site's own order",
+        (SearchSort.Relevance, SearchDirection.Ascending) => ", in the site's own order turned around",
+        (SearchSort.Endorsements, SearchDirection.Descending) => $", most {words.Approvals ?? "approvals"} first",
+        (SearchSort.Endorsements, SearchDirection.Ascending) => $", fewest {words.Approvals ?? "approvals"} first",
         (SearchSort.Downloads, SearchDirection.Descending) => ", most downloaded first",
         (SearchSort.Downloads, SearchDirection.Ascending) => ", least downloaded first",
         (SearchSort.Updated, SearchDirection.Descending) => ", last updated first",

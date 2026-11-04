@@ -66,7 +66,8 @@ public interface IModLookup
     /// One page of a game's mods that match <paramref name="query"/>, from the game's source.
     /// </summary>
     /// <exception cref="ArgumentException">
-    /// The game's source isn't registered or can't search, or the source doesn't know the game.
+    /// The game's source isn't registered or can't search, or can't search as <paramref name="query"/> asks, which says
+    /// what it can (<see cref="IModSearch.Capabilities"/>); or the source doesn't know the game.
     /// </exception>
     /// <exception cref="Sources.Abstractions.Accounts.AuthenticationFailedException">The site needs a linked account, or refused it.</exception>
     /// <exception cref="HttpRequestException">The site couldn't be reached, or refused the search.</exception>

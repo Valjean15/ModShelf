@@ -8,6 +8,7 @@ using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Search;
 
 namespace ModShelf.Application.Tests.Catalog;
@@ -360,6 +361,9 @@ public sealed class ModLookupTests
         public SourceId Id => catalog.Id;
 
         public string DisplayName => catalog.DisplayName;
+
+
+        public SiteWords Words => catalog.Words;
 
         public IReadOnlyList<ModRequirement> Requirements { get; init; } = [];
 

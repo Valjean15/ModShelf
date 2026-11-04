@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Common;
 
 namespace ModShelf.Presentation.Tests.Fakes;
 
@@ -17,6 +18,11 @@ internal sealed class ScriptedCatalog(SourceId id, string displayName) : IModCat
     public SourceId Id { get; } = id;
 
     public string DisplayName { get; } = displayName;
+
+    /// <summary>
+    /// What the site calls following a mod and approving one: Nexus Mods' words unless the test says otherwise.
+    /// </summary>
+    public SiteWords Words { get; set; } = TestData.NexusWords;
 
     /// <summary>
     /// Each game's name by its key; a game not here is unknown to the site.

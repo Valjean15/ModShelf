@@ -1,40 +1,41 @@
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Search;
 
 namespace ModShelf.Presentation.ViewModels.Browse;
 
 /// <summary>
 /// The choices of Browse's toolbar that a game's own settings can start it on: the orders, how recently the mods were
-/// updated, and the page sizes. The first of each is Browse's own.
+/// updated, and the page sizes; each game offered only what its site's search can do (<see cref="For"/>).
 /// </summary>
 internal static class BrowseChoices
 {
     /// <summary>
-    /// The orders a search's results can come in.
+    /// The orders Browse lists, in its order; null names are approval's, in the site's words.
     /// </summary>
-    public static IReadOnlyList<SortChoice> Sorts { get; } =
+    private static readonly (SearchSort Sort, SearchDirection Direction, string? Name)[] Orders =
     [
-        new(SearchSort.Relevance, SearchDirection.Descending, Strings.BrowseSortBestMatch),
-        new(SearchSort.Endorsements, SearchDirection.Descending, Strings.BrowseSortMostEndorsed),
-        new(SearchSort.Endorsements, SearchDirection.Ascending, Strings.BrowseSortLeastEndorsed),
-        new(SearchSort.Downloads, SearchDirection.Descending, Strings.BrowseSortMostDownloaded),
-        new(SearchSort.Downloads, SearchDirection.Ascending, Strings.BrowseSortLeastDownloaded),
-        new(SearchSort.Updated, SearchDirection.Descending, Strings.BrowseSortRecentlyUpdated),
-        new(SearchSort.Updated, SearchDirection.Ascending, Strings.BrowseSortLongestSinceUpdated),
-        new(SearchSort.Newest, SearchDirection.Descending, Strings.BrowseSortNewest),
-        new(SearchSort.Newest, SearchDirection.Ascending, Strings.BrowseSortOldest),
-        new(SearchSort.UniqueDownloads, SearchDirection.Descending, Strings.BrowseSortMostUniqueDownloads),
-        new(SearchSort.Size, SearchDirection.Descending, Strings.BrowseSortLargest),
-        new(SearchSort.Size, SearchDirection.Ascending, Strings.BrowseSortSmallest),
-        new(SearchSort.Name, SearchDirection.Ascending, Strings.BrowseSortNameAToZ),
-        new(SearchSort.Name, SearchDirection.Descending, Strings.BrowseSortNameZToA),
+        (SearchSort.Relevance, SearchDirection.Descending, Strings.BrowseSortBestMatch),
+        (SearchSort.Endorsements, SearchDirection.Descending, null),
+        (SearchSort.Endorsements, SearchDirection.Ascending, null),
+        (SearchSort.Downloads, SearchDirection.Descending, Strings.BrowseSortMostDownloaded),
+        (SearchSort.Downloads, SearchDirection.Ascending, Strings.BrowseSortLeastDownloaded),
+        (SearchSort.Updated, SearchDirection.Descending, Strings.BrowseSortRecentlyUpdated),
+        (SearchSort.Updated, SearchDirection.Ascending, Strings.BrowseSortLongestSinceUpdated),
+        (SearchSort.Newest, SearchDirection.Descending, Strings.BrowseSortNewest),
+        (SearchSort.Newest, SearchDirection.Ascending, Strings.BrowseSortOldest),
+        (SearchSort.UniqueDownloads, SearchDirection.Descending, Strings.BrowseSortMostUniqueDownloads),
+        (SearchSort.Size, SearchDirection.Descending, Strings.BrowseSortLargest),
+        (SearchSort.Size, SearchDirection.Ascending, Strings.BrowseSortSmallest),
+        (SearchSort.Name, SearchDirection.Ascending, Strings.BrowseSortNameAToZ),
+        (SearchSort.Name, SearchDirection.Descending, Strings.BrowseSortNameZToA),
     ];
 
     /// <summary>
     /// How recently the mods a search finds were updated: any time, or in the last day, week or month.
     /// </summary>
-    public static IReadOnlyList<TimeWindowChoice> TimeWindows { get; } =
+    private static readonly TimeWindowChoice[] TimeWindows =
     [
         new(null, Strings.BrowseUpdatedAnyTime),
         new(TimeSpan.FromDays(1), Strings.BrowseUpdatedDay),
@@ -45,13 +46,49 @@ internal static class BrowseChoices
     /// <summary>
     /// How many mods a page can list: 20, 50 or 100.
     /// </summary>
-    public static IReadOnlyList<PageSizeChoice> PageSizes { get; } =
+    private static readonly PageSizeChoice[] PageSizes =
         [.. new[] { 20, 50, SearchQuery.MaxCount }.Select(count => new PageSizeChoice(count, Text.Format(Strings.BrowsePerPage, count)))];
 
     /// <summary>
-    /// The order <paramref name="sort"/> names, going as <paramref name="direction"/> says, or the order's own way;
-    /// null when there's none such.
+    /// Every choice, as before a game is chosen, or for a site that can't search.
     /// </summary>
-    public static SortChoice? SortOf(SearchSort sort, SearchDirection? direction)
-        => Sorts.FirstOrDefault(choice => choice.Sort == sort && (direction is null || choice.Direction == direction));
+    public static BrowseOffer Every { get; } = For(capabilities: null, SiteWords.None);
+
+    /// <summary>
+    /// What Browse offers for a site whose search can do as <paramref name="capabilities"/> say, every choice when null;
+    /// its orders by approval named in its words.
+    /// </summary>
+    public static BrowseOffer For(SearchCapabilities? capabilities, SiteWords words)
+    {
+        ArgumentNullException.ThrowIfNull(words);
+
+        string approvals = words.Approvals ?? Strings.BrowseApprovalsUnnamed;
+        SortChoice[] every =
+        [
+            .. Orders.Select(order => new SortChoice(
+                order.Sort,
+                order.Direction,
+                order.Name ?? Text.Format(order.Direction == SearchDirection.Descending ? Strings.BrowseSortMostApproved : Strings.BrowseSortLeastApproved, approvals))),
+        ];
+        if (capabilities is null)
+        {
+            return new BrowseOffer(
+                every,
+                every[0],
+                TimeWindows,
+                PageSizes,
+                SearchFilters.Text | SearchFilters.Author | SearchFilters.Category | SearchFilters.UpdatedSince | SearchFilters.AdultContent);
+        }
+
+        SortChoice[] offered = [.. every.Where(choice => capabilities.Has(new SearchOrder(choice.Sort, choice.Direction)))];
+        SortChoice[] sorts = offered.Length > 0 ? offered : every;
+        SearchOrder own = capabilities.Orders[0];
+        PageSizeChoice[] sizes = [.. PageSizes.Where(size => size.Count <= capabilities.MaxCount)];
+        return new BrowseOffer(
+            sorts,
+            sorts.FirstOrDefault(choice => choice.Sort == own.Sort && choice.Direction == own.Direction) ?? sorts[0],
+            capabilities.Has(SearchFilters.UpdatedSince) ? TimeWindows : [TimeWindows[0]],
+            sizes.Length > 0 ? sizes : [new PageSizeChoice(capabilities.MaxCount, Text.Format(Strings.BrowsePerPage, capabilities.MaxCount))],
+            capabilities.Filters);
+    }
 }

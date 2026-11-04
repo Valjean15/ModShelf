@@ -10,6 +10,7 @@ using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Common;
 
 namespace ModShelf.Presentation.ViewModels.ModPages;
 
@@ -75,7 +76,8 @@ public sealed partial class ModPageViewModel : ObservableObject
         Mod = page.Mod.Mod;
         Name = page.Mod.Name;
         GameName = page.Game.Name;
-        ModInfoText text = ModInfoText.Of(page.Mod, services.TimeProvider);
+        SiteWords words = services.Sources.Words(Mod.Game.Source);
+        ModInfoText text = ModInfoText.Of(page.Mod, words, services.TimeProvider);
         AuthorText = text.Author;
         Summary = text.Summary;
         VersionText = text.Version;
@@ -87,10 +89,10 @@ public sealed partial class ModPageViewModel : ObservableObject
         HasPage = page.Mod.PageUrl is not null;
         CategoryText = page.Mod.Category ?? string.Empty;
         Changelog = NewestFirst(page.Changelogs, page.Mod.Version);
-        CanTrack = services.Tracked.CanTrack(Mod.Game.Source);
+        CanTrack = services.Tracked.CanTrack(Mod.Game.Source) && words.CanFollow;
         string site = services.Sources.SiteName(Mod.Game.Source);
-        TrackText = Text.Format(Strings.BrowseTrack, site);
-        UntrackText = Text.Format(Strings.BrowseUntrack, site);
+        TrackText = words.Follow is { } follow ? Text.Format(Strings.BrowseFollow, Text.Capitalized(follow), site) : string.Empty;
+        UntrackText = words.Unfollow is { } unfollow ? Text.Format(Strings.BrowseUnfollow, Text.Capitalized(unfollow), site) : string.Empty;
         OpenPageText = Text.Format(Strings.JobOpenPage, site);
         SiteFilesHeading = Text.Format(Strings.ModPageSiteFiles, site);
         OfflineText = Text.Format(Strings.ModPageShownOnline, site);
@@ -563,6 +565,7 @@ public sealed partial class ModPageViewModel : ObservableObject
     {
         bool track = !IsTracked;
         string site = _services.Sources.SiteName(Mod.Game.Source);
+        string followed = _services.Sources.Words(Mod.Game.Source).Followed ?? string.Empty;
         return RunAsync(
             track ? PageAction.Track : PageAction.Untrack,
             async () =>
@@ -571,14 +574,18 @@ public sealed partial class ModPageViewModel : ObservableObject
                 {
                     await _services.Tracked.SetAsync(Mod, track, cancellationToken);
                 }
-                catch (Exception exception) when (SiteProblems.Describe(exception, site, Strings.BrowseTrackFailed) is { } problem)
+                catch (Exception exception) when (SiteProblems.Describe(exception, site, SiteProblems.InWords(Strings.BrowseFollowFailed, followed)) is { } problem)
                 {
                     Tell(problem, isProblem: true);
                     return;
                 }
 
                 IsTracked = track;
-                Tell(Text.Format(track ? Strings.BrowseTrackedNote : Strings.BrowseUntrackedNote, site), isProblem: false);
+                Tell(
+                    track
+                        ? Text.Format(Strings.BrowseFollowedNote, Text.Capitalized(followed), site)
+                        : Text.Format(Strings.BrowseUnfollowedNote, followed, site),
+                    isProblem: false);
             },
             cancellationToken);
     }

@@ -9,6 +9,8 @@ using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
 using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Common;
+using ModShelf.Sources.Abstractions.Search;
 
 namespace ModShelf.Presentation.ViewModels.Browse;
 
@@ -18,20 +20,24 @@ namespace ModShelf.Presentation.ViewModels.Browse;
 public sealed partial class BrowseViewModel
 {
     /// <summary>
-    /// Shows the game's rows in place of the list, and reads its categories.
+    /// What the toolbar offers: for the chosen game's site.
     /// </summary>
+    private BrowseOffer _offer = BrowseChoices.Every;
+
     /// <summary>
     /// The last reading of the chosen game's own settings, for tests to wait on.
     /// </summary>
     internal Task DefaultsWork { get; private set; } = Task.CompletedTask;
 
     /// <summary>
-    /// Shows the chosen game's rows, reads its categories, and starts the toolbar as the game's own settings say.
+    /// Offers what the chosen game's site can search by, shows its rows, reads its categories, and starts the toolbar as
+    /// the game's own settings say.
     /// </summary>
     partial void OnGameChanged(GameChoice? value)
     {
         if (value is not null)
         {
+            Offer(value.Game);
             ShowRows(value.Game, closeMod: true);
             CategoriesWork = ReadCategoriesAsync(value.Game);
             DefaultsWork = StartAsTheGameSaysAsync(value.Game);
@@ -163,14 +169,51 @@ public sealed partial class BrowseViewModel
         _choosingQuietly = true;
         try
         {
-            SelectedSort = defaults.Sort is { } sort ? BrowseChoices.SortOf(sort, defaults.Direction) ?? Sorts[0] : Sorts[0];
-            SelectedTimeWindow = TimeWindows.FirstOrDefault(window => window.Within == defaults.UpdatedWithin) ?? TimeWindows[0];
-            SelectedPageSize = PageSizes.FirstOrDefault(size => size.Count == defaults.PageSize) ?? PageSizes[0];
+            // An order or page size the game's site lacks, as one set by hand, starts on its own.
+            SelectedSort = defaults.Sort is { } sort ? _offer.SortOf(sort, defaults.Direction) ?? _offer.Default : _offer.Default;
+            SelectedTimeWindow = _offer.SameTimeWindow(defaults.UpdatedWithin);
+            SelectedPageSize = _offer.SamePageSize(defaults.PageSize);
         }
         finally
         {
             _choosingQuietly = false;
         }
+    }
+
+    /// <summary>
+    /// Offers the orders, filters and page sizes the game's site's search has, keeping each choice it has too, and its
+    /// list of followed mods in its words.
+    /// </summary>
+    private void Offer(GameRef game)
+    {
+        SiteWords words = _services.Sources.Words(game.Source);
+        BrowseOffer offer = BrowseChoices.For(_services.Sources.Find<IModSearch>(game.Source)?.Capabilities, words);
+        _choosingQuietly = true;
+        try
+        {
+            SortChoice sort = offer.SameSort(SelectedSort);
+            TimeWindowChoice window = offer.SameTimeWindow(SelectedTimeWindow?.Within);
+            PageSizeChoice size = offer.SamePageSize(SelectedPageSize?.Count);
+            _offer = offer;
+            Sorts = offer.Sorts;
+            TimeWindows = offer.TimeWindows;
+            PageSizes = offer.PageSizes;
+            SelectedSort = sort;
+            SelectedTimeWindow = window;
+            SelectedPageSize = size;
+            CanSearchByUpdated = offer.Has(SearchFilters.UpdatedSince);
+            CanSearchByAuthor = offer.Has(SearchFilters.Author);
+            CanSearchByCategory = offer.Has(SearchFilters.Category);
+            CanIncludeAdult = offer.Has(SearchFilters.AdultContent);
+        }
+        finally
+        {
+            _choosingQuietly = false;
+        }
+
+        string? followed = _services.Tracked.CanTrack(game.Source) ? words.Followed : null;
+        CanFollow = followed is not null;
+        ShowFollowedText = followed is null ? string.Empty : Text.Format(Strings.BrowseShowFollowed, Text.Capitalized(followed));
     }
 
     /// <summary>

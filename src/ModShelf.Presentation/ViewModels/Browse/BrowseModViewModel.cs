@@ -8,6 +8,7 @@ using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Presentation.ViewModels.ModPages;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Common;
 
 namespace ModShelf.Presentation.ViewModels.Browse;
 
@@ -21,6 +22,7 @@ public sealed partial class BrowseModViewModel : ObservableObject
     private readonly Action _selectionChanged;
 
     /// <param name="problem">Why the mod's details couldn't be read, for a tracked mod; null when they were.</param>
+    /// <param name="words">The mod's site's words, for what it counts as approval.</param>
     /// <param name="open">Opens the mod on the screen.</param>
     /// <param name="selectionChanged">Tells the screen the mod was selected, or no longer is.</param>
     /// <param name="fact">What it says besides what it always says, as fits the order it's listed in.</param>
@@ -29,6 +31,7 @@ public sealed partial class BrowseModViewModel : ObservableObject
         string? problem,
         LibraryMod? inLibrary,
         ModPictures pictures,
+        SiteWords words,
         TimeProvider timeProvider,
         Func<ModRef, CancellationToken, Task> open,
         Action selectionChanged,
@@ -46,7 +49,7 @@ public sealed partial class BrowseModViewModel : ObservableObject
         Picture = new ModPictureViewModel(pictures);
         Mod = mod.Mod;
         Name = mod.Name;
-        ModInfoText text = ModInfoText.Of(mod, timeProvider);
+        ModInfoText text = ModInfoText.Of(mod, words, timeProvider);
         AuthorText = text.Author;
         Summary = text.Summary;
         VersionText = text.Version;

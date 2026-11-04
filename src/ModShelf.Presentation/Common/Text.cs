@@ -8,4 +8,13 @@ namespace ModShelf.Presentation.Common;
 internal static class Text
 {
     public static string Format(string format, params object?[] values) => string.Format(CultureInfo.CurrentCulture, format, values);
+
+    /// <summary>
+    /// A word as it starts a sentence or a label, such as a site's "track" as "Track".
+    /// </summary>
+    public static string Capitalized(string word)
+    {
+        ArgumentNullException.ThrowIfNull(word);
+        return word.Length == 0 ? word : char.ToUpper(word[0], CultureInfo.CurrentCulture) + word[1..];
+    }
 }

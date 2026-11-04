@@ -7,12 +7,14 @@ namespace ModShelf.Sources.Abstractions.Search;
 public enum SearchSort
 {
     /// <summary>
-    /// The best matches for the words first. Without words, the same as <see cref="Endorsements"/>.
+    /// The best matches for the words first. Without words, the site's own order, such as the most endorsed first on
+    /// Nexus Mods.
     /// </summary>
     Relevance = 0,
 
     /// <summary>
-    /// The most endorsed, liked or followed first, whatever the site counts as approval.
+    /// The most endorsed, liked or followed first: whatever the site counts as approval, in
+    /// <see cref="Catalog.ModInfo.Endorsements"/>, and names in <see cref="Common.SiteWords.Approvals"/>.
     /// </summary>
     Endorsements = 1,
 

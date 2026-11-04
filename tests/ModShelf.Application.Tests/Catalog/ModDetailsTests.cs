@@ -11,6 +11,7 @@ using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Testing;
 
 namespace ModShelf.Application.Tests.Catalog;
@@ -233,6 +234,9 @@ public sealed class ModDetailsTests : IDisposable
         public SourceId Id { get; } = id;
 
         public string DisplayName => Id.Value;
+
+
+        public SiteWords Words => SiteWords.None;
     }
 
     /// <summary>
@@ -246,6 +250,9 @@ public sealed class ModDetailsTests : IDisposable
         public SourceId Id { get; } = new("held");
 
         public string DisplayName => "Held";
+
+
+        public SiteWords Words => SiteWords.None;
 
         public int Started => Volatile.Read(ref _started);
 

@@ -502,7 +502,7 @@ public sealed class BrowseViewModelTests : IDisposable
         await Screen.ShowTrackedCommand.ExecuteAsync(null);
 
         Assert.True(Screen.IsShowingTracked);
-        Assert.Equal("You track 3 mods of Skyrim Special Edition on Nexus Mods.", Screen.ResultsText);
+        Assert.Equal("3 tracked mods of Skyrim Special Edition on Nexus Mods.", Screen.ResultsText);
         Assert.Equal(["Address Library", "SkyUI", "Mod 266"], _harness.Names());
         Assert.Equal([null, null, "Couldn't read its details: No Mod Found"], Screen.Results.Select(row => row.Problem));
         Assert.False(Screen.HasMore);
@@ -536,7 +536,7 @@ public sealed class BrowseViewModelTests : IDisposable
 
         await Screen.ShowTrackedCommand.ExecuteAsync(null);
 
-        Assert.Equal("You track no mods of Skyrim Special Edition on Nexus Mods.", Screen.ResultsText);
+        Assert.Equal("No tracked mods of Skyrim Special Edition on Nexus Mods.", Screen.ResultsText);
         Assert.Empty(Screen.Results);
     }
 

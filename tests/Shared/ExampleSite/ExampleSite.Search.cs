@@ -1,5 +1,6 @@
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Search;
 
 namespace ModShelf.Testing;
@@ -11,6 +12,18 @@ public sealed partial class ExampleSite
     /// </summary>
     public static IReadOnlyList<SearchSort> Sorts { get; } =
         [SearchSort.Relevance, SearchSort.Downloads, SearchSort.Updated, SearchSort.Newest, SearchSort.Name];
+
+    /// <summary>
+    /// Its orders either way round, by relevance first; words and when mods were updated; 50 mods a page. It has no
+    /// adult content. A test may say fewer, as another site's search might have, for the app to keep to.
+    /// </summary>
+    public SearchCapabilities Capabilities { get; init; } =
+        new(Sorts.SelectMany(SearchOrder.BothWays), SearchFilters.Text | SearchFilters.UpdatedSince, PageLimit);
+
+    /// <summary>
+    /// It neither follows mods nor counts approval.
+    /// </summary>
+    public SiteWords Words => SiteWords.None;
 
     /// <summary>
     /// Finds a game's mods whose names hold every word, by the orders in <see cref="Sorts"/>, and how recently they were

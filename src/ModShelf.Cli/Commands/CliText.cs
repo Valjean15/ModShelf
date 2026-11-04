@@ -1,9 +1,14 @@
 using System.Globalization;
 
+using ModShelf.Application.Sources;
+using ModShelf.Domain.Mods;
+using ModShelf.Sources.Abstractions;
+using ModShelf.Sources.Abstractions.Common;
+
 namespace ModShelf.Cli.Commands;
 
 /// <summary>
-/// How the commands write times, dates and counts.
+/// How the commands write times, dates and counts, and the sites' words.
 /// </summary>
 internal static class CliText
 {
@@ -27,4 +32,15 @@ internal static class CliText
     /// </summary>
     public static string Count(int count, string one, string many)
         => count == 1 ? $"1 {one}" : string.Create(CultureInfo.CurrentCulture, $"{count:N0} {many}");
+
+    /// <summary>
+    /// A site's word as it starts a label, such as "endorsements" as "Endorsements".
+    /// </summary>
+    public static string Capitalized(string word)
+        => word.Length == 0 ? word : char.ToUpper(word[0], CultureInfo.CurrentCulture) + word[1..];
+
+    /// <summary>
+    /// What the site calls following a mod and approving one; none when no source of that ID is registered.
+    /// </summary>
+    public static SiteWords Words(ISourceRegistry sources, SourceId source) => sources.Find<IModSource>(source)?.Words ?? SiteWords.None;
 }

@@ -1,5 +1,6 @@
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Common;
 
 namespace ModShelf.Application.Tests.Fakes;
 
@@ -11,6 +12,9 @@ internal sealed class CatalogOnlySource(SourceId id) : IModCatalog
     public SourceId Id { get; } = id;
 
     public string DisplayName => Id.Value;
+
+
+    public SiteWords Words => SiteWords.None;
 
     public Task<IReadOnlyList<GameInfo>> GetGamesAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
 

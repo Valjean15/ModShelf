@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Links;
 using ModShelf.Sources.Abstractions.Search;
 
@@ -18,6 +19,14 @@ internal sealed class FakeCatalogSource(SourceId id) : ILinkRecognizer, IModCata
     public SourceId Id { get; } = id;
 
     public string DisplayName => Id.Value;
+
+
+    public SiteWords Words => SiteWords.None;
+
+    public SearchCapabilities Capabilities { get; set; } = new(
+        Enum.GetValues<SearchSort>().SelectMany(SearchOrder.BothWays),
+        SearchFilters.Text | SearchFilters.Author | SearchFilters.Category | SearchFilters.UpdatedSince | SearchFilters.AdultContent,
+        SearchQuery.MaxCount);
 
     public ModFileRef LinkedFile => TestData.File(Id, "35407");
 

@@ -1,5 +1,6 @@
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Accounts;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Quota;
 
 namespace ModShelf.Application.Tests.Fakes;
@@ -13,6 +14,9 @@ internal sealed class FakeAccountSource(SourceId id, params FakeStrategy[] strat
     public SourceId Id { get; } = id;
 
     public string DisplayName => $"{Id.Value} site";
+
+
+    public SiteWords Words => SiteWords.None;
 
     public bool WorksWithoutAccount { get; init; }
 

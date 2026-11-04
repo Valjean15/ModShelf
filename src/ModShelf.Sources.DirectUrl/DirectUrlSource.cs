@@ -1,6 +1,7 @@
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Downloads;
 using ModShelf.Sources.Abstractions.Links;
 using ModShelf.Sources.DirectUrl.Resources;
@@ -32,6 +33,8 @@ public sealed class DirectUrlSource : IDownloadResolver, ILinkRecognizer
     public SourceId Id => DirectId;
 
     public string DisplayName => Strings.DisplayName;
+
+    public SiteWords Words => SiteWords.None;
 
     public Task<RecognizedLink?> RecognizeAsync(Uri link, CancellationToken cancellationToken)
     {

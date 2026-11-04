@@ -4,6 +4,7 @@ using ModShelf.Application.Releases.Ports;
 using ModShelf.Application.Sources;
 using ModShelf.Application.Tests.Fakes;
 using ModShelf.Domain.Mods;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Links;
 using ModShelf.Testing;
 
@@ -155,6 +156,9 @@ public sealed class AppUninstallTests
         public SourceId Id { get; } = new("other-mods");
 
         public string DisplayName => "Other mods";
+
+
+        public SiteWords Words => SiteWords.None;
 
         public string Scheme => "othermods";
     }

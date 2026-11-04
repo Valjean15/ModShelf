@@ -6,7 +6,9 @@ namespace ModShelf.Sources.Abstractions.Watchlist;
 /// The mods the linked account follows on the site, such as Nexus Mods' tracked mods, to read and to change.
 /// </summary>
 /// <remarks>
-/// Every method acts on the linked account, so each needs one.
+/// Every method acts on the linked account, so each needs one. The site names following in its
+/// <see cref="IModSource.Words"/>: <see cref="Common.SiteWords.Follow"/>, <see cref="Common.SiteWords.Unfollow"/> and
+/// <see cref="Common.SiteWords.Followed"/>.
 /// </remarks>
 public interface IWatchlistSync : IModSource
 {

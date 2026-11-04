@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Accounts;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Nexus.Tests.Common;
 
 using WireMock.Logging;
@@ -187,6 +188,16 @@ public sealed class NexusSourceWatchlistTests : IDisposable
         await Source.WatchAsync(Smapi, Cancellation);
 
         Assert.Equal(["POST", "GET"], _api.Requests.Select(request => request.RequestMessage!.Method));
+    }
+
+    [Fact]
+    public void TracksModsAndCountsEndorsementsInItsOwnWords()
+    {
+        SiteWords words = Source.Words;
+
+        Assert.Equal(
+            ("track", "untrack", "tracked", "endorsement", "endorsements"),
+            (words.Follow, words.Unfollow, words.Followed, words.Approval, words.Approvals));
     }
 
     [Theory]

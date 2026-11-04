@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Accounts;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Nexus.Api;
 using ModShelf.Sources.Nexus.Resources;
 
@@ -54,6 +55,18 @@ public sealed partial class NexusSource : IAccountLinker
     public SourceId Id => NexusId;
 
     public string DisplayName => Strings.DisplayName;
+
+    /// <summary>
+    /// Nexus Mods tracks mods, and counts endorsements.
+    /// </summary>
+    public SiteWords Words { get; } = new()
+    {
+        Follow = Strings.WordFollow,
+        Unfollow = Strings.WordUnfollow,
+        Followed = Strings.WordFollowed,
+        Approval = Strings.WordApproval,
+        Approvals = Strings.WordApprovals,
+    };
 
     /// <summary>
     /// A count the API gives, or null when it gives none or a negative one.

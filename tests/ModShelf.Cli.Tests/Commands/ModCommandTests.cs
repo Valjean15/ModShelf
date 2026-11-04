@@ -2,6 +2,7 @@ using System.Globalization;
 
 using ModShelf.Cli.Tests.Common;
 using ModShelf.Cli.Tests.Fakes;
+using ModShelf.Sources.Abstractions.Common;
 
 using static ModShelf.Cli.Tests.Fakes.FakeCatalogSite;
 
@@ -19,11 +20,12 @@ public sealed class ModCommandTests : IAsyncDisposable
 
     private readonly FakeAccountSite _site = new();
     private readonly ScriptedBrowser _browser = new();
+    private readonly FakeCatalogSite _catalog = new();
     private readonly InProcessCli _cli;
 
     public ModCommandTests()
     {
-        _cli = new InProcessCli(_site, _browser, sources: [new FakeCatalogSite()]);
+        _cli = new InProcessCli(_site, _browser, sources: [_catalog]);
     }
 
     private static CancellationToken Cancellation => TestContext.Current.CancellationToken;
@@ -62,6 +64,29 @@ public sealed class ModCommandTests : IAsyncDisposable
         Assert.DoesNotContain("Changelog", shown.Output, StringComparison.Ordinal);
         Assert.StartsWith("*", Row(shown, FileLink("1", NewestMainFile)), StringComparison.Ordinal);
         Assert.StartsWith(" ", Row(shown, FileLink("1", "11")), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task NamesApprovalInTheSitesWords()
+    {
+        _catalog.Words = new SiteWords { Approval = "like", Approvals = "likes" };
+
+        CliResult shown = await RunAsync(["mod", "show", ModLink("1").AbsoluteUri]);
+
+        Assert.Contains("Likes:", shown.Output, StringComparison.Ordinal);
+        Assert.DoesNotContain("Endorsements:", shown.Output, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SaysNoApprovalWhenTheSiteHasNoWordForIt()
+    {
+        _catalog.Words = SiteWords.None;
+
+        CliResult shown = await RunAsync(["mod", "show", ModLink("1").AbsoluteUri]);
+
+        Assert.Equal(Done, shown.ExitCode);
+        Assert.DoesNotContain("Endorsements:", shown.Output, StringComparison.Ordinal);
+        Assert.Contains("Downloads:", shown.Output, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -101,7 +101,8 @@ public sealed partial class BrowseViewModel
 
     /// <summary>
     /// Lists the game's rows afresh, all three at once, dropping a listing of the rows under way. Trending shows where
-    /// the game's site lists its trending mods; adult mods only when the user asked for them.
+    /// the game's site lists its trending mods, and the newest and the recently updated where its search has those
+    /// orders; adult mods only when the user asked for them.
     /// </summary>
     private async Task ListRowsAsync(GameRef game)
     {
@@ -120,16 +121,20 @@ public sealed partial class BrowseViewModel
         _rowsListed = (game, adult);
         string site = _services.Sources.SiteName(game.Source);
         ITrendingMods? trending = _services.Sources.Find<ITrendingMods>(game.Source);
+        SearchCapabilities? search = _services.Sources.Find<IModSearch>(game.Source)?.Capabilities;
         Rows[0].IsShown = trending is not null;
+        Rows[1].IsShown = search?.Has(new SearchOrder(SearchSort.Newest, SearchDirection.Descending)) ?? true;
+        Rows[2].IsShown = search?.Has(new SearchOrder(SearchSort.Updated, SearchDirection.Descending)) ?? true;
         foreach (BrowseRowViewModel row in Rows)
         {
             row.Load();
         }
 
+        int count = Math.Min(RowSize, search?.MaxCount ?? RowSize);
         bool[] listed = await Task.WhenAll(
             ListRowAsync(Rows[0], site, token => trending?.GetTrendingAsync(game, token) ?? Task.FromResult<IReadOnlyList<ModInfo>>([]), BrowseFact.None, adult, listing.Token),
-            ListRowAsync(Rows[1], site, token => NewestAsync(game, SearchSort.Newest, adult, token), BrowseFact.Published, adult, listing.Token),
-            ListRowAsync(Rows[2], site, token => NewestAsync(game, SearchSort.Updated, adult, token), BrowseFact.Updated, adult, listing.Token));
+            ListRowAsync(Rows[1], site, token => NewestAsync(Rows[1], game, SearchSort.Newest, count, adult, token), BrowseFact.Published, adult, listing.Token),
+            ListRowAsync(Rows[2], site, token => NewestAsync(Rows[2], game, SearchSort.Updated, count, adult, token), BrowseFact.Updated, adult, listing.Token));
         if (Interlocked.CompareExchange(ref _rowsListing, null, listing) == listing && listed.Contains(false))
         {
             _rowsListed = null;
@@ -137,10 +142,10 @@ public sealed partial class BrowseViewModel
     }
 
     /// <summary>
-    /// The first of the game's mods in the order, as many as a row lists.
+    /// The first of the game's mods in the order, as many as a row lists; none for a row not shown.
     /// </summary>
-    private async Task<IReadOnlyList<ModInfo>> NewestAsync(GameRef game, SearchSort sort, bool adult, CancellationToken cancellationToken)
-        => (await _lookup.SearchAsync(game, new SearchQuery(sort: sort, count: RowSize, includeAdultContent: adult), cancellationToken)).Mods;
+    private async Task<IReadOnlyList<ModInfo>> NewestAsync(BrowseRowViewModel row, GameRef game, SearchSort sort, int count, bool adult, CancellationToken cancellationToken)
+        => row.IsShown ? (await _lookup.SearchAsync(game, new SearchQuery(sort: sort, count: count, includeAdultContent: adult), cancellationToken)).Mods : [];
 
     /// <summary>
     /// Lists a row, or says why it couldn't. A listing a later one replaced changes nothing.
@@ -212,7 +217,7 @@ public sealed partial class BrowseViewModel
 
     /// <summary>
     /// Chooses every category, then reads the game's categories from its site for the category box, by name. When the
-    /// site can't say, the box offers every category only.
+    /// site can't say, or can't search by them, the box offers every category only.
     /// </summary>
     private async Task ReadCategoriesAsync(GameRef game)
     {
@@ -227,7 +232,7 @@ public sealed partial class BrowseViewModel
             _choosingQuietly = false;
         }
 
-        if (_services.Sources.Find<IModCatalog>(game.Source) is not { } catalog)
+        if (!CanSearchByCategory || _services.Sources.Find<IModCatalog>(game.Source) is not { } catalog)
         {
             return;
         }

@@ -31,19 +31,31 @@
                     Command="{Binding SearchCommand}" />
         </Grid>
 
-        <!-- How to search, and the tracked mods instead. -->
+        <!-- How to search, as far as the game's site can, and the mods the account follows there instead. -->
         <WrapPanel DockPanel.Dock="Top" Margin="0,8,0,0" ItemSpacing="8" LineSpacing="8">
             <ComboBox MinWidth="200" ItemsSource="{Binding Sorts}" SelectedItem="{Binding SelectedSort}" />
-            <ComboBox MinWidth="230" ItemsSource="{Binding TimeWindows}" SelectedItem="{Binding SelectedTimeWindow}" />
-            <ComboBox MinWidth="180" MaxWidth="260" ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" />
+            <ComboBox MinWidth="230"
+                      ItemsSource="{Binding TimeWindows}"
+                      SelectedItem="{Binding SelectedTimeWindow}"
+                      IsVisible="{Binding CanSearchByUpdated}" />
+            <ComboBox MinWidth="180"
+                      MaxWidth="260"
+                      ItemsSource="{Binding Categories}"
+                      SelectedItem="{Binding SelectedCategory}"
+                      IsVisible="{Binding CanSearchByCategory}" />
             <ComboBox ItemsSource="{Binding PageSizes}" SelectedItem="{Binding SelectedPageSize}" />
-            <TextBox Width="200" Text="{Binding Author}" PlaceholderText="{x:Static res:Strings.BrowseAuthorHint}">
+            <TextBox Width="200"
+                     Text="{Binding Author}"
+                     PlaceholderText="{x:Static res:Strings.BrowseAuthorHint}"
+                     IsVisible="{Binding CanSearchByAuthor}">
                 <TextBox.KeyBindings>
                     <KeyBinding Gesture="Enter" Command="{Binding SearchCommand}" />
                 </TextBox.KeyBindings>
             </TextBox>
-            <CheckBox Content="{x:Static res:Strings.BrowseAdultContent}" IsChecked="{Binding IncludeAdultContent}" />
-            <Button Content="{x:Static res:Strings.BrowseShowTracked}" Command="{Binding ShowTrackedCommand}" />
+            <CheckBox Content="{x:Static res:Strings.BrowseAdultContent}"
+                      IsChecked="{Binding IncludeAdultContent}"
+                      IsVisible="{Binding CanIncludeAdult}" />
+            <Button Content="{Binding ShowFollowedText}" Command="{Binding ShowTrackedCommand}" IsVisible="{Binding CanFollow}" />
             <pictures:PreviewsPicker DataContext="{Binding Previews}" />
         </WrapPanel>
 

@@ -8,7 +8,9 @@ using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
+using ModShelf.Presentation.ViewModels.Browse;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Search;
 
 namespace ModShelf.Presentation.ViewModels.Settings;
 
@@ -80,6 +82,7 @@ public sealed partial class SettingsViewModel
             change => ChangeAsync(token => _settings.SetGameAsync(game, change, token), sayProblem: false),
             SaveFoldersAsync,
             other => CopyGameAsync(other, game),
+            BrowseChoices.For(_sources.Find<IModSearch>(game.Source)?.Capabilities, _sources.Words(game.Source)),
             LibraryRoot);
         page.Show(_shown, LibraryRoot);
         ShowSameNamed(page);

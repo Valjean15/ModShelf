@@ -14,6 +14,7 @@ using ModShelf.Cli.Tests.Fakes;
 using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
+using ModShelf.Sources.Abstractions.Search;
 
 using static ModShelf.Cli.Tests.Fakes.FakeHandoffSource;
 
@@ -37,6 +38,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     private readonly ScriptedBrowser _browser = new() { UserActs = false };
     private readonly ScriptedQueueOwner _desktopApp = new();
     private readonly FakeHandoffSource _handoff;
+    private readonly FakeCatalogSite _catalog = new();
     private InProcessCli? _cli;
 
     public ModShelfMcpServerTests()
@@ -49,7 +51,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     private InProcessCli Cli => _cli ??= new InProcessCli(
         _site,
         _browser,
-        sources: [_handoff, new FakeCatalogSite()],
+        sources: [_handoff, _catalog],
         configureServices: services =>
         {
             if (_desktopApp.Runs)
@@ -1043,6 +1045,51 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         Assert.Equal((22, 5, true), (found.Total, found.Offset, found.HasMore));
         Assert.Equal(5, found.Mods.Count);
         Assert.All(found.Mods, mod => Assert.Equal(("fake-catalog", "game", "Someone"), (mod.Source, mod.Game, mod.Author)));
+    }
+
+    [Fact]
+    public async Task SearchesInTheSitesOwnOrderAndPageSizeUnlessAsked()
+    {
+        _catalog.Capabilities = new([.. SearchOrder.BothWays(SearchSort.Newest), .. SearchOrder.BothWays(SearchSort.Name)], SearchFilters.Text, 10);
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        SearchResult found = await mcp.CallAsync<SearchResult>("mod_search", Arguments(("game", "game"), ("source", "fake-catalog")), Cancellation);
+        SearchQuery own = _catalog.LastQuery!;
+        await mcp.CallAsync<SearchResult>("mod_search", Arguments(("game", "game"), ("source", "fake-catalog"), ("ascending", true), ("page", 2)), Cancellation);
+        SearchQuery turned = _catalog.LastQuery!;
+
+        Assert.Equal((44, 0, true, 10), (found.Total, found.Offset, found.HasMore, found.Mods.Count));
+        Assert.Equal((SearchSort.Newest, SearchDirection.Descending, 10), (own.Sort, own.Direction, own.Count));
+        Assert.Equal((SearchSort.Newest, SearchDirection.Ascending, 10, 10), (turned.Sort, turned.Direction, turned.Offset, turned.Count));
+    }
+
+    [Fact]
+    public async Task TheSitesOwnOrderGoesItsOwnWayAndAscendingTurnsItAround()
+    {
+        _catalog.Capabilities = new([new(SearchSort.Name, SearchDirection.Ascending), new(SearchSort.Name, SearchDirection.Descending)], SearchFilters.Text, 100);
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        await mcp.CallAsync<SearchResult>("mod_search", Arguments(("game", "game"), ("source", "fake-catalog")), Cancellation);
+        SearchQuery own = _catalog.LastQuery!;
+        await mcp.CallAsync<SearchResult>("mod_search", Arguments(("game", "game"), ("source", "fake-catalog"), ("ascending", true)), Cancellation);
+        SearchQuery turned = _catalog.LastQuery!;
+
+        Assert.Equal((SearchSort.Name, SearchDirection.Ascending), (own.Sort, own.Direction));
+        Assert.Equal((SearchSort.Name, SearchDirection.Descending), (turned.Sort, turned.Direction));
+    }
+
+    [Theory]
+    [InlineData("author", "Someone", "Fake catalog site can't search by author. It can search by words.")]
+    [InlineData("pageSize", 100, "Fake catalog site lists at most 50 mods a page.")]
+    [InlineData("sort", "Size", "Fake catalog site can't sort by Size. It can sort by Relevance.")]
+    public async Task ASearchTheSiteCantDoIsRefusedSayingWhatItCan(string name, object value, string problem)
+    {
+        _catalog.Capabilities = new([new(SearchSort.Relevance, SearchDirection.Descending)], SearchFilters.Text, 50);
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        Dictionary<string, object?> arguments = new() { ["game"] = "game", ["source"] = "fake-catalog", [name] = value };
+
+        Assert.Contains(problem, await mcp.CallFailingAsync("mod_search", arguments, Cancellation), StringComparison.Ordinal);
+        Assert.Null(_catalog.LastQuery);
     }
 
     [Theory]

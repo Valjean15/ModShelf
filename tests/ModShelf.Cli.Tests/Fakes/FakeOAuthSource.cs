@@ -1,5 +1,6 @@
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Accounts;
+using ModShelf.Sources.Abstractions.Common;
 
 namespace ModShelf.Cli.Tests.Fakes;
 
@@ -23,6 +24,9 @@ internal sealed class FakeOAuthSource : IFakeAccountSource
     public SourceId Id => SourceId;
 
     public string DisplayName => "Fake OAuth site";
+
+
+    public SiteWords Words => SiteWords.None;
 
     public bool WorksWithoutAccount => false;
 

@@ -3,9 +3,11 @@ using System.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 
 using ModShelf.Application.Catalog;
+using ModShelf.Application.Sources;
 using ModShelf.Cli.Hosting;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Common;
 
 namespace ModShelf.Cli.Commands;
 
@@ -87,16 +89,17 @@ internal static partial class ModCommand
                         return problem.ExitCode;
                     }
 
-                    Write(environment.Output, page, all, changelog);
+                    SiteWords words = CliText.Words(services.GetRequiredService<ISourceRegistry>(), page.Mod.Mod.Game.Source);
+                    Write(environment.Output, page, words, all, changelog);
                     return ExitCodes.Done;
                 },
                 cancellationToken)
             .ConfigureAwait(false);
     }
 
-    private static void Write(TextWriter output, ModPage page, bool all, bool changelog)
+    private static void Write(TextWriter output, ModPage page, SiteWords words, bool all, bool changelog)
     {
-        WriteDetails(output, page);
+        WriteDetails(output, page, words);
         WriteFiles(output, page, all);
         if (changelog)
         {
@@ -104,7 +107,8 @@ internal static partial class ModCommand
         }
     }
 
-    private static void WriteDetails(TextWriter output, ModPage page)
+    /// <param name="words">The site's words, for what it counts as approval.</param>
+    private static void WriteDetails(TextWriter output, ModPage page, SiteWords words)
     {
         ModInfo mod = page.Mod;
         output.WriteLine(mod.Name);
@@ -114,7 +118,9 @@ internal static partial class ModCommand
             .. mod.Author is { } author ? new[] { new[] { "Author:", author } } : [],
             .. mod.Version is { } version ? new[] { new[] { "Version:", version } } : [],
             .. mod.UpdatedAt is { } updated ? new[] { new[] { "Updated:", CliText.Date(updated) } } : [],
-            .. mod.Endorsements is { } endorsements ? new[] { new[] { "Endorsements:", CliText.Count(endorsements) } } : [],
+            .. mod.Endorsements is { } endorsements && words.Approvals is { } approvals
+                ? new[] { new[] { $"{CliText.Capitalized(approvals)}:", CliText.Count(endorsements) } }
+                : [],
             .. mod.Downloads is { } downloads ? new[] { new[] { "Downloads:", CliText.Count(downloads) } } : [],
             .. mod.PageUrl is { } pageUrl ? new[] { new[] { "Page:", pageUrl.AbsoluteUri } } : [],
         ];

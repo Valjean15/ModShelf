@@ -4,6 +4,7 @@ using System.Net;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Links;
 
 namespace ModShelf.Application.Tests.Fakes;
@@ -28,6 +29,9 @@ internal sealed class FakeModSite : ILinkRecognizer, IModCatalog, IHandoffScheme
     public SourceId Id => SourceId;
 
     public string DisplayName => "Fake mod site";
+
+
+    public SiteWords Words => SiteWords.None;
 
     public string Scheme => "fakemods";
 

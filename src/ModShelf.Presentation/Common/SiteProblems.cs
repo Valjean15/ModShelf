@@ -32,4 +32,10 @@ internal static class SiteProblems
         _ when IsSiteProblem(exception) => Text.Format(failed, site, exception.Message),
         _ => null,
     };
+
+    /// <summary>
+    /// What to say of a problem in the site's words, such as "{0} couldn't list your {2} mods: {1}" with its word for
+    /// a followed mod as {2}: the site's name and what went wrong are left for <see cref="Describe"/> to fill in.
+    /// </summary>
+    public static string InWords(string failed, string word) => Text.Format(failed, "{0}", "{1}", word);
 }

@@ -14,6 +14,14 @@ public sealed partial class NexusSource : IModSearch
 {
     private static readonly string SearchModsQuery = ReadQuery("Search", "SearchMods.graphql");
 
+    /// <summary>
+    /// Every order either way round, by relevance first; every filter; 100 mods a page.
+    /// </summary>
+    public SearchCapabilities Capabilities { get; } = new(
+        Enum.GetValues<SearchSort>().SelectMany(SearchOrder.BothWays),
+        SearchFilters.Text | SearchFilters.Author | SearchFilters.Category | SearchFilters.UpdatedSince | SearchFilters.AdultContent,
+        SearchQuery.MaxCount);
+
     /// <exception cref="ArgumentException">The game isn't Nexus Mods'.</exception>
     /// <exception cref="HttpRequestException">The API couldn't be reached, or refused the search.</exception>
     public async Task<SearchPage> SearchAsync(GameRef game, SearchQuery query, CancellationToken cancellationToken)

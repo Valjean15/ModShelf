@@ -95,7 +95,7 @@ public sealed class BrowseGameSettingsTests : IDisposable
 
         await _harness.ChooseAsync(BrowseHarness.Fallout);
 
-        Assert.Equal(("Most endorsed", 20), (Screen.SelectedSort.Name, Screen.SelectedPageSize.Count));
+        Assert.Equal(("Most endorsements", 20), (Screen.SelectedSort.Name, Screen.SelectedPageSize.Count));
     }
 
     [Fact]

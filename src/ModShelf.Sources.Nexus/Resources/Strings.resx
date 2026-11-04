@@ -71,4 +71,24 @@
   <data name="TierSupporter" xml:space="preserve">
     <value>Supporter</value>
   </data>
+  <data name="WordApproval" xml:space="preserve">
+    <value>endorsement</value>
+    <comment>One of what Nexus Mods counts as approval of a mod, as in "1 endorsement". Lowercase.</comment>
+  </data>
+  <data name="WordApprovals" xml:space="preserve">
+    <value>endorsements</value>
+    <comment>More than one, as in "87 endorsements" and "Most endorsements". Lowercase.</comment>
+  </data>
+  <data name="WordFollow" xml:space="preserve">
+    <value>track</value>
+    <comment>Following a mod with the account, as the mod page's Track button does: "Track on Nexus Mods". Lowercase.</comment>
+  </data>
+  <data name="WordFollowed" xml:space="preserve">
+    <value>tracked</value>
+    <comment>A mod the account follows, as in "Tracked mods" and "Tracked on Nexus Mods.". Lowercase.</comment>
+  </data>
+  <data name="WordUnfollow" xml:space="preserve">
+    <value>untrack</value>
+    <comment>Following a mod no longer: "Untrack on Nexus Mods". Lowercase.</comment>
+  </data>
 </root>

@@ -1,4 +1,5 @@
 using ModShelf.Domain.Mods;
+using ModShelf.Sources.Abstractions.Common;
 
 namespace ModShelf.Sources.Abstractions;
 
@@ -17,4 +18,10 @@ public interface IModSource
     /// The site's name as shown to the user, such as "Nexus Mods".
     /// </summary>
     string DisplayName { get; }
+
+    /// <summary>
+    /// What the site calls following a mod and approving one, such as Nexus Mods' "track" and "endorsements";
+    /// <see cref="SiteWords.None"/> for a site with neither.
+    /// </summary>
+    SiteWords Words { get; }
 }

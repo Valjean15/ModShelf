@@ -40,6 +40,19 @@ public sealed class NexusSourceSearchTests : IDisposable
         _api.Dispose();
     }
 
+    [Fact]
+    public void SearchesInEveryOrderEitherWayRoundByEveryFilterAHundredModsAPage()
+    {
+        SearchCapabilities can = Source.Capabilities;
+
+        Assert.Equal(new SearchOrder(SearchSort.Relevance, SearchDirection.Descending), can.Orders[0]);
+        Assert.Equal(Enum.GetValues<SearchSort>().Length * 2, can.Orders.Count);
+        Assert.All(Enum.GetValues<SearchSort>().SelectMany(SearchOrder.BothWays), order => Assert.True(can.Has(order), $"{order.Sort} {order.Direction}"));
+        Assert.Equal(
+            (SearchFilters.Text | SearchFilters.Author | SearchFilters.Category | SearchFilters.UpdatedSince | SearchFilters.AdultContent, 100),
+            (can.Filters, can.MaxCount));
+    }
+
     [Theory]
     [InlineData("search-words", "SMAPI", SearchSort.Relevance, 0, null, false, SearchDirection.Descending, 33, "2367", "SMAPI Templates")]
     [InlineData("search-downloads", "SMAPI", SearchSort.Downloads, 0, null, false, SearchDirection.Descending, 33, "2400", "SMAPI - Stardew Modding API")]

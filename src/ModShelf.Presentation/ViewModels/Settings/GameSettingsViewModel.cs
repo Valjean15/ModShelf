@@ -10,6 +10,7 @@ using ModShelf.Domain.Updates;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.ViewModels.Browse;
+using ModShelf.Sources.Abstractions.Search;
 
 namespace ModShelf.Presentation.ViewModels.Settings;
 
@@ -23,6 +24,7 @@ public sealed partial class GameSettingsViewModel : ObservableObject
 {
     private readonly Func<Func<GameSettings, GameSettings>, Task<string?>> _change;
     private readonly Func<GameRef, Task> _copyFrom;
+    private readonly BrowseOffer _browse;
     private AppSettings _shown = new();
     private bool _showing;
 
@@ -31,6 +33,7 @@ public sealed partial class GameSettingsViewModel : ObservableObject
     /// <param name="change">Changes the game's own settings, saying what went wrong, or null.</param>
     /// <param name="saveFolders">Sets or removes the game's own folder pattern, saying what went wrong, or null.</param>
     /// <param name="copyFrom">Asks, then gives the game the settings of the same game on another site.</param>
+    /// <param name="browse">What Browse offers for the game's site, for how Browse starts.</param>
     /// <param name="root">The library's folder, for the folder pattern's example.</param>
     internal GameSettingsViewModel(
         GameRef game,
@@ -38,17 +41,20 @@ public sealed partial class GameSettingsViewModel : ObservableObject
         Func<Func<GameSettings, GameSettings>, Task<string?>> change,
         Func<GameRef?, FolderPattern?, Task<string?>> saveFolders,
         Func<GameRef, Task> copyFrom,
+        BrowseOffer browse,
         string root)
     {
         ArgumentNullException.ThrowIfNull(game);
         ArgumentNullException.ThrowIfNull(change);
         ArgumentNullException.ThrowIfNull(saveFolders);
         ArgumentNullException.ThrowIfNull(copyFrom);
+        ArgumentNullException.ThrowIfNull(browse);
 
         Game = game;
         Name = name;
         _change = change;
         _copyFrom = copyFrom;
+        _browse = browse;
         Folders = new FolderPatternViewModel(game, FolderPattern.Default, root, saveFolders);
     }
 
@@ -212,32 +218,33 @@ public sealed partial class GameSettingsViewModel : ObservableObject
     /// <summary>
     /// Such as "Browse's own: Best match · Updated any time · 20 a page".
     /// </summary>
-    public string EveryGamesBrowse { get; } = Text.Format(
-        Strings.GameBrowseDefault,
-        BrowseChoices.Sorts[0].Name,
-        BrowseChoices.TimeWindows[0].Name,
-        BrowseChoices.PageSizes[0].Name);
+    public string EveryGamesBrowse => Text.Format(Strings.GameBrowseDefault, _browse.Default.Name, TimeWindows[0].Name, PageSizes[0].Name);
 
     /// <summary>
-    /// The orders Browse offers.
+    /// The orders Browse offers for the game's site, by approval in its words.
     /// </summary>
-    public IReadOnlyList<SortChoice> Sorts { get; } = BrowseChoices.Sorts;
+    public IReadOnlyList<SortChoice> Sorts => _browse.Sorts;
 
     [ObservableProperty]
     public partial SortChoice? SelectedSort { get; set; }
 
     /// <summary>
-    /// How recently updated the mods Browse finds are.
+    /// How recently updated the mods Browse finds are: any time, and more where the game's site can search by it.
     /// </summary>
-    public IReadOnlyList<TimeWindowChoice> TimeWindows { get; } = BrowseChoices.TimeWindows;
+    public IReadOnlyList<TimeWindowChoice> TimeWindows => _browse.TimeWindows;
+
+    /// <summary>
+    /// Whether the game's site can search by when mods were updated, for the box to show.
+    /// </summary>
+    public bool CanSearchByUpdated => _browse.Has(SearchFilters.UpdatedSince);
 
     [ObservableProperty]
     public partial TimeWindowChoice? SelectedTimeWindow { get; set; }
 
     /// <summary>
-    /// How many mods a page of Browse lists.
+    /// How many mods a page of Browse lists, as many as the game's site's pages hold at most.
     /// </summary>
-    public IReadOnlyList<PageSizeChoice> PageSizes { get; } = BrowseChoices.PageSizes;
+    public IReadOnlyList<PageSizeChoice> PageSizes => _browse.PageSizes;
 
     [ObservableProperty]
     public partial PageSizeChoice? SelectedPageSize { get; set; }
@@ -304,9 +311,9 @@ public sealed partial class GameSettingsViewModel : ObservableObject
 
             BrowseDefaults browse = own.Browse ?? BrowseDefaults.None;
             HasOwnBrowse = own.Browse is not null;
-            SelectedSort = browse.Sort is { } sort ? BrowseChoices.SortOf(sort, browse.Direction) ?? Sorts[0] : Sorts[0];
-            SelectedTimeWindow = TimeWindows.FirstOrDefault(window => window.Within == browse.UpdatedWithin) ?? TimeWindows[0];
-            SelectedPageSize = PageSizes.FirstOrDefault(size => size.Count == browse.PageSize) ?? PageSizes[0];
+            SelectedSort = browse.Sort is { } sort ? _browse.SortOf(sort, browse.Direction) ?? _browse.Default : _browse.Default;
+            SelectedTimeWindow = _browse.SameTimeWindow(browse.UpdatedWithin);
+            SelectedPageSize = _browse.SamePageSize(browse.PageSize);
 
             IsHidden = own.Hidden ?? false;
         }
@@ -416,7 +423,7 @@ public sealed partial class GameSettingsViewModel : ObservableObject
     /// Says how Browse starts for the game: as Browse's own does, to change.
     /// </summary>
     [RelayCommand]
-    private Task OverrideBrowseAsync() => ChangeAsync(own => own with { Browse = BrowseOf(Sorts[0], TimeWindows[0], PageSizes[0]) });
+    private Task OverrideBrowseAsync() => ChangeAsync(own => own with { Browse = BrowseOf(_browse.Default, TimeWindows[0], PageSizes[0]) });
 
     [RelayCommand]
     private Task UseDefaultBrowseAsync() => ChangeAsync(own => own with { Browse = null });

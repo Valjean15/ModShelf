@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Search;
 
 namespace ModShelf.Presentation.Tests.Fakes;
@@ -14,6 +15,9 @@ internal sealed class ScriptedTrending(SourceId id, string displayName) : ITrend
     public SourceId Id { get; } = id;
 
     public string DisplayName { get; } = displayName;
+
+
+    public SiteWords Words => SiteWords.None;
 
     /// <summary>
     /// Each game's trending mods; a game not here has none.

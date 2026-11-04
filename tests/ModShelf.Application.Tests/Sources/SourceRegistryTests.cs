@@ -2,6 +2,7 @@ using ModShelf.Application.Sources;
 using ModShelf.Application.Tests.Fakes;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Downloads;
 
 namespace ModShelf.Application.Tests.Sources;
@@ -44,5 +45,8 @@ public sealed class SourceRegistryTests
         public SourceId Id { get; } = id;
 
         public string DisplayName => Id.Value;
+
+
+        public SiteWords Words => SiteWords.None;
     }
 }

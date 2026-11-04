@@ -101,14 +101,69 @@ public sealed class ExampleSiteTests : IAsyncDisposable
     }
 
     [Theory]
-    [InlineData("--sort", "Endorsements", "Example Mods can't sort by Endorsements.")]
-    [InlineData("--author", "Ana", "Example Mods can't search by author or category.")]
+    [InlineData("--sort", "Endorsements", "Example Mods can't sort by Endorsements. It can sort by Relevance, Downloads, Updated, Newest and Name.")]
+    [InlineData("--author", "Ana", "Example Mods can't search by author. It can search by words and by when mods were updated.")]
+    [InlineData("--page-size", "100", "Example Mods lists at most 50 mods a page.")]
     public async Task SaysWhatTheSiteCantSearchBy(string option, string value, string refusal)
     {
         CliResult refused = await RunAsync("mod", "search", "--game", "stardew-valley", "--source", "example", option, value);
 
         Assert.Equal(BadInput, refused.ExitCode);
         Assert.Equal(refusal, refused.Errors.Trim());
+    }
+
+    [Fact]
+    public async Task PagesThroughItsGameAWholePageOfItsOwnSizeAtATime()
+    {
+        CliResult first = await RunAsync("mod", "search", "--game", "pixel-farm", "--source", "example");
+        CliResult second = await RunAsync("mod", "search", "--game", "pixel-farm", "--source", "example", "--page-size", "50", "--page", "2");
+
+        Assert.Contains("55 mods match, in the site's own order. These are 1 to 20.", first.Output, StringComparison.Ordinal);
+        Assert.Contains("More on the next page: add --page 2.", first.Output, StringComparison.Ordinal);
+        Assert.Contains("55 mods match, in the site's own order. These are 51 to 55.", second.Output, StringComparison.Ordinal);
+        Assert.DoesNotContain("More on the next page", second.Output, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ListsNoColumnForApprovalItDoesntCount()
+    {
+        CliResult found = await RunAsync("mod", "search", "--game", "stardew-valley", "--source", "example");
+
+        Assert.Equal(["ID", "Name", "Author", "Downloads", "Updated", "Link"], Words(Lines(found)[1]));
+    }
+
+    [Fact]
+    public async Task IncludingAdultModsChangesNothingOnASiteWithoutThem()
+    {
+        CliResult without = await RunAsync("mod", "search", "--game", "stardew-valley", "--source", "example");
+        CliResult with = await RunAsync("mod", "search", "--game", "stardew-valley", "--source", "example", "--adult");
+
+        Assert.Equal((Done, without.Output), (with.ExitCode, with.Output));
+    }
+
+    [Theory]
+    [InlineData("browse.sort", "size", "Example Mods can't sort by size. It can sort by relevance, downloads, updated, newest, name.")]
+    [InlineData("browse.pageSize", "100", "Example Mods lists at most 50 mods a page.")]
+    public async Task RefusesAGamesBrowseSettingItsSiteCantDo(string setting, string value, string refusal)
+    {
+        CliResult refused = await RunAsync("settings", "set", $"games.example/stardew-valley.{setting}", value);
+        CliResult shown = await RunAsync("settings", "show");
+
+        Assert.Equal(BadInput, refused.ExitCode);
+        Assert.Equal(refusal, refused.Errors.Trim());
+        Assert.DoesNotContain("games.example/stardew-valley.browse", shown.Output, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("browse.sort", "newest")]
+    [InlineData("browse.direction", "ascending")]
+    [InlineData("browse.window", "7d")]
+    [InlineData("browse.pageSize", "50")]
+    public async Task TakesAGamesBrowseSettingItsSiteCanDo(string setting, string value)
+    {
+        CliResult set = await RunAsync("settings", "set", $"games.example/stardew-valley.{setting}", value);
+
+        Assert.Equal(Done, set.ExitCode);
     }
 
     [Fact]

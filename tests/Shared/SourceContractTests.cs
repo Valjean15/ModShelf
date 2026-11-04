@@ -2,6 +2,7 @@ using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Downloads;
 using ModShelf.Sources.Abstractions.Links;
 using ModShelf.Sources.Abstractions.Quota;
@@ -34,6 +35,12 @@ public abstract class SourceContractTests<TSource>
     /// The clock the source reads, for the checks of how far back its update feed reaches.
     /// </summary>
     protected virtual TimeProvider Clock => TimeProvider.System;
+
+    /// <summary>
+    /// A game of the source's with more mods than a page holds at most, for the checks of what its search can do; null
+    /// skips them, as for a source whose searches aren't recorded.
+    /// </summary>
+    protected virtual GameRef? SearchableGame => null;
 
     [Fact]
     public void KeepsItsDocumentedId()
@@ -220,6 +227,134 @@ public abstract class SourceContractTests<TSource>
     }
 
     [Fact]
+    public void NamesFollowingInThreeWordsWhenItFollowsModsAndInNoneOtherwise()
+    {
+        TSource source = CreateSource();
+        SiteWords words = source.Words;
+
+        Assert.NotNull(words);
+        if (source is IWatchlistSync)
+        {
+            Assert.True(words.CanFollow, $"{typeof(TSource).Name} follows mods, so it says what it calls following one.");
+        }
+        else
+        {
+            Assert.Equal((null, null, null), (words.Follow, words.Unfollow, words.Followed));
+        }
+    }
+
+    [Fact]
+    public void NamesApprovalInTwoWordsOrNone()
+    {
+        SiteWords words = CreateSource().Words;
+
+        Assert.Equal(words.Approval is null, words.Approvals is null);
+    }
+
+    [Fact]
+    public void ItsWordsAreLowercaseAsInASentence()
+    {
+        SiteWords words = CreateSource().Words;
+
+        Assert.All(
+            new[] { words.Follow, words.Unfollow, words.Followed, words.Approval, words.Approvals }.OfType<string>(),
+            word => Assert.True(char.IsLower(word[0]), $"'{word}' starts with a capital."));
+    }
+
+    [Fact]
+    public void NamesApprovalWhenItSortsByIt()
+    {
+        IModSearch search = Capability<IModSearch>();
+        Assert.SkipUnless(search.Capabilities.Has(SearchSort.Endorsements), $"{typeof(TSource).Name} doesn't sort by approval.");
+
+        Assert.True(search.Words.CountsApproval);
+    }
+
+    [Fact]
+    public async Task ListsAGamesModsInEachOrderItHas()
+    {
+        IModSearch search = Capability<IModSearch>();
+        GameRef game = Searchable();
+
+        foreach (SearchOrder order in search.Capabilities.Orders)
+        {
+            SearchPage page = await search.SearchAsync(
+                game, new SearchQuery(sort: order.Sort, direction: order.Direction, count: search.Capabilities.MaxCount), TestContext.Current.CancellationToken);
+
+            Assert.NotEmpty(page.Mods);
+            AssertInOrder(page.Mods, order);
+        }
+    }
+
+    [Fact]
+    public async Task APageHoldsAsManyModsAsAskedWhileMoreMatch()
+    {
+        IModSearch search = Capability<IModSearch>();
+        GameRef game = Searchable();
+        int most = search.Capabilities.MaxCount;
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+
+        SearchPage first = await search.SearchAsync(game, new SearchQuery(count: most), cancellationToken);
+        SearchPage second = await search.SearchAsync(game, new SearchQuery(offset: most, count: most), cancellationToken);
+
+        Assert.True(first.TotalCount > most, $"The game has {first.TotalCount} mods, not more than a page holds.");
+        Assert.Equal((most, true), (first.Mods.Count, first.HasMore));
+        Assert.Equal(Math.Min(most, first.TotalCount - most), second.Mods.Count);
+        Assert.Empty(first.Mods.Select(mod => mod.Mod).Intersect(second.Mods.Select(mod => mod.Mod)));
+    }
+
+    [Fact]
+    public async Task NarrowsItsResultsByEachFilterItHas()
+    {
+        IModSearch search = Capability<IModSearch>();
+        GameRef game = Searchable();
+        SearchCapabilities can = search.Capabilities;
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        IReadOnlyList<ModInfo> every = (await search.SearchAsync(game, new SearchQuery(count: can.MaxCount), cancellationToken)).Mods;
+
+        if (can.Has(SearchFilters.Text))
+        {
+            string word = every[0].Name.Split(' ')[0];
+            Assert.NotEmpty((await search.SearchAsync(game, new SearchQuery(word, count: can.MaxCount), cancellationToken)).Mods);
+        }
+
+        if (can.Has(SearchFilters.Author) && every.FirstOrDefault(mod => mod.Author is not null)?.Author is { } author)
+        {
+            IReadOnlyList<ModInfo> found = (await search.SearchAsync(game, new SearchQuery(author: author, count: can.MaxCount), cancellationToken)).Mods;
+            Assert.All(found, mod => Assert.Equal(author, mod.Author, ignoreCase: true));
+        }
+
+        if (can.Has(SearchFilters.Category) && every.FirstOrDefault(mod => mod.Category is not null)?.Category is { } category)
+        {
+            IReadOnlyList<ModInfo> found = (await search.SearchAsync(game, new SearchQuery(category: category, count: can.MaxCount), cancellationToken)).Mods;
+            Assert.All(found, mod => Assert.Equal(category, mod.Category));
+        }
+
+        if (can.Has(SearchFilters.UpdatedSince) && every.Select(mod => mod.UpdatedAt).OfType<DateTimeOffset>().Order().ToArray() is { Length: > 1 } updated)
+        {
+            DateTimeOffset since = updated[updated.Length / 2];
+            IReadOnlyList<ModInfo> found = (await search.SearchAsync(game, new SearchQuery(count: can.MaxCount, updatedSince: since), cancellationToken)).Mods;
+            Assert.NotEmpty(found);
+            Assert.All(found, mod => Assert.True(mod.UpdatedAt is not { } at || at >= since));
+        }
+
+        Assert.All(every, mod => Assert.False(mod.HasAdultContent, "Adult mods are left out unless asked for."));
+    }
+
+    [Fact]
+    public async Task MarksNoModAdultWithoutAdultContent()
+    {
+        IModSearch search = Capability<IModSearch>();
+        GameRef game = Searchable();
+        Assert.SkipWhen(search.Capabilities.Has(SearchFilters.AdultContent), $"{typeof(TSource).Name} has adult content.");
+
+        SearchPage page = await search.SearchAsync(
+            game, new SearchQuery(count: search.Capabilities.MaxCount, includeAdultContent: true), TestContext.Current.CancellationToken);
+
+        Assert.All(page.Mods, mod => Assert.False(mod.HasAdultContent));
+    }
+
+    [Fact]
     public async Task RefusesToSearchAnotherSourcesGame()
     {
         IModSearch search = Capability<IModSearch>();
@@ -328,6 +463,36 @@ public abstract class SourceContractTests<TSource>
         ILinkRecognizer recognizer = Capability<ILinkRecognizer>();
         return await recognizer.RecognizeAsync(OwnLinks[0], TestContext.Current.CancellationToken)
             ?? throw new InvalidOperationException($"{typeof(TSource).Name} doesn't recognize its own link {OwnLinks[0]}.");
+    }
+
+    /// <summary>
+    /// Mods in the order, as far as what they say shows it: their counts, dates and sizes, where they say them.
+    /// </summary>
+    private static void AssertInOrder(IReadOnlyList<ModInfo> mods, SearchOrder order)
+    {
+        Func<ModInfo, double?>? key = order.Sort switch
+        {
+            SearchSort.Endorsements => mod => mod.Endorsements,
+            SearchSort.Downloads => mod => mod.Downloads,
+            SearchSort.Updated => mod => mod.UpdatedAt?.ToUnixTimeSeconds(),
+            SearchSort.Newest => mod => mod.PublishedAt?.ToUnixTimeSeconds(),
+            SearchSort.Size => mod => mod.Size,
+            _ => null,
+        };
+        if (key is null)
+        {
+            return;
+        }
+
+        double[] known = [.. mods.Select(key).OfType<double>()];
+        double[] expected = order.Direction == SearchDirection.Descending ? [.. known.OrderDescending()] : [.. known.Order()];
+        Assert.Equal(expected, known);
+    }
+
+    private GameRef Searchable()
+    {
+        Assert.SkipWhen(SearchableGame is null, $"{typeof(TSource).Name}'s tests name no game to search.");
+        return SearchableGame!;
     }
 
     private TCapability Capability<TCapability>()

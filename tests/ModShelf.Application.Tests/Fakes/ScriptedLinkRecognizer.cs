@@ -1,4 +1,5 @@
 using ModShelf.Domain.Mods;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Links;
 
 namespace ModShelf.Application.Tests.Fakes;
@@ -13,6 +14,9 @@ internal sealed class ScriptedLinkRecognizer(SourceId id, Func<Uri, RecognizedLi
     public SourceId Id { get; } = id;
 
     public string DisplayName => Id.Value;
+
+
+    public SiteWords Words => SiteWords.None;
 
     public int Calls => Volatile.Read(ref _calls);
 

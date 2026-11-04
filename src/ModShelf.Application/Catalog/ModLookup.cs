@@ -11,8 +11,9 @@ namespace ModShelf.Application.Catalog;
 /// <summary>
 /// Finds the source a link belongs to, as <see cref="Downloads.ILinkDownloads"/> does, and asks its <see cref="IModCatalog"/>
 /// about the mod, all four questions at once, and its <see cref="IModRequirements"/>, when it has one, at the same time.
-/// Searches go to the game's source's <see cref="IModSearch"/>. Each source's games, and each mod's changelog asked about
-/// by version, are kept once read.
+/// Searches go to the game's source's <see cref="IModSearch"/>, once checked against its
+/// <see cref="IModSearch.Capabilities"/>. Each source's games, and each mod's changelog asked about by version, are kept
+/// once read.
 /// </summary>
 internal sealed class ModLookup : IModLookup
 {
@@ -97,6 +98,7 @@ internal sealed class ModLookup : IModLookup
         ArgumentNullException.ThrowIfNull(query);
 
         IModSearch search = _sources.Require<IModSearch>(game.Source, "can't search", nameof(game));
+        SearchChecks.Ensure(search.Capabilities, query, search.DisplayName);
         return search.SearchAsync(game, query, cancellationToken);
     }
 

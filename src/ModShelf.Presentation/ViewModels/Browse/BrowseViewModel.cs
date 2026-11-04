@@ -188,9 +188,10 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     public partial string Author { get; set; } = string.Empty;
 
     /// <summary>
-    /// The orders a search's results can come in.
+    /// The orders a search's results can come in: the chosen game's site's, by approval in its words.
     /// </summary>
-    public IReadOnlyList<SortChoice> Sorts { get; } = BrowseChoices.Sorts;
+    [ObservableProperty]
+    public partial IReadOnlyList<SortChoice> Sorts { get; private set; } = BrowseChoices.Every.Sorts;
 
     /// <summary>
     /// The order of the results. Changing it searches again, or searches in place of the rows.
@@ -199,9 +200,35 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     public partial SortChoice SelectedSort { get; set; }
 
     /// <summary>
-    /// How recently the mods a search finds were updated: any time, or in the last day, week or month.
+    /// How recently the mods a search finds were updated: any time, or in the last day, week or month where the chosen
+    /// game's site can search by it.
     /// </summary>
-    public IReadOnlyList<TimeWindowChoice> TimeWindows { get; } = BrowseChoices.TimeWindows;
+    [ObservableProperty]
+    public partial IReadOnlyList<TimeWindowChoice> TimeWindows { get; private set; } = BrowseChoices.Every.TimeWindows;
+
+    /// <summary>
+    /// Whether the chosen game's site can search by when mods were updated, for the box to show.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool CanSearchByUpdated { get; private set; } = true;
+
+    /// <summary>
+    /// Whether the chosen game's site can search by author, for the box to show. A site that can't is asked by none.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool CanSearchByAuthor { get; private set; } = true;
+
+    /// <summary>
+    /// Whether the chosen game's site can search by category, for the box to show. A site that can't is asked by none.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool CanSearchByCategory { get; private set; } = true;
+
+    /// <summary>
+    /// Whether the chosen game's site marks mods with adult content, for the switch to show.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool CanIncludeAdult { get; private set; } = true;
 
     /// <summary>
     /// How recently the mods found were updated. Changing it searches again, or searches in place of the rows.
@@ -222,9 +249,10 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     public partial CategoryChoice? SelectedCategory { get; set; }
 
     /// <summary>
-    /// How many mods a page can list.
+    /// How many mods a page can list, as many as the chosen game's site's pages hold at most.
     /// </summary>
-    public IReadOnlyList<PageSizeChoice> PageSizes { get; } = BrowseChoices.PageSizes;
+    [ObservableProperty]
+    public partial IReadOnlyList<PageSizeChoice> PageSizes { get; private set; } = BrowseChoices.Every.PageSizes;
 
     /// <summary>
     /// How many mods a page lists. Changing it searches again, or searches in place of the rows.
@@ -259,6 +287,19 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     /// </summary>
     [ObservableProperty]
     public partial bool IsShowingTracked { get; private set; }
+
+    /// <summary>
+    /// Whether the chosen game's site follows mods with the account, for the button that lists them to show.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool CanFollow { get; private set; }
+
+    /// <summary>
+    /// The button that lists the mods the account follows, in the site's words, such as "Tracked mods"; empty when it
+    /// follows none.
+    /// </summary>
+    [ObservableProperty]
+    public partial string ShowFollowedText { get; private set; } = string.Empty;
 
     /// <summary>
     /// Whether more mods can be listed after these.
