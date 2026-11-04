@@ -12,7 +12,7 @@ you should see.
 ## 1. The server
 
 - [ ] **1.1 Tools.** Start the agent's app, and ask it which ModShelf tools it has.
-  24 tools, from `library_list` to `diagnostics`. Claude Desktop's settings show the server as running. After ModShelf
+  25 tools, from `library_list` to `diagnostics`. Claude Desktop's settings show the server as running. After ModShelf
   is updated, quit Claude Desktop completely, start it again and begin a new conversation: an older list of the tools
   makes calls such as `download` with `link` fail with "download doesn't take these arguments: it needs links. …".
 - [ ] **1.2 Reading.** Ask for the library, the updates and the settings; then for the mods with files missing from disk.
@@ -20,6 +20,8 @@ you should see.
   The missing ones come from one `library_list` with `missingOnly`; with none missing, none.
 - [ ] **1.3 Accounts.** Ask which accounts are linked.
   Nexus Mods linked, at its level, such as Premium; never the account's name or key.
+- [ ] **1.4 A game by its name.** Ask the agent for the key of "stalker 2", then of "final fantasy 12".
+  It calls `mod_games`: S.T.A.L.K.E.R. 2: Heart of Chornobyl first with its key, then Final Fantasy XII: The Zodiac Age.
 
 ## 2. Downloads
 
@@ -97,6 +99,7 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 1.1 Tools | | |
 | 1.2 Reading | | |
 | 1.3 Accounts | | |
+| 1.4 A game by its name | | |
 | 2.1 Without the desktop app | | |
 | 2.2 With the desktop app | | |
 | 2.3 Changing a download | | |

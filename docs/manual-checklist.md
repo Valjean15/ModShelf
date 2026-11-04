@@ -64,6 +64,8 @@ A new terminal needs all these lines again, with the same folders. Never paste a
   Only Pathoschild's mods, numbered from 6.
 - [ ] **3.4 No match.** `ms mod search zqxj no such mod zqxj --game stardewvalley`.
   "No mods match." Exit code 0.
+- [ ] **3.4a Games by name.** `ms mod games stalker 2`, then `ms mod games final fantasy 12`, then `ms mod games valley stardew`.
+  S.T.A.L.K.E.R. 2: Heart of Chornobyl, with its key; Final Fantasy XII: The Zodiac Age; Stardew Valley, key `stardewvalley`. Each says how many match, and "To search a game's mods: mod search --game <its key>".
 - [ ] **3.5 The site's own order, and endorsements.** `ms mod search --game stardewvalley`, then the same with `--sort Endorsements`.
   "*N* mods match, in the site's own order. These are 1 to 20.", the most endorsed at the top, then "…, most endorsements first." with the same mods. The table's columns are ID, Name, Author, Endorsements, Downloads, Updated and Link.
 
@@ -239,6 +241,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 3.2 Order and page size | | | |
 | 3.3 Author and next page | | | |
 | 3.4 No match | | | |
+| 3.4a Games by name | | | |
 | 3.5 Own order and endorsements | | | |
 | 4.1 Download a mod's page | | – | |
 | 4.2 Download a file's link | | – | |

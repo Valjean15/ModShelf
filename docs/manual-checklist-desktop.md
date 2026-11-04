@@ -70,6 +70,8 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
 
 - [ ] **3.1 The games.** Open the Browse screen.
   The game box lists Nexus Mods' games. With nothing in the library yet, it starts with none chosen: "Choose a game to search its mods."
+- [ ] **3.1a Games by name.** Type each in the game box: `stalker 2`, `final fantasy 12`, `dragons dogma`, `valley`, `dew`.
+  S.T.A.L.K.E.R. 2: Heart of Chornobyl; Final Fantasy XII: The Zodiac Age; Dragon's Dogma 2; for `valley`, the games whose names start with "Valley" first, then Stardew Valley and the others; for `dew`, none. Clearing the box lists every game again.
 - [ ] **3.2 Search.** Choose Stardew Valley (type to filter the list), type `smapi` in the search box, and **Search**.
   "*N* mods match." SMAPI is near the top, with its downloads, endorsements and last update.
 - [ ] **3.2a The game's rows.** Clear the search box.
@@ -205,7 +207,7 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
 ## 10. Settings
 
 - [ ] **10.0 Categories and search.** Open the Settings screen, then each category in its list.
-  It opens on **General**: the theme, closing the window, and pictures and mod details. **Library**: the library folder, the folder pattern, old versions and **Rescan the library**. **Updates**, **Links**, **Games** (each game's own settings, the library's games each with its banner from Nexus Mods) and **About** show theirs. Type `folder` in **Search settings**: the library folder, the folder pattern, old versions (the _archive folder), the rescan, the games' patterns and About (the log folder), under "Settings that match “folder”", and General, Updates and Links fade in the list. `zzz`: "No setting matches “zzz”." Escape, or choosing a category, ends the search. **Rescan the library** says what it found, as on the Library screen. Make the window narrow: the categories move above the settings, side by side.
+  It opens on **General**: the theme, closing the window, and pictures and mod details. **Library**: the library folder, the folder pattern, old versions and **Rescan the library**. **Updates**, **Links**, **Games** (each game's own settings, the library's games each with its banner from Nexus Mods) and **About** show theirs. Type `folder` in **Search settings**: the library folder, the folder pattern, old versions (the _archive folder), the rescan, the games' patterns and About (the log folder), under "Settings that match “folder”", and General, Updates and Links fade in the list. `zzz`: "No setting matches “zzz”." Type `stardew`: **Games** shows Stardew Valley alone, its page open. Escape, or choosing a category, ends the search. **Rescan the library** says what it found, as on the Library screen. Make the window narrow: the categories move above the settings, side by side.
 - [ ] **10.1 Folder patterns.** In **Library**, under "Folder pattern", change every game's pattern to `{source}/{game}/{modid}/{file}`.
   The example under it changes as you type. `{mod}/{file}x` says what's wrong, and **Save** is disabled. With the right pattern, **Save**: a mod the library doesn't have yet then downloads to `nexus\<game>\<mod's ID>\…`. Mods in the library keep their folders, and files downloaded already stay where they are.
 - [ ] **10.2 A game's own settings.** In **Games**, **Add a game…**, type `stardewvalley`. On its page, **Override** each setting in turn: under "Folder pattern" change its pattern and **Save**; under "Old versions" choose the _archive folder; under "Update checks" choose **Every day**; under "Notices" untick the box; under "Browse" choose **Recently updated**, **Updated in the last week** and **50 per page**. Then **Use default** for each.
@@ -330,6 +332,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 2.4 Key links the account | | | |
 | 2.5 Check | | | |
 | 3.1 Games | | | |
+| 3.1a Games by name | | | |
 | 3.2 Search | | | |
 | 3.2a The game's rows | | | |
 | 3.3 Order and pages | | | |
