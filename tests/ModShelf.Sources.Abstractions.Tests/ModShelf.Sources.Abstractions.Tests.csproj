@@ -4,4 +4,10 @@
     <ProjectReference Include="..\..\src\ModShelf.Sources.Abstractions\ModShelf.Sources.Abstractions.csproj" />
   </ItemGroup>
 
+  <!-- The checks every source shares, run against the example site the other test projects run through the app. -->
+  <ItemGroup>
+    <Compile Include="..\Shared\SourceContractTests.cs" Link="Shared\SourceContractTests.cs" />
+    <Compile Include="..\Shared\ExampleSite\*.cs" Link="Shared\ExampleSite\%(Filename)%(Extension)" />
+  </ItemGroup>
+
 </Project>
