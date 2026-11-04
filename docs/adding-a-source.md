@@ -59,15 +59,15 @@ but never merges, links or changes them by itself.
 
 ## 4. The capabilities
 
-`IModSource` gives the ID and the display name. A source implements only the capabilities its site has. What ModShelf
-does without each:
+`IModSource` gives the ID, the display name and the site's words (below). A source implements only the capabilities its
+site has. What ModShelf does without each:
 
 | Capability | What it is | Without it |
 |---|---|---|
 | `ILinkRecognizer` | Turns a link to the site's mod or file into a file reference. | Nothing of the site can be downloaded by link. |
 | `IDownloadResolver` | Turns a file into a `DownloadTicket`, or `HandoffRequired` when the user must start the download on the site. | Its files can't be downloaded. |
 | `IModCatalog` | The site's games, a game, a mod, its files and its changelogs. | Its files don't go into the library (they're saved to a folder, as plain web links are), and nothing is checked for updates. |
-| `IModSearch` | A game's mods by words, sorted, a page at a time. | Browse doesn't list the site's games. |
+| `IModSearch` | A game's mods, a page at a time, in the orders and by the filters its `Capabilities` say. | Browse doesn't list the site's games. |
 | `ITrendingMods` | What the site says is trending for a game. | Browse shows no trending row for it. |
 | `IModRequirements` | What a mod needs, as its author listed it. | The mod page lists no requirements. |
 | `IUpdateFeed` | Which of a game's mods changed lately, in one request. | Each watched mod is asked for its files on its own: one request per mod per check. |
@@ -115,11 +115,40 @@ So map the site's categories onto `ModFileCategory` with care:
   matches on a rescan); every hash the site publishes.
 - `PageUrl`, when the file has a page, is a link the source's own recognizer takes.
 
+### The site's words
+
+`Words` says what the site calls following a mod and approving one, from the source's own `Strings.resx`, each word
+lowercase, as in the middle of a sentence; the screens put them in their own phrases and capitalize them where a
+sentence starts. Nexus Mods' are:
+
+| Word | Nexus Mods | Shown as |
+|---|---|---|
+| `Follow` | track | **Track on Nexus Mods** |
+| `Unfollow` | untrack | **Untrack on Nexus Mods** |
+| `Followed` | tracked | **Tracked mods**, "Tracked on Nexus Mods.", "12 tracked mods of Stardew Valley on Nexus Mods." |
+| `Approval` | endorsement | "1 endorsement" |
+| `Approvals` | endorsements | "87 endorsements", **Most endorsements**, **Fewest endorsements**, the CLI's Endorsements column |
+
+A site with `IWatchlistSync` gives all three words for following; one without gives none. A site that counts approval
+in `ModInfo.Endorsements` gives both words for it, and one that sorts by `SearchSort.Endorsements` must; a site without
+gives neither, and nothing shows it: no count, no order by it, no CLI column. `SiteWords.None` is a site with neither.
+
 ### Search
 
-Today `SearchQuery` holds Nexus Mods' orders and filters. A source refuses one it can't apply with `ArgumentException`,
-rather than ignoring it, and gives no more mods a page than its site does. 1.0.0 step 3 makes `IModSearch` say what it
-supports, its page sizes among it, and this section with it.
+`Capabilities` says what the site's search can do, and ModShelf asks nothing more: a search that would is refused before
+it's sent, saying what the site can ("Example Mods can't search by author. It can search by words and by when mods were
+updated."), and the screens offer only these.
+
+- **Orders:** each `SearchOrder`, a `SearchSort` and its `SearchDirection`, the site has; its own first, which a search
+  that names none uses. A sort the site has only one way round is listed only that way.
+- **Filters:** what it narrows by: `Text`, `Author`, `Category`, `UpdatedSince`, `AdultContent`. A site without
+  `AdultContent` marks no mod as adult, so including adult mods changes nothing there.
+- **The largest page,** from 1 to 100. A page holds as many mods as asked, up to it, while more match, so pages
+  follow on whole.
+
+The source may still refuse what it can't do with `ArgumentException`; it's never sent. The contract checks that each
+declared order lists the mods in it, each filter narrows them, and pages are full, against a game the test names
+(`SearchableGame`).
 
 ### Accounts
 
@@ -171,7 +200,9 @@ tied to a personal account never leave the developer's machine.
 
 - `tests/ModShelf.Sources.<Name>.Tests` has a class deriving from `SourceContractTests<T>`, with the source's ID, its
   own links (handoff links among them, when it has a scheme) and a factory for the source against the recordings.
-  The checks of a capability the source doesn't implement are skipped.
+  The checks of a capability the source doesn't implement are skipped. The checks of what its search can do need a
+  game to search, `SearchableGame`, with more mods than a page holds, and answers to every search they make; they're
+  skipped without one.
 - The tests set the source up as the hosts do: `AddSourceHttpClients()`, with no account linked, then
   `Add<Name>Source()` (see `RecordedNexusApi.BuildServices`), so the retries and time limits are the app's.
 - The site's answers are recorded by `Fixtures/Record-<Name>Fixtures.ps1`, which the human runs with their own

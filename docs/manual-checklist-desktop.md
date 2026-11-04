@@ -78,6 +78,8 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
   The list starts over, newest first, and **Load more** adds the next mods below.
 - [ ] **3.3a Size, name and unique downloads.** Choose **Largest**, then **Name, A to Z**, then **Most unique downloads**.
   Largest: each mod says its size, the biggest first (several GB at the top). Name, A to Z: names starting with quotes and digits first, then A. Most unique downloads: SMAPI and Content Patcher near the top.
+- [ ] **3.3a2 Endorsements.** Open the order box, then choose **Most endorsements**, then **Fewest endorsements**.
+  It lists 14 orders. Most endorsements: SMAPI and Content Patcher near the top, each mod saying its endorsements. Fewest endorsements: mods with few or none first.
 - [ ] **3.3b Time window, category and page size.** Choose **Updated in the last week**, then **Modding Tools** in the category box, then **50 per page**.
   Each searches again: every mod listed was updated in the last week (open one to see its last update), then only Modding Tools, then 50 mods before **Load more**, which keeps all three. Choosing another game sets the category box back to **All categories**, with that game's categories.
 - [ ] **3.4 Author.** Type `Pathoschild` in the author box, and search again.
@@ -190,7 +192,7 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
 - [ ] **9.2a The games.** On the Library screen, with the games shown.
   The heading counts 2 games. "Sort" by **Most mods** (the default), **Name**, **Most space** and **Updates first** reorders them; games that tie go by name. "stardew" in the filter leaves Stardew Valley; "zzz" says "No game's name has “zzz”." With the window narrow, each game's mods and updates go under its name, "Checked" goes, and the sort and previews go below the filter.
 - [ ] **9.3 Track** (Premium only). On SMAPI's page in Browse, **Track on Nexus Mods**.
-  "Tracked on Nexus Mods." **Tracked mods** for Stardew Valley lists SMAPI, and the website's Tracking Centre shows it.
+  "Tracked on Nexus Mods." **Tracked mods** for Stardew Valley lists SMAPI under "*N* tracked mods of Stardew Valley on Nexus Mods.", and the website's Tracking Centre shows it.
 - [ ] **9.4 Untrack** (Premium only). **Untrack on Nexus Mods**.
   "No longer tracked on Nexus Mods." It's gone from **Tracked mods** and from the website. If SMAPI was tracked before you started, track it again.
 - [ ] **9.5 Remove from the library.** On the Library screen, open the **…** menu of the mod you watched in 9.2, and **Remove from library…**.
@@ -332,6 +334,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 3.2a The game's rows | | | |
 | 3.3 Order and pages | | | |
 | 3.3a Size, name and unique downloads | | | |
+| 3.3a2 Endorsements | | | |
 | 3.3b Time window, category and page size | | | |
 | 3.4 Author | | | |
 | 3.5 Mod's page | | | |

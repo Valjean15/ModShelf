@@ -64,6 +64,8 @@ A new terminal needs all these lines again, with the same folders. Never paste a
   Only Pathoschild's mods, numbered from 6.
 - [ ] **3.4 No match.** `ms mod search zqxj no such mod zqxj --game stardewvalley`.
   "No mods match." Exit code 0.
+- [ ] **3.5 The site's own order, and endorsements.** `ms mod search --game stardewvalley`, then the same with `--sort Endorsements`.
+  "*N* mods match, in the site's own order. These are 1 to 20.", the most endorsed at the top, then "…, most endorsements first." with the same mods. The table's columns are ID, Name, Author, Endorsements, Downloads, Updated and Link.
 
 ## 4. Download straight away (Premium only)
 
@@ -237,6 +239,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 3.2 Order and page size | | | |
 | 3.3 Author and next page | | | |
 | 3.4 No match | | | |
+| 3.5 Own order and endorsements | | | |
 | 4.1 Download a mod's page | | – | |
 | 4.2 Download a file's link | | – | |
 | 4.3 Queue | | – | |
