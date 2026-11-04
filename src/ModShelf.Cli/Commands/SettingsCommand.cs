@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
+using ModShelf.Application.Sources;
 using ModShelf.Cli.Common;
 using ModShelf.Cli.Hosting;
 using ModShelf.Domain.Library;
@@ -111,7 +112,14 @@ internal static class SettingsCommand
                         string now;
                         try
                         {
-                            now = await SettingChanges.ChangeAsync(settings, name, value, cancellationToken).ConfigureAwait(false);
+                            now = await SettingChanges.ChangeAsync(
+                                    settings,
+                                    services.GetRequiredService<IModLibrary>(),
+                                    services.GetRequiredService<ISourceRegistry>(),
+                                    name,
+                                    value,
+                                    cancellationToken)
+                                .ConfigureAwait(false);
                         }
                         catch (InvalidOperationException exception) when (value is not null && SettingChanges.IsLibraryRoot(name))
                         {

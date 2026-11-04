@@ -53,6 +53,19 @@ public sealed partial class LibraryGameViewModel : ObservableObject
     public string Initial => Covers.InitialOf(Name);
 
     /// <summary>
+    /// Such as "Also on Example Mods", when the library has a game of the same name on another site; empty otherwise.
+    /// They stay two games.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasAlsoOn))]
+    public partial string AlsoOnText { get; internal set; } = string.Empty;
+
+    /// <summary>
+    /// Whether the library has a game of the same name on another site.
+    /// </summary>
+    public bool HasAlsoOn => AlsoOnText.Length > 0;
+
+    /// <summary>
     /// The hue of its cover, from 0 to 359, the same for the game every time.
     /// </summary>
     public int CoverHue { get; }

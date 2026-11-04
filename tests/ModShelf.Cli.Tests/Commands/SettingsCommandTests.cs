@@ -27,9 +27,10 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     // A game's own settings as listed: its folders by their older name.
     private static readonly string[] StardewSettings =
     [
-        "library.folders.StardewValley", "games.StardewValley.oldVersions", "games.StardewValley.checkUpdates", "games.StardewValley.updateInterval",
-        "games.StardewValley.notify", "games.StardewValley.hidden", "games.StardewValley.browse.sort", "games.StardewValley.browse.direction",
-        "games.StardewValley.browse.window", "games.StardewValley.browse.pageSize",
+        "library.folders.nexus/StardewValley", "games.nexus/StardewValley.oldVersions", "games.nexus/StardewValley.checkUpdates",
+        "games.nexus/StardewValley.updateInterval", "games.nexus/StardewValley.notify", "games.nexus/StardewValley.hidden",
+        "games.nexus/StardewValley.browse.sort", "games.nexus/StardewValley.browse.direction", "games.nexus/StardewValley.browse.window",
+        "games.nexus/StardewValley.browse.pageSize",
     ];
 
     private readonly FakeAccountSite _site = new();
@@ -97,10 +98,10 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         CliResult one = await RunAsync("set", "Library.Folders.SkyrimSpecialEdition", "{mod}/{file}");
 
         Assert.Equal("library.folders is now {source}/{game}/{modid}/{file}.", every.Output.Trim());
-        Assert.Equal("library.folders.SkyrimSpecialEdition is now {mod}/{file}.", one.Output.Trim());
+        Assert.Equal("library.folders.nexus/SkyrimSpecialEdition is now {mod}/{file}.", one.Output.Trim());
         CliResult shown = await RunAsync("show");
         Assert.Equal("{source}/{game}/{modid}/{file}", Value(shown, "library.folders"));
-        Assert.Equal("{mod}/{file}", Value(shown, "library.folders.SkyrimSpecialEdition"));
+        Assert.Equal("{mod}/{file}", Value(shown, "library.folders.nexus/SkyrimSpecialEdition"));
     }
 
     [Fact]
@@ -109,7 +110,7 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         string[] said =
         [
             (await RunAsync("set", "Games.StardewValley.Folders", "{mod}/{file}")).Output.Trim(),
-            (await RunAsync("set", "games.stardewvalley.oldVersions", "archive")).Output.Trim(),
+            (await RunAsync("set", "games.nexus/stardewvalley.oldVersions", "archive")).Output.Trim(),
             (await RunAsync("set", "games.stardewvalley.checkUpdates", "false")).Output.Trim(),
             (await RunAsync("set", "games.stardewvalley.updateInterval", "1d")).Output.Trim(),
             (await RunAsync("set", "games.stardewvalley.notify", "true")).Output.Trim(),
@@ -122,16 +123,16 @@ public sealed class SettingsCommandTests : IAsyncDisposable
 
         Assert.Equal(
             [
-                "Games.StardewValley.Folders is now {mod}/{file}.",
-                "games.stardewvalley.oldVersions is now archive: when a newer version of a file is downloaded, the old ones move to an _archive folder.",
-                "games.stardewvalley.checkUpdates is now false: stardewvalley's watched mods are checked for updates only when the game alone is checked.",
-                "games.stardewvalley.updateInterval is now 1d: the desktop app checks stardewvalley's watched mods for updates that often.",
-                "games.stardewvalley.notify is now true: the desktop app shows a notice when a background check finds new updates of stardewvalley's mods.",
-                "games.stardewvalley.hidden is now true: the desktop app's lists leave stardewvalley out, and its mods are still checked for updates.",
-                "games.stardewvalley.browse.sort is now uniquedownloads: the desktop app's Browse screen starts so when stardewvalley is chosen.",
-                "games.stardewvalley.browse.direction is now ascending: the desktop app's Browse screen starts so when stardewvalley is chosen.",
-                "games.stardewvalley.browse.window is now 7d: the desktop app's Browse screen starts so when stardewvalley is chosen.",
-                "games.stardewvalley.browse.pageSize is now 50: the desktop app's Browse screen starts so when stardewvalley is chosen.",
+                "games.nexus/StardewValley.folders is now {mod}/{file}.",
+                "games.nexus/stardewvalley.oldVersions is now archive: when a newer version of a file is downloaded, the old ones move to an _archive folder.",
+                "games.nexus/stardewvalley.checkUpdates is now false: nexus/stardewvalley's watched mods are checked for updates only when the game alone is checked.",
+                "games.nexus/stardewvalley.updateInterval is now 1d: the desktop app checks nexus/stardewvalley's watched mods for updates that often.",
+                "games.nexus/stardewvalley.notify is now true: the desktop app shows a notice when a background check finds new updates of nexus/stardewvalley's mods.",
+                "games.nexus/stardewvalley.hidden is now true: the desktop app's lists leave nexus/stardewvalley out, and its mods are still checked for updates.",
+                "games.nexus/stardewvalley.browse.sort is now uniquedownloads: the desktop app's Browse screen starts so when nexus/stardewvalley is chosen.",
+                "games.nexus/stardewvalley.browse.direction is now ascending: the desktop app's Browse screen starts so when nexus/stardewvalley is chosen.",
+                "games.nexus/stardewvalley.browse.window is now 7d: the desktop app's Browse screen starts so when nexus/stardewvalley is chosen.",
+                "games.nexus/stardewvalley.browse.pageSize is now 50: the desktop app's Browse screen starts so when nexus/stardewvalley is chosen.",
             ],
             said);
         CliResult shown = await RunAsync("show");
@@ -160,13 +161,13 @@ public sealed class SettingsCommandTests : IAsyncDisposable
 
         Assert.Equal(
             [
-                "games.fallout4.hidden is gone, so the desktop app's lists show fallout4.",
-                "games.fallout4.browse.pageSize is gone, so the desktop app's Browse screen shows fallout4's mods as it would any game's.",
-                "games.fallout4.updateInterval is gone, so fallout4 goes by updates.interval again.",
-                "games.fallout4.checkUpdates is gone, so fallout4's watched mods are checked for updates with every game's.",
-                "games.fallout4.notify is gone, so fallout4 goes by updates.notify again.",
-                "games.fallout4.oldVersions is gone, so fallout4 goes by library.oldVersions again.",
-                "games.fallout4.folders is gone, so fallout4's files go by library.folders again.",
+                "games.nexus/fallout4.hidden is gone, so the desktop app's lists show nexus/fallout4.",
+                "games.nexus/fallout4.browse.pageSize is gone, so the desktop app's Browse screen shows nexus/fallout4's mods as it would any game's.",
+                "games.nexus/fallout4.updateInterval is gone, so nexus/fallout4 goes by updates.interval again.",
+                "games.nexus/fallout4.checkUpdates is gone, so nexus/fallout4's watched mods are checked for updates with every game's.",
+                "games.nexus/fallout4.notify is gone, so nexus/fallout4 goes by updates.notify again.",
+                "games.nexus/fallout4.oldVersions is gone, so nexus/fallout4 goes by library.oldVersions again.",
+                "games.nexus/fallout4.folders is gone, so nexus/fallout4's files go by library.folders again.",
             ],
             said);
         Assert.DoesNotContain("fallout4", (await RunAsync("show")).Output, StringComparison.Ordinal);
@@ -185,7 +186,7 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         CliResult folders = await RunAsync("reset", "library.folders");
 
         Assert.Equal($"library.root is back to its default, {Path.Combine(_cli.Downloads, "ModShelf")}.", root.Output.Trim());
-        Assert.Equal("library.folders.skyrimspecialedition is gone, so skyrimspecialedition's files go by library.folders again.", game.Output.Trim());
+        Assert.Equal("library.folders.nexus/skyrimspecialedition is gone, so nexus/skyrimspecialedition's files go by library.folders again.", game.Output.Trim());
         Assert.Equal("library.folders is back to its default, {source}/{game}/{mod} ({modid})/{file}.", folders.Output.Trim());
         CliResult shown = await RunAsync("show");
         Assert.EndsWith("(default)", Value(shown, "library.root"), StringComparison.Ordinal);
@@ -223,7 +224,7 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     [InlineData("set", "library.root", "Mods", "isn't a full path")]
     [InlineData("set", "library.folders", "{mod}", "The last part must be exactly {file}.")]
     [InlineData("set", "library.folders.skyrimspecialedition", "{name}/{file}", "{name} isn't a folder's part.")]
-    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<game>, library.oldVersions, updates.interval, updates.notify, appearance.theme, window.closeToTray, setup.done, app.checkForUpdates, previews.library, previews.updates, previews.browse, previews.downloads, pictures.maxSize, pictures.adult, details.maxAge, games.<game>.folders, games.<game>.oldVersions, games.<game>.checkUpdates, games.<game>.updateInterval, games.<game>.notify, games.<game>.hidden, games.<game>.browse.sort, games.<game>.browse.direction, games.<game>.browse.window, games.<game>.browse.pageSize.")]
+    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<site>/<game>, library.oldVersions, updates.interval, updates.notify, appearance.theme, window.closeToTray, setup.done, app.checkForUpdates, previews.library, previews.updates, previews.browse, previews.downloads, pictures.maxSize, pictures.adult, details.maxAge, games.<site>/<game>.folders, games.<site>/<game>.oldVersions, games.<site>/<game>.checkUpdates, games.<site>/<game>.updateInterval, games.<site>/<game>.notify, games.<site>/<game>.hidden, games.<site>/<game>.browse.sort, games.<site>/<game>.browse.direction, games.<site>/<game>.browse.window, games.<site>/<game>.browse.pageSize, such as games.nexus/stardewvalley.notify; a game's key alone, as games.stardewvalley.notify, does while only one site's game has it.")]
     [InlineData("reset", "library.folders.", null, "There's no setting called library.folders.")]
     [InlineData("set", "library.oldVersions", "0", "'0' isn't a rule for old versions. Use all, archive, or how many versions to keep, from 1 to 99, such as 2.")]
     [InlineData("set", "appearance.theme", "blue", "'blue' isn't system, light or dark.")]
@@ -244,6 +245,9 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     [InlineData("set", "games.fallout4.colour", "teal", "There's no setting called games.fallout4.colour.")]
     [InlineData("set", "games..hidden", "true", "There's no setting called games..hidden.")]
     [InlineData("set", "games.a.b.hidden", "true", "There's no setting called games.a.b.hidden.")]
+    [InlineData("set", "games.Nexus Mods/fallout4.hidden", "true", "'Nexus Mods/fallout4' isn't a game: name it by its site and its key there, such as nexus/stardewvalley.")]
+    [InlineData("set", "games./fallout4.hidden", "true", "'/fallout4' isn't a game: name it by its site and its key there, such as nexus/stardewvalley.")]
+    [InlineData("set", "library.folders.nexus/", "{mod}/{file}", "'nexus/' isn't a game: name it by its site and its key there, such as nexus/stardewvalley.")]
     public async Task SaysWhatsWrongWithASetting(string command, string name, string? value, string message)
     {
         CliResult refused = await RunAsync([command, name, .. value is null ? Array.Empty<string>() : [value]]);

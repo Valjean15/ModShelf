@@ -93,10 +93,10 @@ public sealed class LibraryOldVersionsTests : IDisposable
         _store.Settings = new AppSettings
         {
             OldVersions = OldVersionRule.KeepAll,
-            Games = new Dictionary<string, GameSettings>(StringComparer.OrdinalIgnoreCase)
+            Games = new Dictionary<GameRef, GameSettings>(AppSettings.GameComparer)
             {
-                ["SkyrimSpecialEdition"] = new() { OldVersions = OldVersionRule.KeepLatest(1) },
-                ["fallout4"] = new() { OldVersions = OldVersionRule.Archive },
+                [new GameRef(FakeModSite.SourceId, "SkyrimSpecialEdition")] = new() { OldVersions = OldVersionRule.KeepLatest(1) },
+                [new GameRef(FakeModSite.SourceId, "fallout4")] = new() { OldVersions = OldVersionRule.Archive },
             },
         };
 

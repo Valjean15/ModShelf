@@ -168,6 +168,9 @@ public sealed class BrowseGameSettingsTests : IDisposable
         Assert.Equal(3, Screen.Games.Count);
     }
 
+    /// <summary>
+    /// Nexus Mods' games' own settings, by their keys in any case.
+    /// </summary>
     private static AppSettings Settings(params (string Game, GameSettings Own)[] games)
-        => new() { Games = games.ToDictionary(game => game.Game, game => game.Own, StringComparer.OrdinalIgnoreCase) };
+        => new() { Games = games.ToDictionary(game => new GameRef(TestData.Nexus, game.Game), game => game.Own, AppSettings.GameComparer) };
 }

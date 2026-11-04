@@ -7,6 +7,7 @@ using System.Text.Json.Nodes;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Domain.Library;
+using ModShelf.Domain.Mods;
 using ModShelf.Domain.Updates;
 using ModShelf.Sources.Abstractions.Search;
 
@@ -22,7 +23,7 @@ namespace ModShelf.Infrastructure.Settings;
 ///     "oldVersions": 2
 ///   },
 ///   "games": {
-///     "skyrimspecialedition": {
+///     "nexus/skyrimspecialedition": {
 ///       "folders": "{source}/{game}/{mod}/{file}",
 ///       "oldVersions": "archive",
 ///       "checkUpdates": true,
@@ -45,8 +46,10 @@ namespace ModShelf.Infrastructure.Settings;
 /// </summary>
 /// <remarks>
 /// Settings left out take their defaults. Saving keeps whatever else the file holds, such as a newer version's settings,
-/// and replaces the file in one step, so it's never left half-written. Games' folders in <c>library.gameFolders</c>, as
-/// 0.9.2 kept them, are read too, and move to <c>games</c> when the settings are next saved.
+/// and replaces the file in one step, so it's never left half-written. A game is named by its site and its key there. A
+/// game named by its key alone, as before 1.0.0, when only Nexus Mods had games, is Nexus Mods' game, and is named by
+/// its site when the settings are next saved. Games' folders in <c>library.gameFolders</c>, as 0.9.2 kept them, are read
+/// too, and move to <c>games</c> when the settings are next saved.
 /// </remarks>
 internal sealed class JsonSettingsStore : ISettingsStore
 {
@@ -81,6 +84,9 @@ internal sealed class JsonSettingsStore : ISettingsStore
     private const string TimeWindow = "window";
     private const string PageSize = "pageSize";
     private const string Hidden = "hidden";
+
+    // Before 1.0.0, a game's settings named the game alone, and only Nexus Mods had games.
+    private static readonly SourceId SiteBeforeSites = new("nexus");
 
     private static readonly JsonDocumentOptions Reading = new() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
     private static readonly JsonSerializerOptions Writing = new() { WriteIndented = true };
@@ -454,11 +460,12 @@ internal sealed class JsonSettingsStore : ISettingsStore
 
     /// <summary>
     /// Each game's own settings, from <c>games</c>, and the folders 0.9.2 kept in <c>library.gameFolders</c>, which a
-    /// game's own folders in <c>games</c> come before.
+    /// game's own folders in <c>games</c> come before. A game named by its site comes before the same game named by its key
+    /// alone.
     /// </summary>
-    private static ImmutableDictionary<string, GameSettings> ReadGames(JsonNode? section, JsonNode? oldFolders)
+    private static ImmutableDictionary<GameRef, GameSettings> ReadGames(JsonNode? section, JsonNode? oldFolders)
     {
-        ImmutableDictionary<string, GameSettings>.Builder games = ImmutableDictionary.CreateBuilder<string, GameSettings>(StringComparer.OrdinalIgnoreCase);
+        ImmutableDictionary<GameRef, GameSettings>.Builder games = ImmutableDictionary.CreateBuilder<GameRef, GameSettings>(AppSettings.GameComparer);
         switch (oldFolders)
         {
             case null:
@@ -466,10 +473,11 @@ internal sealed class JsonSettingsStore : ISettingsStore
             case JsonObject folders:
                 foreach ((string game, JsonNode? pattern) in folders)
                 {
+                    string name = $"{Library}.{GameFolders}.{game}";
                     string text = pattern is JsonValue value && value.TryGetValue(out string? set) && !string.IsNullOrWhiteSpace(set)
                         ? set
-                        : throw new InvalidDataException($"{Library}.{GameFolders}.{game} must be a folder pattern.");
-                    games[game] = new GameSettings { Folders = FolderPattern.Parse(text) };
+                        : throw new InvalidDataException($"{name} must be a folder pattern.");
+                    games[GameNamed(game, name)] = new GameSettings { Folders = FolderPattern.Parse(text) };
                 }
 
                 break;
@@ -482,9 +490,10 @@ internal sealed class JsonSettingsStore : ISettingsStore
             case null:
                 break;
             case JsonObject read:
-                foreach ((string game, JsonNode? node) in read)
+                foreach ((string key, JsonNode? node) in read.OrderBy(entry => entry.Key.Contains('/', StringComparison.Ordinal)))
                 {
-                    string name = $"{Games}.{game}";
+                    string name = $"{Games}.{key}";
+                    GameRef game = GameNamed(key, name);
                     if (node is not JsonObject settings)
                     {
                         throw new InvalidDataException($"{name} must hold the game's settings.");
@@ -515,6 +524,41 @@ internal sealed class JsonSettingsStore : ISettingsStore
         }
 
         return games.ToImmutable();
+    }
+
+    /// <summary>
+    /// The game a key of <c>games</c> names: its site and its key there, such as <c>nexus/stardewvalley</c>, or its key
+    /// alone, as before 1.0.0, for Nexus Mods' game.
+    /// </summary>
+    /// <param name="name">Where the key is, to say so when it names no game.</param>
+    private static GameRef GameNamed(string key, string name)
+    {
+        if (GameRef.TryParse(key, out GameRef? game))
+        {
+            return game;
+        }
+
+        if (!key.Contains('/', StringComparison.Ordinal) && !string.IsNullOrWhiteSpace(key))
+        {
+            return new GameRef(SiteBeforeSites, key.Trim());
+        }
+
+        throw new InvalidDataException($"{name} must name a game by its site and its key there, such as nexus/stardewvalley.");
+    }
+
+    /// <summary>
+    /// The game a key of <c>games</c> names, as <see cref="GameNamed"/> reads it; null for one that names none.
+    /// </summary>
+    private static GameRef? GameNamedOrNull(string key)
+    {
+        try
+        {
+            return GameNamed(key, key);
+        }
+        catch (InvalidDataException)
+        {
+            return null;
+        }
     }
 
     /// <summary>
@@ -568,22 +612,38 @@ internal sealed class JsonSettingsStore : ISettingsStore
     private static string WindowText(TimeSpan window) => $"{window.TotalDays.ToString(CultureInfo.InvariantCulture)}d";
 
     /// <summary>
-    /// Writes each game's own settings to <c>games</c>, in the games' order, keeping in each game's what this version
-    /// doesn't know; a game with no setting left goes, unless it holds such settings.
+    /// Writes each game's own settings to <c>games</c>, by site and key, in the games' order, keeping in each game's what
+    /// this version doesn't know; a game with no setting left goes, unless it holds such settings. A game named by its key
+    /// alone is named by its site from now on.
     /// </summary>
-    private static void WriteGames(JsonObject file, IReadOnlyDictionary<string, GameSettings> games)
+    private static void WriteGames(JsonObject file, IReadOnlyDictionary<GameRef, GameSettings> games)
     {
         JsonObject before = file[Games] as JsonObject ?? [];
         JsonObject section = [];
-        IEnumerable<string> names = before.Select(entry => entry.Key)
-            .Concat(games.Keys)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .Order(StringComparer.OrdinalIgnoreCase);
-        foreach (string name in names)
+
+        // What the file holds of each game: named by its site first, so what that holds comes before the key alone's.
+        Dictionary<GameRef, JsonObject> kept = new(AppSettings.GameComparer);
+        foreach ((string key, JsonNode? node) in before.OrderByDescending(entry => entry.Key.Contains('/', StringComparison.Ordinal)))
         {
-            string? stored = before.Select(entry => entry.Key).FirstOrDefault(key => string.Equals(key, name, StringComparison.OrdinalIgnoreCase));
-            JsonObject game = stored is not null && before[stored] is JsonObject kept ? (JsonObject)kept.DeepClone() : [];
-            GameSettings settings = games.TryGetValue(name, out GameSettings? set) ? set : GameSettings.None;
+            if (GameNamedOrNull(key) is not { } named)
+            {
+                section[key] = node?.DeepClone();
+            }
+            else if (node is JsonObject held && !kept.ContainsKey(named))
+            {
+                kept[named] = (JsonObject)held.DeepClone();
+            }
+        }
+
+        IEnumerable<GameRef> all = kept.Keys
+            .Concat(games.Keys)
+            .Distinct(AppSettings.GameComparer)
+            .OrderBy(game => game.ToString(), StringComparer.OrdinalIgnoreCase);
+        foreach (GameRef stored in all)
+        {
+            JsonObject game = kept.TryGetValue(stored, out JsonObject? held) ? held : [];
+            GameRef key = games.Keys.FirstOrDefault(set => AppSettings.GameComparer.Equals(set, stored)) ?? stored;
+            GameSettings settings = games.TryGetValue(key, out GameSettings? set) ? set : GameSettings.None;
             Set(game, Folders, settings.Folders?.Text);
             WriteOldVersions(game, settings.OldVersions);
             SetFlag(game, CheckUpdates, settings.CheckUpdates);
@@ -593,7 +653,7 @@ internal sealed class JsonSettingsStore : ISettingsStore
             SetFlag(game, Hidden, settings.Hidden);
             if (game.Count > 0)
             {
-                section[games.Keys.FirstOrDefault(key => string.Equals(key, name, StringComparison.OrdinalIgnoreCase)) ?? stored ?? name] = game;
+                section[key.ToString()] = game;
             }
         }
 

@@ -1,4 +1,5 @@
 using ModShelf.Application.Settings;
+using ModShelf.Domain.Mods;
 
 namespace ModShelf.Presentation.Services;
 
@@ -8,7 +9,7 @@ namespace ModShelf.Presentation.Services;
 internal sealed class HiddenGames : IHiddenGames
 {
     private readonly Lock _gate = new();
-    private HashSet<string> _hidden = new(StringComparer.OrdinalIgnoreCase);
+    private HashSet<GameRef> _hidden = new(AppSettings.GameComparer);
 
     public event EventHandler? Changed;
 
@@ -23,7 +24,7 @@ internal sealed class HiddenGames : IHiddenGames
         }
     }
 
-    public bool IsHidden(string game)
+    public bool IsHidden(GameRef game)
     {
         ArgumentNullException.ThrowIfNull(game);
 
@@ -37,7 +38,7 @@ internal sealed class HiddenGames : IHiddenGames
     {
         ArgumentNullException.ThrowIfNull(settings);
 
-        HashSet<string> hidden = new(settings.Games.Where(game => game.Value.Hidden == true).Select(game => game.Key), StringComparer.OrdinalIgnoreCase);
+        HashSet<GameRef> hidden = new(settings.Games.Where(game => game.Value.Hidden == true).Select(game => game.Key), AppSettings.GameComparer);
         lock (_gate)
         {
             if (hidden.SetEquals(_hidden))

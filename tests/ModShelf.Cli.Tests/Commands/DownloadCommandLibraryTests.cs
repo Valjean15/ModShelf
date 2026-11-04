@@ -270,7 +270,7 @@ public sealed class DownloadCommandLibraryTests : IAsyncDisposable
     {
         string root = Path.Combine(_folder.Path, "Mods");
         await RunAsync("settings", "set", "library.root", root);
-        await RunAsync("settings", "set", "library.folders.game", "{mod}/{file}");
+        await RunAsync("settings", "set", $"library.folders.{FakeHandoffSource.SourceId}/game", "{mod}/{file}");
 
         CliResult result = await RunAsync("download", HandoffLink("3").AbsoluteUri);
 

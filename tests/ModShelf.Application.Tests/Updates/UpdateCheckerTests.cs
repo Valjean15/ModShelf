@@ -93,7 +93,7 @@ public sealed class UpdateCheckerTests : IDisposable
         _library.Add(LibraryMod.Watch(new ModRef(Fallout, "5"), "Mod 5", null, null, TestData.Now.AddDays(-9)));
         _store.Settings = new AppSettings
         {
-            Games = new Dictionary<string, GameSettings>(StringComparer.OrdinalIgnoreCase) { ["SkyrimSpecialEdition"] = new() { CheckUpdates = false } },
+            Games = new Dictionary<GameRef, GameSettings>(AppSettings.GameComparer) { [new GameRef(FakeModSite.SourceId, "SkyrimSpecialEdition")] = new() { CheckUpdates = false } },
         };
 
         await CheckAsync(_site);
@@ -108,7 +108,7 @@ public sealed class UpdateCheckerTests : IDisposable
         _library.Add(LibraryMod.Watch(new ModRef(Fallout, "5"), "Mod 5", null, null, TestData.Now.AddDays(-9)));
         _store.Settings = new AppSettings
         {
-            Games = new Dictionary<string, GameSettings>(StringComparer.OrdinalIgnoreCase) { ["skyrimspecialedition"] = new() { CheckUpdates = false } },
+            Games = new Dictionary<GameRef, GameSettings>(AppSettings.GameComparer) { [new GameRef(FakeModSite.SourceId, "skyrimspecialedition")] = new() { CheckUpdates = false } },
         };
         using UpdateChecker checker = Checker(_site);
 

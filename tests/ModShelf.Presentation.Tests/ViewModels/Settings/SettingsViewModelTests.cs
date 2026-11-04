@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using ModShelf.Application.Releases;
 using ModShelf.Application.Settings;
 using ModShelf.Domain.Library;
+using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.Tests.Fakes;
@@ -153,8 +154,8 @@ public sealed class SettingsViewModelTests
             LibraryRoot = Moved,
             LibraryFolders = ById,
             Games = ImmutableDictionary.CreateRange(
-                StringComparer.OrdinalIgnoreCase,
-                [new KeyValuePair<string, GameSettings>("stardewvalley", new() { Folders = Flat }), new KeyValuePair<string, GameSettings>("Fallout4", new() { Folders = ById })]),
+                AppSettings.GameComparer,
+                [KeyValuePair.Create(Nexus("stardewvalley"), new GameSettings { Folders = Flat }), KeyValuePair.Create(Nexus("Fallout4"), new GameSettings { Folders = ById })]),
             OldVersions = OldVersionRule.Archive,
             UpdateInterval = TimeSpan.FromMinutes(90),
             NotifyOfUpdates = false,
@@ -166,8 +167,8 @@ public sealed class SettingsViewModelTests
         Assert.Equal((Moved, false), (Screen.LibraryRoot, Screen.IsDefaultRoot));
         Assert.True(Screen.UseDefaultRootCommand.CanExecute(null));
         Assert.Equal((ById.Text, true), (Screen.Folders.Text, Screen.Folders.IsNotDefault));
-        Assert.Equal(["Fallout4", "stardewvalley"], Screen.Games.Select(row => row.Game));
-        Assert.Equal("Fallout4", Screen.Game?.Game);
+        Assert.Equal(["Fallout4", "stardewvalley"], Screen.Games.Select(row => row.Game.Key));
+        Assert.Equal(Nexus("Fallout4"), Screen.Game?.Game);
         Assert.Equal(
             "For example: " + Path.Combine(Moved, "nexus", "Fallout4", "12604", "SkyUI_5_2_SE.7z"),
             Screen.Game?.Folders.Preview);
@@ -507,36 +508,36 @@ public sealed class SettingsViewModelTests
         Assert.Equal(
             new TextQuestion(
                 "Add a game",
-                "Enter the game as its site names it in links, such as skyrimspecialedition for Skyrim Special Edition on Nexus Mods. It can then have settings of its own.",
+                "Enter the game as its site names it in links, such as skyrimspecialedition for Skyrim Special Edition on Nexus Mods. To name its site too, put it first, as in nexus/skyrimspecialedition. It can then have settings of its own.",
                 "skyrimspecialedition",
                 "Add"),
             Assert.Single(_harness.Dialogs.Questions));
         GameSettingsViewModel game = Assert.IsType<GameSettingsViewModel>(Screen.Game);
-        Assert.Equal(("stardewvalley", "Uses the defaults"), (Assert.Single(Screen.Games).Game, Screen.Games[0].Note));
-        Assert.Equal(("stardewvalley", false, "Every game's: {source}/{game}/{modid}/{file}"), (game.Game, game.HasOwnFolders, game.EveryGamesFolders));
+        Assert.Equal((Nexus("stardewvalley"), "Uses the defaults"), (Assert.Single(Screen.Games).Game, Screen.Games[0].Note));
+        Assert.Equal((Nexus("stardewvalley"), false, "Every game's: {source}/{game}/{modid}/{file}"), (game.Game, game.HasOwnFolders, game.EveryGamesFolders));
         Assert.Empty(_harness.Settings.Changes);
 
         await game.OverrideFoldersCommand.ExecuteAsync(null);
 
         FolderPatternViewModel stardew = game.Folders;
         Assert.Equal((true, ById.Text), (game.HasOwnFolders, stardew.Text));
-        Assert.Equal(ById, _harness.Settings.Stored.FoldersFor("stardewvalley"));
+        Assert.Equal(ById, _harness.Settings.Stored.FoldersFor(Nexus("stardewvalley")));
         Assert.Equal("1 setting overridden", Screen.Games[0].Note);
 
         stardew.Text = Flat.Text;
         await stardew.SaveCommand.ExecuteAsync(null);
 
-        Assert.Equal(Flat, _harness.Settings.Stored.FoldersFor("StardewValley"));
+        Assert.Equal(Flat, _harness.Settings.Stored.FoldersFor(Nexus("StardewValley")));
         Assert.Same(game, Screen.Game);
         Assert.False(stardew.IsChanged);
 
         await stardew.RemoveCommand.ExecuteAsync(null);
 
         // The game stays listed, using every game's pattern again.
-        Assert.Equal(("stardewvalley", false), (Assert.Single(Screen.Games).Game, game.HasOwnFolders));
+        Assert.Equal((Nexus("stardewvalley"), false), (Assert.Single(Screen.Games).Game, game.HasOwnFolders));
         Assert.Empty(_harness.Settings.Stored.Games);
         Assert.Equal(
-            ["folders stardewvalley {source}/{game}/{modid}/{file}", "folders stardewvalley {mod}/{file}", "folders stardewvalley null"],
+            ["folders nexus/stardewvalley {source}/{game}/{modid}/{file}", "folders nexus/stardewvalley {mod}/{file}", "folders nexus/stardewvalley null"],
             _harness.Settings.Changes);
     }
 
@@ -546,17 +547,17 @@ public sealed class SettingsViewModelTests
         _harness.Settings.Stored = new AppSettings
         {
             Games = ImmutableDictionary.CreateRange(
-                StringComparer.OrdinalIgnoreCase,
-                [new KeyValuePair<string, GameSettings>("stardewvalley", new() { Folders = Flat }), new KeyValuePair<string, GameSettings>("fallout4", new() { Hidden = true })]),
+                AppSettings.GameComparer,
+                [KeyValuePair.Create(Nexus("stardewvalley"), new GameSettings { Folders = Flat }), KeyValuePair.Create(Nexus("fallout4"), new GameSettings { Hidden = true })]),
         };
         await _harness.StartAsync();
         _harness.Dialogs.Answers.Enqueue("StardewValley");
 
         await Screen.AddGameCommand.ExecuteAsync(null);
 
-        Assert.Equal(["fallout4", "stardewvalley"], Screen.Games.Select(row => row.Game));
+        Assert.Equal(["fallout4", "stardewvalley"], Screen.Games.Select(row => row.Game.Key));
         Assert.Same(Screen.Games[1], Screen.SelectedGame);
-        Assert.Equal("stardewvalley", Screen.Game?.Game);
+        Assert.Equal(Nexus("stardewvalley"), Screen.Game?.Game);
         Assert.Empty(_harness.Settings.Changes);
     }
 
@@ -727,4 +728,6 @@ public sealed class SettingsViewModelTests
         Assert.False(couldChooseWhileMoving);
         Assert.True(Screen.UseDefaultRootCommand.CanExecute(null));
     }
+
+    private static GameRef Nexus(string key) => new(TestData.Nexus, key);
 }

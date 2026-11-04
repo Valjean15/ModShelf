@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 
 using ModShelf.Domain.Library;
+using ModShelf.Domain.Mods;
 
 namespace ModShelf.Application.Settings;
 
@@ -42,10 +43,11 @@ public sealed record AppSettings
     public FolderPattern? LibraryFolders { get; init; }
 
     /// <summary>
-    /// Single games' own settings, by the game as its site names it, such as skyrimspecialedition, in any case.
+    /// Single games' own settings, by the game: its site, and its key there in any case (<see cref="GameComparer"/>). The
+    /// same game on two sites is two games, each with settings of its own.
     /// </summary>
-    public IReadOnlyDictionary<string, GameSettings> Games { get; init; }
-        = ImmutableDictionary.Create<string, GameSettings>(StringComparer.OrdinalIgnoreCase);
+    public IReadOnlyDictionary<GameRef, GameSettings> Games { get; init; }
+        = ImmutableDictionary.Create<GameRef, GameSettings>(GameComparer);
 
     /// <summary>
     /// What happens to a library file's old versions when a newer one is downloaded; null for
@@ -126,44 +128,61 @@ public sealed record AppSettings
     };
 
     /// <summary>
+    /// Compares games as the settings do: the same site, and the same key in any case, as a user may type it.
+    /// </summary>
+    public static IEqualityComparer<GameRef> GameComparer { get; } = new SameGame();
+
+    /// <summary>
     /// The settings of <paramref name="game"/>'s own: <see cref="GameSettings.None"/> when it has none.
     /// </summary>
-    public GameSettings GameFor(string game)
+    public GameSettings GameFor(GameRef game)
     {
         ArgumentNullException.ThrowIfNull(game);
 
-        return Games.TryGetValue(game, out GameSettings? settings) ? settings : GameSettings.None;
+        return Games.TryGetValue(game, out GameSettings? settings)
+            ? settings
+            : Games.FirstOrDefault(stored => GameComparer.Equals(stored.Key, game)).Value ?? GameSettings.None;
     }
 
     /// <summary>
     /// The pattern files of <paramref name="game"/> go by: its own, or every game's.
     /// </summary>
-    public FolderPattern FoldersFor(string game) => GameFor(game).Folders ?? LibraryFolders ?? FolderPattern.Default;
+    public FolderPattern FoldersFor(GameRef game) => GameFor(game).Folders ?? LibraryFolders ?? FolderPattern.Default;
 
     /// <summary>
     /// What happens to old versions of <paramref name="game"/>'s files: its own rule, or every game's.
     /// </summary>
-    public OldVersionRule OldVersionsFor(string game) => GameFor(game).OldVersions ?? OldVersions ?? OldVersionRule.Default;
+    public OldVersionRule OldVersionsFor(GameRef game) => GameFor(game).OldVersions ?? OldVersions ?? OldVersionRule.Default;
 
     /// <summary>
     /// How often <paramref name="game"/>'s watched mods are checked in the background: its own interval, or every
     /// game's.
     /// </summary>
-    public TimeSpan IntervalFor(string game) => GameFor(game).UpdateInterval ?? UpdateInterval ?? Domain.Updates.UpdateInterval.Default;
+    public TimeSpan IntervalFor(GameRef game) => GameFor(game).UpdateInterval ?? UpdateInterval ?? Domain.Updates.UpdateInterval.Default;
 
     /// <summary>
     /// Whether a background check that finds new updates of <paramref name="game"/>'s mods shows a notice: as the game
     /// says, or as every game does.
     /// </summary>
-    public bool NotifiesFor(string game) => GameFor(game).Notify ?? NotifyOfUpdates ?? true;
+    public bool NotifiesFor(GameRef game) => GameFor(game).Notify ?? NotifyOfUpdates ?? true;
 
     /// <summary>
     /// Whether <paramref name="game"/>'s watched mods are checked for updates with every game's: yes unless it says not.
     /// </summary>
-    public bool ChecksUpdatesOf(string game) => GameFor(game).CheckUpdates ?? true;
+    public bool ChecksUpdatesOf(GameRef game) => GameFor(game).CheckUpdates ?? true;
 
     /// <summary>
     /// Whether the desktop app's lists leave <paramref name="game"/> out.
     /// </summary>
-    public bool IsHidden(string game) => GameFor(game).Hidden ?? false;
+    public bool IsHidden(GameRef game) => GameFor(game).Hidden ?? false;
+
+    private sealed class SameGame : IEqualityComparer<GameRef>
+    {
+        public bool Equals(GameRef? x, GameRef? y)
+            => ReferenceEquals(x, y)
+                || (x is not null && y is not null && x.Source == y.Source && string.Equals(x.Key, y.Key, StringComparison.OrdinalIgnoreCase));
+
+        public int GetHashCode(GameRef obj)
+            => HashCode.Combine(obj.Source, StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Key));
+    }
 }

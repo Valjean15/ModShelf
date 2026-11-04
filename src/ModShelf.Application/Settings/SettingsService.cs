@@ -5,6 +5,7 @@ using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Domain.Common;
 using ModShelf.Domain.Library;
+using ModShelf.Domain.Mods;
 using ModShelf.Domain.Updates;
 
 namespace ModShelf.Application.Settings;
@@ -69,38 +70,39 @@ internal sealed class SettingsService : ISettingsService, IDisposable
             .ConfigureAwait(false);
     }
 
-    public Task SetLibraryFoldersAsync(string? game, FolderPattern? pattern, CancellationToken cancellationToken)
+    public Task SetLibraryFoldersAsync(GameRef? game, FolderPattern? pattern, CancellationToken cancellationToken)
     {
         if (game is null)
         {
             return ChangeAsync((settings, _) => Task.FromResult(settings with { LibraryFolders = pattern }), cancellationToken);
         }
 
-        ArgumentException.ThrowIfNullOrWhiteSpace(game);
         return SetGameAsync(game, settings => settings with { Folders = pattern }, cancellationToken);
     }
 
-    public Task SetGameAsync(string game, Func<GameSettings, GameSettings> change, CancellationToken cancellationToken)
+    public Task SetGameAsync(GameRef game, Func<GameSettings, GameSettings> change, CancellationToken cancellationToken)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(game);
+        ArgumentNullException.ThrowIfNull(game);
         ArgumentNullException.ThrowIfNull(change);
 
-        string key = game.Trim();
         return ChangeAsync(
-            (settings, _) =>
-            {
-                GameSettings changed = change(settings.GameFor(key)) ?? throw new InvalidOperationException("A game's changed settings can't be null.");
-                if (changed.Browse is { IsNone: true })
-                {
-                    changed = changed with { Browse = null };
-                }
-
-                // The game keeps the key it was stored under, in its case, rather than gaining a second.
-                ImmutableDictionary<string, GameSettings> games = settings.Games.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
-                string stored = games.Keys.FirstOrDefault(name => string.Equals(name, key, StringComparison.OrdinalIgnoreCase)) ?? key;
-                return Task.FromResult(settings with { Games = changed.IsNone ? games.Remove(stored) : games.SetItem(stored, changed) });
-            },
+            (settings, _) => Task.FromResult(WithGame(
+                settings,
+                game,
+                change(settings.GameFor(game)) ?? throw new InvalidOperationException("A game's changed settings can't be null."))),
             cancellationToken);
+    }
+
+    public Task CopyGameAsync(GameRef other, GameRef game, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(other);
+        ArgumentNullException.ThrowIfNull(game);
+        if (AppSettings.GameComparer.Equals(other, game))
+        {
+            throw new ArgumentException("A game can't take its settings from itself.", nameof(game));
+        }
+
+        return ChangeAsync((settings, _) => Task.FromResult(WithGame(settings, game, settings.GameFor(other))), cancellationToken);
     }
 
     public Task SetOldVersionsAsync(OldVersionRule? rule, CancellationToken cancellationToken)
@@ -237,6 +239,18 @@ internal sealed class SettingsService : ISettingsService, IDisposable
         }
 
         return Path.TrimEndingDirectorySeparator(Path.GetFullPath(root.Trim()));
+    }
+
+    /// <summary>
+    /// The settings with <paramref name="game"/>'s own as <paramref name="own"/>: kept under the key it was stored under,
+    /// in its case, rather than gaining a second; forgotten when it has none.
+    /// </summary>
+    private static AppSettings WithGame(AppSettings settings, GameRef game, GameSettings own)
+    {
+        GameSettings changed = own.Browse is { IsNone: true } ? own with { Browse = null } : own;
+        ImmutableDictionary<GameRef, GameSettings> games = settings.Games.ToImmutableDictionary(AppSettings.GameComparer);
+        GameRef stored = games.Keys.FirstOrDefault(key => AppSettings.GameComparer.Equals(key, game)) ?? game;
+        return settings with { Games = changed.IsNone ? games.Remove(stored) : games.SetItem(stored, changed) };
     }
 
     private async Task ChangeAsync(Func<AppSettings, CancellationToken, Task<AppSettings>> change, CancellationToken cancellationToken)

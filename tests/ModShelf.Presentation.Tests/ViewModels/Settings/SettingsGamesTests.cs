@@ -41,11 +41,11 @@ public sealed class SettingsGamesTests
 
         Assert.Equal(
             [("fallout4", "fallout4", "Hidden · 1 setting overridden"), ("skyrimspecialedition", "Skyrim Special Edition", "Uses the defaults"), ("StardewValley", "Stardew Valley", "2 settings overridden")],
-            Screen.Games.Select(row => (row.Game, row.Name, row.Note)));
+            Screen.Games.Select(row => (row.Game.Key, row.Name, row.Note)));
         Assert.Equal(("F", "S"), (Screen.Games[0].Initial, Screen.Games[1].Initial));
         Assert.False(Screen.HasNoGames);
         Assert.Same(Screen.Games[0], Screen.SelectedGame);
-        Assert.Equal("fallout4", Game.Game);
+        Assert.Equal(new GameRef(TestData.Nexus, "fallout4"), Game.Game);
     }
 
     [Fact]
@@ -61,7 +61,7 @@ public sealed class SettingsGamesTests
 
         await StartAsync();
         await CoversShownAsync();
-        GameRowViewModel skyrim = Screen.Games.Single(row => row.Game == "skyrimspecialedition");
+        GameRowViewModel skyrim = Screen.Games.Single(row => row.Game == Skyrim);
         Screen.OnShown();
         await Screen.GamesWork;
         await CoversShownAsync();
@@ -69,7 +69,7 @@ public sealed class SettingsGamesTests
         // Stardew Valley's site can't name it, so it has no cover; and a game only the settings have isn't asked.
         Assert.Equal(
             [("fallout4", null), ("skyrimspecialedition", ScriptedPictureCache.FileOf(skyrimCover)), ("stardewvalley", null)],
-            Screen.Games.Select(row => (row.Game, row.Cover.File)));
+            Screen.Games.Select(row => (row.Game.Key, row.Cover.File)));
         Assert.Same(skyrim, Screen.Games[1]);
         Assert.Equal([skyrimCover], _harness.Pictures.Cache.Asked);
     }
@@ -254,12 +254,12 @@ public sealed class SettingsGamesTests
         Game.IsHidden = true;
         await Game.Saving;
 
-        Assert.Equal((true, true, "Hidden"), (Own().Hidden, _harness.Hidden.IsHidden("StardewValley"), Screen.Games[0].Note));
+        Assert.Equal((true, true, "Hidden"), (Own().Hidden, _harness.Hidden.IsHidden(new GameRef(TestData.Nexus, "StardewValley")), Screen.Games[0].Note));
 
         Game.IsHidden = false;
         await Game.Saving;
 
-        Assert.False(_harness.Hidden.IsHidden("stardewvalley"));
+        Assert.False(_harness.Hidden.IsHidden(Stardew));
         Assert.Empty(_harness.Settings.Stored.Games);
     }
 
@@ -285,7 +285,7 @@ public sealed class SettingsGamesTests
         _harness.GameSettings.Open(Stardew);
 
         Assert.Equal((SettingsCategory.Games, string.Empty), (Screen.SelectedCategory?.Category, Screen.SearchText));
-        Assert.Equal("stardewvalley", Screen.SelectedGame?.Game);
+        Assert.Equal(Stardew, Screen.SelectedGame?.Game);
         Assert.Equal("Stardew Valley", Game.Name);
         Assert.Equal(Presentation.Services.Screen.Settings, _harness.Navigation.Current);
     }
@@ -298,7 +298,7 @@ public sealed class SettingsGamesTests
         _harness.GameSettings.Open(Skyrim);
         await Screen.GamesWork;
 
-        Assert.Equal(("skyrimspecialedition", "Skyrim Special Edition"), (Assert.Single(Screen.Games).Game, Game.Name));
+        Assert.Equal((Skyrim, "Skyrim Special Edition"), (Assert.Single(Screen.Games).Game, Game.Name));
     }
 
     [Fact]
@@ -309,7 +309,7 @@ public sealed class SettingsGamesTests
 
         await StartAsync();
 
-        Assert.Equal(["fallout4"], Screen.Games.Select(row => row.Game));
+        Assert.Equal(["fallout4"], Screen.Games.Select(row => row.Game.Key));
         Assert.Contains(_harness.Logger.Entries, entry => entry.StartsWith("Warning: Couldn't list the library's games for the Settings screen", StringComparison.Ordinal));
     }
 
@@ -321,8 +321,14 @@ public sealed class SettingsGamesTests
         Assert.Equal((true, null, null), (Screen.HasNoGames, Screen.SelectedGame, Screen.Game));
     }
 
+    /// <summary>
+    /// Nexus Mods' games' own settings, by their keys in any case.
+    /// </summary>
     private void Store(params (string Game, GameSettings Own)[] games)
-        => _harness.Settings.Stored = new AppSettings { Games = games.ToImmutableDictionary(game => game.Game, game => game.Own, StringComparer.OrdinalIgnoreCase) };
+        => _harness.Settings.Stored = new AppSettings
+        {
+            Games = games.ToImmutableDictionary(game => new GameRef(TestData.Nexus, game.Game), game => game.Own, AppSettings.GameComparer),
+        };
 
     private GameSettings Own() => _harness.Settings.Stored.GameFor(Game.Game);
 
@@ -347,6 +353,6 @@ public sealed class SettingsGamesTests
     {
         _harness.Library.Add(TestData.LibraryMod(TestData.Mod("1", game), "A mod"));
         await StartAsync();
-        Assert.Equal(game, Game.Game);
+        Assert.Equal(game, Game.Game.Key);
     }
 }

@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 
+using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.ViewModels.Pictures;
 
@@ -10,20 +11,20 @@ namespace ModShelf.Presentation.ViewModels.Settings;
 /// </summary>
 public sealed partial class GameRowViewModel : ObservableObject
 {
-    internal GameRowViewModel(string game, string name, ModPictures pictures)
+    internal GameRowViewModel(GameRef game, string name, ModPictures pictures)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(game);
+        ArgumentNullException.ThrowIfNull(game);
 
         Game = game;
-        CoverHue = Covers.HueOf(game);
+        CoverHue = Covers.HueOf(game.Key);
         Name = name;
         Cover = new GamePictureViewModel(pictures);
     }
 
     /// <summary>
-    /// The game as its site names it in links, such as skyrimspecialedition.
+    /// The game: its site, and its key there, such as skyrimspecialedition.
     /// </summary>
-    public string Game { get; }
+    public GameRef Game { get; }
 
     /// <summary>
     /// The hue of the game's cover, from its key.
@@ -36,7 +37,8 @@ public sealed partial class GameRowViewModel : ObservableObject
     public GamePictureViewModel Cover { get; }
 
     /// <summary>
-    /// The game's name, once its site says it; its key until then.
+    /// The game's name, once its site says it, with the site's when another site's game has the same name; its key until
+    /// then.
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Initial))]

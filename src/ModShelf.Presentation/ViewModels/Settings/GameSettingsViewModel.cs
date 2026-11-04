@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 
 using ModShelf.Application.Settings;
 using ModShelf.Domain.Library;
+using ModShelf.Domain.Mods;
 using ModShelf.Domain.Updates;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
@@ -21,35 +22,40 @@ namespace ModShelf.Presentation.ViewModels.Settings;
 public sealed partial class GameSettingsViewModel : ObservableObject
 {
     private readonly Func<Func<GameSettings, GameSettings>, Task<string?>> _change;
+    private readonly Func<GameRef, Task> _copyFrom;
     private AppSettings _shown = new();
     private bool _showing;
 
-    /// <param name="game">The game as its site names it in links.</param>
+    /// <param name="game">The game.</param>
     /// <param name="name">The game's name.</param>
     /// <param name="change">Changes the game's own settings, saying what went wrong, or null.</param>
     /// <param name="saveFolders">Sets or removes the game's own folder pattern, saying what went wrong, or null.</param>
+    /// <param name="copyFrom">Asks, then gives the game the settings of the same game on another site.</param>
     /// <param name="root">The library's folder, for the folder pattern's example.</param>
     internal GameSettingsViewModel(
-        string game,
+        GameRef game,
         string name,
         Func<Func<GameSettings, GameSettings>, Task<string?>> change,
-        Func<string?, FolderPattern?, Task<string?>> saveFolders,
+        Func<GameRef?, FolderPattern?, Task<string?>> saveFolders,
+        Func<GameRef, Task> copyFrom,
         string root)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(game);
+        ArgumentNullException.ThrowIfNull(game);
         ArgumentNullException.ThrowIfNull(change);
         ArgumentNullException.ThrowIfNull(saveFolders);
+        ArgumentNullException.ThrowIfNull(copyFrom);
 
         Game = game;
         Name = name;
         _change = change;
+        _copyFrom = copyFrom;
         Folders = new FolderPatternViewModel(game, FolderPattern.Default, root, saveFolders);
     }
 
     /// <summary>
-    /// The game as its site names it in links, such as skyrimspecialedition.
+    /// The game: its site, and its key there, such as skyrimspecialedition.
     /// </summary>
-    public string Game { get; }
+    public GameRef Game { get; }
 
     /// <summary>
     /// The game's name, once its site says it.
@@ -57,6 +63,23 @@ public sealed partial class GameSettingsViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HideText))]
     public partial string Name { get; internal set; }
+
+    /// <summary>
+    /// Such as "Also on Example Mods", when another site has a game of the same name; empty otherwise.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasAlsoOn))]
+    public partial string AlsoOnText { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// Whether another site has a game of the same name.
+    /// </summary>
+    public bool HasAlsoOn => AlsoOnText.Length > 0;
+
+    /// <summary>
+    /// The same game on other sites, whose settings the game can take, as the user chooses.
+    /// </summary>
+    public ObservableCollection<GameCopyViewModel> CopyChoices { get; } = [];
 
     /// <summary>
     /// What went wrong saving the last change; null when nothing did.
@@ -291,6 +314,28 @@ public sealed partial class GameSettingsViewModel : ObservableObject
         {
             _showing = false;
         }
+    }
+
+    /// <summary>
+    /// Says which other sites have a game named as this one, and offers to copy each one's settings.
+    /// </summary>
+    /// <param name="others">Each such game, with its name and site, such as "Stardew Valley (Example Mods)".</param>
+    /// <param name="alsoOn">Such as "Also on Example Mods"; empty for none.</param>
+    internal void ShowSameNamed(IReadOnlyList<KeyValuePair<GameRef, string>> others, string alsoOn)
+    {
+        ArgumentNullException.ThrowIfNull(others);
+        ArgumentNullException.ThrowIfNull(alsoOn);
+
+        AlsoOnText = alsoOn;
+        CopyChoices.SyncWith(
+        [
+            .. others.Select(other =>
+            {
+                string text = Text.Format(Strings.GameCopySettingsFrom, other.Value);
+                return CopyChoices.FirstOrDefault(choice => choice.Game == other.Key && choice.Text == text)
+                    ?? new GameCopyViewModel(other.Key, text, _copyFrom);
+            }),
+        ]);
     }
 
     /// <summary>

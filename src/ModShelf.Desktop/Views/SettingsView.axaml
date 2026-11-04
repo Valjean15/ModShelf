@@ -354,6 +354,23 @@
                                                 <TextBlock Classes="subheading" Margin="0,0,0,4" TextWrapping="Wrap" Text="{Binding Name}" />
                                                 <TextBlock Classes="problem" TextWrapping="Wrap" Text="{Binding Problem}" IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}" />
 
+                                                <!-- The same game on another site: said, and its settings offered, never taken by itself. -->
+                                                <StackPanel Spacing="6" IsVisible="{Binding HasAlsoOn}">
+                                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding AlsoOnText}" />
+                                                    <ItemsControl ItemsSource="{Binding CopyChoices}">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <WrapPanel ItemSpacing="8" LineSpacing="6" />
+                                                            </ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate x:DataType="vm:GameCopyViewModel">
+                                                                <Button Content="{Binding Text}" Command="{Binding CopyCommand}" />
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </StackPanel>
+
                                                 <!-- Folder pattern. -->
                                                 <StackPanel Spacing="4">
                                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">

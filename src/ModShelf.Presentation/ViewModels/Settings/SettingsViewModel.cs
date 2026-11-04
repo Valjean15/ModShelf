@@ -407,11 +407,11 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     [RelayCommand(CanExecute = nameof(IsLoaded))]
     private async Task AddGameAsync(CancellationToken cancellationToken)
     {
-        string? game = (await _dialogs.AskTextAsync(
+        string? typed = (await _dialogs.AskTextAsync(
                 new TextQuestion(Strings.SettingsAddGameTitle, Strings.SettingsAddGameMessage, Strings.SettingsAddGameHint, Strings.SettingsAddGameConfirm),
                 cancellationToken))
             ?.Trim();
-        if (!string.IsNullOrEmpty(game))
+        if (!string.IsNullOrEmpty(typed) && await GameTypedAsync(typed, cancellationToken) is { } game)
         {
             AddGame(game);
         }

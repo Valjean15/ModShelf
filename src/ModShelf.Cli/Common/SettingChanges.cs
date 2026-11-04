@@ -1,8 +1,12 @@
 using System.Globalization;
 
+using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
+using ModShelf.Application.Sources;
 using ModShelf.Domain.Library;
+using ModShelf.Domain.Mods;
 using ModShelf.Domain.Updates;
+using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Search;
 
 namespace ModShelf.Cli.Common;
@@ -28,9 +32,10 @@ internal static class SettingChanges
     public const string AdultPictures = "pictures.adult";
     public const string DetailsMaxAge = "details.maxAge";
     public const string GamesPrefix = "games.";
-    public const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<game>, {OldVersions}, {Interval}, {Notify}, {Theme}, {CloseToTray}, {SetupDone}, {CheckForAppUpdates}, {PreviewsPrefix}library, {PreviewsPrefix}updates, {PreviewsPrefix}browse, {PreviewsPrefix}downloads, {PicturesMaxSize}, {AdultPictures}, {DetailsMaxAge}, "
-        + $"{GamesPrefix}<game>.{GameFolders}, {GamesPrefix}<game>.{GameOldVersions}, {GamesPrefix}<game>.{GameCheckUpdates}, {GamesPrefix}<game>.{GameInterval}, {GamesPrefix}<game>.{GameNotify}, {GamesPrefix}<game>.{GameHidden}, "
-        + $"{GamesPrefix}<game>.{BrowseSort}, {GamesPrefix}<game>.{BrowseDirection}, {GamesPrefix}<game>.{BrowseWindow}, {GamesPrefix}<game>.{BrowsePageSize}";
+    public const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<site>/<game>, {OldVersions}, {Interval}, {Notify}, {Theme}, {CloseToTray}, {SetupDone}, {CheckForAppUpdates}, {PreviewsPrefix}library, {PreviewsPrefix}updates, {PreviewsPrefix}browse, {PreviewsPrefix}downloads, {PicturesMaxSize}, {AdultPictures}, {DetailsMaxAge}, "
+        + $"{GamesPrefix}<site>/<game>.{GameFolders}, {GamesPrefix}<site>/<game>.{GameOldVersions}, {GamesPrefix}<site>/<game>.{GameCheckUpdates}, {GamesPrefix}<site>/<game>.{GameInterval}, {GamesPrefix}<site>/<game>.{GameNotify}, {GamesPrefix}<site>/<game>.{GameHidden}, "
+        + $"{GamesPrefix}<site>/<game>.{BrowseSort}, {GamesPrefix}<site>/<game>.{BrowseDirection}, {GamesPrefix}<site>/<game>.{BrowseWindow}, {GamesPrefix}<site>/<game>.{BrowsePageSize}, "
+        + "such as games.nexus/stardewvalley.notify; a game's key alone, as games.stardewvalley.notify, does while only one site's game has it";
 
     private const string GameFolders = "folders";
     private const string GameOldVersions = "oldVersions";
@@ -44,7 +49,7 @@ internal static class SettingChanges
     private const string BrowsePageSize = "browse.pageSize";
 
     /// <summary>
-    /// The settings a game can have of its own, by the names that follow <c>games.&lt;game&gt;.</c>.
+    /// The settings a game can have of its own, by the names that follow <c>games.&lt;site&gt;/&lt;game&gt;.</c>.
     /// </summary>
     private static readonly string[] GameSettingNames =
         [GameFolders, GameOldVersions, GameCheckUpdates, GameInterval, GameNotify, GameHidden, BrowseSort, BrowseDirection, BrowseWindow, BrowsePageSize];
@@ -57,10 +62,10 @@ internal static class SettingChanges
         + "library.oldVersions; minutes, hours or days, such as 30m, 6h or 1d, for updates.interval and details.maxAge; true or false for "
         + "updates.notify, window.closeToTray, setup.done and app.checkForUpdates; system, light or dark for appearance.theme; "
         + "off, thumbnails or cards for previews.<screen>; a number of megabytes from 64 to 8192 for pictures.maxSize; "
-        + "hidden, blurred or shown for pictures.adult; for a game of its own, as every game's for games.<game>.oldVersions, "
-        + "games.<game>.updateInterval and games.<game>.notify, true or false for games.<game>.checkUpdates and games.<game>.hidden, "
-        + "relevance, endorsements, downloads, updated, newest, name, size or uniquedownloads for games.<game>.browse.sort, ascending or descending "
-        + "for games.<game>.browse.direction, 1d, 7d or 30d for games.<game>.browse.window, and 20, 50 or 100 for games.<game>.browse.pageSize; "
+        + "hidden, blurred or shown for pictures.adult; for a game of its own, as every game's for games.<site>/<game>.oldVersions, "
+        + "games.<site>/<game>.updateInterval and games.<site>/<game>.notify, true or false for games.<site>/<game>.checkUpdates and games.<site>/<game>.hidden, "
+        + "relevance, endorsements, downloads, updated, newest, name, size or uniquedownloads for games.<site>/<game>.browse.sort, ascending or descending "
+        + "for games.<site>/<game>.browse.direction, 1d, 7d or 30d for games.<site>/<game>.browse.window, and 20, 50 or 100 for games.<site>/<game>.browse.pageSize; "
         + "a folder pattern, such as \"{source}/{game}/{mod} ({modid})/{file}\", for the others";
 
     /// <summary>
@@ -103,7 +108,7 @@ internal static class SettingChanges
             Of(LibraryFolders, stored.LibraryFolders?.Text, FolderPattern.Default.Text),
             .. stored.Games
                 .Where(game => game.Value.Folders is not null)
-                .OrderBy(game => game.Key, StringComparer.OrdinalIgnoreCase)
+                .OrderBy(game => game.Key.ToString(), StringComparer.OrdinalIgnoreCase)
                 .Select(game => new SettingValue(GamePrefix + game.Key, game.Value.Folders!.Text, IsDefault: false)),
             Of(OldVersions, stored.OldVersions?.ToString(), OldVersionRule.Default.ToString()),
             Of(Interval, stored.UpdateInterval is { } every ? UpdateInterval.Format(every) : null, UpdateInterval.Format(UpdateInterval.Default)),
@@ -120,7 +125,7 @@ internal static class SettingChanges
             Of(AdultPictures, stored.AdultPictures is { } adult ? Name(adult) : null, Name(Application.Settings.AdultPictures.Blurred)),
             Of(DetailsMaxAge, stored.DetailsMaxAge is { } age ? UpdateInterval.Format(age) : null, UpdateInterval.Format(AppSettings.DefaultDetailsMaxAge)),
             .. stored.Games
-                .OrderBy(game => game.Key, StringComparer.OrdinalIgnoreCase)
+                .OrderBy(game => game.Key.ToString(), StringComparer.OrdinalIgnoreCase)
                 .SelectMany(game => GameValues(game.Key, game.Value)),
         ];
     }
@@ -134,9 +139,17 @@ internal static class SettingChanges
     /// <exception cref="InvalidOperationException">
     /// The library's root can't change now: its library has files, which moving the library moves, or downloads under way.
     /// </exception>
-    public static async Task<string> ChangeAsync(ISettingsService settings, string name, string? value, CancellationToken cancellationToken)
+    public static async Task<string> ChangeAsync(
+        ISettingsService settings,
+        IModLibrary library,
+        ISourceRegistry sources,
+        string name,
+        string? value,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(settings);
+        ArgumentNullException.ThrowIfNull(library);
+        ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(name);
         if (!IsSetting(name))
         {
@@ -145,11 +158,14 @@ internal static class SettingChanges
 
         if (GameSettingOf(name) is { } own)
         {
-            return await ChangeGameAsync(settings, name.Trim(), own.Game, own.Setting, value, cancellationToken).ConfigureAwait(false);
+            GameRef ownGame = await GameNamedAsync(own.Game, settings, library, sources, cancellationToken).ConfigureAwait(false);
+            return await ChangeGameAsync(settings, $"{GamesPrefix}{ownGame}.{own.Setting}", ownGame, own.Setting, value, cancellationToken).ConfigureAwait(false);
         }
 
         string setting = name.Trim().ToLowerInvariant();
-        string? game = setting.StartsWith(GamePrefix, StringComparison.Ordinal) ? name.Trim()[GamePrefix.Length..] : null;
+        GameRef? game = setting.StartsWith(GamePrefix, StringComparison.Ordinal)
+            ? await GameNamedAsync(name.Trim()[GamePrefix.Length..], settings, library, sources, cancellationToken).ConfigureAwait(false)
+            : null;
         if (setting == LibraryRoot)
         {
             await settings.SetLibraryRootAsync(value, cancellationToken).ConfigureAwait(false);
@@ -278,8 +294,51 @@ internal static class SettingChanges
         => new(name, value ?? defaultValue, IsDefault: value is null);
 
     /// <summary>
-    /// The game and the name of its setting in <c>games.&lt;game&gt;.&lt;setting&gt;</c>, in any case; null for another
-    /// setting.
+    /// The game a setting's name gives: its site and its key there, such as nexus/stardewvalley; or its key alone, which
+    /// is the game of that key in the library or the settings while only one site's is, or the game of the only site
+    /// that has games.
+    /// </summary>
+    /// <exception cref="ArgumentException">The name gives no game, or a key more than one site's game has.</exception>
+    private static async Task<GameRef> GameNamedAsync(
+        string written,
+        ISettingsService settings,
+        IModLibrary library,
+        ISourceRegistry sources,
+        CancellationToken cancellationToken)
+    {
+        string typed = written.Trim();
+        if (GameRef.TryParse(typed, out GameRef? game))
+        {
+            return game;
+        }
+
+        if (typed.Contains('/', StringComparison.Ordinal))
+        {
+            throw new ArgumentException($"'{typed}' isn't a game: name it by its site and its key there, such as nexus/stardewvalley.");
+        }
+
+        AppSettings stored = await settings.GetAsync(cancellationToken).ConfigureAwait(false);
+        IReadOnlyList<LibraryMod> mods = await library.ListAsync(cancellationToken).ConfigureAwait(false);
+        SourceId[] listed =
+        [
+            .. mods.Select(mod => mod.Mod.Game).Concat(stored.Games.Keys)
+                .Where(known => string.Equals(known.Key, typed, StringComparison.OrdinalIgnoreCase))
+                .Select(known => known.Source)
+                .Distinct(),
+        ];
+        SourceId[] sites = listed.Length > 0 ? listed : [.. sources.All<IModCatalog>().Select(source => source.Id)];
+        return sites.Length switch
+        {
+            1 => new GameRef(sites[0], typed),
+            0 => throw new ArgumentException($"No site has games, so {typed} can't be one: name its site too, such as nexus/{typed}."),
+            _ => throw new ArgumentException(
+                $"More than one site may have a game called {typed}: name its site too, as {string.Join(" or ", sites.Select(site => $"{site}/{typed}"))}."),
+        };
+    }
+
+    /// <summary>
+    /// The game and the name of its setting in <c>games.&lt;site&gt;/&lt;game&gt;.&lt;setting&gt;</c>, in any case; null for
+    /// another setting. The game is as written: its site and key, or its key alone.
     /// </summary>
     private static (string Game, string Setting)? GameSettingOf(string name)
     {
@@ -305,9 +364,9 @@ internal static class SettingChanges
     }
 
     /// <summary>
-    /// A game's own settings but its folder pattern, as <c>games.&lt;game&gt;.&lt;setting&gt;</c>.
+    /// A game's own settings but its folder pattern, as <c>games.&lt;site&gt;/&lt;game&gt;.&lt;setting&gt;</c>.
     /// </summary>
-    private static IEnumerable<SettingValue> GameValues(string game, GameSettings own)
+    private static IEnumerable<SettingValue> GameValues(GameRef game, GameSettings own)
     {
         string prefix = $"{GamesPrefix}{game}.";
         (string Name, string? Value)[] values =
@@ -343,7 +402,7 @@ internal static class SettingChanges
     private static async Task<string> ChangeGameAsync(
         ISettingsService settings,
         string named,
-        string game,
+        GameRef game,
         string setting,
         string? value,
         CancellationToken cancellationToken)
@@ -407,7 +466,7 @@ internal static class SettingChanges
     private static async Task<string> ChangeBrowseAsync(
         ISettingsService settings,
         string named,
-        string game,
+        GameRef game,
         string setting,
         string? value,
         CancellationToken cancellationToken)

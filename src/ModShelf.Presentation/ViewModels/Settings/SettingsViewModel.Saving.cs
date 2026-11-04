@@ -1,6 +1,7 @@
 using ModShelf.Application.Settings;
 using ModShelf.Domain.Common;
 using ModShelf.Domain.Library;
+using ModShelf.Domain.Mods;
 using ModShelf.Domain.Updates;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
@@ -28,7 +29,7 @@ public sealed partial class SettingsViewModel
     /// Saves a game's folder pattern, or every game's with a null game; a null pattern sets it back.
     /// </summary>
     /// <returns>What went wrong; null when it's saved.</returns>
-    private Task<string?> SaveFoldersAsync(string? game, FolderPattern? pattern)
+    private Task<string?> SaveFoldersAsync(GameRef? game, FolderPattern? pattern)
         => ChangeAsync(token => _settings.SetLibraryFoldersAsync(game, pattern, token), sayProblem: false);
 
     /// <summary>

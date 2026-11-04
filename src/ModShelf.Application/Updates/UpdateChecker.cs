@@ -74,7 +74,7 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
             settings = null;
         }
 
-        return await CheckWhereAsync(game => settings?.ChecksUpdatesOf(game.Key) ?? true, cancellationToken).ConfigureAwait(false);
+        return await CheckWhereAsync(game => settings?.ChecksUpdatesOf(game) ?? true, cancellationToken).ConfigureAwait(false);
     }
 
     public Task<UpdateCheck> CheckAsync(IReadOnlyCollection<GameRef> games, CancellationToken cancellationToken)

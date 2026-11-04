@@ -106,8 +106,11 @@ public sealed class LibraryHiddenGamesTests : IDisposable
         Assert.Empty(_harness.GameSettings.Opened);
     }
 
+    /// <summary>
+    /// Nexus Mods' games, by their keys in any case, hidden.
+    /// </summary>
     private static AppSettings Hiding(params string[] games)
-        => new() { Games = games.ToDictionary(game => game, _ => new GameSettings { Hidden = true }, StringComparer.OrdinalIgnoreCase) };
+        => new() { Games = games.ToDictionary(game => new GameRef(TestData.Nexus, game), _ => new GameSettings { Hidden = true }, AppSettings.GameComparer) };
 
     private Task StartAsync()
         => _harness.StartAsync(TestData.LibraryMod(SkyUi, "SkyUI"), TestData.LibraryMod(Smapi, "SMAPI"), TestData.LibraryMod(Unofficial, "Unofficial Patch"));

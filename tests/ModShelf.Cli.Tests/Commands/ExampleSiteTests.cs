@@ -132,6 +132,53 @@ public sealed class ExampleSiteTests : IAsyncDisposable
         Assert.Equal(["v1a2b", "Better", "Crops", "1.0"], Words(lines[main + 3])[..4]);
     }
 
+    [Fact]
+    public async Task AGameNamedByItsKeyAloneIsTheOnlySitesThatTheLibraryHas()
+    {
+        await RunAsync("library", "watch", ExampleSite.ModLink(Crops).AbsoluteUri);
+
+        CliResult set = await RunAsync("settings", "set", "games.Stardew-Valley.notify", "false");
+        CliResult shown = await RunAsync("settings", "show");
+
+        Assert.Equal(Done, set.ExitCode);
+        Assert.StartsWith("games.example/Stardew-Valley.notify is now false:", set.Output.Trim(), StringComparison.Ordinal);
+        Assert.Contains(Lines(shown), line => Words(line) is ["games.example/Stardew-Valley.notify", "false"]);
+    }
+
+    [Fact]
+    public async Task AGameNamedByItsKeyAloneIsTheOnlySitesThatHasSettings()
+    {
+        await RunAsync("settings", "set", "games.example/stardew-valley.hidden", "true");
+
+        CliResult reset = await RunAsync("settings", "reset", "games.stardew-valley.hidden");
+
+        Assert.Equal("games.example/stardew-valley.hidden is gone, so the desktop app's lists show example/stardew-valley.", reset.Output.Trim());
+    }
+
+    [Fact]
+    public async Task AGameNamedByAKeyAloneThatTwoSitesMayHaveNeedsItsSite()
+    {
+        CliResult refused = await RunAsync("settings", "set", "games.stardewvalley.notify", "false");
+
+        Assert.Equal(BadInput, refused.ExitCode);
+        Assert.Equal(
+            "More than one site may have a game called stardewvalley: name its site too, as nexus/stardewvalley or example/stardewvalley.",
+            refused.Errors.Trim());
+    }
+
+    [Fact]
+    public async Task TheSameKeyOnTwoSitesKeepsSettingsOfItsOwnOnEach()
+    {
+        await RunAsync("settings", "set", "games.nexus/stardew-valley.hidden", "true");
+        await RunAsync("settings", "set", "games.example/stardew-valley.notify", "false");
+
+        string[] shown = Lines(await RunAsync("settings", "show"));
+
+        Assert.Contains(shown, line => Words(line) is ["games.nexus/stardew-valley.hidden", "true"]);
+        Assert.Contains(shown, line => Words(line) is ["games.example/stardew-valley.notify", "false"]);
+        Assert.DoesNotContain(shown, line => line.StartsWith("games.example/stardew-valley.hidden", StringComparison.Ordinal));
+    }
+
     private static string[] Lines(CliResult result) => result.Output.TrimEnd().ReplaceLineEndings("\n").Split('\n');
 
     private static string[] Words(string line) => line.Split(' ', StringSplitOptions.RemoveEmptyEntries);

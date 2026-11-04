@@ -406,7 +406,7 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
         StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
         List<UpdateGameViewModel> games = [];
         foreach (IGrouping<GameRef, LibraryMod> game in _mods.Values
-            .Where(mod => mod.OfferedUpdates.Count > 0 && !_hiddenGames.IsHidden(mod.Mod.Game.Key))
+            .Where(mod => mod.OfferedUpdates.Count > 0 && !_hiddenGames.IsHidden(mod.Mod.Game))
             .GroupBy(mod => mod.Mod.Game))
         {
             List<UpdateViewModel> rows = [];

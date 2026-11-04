@@ -1,5 +1,6 @@
 using ModShelf.Application.Settings;
 using ModShelf.Domain.Library;
+using ModShelf.Domain.Mods;
 using ModShelf.Domain.Updates;
 using ModShelf.Sources.Abstractions.Search;
 
@@ -11,6 +12,9 @@ namespace ModShelf.Application.Tests.Settings;
 public sealed class GameSettingsTests
 {
     private static readonly FolderPattern Flat = FolderPattern.Parse("{mod}/{file}");
+    private static readonly GameRef Stardew = new(new SourceId("nexus"), "stardewvalley");
+    private static readonly GameRef Skyrim = new(new SourceId("nexus"), "skyrimspecialedition");
+    private static readonly GameRef X = new(new SourceId("nexus"), "x");
 
     [Fact]
     public void AGameWithoutSettingsOfItsOwnUsesEveryGames()
@@ -23,11 +27,11 @@ public sealed class GameSettingsTests
             NotifyOfUpdates = false,
         };
 
-        Assert.Same(GameSettings.None, settings.GameFor("stardewvalley"));
+        Assert.Same(GameSettings.None, settings.GameFor(Stardew));
         Assert.Equal(
             (Flat, OldVersionRule.Archive, TimeSpan.FromHours(1), false, true, false),
-            (settings.FoldersFor("stardewvalley"), settings.OldVersionsFor("stardewvalley"), settings.IntervalFor("stardewvalley"),
-                settings.NotifiesFor("stardewvalley"), settings.ChecksUpdatesOf("stardewvalley"), settings.IsHidden("stardewvalley")));
+            (settings.FoldersFor(Stardew), settings.OldVersionsFor(Stardew), settings.IntervalFor(Stardew),
+                settings.NotifiesFor(Stardew), settings.ChecksUpdatesOf(Stardew), settings.IsHidden(Stardew)));
     }
 
     [Fact]
@@ -37,8 +41,8 @@ public sealed class GameSettingsTests
 
         Assert.Equal(
             (FolderPattern.Default, OldVersionRule.Default, UpdateInterval.Default, true, true, false),
-            (settings.FoldersFor("x"), settings.OldVersionsFor("x"), settings.IntervalFor("x"), settings.NotifiesFor("x"), settings.ChecksUpdatesOf("x"),
-                settings.IsHidden("x")));
+            (settings.FoldersFor(X), settings.OldVersionsFor(X), settings.IntervalFor(X), settings.NotifiesFor(X), settings.ChecksUpdatesOf(X),
+                settings.IsHidden(X)));
     }
 
     [Fact]
@@ -58,15 +62,53 @@ public sealed class GameSettingsTests
             OldVersions = OldVersionRule.Archive,
             UpdateInterval = TimeSpan.FromHours(1),
             NotifyOfUpdates = false,
-            Games = new Dictionary<string, GameSettings>(StringComparer.OrdinalIgnoreCase) { ["StardewValley"] = own },
+            Games = new Dictionary<GameRef, GameSettings>(AppSettings.GameComparer) { [new GameRef(new SourceId("nexus"), "StardewValley")] = own },
         };
 
-        Assert.Same(own, settings.GameFor("stardewvalley"));
+        Assert.Same(own, settings.GameFor(Stardew));
         Assert.Equal(
             (Flat, OldVersionRule.KeepAll, TimeSpan.FromDays(1), true, false, true),
-            (settings.FoldersFor("STARDEWVALLEY"), settings.OldVersionsFor("stardewvalley"), settings.IntervalFor("stardewvalley"),
-                settings.NotifiesFor("stardewvalley"), settings.ChecksUpdatesOf("stardewvalley"), settings.IsHidden("stardewvalley")));
-        Assert.Equal((OldVersionRule.Archive, true), (settings.OldVersionsFor("skyrimspecialedition"), settings.ChecksUpdatesOf("skyrimspecialedition")));
+            (settings.FoldersFor(new GameRef(new SourceId("nexus"), "STARDEWVALLEY")), settings.OldVersionsFor(Stardew), settings.IntervalFor(Stardew),
+                settings.NotifiesFor(Stardew), settings.ChecksUpdatesOf(Stardew), settings.IsHidden(Stardew)));
+        Assert.Equal((OldVersionRule.Archive, true), (settings.OldVersionsFor(Skyrim), settings.ChecksUpdatesOf(Skyrim)));
+    }
+
+    [Fact]
+    public void AGamesOwnSettingsAreFoundWhateverCaseTheGamesWereKeptIn()
+    {
+        GameSettings own = new() { Notify = false };
+
+        // Kept without the settings' comparer, as a test or a caller might build them.
+        AppSettings settings = new() { Games = new Dictionary<GameRef, GameSettings> { [new GameRef(new SourceId("nexus"), "StardewValley")] = own } };
+
+        Assert.Same(own, settings.GameFor(Stardew));
+    }
+
+    [Fact]
+    public void TheSameKeyOnAnotherSiteIsAnotherGame()
+    {
+        GameSettings own = new() { Hidden = true };
+        AppSettings settings = new()
+        {
+            Games = new Dictionary<GameRef, GameSettings>(AppSettings.GameComparer) { [Stardew] = own },
+        };
+
+        Assert.True(settings.IsHidden(Stardew));
+        Assert.False(settings.IsHidden(new GameRef(new SourceId("example"), "stardewvalley")));
+        Assert.Same(GameSettings.None, settings.GameFor(new GameRef(new SourceId("example"), "stardewvalley")));
+    }
+
+    [Fact]
+    public void GamesAreTheSameByTheirSiteAndTheirKeyInAnyCase()
+    {
+        IEqualityComparer<GameRef> same = AppSettings.GameComparer;
+
+        Assert.True(same.Equals(Stardew, new GameRef(new SourceId("nexus"), "StardewValley")));
+        Assert.Equal(same.GetHashCode(Stardew), same.GetHashCode(new GameRef(new SourceId("nexus"), "StardewValley")));
+        Assert.False(same.Equals(Stardew, new GameRef(new SourceId("example"), "stardewvalley")));
+        Assert.False(same.Equals(Stardew, Skyrim));
+        Assert.False(same.Equals(Stardew, null));
+        Assert.True(same.Equals(null, null));
     }
 
     [Fact]

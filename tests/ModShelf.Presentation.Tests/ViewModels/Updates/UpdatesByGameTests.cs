@@ -49,7 +49,7 @@ public sealed class UpdatesByGameTests : IDisposable
     {
         _harness.Settings.Stored = new AppSettings
         {
-            Games = new Dictionary<string, GameSettings>(StringComparer.OrdinalIgnoreCase) { ["StardewValley"] = new() { Hidden = true } },
+            Games = new Dictionary<GameRef, GameSettings>(AppSettings.GameComparer) { [new GameRef(TestData.Nexus, "StardewValley")] = new() { Hidden = true } },
         };
 
         await _harness.StartAsync(
@@ -68,7 +68,7 @@ public sealed class UpdatesByGameTests : IDisposable
             UpdatesHarness.ModWithUpdates(Smapi, "SMAPI", TestData.Now, "9"),
             UpdatesHarness.ModWithUpdates(SkyUi, "SkyUI", TestData.Now, "53"));
 
-        _harness.Hidden.Show(new AppSettings { Games = new Dictionary<string, GameSettings> { ["skyrimspecialedition"] = new() { Hidden = true } } });
+        _harness.Hidden.Show(new AppSettings { Games = new Dictionary<GameRef, GameSettings> { [new GameRef(TestData.Nexus, "skyrimspecialedition")] = new() { Hidden = true } } });
 
         Assert.Equal("Stardew Valley", Assert.Single(Screen.Games).Name);
         Assert.Equal(1, Screen.Badge);

@@ -3,7 +3,9 @@ using System.ComponentModel;
 using ModelContextProtocol;
 using ModelContextProtocol.Server;
 
+using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
+using ModShelf.Application.Sources;
 using ModShelf.Cli.Common;
 
 namespace ModShelf.Cli.Mcp;
@@ -12,10 +14,10 @@ namespace ModShelf.Cli.Mcp;
 /// The MCP tools for the settings in <c>settings.json</c>, by the names the CLI's settings command gives them.
 /// </summary>
 [McpServerToolType]
-internal sealed class SettingsTools(ISettingsService settings)
+internal sealed class SettingsTools(ISettingsService settings, IModLibrary library, ISourceRegistry sources)
 {
     [McpServerTool(Name = "settings_show", Title = "Show the settings", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Shows every setting, the ones left at their defaults too, where they're kept, and what each one's value can be. library.root is where the library is; library.folders, and library.folders.<game> for a game of its own, how its folders are named; library.oldVersions whether a file's old versions stay (all), move to an _archive folder (archive), or are deleted down to a number; updates.interval how often the desktop app checks for updates; games.<game>.<setting> a game's own settings in place of every game's: oldVersions, checkUpdates (false: its mods are checked only when the game alone is), updateInterval, notify, hidden (left out of the desktop app's lists, still checked), and browse.sort, browse.direction, browse.window and browse.pageSize (how the desktop app's Browse screen starts for it).")]
+    [Description("Shows every setting, the ones left at their defaults too, where they're kept, and what each one's value can be. library.root is where the library is; library.folders, and library.folders.<site>/<game> for a game of its own, how its folders are named; library.oldVersions whether a file's old versions stay (all), move to an _archive folder (archive), or are deleted down to a number; updates.interval how often the desktop app checks for updates; games.<site>/<game>.<setting> a game's own settings in place of every game's, such as games.nexus/stardewvalley.notify, each site's game apart: oldVersions, checkUpdates (false: its mods are checked only when the game alone is), updateInterval, notify, hidden (left out of the desktop app's lists, still checked), and browse.sort, browse.direction, browse.window and browse.pageSize (how the desktop app's Browse screen starts for it).")]
     public Task<SettingsListing> ShowAsync(CancellationToken cancellationToken)
         => McpProblems.GuardAsync(async () =>
         {
@@ -32,7 +34,7 @@ internal sealed class SettingsTools(ISettingsService settings)
         => ChangeAsync(setting, value, cancellationToken);
 
     [McpServerTool(Name = "settings_reset", Title = "Reset a setting", Idempotent = true, Destructive = false, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Sets a setting back to its default; for library.folders.<game> and games.<game>.<setting>, the game goes by every game's setting again.")]
+    [Description("Sets a setting back to its default; for library.folders.<site>/<game> and games.<site>/<game>.<setting>, the game goes by every game's setting again.")]
     public Task<SettingResult> ResetAsync(
         [Description($"The setting: {SettingChanges.Names}.")] string setting,
         CancellationToken cancellationToken)
@@ -43,7 +45,7 @@ internal sealed class SettingsTools(ISettingsService settings)
         {
             try
             {
-                string now = await SettingChanges.ChangeAsync(settings, setting, value, cancellationToken).ConfigureAwait(false);
+                string now = await SettingChanges.ChangeAsync(settings, library, sources, setting, value, cancellationToken).ConfigureAwait(false);
                 return new SettingResult(setting.Trim(), now);
             }
             catch (InvalidOperationException exception) when (SettingChanges.IsLibraryRoot(setting))

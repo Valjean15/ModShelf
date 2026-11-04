@@ -844,17 +844,20 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     {
         StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
         Dictionary<GameRef, LibraryModViewModel[]> byGame = _mods.Values.GroupBy(mod => mod.Mod.Game).ToDictionary(game => game.Key, game => game.ToArray());
+        KeyValuePair<GameRef, string>[] named = [.. byGame.Keys.Select(game => KeyValuePair.Create(game, _games[game].Name))];
         foreach ((GameRef game, LibraryModViewModel[] mods) in byGame)
         {
-            _games[game].Show(mods);
+            LibraryGameViewModel heading = _games[game];
+            heading.Show(mods);
+            heading.AlsoOnText = SameNamedGames.AlsoOn(SameNamedGames.Of(game, heading.Name, named), _sources);
         }
 
         string filter = GamesFilter.Trim();
-        int hidden = byGame.Keys.Count(game => _hiddenGames.IsHidden(game.Key));
+        int hidden = byGame.Keys.Count(game => _hiddenGames.IsHidden(game));
         HasHiddenGames = hidden > 0;
         ShowHiddenGamesText = Text.Format(Strings.LibraryShowHidden, hidden);
         IEnumerable<LibraryGameViewModel> shown = byGame.Keys
-            .Where(game => ShowHiddenGames || !_hiddenGames.IsHidden(game.Key))
+            .Where(game => ShowHiddenGames || !_hiddenGames.IsHidden(game))
             .Select(game => _games[game])
             .Where(game => Has(game.Name, filter));
         IOrderedEnumerable<LibraryGameViewModel> ordered = SelectedGameOrder.Value switch

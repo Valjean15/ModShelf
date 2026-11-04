@@ -1,4 +1,5 @@
 using ModShelf.Application.Settings;
+using ModShelf.Domain.Mods;
 
 namespace ModShelf.Presentation.Services;
 
@@ -19,9 +20,10 @@ public interface IHiddenGames
     int Count { get; }
 
     /// <summary>
-    /// Whether <paramref name="game"/>, by its key in any case, is hidden.
+    /// Whether <paramref name="game"/>, by its site and its key in any case, is hidden. The same game on another site isn't
+    /// hidden with it.
     /// </summary>
-    bool IsHidden(string game);
+    bool IsHidden(GameRef game);
 
     /// <summary>
     /// Takes the hidden games from <paramref name="settings"/>, as read last, raising <see cref="Changed"/> when they

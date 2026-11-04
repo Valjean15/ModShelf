@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 
 using ModShelf.Application.Settings;
 using ModShelf.Domain.Library;
+using ModShelf.Domain.Mods;
 
 namespace ModShelf.Presentation.Tests.Fakes;
 
@@ -66,37 +67,16 @@ internal sealed class InMemorySettingsService : ISettingsService
     public Task SetLibraryRootAsync(string? root, CancellationToken cancellationToken)
         => ChangeAsync($"root {root ?? "null"}", settings => RootRefusal is { } refusal ? throw refusal : settings with { LibraryRoot = root });
 
-    public Task SetLibraryFoldersAsync(string? game, FolderPattern? pattern, CancellationToken cancellationToken)
+    public Task SetLibraryFoldersAsync(GameRef? game, FolderPattern? pattern, CancellationToken cancellationToken)
         => ChangeAsync(
-            $"folders {game ?? "*"} {pattern?.Text ?? "null"}",
-            settings =>
-            {
-                if (game is null)
-                {
-                    return settings with { LibraryFolders = pattern };
-                }
+            $"folders {game?.ToString() ?? "*"} {pattern?.Text ?? "null"}",
+            settings => game is null ? settings with { LibraryFolders = pattern } : WithGame(settings, game, settings.GameFor(game) with { Folders = pattern }));
 
-                ArgumentException.ThrowIfNullOrWhiteSpace(game);
-                ImmutableDictionary<string, GameSettings> games = settings.Games.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
-                GameSettings own = settings.GameFor(game) with { Folders = pattern };
-                return settings with { Games = own.IsNone ? games.Remove(game) : games.SetItem(game, own) };
-            });
+    public Task SetGameAsync(GameRef game, Func<GameSettings, GameSettings> change, CancellationToken cancellationToken)
+        => ChangeAsync($"game {game}", settings => WithGame(settings, game, change(settings.GameFor(game))));
 
-    public Task SetGameAsync(string game, Func<GameSettings, GameSettings> change, CancellationToken cancellationToken)
-        => ChangeAsync(
-            $"game {game}",
-            settings =>
-            {
-                ArgumentException.ThrowIfNullOrWhiteSpace(game);
-                GameSettings own = change(settings.GameFor(game));
-                if (own.Browse is { IsNone: true })
-                {
-                    own = own with { Browse = null };
-                }
-
-                ImmutableDictionary<string, GameSettings> games = settings.Games.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
-                return settings with { Games = own.IsNone ? games.Remove(game) : games.SetItem(game, own) };
-            });
+    public Task CopyGameAsync(GameRef other, GameRef game, CancellationToken cancellationToken)
+        => ChangeAsync($"copy {other} to {game}", settings => WithGame(settings, game, settings.GameFor(other)));
 
     public Task SetOldVersionsAsync(OldVersionRule? rule, CancellationToken cancellationToken)
         => ChangeAsync($"oldVersions {rule?.ToString() ?? "null"}", settings => settings with { OldVersions = rule });
@@ -137,6 +117,17 @@ internal sealed class InMemorySettingsService : ISettingsService
 
     public Task SetAdultPicturesAsync(AdultPictures? pictures, CancellationToken cancellationToken)
         => ChangeAsync($"adultPictures {pictures?.ToString() ?? "null"}", settings => settings with { AdultPictures = pictures });
+
+    /// <summary>
+    /// The settings with the game's own as <paramref name="own"/>; without the game when it has none.
+    /// </summary>
+    private static AppSettings WithGame(AppSettings settings, GameRef game, GameSettings own)
+    {
+        ArgumentNullException.ThrowIfNull(game);
+        GameSettings kept = own.Browse is { IsNone: true } ? own with { Browse = null } : own;
+        ImmutableDictionary<GameRef, GameSettings> games = settings.Games.ToImmutableDictionary(AppSettings.GameComparer);
+        return settings with { Games = kept.IsNone ? games.Remove(game) : games.SetItem(game, kept) };
+    }
 
     private async Task ChangeAsync(string change, Func<AppSettings, AppSettings> apply)
     {

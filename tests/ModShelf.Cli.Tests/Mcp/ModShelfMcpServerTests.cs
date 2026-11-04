@@ -134,14 +134,27 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     {
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
 
-        SettingResult changed = await mcp.CallAsync<SettingResult>("settings_set", Arguments(("setting", "games.stardewvalley.updateInterval"), ("value", "2d")), Cancellation);
+        SettingResult changed = await mcp.CallAsync<SettingResult>("settings_set", Arguments(("setting", "games.nexus/stardewvalley.updateInterval"), ("value", "2d")), Cancellation);
         SettingsListing shown = await mcp.CallAsync<SettingsListing>("settings_show", null, Cancellation);
-        SettingResult reset = await mcp.CallAsync<SettingResult>("settings_reset", Arguments(("setting", "games.stardewvalley.updateInterval")), Cancellation);
+        SettingResult reset = await mcp.CallAsync<SettingResult>("settings_reset", Arguments(("setting", "games.nexus/stardewvalley.updateInterval")), Cancellation);
 
-        Assert.Equal("games.stardewvalley.updateInterval is now 2d: the desktop app checks stardewvalley's watched mods for updates that often.", changed.Message);
-        Assert.Contains(shown.Settings, setting => setting is { Name: "games.stardewvalley.updateInterval", Value: "2d", IsDefault: false });
-        Assert.Contains("games.<game>.browse.pageSize", shown.Values, StringComparison.Ordinal);
-        Assert.Equal("games.stardewvalley.updateInterval is gone, so stardewvalley goes by updates.interval again.", reset.Message);
+        Assert.Equal("games.nexus/stardewvalley.updateInterval is now 2d: the desktop app checks nexus/stardewvalley's watched mods for updates that often.", changed.Message);
+        Assert.Contains(shown.Settings, setting => setting is { Name: "games.nexus/stardewvalley.updateInterval", Value: "2d", IsDefault: false });
+        Assert.Contains("games.<site>/<game>.browse.pageSize", shown.Values, StringComparison.Ordinal);
+        Assert.Equal("games.nexus/stardewvalley.updateInterval is gone, so nexus/stardewvalley goes by updates.interval again.", reset.Message);
+    }
+
+    [Fact]
+    public async Task AGamesKeyAloneThatMoreThanOneSiteMayHaveIsRefusedNamingThem()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        string refused = await mcp.CallFailingAsync("settings_set", Arguments(("setting", "games.stardewvalley.notify"), ("value", "false")), Cancellation);
+
+        Assert.Contains(
+            "More than one site may have a game called stardewvalley: name its site too, as nexus/stardewvalley or fake-handoff/stardewvalley or fake-catalog/stardewvalley.",
+            refused,
+            StringComparison.Ordinal);
     }
 
     [Theory]

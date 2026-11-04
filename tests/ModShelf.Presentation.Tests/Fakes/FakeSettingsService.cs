@@ -1,5 +1,6 @@
 using ModShelf.Application.Settings;
 using ModShelf.Domain.Library;
+using ModShelf.Domain.Mods;
 
 namespace ModShelf.Presentation.Tests.Fakes;
 
@@ -50,9 +51,11 @@ internal sealed class FakeSettingsService : ISettingsService
 
     public Task SetLibraryRootAsync(string? root, CancellationToken cancellationToken) => throw new NotSupportedException();
 
-    public Task SetLibraryFoldersAsync(string? game, FolderPattern? pattern, CancellationToken cancellationToken) => throw new NotSupportedException();
+    public Task SetLibraryFoldersAsync(GameRef? game, FolderPattern? pattern, CancellationToken cancellationToken) => throw new NotSupportedException();
 
-    public Task SetGameAsync(string game, Func<GameSettings, GameSettings> change, CancellationToken cancellationToken) => throw new NotSupportedException();
+    public Task SetGameAsync(GameRef game, Func<GameSettings, GameSettings> change, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    public Task CopyGameAsync(GameRef other, GameRef game, CancellationToken cancellationToken) => throw new NotSupportedException();
 
     public Task SetOldVersionsAsync(OldVersionRule? rule, CancellationToken cancellationToken) => throw new NotSupportedException();
 

@@ -83,7 +83,7 @@ public sealed class DiagnosticsReportTests
             Theme = AppTheme.Dark,
             NotifyOfUpdates = false,
             CloseToTray = true,
-            Games = new Dictionary<string, GameSettings> { ["skyrimspecialedition"] = new() { Folders = FolderPattern.Default } },
+            Games = new Dictionary<GameRef, GameSettings> { [new GameRef(TestData.Nexus, "skyrimspecialedition")] = new() { Folders = FolderPattern.Default } },
         };
 
         Assert.Equal(
@@ -96,11 +96,11 @@ public sealed class DiagnosticsReportTests
     {
         _store.Settings = new AppSettings
         {
-            Games = new Dictionary<string, GameSettings>
+            Games = new Dictionary<GameRef, GameSettings>
             {
-                ["skyrimspecialedition"] = new() { Folders = FolderPattern.Default, Hidden = true },
-                ["stardewvalley"] = new() { UpdateInterval = TimeSpan.FromDays(1) },
-                ["fallout4"] = new() { Folders = FolderPattern.Default },
+                [new GameRef(TestData.Nexus, "skyrimspecialedition")] = new() { Folders = FolderPattern.Default, Hidden = true },
+                [new GameRef(TestData.Nexus, "stardewvalley")] = new() { UpdateInterval = TimeSpan.FromDays(1) },
+                [new GameRef(TestData.Nexus, "fallout4")] = new() { Folders = FolderPattern.Default },
             },
         };
 

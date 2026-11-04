@@ -109,7 +109,7 @@ internal sealed partial class UpdateCheckService : BackgroundService
     /// Whether <paramref name="game"/> is checked with every game: its updates are checked, on every game's interval.
     /// </summary>
     private static bool FollowsEveryGame(AppSettings? settings, GameRef game)
-        => settings is null || (settings.ChecksUpdatesOf(game.Key) && settings.GameFor(game.Key).UpdateInterval is null);
+        => settings is null || (settings.ChecksUpdatesOf(game) && settings.GameFor(game).UpdateInterval is null);
 
     /// <summary>
     /// Checks the games checked on every game's interval: every game whose updates are checked, unless one has an
@@ -184,7 +184,7 @@ internal sealed partial class UpdateCheckService : BackgroundService
                 .. (await _library.ListAsync(stoppingToken).ConfigureAwait(false))
                     .Where(mod => mod.IsWatched)
                     .GroupBy(mod => mod.Mod.Game)
-                    .Where(game => settings.ChecksUpdatesOf(game.Key.Key) && settings.GameFor(game.Key.Key).UpdateInterval is not null),
+                    .Where(game => settings.ChecksUpdatesOf(game.Key) && settings.GameFor(game.Key).UpdateInterval is not null),
             ];
         }
         catch (Exception exception) when (!stoppingToken.IsCancellationRequested)
@@ -206,12 +206,12 @@ internal sealed partial class UpdateCheckService : BackgroundService
             DateTimeOffset? last = ownChecks.TryGetValue(game.Key, out DateTimeOffset checkedAt) ? checkedAt
                 : game.Any(mod => mod.CheckedAt is null) ? null
                 : game.Min(mod => mod.CheckedAt!.Value);
-            DateTimeOffset dueAt = last is { } from ? (from < now ? from : now) + settings.IntervalFor(game.Key.Key) : now;
+            DateTimeOffset dueAt = last is { } from ? (from < now ? from : now) + settings.IntervalFor(game.Key) : now;
             if (dueAt <= now)
             {
                 due.Add(game.Key);
                 ownChecks[game.Key] = now;
-                dueAt = now + settings.IntervalFor(game.Key.Key);
+                dueAt = now + settings.IntervalFor(game.Key);
             }
 
             next = next is { } earlier && earlier < dueAt ? earlier : dueAt;
@@ -280,7 +280,7 @@ internal sealed partial class UpdateCheckService : BackgroundService
         {
             // Settings that can't be read: the interval's read already said so.
             AppSettings? settings = await SettingsOrNullAsync(cancellationToken).ConfigureAwait(false);
-            LibraryUpdate[] found = [.. check.Found.Where(update => settings?.NotifiesFor(update.File.Mod.Game.Key) ?? true)];
+            LibraryUpdate[] found = [.. check.Found.Where(update => settings?.NotifiesFor(update.File.Mod.Game) ?? true)];
             if (found.Length > 0)
             {
                 IReadOnlyList<LibraryMod> library = await _library.ListAsync(cancellationToken).ConfigureAwait(false);

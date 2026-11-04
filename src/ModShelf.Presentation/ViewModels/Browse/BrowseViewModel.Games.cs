@@ -129,7 +129,7 @@ public sealed partial class BrowseViewModel
     private void ShowGameChoices()
     {
         StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
-        Games.SyncWith([.. _allGames.Where(game => !_hiddenGames.IsHidden(game.Game.Key)).OrderBy(game => game.Name, byName)]);
+        Games.SyncWith([.. _allGames.Where(game => !_hiddenGames.IsHidden(game.Game)).OrderBy(game => game.Name, byName)]);
     }
 
     /// <summary>
@@ -155,7 +155,7 @@ public sealed partial class BrowseViewModel
         }
 
         _hiddenGames.Show(settings);
-        if (Game?.Game != game || !IsShowingRows || settings.GameFor(game.Key).Browse is not { } defaults)
+        if (Game?.Game != game || !IsShowingRows || settings.GameFor(game).Browse is not { } defaults)
         {
             return;
         }
@@ -195,7 +195,7 @@ public sealed partial class BrowseViewModel
     {
         Dictionary<GameRef, int> counts = _inLibrary.Keys.GroupBy(mod => mod.Game).ToDictionary(game => game.Key, game => game.Count());
         return games
-            .Where(game => counts.ContainsKey(game.Game) && !_hiddenGames.IsHidden(game.Game.Key))
+            .Where(game => counts.ContainsKey(game.Game) && !_hiddenGames.IsHidden(game.Game))
             .OrderByDescending(game => counts[game.Game])
             .ThenBy(game => game.Name, StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true))
             .FirstOrDefault();

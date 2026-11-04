@@ -507,8 +507,11 @@ public sealed class UpdateCheckServiceTests : IDisposable
     /// <summary>
     /// Games' own settings, by each game's name.
     /// </summary>
-    private static Dictionary<string, GameSettings> OwnSettings(params (string Game, GameSettings Settings)[] games)
-        => games.ToDictionary(game => game.Game, game => game.Settings, StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// Games' own settings, by their keys on the fake site, in any case.
+    /// </summary>
+    private static Dictionary<GameRef, GameSettings> OwnSettings(params (string Game, GameSettings Settings)[] games)
+        => games.ToDictionary(game => new GameRef(FakeModSite.SourceId, game.Game), game => game.Settings, AppSettings.GameComparer);
 
     /// <summary>
     /// Lets the service's loop run as far as it can on the current time.

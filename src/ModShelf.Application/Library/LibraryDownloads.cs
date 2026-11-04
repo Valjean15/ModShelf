@@ -209,7 +209,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
         else
         {
             details = await ReadDetailsAsync(catalog, file, cancellationToken).ConfigureAwait(false);
-            string pathByPattern = settings.FoldersFor(file.Mod.Game.Key).Render(
+            string pathByPattern = settings.FoldersFor(file.Mod.Game).Render(
                 file.Mod.Game.Source.Value, file.Mod.Game.Key, details.Mod.Name, file.Mod.Id, details.File.FileName);
             string folder = stored is { Files.Count: > 0 }
                 ? LibraryLocations.ModFolderOf(stored.Files[^1].RelativePath)
@@ -382,7 +382,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
         // changes, and moved back if it can't, and they leave it before they're deleted.
         OldVersionPlan plan = details is null || stored is null
             ? OldVersionPlan.None
-            : OldVersions.Plan(stored, job.File, details.Files, settings.OldVersionsFor(job.File.Mod.Game.Key));
+            : OldVersions.Plan(stored, job.File, details.Files, settings.OldVersionsFor(job.File.Mod.Game));
 
         // The version it replaces: the nearest older one in its update chain.
         IReadOnlyList<LibraryFile> older = details is null || stored is null ? [] : OldVersions.ReplacedBy(stored, job.File, details.Files);

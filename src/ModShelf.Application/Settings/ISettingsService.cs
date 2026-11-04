@@ -1,4 +1,5 @@
 using ModShelf.Domain.Library;
+using ModShelf.Domain.Mods;
 using ModShelf.Domain.Updates;
 
 namespace ModShelf.Application.Settings;
@@ -44,16 +45,22 @@ public interface ISettingsService
     /// Sets where downloaded files go: for every game, or for <paramref name="game"/> only. Null sets it back: a game to
     /// the pattern for every game, and that to <see cref="FolderPattern.Default"/>.
     /// </summary>
-    /// <exception cref="ArgumentException"><paramref name="game"/> is blank.</exception>
-    Task SetLibraryFoldersAsync(string? game, FolderPattern? pattern, CancellationToken cancellationToken);
+    Task SetLibraryFoldersAsync(GameRef? game, FolderPattern? pattern, CancellationToken cancellationToken);
 
     /// <summary>
     /// Changes <paramref name="game"/>'s own settings: <paramref name="change"/> takes those it has, or
     /// <see cref="GameSettings.None"/>, and gives those it should have. A game left with no setting of its own is
     /// forgotten.
     /// </summary>
-    /// <exception cref="ArgumentException"><paramref name="game"/> is blank.</exception>
-    Task SetGameAsync(string game, Func<GameSettings, GameSettings> change, CancellationToken cancellationToken);
+    Task SetGameAsync(GameRef game, Func<GameSettings, GameSettings> change, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gives <paramref name="game"/> the own settings <paramref name="other"/> has, in place of its own, such as the same
+    /// game on another site: every one of them, and none when <paramref name="other"/> has none. The user chooses this;
+    /// ModShelf never does it by itself.
+    /// </summary>
+    /// <exception cref="ArgumentException">Both are the same game.</exception>
+    Task CopyGameAsync(GameRef other, GameRef game, CancellationToken cancellationToken);
 
     /// <summary>
     /// Sets what happens to a library file's old versions when a newer one is downloaded, or sets it back to

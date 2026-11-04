@@ -756,7 +756,7 @@
   </data>
   <data name="BrowseGameOnSite" xml:space="preserve">
     <value>{0} ({1})</value>
-    <comment>A game when several sites can search: {0} is the game's name, {1} the site's.</comment>
+    <comment>A game named with its site, where two sites' games could be told apart only so: {0} is the game's name, {1} the site's.</comment>
   </data>
   <data name="BrowseNoSites" xml:space="preserve">
     <value>No site ModShelf knows can search its mods.</value>
@@ -1251,7 +1251,7 @@
     <comment>The title of the dialog that asks for a game.</comment>
   </data>
   <data name="SettingsAddGameMessage" xml:space="preserve">
-    <value>Enter the game as its site names it in links, such as skyrimspecialedition for Skyrim Special Edition on Nexus Mods. It can then have settings of its own.</value>
+    <value>Enter the game as its site names it in links, such as skyrimspecialedition for Skyrim Special Edition on Nexus Mods. To name its site too, put it first, as in nexus/skyrimspecialedition. It can then have settings of its own.</value>
     <comment>Asks for a game to give its own folder pattern.</comment>
   </data>
   <data name="SettingsAddGameHint" xml:space="preserve">
@@ -2683,5 +2683,65 @@
   <data name="ModOfferSkipped" xml:space="preserve">
     <value>Offer skipped updates again</value>
     <comment>Menu item: offer again the updates the user skipped of a library mod.</comment>
+  </data>
+  <data name="GameAlsoOn" xml:space="preserve">
+    <value>Also on {0}</value>
+    <comment>Under a game that another site has too, by the same name: {0} is the other site, or sites, such as Example Mods. ModShelf keeps them apart.</comment>
+  </data>
+  <data name="ListAnd" xml:space="preserve">
+    <value>{0} and {1}</value>
+    <comment>The last two of a list: {0} is the ones before, joined by commas, {1} the last.</comment>
+  </data>
+  <data name="GameCopySettingsFrom" xml:space="preserve">
+    <value>Copy settings from {0}</value>
+    <comment>A button on a game's settings, for the same game on another site: {0} is that game, such as Stardew Valley (Example Mods).</comment>
+  </data>
+  <data name="GameCopyTitle" xml:space="preserve">
+    <value>Copy the settings?</value>
+    <comment>Asks before a game takes another's settings.</comment>
+  </data>
+  <data name="GameCopyMessage" xml:space="preserve">
+    <value>{0} will take the settings of {1} in place of its own: {2}.</value>
+    <comment>{0} is the game whose settings change, {1} the one they come from, both named with their sites; {2} lists the settings, such as "folders and notices".</comment>
+  </data>
+  <data name="GameCopyMessageNone" xml:space="preserve">
+    <value>{1} has no settings of its own, so {0} will use every game's in place of its own.</value>
+    <comment>{0} is the game whose settings change, {1} the one they come from, both named with their sites.</comment>
+  </data>
+  <data name="GameCopyConfirm" xml:space="preserve">
+    <value>Copy settings</value>
+    <comment>Confirms copying a game's settings.</comment>
+  </data>
+  <data name="GameCopyFolders" xml:space="preserve">
+    <value>folders</value>
+    <comment>In the list of settings a copy takes.</comment>
+  </data>
+  <data name="GameCopyOldVersions" xml:space="preserve">
+    <value>old versions</value>
+    <comment>In the list of settings a copy takes.</comment>
+  </data>
+  <data name="GameCopyUpdates" xml:space="preserve">
+    <value>update checks</value>
+    <comment>In the list of settings a copy takes.</comment>
+  </data>
+  <data name="GameCopyNotices" xml:space="preserve">
+    <value>notices</value>
+    <comment>In the list of settings a copy takes.</comment>
+  </data>
+  <data name="GameCopyBrowse" xml:space="preserve">
+    <value>how Browse starts</value>
+    <comment>In the list of settings a copy takes.</comment>
+  </data>
+  <data name="GameCopyHidden" xml:space="preserve">
+    <value>hidden from the lists</value>
+    <comment>In the list of settings a copy takes.</comment>
+  </data>
+  <data name="SettingsAddGameSiteTitle" xml:space="preserve">
+    <value>Which site?</value>
+    <comment>Asks which site's game was added, when more than one site has games.</comment>
+  </data>
+  <data name="SettingsAddGameSiteMessage" xml:space="preserve">
+    <value>Which site's game is {0}?</value>
+    <comment>{0} is the game's key as typed, such as stardewvalley.</comment>
   </data>
 </root>

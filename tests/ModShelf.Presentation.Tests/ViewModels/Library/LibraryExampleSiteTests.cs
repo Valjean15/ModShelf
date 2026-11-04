@@ -39,4 +39,16 @@ public sealed class LibraryExampleSiteTests : IDisposable
         Assert.Equal("Better Crops", _harness.Row(crops).Name);
         Assert.Equal(Crops.Game, Screen.OpenGame?.Game);
     }
+
+    [Fact]
+    public async Task EachOfTheSameGameOnTwoSitesSaysWhereElseItIs()
+    {
+        LibraryMod skyUi = TestData.LibraryMod(TestData.Mod("12604"), "SkyUI");
+
+        await _harness.StartAsync(TestData.LibraryMod(Smapi, "SMAPI"), TestData.LibraryMod(Crops, "Better Crops"), skyUi);
+
+        Assert.Equal(("Also on Example Mods", true), (_harness.Game(Smapi.Game).AlsoOnText, _harness.Game(Smapi.Game).HasAlsoOn));
+        Assert.Equal("Also on Nexus Mods", _harness.Game(Crops.Game).AlsoOnText);
+        Assert.Equal((string.Empty, false), (_harness.Game(skyUi.Mod.Game).AlsoOnText, _harness.Game(skyUi.Mod.Game).HasAlsoOn));
+    }
 }

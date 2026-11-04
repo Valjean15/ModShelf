@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Domain.Library;
+using ModShelf.Domain.Mods;
 using ModShelf.Infrastructure.Settings;
 using ModShelf.Sources.Abstractions.Search;
 using ModShelf.Testing;
@@ -39,20 +40,20 @@ public sealed class JsonSettingsStoreTests : IDisposable
         string root = Path.Combine(_folder.Path, "Mods");
         FolderPattern byId = FolderPattern.Parse("{source}/{game}/{modid}/{file}");
         FolderPattern flat = FolderPattern.Parse("{mod}/{file}");
-        await Store().SaveAsync(Settings(root, byId, ("skyrimspecialedition", flat)), Cancellation);
+        await Store().SaveAsync(Settings(root, byId, ("nexus/skyrimspecialedition", flat)), Cancellation);
 
         AppSettings settings = await Store().LoadAsync(Cancellation);
 
         Assert.Equal((root, byId), (settings.LibraryRoot, settings.LibraryFolders));
-        Assert.Equal(flat, settings.FoldersFor("SkyrimSpecialEdition"));
-        Assert.Equal(byId, settings.FoldersFor("stardewvalley"));
+        Assert.Equal(flat, settings.FoldersFor(Nexus("SkyrimSpecialEdition")));
+        Assert.Equal(byId, settings.FoldersFor(Nexus("stardewvalley")));
     }
 
     [Fact]
     public async Task TheFileIsTheDocumentedJson()
     {
         string root = Path.Combine(_folder.Path, "Mods");
-        await Store().SaveAsync(Settings(root, FolderPattern.Default, ("stardewvalley", FolderPattern.Parse("{mod}/{file}"))), Cancellation);
+        await Store().SaveAsync(Settings(root, FolderPattern.Default, ("nexus/stardewvalley", FolderPattern.Parse("{mod}/{file}"))), Cancellation);
 
         string expected = $$"""
             {
@@ -61,7 +62,7 @@ public sealed class JsonSettingsStoreTests : IDisposable
                 "folders": "{source}/{game}/{mod} ({modid})/{file}"
               },
               "games": {
-                "stardewvalley": {
+                "nexus/stardewvalley": {
                   "folders": "{mod}/{file}"
                 }
               }
@@ -547,21 +548,21 @@ public sealed class JsonSettingsStoreTests : IDisposable
             Hidden = true,
         };
         GameSettings skyrim = new() { OldVersions = OldVersionRule.Archive, Browse = new BrowseDefaults { UpdatedWithin = TimeSpan.FromDays(1) } };
-        await Store().SaveAsync(new AppSettings { Games = Games(("StardewValley", stardew), ("skyrimspecialedition", skyrim)) }, Cancellation);
+        await Store().SaveAsync(new AppSettings { Games = Games(("nexus/StardewValley", stardew), ("nexus/skyrimspecialedition", skyrim)) }, Cancellation);
 
         AppSettings settings = await Store().LoadAsync(Cancellation);
 
-        Assert.Equal((stardew, skyrim), (settings.GameFor("stardewvalley"), settings.GameFor("SkyrimSpecialEdition")));
+        Assert.Equal((stardew, skyrim), (settings.GameFor(Nexus("stardewvalley")), settings.GameFor(Nexus("SkyrimSpecialEdition"))));
         string expected = """
             {
               "games": {
-                "skyrimspecialedition": {
+                "nexus/skyrimspecialedition": {
                   "oldVersions": "archive",
                   "browse": {
                     "window": "1d"
                   }
                 },
-                "StardewValley": {
+                "nexus/StardewValley": {
                   "folders": "{mod}/{file}",
                   "oldVersions": 3,
                   "checkUpdates": false,
@@ -594,10 +595,12 @@ public sealed class JsonSettingsStoreTests : IDisposable
         AppSettings settings = await Store().LoadAsync(Cancellation);
         await Store().SaveAsync(settings, Cancellation);
 
-        Assert.Equal(new GameSettings { Folders = FolderPattern.Parse("{mod}/{file}") }, settings.GameFor("skyrimspecialedition"));
-        Assert.Equal(new GameSettings { Folders = FolderPattern.Parse("{modid}/{file}"), Hidden = true }, settings.GameFor("stardewvalley"));
+        Assert.Equal(new GameSettings { Folders = FolderPattern.Parse("{mod}/{file}") }, settings.GameFor(Nexus("skyrimspecialedition")));
+        Assert.Equal(new GameSettings { Folders = FolderPattern.Parse("{modid}/{file}"), Hidden = true }, settings.GameFor(Nexus("stardewvalley")));
         string file = await File.ReadAllTextAsync(FilePath, Cancellation);
         Assert.DoesNotContain("gameFolders", file, StringComparison.Ordinal);
+        Assert.Contains("\"nexus/skyrimspecialedition\"", file, StringComparison.Ordinal);
+        Assert.Contains("\"nexus/STARDEWVALLEY\"", file, StringComparison.Ordinal);
         Assert.Equal(settings.Games.Values, (await Store().LoadAsync(Cancellation)).Games.Values);
     }
 
@@ -608,7 +611,7 @@ public sealed class JsonSettingsStoreTests : IDisposable
 
         AppSettings settings = await Store().LoadAsync(Cancellation);
 
-        Assert.Equal(new GameSettings { Folders = FolderPattern.Parse("{mod}/{file}"), Notify = false }, settings.GameFor("fallout4"));
+        Assert.Equal(new GameSettings { Folders = FolderPattern.Parse("{mod}/{file}"), Notify = false }, settings.GameFor(Nexus("fallout4")));
     }
 
     [Fact]
@@ -624,6 +627,8 @@ public sealed class JsonSettingsStoreTests : IDisposable
         Assert.DoesNotContain("hidden", file, StringComparison.Ordinal);
         Assert.DoesNotContain("stardewvalley", file, StringComparison.Ordinal);
         Assert.DoesNotContain("pageSize", file, StringComparison.Ordinal);
+        Assert.Contains("\"nexus/fallout4\"", file, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"fallout4\"", file, StringComparison.Ordinal);
         Assert.Empty((await Store().LoadAsync(Cancellation)).Games);
     }
 
@@ -640,7 +645,7 @@ public sealed class JsonSettingsStoreTests : IDisposable
                 OldVersions = OldVersionRule.KeepAll,
                 Browse = new BrowseDefaults { Sort = SearchSort.Updated, Direction = SearchDirection.Descending, UpdatedWithin = TimeSpan.FromDays(7) },
             },
-            settings.GameFor("fallout4"));
+            settings.GameFor(Nexus("fallout4")));
     }
 
     [Fact]
@@ -650,7 +655,52 @@ public sealed class JsonSettingsStoreTests : IDisposable
 
         AppSettings settings = await Store().LoadAsync(Cancellation);
 
-        Assert.Equal("STARDEWVALLEY", Assert.Single(settings.Games).Key);
+        Assert.Equal(Nexus("STARDEWVALLEY"), Assert.Single(settings.Games).Key);
+    }
+
+    [Fact]
+    public async Task ReadsEachSitesGameApart()
+    {
+        await WriteAsync("""{ "games": { "nexus/stardewvalley": { "hidden": true }, "example/stardewvalley": { "notify": false } } }""");
+
+        AppSettings settings = await Store().LoadAsync(Cancellation);
+
+        Assert.Equal(2, settings.Games.Count);
+        Assert.Equal(new GameSettings { Hidden = true }, settings.GameFor(Nexus("stardewvalley")));
+        Assert.Equal(new GameSettings { Notify = false }, settings.GameFor(new GameRef(new SourceId("example"), "stardewvalley")));
+    }
+
+    [Fact]
+    public async Task AGameNamedByItsKeyAloneIsNexusModsAndIsNamedByItsSiteWhenSaved()
+    {
+        // As 0.9.x wrote them, when only Nexus Mods had games.
+        await WriteAsync("""{ "games": { "stardewvalley": { "notify": false, "colour": "teal" } } }""");
+
+        AppSettings settings = await Store().LoadAsync(Cancellation);
+        await Store().SaveAsync(settings, Cancellation);
+
+        Assert.Equal(Nexus("stardewvalley"), Assert.Single(settings.Games).Key);
+        string file = await File.ReadAllTextAsync(FilePath, Cancellation);
+        Assert.Contains("\"nexus/stardewvalley\"", file, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"stardewvalley\"", file, StringComparison.Ordinal);
+        Assert.Contains("\"colour\": \"teal\"", file, StringComparison.Ordinal);
+        Assert.Equal(settings.Games, (await Store().LoadAsync(Cancellation)).Games);
+    }
+
+    [Fact]
+    public async Task AGameNamedByItsSiteComesBeforeTheSameGameNamedByItsKeyAlone()
+    {
+        await WriteAsync("""{ "games": { "nexus/stardewvalley": { "hidden": true, "colour": "teal" }, "STARDEWVALLEY": { "notify": false, "colour": "red" } } }""");
+
+        AppSettings settings = await Store().LoadAsync(Cancellation);
+        await Store().SaveAsync(settings, Cancellation);
+
+        (GameRef game, GameSettings own) = Assert.Single(settings.Games);
+        Assert.Equal((Nexus("stardewvalley"), new GameSettings { Hidden = true }), (game, own));
+        string file = await File.ReadAllTextAsync(FilePath, Cancellation);
+        Assert.Contains("\"colour\": \"teal\"", file, StringComparison.Ordinal);
+        Assert.DoesNotContain("red", file, StringComparison.Ordinal);
+        Assert.DoesNotContain("STARDEWVALLEY", file, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -658,7 +708,7 @@ public sealed class JsonSettingsStoreTests : IDisposable
     {
         await WriteAsync("""{ "games": { "fallout4": { "hidden": true, "browse": { } } } }""");
 
-        Assert.Equal(new GameSettings { Hidden = true }, (await Store().LoadAsync(Cancellation)).GameFor("fallout4"));
+        Assert.Equal(new GameSettings { Hidden = true }, (await Store().LoadAsync(Cancellation)).GameFor(Nexus("fallout4")));
     }
 
     [Fact]
@@ -686,6 +736,11 @@ public sealed class JsonSettingsStoreTests : IDisposable
     [InlineData("""{ "games": { "fallout4": { "browse": { "pageSize": 30 } } } }""", "games.fallout4.browse.pageSize must be 20, 50 or 100.")]
     [InlineData("""{ "games": { "fallout4": { "browse": { "pageSize": "50" } } } }""", "games.fallout4.browse.pageSize must be 20, 50 or 100.")]
     [InlineData("""{ "library": { "gameFolders": [] } }""", "library.gameFolders must hold a folder pattern for each game.")]
+    [InlineData("""{ "games": { "nexus/": { "hidden": true } } }""", "games.nexus/ must name a game by its site and its key there, such as nexus/stardewvalley.")]
+    [InlineData("""{ "games": { "/fallout4": { "hidden": true } } }""", "games./fallout4 must name a game by its site and its key there, such as nexus/stardewvalley.")]
+    [InlineData("""{ "games": { "Nexus Mods/fallout4": { "hidden": true } } }""", "games.Nexus Mods/fallout4 must name a game by its site and its key there, such as nexus/stardewvalley.")]
+    [InlineData("""{ "games": { " ": { "hidden": true } } }""", "games.  must name a game by its site and its key there, such as nexus/stardewvalley.")]
+    [InlineData("""{ "library": { "gameFolders": { "nexus/": "{mod}/{file}" } } }""", "library.gameFolders.nexus/ must name a game by its site and its key there, such as nexus/stardewvalley.")]
     public async Task SaysWhenAGamesSettingIsWrong(string content, string message)
     {
         await WriteAsync(content);
@@ -716,11 +771,18 @@ public sealed class JsonSettingsStoreTests : IDisposable
     {
         LibraryRoot = root,
         LibraryFolders = folders,
-        Games = games.ToImmutableDictionary(game => game.Game, game => new GameSettings { Folders = game.Pattern }, StringComparer.OrdinalIgnoreCase),
+        Games = games.ToImmutableDictionary(game => Game(game.Game), game => new GameSettings { Folders = game.Pattern }, AppSettings.GameComparer),
     };
 
-    private static ImmutableDictionary<string, GameSettings> Games(params (string Game, GameSettings Settings)[] games)
-        => games.ToImmutableDictionary(game => game.Game, game => game.Settings, StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// Games' own settings, by the games as text, such as nexus/stardewvalley.
+    /// </summary>
+    private static ImmutableDictionary<GameRef, GameSettings> Games(params (string Game, GameSettings Settings)[] games)
+        => games.ToImmutableDictionary(game => Game(game.Game), game => game.Settings, AppSettings.GameComparer);
+
+    private static GameRef Game(string text) => GameRef.TryParse(text, out GameRef? game) ? game : throw new ArgumentException($"'{text}' isn't a game.", nameof(text));
+
+    private static GameRef Nexus(string key) => new(new SourceId("nexus"), key);
 
     private JsonSettingsStore Store() => new(FilePath);
 

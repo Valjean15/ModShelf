@@ -13,7 +13,8 @@ namespace ModShelf.Presentation.Tests.ViewModels.Settings;
 internal sealed class SettingsHarness
 {
     /// <param name="releases">ModShelf's releases, as the test sets them up; by default, an installed ModShelf.</param>
-    public SettingsHarness(bool protectedByOs = true, ScriptedAppReleases? releases = null)
+    /// <param name="example">The example site, beside Nexus Mods.</param>
+    public SettingsHarness(bool protectedByOs = true, ScriptedAppReleases? releases = null, ExampleSite? example = null)
     {
         Releases = releases ?? new ScriptedAppReleases();
         Mover = new ScriptedLibraryMover(Settings);
@@ -32,7 +33,7 @@ internal sealed class SettingsHarness
             Themes,
             Tray,
             Dialogs,
-            new FakeSourceRegistry(Catalog),
+            example is null ? new FakeSourceRegistry(Catalog) : new FakeSourceRegistry(Catalog, example),
             Hidden,
             GameSettings,
             PicturesCard,

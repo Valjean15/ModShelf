@@ -215,7 +215,7 @@ internal sealed partial class LibraryRescanner : ILibraryRescan
     private static IEnumerable<string> FoldersOf(Scan scan, ModRef mod, LibraryMod? stored, string name)
     {
         string byPattern = LibraryLocations.FolderOf(
-            scan.Settings.FoldersFor(mod.Game.Key).Render(mod.Game.Source.Value, mod.Game.Key, name, mod.Id, "file"));
+            scan.Settings.FoldersFor(mod.Game).Render(mod.Game.Source.Value, mod.Game.Key, name, mod.Id, "file"));
         return (stored?.Files.Select(file => LibraryLocations.ModFolderOf(file.RelativePath)) ?? [])
             .Append(byPattern)
             .Distinct(StringComparer.Ordinal)

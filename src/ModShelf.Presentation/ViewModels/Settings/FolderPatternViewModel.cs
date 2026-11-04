@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using ModShelf.Domain.Library;
+using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 
@@ -20,18 +21,18 @@ public sealed partial class FolderPatternViewModel : ObservableObject
     private const string SampleModId = "12604";
     private const string SampleFile = "SkyUI_5_2_SE.7z";
 
-    private readonly Func<string?, FolderPattern?, Task<string?>> _save;
+    private readonly Func<GameRef?, FolderPattern?, Task<string?>> _save;
     private FolderPattern _saved;
     private string _root;
 
-    /// <param name="game">The game, as its site names it in links; null for every game.</param>
+    /// <param name="game">The game; null for every game.</param>
     /// <param name="saved">The pattern as it's stored.</param>
     /// <param name="root">The library's root, for the preview.</param>
     /// <param name="save">
     /// Saves a game's pattern, or every game's with a null game; a null pattern sets it back. Returns what went wrong, or
     /// null.
     /// </param>
-    internal FolderPatternViewModel(string? game, FolderPattern saved, string root, Func<string?, FolderPattern?, Task<string?>> save)
+    internal FolderPatternViewModel(GameRef? game, FolderPattern saved, string root, Func<GameRef?, FolderPattern?, Task<string?>> save)
     {
         ArgumentNullException.ThrowIfNull(saved);
         ArgumentNullException.ThrowIfNull(root);
@@ -47,12 +48,12 @@ public sealed partial class FolderPatternViewModel : ObservableObject
     /// <summary>
     /// The game; null for every game.
     /// </summary>
-    public string? Game { get; }
+    public GameRef? Game { get; }
 
     /// <summary>
-    /// The game, or "Every game".
+    /// The game as its site names it in links, or "Every game".
     /// </summary>
-    public string Name => Game ?? Strings.SettingsFoldersEveryGame;
+    public string Name => Game?.Key ?? Strings.SettingsFoldersEveryGame;
 
     /// <summary>
     /// Whether it's a game's own pattern, which can be removed, rather than every game's, which can be set back.
@@ -133,7 +134,7 @@ public sealed partial class FolderPatternViewModel : ObservableObject
             FolderPattern pattern = FolderPattern.Parse(Text);
             Preview = Common.Text.Format(
                 Strings.SettingsFoldersPreview,
-                LibraryPaths.Resolve(_root, pattern.Render(SampleSource, Game ?? SampleGame, SampleMod, SampleModId, SampleFile)));
+                LibraryPaths.Resolve(_root, pattern.Render(Game?.Source.Value ?? SampleSource, Game?.Key ?? SampleGame, SampleMod, SampleModId, SampleFile)));
             Problem = null;
         }
         catch (ArgumentException exception)
