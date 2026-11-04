@@ -74,6 +74,11 @@ you should see.
 - [ ] **3.1a A game's previews.** With the desktop app running, ask the agent to show Stardew Valley's mods as cards in
   the Library, then open the Settings screen at Stardew Valley's page.
   The agent sets `games.nexus/stardewvalley.previews` to `cards`. Its page shows "Previews" overridden, on **Cards**.
+- [ ] **3.1b A game's own folder.** With files of a game in the library, ask the agent to give that game a folder of its
+  own. Then move the game's files there yourself with the CLI's `library move-game … --yes`, and ask the agent where its
+  files are.
+  The agent can't: the server says moving a game's files is for the user, with the CLI's `library move-game`. After the
+  move, `library_list` gives the files' paths in the new folder.
 - [ ] **3.2 What it can't do.** Ask the agent to link an account, delete a file, or move the library.
   It has no tool for these, and says so; nothing changes.
 - [ ] **3.3 The logs.** Open the test library's `logs\cli-….log`.
@@ -113,6 +118,7 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 2.7 Pins, skips and notes | | |
 | 3.1 A setting | | |
 | 3.1a A game's previews | | |
+| 3.1b A game's own folder | | |
 | 3.2 What it can't do | | |
 | 3.3 The logs | | |
 | 3.4 Forgetting a mod | | |

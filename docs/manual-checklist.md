@@ -124,6 +124,8 @@ Use a file of a few hundred MB, so there's time to stop it: for example a textur
   The first set says `games.nexus/stardewvalley.checkUpdates is now false`, the game's key alone naming Nexus Mods' game. With `checkUpdates` false, `library check` says "Checked 0 mods with 0 requests." `settings show` lists `games.nexus/stardewvalley.checkUpdates false`, `games.nexus/stardewvalley.updateInterval 1d` and `games.nexus/stardewvalley.browse.window 7d`, and `settings.json` holds them under `"games"`, as `"nexus/stardewvalley"`. Each reset says the game goes by every game's setting again, or Browse's own, and `settings show` lists none of them afterwards.
 - [ ] **7.5a A game's previews.** `ms settings set games.stardewvalley.previews cards`, `ms settings set games.stardewvalley.previews big`, `ms settings show`, then `ms settings reset games.stardewvalley.previews`.
   The first says "games.nexus/stardewvalley.previews is now cards: on nexus/stardewvalley's page in the desktop app's Library, and in Browse while it's chosen, its mods show as cards, with large pictures." The second says "'big' isn't off, thumbnails or cards." with exit code 2. `settings show` lists `games.nexus/stardewvalley.previews cards`, and `settings.json` holds `"previews": "cards"` under `"nexus/stardewvalley"`. The reset says the game's mods show as `previews.library` and `previews.browse` say.
+- [ ] **7.5b A game's own folder.** With SMAPI's file downloaded (4 or 5): `ms settings set games.stardewvalley.root "$test\Stardew"`, then `ms library move-game stardewvalley "$test\Stardew"`, then the same with `--yes`, `ms library list --files` and `ms settings show`. Then `ms download "https://www.nexusmods.com/stardewvalley/mods/2400"` once more, and last `ms library move-game stardewvalley --yes`.
+  The set is refused (exit code 1): "nexus/stardewvalley has files in …. Moving the game's files changes its folder and takes them along. To move them there: library move-game stardewvalley "…\Stardew"". Without `--yes`, it says how many files move, how much room they take, from where to where, and that both folders are on one drive; "Nothing moved yet. To move them: add --yes." and nothing moves. With `--yes`: "Moved 1 file from … to …\Stardew." and the file is under `…\Stardew\nexus\stardewvalley\SMAPI (2400)\`. `library list --files` shows it there, `settings show` lists `games.nexus/stardewvalley.root`, and the download says the file is in the library already, at its new path. Moving back puts the file in the library's folder, removes the emptied `Stardew` folder, and `settings show` no longer lists the root.
 - [ ] **7.6 Settings from before 1.0.0.** Before upgrading, note a game's own setting in `settings.json`, such as `"stardewvalley": { "notify": false }` under `"games"`. After upgrading, `ms settings show`.
   It lists `games.nexus/stardewvalley.notify false`. After any `ms settings set`, `settings.json` names the game `"nexus/stardewvalley"`, and keeps anything else it held.
 
@@ -266,6 +268,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 7.4 Unknown game | | | |
 | 7.5 A game's own settings | | | |
 | 7.5a A game's previews | | | |
+| 7.5b A game's own folder | | | |
 | 8.1 Tracked list | | – | |
 | 8.2 Track | | – | |
 | 8.3 Track again | | – | |

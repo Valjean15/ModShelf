@@ -222,6 +222,8 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
   Stardew Valley's page shows its mods without pictures, and the buttons say "This game's previews", with a tooltip saying a choice changes the game's; the other game shows thumbnails under "Previews". Browse shows Stardew Valley's results without pictures too, while another game shows cards. After **Cards** on its page, Settings shows Stardew Valley's previews on **Cards** at once, and the Library's own are still **Thumbnails**. **Use default** brings back the screens' previews on both.
 - [ ] **10.2e A change from the command line.** With the app open on another screen, run `dotnet run --project src/ModShelf.Cli -- settings set games.stardewvalley.notify false`, then open the Settings screen at Stardew Valley's page.
   "Notices" says **Overridden**, with the box unticked, without restarting the app.
+- [ ] **10.2f A game's own folder.** With Stardew Valley's files in the library, run `dotnet run --project src/ModShelf.Cli -- library move-game stardewvalley "<a new folder>" --yes`, then look at Stardew Valley in the Library, its SMAPI page, and its page in Settings › Games. Move it back with `library move-game stardewvalley --yes` afterwards.
+  No file of Stardew Valley says it's missing; **Open folder** on SMAPI opens its folder under the new folder; the folder pattern's example on Stardew Valley's Settings page starts with the new folder. **Choose another folder…** for the library moves only the other games' files, and refuses a folder that holds Stardew Valley's.
 - [ ] **10.3 Old versions.** Choose **Move the old versions to an _archive folder beside it**, then **Keep the newest versions** with 3.
   Each is kept at once: the settings file (10.7) holds `"oldVersions": 3`. The rule applies when a newer version of a file is downloaded from then on.
 - [ ] **10.4 Updates.** Choose **Every hour**, and untick **Show a notice when a check finds new updates**.
@@ -399,6 +401,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 10.2c A game's gear | | | |
 | 10.2d A game's previews | | | |
 | 10.2e A change from the command line | | | |
+| 10.2f A game's own folder | | | |
 | 10.3 Old versions | | | |
 | 10.4 Updates | | | |
 | 10.5 Theme | | | |
