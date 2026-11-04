@@ -14,6 +14,7 @@ using ModShelf.Cli.Tests.Fakes;
 using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
+using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Search;
 
 using static ModShelf.Cli.Tests.Fakes.FakeHandoffSource;
@@ -87,7 +88,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
                 "accounts_status", "diagnostics", "download", "downloads_cancel", "downloads_list", "downloads_pause",
                 "downloads_resume", "downloads_retry", "library_changes", "library_check", "library_forget", "library_list",
                 "library_note", "library_pin", "library_rescan", "library_skip", "library_unwatch", "library_updates", "library_watch",
-                "mod_search", "mod_show", "settings_reset", "settings_set", "settings_show",
+                "mod_games", "mod_search", "mod_show", "settings_reset", "settings_set", "settings_show",
             ],
             tools.Select(tool => tool.Name).Order(StringComparer.Ordinal));
         Assert.Equal(ModShelfMcpServer.Instructions, mcp.Client.ServerInstructions);
@@ -1048,6 +1049,47 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task FindsASitesGameByTheStartsOfItsNamesWords()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        GamesResult found = await mcp.CallAsync<GamesResult>("mod_games", Arguments(("words", "GAME example"), ("source", "fake-catalog")), Cancellation);
+        GamesResult none = await mcp.CallAsync<GamesResult>("mod_games", Arguments(("words", "ample"), ("source", "fake-catalog")), Cancellation);
+        GamesResult every = await mcp.CallAsync<GamesResult>("mod_games", Arguments(("source", "fake-catalog")), Cancellation);
+
+        Assert.Equal((1, 0, false), (found.Total, found.Offset, found.HasMore));
+        Assert.Equal(new GameEntry("fake-catalog", "game", "Example Game", "https://catalog.example/game"), Assert.Single(found.Games));
+        Assert.Equal((0, 0), (none.Total, none.Games.Count));
+        Assert.Equal(1, every.Total);
+    }
+
+    [Fact]
+    public async Task ListsASitesGamesAPageAtATimeThoseStartingWithTheWordsFirst()
+    {
+        _catalog.MoreGames.AddRange([new GameInfo(new GameRef(FakeCatalogSite.SourceId, "gamebox"), "Game Box"), new GameInfo(new GameRef(FakeCatalogSite.SourceId, "zoo"), "Zoo")]);
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        GamesResult first = await mcp.CallAsync<GamesResult>("mod_games", Arguments(("words", "game"), ("source", "fake-catalog"), ("pageSize", 1)), Cancellation);
+        GamesResult second = await mcp.CallAsync<GamesResult>("mod_games", Arguments(("words", "game"), ("source", "fake-catalog"), ("pageSize", 1), ("page", 2)), Cancellation);
+
+        Assert.Equal((2, 0, true, "gamebox"), (first.Total, first.Offset, first.HasMore, Assert.Single(first.Games).Game));
+        Assert.Equal((2, 1, false, "game"), (second.Total, second.Offset, second.HasMore, Assert.Single(second.Games).Game));
+    }
+
+    [Theory]
+    [InlineData("pageSize", 0, "pageSize must be from 1 to 100.")]
+    [InlineData("pageSize", 101, "pageSize must be from 1 to 100.")]
+    [InlineData("page", 0, "page must be 1 or more")]
+    [InlineData("source", "direct", "'direct' can't list its games. Sites that can: ")]
+    public async Task AListOfGamesItCantMakeIsRefused(string name, object value, string problem)
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        Dictionary<string, object?> arguments = new() { ["source"] = "fake-catalog", [name] = value };
+
+        Assert.Contains(problem, await mcp.CallFailingAsync("mod_games", arguments, Cancellation), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task SearchesInTheSitesOwnOrderAndPageSizeUnlessAsked()
     {
         _catalog.Capabilities = new([.. SearchOrder.BothWays(SearchSort.Newest), .. SearchOrder.BothWays(SearchSort.Name)], SearchFilters.Text, 10);
@@ -1135,7 +1177,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
             await mcp.CloseAsync(Cancellation);
         }
 
-        Assert.Contains(Cli.Logs.Entries, entry => entry.Contains("The MCP server started, with 24 tools", StringComparison.Ordinal));
+        Assert.Contains(Cli.Logs.Entries, entry => entry.Contains("The MCP server started, with 25 tools", StringComparison.Ordinal));
         Assert.DoesNotContain(Cli.Logs.Entries, entry => entry.Contains(GoodKey, StringComparison.Ordinal));
         Assert.DoesNotContain(Cli.Logs.Entries, entry => entry.Contains("handoff.example", StringComparison.Ordinal));
     }

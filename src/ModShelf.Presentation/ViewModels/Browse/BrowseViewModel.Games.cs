@@ -2,6 +2,7 @@ using System.Globalization;
 
 using CommunityToolkit.Mvvm.Input;
 
+using ModShelf.Application.Common;
 using ModShelf.Application.Settings;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
@@ -136,7 +137,15 @@ public sealed partial class BrowseViewModel
     {
         StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
         Games.SyncWith([.. _allGames.Where(game => !_hiddenGames.IsHidden(game.Game)).OrderBy(game => game.Name, byName)]);
+        ShowGameMatches();
     }
+
+    partial void OnGameTextChanged(string value) => ShowGameMatches();
+
+    /// <summary>
+    /// Lists the games whose names match what's typed in the game box, those that start with it first.
+    /// </summary>
+    private void ShowGameMatches() => GameMatches.SyncWith(NameQuery.Parse(GameText).Find(Games, game => game.Name));
 
     /// <summary>
     /// Starts the toolbar as the game's own settings say, when it has some: its order, how recently its mods were

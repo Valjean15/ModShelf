@@ -167,6 +167,75 @@ public sealed class ExampleSiteTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task ListsItsGamesEachWithItsKey()
+    {
+        CliResult listed = await RunAsync("mod", "games", "--source", "example");
+
+        Assert.Equal(Done, listed.ExitCode);
+        string[] lines = Lines(listed);
+        Assert.Equal("Example Mods lists 2 games. These are 1 to 2.", lines[0]);
+        Assert.Equal(["Key", "Name"], Words(lines[1]));
+        Assert.Equal(["pixel-farm", "Pixel", "Farm"], Words(lines[2]));
+        Assert.Equal(["stardew-valley", "Stardew", "Valley"], Words(lines[3]));
+        Assert.Equal("To search a game's mods: mod search --game <its key>", lines[^1]);
+    }
+
+    [Theory]
+    [InlineData("valley")]
+    [InlineData("VALLEY stardew")]
+    [InlineData("stardew-valley")]
+    public async Task FindsAGameByTheStartsOfItsNamesWords(string words)
+    {
+        CliResult found = await RunAsync(["mod", "games", .. words.Split(' '), "--source", "example"]);
+
+        string[] lines = Lines(found);
+        Assert.Equal("1 game on Example Mods matches.", lines[0]);
+        Assert.Equal(["stardew-valley", "Stardew", "Valley"], Words(lines[2]));
+    }
+
+    [Fact]
+    public async Task SaysWhenNoGameIsNamedSo()
+    {
+        CliResult found = await RunAsync("mod", "games", "dew", "--source", "example");
+
+        Assert.Equal((Done, "No game on Example Mods is named so: \"dew\"."), (found.ExitCode, found.Output.Trim()));
+    }
+
+    [Fact]
+    public async Task PagesThroughItsGames()
+    {
+        CliResult first = await RunAsync("mod", "games", "--source", "example", "--page-size", "1");
+        CliResult second = await RunAsync("mod", "games", "--source", "example", "--page-size", "1", "--page", "2");
+        CliResult beyond = await RunAsync("mod", "games", "--source", "example", "--page-size", "1", "--page", "3");
+
+        Assert.Contains("More on the next page: add --page 2.", first.Output, StringComparison.Ordinal);
+        Assert.StartsWith("Example Mods lists 2 games. These are 2 to 2.", second.Output, StringComparison.Ordinal);
+        Assert.DoesNotContain("More on the next page", second.Output, StringComparison.Ordinal);
+        Assert.Equal("No games on that page: Example Mods lists 2 games, 1 to a page.", beyond.Output.Trim());
+    }
+
+    [Theory]
+    [InlineData("--page-size", "0", "--page-size must be from 1 to 100.")]
+    [InlineData("--page-size", "101", "--page-size must be from 1 to 100.")]
+    [InlineData("--page", "0", "--page must be 1 or more, and not that many pages in.")]
+    public async Task RefusesAPageItCantGive(string option, string value, string refusal)
+    {
+        CliResult refused = await RunAsync("mod", "games", "--source", "example", option, value);
+
+        Assert.Equal((BadInput, refusal), (refused.ExitCode, refused.Errors.Trim()));
+    }
+
+    [Fact]
+    public async Task AsksWhichSitesGamesToListNowTwoHaveGames()
+    {
+        CliResult refused = await RunAsync("mod", "games", "valley");
+
+        Assert.Equal(BadInput, refused.ExitCode);
+        Assert.StartsWith("More than one site can list its games; choose one with --source: ", refused.Errors.Trim(), StringComparison.Ordinal);
+        Assert.Contains("example", refused.Errors, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task AsksWhichSiteToSearchNowTwoCan()
     {
         CliResult unclear = await RunAsync("mod", "search", "golden", "--game", "stardew-valley");

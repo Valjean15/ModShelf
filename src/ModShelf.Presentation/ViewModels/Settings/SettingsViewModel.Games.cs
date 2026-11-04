@@ -3,6 +3,7 @@ using System.Globalization;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
+using ModShelf.Application.Common;
 using ModShelf.Application.Settings;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
@@ -253,7 +254,8 @@ public sealed partial class SettingsViewModel
 
     /// <summary>
     /// Lists the games by name, each with its picture once its site gives one, and saying whether it has settings of its
-    /// own, and shows the chosen one's, or the first's.
+    /// own, and shows the chosen one's, or the first's. While searching, only the games whose names match are listed,
+    /// when some do.
     /// </summary>
     private void ShowGames()
     {
@@ -269,7 +271,10 @@ public sealed partial class SettingsViewModel
             rows.Add(row);
         }
 
-        Games.SyncWith([.. rows.OrderBy(row => row.Name, byName)]);
+        NameQuery search = Search();
+        GameRowViewModel[] named = [.. rows.Where(row => !search.IsEmpty && search.Matches(row.Name))];
+        IEnumerable<GameRowViewModel> listed = named.Length > 0 ? named : rows;
+        Games.SyncWith([.. listed.OrderBy(row => row.Name, byName)]);
         HasNoGames = Games.Count == 0;
         if (Game is { } page)
         {
@@ -282,7 +287,18 @@ public sealed partial class SettingsViewModel
         {
             SelectedGame = Games.FirstOrDefault();
         }
+
+        if (!search.IsEmpty)
+        {
+            // Names read since the search was typed may match it.
+            ShowSections();
+        }
     }
+
+    /// <summary>
+    /// The listed games whose names match <paramref name="search"/>.
+    /// </summary>
+    private IEnumerable<GameRef> GamesNamed(NameQuery search) => ListedGames().Where(game => search.Matches(NameOf(game)));
 
     /// <summary>
     /// Says on <paramref name="page"/> which other sites have a game of its name, and offers each one's settings.

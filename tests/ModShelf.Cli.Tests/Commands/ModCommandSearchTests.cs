@@ -1,5 +1,7 @@
 using ModShelf.Cli.Tests.Common;
 using ModShelf.Cli.Tests.Fakes;
+using ModShelf.Domain.Mods;
+using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Search;
 
@@ -223,6 +225,23 @@ public sealed class ModCommandSearchTests : IAsyncDisposable
         Assert.Contains("44 mods match, most likes first.", most.Output, StringComparison.Ordinal);
         Assert.Contains("44 mods match, fewest likes first.", fewest.Output, StringComparison.Ordinal);
         Assert.Equal(["ID", "Name", "Author", "Likes", "Downloads", "Updated", "Link"], most.Output.ReplaceLineEndings("\n").Split('\n')[1].Split(' ', StringSplitOptions.RemoveEmptyEntries));
+    }
+
+    [Fact]
+    public async Task ListsTheGamesThatStartWithTheWordsFirst()
+    {
+        _catalog.MoreGames.AddRange(
+        [
+            new GameInfo(new GameRef(FakeCatalogSite.SourceId, "abyss"), "Abyss Game"),
+            new GameInfo(new GameRef(FakeCatalogSite.SourceId, "gamebox"), "Game Box"),
+            new GameInfo(new GameRef(FakeCatalogSite.SourceId, "zoo"), "Zoo"),
+        ]);
+
+        CliResult found = await _cli.RunAsync(["mod", "games", "game", "--source", "fake-catalog"], Cancellation);
+
+        string[] lines = found.Output.ReplaceLineEndings("\n").Split('\n');
+        Assert.Equal("3 games on Fake catalog site match. These are 1 to 3.", lines[0]);
+        Assert.Equal(["gamebox", "abyss", "game"], lines[2..5].Select(line => line.Split(' ')[0]));
     }
 
     [Fact]

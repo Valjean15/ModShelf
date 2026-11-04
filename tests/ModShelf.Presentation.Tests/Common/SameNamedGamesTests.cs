@@ -10,16 +10,21 @@ public sealed class SameNamedGamesTests
     [InlineData("Stardew Valley", "stardew valley")]
     [InlineData("Stardew Valley ", " Stardew Valley")]
     [InlineData("\tSTARDEW VALLEY\n", "Stardew Valley")]
-    public void NamesAreTheSameIgnoringCaseAndSpacesAtTheirEnds(string first, string second)
+    [InlineData("Stardew Valley", "StardewValley")]
+    [InlineData("Stardew Valley", "Stardew  Valley")]
+    [InlineData("Pokémon", "Pokemon")]
+    [InlineData("S.T.A.L.K.E.R. 2", "Stalker 2")]
+    [InlineData("Final Fantasy XII", "Final Fantasy 12")]
+    public void NamesAreTheSameIgnoringCaseAccentsPunctuationAndSpaces(string first, string second)
     {
         Assert.True(SameNamedGames.Same(first, second));
         Assert.True(SameNamedGames.Same(second, first));
     }
 
     [Theory]
-    [InlineData("Stardew Valley", "StardewValley")]
-    [InlineData("Stardew Valley", "Stardew  Valley")]
     [InlineData("Skyrim", "Skyrim Special Edition")]
+    [InlineData("Stardew Valley", "Stardew Valley 2")]
+    [InlineData("Final Fantasy XII", "Final Fantasy XIII")]
     public void NamesDifferingOtherwiseAreNot(string first, string second)
         => Assert.False(SameNamedGames.Same(first, second));
 

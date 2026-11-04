@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
+using ModShelf.Application.Common;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 
@@ -8,12 +9,10 @@ namespace ModShelf.Presentation.ViewModels.Settings;
 
 /// <summary>
 /// The screen's categories, one shown at a time, and the search, which shows the settings that match from every
-/// category instead.
+/// category instead, and the games whose names match.
 /// </summary>
 public sealed partial class SettingsViewModel
 {
-    private static readonly char[] Spaces = [' ', '\t'];
-
     /// <summary>
     /// General, Library, Updates, Links, Games and About.
     /// </summary>
@@ -34,8 +33,8 @@ public sealed partial class SettingsViewModel
     public partial SettingsCategoryViewModel? SelectedCategory { get; set; }
 
     /// <summary>
-    /// Words to look for in the settings' headings, explanations and choices; empty for none, which shows the category
-    /// chosen.
+    /// Words to look for in the settings' headings, explanations and choices, and in the games' names, as
+    /// <see cref="NameQuery"/> reads them; empty for none, which shows the category chosen.
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsSearching))]
@@ -44,7 +43,7 @@ public sealed partial class SettingsViewModel
     /// <summary>
     /// Whether the settings shown are a search's, from every category.
     /// </summary>
-    public bool IsSearching => Words().Length > 0;
+    public bool IsSearching => !Search().IsEmpty;
 
     /// <summary>
     /// Such as "Settings that match “theme”"; empty when no search is under way.
@@ -209,7 +208,11 @@ public sealed partial class SettingsViewModel
         }
     }
 
-    partial void OnSearchTextChanged(string value) => ShowSections();
+    partial void OnSearchTextChanged(string value)
+    {
+        ShowSections();
+        ShowGames();
+    }
 
     /// <summary>
     /// Clears the search, back to the category chosen.
@@ -219,12 +222,12 @@ public sealed partial class SettingsViewModel
 
     /// <summary>
     /// Shows the chosen category's sections; or, while searching, those that say every word searched for, from every
-    /// category, and which categories hold some.
+    /// category, and which categories hold some. The games' section shows too when a game's name matches.
     /// </summary>
     private void ShowSections()
     {
-        string[] words = Words();
-        if (words.Length == 0)
+        NameQuery search = Search();
+        if (search.IsEmpty)
         {
             SettingsCategory category = (SelectedCategory ?? Categories[0]).Category;
             foreach (SettingsSectionViewModel section in Sections)
@@ -244,7 +247,7 @@ public sealed partial class SettingsViewModel
 
         foreach (SettingsSectionViewModel section in Sections)
         {
-            section.IsShown = section.Matches(words);
+            section.IsShown = section.Matches(search) || (section == GamesSection && GamesNamed(search).Any());
         }
 
         foreach (SettingsCategoryViewModel shown in Categories)
@@ -257,5 +260,5 @@ public sealed partial class SettingsViewModel
         NothingMatches = Sections.Any(section => section.IsShown) ? null : Text.Format(Strings.SettingsNothingMatches, searched);
     }
 
-    private string[] Words() => SearchText.Split(Spaces, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    private NameQuery Search() => NameQuery.Parse(SearchText);
 }

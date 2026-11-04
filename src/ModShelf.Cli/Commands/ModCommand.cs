@@ -55,6 +55,7 @@ internal static partial class ModCommand
         {
             show,
             CreateSearch(environment),
+            CreateGames(environment),
             CreateUpdates(environment),
             CreateTracked(environment),
             CreateTrack(environment, track: true),

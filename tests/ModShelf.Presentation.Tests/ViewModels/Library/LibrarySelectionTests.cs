@@ -57,14 +57,14 @@ public sealed class LibrarySelectionTests : IDisposable
     {
         await StartAsync();
         _ = Row(SkyUi);
-        Screen.ModsFilter = "s";
+        Screen.ModsFilter = "lib";
 
         Screen.AreAllShownSelected = true;
         Screen.ModsFilter = string.Empty;
         string[] selected = [.. Screen.GameMods.Where(mod => mod.IsSelected).Select(mod => mod.Name)];
         Screen.AreAllShownSelected = false;
 
-        Assert.Equal(["Address Library", "SkyUI"], selected);
+        Assert.Equal(["Address Library"], selected);
         Assert.Equal("0 selected", Screen.SelectionText);
     }
 

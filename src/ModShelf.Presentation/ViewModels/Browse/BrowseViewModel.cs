@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Catalog;
+using ModShelf.Application.Common;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Library;
 using ModShelf.Application.Library.Ports;
@@ -156,6 +157,18 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     /// The games the sites that can search have, by name.
     /// </summary>
     public ObservableCollection<GameChoice> Games { get; } = [];
+
+    /// <summary>
+    /// What's typed in the game box, to find a game by its name.
+    /// </summary>
+    [ObservableProperty]
+    public partial string GameText { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The games whose names match <see cref="GameText"/>, as <see cref="NameQuery"/> reads it, those that start with it
+    /// first, each by name otherwise; every game while nothing's typed.
+    /// </summary>
+    public ObservableCollection<GameChoice> GameMatches { get; } = [];
 
     /// <summary>
     /// The game whose mods are searched; null until one is chosen. Choosing one searches it.

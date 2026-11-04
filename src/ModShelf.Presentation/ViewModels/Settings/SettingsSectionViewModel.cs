@@ -1,6 +1,6 @@
-using System.Globalization;
-
 using CommunityToolkit.Mvvm.ComponentModel;
+
+using ModShelf.Application.Common;
 
 namespace ModShelf.Presentation.ViewModels.Settings;
 
@@ -10,7 +10,6 @@ namespace ModShelf.Presentation.ViewModels.Settings;
 /// </summary>
 public sealed partial class SettingsSectionViewModel : ObservableObject
 {
-    private static readonly CompareInfo Comparing = CultureInfo.InvariantCulture.CompareInfo;
     private readonly string _words;
 
     /// <param name="words">What the section says, which a search looks in: its heading, what it explains, its choices.</param>
@@ -28,8 +27,8 @@ public sealed partial class SettingsSectionViewModel : ObservableObject
     public partial bool IsShown { get; internal set; }
 
     /// <summary>
-    /// Whether the section says each of the words searched for, in any case and with or without accents.
+    /// Whether each word searched for starts a word the section says, as <see cref="NameQuery"/> reads names: in any
+    /// case, with or without accents.
     /// </summary>
-    internal bool Matches(IEnumerable<string> words)
-        => words.All(word => Comparing.IndexOf(_words, word, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace) >= 0);
+    internal bool Matches(NameQuery search) => search.Matches(_words);
 }

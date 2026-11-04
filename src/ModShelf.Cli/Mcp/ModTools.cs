@@ -1,9 +1,11 @@
 using System.ComponentModel;
+using System.Globalization;
 
 using ModelContextProtocol;
 using ModelContextProtocol.Server;
 
 using ModShelf.Application.Catalog;
+using ModShelf.Application.Common;
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
@@ -15,8 +17,8 @@ using ModShelf.Sources.Abstractions.Search;
 namespace ModShelf.Cli.Mcp;
 
 /// <summary>
-/// The MCP tools that look mods up on their sites: a mod's details and files, and searching a game's mods. Nothing is
-/// downloaded or saved.
+/// The MCP tools that look mods up on their sites: a mod's details and files, searching a game's mods, and finding a
+/// site's games by name. Nothing is downloaded or saved.
 /// </summary>
 [McpServerToolType]
 internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettingsService settings, ISourceRegistry sources)
@@ -25,6 +27,11 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
     /// How many mods a page lists unless pageSize says otherwise, or fewer when the site's pages hold fewer.
     /// </summary>
     private const int DefaultPageSize = 20;
+
+    /// <summary>
+    /// The most games a page of <c>mod_games</c> lists.
+    /// </summary>
+    private const int MostGamesAPage = 100;
 
     // The sections listed unless all files are asked for, as the sites show them.
     private static readonly ModFileCategory[] CurrentSections =
@@ -138,7 +145,7 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
                 throw new McpException($"pageSize must be from 1 to {SearchQuery.MaxCount}.");
             }
 
-            SourceId site = ChooseSource(lookup.SearchableSources, source);
+            SourceId site = ChooseSource(lookup.SearchableSources, source, "search");
 
             // The site's own order and page size unless asked otherwise; a whole number of pages in, so each page starts
             // where the last ended.
@@ -180,23 +187,57 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
                 ]);
         });
 
+    [McpServerTool(Name = "mod_games", Title = "Find a site's games", ReadOnly = true, Idempotent = true, OpenWorld = true, UseStructuredContent = true)]
+    [Description("Lists a site's games whose names match, those that start with the words first, a page at a time, each with the key mod_search's game takes. Each word must start a word of the name, in any order; case, accents, quotes and other punctuation don't count, and a Roman numeral from II to XXX is its number too: \"stalker 2\" finds S.T.A.L.K.E.R. 2, \"final fantasy 12\" Final Fantasy XII.")]
+    public Task<GamesResult> GamesAsync(
+        [Description("Words of the game's name; none to list every game.")] string? words = null,
+        [Description("The site, such as nexus; needed only when more than one site lists its games.")] string? source = null,
+        [Description("Which page of games, from 1.")] int page = 1,
+        [Description("How many games a page lists, from 1 to 100.")] int pageSize = 20,
+        CancellationToken cancellationToken = default)
+        => McpProblems.GuardAsync(async () =>
+        {
+            if (pageSize is < 1 or > MostGamesAPage)
+            {
+                throw new McpException($"pageSize must be from 1 to {MostGamesAPage}.");
+            }
+
+            if (page < 1 || (long)(page - 1) * pageSize > int.MaxValue)
+            {
+                throw new McpException("page must be 1 or more, and not that many pages in.");
+            }
+
+            SourceId site = ChooseSource([.. sources.All<IModCatalog>().Select(catalog => catalog.Id)], source, "list its games");
+            StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
+            IReadOnlyList<GameInfo> found = NameQuery.Parse(words).Find(
+                (await lookup.GetGamesAsync(site, cancellationToken).ConfigureAwait(false)).OrderBy(game => game.Name, byName),
+                game => game.Name);
+            int offset = (page - 1) * pageSize;
+            GameEntry[] shown =
+            [
+                .. found.Skip(offset).Take(pageSize).Select(game => new GameEntry(game.Game.Source.Value, game.Game.Key, game.Name, game.PageUrl?.AbsoluteUri)),
+            ];
+            return new GamesResult(found.Count, offset, offset + shown.Length < found.Count, shown);
+        });
+
     /// <summary>
-    /// The site asked for, or the only one that can search.
+    /// The site asked for, or the only one that can.
     /// </summary>
+    /// <param name="what">What the site must be able to do, such as "search".</param>
     /// <exception cref="McpException">That site can't, or there's no choice to make.</exception>
-    private static SourceId ChooseSource(IReadOnlyList<SourceId> able, string? asked)
+    private static SourceId ChooseSource(IReadOnlyList<SourceId> able, string? asked, string what)
     {
         if (asked is null)
         {
             return able.Count switch
             {
                 1 => able[0],
-                0 => throw new McpException("No site ModShelf knows can search."),
-                _ => throw new McpException($"More than one site can search; choose one with source: {string.Join(", ", able)}."),
+                0 => throw new McpException($"No site ModShelf knows can {what}."),
+                _ => throw new McpException($"More than one site can {what}; choose one with source: {string.Join(", ", able)}."),
             };
         }
 
         return able.FirstOrDefault(source => string.Equals(source.Value, asked.Trim(), StringComparison.OrdinalIgnoreCase))
-            ?? throw new McpException($"'{asked}' can't search. Sites that can: {string.Join(", ", able)}.");
+            ?? throw new McpException($"'{asked}' can't {what}. Sites that can: {string.Join(", ", able)}.");
     }
 }

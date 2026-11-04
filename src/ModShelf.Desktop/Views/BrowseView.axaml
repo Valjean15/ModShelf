@@ -13,9 +13,11 @@
 
         <!-- The game, and what to look for in it: words, or a link to a mod. -->
         <Grid DockPanel.Dock="Top" ColumnDefinitions="260,*,Auto" ColumnSpacing="8">
-            <AutoCompleteBox ItemsSource="{Binding Games}"
+            <!-- The view model finds the games whose names match what's typed, those starting with it first. -->
+            <AutoCompleteBox ItemsSource="{Binding GameMatches}"
                              SelectedItem="{Binding Game}"
-                             FilterMode="Contains"
+                             Text="{Binding GameText, Mode=TwoWay}"
+                             FilterMode="None"
                              PlaceholderText="{x:Static res:Strings.BrowseGameHint}"
                              IsEnabled="{Binding !IsReadingGames}" />
             <TextBox Grid.Column="1"

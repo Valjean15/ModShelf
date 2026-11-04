@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Catalog;
+using ModShelf.Application.Common;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Library;
 using ModShelf.Application.Library.Ports;
@@ -188,7 +189,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     public partial string ShowHiddenGamesText { get; private set; } = string.Empty;
 
     /// <summary>
-    /// What the games' names must have to show; empty for every game.
+    /// What the games' names must match to show, as <see cref="NameQuery"/> reads it; empty for every game.
     /// </summary>
     [ObservableProperty]
     public partial string GamesFilter { get; set; } = string.Empty;
@@ -236,7 +237,8 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     public ObservableCollection<LibraryModViewModel> GameMods { get; } = [];
 
     /// <summary>
-    /// What the open game's mods' names or authors must have to show; empty for every mod.
+    /// What the open game's mods' names or authors must match to show, as <see cref="NameQuery"/> reads it; empty for every
+    /// mod.
     /// </summary>
     [ObservableProperty]
     public partial string ModsFilter { get; set; } = string.Empty;
@@ -852,14 +854,14 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             heading.AlsoOnText = SameNamedGames.AlsoOn(SameNamedGames.Of(game, heading.Name, named), _sources);
         }
 
-        string filter = GamesFilter.Trim();
+        NameQuery filter = NameQuery.Parse(GamesFilter);
         int hidden = byGame.Keys.Count(game => _hiddenGames.IsHidden(game));
         HasHiddenGames = hidden > 0;
         ShowHiddenGamesText = Text.Format(Strings.LibraryShowHidden, hidden);
         IEnumerable<LibraryGameViewModel> shown = byGame.Keys
             .Where(game => ShowHiddenGames || !_hiddenGames.IsHidden(game))
             .Select(game => _games[game])
-            .Where(game => Has(game.Name, filter));
+            .Where(game => filter.Matches(game.Name));
         IOrderedEnumerable<LibraryGameViewModel> ordered = SelectedGameOrder.Value switch
         {
             GameOrder.MostMods => shown.OrderByDescending(game => game.ModCount),
@@ -880,7 +882,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             : summary;
         IsEmpty = _mods.Count == 0;
         NothingMatches = !IsEmpty && Games.Count == 0;
-        NothingMatchesText = NothingMatches ? Text.Format(Strings.LibraryNothingMatchesGames, filter) : string.Empty;
+        NothingMatchesText = NothingMatches ? Text.Format(Strings.LibraryNothingMatchesGames, filter.Text) : string.Empty;
 
         if (OpenGame is { } open && !byGame.ContainsKey(open.Game))
         {
@@ -918,9 +920,9 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             toggle.Count = mods.Count(mod => Says(toggle.Kind, mod));
         }
 
-        string filter = ModsFilter.Trim();
+        NameQuery filter = NameQuery.Parse(ModsFilter);
         IEnumerable<LibraryModViewModel> shown = mods
-            .Where(mod => Has(mod.Name, filter) || (_shown.GetValueOrDefault(mod.Mod)?.Author is { } author && Has(author, filter)))
+            .Where(mod => filter.Matches(mod.Name) || (_shown.GetValueOrDefault(mod.Mod)?.Author is { } author && filter.Matches(author)))
             .Where(mod => ModFilters.All(toggle => !toggle.IsOn || Says(toggle.Kind, mod)));
         IOrderedEnumerable<LibraryModViewModel> ordered = SelectedModOrder.Value switch
         {
@@ -933,12 +935,6 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         GameMods.SyncWith([.. ordered.ThenBy(mod => mod.Name, byName)]);
         NoModMatches = GameMods.Count == 0;
     }
-
-    /// <summary>
-    /// Whether the text has the filter, as the user's culture compares text, case aside; any text has an empty filter.
-    /// </summary>
-    private static bool Has(string text, string filter)
-        => filter.Length == 0 || CultureInfo.CurrentCulture.CompareInfo.IndexOf(text, filter, CompareOptions.IgnoreCase) >= 0;
 
     private static bool Says(ModFilterKind kind, LibraryModViewModel mod) => kind switch
     {

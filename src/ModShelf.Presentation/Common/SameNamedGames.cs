@@ -1,3 +1,4 @@
+using ModShelf.Application.Common;
 using ModShelf.Application.Sources;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Resources;
@@ -11,15 +12,10 @@ namespace ModShelf.Presentation.Common;
 internal static class SameNamedGames
 {
     /// <summary>
-    /// Whether two games' names are the same: ignoring case, and spaces at their ends.
+    /// Whether two games' names are the same, as <see cref="NameQuery.SameName"/> says: ignoring case, accents,
+    /// apostrophes, quotes, other punctuation and spaces, with Roman numerals read as numbers.
     /// </summary>
-    public static bool Same(string first, string second)
-    {
-        ArgumentNullException.ThrowIfNull(first);
-        ArgumentNullException.ThrowIfNull(second);
-
-        return string.Equals(first.Trim(), second.Trim(), StringComparison.OrdinalIgnoreCase);
-    }
+    public static bool Same(string first, string second) => NameQuery.SameName(first, second);
 
     /// <summary>
     /// The games among <paramref name="named"/> on other sites than <paramref name="game"/>'s, named as it is.

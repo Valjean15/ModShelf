@@ -68,8 +68,13 @@ internal sealed partial class FakeCatalogSite : ILinkRecognizer, IModCatalog, IM
         return Task.FromResult<RecognizedLink?>(new RecognizedLink(File(mod, file), $"file-{file}.zip"));
     }
 
+    /// <summary>
+    /// Games it lists besides Example Game, which have no mods; none unless the test adds them.
+    /// </summary>
+    public List<GameInfo> MoreGames { get; } = [];
+
     public Task<IReadOnlyList<GameInfo>> GetGamesAsync(CancellationToken cancellationToken)
-        => Task.FromResult<IReadOnlyList<GameInfo>>([new GameInfo(new GameRef(Id, "game"), "Example Game", new Uri($"https://{Host}/game"))]);
+        => Task.FromResult<IReadOnlyList<GameInfo>>([new GameInfo(new GameRef(Id, "game"), "Example Game", new Uri($"https://{Host}/game")), .. MoreGames]);
 
     public Task<GameInfo> GetGameAsync(GameRef game, CancellationToken cancellationToken)
         => Task.FromResult(new GameInfo(game, "Example Game", new Uri($"https://{Host}/game")));
