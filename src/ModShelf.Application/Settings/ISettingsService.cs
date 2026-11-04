@@ -31,13 +31,20 @@ public interface ISettingsService
     /// <exception cref="InvalidDataException">The stored settings can't be read.</exception>
     Task<string> GetLibraryRootAsync(CancellationToken cancellationToken);
 
+    /// <returns>
+    /// Where the library's files are: its root, the one set or the default, and the folders of games with their own.
+    /// </returns>
+    /// <exception cref="InvalidDataException">The stored settings can't be read.</exception>
+    Task<Library.LibraryRoots> GetLibraryRootsAsync(CancellationToken cancellationToken);
+
     /// <summary>
     /// Sets the library's root folder, or sets it back to the default with null. Only an empty library's root changes this
-    /// way; <see cref="Library.ILibraryMover"/> moves a library with files.
+    /// way; <see cref="Library.ILibraryMover"/> moves a library with files. Games with folders of their own don't count.
     /// </summary>
     /// <exception cref="ArgumentException"><paramref name="root"/> isn't an absolute path.</exception>
     /// <exception cref="InvalidOperationException">
-    /// The library has files under its current root, or downloads into it aren't finished.
+    /// The library has files under its current root, downloads into it aren't finished, or the new root is a game's
+    /// folder, inside one, or holds one.
     /// </exception>
     Task SetLibraryRootAsync(string? root, CancellationToken cancellationToken);
 
@@ -52,12 +59,22 @@ public interface ISettingsService
     /// <see cref="GameSettings.None"/>, and gives those it should have. A game left with no setting of its own is
     /// forgotten.
     /// </summary>
+    /// <remarks>
+    /// Its folder (<see cref="GameSettings.Root"/>) changes this way only while it has no files;
+    /// <see cref="Library.ILibraryMover.MoveGameAsync"/> moves a game with files.
+    /// </remarks>
+    /// <exception cref="ArgumentException">The game's new folder isn't an absolute path.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// The game's folder would change while it has files, or downloads of its files into its folder aren't finished;
+    /// or the new folder is the library's root or another game's folder, is inside one, or holds one.
+    /// </exception>
     Task SetGameAsync(GameRef game, Func<GameSettings, GameSettings> change, CancellationToken cancellationToken);
 
     /// <summary>
     /// Gives <paramref name="game"/> the own settings <paramref name="other"/> has, in place of its own, such as the same
     /// game on another site: every one of them, and none when <paramref name="other"/> has none. The user chooses this;
-    /// ModShelf never does it by itself.
+    /// ModShelf never does it by itself. The game keeps its own folder (<see cref="GameSettings.Root"/>), which only
+    /// moving its files changes.
     /// </summary>
     /// <exception cref="ArgumentException">Both are the same game.</exception>
     Task CopyGameAsync(GameRef other, GameRef game, CancellationToken cancellationToken);

@@ -583,6 +583,23 @@ public sealed class JsonSettingsStoreTests : IDisposable
     }
 
     [Fact]
+    public async Task KeepsAGamesOwnFolderFirst()
+    {
+        string folder = Path.Combine(_folder.Path, "Stardew mods");
+        GameSettings stardew = new() { Root = folder, Folders = FolderPattern.Parse("{mod}/{file}") };
+        await Store().SaveAsync(new AppSettings { Games = Games(("nexus/stardewvalley", stardew)) }, Cancellation);
+
+        AppSettings settings = await Store().LoadAsync(Cancellation);
+
+        Assert.Equal(stardew, settings.GameFor(Nexus("stardewvalley")));
+        string file = await File.ReadAllTextAsync(FilePath, Cancellation);
+        Assert.True(
+            file.IndexOf("\"root\"", StringComparison.Ordinal) < file.IndexOf("\"folders\"", StringComparison.Ordinal),
+            "A game's folder comes before its pattern.");
+        Assert.Contains(System.Text.Json.JsonSerializer.Serialize(folder), file, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task KeepsAGamesOwnPreviews()
     {
         GameSettings stardew = new() { Notify = false, Previews = PreviewLevel.Cards, Hidden = true };
@@ -773,6 +790,8 @@ public sealed class JsonSettingsStoreTests : IDisposable
     [InlineData("""{ "games": { "fallout4": { "hidden": "yes" } } }""", "games.fallout4.hidden must be true or false.")]
     [InlineData("""{ "games": { "fallout4": { "previews": "big" } } }""", "games.fallout4.previews must be off, thumbnails or cards.")]
     [InlineData("""{ "games": { "fallout4": { "previews": 2 } } }""", "games.fallout4.previews must be text.")]
+    [InlineData("""{ "games": { "fallout4": { "root": "Fallout mods" } } }""", "games.fallout4.root must be a full path, not 'Fallout mods'.")]
+    [InlineData("""{ "games": { "fallout4": { "root": 4 } } }""", "games.fallout4.root must be text.")]
     [InlineData("""{ "games": { "fallout4": { "browse": 3 } } }""", "games.fallout4.browse must hold how Browse shows the game's mods.")]
     [InlineData("""{ "games": { "fallout4": { "browse": { "sort": "best" } } } }""", "games.fallout4.browse.sort must be one of relevance, ")]
     [InlineData("""{ "games": { "fallout4": { "browse": { "direction": "up" } } } }""", "games.fallout4.browse.direction must be ascending or descending.")]

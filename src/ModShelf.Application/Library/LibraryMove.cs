@@ -1,7 +1,7 @@
 namespace ModShelf.Application.Library;
 
 /// <summary>
-/// What <see cref="ILibraryMover.MoveAsync"/> did.
+/// What <see cref="ILibraryMover.MoveAsync"/> or <see cref="ILibraryMover.MoveGameAsync"/> did.
 /// </summary>
 /// <param name="From">The old root.</param>
 /// <param name="To">The new root, as it's stored.</param>
@@ -10,5 +10,9 @@ namespace ModShelf.Application.Library;
 /// <param name="Missing">
 /// How many files the library has that weren't on disk. They stay in the library, to be downloaded again.
 /// </param>
+/// <param name="CopiesKept">
+/// Of those already there, how many still had a copy in the old folder, a game's move having found them there. The
+/// copies stay.
+/// </param>
 /// <remarks>When the library is in the new root already, nothing changes, and <paramref name="From"/> is <paramref name="To"/>.</remarks>
-public sealed record LibraryMove(string From, string To, int Moved, int AlreadyThere, int Missing);
+public sealed record LibraryMove(string From, string To, int Moved, int AlreadyThere, int Missing, int CopiesKept = 0);

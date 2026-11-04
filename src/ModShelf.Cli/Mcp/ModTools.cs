@@ -48,7 +48,7 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
         {
             ModPage page = await lookup.LookUpAsync(McpProblems.Link(link), cancellationToken).ConfigureAwait(false);
             LibraryMod? known = await library.FindAsync(page.Mod.Mod, cancellationToken).ConfigureAwait(false);
-            string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+            LibraryRoots roots = await settings.GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false);
 
             ModFile[] listed =
             [
@@ -64,7 +64,7 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
                 .. (known?.Files ?? [])
                     .Where(file => !onSite.Contains(file.File))
                     .OrderByDescending(file => file.UploadedAt)
-                    .Select(file => McpEntries.File(file, root)),
+                    .Select(file => McpEntries.File(file, roots)),
             ];
             DateTimeOffset? newestOnSite = page.Files.Count == 0 ? null : page.Files.Max(file => file.UploadedAt);
             return new ModDetails(
@@ -89,7 +89,7 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
                     .. listed.Select(file =>
                     {
                         LibraryFile? have = known?.Files.FirstOrDefault(kept => kept.File == file.Reference);
-                        string? path = have is null ? null : LibraryPaths.Resolve(root, have.RelativePath);
+                        string? path = have is null ? null : roots.Resolve(have);
                         return new ModFileEntry(
                             file.Reference.Id,
                             file.Name,

@@ -14,8 +14,8 @@ namespace ModShelf.Cli.Commands;
 /// <summary>
 /// <c>library list</c>, <c>library watch &lt;link&gt;</c>, <c>library unwatch &lt;link&gt;</c>,
 /// <c>library forget &lt;link&gt;</c> and <c>library move &lt;folder&gt;</c>: the mods ModShelf watches for updates or
-/// has downloaded files of, and where their files are. Checking for updates, rescanning, and pins, skipped updates and
-/// notes are in files of their own.
+/// has downloaded files of, and where their files are. Checking for updates, rescanning, moving a game's files, and
+/// pins, skipped updates and notes are in files of their own.
 /// </summary>
 internal static partial class LibraryCommand
 {
@@ -41,7 +41,7 @@ internal static partial class LibraryCommand
         };
         move.SetAction((parsed, cancellationToken) => MoveAsync(environment, parsed.GetValue(folder)!, cancellationToken));
 
-        return new Command("library", "Shows the library of watched and downloaded mods, watches mods and checks them for updates, pins mods, skips updates, keeps notes, forgets and rescans mods, and moves the library.")
+        return new Command("library", "Shows the library of watched and downloaded mods, watches mods and checks them for updates, pins mods, skips updates, keeps notes, forgets and rescans mods, and moves the library or a game's files.")
         {
             list,
             CreateWatch(environment, watch: true),
@@ -55,6 +55,7 @@ internal static partial class LibraryCommand
             CreateCheck(environment),
             CreateUpdates(environment),
             move,
+            CreateMoveGame(environment),
         };
     }
 
@@ -191,10 +192,10 @@ internal static partial class LibraryCommand
                     WriteNotes(environment.Output, mods);
                     if (files)
                     {
-                        string root;
+                        LibraryRoots roots;
                         try
                         {
-                            root = await services.GetRequiredService<ISettingsService>().GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+                            roots = await services.GetRequiredService<ISettingsService>().GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false);
                         }
                         catch (InvalidDataException exception)
                         {
@@ -202,7 +203,7 @@ internal static partial class LibraryCommand
                             return ExitCodes.Failed;
                         }
 
-                        WriteFiles(environment.Output, mods, root);
+                        WriteFiles(environment.Output, mods, roots);
                     }
 
                     return ExitCodes.Done;
@@ -241,7 +242,7 @@ internal static partial class LibraryCommand
     /// A table of the library's files, by mod as the mods are listed, the latest downloaded first. A file recorded before
     /// ModShelf kept hashes has none until a rescan reads it.
     /// </summary>
-    private static void WriteFiles(TextWriter output, IReadOnlyList<LibraryMod> mods, string root)
+    private static void WriteFiles(TextWriter output, IReadOnlyList<LibraryMod> mods, LibraryRoots roots)
     {
         LibraryFile[] all =
         [
@@ -272,7 +273,7 @@ internal static partial class LibraryCommand
                 file.VersionLabel ?? "-",
                 Sizes.Format(file.SizeInBytes),
                 file.Sha256 ?? "-",
-                LibraryPaths.Resolve(root, file.RelativePath),
+                roots.Resolve(file),
             }),
         ];
         TextTable.Write(output, rows);

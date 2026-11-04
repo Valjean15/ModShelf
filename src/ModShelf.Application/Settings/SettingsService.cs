@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 
 using ModShelf.Application.Downloads.Ports;
+using ModShelf.Application.Library;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Domain.Common;
@@ -46,6 +47,9 @@ internal sealed class SettingsService : ISettingsService, IDisposable
     public async Task<string> GetLibraryRootAsync(CancellationToken cancellationToken)
         => (await _store.LoadAsync(cancellationToken).ConfigureAwait(false)).LibraryRoot ?? DefaultLibraryRoot;
 
+    public async Task<LibraryRoots> GetLibraryRootsAsync(CancellationToken cancellationToken)
+        => LibraryRoots.Of(await _store.LoadAsync(cancellationToken).ConfigureAwait(false), DefaultLibraryRoot);
+
     public async Task SetLibraryRootAsync(string? root, CancellationToken cancellationToken)
     {
         string? normalized = root is null ? null : FullRoot(root, nameof(root));
@@ -55,13 +59,19 @@ internal sealed class SettingsService : ISettingsService, IDisposable
                     string current = settings.LibraryRoot ?? DefaultLibraryRoot;
                     if (!FilePaths.Same(current, normalized ?? DefaultLibraryRoot))
                     {
-                        if ((await _library.ListAsync(token).ConfigureAwait(false)).Any(mod => mod.Files.Count > 0))
+                        LibraryRoots roots = LibraryRoots.Of(settings, DefaultLibraryRoot);
+                        if ((await _library.ListAsync(token).ConfigureAwait(false)).Any(mod => mod.Files.Count > 0 && !roots.HasOwn(mod.Mod.Game)))
                         {
                             throw new InvalidOperationException(
                                 $"The library has files in {current}. Moving the library changes its root and takes them along.");
                         }
 
-                        await EnsureNoDownloadsIntoAsync(current, token).ConfigureAwait(false);
+                        if (roots.ClashOf(null, normalized ?? DefaultLibraryRoot) is { } clash)
+                        {
+                            throw new InvalidOperationException(clash);
+                        }
+
+                        await EnsureNoDownloadsIntoAsync(current, null, token).ConfigureAwait(false);
                     }
 
                     return settings with { LibraryRoot = normalized };
@@ -86,10 +96,20 @@ internal sealed class SettingsService : ISettingsService, IDisposable
         ArgumentNullException.ThrowIfNull(change);
 
         return ChangeAsync(
-            (settings, _) => Task.FromResult(WithGame(
-                settings,
-                game,
-                change(settings.GameFor(game)) ?? throw new InvalidOperationException("A game's changed settings can't be null."))),
+            async (settings, token) =>
+            {
+                GameSettings before = settings.GameFor(game);
+                GameSettings after = change(before) ?? throw new InvalidOperationException("A game's changed settings can't be null.");
+                // The same folder named another way stays as it's stored.
+                after = after with
+                {
+                    Root = SameFolder(before.Root, after.Root)
+                        ? before.Root
+                        : await CheckGameRootAsync(settings, game, after.Root, token).ConfigureAwait(false),
+                };
+
+                return WithGame(settings, game, after);
+            },
             cancellationToken);
     }
 
@@ -102,7 +122,10 @@ internal sealed class SettingsService : ISettingsService, IDisposable
             throw new ArgumentException("A game can't take its settings from itself.", nameof(game));
         }
 
-        return ChangeAsync((settings, _) => Task.FromResult(WithGame(settings, game, settings.GameFor(other))), cancellationToken);
+        // Its folder changes only with its files.
+        return ChangeAsync(
+            (settings, _) => Task.FromResult(WithGame(settings, game, settings.GameFor(other) with { Root = settings.GameFor(game).Root })),
+            cancellationToken);
     }
 
     public Task SetOldVersionsAsync(OldVersionRule? rule, CancellationToken cancellationToken)
@@ -212,13 +235,28 @@ internal sealed class SettingsService : ISettingsService, IDisposable
     }
 
     /// <summary>
-    /// Throws unless every download into <paramref name="root"/> has finished or been cancelled.
+    /// Sets the folder of a game whose files are there already, as moving the game does once they're all moved; null
+    /// for the library's root.
     /// </summary>
-    /// <exception cref="InvalidOperationException">A download into the root is unfinished.</exception>
-    internal async Task EnsureNoDownloadsIntoAsync(string root, CancellationToken cancellationToken)
+    internal Task MoveGameRootAsync(GameRef game, string? root, CancellationToken cancellationToken)
+    {
+        string? normalized = root is null ? null : FullRoot(root, nameof(root));
+        return ChangeAsync(
+            (settings, _) => Task.FromResult(WithGame(settings, game, settings.GameFor(game) with { Root = normalized })),
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// Throws unless every download into <paramref name="root"/>, of <paramref name="game"/>'s files when it's given,
+    /// has finished or been cancelled.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Such a download is unfinished.</exception>
+    internal async Task EnsureNoDownloadsIntoAsync(string root, GameRef? game, CancellationToken cancellationToken)
     {
         int unfinished = (await _jobs.ListAsync(cancellationToken).ConfigureAwait(false))
-            .Count(job => !job.IsFinished && LibraryPaths.RelativeTo(root, Path.Combine(job.TargetDirectory, job.FileName)) is not null);
+            .Count(job => !job.IsFinished
+                && (game is null || AppSettings.GameComparer.Equals(job.File.Mod.Game, game))
+                && LibraryPaths.RelativeTo(root, Path.Combine(job.TargetDirectory, job.FileName)) is not null);
         if (unfinished > 0)
         {
             throw new InvalidOperationException(unfinished == 1
@@ -241,6 +279,9 @@ internal sealed class SettingsService : ISettingsService, IDisposable
         return Path.TrimEndingDirectorySeparator(Path.GetFullPath(root.Trim()));
     }
 
+    private static bool SameFolder(string? first, string? second)
+        => first is null ? second is null : second is not null && FilePaths.Same(first, second);
+
     /// <summary>
     /// The settings with <paramref name="game"/>'s own as <paramref name="own"/>: kept under the key it was stored under,
     /// in its case, rather than gaining a second; forgotten when it has none.
@@ -251,6 +292,31 @@ internal sealed class SettingsService : ISettingsService, IDisposable
         ImmutableDictionary<GameRef, GameSettings> games = settings.Games.ToImmutableDictionary(AppSettings.GameComparer);
         GameRef stored = games.Keys.FirstOrDefault(key => AppSettings.GameComparer.Equals(key, game)) ?? game;
         return settings with { Games = changed.IsNone ? games.Remove(stored) : games.SetItem(stored, changed) };
+    }
+
+    /// <summary>
+    /// The new folder of a game whose folder changes without its files, as it's stored, once it's checked.
+    /// </summary>
+    /// <returns>The folder as it's stored; null for the library's root.</returns>
+    /// <exception cref="InvalidOperationException">The game has files, downloads into its folder aren't finished, or the folder clashes.</exception>
+    private async Task<string?> CheckGameRootAsync(AppSettings settings, GameRef game, string? root, CancellationToken cancellationToken)
+    {
+        string? normalized = root is null ? null : FullRoot(root, nameof(root));
+        LibraryRoots roots = LibraryRoots.Of(settings, DefaultLibraryRoot);
+        string current = roots.For(game);
+        if ((await _library.ListAsync(cancellationToken).ConfigureAwait(false))
+            .Any(mod => mod.Files.Count > 0 && AppSettings.GameComparer.Equals(mod.Mod.Game, game)))
+        {
+            throw new InvalidOperationException($"{game} has files in {current}. Moving the game's files changes its folder and takes them along.");
+        }
+
+        if (normalized is not null && roots.ClashOf(game, normalized) is { } clash)
+        {
+            throw new InvalidOperationException(clash);
+        }
+
+        await EnsureNoDownloadsIntoAsync(current, game, cancellationToken).ConfigureAwait(false);
+        return normalized;
     }
 
     private async Task ChangeAsync(Func<AppSettings, CancellationToken, Task<AppSettings>> change, CancellationToken cancellationToken)

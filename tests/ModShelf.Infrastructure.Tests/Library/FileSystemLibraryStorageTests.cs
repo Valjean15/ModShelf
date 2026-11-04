@@ -25,6 +25,39 @@ public sealed class FileSystemLibraryStorageTests : IDisposable
     }
 
     [Fact]
+    public void TellsTheRoomOnTheDriveOfAFolderThatNeedntExistYet()
+    {
+        FileSystemLibraryStorage storage = new();
+
+        long? free = storage.FreeSpace(Path.Combine(_folder.Path, "Not made", "yet"));
+
+        Assert.NotNull(free);
+        Assert.True(free > 0);
+        Assert.Throws<ArgumentException>(() => storage.FreeSpace(" "));
+    }
+
+    [Fact]
+    public void FoldersOnOneDriveAreOnTheSameDrive()
+    {
+        FileSystemLibraryStorage storage = new();
+        string made = Path.Combine(_folder.Path, "Made");
+        Directory.CreateDirectory(made);
+
+        Assert.True(storage.SameDrive(made, Path.Combine(_folder.Path, "Not made", "yet")));
+        Assert.Throws<ArgumentException>(() => storage.SameDrive(made, " "));
+    }
+
+    [Fact]
+    public void FoldersOnTwoDrivesAreNotOnTheSameDrive()
+    {
+        // Linux keeps the kernel's processes on a file system of its own, mounted at /proc.
+        Assert.SkipUnless(OperatingSystem.IsLinux() && Directory.Exists("/proc/self"), "Needs Linux's /proc.");
+        FileSystemLibraryStorage storage = new();
+
+        Assert.False(storage.SameDrive("/proc/self", _folder.Path));
+    }
+
+    [Fact]
     public void OnWindowsAPathLeavesRoomForTheDownloadsLongerName()
     {
         FileSystemLibraryStorage windows = new(isWindows: true);

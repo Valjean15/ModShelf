@@ -40,6 +40,18 @@ public interface ILibraryStorage
     bool IsSameFolder(string first, string second);
 
     /// <summary>
+    /// The bytes this user may still write on the drive that holds <paramref name="folder"/>, which needn't exist yet;
+    /// null when the system can't tell, such as for a network share on Windows.
+    /// </summary>
+    long? FreeSpace(string folder);
+
+    /// <summary>
+    /// Whether two folders, which needn't exist yet, are on the same drive, so a file moves from one to the other
+    /// without being copied. False when the system can't tell.
+    /// </summary>
+    bool SameDrive(string first, string second);
+
+    /// <summary>
     /// Checks that this system can save a download at <paramref name="path"/>, with the room the download needs while
     /// it's under way.
     /// </summary>

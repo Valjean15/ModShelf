@@ -1,3 +1,4 @@
+using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
@@ -48,6 +49,9 @@ internal sealed class FakeSettingsService : ISettingsService
 
     public Task<string> GetLibraryRootAsync(CancellationToken cancellationToken)
         => Refusal is null ? Task.FromResult(LibraryRoot) : Task.FromException<string>(Refusal);
+
+    public Task<LibraryRoots> GetLibraryRootsAsync(CancellationToken cancellationToken)
+        => Refusal is null ? Task.FromResult(LibraryRoots.Of(Stored, LibraryRoot)) : Task.FromException<LibraryRoots>(Refusal);
 
     public Task SetLibraryRootAsync(string? root, CancellationToken cancellationToken) => throw new NotSupportedException();
 

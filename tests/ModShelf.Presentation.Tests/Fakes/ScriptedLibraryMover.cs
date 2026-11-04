@@ -1,4 +1,8 @@
+using System.Collections.Immutable;
+
 using ModShelf.Application.Library;
+using ModShelf.Application.Settings;
+using ModShelf.Domain.Mods;
 
 namespace ModShelf.Presentation.Tests.Fakes;
 
@@ -28,5 +32,28 @@ internal sealed class ScriptedLibraryMover(InMemorySettingsService settings) : I
         string from = settings.Stored.LibraryRoot ?? settings.DefaultLibraryRoot;
         settings.Stored = settings.Stored with { LibraryRoot = root };
         return Task.FromResult(new LibraryMove(from, root, 3, 0, Missing));
+    }
+
+    public Task<GameMovePlan> PlanGameMoveAsync(GameRef game, string? folder, CancellationToken cancellationToken)
+    {
+        LibraryRoots roots = LibraryRoots.Of(settings.Stored, settings.DefaultLibraryRoot);
+        return Refusal is { } refusal
+            ? Task.FromException<GameMovePlan>(refusal)
+            : Task.FromResult(new GameMovePlan(game, roots.For(game), folder ?? roots.Root, 3, 3000, 0, Missing, null, SameDrive: true));
+    }
+
+    public Task<LibraryMove> MoveGameAsync(GameRef game, string? folder, IProgress<LibraryMoveProgress>? progress, CancellationToken cancellationToken)
+    {
+        Moves.Add($"{game} {folder ?? "back"}");
+        if (Refusal is { } refusal)
+        {
+            return Task.FromException<LibraryMove>(refusal);
+        }
+
+        LibraryRoots roots = LibraryRoots.Of(settings.Stored, settings.DefaultLibraryRoot);
+        string from = roots.For(game);
+        GameSettings own = settings.Stored.GameFor(game) with { Root = folder };
+        settings.Stored = settings.Stored with { Games = settings.Stored.Games.ToImmutableDictionary(AppSettings.GameComparer).SetItem(game, own) };
+        return Task.FromResult(new LibraryMove(from, folder ?? roots.Root, 3, 0, Missing));
     }
 }

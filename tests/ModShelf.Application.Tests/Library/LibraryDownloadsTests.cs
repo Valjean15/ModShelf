@@ -89,6 +89,70 @@ public sealed class LibraryDownloadsTests : IDisposable
     }
 
     [Fact]
+    public async Task QueuesAndRecordsAGamesFileInItsOwnFolder()
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "ModShelf.Tests", "Skyrim");
+        _store.Settings = new AppSettings
+        {
+            Games = new Dictionary<GameRef, GameSettings>(AppSettings.GameComparer)
+            {
+                [new GameRef(FakeModSite.SourceId, "SkyrimSpecialEdition")] = new() { Root = folder },
+            },
+        };
+        using LibraryDownloads library = Create();
+
+        LibraryDownload added = await library.AddAsync(Link(SkyUi, SkyUi52), Cancellation);
+        LibraryFile? inTheRoot = (await library.RecordAsync(Done(SkyUi53, SkyUiFolder, "SkyUI_5_3_SE.7z"), Cancellation))?.File;
+        LibraryFile? recorded = (await library.RecordAsync(RecordingDownloadService.Completed(added.Queued!.Job), Cancellation))?.File;
+
+        Assert.Equal(Path.Combine(folder, "fake-mods", "skyrimspecialedition", "SkyUI (12604)", "SkyUI_5_2_SE.7z"), added.Path);
+        Assert.Null(inTheRoot);
+        Assert.Equal("fake-mods/skyrimspecialedition/SkyUI (12604)/SkyUI_5_2_SE.7z", recorded?.RelativePath);
+    }
+
+    [Fact]
+    public async Task AnotherGamesFileInAnotherFolderTakesNoName()
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "ModShelf.Tests", "Skyrim");
+        _store.Settings = new AppSettings
+        {
+            Games = new Dictionary<GameRef, GameSettings>(AppSettings.GameComparer)
+            {
+                [new GameRef(FakeModSite.SourceId, "skyrimspecialedition")] = new() { Root = folder },
+            },
+        };
+        ModRef fallout = new(new GameRef(FakeModSite.SourceId, "fallout4"), "1");
+        _library.Add(LibraryMod.Watch(fallout, "Other", null, null, TestData.Now).WithFile(new LibraryFile(
+            new ModFileRef(fallout, "1"), "Other", null, ModFileCategory.Main, TestData.Now, "fake-mods/skyrimspecialedition/SkyUI (12604)/SkyUI_5_2_SE.7z", 100, TestData.Now)));
+        using LibraryDownloads library = Create();
+
+        LibraryDownload added = await library.AddAsync(Link(SkyUi, SkyUi52), Cancellation);
+
+        Assert.Equal(Path.Combine(folder, "fake-mods", "skyrimspecialedition", "SkyUI (12604)", "SkyUI_5_2_SE.7z"), added.Path);
+    }
+
+    [Fact]
+    public async Task AGamesFileOnDiskInItsOwnFolderIsntDownloadedAgain()
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "ModShelf.Tests", "Skyrim");
+        _store.Settings = new AppSettings
+        {
+            Games = new Dictionary<GameRef, GameSettings>(AppSettings.GameComparer)
+            {
+                [new GameRef(FakeModSite.SourceId, "skyrimspecialedition")] = new() { Root = folder },
+            },
+        };
+        string relativePath = "fake-mods/skyrimspecialedition/SkyUI (12604)/SkyUI_5_2_SE.7z";
+        _library.Add(ModWith(StoredFile(SkyUi52, relativePath)));
+        _storage.Add(LibraryPaths.Resolve(folder, relativePath));
+        using LibraryDownloads library = Create();
+
+        LibraryDownload added = await library.AddAsync(Link(SkyUi, SkyUi52), Cancellation);
+
+        Assert.Equal((LibraryPaths.Resolve(folder, relativePath), null), (added.Path, added.Queued));
+    }
+
+    [Fact]
     public async Task MakesTheNamesSafeOnEverySystem()
     {
         _site.AddMod("3863", "SKSE: Script Extender?");
@@ -661,6 +725,32 @@ public sealed class LibraryDownloadsTests : IDisposable
         {
             Assert.Equal([SkyUi52], Assert.Single(_library.Mods).Files.Select(file => file.File.Id));
         }
+    }
+
+    [Fact]
+    public async Task AHoldAddsTheMissedDownloadsInAGamesOwnFolderAndNamesItWhenOneCantBe()
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "ModShelf.Tests", "Skyrim");
+        _store.Settings = new AppSettings
+        {
+            Games = new Dictionary<GameRef, GameSettings>(AppSettings.GameComparer)
+            {
+                [new GameRef(FakeModSite.SourceId, "skyrimspecialedition")] = new() { Root = folder },
+            },
+        };
+        string skyUiFolder = Path.Combine(folder, "fake-mods", "skyrimspecialedition", "SkyUI (12604)");
+        foreach (DownloadJobSnapshot job in new[] { Done(SkyUi52, skyUiFolder, "SkyUI_5_2_SE.7z"), Done("99", skyUiFolder, "unlisted.7z") })
+        {
+            _downloads.Update(job);
+            _storage.Add(Path.Combine(job.TargetDirectory, job.FileName));
+        }
+
+        using LibraryDownloads library = Create();
+
+        InvalidOperationException refused = await Assert.ThrowsAsync<InvalidOperationException>(() => library.HoldAsync(Cancellation));
+
+        Assert.Equal([SkyUi52], Assert.Single(_library.Mods).Files.Select(file => file.File.Id));
+        Assert.StartsWith($"A download into {folder} finished, but couldn't be added", refused.Message, StringComparison.Ordinal);
     }
 
     [Fact]

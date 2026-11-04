@@ -74,6 +74,20 @@ internal sealed class FakeLibraryStorage : ILibraryStorage
     public long? FileSize(string path) => _files.TryGetValue(path, out long size) ? size : null;
 
     /// <summary>
+    /// The drives' roots, each a drive of its own; a path under none of them is on the system's drive.
+    /// </summary>
+    public List<string> Drives { get; } = [];
+
+    /// <summary>
+    /// The free space on each drive, by its root, and on the system's drive by the empty string; unknown otherwise.
+    /// </summary>
+    public Dictionary<string, long> Free { get; } = new(StringComparer.Ordinal);
+
+    public long? FreeSpace(string folder) => Free.TryGetValue(DriveOf(folder), out long free) ? free : null;
+
+    public bool SameDrive(string first, string second) => DriveOf(first) == DriveOf(second);
+
+    /// <summary>
     /// What listing the folder at a path throws instead.
     /// </summary>
     public ConcurrentDictionary<string, Exception> ListFailures { get; } = new(StringComparer.Ordinal);
@@ -140,7 +154,8 @@ internal sealed class FakeLibraryStorage : ILibraryStorage
             throw new IOException($"Can't move {source} to {destination}.");
         }
 
-        _files[destination] = size;
+        // Its folders are made as it moves, and can go once they're empty.
+        Add(destination, size);
         Moves.Enqueue((source, destination));
         AfterMove?.Invoke(destination);
     }
@@ -176,4 +191,8 @@ internal sealed class FakeLibraryStorage : ILibraryStorage
             throw new PathTooLongException($"{path} is too long.");
         }
     }
+
+    private string DriveOf(string path)
+        => Drives.Where(root => FilePaths.Same(path, root) || Domain.Library.LibraryPaths.RelativeTo(root, path) is not null)
+            .MaxBy(root => root.Length) ?? string.Empty;
 }

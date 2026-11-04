@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
 
+using ModShelf.Domain.Mods;
+
 namespace ModShelf.Application.Library;
 
 /// <summary>
@@ -21,4 +23,10 @@ internal sealed partial class LibraryMover
 
     [LoggerMessage(EventId = 616, Level = LogLevel.Warning, Message = "A download into {From} started while the library moved from it, so the {Count} files moved went back")]
     private static partial void LogDownloadStarted(ILogger logger, string from, int count);
+
+    [LoggerMessage(EventId = 627, Level = LogLevel.Information, Message = "Moved {Game}'s files from {From} to {To}: {Count} files")]
+    private static partial void LogGameMoved(ILogger logger, GameRef game, string from, string to, int count);
+
+    [LoggerMessage(EventId = 628, Level = LogLevel.Information, Message = "The move of {Game}'s files was stopped, so the {Count} files moved went back")]
+    private static partial void LogGameMoveStopped(ILogger logger, GameRef game, int count);
 }

@@ -34,10 +34,11 @@ internal static class SettingChanges
     public const string DetailsMaxAge = "details.maxAge";
     public const string GamesPrefix = "games.";
     public const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<site>/<game>, {OldVersions}, {Interval}, {Notify}, {Theme}, {CloseToTray}, {SetupDone}, {CheckForAppUpdates}, {PreviewsPrefix}library, {PreviewsPrefix}updates, {PreviewsPrefix}browse, {PreviewsPrefix}downloads, {PicturesMaxSize}, {AdultPictures}, {DetailsMaxAge}, "
-        + $"{GamesPrefix}<site>/<game>.{GameFolders}, {GamesPrefix}<site>/<game>.{GameOldVersions}, {GamesPrefix}<site>/<game>.{GameCheckUpdates}, {GamesPrefix}<site>/<game>.{GameInterval}, {GamesPrefix}<site>/<game>.{GameNotify}, {GamesPrefix}<site>/<game>.{GamePreviews}, {GamesPrefix}<site>/<game>.{GameHidden}, "
+        + $"{GamesPrefix}<site>/<game>.{GameRoot}, {GamesPrefix}<site>/<game>.{GameFolders}, {GamesPrefix}<site>/<game>.{GameOldVersions}, {GamesPrefix}<site>/<game>.{GameCheckUpdates}, {GamesPrefix}<site>/<game>.{GameInterval}, {GamesPrefix}<site>/<game>.{GameNotify}, {GamesPrefix}<site>/<game>.{GamePreviews}, {GamesPrefix}<site>/<game>.{GameHidden}, "
         + $"{GamesPrefix}<site>/<game>.{BrowseSort}, {GamesPrefix}<site>/<game>.{BrowseDirection}, {GamesPrefix}<site>/<game>.{BrowseWindow}, {GamesPrefix}<site>/<game>.{BrowsePageSize}, "
         + "such as games.nexus/stardewvalley.notify; a game's key alone, as games.stardewvalley.notify, does while only one site's game has it";
 
+    private const string GameRoot = "root";
     private const string GameFolders = "folders";
     private const string GameOldVersions = "oldVersions";
     private const string GameCheckUpdates = "checkUpdates";
@@ -54,13 +55,13 @@ internal static class SettingChanges
     /// The settings a game can have of its own, by the names that follow <c>games.&lt;site&gt;/&lt;game&gt;.</c>.
     /// </summary>
     private static readonly string[] GameSettingNames =
-        [GameFolders, GameOldVersions, GameCheckUpdates, GameInterval, GameNotify, GamePreviews, GameHidden, BrowseSort, BrowseDirection, BrowseWindow, BrowsePageSize];
+        [GameRoot, GameFolders, GameOldVersions, GameCheckUpdates, GameInterval, GameNotify, GamePreviews, GameHidden, BrowseSort, BrowseDirection, BrowseWindow, BrowsePageSize];
 
     /// <summary>
     /// What each setting's value is.
     /// </summary>
     public const string Values =
-        "a full path for library.root; all, archive or how many versions to keep for "
+        "a full path for library.root and games.<site>/<game>.root; all, archive or how many versions to keep for "
         + "library.oldVersions; minutes, hours or days, such as 30m, 6h or 1d, for updates.interval and details.maxAge; true or false for "
         + "updates.notify, window.closeToTray, setup.done and app.checkForUpdates; system, light or dark for appearance.theme; "
         + "off, thumbnails or cards for previews.<screen> and games.<site>/<game>.previews; a number of megabytes from 64 to 8192 for pictures.maxSize; "
@@ -93,6 +94,16 @@ internal static class SettingChanges
     {
         ArgumentNullException.ThrowIfNull(name);
         return name.Trim().Equals(LibraryRoot, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// The game, as written, whose folder <paramref name="name"/> names, as in <c>games.&lt;site&gt;/&lt;game&gt;.root</c>;
+    /// null for another setting.
+    /// </summary>
+    public static string? GameOfRoot(string name)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        return GameSettingOf(name) is { Setting: GameRoot } own ? own.Game : null;
     }
 
     /// <summary>
@@ -139,7 +150,8 @@ internal static class SettingChanges
     /// <returns>What the setting is now, as a sentence.</returns>
     /// <exception cref="ArgumentException">There's no such setting, or <paramref name="value"/> isn't one of its values.</exception>
     /// <exception cref="InvalidOperationException">
-    /// The library's root can't change now: its library has files, which moving the library moves, or downloads under way.
+    /// The library's root, or a game's folder, can't change now: it has files, which moving the library or the game
+    /// moves, or downloads under way; or the folder is another's, inside one or holds one.
     /// </exception>
     public static async Task<string> ChangeAsync(
         ISettingsService settings,
@@ -301,7 +313,7 @@ internal static class SettingChanges
     /// that has games.
     /// </summary>
     /// <exception cref="ArgumentException">The name gives no game, or a key more than one site's game has.</exception>
-    private static async Task<GameRef> GameNamedAsync(
+    public static async Task<GameRef> GameNamedAsync(
         string written,
         ISettingsService settings,
         IModLibrary library,
@@ -373,6 +385,7 @@ internal static class SettingChanges
         string prefix = $"{GamesPrefix}{game}.";
         (string Name, string? Value)[] values =
         [
+            (GameRoot, own.Root),
             (GameOldVersions, own.OldVersions?.ToString()),
             (GameCheckUpdates, own.CheckUpdates is { } check ? Text(check) : null),
             (GameInterval, own.UpdateInterval is { } interval ? UpdateInterval.Format(interval) : null),
@@ -416,6 +429,19 @@ internal static class SettingChanges
             FolderPattern? pattern = value is null ? null : FolderPattern.Parse(value);
             await settings.SetLibraryFoldersAsync(game, pattern, cancellationToken).ConfigureAwait(false);
             return pattern is null ? $"{named} is gone, so {game}'s files go by {LibraryFolders} again." : $"{named} is now {pattern.Text}.";
+        }
+
+        if (setting == GameRoot)
+        {
+            string? root = value?.Trim();
+            if (root is not null && !Path.IsPathFullyQualified(root))
+            {
+                throw new ArgumentException($"'{value}' isn't a full path, such as {settings.DefaultLibraryRoot}.", nameof(value));
+            }
+
+            await settings.SetGameAsync(game, own => own with { Root = root }, cancellationToken).ConfigureAwait(false);
+            string now = (await settings.GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false)).For(game);
+            return root is null ? $"{named} is gone, so {game}'s files go in the library's folder, {now}." : $"{named} is now {now}: {game}'s files go there.";
         }
 
         if (setting == GameOldVersions)

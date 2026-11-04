@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using ModShelf.Application.Catalog;
+using ModShelf.Application.Library;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
@@ -41,7 +42,7 @@ public sealed partial class ModPageViewModel : ObservableObject
     private readonly ModFileRef? _linkedFile;
     private readonly Func<ModRef, LibraryMod?> _library;
     private LibraryMod? _inLibrary;
-    private string? _libraryRoot;
+    private LibraryRoots? _roots;
 
     /// <param name="library">What the library has of a mod now; null when nothing.</param>
     /// <param name="previews">The screen's previews, which say whether the page shows the mod's picture, and how
@@ -413,7 +414,7 @@ public sealed partial class ModPageViewModel : ObservableObject
     {
         try
         {
-            _libraryRoot = await _services.Settings.GetLibraryRootAsync(cancellationToken);
+            _roots = await _services.Settings.GetLibraryRootsAsync(cancellationToken);
         }
         catch (InvalidDataException)
         {
@@ -604,10 +605,10 @@ public sealed partial class ModPageViewModel : ObservableObject
                     return;
                 }
 
-                string root;
+                LibraryRoots roots;
                 try
                 {
-                    root = await _services.Settings.GetLibraryRootAsync(cancellationToken);
+                    roots = await _services.Settings.GetLibraryRootsAsync(cancellationToken);
                 }
                 catch (InvalidDataException exception)
                 {
@@ -615,7 +616,7 @@ public sealed partial class ModPageViewModel : ObservableObject
                     return;
                 }
 
-                string folder = Path.GetDirectoryName(LibraryPaths.Resolve(root, latest.RelativePath))!;
+                string folder = Path.GetDirectoryName(roots.Resolve(latest))!;
                 if (!await _services.FolderOpener.TryOpenAsync(folder, cancellationToken))
                 {
                     await _services.Dialogs.ShowMessageAsync(Strings.OpenFolderFailedTitle, Text.Format(Strings.OpenFolderFailed, folder), cancellationToken);
@@ -770,7 +771,7 @@ public sealed partial class ModPageViewModel : ObservableObject
                 .OrderByDescending(file => file.DownloadedAt)
                 .Select(file => new OwnFileViewModel(
                     file,
-                    _libraryRoot is { } root && !_services.Storage.FileExists(LibraryPaths.Resolve(root, file.RelativePath)),
+                    _roots is { } roots && !_services.Storage.FileExists(roots.Resolve(file)),
                     _services.TimeProvider,
                     CopyAsync,
                     DeleteFileAsync)),

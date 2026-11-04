@@ -1,4 +1,5 @@
 using ModShelf.Application.Catalog;
+using ModShelf.Application.Settings;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Tests.Common;
@@ -260,6 +261,26 @@ public sealed class LibraryByGameTests : IDisposable
         await Screen.Checking;
 
         Assert.Equal(["Address Library: —", "SkyUI: 2 days ago"], Screen.GameMods.Select(mod => $"{mod.Name}: {mod.UpdatedText}"));
+    }
+
+    [Fact]
+    public async Task AGamesFilesAreLookedForInItsOwnFolder()
+    {
+        string skyrim = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "ModShelf.Tests", "Skyrim");
+        _harness.Settings.Stored = new AppSettings
+        {
+            Games = new Dictionary<GameRef, GameSettings>(AppSettings.GameComparer) { [SkyUi.Game] = new() { Root = skyrim } },
+        };
+        LibraryFile there = File(SkyUi, "1", 10);
+        LibraryFile gone = File(SkyUi, "2", 10);
+        _harness.Storage.Files.Add(LibraryPaths.Resolve(skyrim, there.RelativePath));
+
+        await _harness.StartAsync(TestData.LibraryMod(SkyUi, "SkyUI", watched: true, there, gone));
+        _harness.Game(SkyUi.Game).OpenCommand.Execute(null);
+        await Screen.Checking;
+
+        // Only the file that's in neither folder is missing; the one in the game's folder isn't.
+        Assert.Equal(1, Assert.Single(Screen.GameMods).MissingCount);
     }
 
     [Fact]

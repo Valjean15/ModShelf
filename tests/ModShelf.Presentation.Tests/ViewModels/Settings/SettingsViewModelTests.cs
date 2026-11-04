@@ -598,6 +598,28 @@ public sealed class SettingsViewModelTests
     }
 
     [Fact]
+    public async Task FilesInGamesOwnFoldersDontMoveWithTheLibrary()
+    {
+        string skyrim = Path.Combine(Path.GetTempPath(), "ModShelf.Tests", "Skyrim");
+        _harness.Library.Add(TestData.LibraryMod(TestData.Mod("1"), "SkyUI", true, TestData.LibraryFile(TestData.Mod("1"), "10", "a.7z")));
+        _harness.Settings.Stored = new AppSettings
+        {
+            Games = new Dictionary<GameRef, GameSettings>(AppSettings.GameComparer) { [TestData.Mod("1").Game] = new() { Root = skyrim } },
+        };
+        await _harness.StartAsync();
+        _harness.Dialogs.Folders.Enqueue(Moved);
+
+        await Screen.ChooseRootCommand.ExecuteAsync(null);
+
+        Assert.Empty(_harness.Dialogs.Confirmations);
+        Assert.Empty(_harness.Mover.Moves);
+        Assert.Equal($"root {Moved}", _harness.Settings.Changes[^1]);
+        Assert.Equal(
+            "For example: " + Path.Combine(skyrim, "nexus", "skyrimspecialedition", "SkyUI (12604)", "SkyUI_5_2_SE.7z"),
+            Screen.Game?.Folders.Preview);
+    }
+
+    [Fact]
     public async Task ALibraryWithFilesMovesThemOnceTheUserConfirms()
     {
         _harness.Library.Add(TestData.LibraryMod(TestData.Mod("1"), "SkyUI", true, TestData.LibraryFile(TestData.Mod("1"), "10", "a.7z"), TestData.LibraryFile(TestData.Mod("1"), "11", "b.7z")));

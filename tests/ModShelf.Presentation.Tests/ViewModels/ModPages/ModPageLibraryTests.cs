@@ -47,6 +47,25 @@ public sealed class ModPageLibraryTests : IDisposable
     }
 
     [Fact]
+    public async Task LooksForAGamesFilesInItsOwnFolder()
+    {
+        string skyrim = Path.Combine(Path.GetTempPath(), "ModShelf.Tests", "Skyrim");
+        _harness.Settings.Stored = new AppSettings
+        {
+            Games = new Dictionary<GameRef, GameSettings>(AppSettings.GameComparer) { [SkyUi.Game] = new() { Root = skyrim } },
+        };
+        LibraryFile there = TestData.LibraryFile(SkyUi, "2", "SkyUI_5_2.7z", daysAgo: 1);
+        LibraryFile inTheRoot = TestData.LibraryFile(SkyUi, "1", "SkyUI_5_1.7z", daysAgo: 9);
+        await _harness.StartAsync(TestData.LibraryMod(SkyUi, "SkyUI", files: [inTheRoot, there]));
+        _harness.Storage.Files.Add(LibraryPaths.Resolve(skyrim, there.RelativePath));
+        _harness.Storage.Files.Add(LibraryPaths.Resolve(TestData.LibraryRoot, inTheRoot.RelativePath));
+
+        ModPageViewModel mod = await OpenAsync();
+
+        Assert.Equal([false, true], mod.OwnFiles.Select(file => file.IsMissing));
+    }
+
+    [Fact]
     public async Task SaysNothingOfMissingFilesWhenTheLibrarysFolderIsntKnown()
     {
         _harness.Settings.Refusal = new InvalidDataException("settings.json isn't JSON.");
@@ -394,6 +413,22 @@ public sealed class ModPageLibraryTests : IDisposable
         await mod.OpenFolderCommand.ExecuteAsync(null);
 
         Assert.Equal([Path.Combine(TestData.LibraryRoot, "nexus", "skyrimspecialedition", "Mod (12604)")], _harness.Folders.Opened);
+    }
+
+    [Fact]
+    public async Task OpensTheModsFolderInItsGamesOwnFolder()
+    {
+        string skyrim = Path.Combine(Path.GetTempPath(), "ModShelf.Tests", "Skyrim");
+        _harness.Settings.Stored = new AppSettings
+        {
+            Games = new Dictionary<GameRef, GameSettings>(AppSettings.GameComparer) { [SkyUi.Game] = new() { Root = skyrim } },
+        };
+        await _harness.StartAsync(TestData.LibraryMod(SkyUi, "SkyUI", files: [TestData.LibraryFile(SkyUi, "1", "SkyUI.7z")]));
+        ModPageViewModel mod = await OpenAsync();
+
+        await mod.OpenFolderCommand.ExecuteAsync(null);
+
+        Assert.Equal([Path.Combine(skyrim, "nexus", "skyrimspecialedition", "Mod (12604)")], _harness.Folders.Opened);
     }
 
     [Theory]

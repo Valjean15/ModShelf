@@ -63,7 +63,7 @@ internal sealed partial class LibraryRescanner : ILibraryRescan
     public async Task<LibraryRescan> RescanAsync(Uri? link, CancellationToken cancellationToken)
     {
         AppSettings settings = await _settings.GetAsync(cancellationToken).ConfigureAwait(false);
-        string root = await _settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+        LibraryRoots roots = LibraryRoots.Of(settings, _settings.DefaultLibraryRoot);
         IReadOnlyList<LibraryMod> library = await _repository.ListAsync(cancellationToken).ConfigureAwait(false);
 
         // A library mod is found by its page there, so one its site removed can still be rescanned.
@@ -71,7 +71,7 @@ internal sealed partial class LibraryRescanner : ILibraryRescan
             ? [.. library.Select(mod => mod.Mod)]
             : [LibraryLinks.ModAt(library, link) ?? (await _sources.RecognizeLinkAsync(link, cancellationToken).ConfigureAwait(false)).File.Mod];
 
-        Scan scan = new(root, settings, library);
+        Scan scan = new(roots, settings, library);
         foreach (ModRef mod in mods)
         {
             await RescanModAsync(scan, mod, library.FirstOrDefault(stored => stored.Mod == mod), cancellationToken).ConfigureAwait(false);
@@ -106,7 +106,7 @@ internal sealed partial class LibraryRescanner : ILibraryRescan
         List<LibraryFile> hashed = [];
         foreach (LibraryFile file in stored?.Files ?? [])
         {
-            string path = LibraryPaths.Resolve(scan.Root, file.RelativePath);
+            string path = scan.Roots.Resolve(file);
             if (!_storage.FileExists(path))
             {
                 scan.Missing.Add(file);
@@ -145,7 +145,7 @@ internal sealed partial class LibraryRescanner : ILibraryRescan
                 [
                     .. siteFiles.Where(file => !have.Contains(file.Reference) && Matches(Path.GetFileName(path), size, file)),
                 ];
-                if (candidates is not [ModFile match] || size is not { } length || LibraryPaths.RelativeTo(scan.Root, path) is not { } relativePath)
+                if (candidates is not [ModFile match] || size is not { } length || scan.Roots.RelativeTo(mod.Game, path) is not { } relativePath)
                 {
                     scan.Unmatched.Add(path);
                     continue;
@@ -220,7 +220,7 @@ internal sealed partial class LibraryRescanner : ILibraryRescan
             .Append(byPattern)
             .Distinct(StringComparer.Ordinal)
             .SelectMany(folder => new[] { folder, folder.Length == 0 ? OldVersions.ArchiveFolder : $"{folder}{LibraryPaths.Separator}{OldVersions.ArchiveFolder}" })
-            .Select(folder => folder.Length == 0 ? scan.Root : LibraryPaths.Resolve(scan.Root, folder));
+            .Select(folder => folder.Length == 0 ? scan.Roots.For(mod.Game) : scan.Roots.Resolve(mod.Game, folder));
     }
 
     /// <summary>
@@ -295,9 +295,12 @@ internal sealed partial class LibraryRescanner : ILibraryRescan
     /// <summary>
     /// A rescan under way: what it knows, and what it found so far.
     /// </summary>
-    private sealed class Scan(string root, AppSettings settings, IReadOnlyList<LibraryMod> library)
+    private sealed class Scan(LibraryRoots roots, AppSettings settings, IReadOnlyList<LibraryMod> library)
     {
-        public string Root { get; } = root;
+        /// <summary>
+        /// The library's root and each game's own folder, which its mods are looked for in.
+        /// </summary>
+        public LibraryRoots Roots { get; } = roots;
 
         public AppSettings Settings { get; } = settings;
 
@@ -306,7 +309,7 @@ internal sealed partial class LibraryRescanner : ILibraryRescan
         /// Windows and macOS.
         /// </summary>
         public HashSet<string> Known { get; } =
-            new(library.SelectMany(mod => mod.Files).Select(file => LibraryPaths.Resolve(root, file.RelativePath)), StringComparer.OrdinalIgnoreCase);
+            new(library.SelectMany(mod => mod.Files).Select(roots.Resolve), StringComparer.OrdinalIgnoreCase);
 
         public List<LibraryFile> Added { get; } = [];
 

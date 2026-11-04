@@ -129,6 +129,19 @@ internal static class SettingsCommand
                             await environment.Error.WriteLineAsync(exception.Message + hint).ConfigureAwait(false);
                             return ExitCodes.Failed;
                         }
+                        catch (InvalidOperationException exception) when (SettingChanges.GameOfRoot(name) is { } game)
+                        {
+                            // A game with files moves with library move-game, there or back into the library's folder.
+                            IReadOnlyList<LibraryMod> library = await services.GetRequiredService<IModLibrary>().ListAsync(cancellationToken).ConfigureAwait(false);
+                            bool hasFiles = library.Any(mod => mod.Files.Count > 0
+                                && (string.Equals(mod.Mod.Game.Key, game, StringComparison.OrdinalIgnoreCase)
+                                    || string.Equals(mod.Mod.Game.ToString(), game, StringComparison.OrdinalIgnoreCase)));
+                            string hint = !hasFiles ? string.Empty
+                                : value is null ? $" To move them back: library move-game {game}"
+                                : $" To move them there: library move-game {game} \"{value}\"";
+                            await environment.Error.WriteLineAsync(exception.Message + hint).ConfigureAwait(false);
+                            return ExitCodes.Failed;
+                        }
 
                         environment.Output.WriteLine(now);
                         return ExitCodes.Done;

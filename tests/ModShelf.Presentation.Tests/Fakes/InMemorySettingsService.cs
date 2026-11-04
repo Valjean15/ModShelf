@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 
+using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
@@ -63,6 +64,9 @@ internal sealed class InMemorySettingsService : ISettingsService
 
     public async Task<string> GetLibraryRootAsync(CancellationToken cancellationToken)
         => (await GetAsync(cancellationToken)).LibraryRoot ?? DefaultLibraryRoot;
+
+    public async Task<LibraryRoots> GetLibraryRootsAsync(CancellationToken cancellationToken)
+        => LibraryRoots.Of(await GetAsync(cancellationToken), DefaultLibraryRoot);
 
     public Task SetLibraryRootAsync(string? root, CancellationToken cancellationToken)
         => ChangeAsync($"root {root ?? "null"}", settings => RootRefusal is { } refusal ? throw refusal : settings with { LibraryRoot = root });

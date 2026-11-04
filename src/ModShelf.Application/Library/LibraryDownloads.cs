@@ -6,6 +6,7 @@ using ModShelf.Application.Downloads;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
+using ModShelf.Domain.Common;
 using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
@@ -173,7 +174,8 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
     {
         ModFileRef file = recognized.File;
         AppSettings settings = await _settings.GetAsync(cancellationToken).ConfigureAwait(false);
-        string root = settings.LibraryRoot ?? _settings.DefaultLibraryRoot;
+        LibraryRoots roots = LibraryRoots.Of(settings, _settings.DefaultLibraryRoot);
+        string root = roots.For(file.Mod.Game);
         IReadOnlyList<LibraryMod> library = await _library.ListAsync(cancellationToken).ConfigureAwait(false);
         IReadOnlyList<DownloadJobSnapshot> jobs = await _downloads.ListAsync(cancellationToken).ConfigureAwait(false);
         LibraryMod? stored = library.FirstOrDefault(mod => mod.Mod == file.Mod);
@@ -214,7 +216,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
             string folder = stored is { Files.Count: > 0 }
                 ? LibraryLocations.ModFolderOf(stored.Files[^1].RelativePath)
                 : LibraryLocations.FolderOf(pathByPattern);
-            relativePath = FreePath(root, library, jobs, folder, LibraryLocations.NameOf(pathByPattern), file);
+            relativePath = FreePath(root, InFolder(roots, root, library), jobs, folder, LibraryLocations.NameOf(pathByPattern), file);
         }
 
         string target = LibraryPaths.Resolve(root, relativePath);
@@ -235,6 +237,12 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
     }
 
     private static bool IsDone(DownloadJobSnapshot job) => job.Status is DownloadJobStatus.Completed or DownloadJobStatus.Cancelled;
+
+    /// <summary>
+    /// The mods whose files are in <paramref name="folder"/>: those of the games it's the folder of.
+    /// </summary>
+    private static LibraryMod[] InFolder(LibraryRoots roots, string folder, IReadOnlyList<LibraryMod> library)
+        => [.. library.Where(mod => FilePaths.Same(roots.For(mod.Mod.Game), folder))];
 
     private static string TargetOf(DownloadJobSnapshot job) => Path.Combine(job.TargetDirectory, job.FileName);
 
@@ -289,19 +297,23 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
             && _storage.FileExists(TargetOf(job));
 
     /// <summary>
-    /// Records the finished downloads under the library root that the library lacks and that are still on disk, with
-    /// the lock taken. Each that can't be is logged.
+    /// Records the finished downloads into the library's folders that the library lacks and that are still on disk,
+    /// with the lock taken. Each that can't be is logged.
     /// </summary>
-    /// <returns>The root, and how many couldn't be recorded.</returns>
+    /// <returns>
+    /// The folder those that couldn't be recorded went into, or the library's root when they went into several; and how
+    /// many couldn't be recorded.
+    /// </returns>
     private async Task<(string Root, int Unrecorded)> RecordMissedHeldAsync(CancellationToken cancellationToken)
     {
-        string root = await _settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+        LibraryRoots roots = await _settings.GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false);
         IReadOnlyList<LibraryMod> library = await _library.ListAsync(cancellationToken).ConfigureAwait(false);
         IReadOnlyList<DownloadJobSnapshot> jobs = await _downloads.ListAsync(cancellationToken).ConfigureAwait(false);
 
         Dictionary<ModFileRef, LibraryFile> kept = library.SelectMany(mod => mod.Files).ToDictionary(file => file.File);
+        HashSet<string> folders = new(StringComparer.Ordinal);
         int unrecorded = 0;
-        foreach (DownloadJobSnapshot job in jobs.Where(job => IsMissing(root, job, kept.GetValueOrDefault(job.File))))
+        foreach (DownloadJobSnapshot job in jobs.Where(job => IsMissing(roots.For(job.File.Mod.Game), job, kept.GetValueOrDefault(job.File))))
         {
             try
             {
@@ -310,11 +322,12 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
                 LogCantRecord(_logger, exception, job.FileName);
+                folders.Add(roots.For(job.File.Mod.Game));
                 unrecorded++;
             }
         }
 
-        return (root, unrecorded);
+        return (folders.Count == 1 ? folders.Single() : roots.Root, unrecorded);
     }
 
     private async Task<LinkDownload> QueueAsync(
@@ -338,7 +351,8 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
     private async Task<LibraryRecord?> RecordCompletedAsync(DownloadJobSnapshot job, CancellationToken cancellationToken)
     {
         AppSettings settings = await _settings.GetAsync(cancellationToken).ConfigureAwait(false);
-        string root = settings.LibraryRoot ?? _settings.DefaultLibraryRoot;
+        LibraryRoots roots = LibraryRoots.Of(settings, _settings.DefaultLibraryRoot);
+        string root = roots.For(job.File.Mod.Game);
         if (LibraryPaths.RelativeTo(root, TargetOf(job)) is not { } relativePath)
         {
             _details.TryRemove(job.Id, out _);
@@ -389,7 +403,7 @@ internal sealed partial class LibraryDownloads : ILibraryDownloads, ILibraryHold
         LibraryFile? replaced = older.Count > 0 ? older[0] : null;
         IReadOnlyList<(LibraryFile Before, LibraryFile After)> archived = plan.Archive.Count == 0
             ? []
-            : Archive(root, await _library.ListAsync(cancellationToken).ConfigureAwait(false), plan.Archive);
+            : Archive(root, InFolder(roots, root, await _library.ListAsync(cancellationToken).ConfigureAwait(false)), plan.Archive);
         LibraryChange change;
         try
         {

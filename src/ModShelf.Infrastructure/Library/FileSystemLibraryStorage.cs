@@ -62,7 +62,7 @@ internal sealed class FileSystemLibraryStorage : ILibraryStorage
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
             // A folder this user can't write in: compared by name, as this system does, with its links followed.
-            return FilePaths.Same(FreeSpace.RealPath(first), FreeSpace.RealPath(second));
+            return FilePaths.Same(Downloads.FreeSpace.RealPath(first), Downloads.FreeSpace.RealPath(second));
         }
     }
 
@@ -99,6 +99,21 @@ internal sealed class FileSystemLibraryStorage : ILibraryStorage
             byte[] digest = await SHA256.HashDataAsync(file, cancellationToken).ConfigureAwait(false);
             return Convert.ToHexStringLower(digest);
         }
+    }
+
+    public long? FreeSpace(string folder)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(folder);
+
+        return Downloads.FreeSpace.Available(folder);
+    }
+
+    public bool SameDrive(string first, string second)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(first);
+        ArgumentException.ThrowIfNullOrWhiteSpace(second);
+
+        return Downloads.FreeSpace.SameVolume(first, second);
     }
 
     public void EnsurePathFits(string path)

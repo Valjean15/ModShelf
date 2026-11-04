@@ -77,6 +77,34 @@ public sealed class LibraryOldVersionsTests : IDisposable
     }
 
     [Fact]
+    public async Task ArchivesAndDeletesInTheGamesOwnFolder()
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "ModShelf.Tests", "Skyrim");
+        _store.Settings = new AppSettings
+        {
+            OldVersions = OldVersionRule.Archive,
+            Games = new Dictionary<GameRef, GameSettings>(AppSettings.GameComparer)
+            {
+                [new GameRef(FakeModSite.SourceId, "skyrimspecialedition")] = new() { Root = folder },
+            },
+        };
+        foreach (string id in OldIds)
+        {
+            _storage.Remove(InRoot(Stored(id).RelativePath));
+            _storage.Add(Domain.Library.LibraryPaths.Resolve(folder, Stored(id).RelativePath));
+        }
+
+        using LibraryDownloads library = Create();
+        LibraryRecord recorded = (await library.RecordAsync(
+            RecordingDownloadService.Completed(RecordingDownloadService.Job(File(SkyUi, "53"), Domain.Library.LibraryPaths.Resolve(folder, Folder), "SkyUI 5.3.7z", DownloadJobStatus.Queued)),
+            Cancellation))!;
+
+        Assert.Equal(["52", "51", "50"], recorded.Archived.Select(file => file.File.Id));
+        Assert.True(_storage.FileExists(Domain.Library.LibraryPaths.Resolve(folder, $"{Folder}/_archive/SkyUI 5.2.7z")));
+        Assert.False(_storage.FileExists(Domain.Library.LibraryPaths.Resolve(folder, $"{Folder}/SkyUI 5.2.7z")));
+    }
+
+    [Fact]
     public async Task KeepsAsManyVersionsAsTheRuleSays()
     {
         _store.Settings = new AppSettings { OldVersions = OldVersionRule.KeepLatest(1) };

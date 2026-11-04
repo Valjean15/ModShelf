@@ -24,12 +24,12 @@ internal sealed partial class OpenedLinks(
     public async Task<OpenedLink> OpenAsync(Uri link, CancellationToken cancellationToken)
     {
         RecognizedLink recognized = await sources.RecognizeLinkAsync(link, cancellationToken).ConfigureAwait(false);
-        string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+        LibraryRoots roots = await settings.GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false);
         IReadOnlyList<DownloadJobSnapshot> jobs = await downloads.ListAsync(cancellationToken).ConfigureAwait(false);
 
         // Such as a download to a folder, waiting for the user to start it on the website: it goes on with the link,
         // where it was going, rather than the file being downloaded a second time into the library.
-        if (jobs.LastOrDefault(job => job.File == recognized.File && !IsDone(job) && !IsInLibrary(root, job)) is { } elsewhere)
+        if (jobs.LastOrDefault(job => job.File == recognized.File && !IsDone(job) && !IsInLibrary(roots, job)) is { } elsewhere)
         {
             LinkDownload going = await links.AddAsync(link, elsewhere.TargetDirectory, elsewhere.FileName, cancellationToken).ConfigureAwait(false);
             LogOpened(logger, recognized.File.Mod.Game.Source.Value, "a download outside the library");
@@ -43,6 +43,6 @@ internal sealed partial class OpenedLinks(
 
     private static bool IsDone(DownloadJobSnapshot job) => job.Status is DownloadJobStatus.Completed or DownloadJobStatus.Cancelled;
 
-    private static bool IsInLibrary(string root, DownloadJobSnapshot job)
-        => LibraryPaths.RelativeTo(root, Path.Combine(job.TargetDirectory, job.FileName)) is not null;
+    private static bool IsInLibrary(LibraryRoots roots, DownloadJobSnapshot job)
+        => roots.RelativeTo(job.File.Mod.Game, Path.Combine(job.TargetDirectory, job.FileName)) is not null;
 }

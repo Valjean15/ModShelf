@@ -24,7 +24,8 @@ namespace ModShelf.Infrastructure.Settings;
 ///   },
 ///   "games": {
 ///     "nexus/skyrimspecialedition": {
-///       "folders": "{source}/{game}/{mod}/{file}",
+///       "root": "E:\\Skyrim mods",
+///       "folders": "{mod} ({modid})/{file}",
 ///       "oldVersions": "archive",
 ///       "checkUpdates": true,
 ///       "updateInterval": "1d",
@@ -502,8 +503,15 @@ internal sealed class JsonSettingsStore : ISettingsStore
 
                     GameSettings before = games.TryGetValue(game, out GameSettings? old) ? old : GameSettings.None;
                     string? folders = Text(settings, Folders, name);
+                    string? root = Text(settings, Root, name);
+                    if (root is not null && !Path.IsPathFullyQualified(root))
+                    {
+                        throw new InvalidDataException($"{name}.{Root} must be a full path, not '{root}'.");
+                    }
+
                     GameSettings own = new()
                     {
+                        Root = root,
                         Folders = folders is null ? before.Folders : FolderPattern.Parse(folders),
                         OldVersions = ReadOldVersions(settings, name),
                         CheckUpdates = Flag(settings, CheckUpdates, name),
@@ -648,6 +656,7 @@ internal sealed class JsonSettingsStore : ISettingsStore
             JsonObject game = kept.TryGetValue(stored, out JsonObject? held) ? held : [];
             GameRef key = games.Keys.FirstOrDefault(set => AppSettings.GameComparer.Equals(set, stored)) ?? stored;
             GameSettings settings = games.TryGetValue(key, out GameSettings? set) ? set : GameSettings.None;
+            Set(game, Root, settings.Root);
             Set(game, Folders, settings.Folders?.Text);
             WriteOldVersions(game, settings.OldVersions);
             SetFlag(game, CheckUpdates, settings.CheckUpdates);

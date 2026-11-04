@@ -116,7 +116,7 @@ internal sealed partial class ModLibrary : IModLibrary
         LibraryFile kept = (await _repository.FindAsync(file.Mod, cancellationToken).ConfigureAwait(false))?.Files
                 .FirstOrDefault(candidate => candidate.File == file)
             ?? throw new KeyNotFoundException($"The library has no file {file.Id} of mod {file.Mod.Id}.");
-        string root = await _settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+        string root = (await _settings.GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false)).For(file.Mod.Game);
         string path = LibraryPaths.Resolve(root, kept.RelativePath);
 
         // From disk first: a file that can't be deleted stays in the library, where the user can see it.
@@ -144,7 +144,7 @@ internal sealed partial class ModLibrary : IModLibrary
         ArgumentNullException.ThrowIfNull(modRef);
 
         LibraryMod stored = await _repository.FindAsync(modRef, cancellationToken).ConfigureAwait(false) ?? throw NotInLibrary(modRef);
-        string root = await _settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+        string root = (await _settings.GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false)).For(modRef.Game);
         DownloadJobSnapshot[] downloads = [.. (await _downloads.ListAsync(cancellationToken).ConfigureAwait(false))
             .Where(job => job.File.Mod == modRef && LibraryPaths.RelativeTo(root, Path.Combine(job.TargetDirectory, job.FileName)) is not null)];
 

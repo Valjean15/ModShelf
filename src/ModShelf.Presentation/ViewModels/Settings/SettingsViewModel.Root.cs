@@ -54,7 +54,9 @@ public sealed partial class SettingsViewModel
         string? missing = null;
         try
         {
-            int files = (await _library.ListAsync(cancellationToken)).Sum(mod => mod.Files.Count);
+            // The files of games with folders of their own stay where they are.
+            LibraryRoots roots = LibraryRoots.Of(_shown, _settings.DefaultLibraryRoot);
+            int files = (await _library.ListAsync(cancellationToken)).Where(mod => !roots.HasOwn(mod.Mod.Game)).Sum(mod => mod.Files.Count);
             if (files == 0)
             {
                 await _settings.SetLibraryRootAsync(folder, cancellationToken);

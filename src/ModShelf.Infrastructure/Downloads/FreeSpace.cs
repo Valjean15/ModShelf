@@ -20,18 +20,28 @@ internal static class FreeSpace
     {
         try
         {
-            // A folder behind a link, such as a Downloads folder linked to another disk, is on the link's target's disk.
-            string path = RealPath(folder);
-            DriveInfo? volume = OperatingSystem.IsWindows()
-                ? new DriveInfo(Path.GetPathRoot(path)!)
-                : DriveInfo.GetDrives()
-                    .Where(drive => Holds(drive.RootDirectory.FullName, path))
-                    .MaxBy(drive => drive.RootDirectory.FullName.Length);
+            DriveInfo? volume = VolumeOf(folder);
             return volume is { IsReady: true } ? volume.AvailableFreeSpace : null;
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException or SecurityException)
         {
             return null;
+        }
+    }
+
+    /// <summary>
+    /// Whether two folders are on the same volume; false when the system can't tell.
+    /// </summary>
+    public static bool SameVolume(string first, string second)
+    {
+        try
+        {
+            return VolumeOf(first) is { } one && VolumeOf(second) is { } other
+                && string.Equals(one.RootDirectory.FullName, other.RootDirectory.FullName, FilePaths.Comparison);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException or SecurityException)
+        {
+            return false;
         }
     }
 
@@ -49,6 +59,21 @@ internal static class FreeSpace
     {
         string under = Path.EndsInDirectorySeparator(root) ? root : root + Path.DirectorySeparatorChar;
         return path.Equals(Path.TrimEndingDirectorySeparator(root), FilePaths.Comparison) || path.StartsWith(under, FilePaths.Comparison);
+    }
+
+    /// <summary>
+    /// The volume that holds <paramref name="folder"/>: on Windows its drive, elsewhere the mount point it's deepest
+    /// under. A folder behind a link, such as a Downloads folder linked to another disk, is on the link's target's disk.
+    /// </summary>
+    /// <exception cref="ArgumentException">Windows has no drive for it, such as for a network share.</exception>
+    private static DriveInfo? VolumeOf(string folder)
+    {
+        string path = RealPath(folder);
+        return OperatingSystem.IsWindows()
+            ? new DriveInfo(Path.GetPathRoot(path)!)
+            : DriveInfo.GetDrives()
+                .Where(drive => Holds(drive.RootDirectory.FullName, path))
+                .MaxBy(drive => drive.RootDirectory.FullName.Length);
     }
 
     /// <param name="linksLeft">How many links deep a link's target is still followed; the system stops sooner.</param>

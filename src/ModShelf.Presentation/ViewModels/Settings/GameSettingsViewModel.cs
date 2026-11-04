@@ -314,7 +314,8 @@ public sealed partial class GameSettingsViewModel : ObservableObject
             FolderPattern everyGamesFolders = settings.LibraryFolders ?? FolderPattern.Default;
             HasOwnFolders = own.Folders is not null;
             EveryGamesFolders = Text.Format(Strings.GameEveryGames, everyGamesFolders.Text);
-            Folders.Show(own.Folders ?? everyGamesFolders, root);
+            // The example is where a file would go: in the game's own folder, when it has one.
+            Folders.Show(own.Folders ?? everyGamesFolders, own.Root ?? root);
 
             OldVersionRule everyGamesRule = settings.OldVersions ?? OldVersionRule.Default;
             HasOwnOldVersions = own.OldVersions is not null;

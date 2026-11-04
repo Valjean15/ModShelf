@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
+using ModShelf.Application.Library;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
@@ -307,10 +308,10 @@ public sealed partial class LibraryModViewModel : ObservableObject
                     return;
                 }
 
-                string root;
+                LibraryRoots roots;
                 try
                 {
-                    root = await _services.Settings.GetLibraryRootAsync(cancellationToken);
+                    roots = await _services.Settings.GetLibraryRootsAsync(cancellationToken);
                 }
                 catch (InvalidDataException exception)
                 {
@@ -318,7 +319,7 @@ public sealed partial class LibraryModViewModel : ObservableObject
                     return;
                 }
 
-                string folder = Path.GetDirectoryName(LibraryPaths.Resolve(root, latest.RelativePath))!;
+                string folder = Path.GetDirectoryName(roots.Resolve(latest))!;
                 if (!await _services.Folders.TryOpenAsync(folder, cancellationToken))
                 {
                     await _services.Dialogs.ShowMessageAsync(Strings.OpenFolderFailedTitle, Text.Format(Strings.OpenFolderFailed, folder), cancellationToken);

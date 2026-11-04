@@ -59,7 +59,7 @@ internal sealed class LibraryTools(
                 throw new McpException("offset must be 0 or more.");
             }
 
-            string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+            LibraryRoots roots = await settings.GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false);
             IReadOnlyList<LibraryMod> mods = await library.ListAsync(cancellationToken).ConfigureAwait(false);
             LibraryMod[] matching =
             [
@@ -69,18 +69,18 @@ internal sealed class LibraryTools(
                     .Where(found => mod is null || string.Equals(found.Mod.Id, mod.Trim(), StringComparison.OrdinalIgnoreCase))
                     .Where(found => !watchedOnly || found.IsWatched)
                     .Where(found => !updatesOnly || found.OfferedUpdates.Count > 0)
-                    .Where(found => !missingOnly || found.Files.Any(file => McpEntries.File(file, root).Missing))
+                    .Where(found => !missingOnly || found.Files.Any(file => McpEntries.File(file, roots).Missing))
                     .OrderBy(found => found.Mod.Game.Source.Value, StringComparer.Ordinal)
                     .ThenBy(found => found.Mod.Game.Key, StringComparer.Ordinal)
                     .ThenBy(found => found.Name, StringComparer.OrdinalIgnoreCase)
                     .ThenBy(found => found.Mod.Id, StringComparer.Ordinal),
             ];
             return new LibraryListing(
-                root,
+                roots.Root,
                 matching.Length,
                 offset,
                 (long)offset + limit < matching.Length,
-                [.. matching.Skip(offset).Take(limit).Select(found => McpEntries.Mod(found, root, compact))]);
+                [.. matching.Skip(offset).Take(limit).Select(found => McpEntries.Mod(found, roots, compact))]);
         });
 
     [McpServerTool(Name = "library_changes", Title = "What's new in the library", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
@@ -96,7 +96,7 @@ internal sealed class LibraryTools(
             }
 
             DateTimeOffset until = time.GetUtcNow();
-            string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+            LibraryRoots roots = await settings.GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false);
             AppSettings stored = await settings.GetAsync(cancellationToken).ConfigureAwait(false);
             IReadOnlyList<LibraryMod> mods = await library.ListAsync(cancellationToken).ConfigureAwait(false);
             IReadOnlyList<LibraryEvent> happened = await history.ListAsync(from, HistoryLimit, cancellationToken).ConfigureAwait(false);
@@ -111,14 +111,14 @@ internal sealed class LibraryTools(
                         found.Mod.Mod.Id,
                         found.Mod.Name,
                         found.Mod.PageUrl?.AbsoluteUri,
-                        McpEntries.File(found.File, root),
+                        McpEntries.File(found.File, roots),
                         [
                             .. found.Mod.Files
                                 .Where(file => file.File != found.File.File)
                                 .OrderByDescending(file => file.UploadedAt)
-                                .Select(file => McpEntries.File(file, root)),
+                                .Select(file => McpEntries.File(file, roots)),
                         ],
-                        McpEntries.Replaced(found.Mod, found.File, happened, root))),
+                        McpEntries.Replaced(found.Mod, found.File, happened, roots))),
             ];
             return new LibraryChanges(from, until, (stored.OldVersions ?? OldVersionRule.Default).ToString(), files);
         });
@@ -130,7 +130,7 @@ internal sealed class LibraryTools(
         CancellationToken cancellationToken = default)
         => McpProblems.GuardAsync(async () =>
         {
-            string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+            LibraryRoots roots = await settings.GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false);
             IReadOnlyList<LibraryMod> mods = await library.ListAsync(cancellationToken).ConfigureAwait(false);
             Dictionary<ModRef, LibraryMod> byRef = mods.ToDictionary(mod => mod.Mod);
             List<UpdateFound> updates = [];
@@ -139,7 +139,7 @@ internal sealed class LibraryTools(
                 foreach (LibraryUpdate update in mod.OfferedUpdates.OrderByDescending(update => update.UploadedAt))
                 {
                     IReadOnlyList<string>? changes = changelog ? await ChangesOfAsync(update, cancellationToken).ConfigureAwait(false) : null;
-                    updates.Add(McpEntries.Found(update, byRef, root, changes));
+                    updates.Add(McpEntries.Found(update, byRef, roots, changes));
                 }
             }
 
@@ -152,12 +152,12 @@ internal sealed class LibraryTools(
         => McpProblems.GuardAsync(async () =>
         {
             UpdateCheck check = await checker.CheckAsync(cancellationToken).ConfigureAwait(false);
-            string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+            LibraryRoots roots = await settings.GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false);
             Dictionary<ModRef, LibraryMod> byRef = (await library.ListAsync(cancellationToken).ConfigureAwait(false)).ToDictionary(mod => mod.Mod);
             return new UpdateCheckResult(
                 check.Checked,
                 check.Requests,
-                [.. check.Found.Select(update => McpEntries.Found(update, byRef, root))],
+                [.. check.Found.Select(update => McpEntries.Found(update, byRef, roots))],
                 [.. check.Failures.Select(failure => new UpdateCheckFailureEntry(failure.Game.Source.Value, failure.Game.Key, failure.Mod?.Id, failure.Reason))]);
         });
 
@@ -170,8 +170,8 @@ internal sealed class LibraryTools(
         {
             Uri mod = McpProblems.Link(link);
             LibraryMod watched = await library.WatchAsync(mod, cancellationToken).ConfigureAwait(false);
-            string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
-            return new WatchResult(true, $"Watching {watched.Name} ({Describe(watched.Mod)}).", McpEntries.Mod(watched, root));
+            LibraryRoots roots = await settings.GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false);
+            return new WatchResult(true, $"Watching {watched.Name} ({Describe(watched.Mod)}).", McpEntries.Mod(watched, roots));
         });
 
     [McpServerTool(Name = "library_unwatch", Title = "Stop watching a mod", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
@@ -183,7 +183,7 @@ internal sealed class LibraryTools(
         {
             Uri mod = McpProblems.Link(link);
             LibraryChange change = await library.UnwatchAsync(mod, cancellationToken).ConfigureAwait(false);
-            string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+            LibraryRoots roots = await settings.GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false);
             string message = change switch
             {
                 { Before: null } => $"{char.ToUpperInvariant(Describe(change.Mod)[0])}{Describe(change.Mod)[1..]} isn't in the library.",
@@ -191,7 +191,7 @@ internal sealed class LibraryTools(
                 { After: null } => $"Stopped watching {change.Before.Name}. It had no downloaded files, so it's out of the library.",
                 _ => $"Stopped watching {change.Before.Name}. Its downloaded files stay in the library.",
             };
-            return new WatchResult(false, message, change.After is { } after ? McpEntries.Mod(after, root) : null);
+            return new WatchResult(false, message, change.After is { } after ? McpEntries.Mod(after, roots) : null);
         });
 
     [McpServerTool(Name = "library_pin", Title = "Pin a mod", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
@@ -203,7 +203,7 @@ internal sealed class LibraryTools(
         => McpProblems.GuardAsync(async () =>
         {
             LibraryChange change = await InLibraryAsync(() => library.SetPinnedAsync(McpProblems.Link(link), pinned, cancellationToken)).ConfigureAwait(false);
-            string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+            LibraryRoots roots = await settings.GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false);
             LibraryMod mod = change.After!;
             string message = (pinned, change.Before!.IsPinned) switch
             {
@@ -212,7 +212,7 @@ internal sealed class LibraryTools(
                 (false, false) => $"{mod.Name} isn't pinned.",
                 _ => $"Unpinned {mod.Name}: its updates are offered again.",
             };
-            return new PinResult(mod.IsPinned, message, McpEntries.Mod(mod, root));
+            return new PinResult(mod.IsPinned, message, McpEntries.Mod(mod, roots));
         });
 
     [McpServerTool(Name = "library_skip", Title = "Skip an update", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
@@ -224,7 +224,7 @@ internal sealed class LibraryTools(
         => McpProblems.GuardAsync(async () =>
         {
             LibraryChange change = await InLibraryAsync(() => library.SkipUpdateAsync(McpProblems.Link(link), skip, cancellationToken)).ConfigureAwait(false);
-            string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+            LibraryRoots roots = await settings.GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false);
             LibraryMod before = change.Before!;
             LibraryMod mod = change.After!;
             ModFileRef? changed = skip
@@ -238,7 +238,7 @@ internal sealed class LibraryTools(
                 (true, _) => $"Skipped {update.Name} of {mod.Name} until a newer update comes.",
                 _ => $"{update.Name} of {mod.Name} is offered again.",
             };
-            return new SkipResult(skip, message, update is null ? null : McpEntries.Update(update, mod, root), McpEntries.Mod(mod, root));
+            return new SkipResult(skip, message, update is null ? null : McpEntries.Update(update, mod, roots), McpEntries.Mod(mod, roots));
         });
 
     [McpServerTool(Name = "library_note", Title = "Keep a note of a mod", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
@@ -250,7 +250,7 @@ internal sealed class LibraryTools(
         => McpProblems.GuardAsync(async () =>
         {
             LibraryChange change = await InLibraryAsync(() => library.SetNoteAsync(McpProblems.Link(link), note, cancellationToken)).ConfigureAwait(false);
-            string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+            LibraryRoots roots = await settings.GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false);
             LibraryMod mod = change.After!;
             string message = (change.Before!.Note, mod.Note) switch
             {
@@ -258,7 +258,7 @@ internal sealed class LibraryTools(
                 (_, null) => $"Removed the note of {mod.Name}.",
                 _ => $"Kept the note of {mod.Name}.",
             };
-            return new NoteResult(mod.Note, message, McpEntries.Mod(mod, root));
+            return new NoteResult(mod.Note, message, McpEntries.Mod(mod, roots));
         });
 
     [McpServerTool(Name = "library_forget", Title = "Forget a mod", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
@@ -284,7 +284,7 @@ internal sealed class LibraryTools(
                 throw new McpException(exception.Message, exception);
             }
 
-            string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+            LibraryRoots roots = await settings.GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false);
             LibraryMod forgotten = change.Before!;
             string files = forgotten.Files.Count switch
             {
@@ -295,7 +295,7 @@ internal sealed class LibraryTools(
             return new ForgetResult(
                 true,
                 $"{forgotten.Name} is out of the library: ModShelf doesn't watch it or keep track of its files any more. {files}",
-                McpEntries.Mod(forgotten, root));
+                McpEntries.Mod(forgotten, roots));
         });
 
     [McpServerTool(Name = "library_rescan", Title = "Rescan the library", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
@@ -307,9 +307,9 @@ internal sealed class LibraryTools(
         {
             Uri? mod = link is null ? null : McpProblems.Link(link);
             LibraryRescan rescan = await rescanner.RescanAsync(mod, cancellationToken).ConfigureAwait(false);
-            string root = await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+            LibraryRoots roots = await settings.GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false);
             RescannedFile Entry(LibraryFile file)
-                => new(file.File.Mod.Game.Source.Value, file.File.Mod.Game.Key, file.File.Mod.Id, McpEntries.File(file, root));
+                => new(file.File.Mod.Game.Source.Value, file.File.Mod.Game.Key, file.File.Mod.Id, McpEntries.File(file, roots));
 
             string message = string.Create(
                 CultureInfo.InvariantCulture,

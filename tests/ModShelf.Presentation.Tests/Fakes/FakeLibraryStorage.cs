@@ -22,6 +22,10 @@ internal sealed class FakeLibraryStorage : ILibraryStorage
 
     public bool IsSameFolder(string first, string second) => throw new NotSupportedException();
 
+    public long? FreeSpace(string folder) => throw new NotSupportedException();
+
+    public bool SameDrive(string first, string second) => throw new NotSupportedException();
+
     public void EnsurePathFits(string path) => throw new NotSupportedException();
 
     public void MoveFile(string source, string destination) => throw new NotSupportedException();

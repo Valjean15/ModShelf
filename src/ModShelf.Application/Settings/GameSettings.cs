@@ -13,6 +13,25 @@ public sealed record GameSettings
     public static GameSettings None { get; } = new();
 
     /// <summary>
+    /// The folder its files are in, in place of the library's root, as an absolute path. Its files' library paths are
+    /// relative to it, and <see cref="Folders"/> still says where they go below it.
+    /// </summary>
+    /// <exception cref="ArgumentException">The folder isn't an absolute path.</exception>
+    public string? Root
+    {
+        get;
+        init
+        {
+            if (value is not null && (string.IsNullOrWhiteSpace(value) || !Path.IsPathFullyQualified(value)))
+            {
+                throw new ArgumentException($"'{value}' isn't a full path.", nameof(Root));
+            }
+
+            field = value;
+        }
+    }
+
+    /// <summary>
     /// Where its downloaded files go in the library.
     /// </summary>
     public FolderPattern? Folders { get; init; }

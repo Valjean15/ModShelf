@@ -395,6 +395,30 @@ public sealed class LibraryRescannerTests : IDisposable
         Assert.Equal(2, Assert.Single(_library.Mods).Files.Count);
     }
 
+    [Fact]
+    public async Task LooksForAGamesFilesInItsOwnFolder()
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "ModShelf.Tests", "Skyrim");
+        _store.Settings = new AppSettings
+        {
+            Games = new Dictionary<GameRef, GameSettings>(AppSettings.GameComparer)
+            {
+                [new GameRef(FakeModSite.SourceId, "skyrimspecialedition")] = new() { Root = folder },
+            },
+        };
+        Have(SkyUi, Stored("35407", "fake-mods/skyrimspecialedition/SkyUI (12604)/SkyUI_5_2_SE.7z", new string('a', 64)));
+        _storage.Remove(InRoot("fake-mods/skyrimspecialedition/SkyUI (12604)/SkyUI_5_2_SE.7z"));
+        _storage.Add(LibraryPaths.Resolve(folder, "fake-mods/skyrimspecialedition/SkyUI (12604)/SkyUI_5_2_SE.7z"));
+        _storage.Add(LibraryPaths.Resolve(folder, "fake-mods/skyrimspecialedition/SkyUI (12604)/SkyUI_5_3_SE.7z"));
+        _storage.Add(Path.Combine(SkyUiFolder, "SkyUI_5_3_SE.7z"));
+
+        LibraryRescan rescan = await Rescanner().RescanAsync(null, Cancellation);
+
+        Assert.Equal("fake-mods/skyrimspecialedition/SkyUI (12604)/SkyUI_5_3_SE.7z", Assert.Single(rescan.Added).RelativePath);
+        Assert.Empty(rescan.Missing);
+        Assert.Equal(LibraryPaths.Resolve(folder, "fake-mods/skyrimspecialedition/SkyUI (12604)/SkyUI_5_3_SE.7z"), Assert.Single(_storage.Hashed));
+    }
+
     private static LibraryFile Stored(string fileId, string relativePath, string? sha256 = null)
         => new(File(SkyUi, fileId), $"File {fileId}", null, ModFileCategory.Main, TestData.Now.AddDays(-9), relativePath, 100, TestData.Now.AddDays(-2), sha256);
 

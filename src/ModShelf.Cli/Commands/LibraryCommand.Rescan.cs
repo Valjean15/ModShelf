@@ -44,11 +44,11 @@ internal static partial class LibraryCommand
                 async services =>
                 {
                     LibraryRescan rescan;
-                    string root;
+                    LibraryRoots roots;
                     try
                     {
                         rescan = await services.GetRequiredService<ILibraryRescan>().RescanAsync(link, cancellationToken).ConfigureAwait(false);
-                        root = await services.GetRequiredService<ISettingsService>().GetLibraryRootAsync(cancellationToken).ConfigureAwait(false);
+                        roots = await services.GetRequiredService<ISettingsService>().GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false);
                     }
                     catch (InvalidDataException exception)
                     {
@@ -61,7 +61,7 @@ internal static partial class LibraryCommand
                         return problem.ExitCode;
                     }
 
-                    WriteRescan(environment.Output, rescan, root);
+                    WriteRescan(environment.Output, rescan, roots);
                     foreach (RescanFailure failure in rescan.Failures)
                     {
                         await environment.Error.WriteLineAsync(
@@ -78,7 +78,7 @@ internal static partial class LibraryCommand
     /// <summary>
     /// What a rescan did: the files it added, as a table, then the counts and paths of the rest.
     /// </summary>
-    private static void WriteRescan(TextWriter output, LibraryRescan rescan, string root)
+    private static void WriteRescan(TextWriter output, LibraryRescan rescan, LibraryRoots roots)
     {
         output.WriteLine($"Rescanned {CliText.Count(rescan.Mods, "mod", "mods")}.");
         if (rescan.Added.Count + rescan.Hashed.Count + rescan.Missing.Count + rescan.Unmatched.Count == 0)
@@ -99,7 +99,7 @@ internal static partial class LibraryCommand
                     file.File.Mod.Id,
                     file.FileName,
                     file.VersionLabel ?? "-",
-                    LibraryPaths.Resolve(root, file.RelativePath),
+                    roots.Resolve(file),
                 }),
             ];
             TextTable.Write(output, rows);
@@ -117,7 +117,7 @@ internal static partial class LibraryCommand
                 : $"{CliText.Count(rescan.Missing.Count, "file", "files")} are missing from disk:");
             foreach (LibraryFile file in rescan.Missing)
             {
-                output.WriteLine($"  {LibraryPaths.Resolve(root, file.RelativePath)}");
+                output.WriteLine($"  {roots.Resolve(file)}");
             }
         }
 

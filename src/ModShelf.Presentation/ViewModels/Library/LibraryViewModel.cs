@@ -790,23 +790,23 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     {
         try
         {
-            string? root;
+            LibraryRoots? roots;
             try
             {
-                root = await _pageServices.Settings.GetLibraryRootAsync(cancellationToken);
+                roots = await _pageServices.Settings.GetLibraryRootsAsync(cancellationToken);
             }
             catch (InvalidDataException)
             {
                 // Settings that can't be read: what's on disk isn't known.
-                root = null;
+                roots = null;
             }
 
-            Dictionary<ModRef, int> missing = root is null
+            Dictionary<ModRef, int> missing = roots is null
                 ? []
                 : await Task.Run(
                     () => mods.ToDictionary(
                         mod => mod.Mod,
-                        mod => mod.Files.Count(file => !_pageServices.Storage.FileExists(LibraryPaths.Resolve(root, file.RelativePath)))),
+                        mod => mod.Files.Count(file => !_pageServices.Storage.FileExists(roots.Resolve(file)))),
                     cancellationToken);
             Dictionary<ModRef, DateTimeOffset?> updated = [];
             foreach (LibraryMod mod in mods)

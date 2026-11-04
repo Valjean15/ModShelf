@@ -29,11 +29,12 @@ public sealed class ModLibraryTests : IDisposable
     private readonly LibraryChanges _changes = new();
     private readonly RecordingDownloadService _downloads = new();
     private readonly RecordingLogger<ModLibrary> _logger = new();
+    private readonly InMemorySettingsStore _store = new();
     private readonly SettingsService _settings;
 
     public ModLibraryTests()
     {
-        _settings = new SettingsService(new InMemorySettingsStore(), new FakeUserFolders(), _repository, new InMemoryDownloadJobRepository([]));
+        _settings = new SettingsService(_store, new FakeUserFolders(), _repository, new InMemoryDownloadJobRepository([]));
     }
 
     private static CancellationToken Cancellation => TestContext.Current.CancellationToken;
@@ -321,6 +322,35 @@ public sealed class ModLibraryTests : IDisposable
         Assert.True(change.After!.IsWatched);
         Assert.Empty(change.After.Files);
         Assert.Empty(_storage.Files);
+    }
+
+    [Fact]
+    public async Task DeletesAFileInItsGamesOwnFolderKeepingThatFolder()
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "ModShelf.Tests", "Skyrim");
+        _store.Settings = GameIn(folder);
+        LibraryFile only = File("35407", "SkyUI (12604)/SkyUI_5_2_SE.7z");
+        _repository.Add(LibraryMod.Restore(SkyUi, "SkyUI", null, null, false, TestData.Now, null, [only]));
+        _storage.Add(LibraryPaths.Resolve(folder, only.RelativePath));
+        _storage.Add(LibraryPaths.Resolve(Root, only.RelativePath));
+
+        await Library(_site).DeleteFileAsync(only.File, Cancellation);
+
+        Assert.Equal([LibraryPaths.Resolve(Root, only.RelativePath)], _storage.Files);
+        Assert.Equal([Path.Combine(folder, "SkyUI (12604)")], _storage.RemovedFolders);
+    }
+
+    [Fact]
+    public async Task AnUnfinishedDownloadIntoItsGamesOwnFolderStopsAForget()
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "ModShelf.Tests", "Skyrim");
+        _store.Settings = GameIn(folder);
+        Stored(watched: true, File("35407"));
+        _downloads.Add(RecordingDownloadService.Job(File("35408").File, Path.Combine(folder, "SkyUI (12604)"), "SkyUI_5_3_SE.7z", DownloadJobStatus.Queued));
+
+        InvalidOperationException refused = await Assert.ThrowsAsync<InvalidOperationException>(() => Library(_site).ForgetAsync(SkyUi, Cancellation));
+
+        Assert.Equal("A download of a file of SkyUI into the library isn't finished. Let it finish, or cancel it, first.", refused.Message);
     }
 
     [Fact]
@@ -788,6 +818,15 @@ public sealed class ModLibraryTests : IDisposable
 
     private static LibraryFile File(string id, string relativePath = "SkyUI_5_2_SE.7z")
         => new(new ModFileRef(TestData.File(TestData.Nexus, id).Mod, id), "SkyUI 5.2", "5.2", ModFileCategory.Main, TestData.Now, relativePath, 1, TestData.Now);
+
+    private static AppSettings GameIn(string folder)
+        => new()
+        {
+            Games = new Dictionary<GameRef, GameSettings>(AppSettings.GameComparer)
+            {
+                [TestData.File(TestData.Nexus, "1").Mod.Game] = new() { Root = folder },
+            },
+        };
 
     private ModLibrary Library(params IModSource[] sources)
         => new(new SourceRegistry(sources), _repository, _settings, _storage, _downloads, _downloads, _changes, _history.History(_time), _time, _logger);

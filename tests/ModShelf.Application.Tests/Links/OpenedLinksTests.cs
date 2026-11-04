@@ -7,6 +7,7 @@ using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
 using ModShelf.Application.Tests.Fakes;
 using ModShelf.Domain.Downloads;
+using ModShelf.Domain.Mods;
 using ModShelf.Testing;
 
 using static ModShelf.Application.Tests.Fakes.FakeModSite;
@@ -109,6 +110,26 @@ public sealed class OpenedLinksTests : IDisposable
         OpenedLink opened = await Create().OpenAsync(HandoffLink(SkyUi, SkyUi52), Cancellation);
 
         Assert.Equal(new OpenedLink(new LinkDownload(waiting, AlreadyQueued: true), Path.Combine(SkyUiFolder, "SkyUI_5_2_SE.7z")), opened);
+        Assert.Empty(_downloads.Enqueued);
+    }
+
+    [Fact]
+    public async Task ADownloadWaitingInItsGamesOwnFolderGoesOnThere()
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "ModShelf.Tests", "Skyrim", "fake-mods", "skyrimspecialedition", "SkyUI (12604)");
+        _store.Settings = new AppSettings
+        {
+            Games = new Dictionary<GameRef, GameSettings>(AppSettings.GameComparer)
+            {
+                [new GameRef(FakeModSite.SourceId, "skyrimspecialedition")] = new() { Root = Path.Combine(Path.GetTempPath(), "ModShelf.Tests", "Skyrim") },
+            },
+        };
+        DownloadJobSnapshot waiting = RecordingDownloadService.Job(File(SkyUi, SkyUi52), folder, "SkyUI_5_2_SE.7z", DownloadJobStatus.AwaitingHandoff);
+        _downloads.Add(waiting);
+
+        OpenedLink opened = await Create().OpenAsync(HandoffLink(SkyUi, SkyUi52), Cancellation);
+
+        Assert.Equal(Path.Combine(folder, "SkyUI_5_2_SE.7z"), opened.LibraryPath);
         Assert.Empty(_downloads.Enqueued);
     }
 

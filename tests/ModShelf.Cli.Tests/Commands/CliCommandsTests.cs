@@ -67,6 +67,7 @@ public sealed class CliCommandsTests : IAsyncDisposable
     [InlineData("queue", "list", "--everything")]
     [InlineData("library", "lists")]
     [InlineData("library", "move")]
+    [InlineData("library", "move-game")]
     public async Task ArgumentsTheCommandLineCantReadAreBadInput(params string[] arguments)
     {
         CliResult refused = await _cli.RunAsync(arguments, Cancellation);

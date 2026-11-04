@@ -15,13 +15,13 @@ internal static class McpEntries
     /// </summary>
     private const string ArchiveFolder = "_archive";
 
-    /// <param name="root">The library's root folder.</param>
+    /// <param name="roots">The library's root, and each game's own folder.</param>
     /// <param name="compact">Whether to leave out the files and updates, giving how many there are.</param>
-    public static LibraryModEntry Mod(LibraryMod mod, string root, bool compact = false)
+    public static LibraryModEntry Mod(LibraryMod mod, LibraryRoots roots, bool compact = false)
     {
         ArgumentNullException.ThrowIfNull(mod);
 
-        LibraryFileEntry[] files = [.. mod.Files.OrderByDescending(file => file.UploadedAt).Select(file => File(file, root))];
+        LibraryFileEntry[] files = [.. mod.Files.OrderByDescending(file => file.UploadedAt).Select(file => File(file, roots))];
         return new LibraryModEntry(
             mod.Mod.Game.Source.Value,
             mod.Mod.Game.Key,
@@ -38,14 +38,14 @@ internal static class McpEntries
             files.Count(file => file.Missing),
             mod.OfferedUpdates.Count,
             compact ? null : files,
-            compact ? null : [.. mod.Updates.OrderByDescending(update => update.UploadedAt).Select(update => Update(update, mod, root))]);
+            compact ? null : [.. mod.Updates.OrderByDescending(update => update.UploadedAt).Select(update => Update(update, mod, roots))]);
     }
 
-    public static LibraryFileEntry File(LibraryFile file, string root)
+    public static LibraryFileEntry File(LibraryFile file, LibraryRoots roots)
     {
         ArgumentNullException.ThrowIfNull(file);
 
-        string path = LibraryPaths.Resolve(root, file.RelativePath);
+        string path = roots.Resolve(file);
         return new LibraryFileEntry(
             file.File.Id,
             file.Name,
@@ -66,7 +66,7 @@ internal static class McpEntries
     /// became of it, as <paramref name="history"/> and the library say; null when it replaced none, or the history doesn't
     /// say.
     /// </summary>
-    public static ReplacedFileEntry? Replaced(LibraryMod mod, LibraryFile file, IReadOnlyList<LibraryEvent> history, string root)
+    public static ReplacedFileEntry? Replaced(LibraryMod mod, LibraryFile file, IReadOnlyList<LibraryEvent> history, LibraryRoots roots)
     {
         ArgumentNullException.ThrowIfNull(mod);
         ArgumentNullException.ThrowIfNull(file);
@@ -83,7 +83,7 @@ internal static class McpEntries
         if (mod.Files.FirstOrDefault(other => other.File == replaced) is { } kept)
         {
             return new ReplacedFileEntry(
-                replaced.Id, kept.VersionLabel ?? downloaded.ReplacesVersion, kept.Name, File(kept, root).Archived ? "archived" : "kept");
+                replaced.Id, kept.VersionLabel ?? downloaded.ReplacesVersion, kept.Name, File(kept, roots).Archived ? "archived" : "kept");
         }
 
         bool deleted = history.Any(happened => happened.Kind == LibraryEventKind.Deleted && happened.File == replaced && happened.At >= downloaded.At);
@@ -91,7 +91,7 @@ internal static class McpEntries
         return new ReplacedFileEntry(replaced.Id, downloaded.ReplacesVersion, name, deleted ? "deleted" : "gone");
     }
 
-    public static LibraryUpdateEntry Update(LibraryUpdate update, LibraryMod mod, string root)
+    public static LibraryUpdateEntry Update(LibraryUpdate update, LibraryMod mod, LibraryRoots roots)
     {
         ArgumentNullException.ThrowIfNull(update);
         ArgumentNullException.ThrowIfNull(mod);
@@ -107,12 +107,12 @@ internal static class McpEntries
             update.UploadedAt,
             update.FoundAt,
             update.PageUrl?.AbsoluteUri,
-            replaces is null ? null : File(replaces, root),
+            replaces is null ? null : File(replaces, roots),
             mod.SkippedUpdates.Contains(update.File));
     }
 
     /// <param name="library">The library, for the update's mod.</param>
-    public static UpdateFound Found(LibraryUpdate update, IReadOnlyDictionary<ModRef, LibraryMod> library, string root, IReadOnlyList<string>? changes = null)
+    public static UpdateFound Found(LibraryUpdate update, IReadOnlyDictionary<ModRef, LibraryMod> library, LibraryRoots roots, IReadOnlyList<string>? changes = null)
     {
         ArgumentNullException.ThrowIfNull(update);
         ArgumentNullException.ThrowIfNull(library);
@@ -124,7 +124,7 @@ internal static class McpEntries
             mod.Game.Key,
             mod.Id,
             known?.Name ?? mod.Id,
-            known is null ? Update(update, root) : Update(update, known, root),
+            known is null ? Update(update, roots) : Update(update, known, roots),
             changes);
     }
 
@@ -152,7 +152,7 @@ internal static class McpEntries
     /// <summary>
     /// An update of a mod the library doesn't have, such as one a check found that was unwatched meanwhile.
     /// </summary>
-    private static LibraryUpdateEntry Update(LibraryUpdate update, string root)
+    private static LibraryUpdateEntry Update(LibraryUpdate update, LibraryRoots roots)
         => new(
             update.File.Id,
             update.Name,

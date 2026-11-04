@@ -148,6 +148,23 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task LeavesMovingAGamesFilesToTheUserAndFindsThemInItsFolder()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await DownloadAndWaitAsync(mcp, "2");
+        string folder = Path.Combine(Cli.Folder, "Game mods");
+
+        string refused = await mcp.CallFailingAsync("settings_set", Arguments(("setting", "games.fake-handoff/game.root"), ("value", folder)), Cancellation);
+        CliResult moved = await Cli.RunAsync(["library", "move-game", "fake-handoff/game", folder, "--yes"], Cancellation);
+        LibraryModEntry mod = Assert.Single((await mcp.CallAsync<LibraryListing>("library_list", null, Cancellation)).Mods);
+
+        Assert.Contains(" Moving a game's files is for the user, with the CLI's library move-game.", refused, StringComparison.Ordinal);
+        Assert.Equal(0, moved.ExitCode);
+        Assert.StartsWith(folder + Path.DirectorySeparatorChar, Assert.Single(mod.Files!).Path, StringComparison.Ordinal);
+        Assert.False(Assert.Single(mod.Files!).Missing);
+    }
+
+    [Fact]
     public async Task ChangesAGamesOwnPreviews()
     {
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);

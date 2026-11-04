@@ -1,4 +1,5 @@
 using ModShelf.Application.Library;
+using ModShelf.Application.Settings;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.ViewModels.Library;
@@ -259,6 +260,21 @@ public sealed class LibraryModViewModelTests : IDisposable
 
         Assert.Equal([Path.Combine(TestData.LibraryRoot, "nexus", "skyrimspecialedition", "Mod (12604)")], _harness.Folders.Opened);
         Assert.Empty(_harness.Dialogs.Messages);
+    }
+
+    [Fact]
+    public async Task OpensTheFolderInTheGamesOwnFolder()
+    {
+        string skyrim = Path.Combine(Path.GetTempPath(), "ModShelf.Tests", "Skyrim");
+        _harness.Settings.Stored = new AppSettings
+        {
+            Games = new Dictionary<GameRef, GameSettings>(AppSettings.GameComparer) { [SkyUi.Game] = new() { Root = skyrim } },
+        };
+        LibraryModViewModel row = await ShowAsync(TestData.LibraryMod(SkyUi, "SkyUI", watched: true, TestData.LibraryFile(SkyUi, "1", "a.7z")));
+
+        await row.OpenFolderCommand.ExecuteAsync(null);
+
+        Assert.Equal([Path.Combine(skyrim, "nexus", "skyrimspecialedition", "Mod (12604)")], _harness.Folders.Opened);
     }
 
     [Fact]
