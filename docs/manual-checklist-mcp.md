@@ -71,6 +71,9 @@ you should see.
 
 - [ ] **3.1 A setting.** Ask the agent to set `library.oldVersions` to `archive`, then to reset it.
   The desktop app's Settings screen shows each, once it's opened again.
+- [ ] **3.1a A game's previews.** With the desktop app running, ask the agent to show Stardew Valley's mods as cards in
+  the Library, then open the Settings screen at Stardew Valley's page.
+  The agent sets `games.nexus/stardewvalley.previews` to `cards`. Its page shows "Previews" overridden, on **Cards**.
 - [ ] **3.2 What it can't do.** Ask the agent to link an account, delete a file, or move the library.
   It has no tool for these, and says so; nothing changes.
 - [ ] **3.3 The logs.** Open the test library's `logs\cli-….log`.
@@ -109,6 +112,7 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 2.6 Hashes | | |
 | 2.7 Pins, skips and notes | | |
 | 3.1 A setting | | |
+| 3.1a A game's previews | | |
 | 3.2 What it can't do | | |
 | 3.3 The logs | | |
 | 3.4 Forgetting a mod | | |

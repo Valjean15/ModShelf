@@ -122,6 +122,8 @@ Use a file of a few hundred MB, so there's time to stop it: for example a textur
   Write down what it says. "The site has no game 'notagame'." is expected, but Nexus Mods doesn't document this answer.
 - [ ] **7.5 A game's own settings.** `ms library watch "https://www.nexusmods.com/stardewvalley/mods/2400"`, then `ms settings set games.stardewvalley.checkUpdates false` and `ms library check`. Then `ms settings set games.nexus/stardewvalley.updateInterval 1d`, `ms settings set games.nexus/stardewvalley.browse.window 7d`, `ms settings show`, and `ms settings reset` for each of the three. Last, `ms library unwatch "https://www.nexusmods.com/stardewvalley/mods/2400"`.
   The first set says `games.nexus/stardewvalley.checkUpdates is now false`, the game's key alone naming Nexus Mods' game. With `checkUpdates` false, `library check` says "Checked 0 mods with 0 requests." `settings show` lists `games.nexus/stardewvalley.checkUpdates false`, `games.nexus/stardewvalley.updateInterval 1d` and `games.nexus/stardewvalley.browse.window 7d`, and `settings.json` holds them under `"games"`, as `"nexus/stardewvalley"`. Each reset says the game goes by every game's setting again, or Browse's own, and `settings show` lists none of them afterwards.
+- [ ] **7.5a A game's previews.** `ms settings set games.stardewvalley.previews cards`, `ms settings set games.stardewvalley.previews big`, `ms settings show`, then `ms settings reset games.stardewvalley.previews`.
+  The first says "games.nexus/stardewvalley.previews is now cards: on nexus/stardewvalley's page in the desktop app's Library, and in Browse while it's chosen, its mods show as cards, with large pictures." The second says "'big' isn't off, thumbnails or cards." with exit code 2. `settings show` lists `games.nexus/stardewvalley.previews cards`, and `settings.json` holds `"previews": "cards"` under `"nexus/stardewvalley"`. The reset says the game's mods show as `previews.library` and `previews.browse` say.
 - [ ] **7.6 Settings from before 1.0.0.** Before upgrading, note a game's own setting in `settings.json`, such as `"stardewvalley": { "notify": false }` under `"games"`. After upgrading, `ms settings show`.
   It lists `games.nexus/stardewvalley.notify false`. After any `ms settings set`, `settings.json` names the game `"nexus/stardewvalley"`, and keeps anything else it held.
 
@@ -263,6 +265,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 7.3 Too far back | | | |
 | 7.4 Unknown game | | | |
 | 7.5 A game's own settings | | | |
+| 7.5a A game's previews | | | |
 | 8.1 Tracked list | | – | |
 | 8.2 Track | | – | |
 | 8.3 Track again | | – | |

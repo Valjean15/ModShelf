@@ -4,7 +4,7 @@ Where files, types and members go. The rules apply to every project under `src` 
 
 ## 1. Folders follow features
 
-- Each project is split into **feature folders named after the domain concept**: `Accounts`, `Catalog`, `Diagnostics`, `Downloads`, `FirstRun`, `Library`, `Mods`, `Notifications`, `Releases`, `Search`, `Settings`, `Sources`, `Links`, `Updates` and `Watchlist`. `Releases` is ModShelf's own releases, which the installed app updates itself from; `Updates` is the mods'. Use the same names in every layer, so one feature can be followed from Domain to Desktop.
+- Each project is split into **feature folders named after the domain concept**: `Accounts`, `Catalog`, `Diagnostics`, `Downloads`, `FirstRun`, `Library`, `Mods`, `Notifications`, `Releases`, `Search`, `Settings`, `Sources`, `Links`, `State`, `Updates` and `Watchlist`. `Releases` is ModShelf's own releases, which the installed app updates itself from; `Updates` is the mods'. `Settings` is what the user sets on purpose; `State` is what the app remembers for them, such as where its window was (ADR 0066). Use the same names in every layer, so one feature can be followed from Domain to Desktop.
 - Group by concept, not by kind. `DownloadJob`, its `DownloadJobId`, `DownloadJobStatus` and `DownloadFailureReason` sit together in `Downloads/`, not in `Entities/`, `ValueObjects/` and `Enums/`.
 - **The namespace always matches the folder.** The build fails otherwise (IDE0130).
 
@@ -89,7 +89,8 @@ Other projects see a project only through what it makes public, so keep that to 
 | 1300–1399 | The app itself: diagnostics, the `nxm://` handler and self-update |
 | 1400–1499 | CLI: the MCP server |
 | 1500–1599 | Pictures and mod details |
-| 1600 onward | Next free block |
+| 1600–1699 | Infrastructure: the UI state file |
+| 1700 onward | Next free block |
 
 ## 7. Files
 
