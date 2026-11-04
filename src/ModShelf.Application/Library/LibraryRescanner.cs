@@ -19,7 +19,7 @@ namespace ModShelf.Application.Library;
 /// </summary>
 internal sealed partial class LibraryRescanner : ILibraryRescan
 {
-    // Nexus Mods gives some files' sizes in kilobytes only.
+    // A site may give a file's size rounded to the kilobyte, as Nexus Mods does for some files.
     private const long SizeTolerance = 1024;
 
     private readonly ISourceRegistry _sources;
