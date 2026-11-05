@@ -39,6 +39,18 @@ public sealed partial class SettingsViewModel
     public partial bool HasNoGames { get; private set; } = true;
 
     /// <summary>
+    /// Whether each game shows its site, as a chip: once two sites are in use, as <see cref="ISitesInUse"/> says when the
+    /// screen is shown. While they do, a game goes by its own name, without its site's.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool ShowSites { get; private set; }
+
+    /// <summary>
+    /// Finding whether two sites are in use, each time the screen is shown.
+    /// </summary>
+    internal Task SitesWork { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
     /// The game whose settings show; the first when none was chosen.
     /// </summary>
     [ObservableProperty]
@@ -57,13 +69,20 @@ public sealed partial class SettingsViewModel
 
     /// <summary>
     /// Reads the library's games again, and the settings, which may have changed while another screen showed: a game's
-    /// own previews, chosen in the Library or Browse, or a change made from the command line.
+    /// own previews, chosen in the Library or Browse, or a change made from the command line. Finds whether two sites
+    /// are in use too, which an account linked can change.
     /// </summary>
     public override void OnShown()
     {
         GamesWork = ReadGamesAsync();
         ShownWork = ShowStoredAsync();
+        SitesWork = ShowSitesAsync();
     }
+
+    /// <summary>
+    /// Names the games plainly beside their sites' chips, or with their sites when same-named, once sites no longer show.
+    /// </summary>
+    partial void OnShowSitesChanged(bool value) => ShowGames();
 
     /// <summary>
     /// Shows the chosen game's own settings.
@@ -85,11 +104,13 @@ public sealed partial class SettingsViewModel
         GameSettingsViewModel page = new(
             game,
             value.Name,
+            _sources.SiteName(game.Source),
             change => ChangeAsync(token => _settings.SetGameAsync(game, change, token), sayProblem: false),
             SaveFoldersAsync,
             other => CopyGameAsync(other, game),
             BrowseChoices.For(_sources.Find<IModSearch>(game.Source)?.Capabilities, _sources.Words(game.Source)),
             LibraryRoot);
+        page.ShowSite = ShowSites;
         page.Show(_shown, LibraryRoot);
         ShowSameNamed(page);
         Game = page;
@@ -117,6 +138,11 @@ public sealed partial class SettingsViewModel
             (false, 0) => Strings.GameUsesDefaults,
             _ => count,
         };
+    }
+
+    private async Task ShowSitesAsync()
+    {
+        ShowSites = await _sitesInUse.AreSeveralAsync(CancellationToken.None);
     }
 
     /// <summary>
@@ -273,6 +299,7 @@ public sealed partial class SettingsViewModel
             GameRowViewModel row = Games.FirstOrDefault(shown => AppSettings.GameComparer.Equals(shown.Game, game))
                 ?? NewRow(game);
             row.Name = NameOf(game);
+            row.ShowSite = ShowSites;
             row.Cover.Place(_gameInfos.GetValueOrDefault(game)?.CoverUrl, CancellationToken.None);
             row.Note = NoteOf(_shown.GameFor(game));
             rows.Add(row);
@@ -286,6 +313,7 @@ public sealed partial class SettingsViewModel
         if (Game is { } page)
         {
             page.Name = NameOf(page.Game);
+            page.ShowSite = ShowSites;
             page.Show(_shown, LibraryRoot);
             ShowSameNamed(page);
         }
@@ -333,7 +361,8 @@ public sealed partial class SettingsViewModel
         => ListedGames().Where(_gameInfos.ContainsKey).Select(game => KeyValuePair.Create(game, _gameInfos[game].Name));
 
     /// <summary>
-    /// The game's name once its site says it, or its key; with its site's when another site's game listed has that name.
+    /// The game's name once its site says it, or its key; with its site's when another site's game listed has that name
+    /// and sites don't show as chips.
     /// </summary>
     private string NameOf(GameRef game)
     {
@@ -342,7 +371,7 @@ public sealed partial class SettingsViewModel
             return game.Key;
         }
 
-        return SameNamedGames.Of(game, info.Name, NamedGames()).Count > 0 ? NameWithSite(game) : info.Name;
+        return !ShowSites && SameNamedGames.Of(game, info.Name, NamedGames()).Count > 0 ? NameWithSite(game) : info.Name;
     }
 
     /// <summary>
@@ -353,7 +382,7 @@ public sealed partial class SettingsViewModel
 
     private GameRowViewModel NewRow(GameRef game)
     {
-        GameRowViewModel row = new(game, NameOf(game), _covers);
+        GameRowViewModel row = new(game, _sources.SiteName(game.Source), NameOf(game), _covers);
         row.Cover.Show(CancellationToken.None);
         return row;
     }

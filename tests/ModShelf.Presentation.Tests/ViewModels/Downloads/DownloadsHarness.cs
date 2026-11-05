@@ -3,12 +3,13 @@ using Microsoft.Extensions.Time.Testing;
 using ModShelf.Application.Downloads;
 using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.ViewModels.Downloads;
+using ModShelf.Sources.Abstractions;
 using ModShelf.Testing;
 
 namespace ModShelf.Presentation.Tests.ViewModels.Downloads;
 
 /// <summary>
-/// The Downloads screen over fakes, with a Nexus Mods source. Its work starts with <see cref="StartAsync"/> and stops
+/// The Downloads screen over fakes, with a Nexus Mods catalog. Its work starts with <see cref="StartAsync"/> and stops
 /// when the harness is disposed.
 /// </summary>
 internal sealed class DownloadsHarness : IDisposable
@@ -16,7 +17,8 @@ internal sealed class DownloadsHarness : IDisposable
     private readonly CancellationTokenSource _stopping = new();
     private bool _disposed;
 
-    public DownloadsHarness()
+    /// <param name="others">Sources beside Nexus Mods, such as direct links.</param>
+    public DownloadsHarness(params IModSource[] others)
     {
         Screen = new DownloadsViewModel(
             Downloads,
@@ -26,7 +28,8 @@ internal sealed class DownloadsHarness : IDisposable
             Settings,
             Browser,
             Dialogs,
-            new FakeSourceRegistry(new FakeSource(TestData.Nexus, "Nexus Mods")),
+            new FakeSourceRegistry([new ScriptedCatalog(TestData.Nexus, "Nexus Mods"), .. others]),
+            Sites,
             Pictures.Pictures,
             UiThread,
             Time,
@@ -36,6 +39,8 @@ internal sealed class DownloadsHarness : IDisposable
     public InMemoryDownloadService Downloads { get; } = new();
 
     public TestPictures Pictures { get; } = new();
+
+    public ScriptedSitesInUse Sites { get; } = new();
 
     public ScriptedLibraryDownloads Library { get; } = new();
 

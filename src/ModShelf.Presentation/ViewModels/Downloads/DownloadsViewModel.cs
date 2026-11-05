@@ -16,6 +16,7 @@ using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.Pictures;
+using ModShelf.Sources.Abstractions.Catalog;
 
 namespace ModShelf.Presentation.ViewModels.Downloads;
 
@@ -34,6 +35,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
     private readonly IOpenedLinks _opened;
     private readonly FolderDownloads _folders;
     private readonly ISourceRegistry _sources;
+    private readonly ISitesInUse _sitesInUse;
     private readonly ModPictures _pictures;
     private readonly IUiThread _uiThread;
     private readonly ILogger<DownloadsViewModel> _logger;
@@ -51,6 +53,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         IBrowserLauncher browser,
         IDialogService dialogs,
         ISourceRegistry sources,
+        ISitesInUse sitesInUse,
         ModPictures pictures,
         IUiThread uiThread,
         TimeProvider timeProvider,
@@ -62,11 +65,13 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(opened);
         ArgumentNullException.ThrowIfNull(dialogs);
         ArgumentNullException.ThrowIfNull(sources);
+        ArgumentNullException.ThrowIfNull(sitesInUse);
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(logger);
 
         _downloads = downloads;
+        _sitesInUse = sitesInUse;
         _library = library;
         _opened = opened;
         _folders = new FolderDownloads(links, dialogs);
@@ -200,6 +205,18 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
     public partial bool CanOpenNextPage { get; private set; }
 
     /// <summary>
+    /// Whether each download from a mod site shows its site: once two sites are in use, as <see cref="ISitesInUse"/> says
+    /// when the screen is shown.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool ShowSites { get; private set; }
+
+    /// <summary>
+    /// Finding whether two sites are in use, each time the screen is shown.
+    /// </summary>
+    internal Task SitesWork { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
     /// Reads the previews from the settings, lists the queue's downloads, then follows every change to them while the app
     /// runs. While another process runs the queue, it says so, and lists the downloads again once they run here.
     /// </summary>
@@ -235,6 +252,28 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         }
 
         await runsHere;
+    }
+
+    /// <summary>
+    /// Finds whether two sites are in use, which can change while another screen shows, such as an account linked.
+    /// </summary>
+    public override void OnShown() => SitesWork = ShowSitesAsync();
+
+    /// <summary>
+    /// Shows the site of each download from a mod site, or no longer does.
+    /// </summary>
+    partial void OnShowSitesChanged(bool value)
+    {
+        foreach (DownloadJobViewModel job in _shown.Values)
+        {
+            job.ShowSite = value && job.FromSite;
+        }
+    }
+
+    private async Task ShowSitesAsync()
+    {
+        bool several = await _sitesInUse.AreSeveralAsync(_stopping);
+        _uiThread.Post(() => ShowSites = several);
     }
 
     private bool CanAdd() => !IsAdding && !string.IsNullOrWhiteSpace(Link);
@@ -448,7 +487,12 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
 
     private void Add(DownloadJobSnapshot job)
     {
-        DownloadJobViewModel added = new(job, _sources.SiteName(job.File.Mod.Game.Source), _jobServices, _pictures);
+        bool fromSite = _sources.Find<IModCatalog>(job.File.Mod.Game.Source) is not null;
+        DownloadJobViewModel added = new(job, _sources.SiteName(job.File.Mod.Game.Source), _jobServices, _pictures)
+        {
+            FromSite = fromSite,
+            ShowSite = ShowSites && fromSite,
+        };
         _shown.Add(job.Id, added);
         if (_picturesShown)
         {

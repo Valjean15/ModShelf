@@ -11,11 +11,14 @@ namespace ModShelf.Presentation.ViewModels.Settings;
 /// </summary>
 public sealed partial class GameRowViewModel : ObservableObject
 {
-    internal GameRowViewModel(GameRef game, string name, ModPictures pictures)
+    /// <param name="siteName">The game's site's name, such as Nexus Mods.</param>
+    internal GameRowViewModel(GameRef game, string siteName, string name, ModPictures pictures)
     {
         ArgumentNullException.ThrowIfNull(game);
+        ArgumentException.ThrowIfNullOrWhiteSpace(siteName);
 
         Game = game;
+        SiteName = siteName;
         CoverHue = Covers.HueOf(game.Key);
         Name = name;
         Cover = new GamePictureViewModel(pictures);
@@ -48,6 +51,17 @@ public sealed partial class GameRowViewModel : ObservableObject
     /// The first letter of the game's name, on its cover until the game has a picture of its own.
     /// </summary>
     public string Initial => Covers.InitialOf(Name);
+
+    /// <summary>
+    /// The game's site's name, such as Nexus Mods, on its chip.
+    /// </summary>
+    public string SiteName { get; }
+
+    /// <summary>
+    /// Whether its site shows, as a chip: once two sites are in use.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool ShowSite { get; internal set; }
 
     /// <summary>
     /// Such as "Uses the defaults", "2 settings overridden" or "Hidden".

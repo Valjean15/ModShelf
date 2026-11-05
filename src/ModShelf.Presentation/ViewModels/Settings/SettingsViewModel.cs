@@ -55,6 +55,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     private readonly IDialogService _dialogs;
     private readonly ISourceRegistry _sources;
     private readonly IHiddenGames _hiddenGames;
+    private readonly ISitesInUse _sitesInUse;
     private readonly ModPictures _covers;
     private readonly ILogger<SettingsViewModel> _logger;
     private AppSettings _shown = new();
@@ -73,6 +74,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         ISourceRegistry sources,
         IHiddenGames hiddenGames,
         IGameSettingsOpener gameSettings,
+        ISitesInUse sitesInUse,
         PicturesViewModel pictures,
         ModPictures covers,
         LinksViewModel links,
@@ -91,6 +93,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(hiddenGames);
         ArgumentNullException.ThrowIfNull(gameSettings);
+        ArgumentNullException.ThrowIfNull(sitesInUse);
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(covers);
         ArgumentNullException.ThrowIfNull(links);
@@ -107,6 +110,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         _dialogs = dialogs;
         _sources = sources;
         _hiddenGames = hiddenGames;
+        _sitesInUse = sitesInUse;
         _covers = covers;
         _logger = logger;
         Pictures = pictures;

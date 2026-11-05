@@ -106,6 +106,7 @@
                                     </Border>
                                     <WrapPanel Grid.Column="1" VerticalAlignment="Center" ItemSpacing="8">
                                         <TextBlock Classes="subheading" Text="{Binding Name}" />
+                                        <Border Classes="site" IsVisible="{Binding ShowSite}"><TextBlock Text="{Binding SiteName}" /></Border>
                                         <TextBlock Classes="note" VerticalAlignment="Center" Text="{Binding CountText}" />
                                     </WrapPanel>
                                     <Button Grid.Column="2"

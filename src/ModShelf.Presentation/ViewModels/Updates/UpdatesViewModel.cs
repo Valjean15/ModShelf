@@ -41,6 +41,7 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
     private readonly ILogger<UpdatesViewModel> _logger;
     private readonly ISettingsService _settings;
     private readonly IHiddenGames _hiddenGames;
+    private readonly ISitesInUse _sitesInUse;
     private readonly UpdatesServices _services;
     private readonly Dictionary<ModRef, LibraryMod> _mods = [];
     private readonly Dictionary<ModFileRef, UpdateViewModel> _shown = [];
@@ -60,6 +61,7 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
         IDialogService dialogs,
         ISettingsService settings,
         IHiddenGames hiddenGames,
+        ISitesInUse sitesInUse,
         ModPictures pictures,
         IUiThread uiThread,
         TimeProvider timeProvider,
@@ -70,6 +72,7 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(hiddenGames);
+        ArgumentNullException.ThrowIfNull(sitesInUse);
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(timeProvider);
@@ -77,6 +80,7 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
 
         _library = library;
         _checker = checker;
+        _sitesInUse = sitesInUse;
         _sources = sources;
         _settings = settings;
         _hiddenGames = hiddenGames;
@@ -185,6 +189,18 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
     internal Task ReadingInterval { get; private set; } = Task.CompletedTask;
 
     /// <summary>
+    /// Finding whether two sites are in use, each time the screen is shown.
+    /// </summary>
+    internal Task SitesWork { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
+    /// Whether each game's heading shows its site: once two sites are in use, as <see cref="ISitesInUse"/> says when the
+    /// screen is shown.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool ShowSites { get; private set; }
+
+    /// <summary>
     /// Reads the previews from the settings, lists the library's updates, then follows its changes while the app runs.
     /// </summary>
     public override async Task StartAsync(CancellationToken cancellationToken)
@@ -219,14 +235,33 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
     public void Dispose() => _changelogs.Dispose();
 
     /// <summary>
-    /// Reads the updates' changelog entries the first time the screen is shown, and those of updates found later; and
-    /// the update interval again, which the Settings screen may have changed.
+    /// Reads the updates' changelog entries the first time the screen is shown, and those of updates found later; the
+    /// update interval again, which the Settings screen may have changed; and whether two sites are in use, which an
+    /// account linked can change.
     /// </summary>
     public override void OnShown()
     {
         _wasShown = true;
         ReadChanges();
         ReadingInterval = ShowIntervalAsync();
+        SitesWork = ShowSitesAsync();
+    }
+
+    /// <summary>
+    /// Shows each game's site, or no longer does.
+    /// </summary>
+    partial void OnShowSitesChanged(bool value)
+    {
+        foreach (UpdateGameViewModel heading in _games.Values)
+        {
+            heading.ShowSite = value;
+        }
+    }
+
+    private async Task ShowSitesAsync()
+    {
+        bool several = await _sitesInUse.AreSeveralAsync(_stopping);
+        _uiThread.Post(() => ShowSites = several);
     }
 
     private bool CanCheckNow() => HasWatched && !IsChecking;
@@ -467,7 +502,7 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
     {
         if (!_games.TryGetValue(game, out UpdateGameViewModel? heading))
         {
-            heading = new UpdateGameViewModel(game, UpdateGameAsync, _pictures);
+            heading = new UpdateGameViewModel(game, _sources.SiteName(game.Source), UpdateGameAsync, _pictures) { ShowSite = ShowSites };
             _games.Add(game, heading);
 
             // Its cover shows whatever the previews, so its icon does too.

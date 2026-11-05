@@ -86,6 +86,17 @@ public sealed partial class DownloadJobViewModel : ObservableObject
     public string SiteName { get; }
 
     /// <summary>
+    /// Whether the file comes from a mod site, rather than a direct link, so its site can show.
+    /// </summary>
+    internal bool FromSite { get; init; }
+
+    /// <summary>
+    /// Whether its site shows, as a chip: once two sites are in use, for a file from a mod site.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool ShowSite { get; internal set; }
+
+    /// <summary>
     /// When the job was added, which orders the list.
     /// </summary>
     public DateTimeOffset CreatedAt => _job.CreatedAt;

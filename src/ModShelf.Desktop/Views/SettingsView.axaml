@@ -339,7 +339,10 @@
                                                         </Border>
                                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                                             <TextBlock Classes="gameName" TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
-                                                            <TextBlock Classes="note" FontSize="12.5" TextTrimming="CharacterEllipsis" Text="{Binding Note}" />
+                                                            <WrapPanel ItemSpacing="8" LineSpacing="2">
+                                                                <Border Classes="site" IsVisible="{Binding ShowSite}"><TextBlock Text="{Binding SiteName}" /></Border>
+                                                                <TextBlock Classes="note" FontSize="12.5" TextTrimming="CharacterEllipsis" Text="{Binding Note}" />
+                                                            </WrapPanel>
                                                         </StackPanel>
                                                     </Grid>
                                                 </DataTemplate>
@@ -351,7 +354,10 @@
                                     <Panel Classes="gamePage" IsVisible="{Binding Game, Converter={x:Static ObjectConverters.IsNotNull}}">
                                         <Border Classes="gamePage" DataContext="{Binding Game}">
                                             <StackPanel x:DataType="vm:GameSettingsViewModel" Spacing="18">
-                                                <TextBlock Classes="subheading" Margin="0,0,0,4" TextWrapping="Wrap" Text="{Binding Name}" />
+                                                <WrapPanel Margin="0,0,0,4" ItemSpacing="10" LineSpacing="4">
+                                                    <TextBlock Classes="subheading" Margin="0" TextWrapping="Wrap" Text="{Binding Name}" />
+                                                    <Border Classes="site" IsVisible="{Binding ShowSite}"><TextBlock Text="{Binding SiteName}" /></Border>
+                                                </WrapPanel>
                                                 <TextBlock Classes="problem" TextWrapping="Wrap" Text="{Binding Problem}" IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}" />
 
                                                 <!-- The same game on another site: said, and its settings offered, never taken by itself. -->

@@ -14,7 +14,7 @@ namespace ModShelf.Presentation.Tests;
 public sealed class PresentationServiceCollectionExtensionsTests
 {
     [Fact]
-    public void RegistersNavigationTheScreensTheMainWindowAndTheTrayOnce()
+    public void RegistersNavigationTheSitesInUseTheScreensTheMainWindowAndTheTrayOnce()
     {
         ServiceCollection services = new();
         services.AddPresentation();
@@ -23,6 +23,7 @@ public sealed class PresentationServiceCollectionExtensionsTests
         Assert.Equal(typeof(NavigationService), Assert.Single(services, descriptor => descriptor.ServiceType == typeof(INavigationService)).ImplementationType);
         Assert.Equal(typeof(HiddenGames), Assert.Single(services, descriptor => descriptor.ServiceType == typeof(IHiddenGames)).ImplementationType);
         Assert.Equal(typeof(GameSettingsOpener), Assert.Single(services, descriptor => descriptor.ServiceType == typeof(IGameSettingsOpener)).ImplementationType);
+        Assert.Equal(typeof(SitesInUse), Assert.Single(services, descriptor => descriptor.ServiceType == typeof(ISitesInUse)).ImplementationType);
         Assert.Equal(
             [typeof(LibraryViewModel), typeof(UpdatesViewModel), typeof(BrowseViewModel), typeof(DownloadsViewModel), typeof(AccountsViewModel), typeof(SettingsViewModel)],
             services.Where(descriptor => descriptor.ServiceType == typeof(ScreenViewModel)).Select(descriptor => descriptor.ImplementationType));

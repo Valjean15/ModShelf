@@ -36,6 +36,7 @@ internal sealed class SettingsHarness
             example is null ? new FakeSourceRegistry(Catalog) : new FakeSourceRegistry(Catalog, example),
             Hidden,
             GameSettings,
+            Sites,
             PicturesCard,
             Pictures.Pictures,
             Links,
@@ -57,6 +58,8 @@ internal sealed class SettingsHarness
     public ScriptedCatalog Catalog { get; } = new(TestData.Nexus, "Nexus Mods");
 
     public HiddenGames Hidden { get; } = new();
+
+    public ScriptedSitesInUse Sites { get; } = new();
 
     public GameSettingsOpener GameSettings { get; }
 

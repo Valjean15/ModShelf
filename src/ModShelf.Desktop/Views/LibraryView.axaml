@@ -92,6 +92,11 @@
                         <TextBlock Classes="note" VerticalAlignment="Center" Text="{x:Static res:Strings.LibrarySortLabel}" />
                         <ComboBox MinWidth="150" ItemsSource="{Binding GameOrders}" SelectedItem="{Binding SelectedGameOrder}" />
                     </StackPanel>
+                    <!-- Once two sites are in use, and the library's games are of both. -->
+                    <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding HasSiteFilter}">
+                        <TextBlock Classes="note" VerticalAlignment="Center" Text="{x:Static res:Strings.LibrarySiteFilter}" />
+                        <ComboBox MinWidth="140" ItemsSource="{Binding SiteChoices}" SelectedItem="{Binding SelectedSite}" />
+                    </StackPanel>
                     <ToggleButton Classes="chip"
                                   Content="{Binding ShowHiddenGamesText}"
                                   IsChecked="{Binding ShowHiddenGames}"
@@ -131,6 +136,7 @@
                                         </pictures:SixteenByNine>
                                         <StackPanel Margin="14,10,14,14" Spacing="4">
                                             <TextBlock FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
+                                            <Border Classes="site" IsVisible="{Binding ShowSite}"><TextBlock Text="{Binding SiteName}" /></Border>
                                             <TextBlock Classes="note" FontSize="12.5" TextTrimming="CharacterEllipsis" Text="{Binding AlsoOnText}" IsVisible="{Binding HasAlsoOn}" />
                                             <WrapPanel ItemSpacing="12">
                                                 <TextBlock Classes="note" Text="{Binding ModsText}" />
@@ -184,7 +190,10 @@
                                                 </Panel>
                                             </Border>
                                             <StackPanel Grid.Column="1" Classes="modCell" VerticalAlignment="Center" Spacing="2">
-                                                <TextBlock FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
+                                                <WrapPanel ItemSpacing="8" LineSpacing="2">
+                                                    <TextBlock FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
+                                                    <Border Classes="site" IsVisible="{Binding ShowSite}"><TextBlock Text="{Binding SiteName}" /></Border>
+                                                </WrapPanel>
                                                 <TextBlock Classes="note" FontSize="12.5" TextTrimming="CharacterEllipsis" Text="{Binding AlsoOnText}" IsVisible="{Binding HasAlsoOn}" />
                                                 <WrapPanel Classes="narrowCell" ItemSpacing="10" LineSpacing="4">
                                                     <TextBlock Classes="note" FontSize="12.5" VerticalAlignment="Center" Text="{Binding ModsText}" />
@@ -284,6 +293,7 @@
                                                                         <TextBlock TextTrimming="CharacterEllipsis" Text="{Binding ModName}" />
                                                                     </Button>
                                                                     <TextBlock Classes="note" FontSize="12.5" VerticalAlignment="Center" Text="{Binding GameName}" />
+                                                                    <Border Classes="site" IsVisible="{Binding ShowSite}"><TextBlock Text="{Binding SiteName}" /></Border>
                                                                 </WrapPanel>
                                                                 <TextBlock TextWrapping="Wrap" Text="{Binding Text}" />
                                                             </StackPanel>
@@ -336,7 +346,10 @@
                     </Panel>
                 </Border>
                 <StackPanel Grid.Column="1" Spacing="2">
-                    <TextBlock Classes="heading" Margin="0" TextWrapping="Wrap" Text="{Binding OpenGame.Name, FallbackValue=''}" />
+                    <WrapPanel ItemSpacing="10" LineSpacing="4">
+                        <TextBlock Classes="heading" Margin="0" TextWrapping="Wrap" Text="{Binding OpenGame.Name, FallbackValue=''}" />
+                        <Border Classes="site" IsVisible="{Binding OpenGame.ShowSite, FallbackValue=False}"><TextBlock Text="{Binding OpenGame.SiteName, FallbackValue=''}" /></Border>
+                    </WrapPanel>
                     <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding OpenGame.AlsoOnText, FallbackValue=''}" IsVisible="{Binding OpenGame.HasAlsoOn, FallbackValue=False}" />
                     <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding OpenGame.SummaryText, FallbackValue=''}" />
                     <!-- What the last Update all did. -->

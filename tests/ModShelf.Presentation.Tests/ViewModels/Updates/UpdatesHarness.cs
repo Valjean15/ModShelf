@@ -39,6 +39,7 @@ internal sealed class UpdatesHarness : IDisposable
             Dialogs,
             Settings,
             Hidden,
+            Sites,
             Pictures.Pictures,
             UiThread,
             Time,
@@ -48,6 +49,8 @@ internal sealed class UpdatesHarness : IDisposable
     public InMemoryModLibrary Library { get; } = new();
 
     public HiddenGames Hidden { get; } = new();
+
+    public ScriptedSitesInUse Sites { get; } = new();
 
     public ScriptedUpdateChecker Checker { get; } = new();
 
@@ -124,13 +127,15 @@ internal sealed class UpdatesHarness : IDisposable
     public IReadOnlyList<string> ChangelogsAsked => [.. Catalog.Asked.Where(asked => asked.StartsWith("GetChangelogsAsync", StringComparison.Ordinal))];
 
     /// <summary>
-    /// Shows the screen, as the main window does, and waits until it has read the changelogs and the update interval.
+    /// Shows the screen, as the main window does, and waits until it has read the changelogs, the update interval and
+    /// whether two sites are in use.
     /// </summary>
     public async Task ShowAsync()
     {
         Screen.OnShown();
         await Screen.ReadingChanges.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
         await Screen.ReadingInterval.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+        await Screen.SitesWork.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
     }
 
     /// <summary>

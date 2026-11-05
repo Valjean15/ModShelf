@@ -21,15 +21,23 @@ public sealed partial class LibraryGameViewModel : ObservableObject
 
     /// <param name="open">Opens the game, showing its mods in place of the games.</param>
     /// <param name="updateAll">Downloads its mods' updates into the library, one after the other.</param>
+    /// <param name="siteName">The game's site's name, such as Nexus Mods.</param>
     internal LibraryGameViewModel(
-        GameRef game, Action<LibraryGameViewModel> open, Func<LibraryGameViewModel, CancellationToken, Task> updateAll, TimeProvider timeProvider, ModPictures pictures)
+        GameRef game,
+        string siteName,
+        Action<LibraryGameViewModel> open,
+        Func<LibraryGameViewModel, CancellationToken, Task> updateAll,
+        TimeProvider timeProvider,
+        ModPictures pictures)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(siteName);
         ArgumentNullException.ThrowIfNull(game);
         ArgumentNullException.ThrowIfNull(open);
         ArgumentNullException.ThrowIfNull(updateAll);
         ArgumentNullException.ThrowIfNull(timeProvider);
 
         Game = game;
+        SiteName = siteName;
         _open = open;
         _updateAll = updateAll;
         _timeProvider = timeProvider;
@@ -64,6 +72,17 @@ public sealed partial class LibraryGameViewModel : ObservableObject
     /// Whether the library has a game of the same name on another site.
     /// </summary>
     public bool HasAlsoOn => AlsoOnText.Length > 0;
+
+    /// <summary>
+    /// The game's site's name, such as Nexus Mods, on its chip.
+    /// </summary>
+    public string SiteName { get; }
+
+    /// <summary>
+    /// Whether its site shows, as a chip: once two sites are in use.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool ShowSite { get; internal set; }
 
     /// <summary>
     /// The hue of its cover, from 0 to 359, the same for the game every time.

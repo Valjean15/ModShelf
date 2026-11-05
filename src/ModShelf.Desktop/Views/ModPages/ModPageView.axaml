@@ -96,6 +96,7 @@
             <StackPanel Grid.Column="1" Spacing="6">
                 <WrapPanel ItemSpacing="10" LineSpacing="4">
                     <TextBlock FontSize="28" FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding Name}" />
+                    <Border Classes="site" IsVisible="{Binding ShowSite}"><TextBlock Text="{Binding SiteName}" /></Border>
                     <Border Classes="tag" IsVisible="{Binding HasAdultContent}">
                         <TextBlock Text="{x:Static res:Strings.BrowseAdultTag}" />
                     </Border>

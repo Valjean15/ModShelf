@@ -113,7 +113,10 @@
                                     <pictures:ModThumbnail DataContext="{Binding Picture}" />
                                 </Panel>
                                 <Grid Grid.Column="1" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="16" RowSpacing="4">
-                                    <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Text="{Binding FileName}" />
+                                    <WrapPanel VerticalAlignment="Center" ItemSpacing="8" LineSpacing="2">
+                                        <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Text="{Binding FileName}" />
+                                        <Border Classes="site" IsVisible="{Binding ShowSite}"><TextBlock Text="{Binding SiteName}" /></Border>
+                                    </WrapPanel>
                                     <TextBlock Grid.Row="1"
                                                Grid.ColumnSpan="2"
                                                Classes="note"

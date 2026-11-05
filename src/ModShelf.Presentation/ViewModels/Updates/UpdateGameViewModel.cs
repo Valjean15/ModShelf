@@ -17,13 +17,16 @@ public sealed partial class UpdateGameViewModel : ObservableObject
 {
     private readonly Func<UpdateGameViewModel, CancellationToken, Task> _updateAll;
 
+    /// <param name="siteName">The game's site's name, such as Nexus Mods.</param>
     /// <param name="updateAll">Downloads the game's updates into the library, one after the other.</param>
-    internal UpdateGameViewModel(GameRef game, Func<UpdateGameViewModel, CancellationToken, Task> updateAll, ModPictures pictures)
+    internal UpdateGameViewModel(GameRef game, string siteName, Func<UpdateGameViewModel, CancellationToken, Task> updateAll, ModPictures pictures)
     {
         ArgumentNullException.ThrowIfNull(game);
+        ArgumentException.ThrowIfNullOrWhiteSpace(siteName);
         ArgumentNullException.ThrowIfNull(updateAll);
 
         Game = game;
+        SiteName = siteName;
         _updateAll = updateAll;
         CoverHue = Covers.HueOf(game.Key);
         Name = game.Key;
@@ -43,6 +46,17 @@ public sealed partial class UpdateGameViewModel : ObservableObject
     /// The first letter of its name, on its cover until the game has a picture of its own.
     /// </summary>
     public string Initial => Covers.InitialOf(Name);
+
+    /// <summary>
+    /// The game's site's name, such as Nexus Mods, on its chip.
+    /// </summary>
+    public string SiteName { get; }
+
+    /// <summary>
+    /// Whether its site shows, as a chip: once two sites are in use.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool ShowSite { get; internal set; }
 
     /// <summary>
     /// The hue of its cover, from 0 to 359, the same for the game every time.

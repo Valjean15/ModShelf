@@ -61,6 +61,7 @@ internal sealed class BrowseHarness : IDisposable
             Dialogs,
             Navigation,
             Hidden,
+            Sites,
             Pictures.Pictures,
             UiThread,
             Time,
@@ -72,6 +73,8 @@ internal sealed class BrowseHarness : IDisposable
     public InMemoryModLibrary Library { get; } = new();
 
     public HiddenGames Hidden { get; } = new();
+
+    public ScriptedSitesInUse Sites { get; } = new();
 
     public ScriptedLibraryDownloads LibraryDownloads { get; } = new();
 

@@ -92,6 +92,7 @@ public sealed partial class ModPageViewModel : ObservableObject
         Changelog = NewestFirst(page.Changelogs, page.Mod.Version);
         CanTrack = services.Tracked.CanTrack(Mod.Game.Source) && words.CanFollow;
         string site = services.Sources.SiteName(Mod.Game.Source);
+        SiteName = site;
         TrackText = words.Follow is { } follow ? Text.Format(Strings.BrowseFollow, Text.Capitalized(follow), site) : string.Empty;
         UntrackText = words.Unfollow is { } unfollow ? Text.Format(Strings.BrowseUnfollow, Text.Capitalized(unfollow), site) : string.Empty;
         OpenPageText = Text.Format(Strings.JobOpenPage, site);
@@ -213,6 +214,16 @@ public sealed partial class ModPageViewModel : ObservableObject
     /// requirements aren't known.
     /// </summary>
     public bool IsOffline { get; internal init; }
+
+    /// <summary>
+    /// The mod's site's name, such as Nexus Mods, on its chip beside its name.
+    /// </summary>
+    public string SiteName { get; }
+
+    /// <summary>
+    /// Whether its site shows, as a chip: once two sites are in use, as the screen that opened it found.
+    /// </summary>
+    public bool ShowSite { get; internal init; }
 
     /// <summary>
     /// What's said in place of the files and the changelog while <see cref="IsOffline"/>, such as "Shown once Nexus Mods

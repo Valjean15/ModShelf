@@ -43,6 +43,8 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     private readonly ISourceRegistry _sources;
     private readonly IHiddenGames _hiddenGames;
     private readonly IGameSettingsOpener _gameSettings;
+    private readonly ISitesInUse _sitesInUse;
+    private readonly LibraryChoice<SourceId?> _allSites;
     private readonly ModPictures _pictures;
     private readonly IUiThread _uiThread;
     private readonly TimeProvider _timeProvider;
@@ -78,6 +80,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         ISourceRegistry sources,
         IHiddenGames hiddenGames,
         IGameSettingsOpener gameSettings,
+        ISitesInUse sitesInUse,
         ModPictures pictures,
         IUiThread uiThread,
         TimeProvider timeProvider,
@@ -89,6 +92,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(hiddenGames);
         ArgumentNullException.ThrowIfNull(gameSettings);
+        ArgumentNullException.ThrowIfNull(sitesInUse);
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(timeProvider);
@@ -99,6 +103,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         _sources = sources;
         _hiddenGames = hiddenGames;
         _gameSettings = gameSettings;
+        _sitesInUse = sitesInUse;
         _pictures = pictures;
         _uiThread = uiThread;
         _logger = logger;
@@ -120,6 +125,8 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             timeProvider,
             logger);
         _timeProvider = timeProvider;
+        _allSites = new LibraryChoice<SourceId?>(null, Strings.LibraryAllSites);
+        SiteChoices.Add(_allSites);
         GameOrders =
         [
             new(GameOrder.MostMods, Strings.GameOrderMostMods),
@@ -144,7 +151,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             new(ModFilterKind.Archived, Strings.ModFilterArchived, ArrangeMods),
             new(ModFilterKind.Missing, Strings.ModFilterMissing, ArrangeMods),
         ];
-        Activity = new LibraryActivityViewModel(history, OpenAsync, GameNameOf, timeProvider, logger);
+        Activity = new LibraryActivityViewModel(history, OpenAsync, GameNameOf, SiteNameOf, timeProvider, logger);
         Previews = new PreviewsViewModel(PreviewScreen.Library, pictures);
         Previews.PropertyChanged += (_, changed) =>
         {
@@ -193,6 +200,36 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     /// </summary>
     [ObservableProperty]
     public partial string GamesFilter { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Whether the games, the open game's heading and the activity show each one's site: once two sites are in use, as
+    /// <see cref="ISitesInUse"/> says when the screen is shown.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool ShowSites { get; private set; }
+
+    /// <summary>
+    /// All sites, then each site the library's games are of, by name, for <see cref="SelectedSite"/>.
+    /// </summary>
+    public ObservableCollection<LibraryChoice<SourceId?>> SiteChoices { get; } = [];
+
+    /// <summary>
+    /// The site whose games show, and whose counts the summary gives: all of them at first, since it isn't remembered, and
+    /// again once the one chosen is no longer offered, or none is chosen.
+    /// </summary>
+    [ObservableProperty]
+    public partial LibraryChoice<SourceId?>? SelectedSite { get; set; }
+
+    /// <summary>
+    /// Whether the site filter shows: while sites show, and the library's games are of two sites or more.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool HasSiteFilter { get; private set; }
+
+    /// <summary>
+    /// Finding whether two sites are in use, each time the screen is shown.
+    /// </summary>
+    internal Task SitesWork { get; private set; } = Task.CompletedTask;
 
     public IReadOnlyList<LibraryChoice<GameOrder>> GameOrders { get; }
 
@@ -372,7 +409,28 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             cancellationToken);
     }
 
+    /// <summary>
+    /// Finds whether two sites are in use, which can change while another screen shows, such as an account linked.
+    /// </summary>
+    public override void OnShown() => SitesWork = ShowSitesAsync();
+
     partial void OnGamesFilterChanged(string value) => Arrange();
+
+    partial void OnSelectedSiteChanged(LibraryChoice<SourceId?>? value) => Arrange();
+
+    /// <summary>
+    /// Shows each game's site, or no longer does, in the activity too, and the site filter with them.
+    /// </summary>
+    partial void OnShowSitesChanged(bool value)
+    {
+        foreach (LibraryGameViewModel game in _games.Values)
+        {
+            game.ShowSite = value;
+        }
+
+        Activity.Refresh();
+        Arrange();
+    }
 
     partial void OnShowHiddenGamesChanged(bool value) => Arrange();
 
@@ -386,6 +444,12 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     /// Shows the open game's own previews, when it has some, or else the screen's.
     /// </summary>
     partial void OnOpenGameChanged(LibraryGameViewModel? value) => Previews.ShowFor(value?.Game);
+
+    private async Task ShowSitesAsync()
+    {
+        bool several = await _sitesInUse.AreSeveralAsync(_stopping);
+        _uiThread.Post(() => ShowSites = several);
+    }
 
     private bool CanShowGames() => IsGameOpen || IsModOpen || IsShowingActivity;
 
@@ -501,6 +565,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             ModPageViewModel opened = new(page, shown => _shown.GetValueOrDefault(shown), _pageServices, Previews, OpenAsync, _stopping)
             {
                 IsOffline = problem is not null,
+                ShowSite = ShowSites,
             };
             _openedMod = mod;
             BackText = IsShowingActivity ? Strings.LibraryActivity
@@ -613,7 +678,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
 
         if (!_games.ContainsKey(mod.Mod.Game))
         {
-            LibraryGameViewModel game = new(mod.Mod.Game, Open, UpdateGameAsync, _timeProvider, _pictures);
+            LibraryGameViewModel game = new(mod.Mod.Game, _sources.SiteName(mod.Mod.Game.Source), Open, UpdateGameAsync, _timeProvider, _pictures) { ShowSite = ShowSites };
             _games.Add(mod.Mod.Game, game);
             if (Previews.ShowsPictures)
             {
@@ -774,6 +839,11 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     /// </summary>
     private string GameNameOf(GameRef game) => _games.TryGetValue(game, out LibraryGameViewModel? shown) ? shown.Name : game.Key;
 
+    /// <summary>
+    /// The game's site's name while sites show; null while they don't.
+    /// </summary>
+    private string? SiteNameOf(GameRef game) => ShowSites ? _sources.SiteName(game.Source) : null;
+
     private void CloseMod()
     {
         _opening?.Cancel();
@@ -844,6 +914,30 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     }
 
     /// <summary>
+    /// Offers a site per site of <paramref name="games"/> while sites show and there are two or more, keeping the one
+    /// chosen while it's offered, or else going back to all sites, as when the games are first arranged.
+    /// </summary>
+    /// <returns>The site whose games show; null for all of them.</returns>
+    private SourceId? ShowSite(IEnumerable<GameRef> games)
+    {
+        StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
+        LibraryChoice<SourceId?>[] sites =
+        [
+            .. games.Select(game => game.Source).Distinct()
+                .Select(source => new LibraryChoice<SourceId?>(source, _sources.SiteName(source)))
+                .OrderBy(choice => choice.Label, byName),
+        ];
+        HasSiteFilter = ShowSites && sites.Length > 1;
+        SiteChoices.SyncWith([_allSites, .. HasSiteFilter ? sites : []]);
+        if (SelectedSite is not { } chosen || !SiteChoices.Contains(chosen))
+        {
+            SelectedSite = chosen = _allSites;
+        }
+
+        return chosen.Value;
+    }
+
+    /// <summary>
     /// Puts the games in order: those with mods whose names have the filter, as the order says; then the open game's
     /// mods. A game whose last mod left the library goes, and when it's open, the games show again.
     /// </summary>
@@ -859,11 +953,13 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             heading.AlsoOnText = SameNamedGames.AlsoOn(SameNamedGames.Of(game, heading.Name, named), _sources);
         }
 
+        SourceId? site = ShowSite(byGame.Keys);
         NameQuery filter = NameQuery.Parse(GamesFilter);
         int hidden = byGame.Keys.Count(game => _hiddenGames.IsHidden(game));
         HasHiddenGames = hidden > 0;
         ShowHiddenGamesText = Text.Format(Strings.LibraryShowHidden, hidden);
         IEnumerable<LibraryGameViewModel> shown = byGame.Keys
+            .Where(game => site is null || game.Source == site)
             .Where(game => ShowHiddenGames || !_hiddenGames.IsHidden(game))
             .Select(game => _games[game])
             .Where(game => filter.Matches(game.Name));
@@ -876,13 +972,15 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         };
         Games.SyncWith([.. ordered.ThenBy(game => game.Name, byName)]);
 
-        long size = _mods.Values.Sum(mod => mod.Size);
+        // The counts are the chosen site's.
+        LibraryModViewModel[] counted = [.. _mods.Values.Where(mod => site is null || mod.Mod.Game.Source == site)];
+        long size = counted.Sum(mod => mod.Size);
         string summary = Text.Format(
             Strings.LibrarySummary,
-            Counts.Of(byGame.Count, Strings.LibraryOneGame, Strings.LibraryGames),
-            Counts.Of(_mods.Count, Strings.LibraryOneMod, Strings.LibraryMods),
+            Counts.Of(counted.Select(mod => mod.Mod.Game).Distinct().Count(), Strings.LibraryOneGame, Strings.LibraryGames),
+            Counts.Of(counted.Length, Strings.LibraryOneMod, Strings.LibraryMods),
             Sizes.Format(size));
-        SummaryText = _mods.Values.Max(mod => mod.CheckedAt) is { } checkedAt
+        SummaryText = counted.Max(mod => mod.CheckedAt) is { } checkedAt
             ? Text.Format(Strings.LibraryCheckedAgo, summary, Dates.Ago(checkedAt, _timeProvider))
             : summary;
         IsEmpty = _mods.Count == 0;

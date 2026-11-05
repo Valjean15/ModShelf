@@ -42,6 +42,7 @@ internal sealed class LibraryHarness : IDisposable
             sources,
             Hidden,
             GameSettings,
+            Sites,
             Pictures.Pictures,
             UiThread,
             Time,
@@ -53,6 +54,8 @@ internal sealed class LibraryHarness : IDisposable
     public ScriptedLibraryHistory History { get; } = new();
 
     public HiddenGames Hidden { get; } = new();
+
+    public ScriptedSitesInUse Sites { get; } = new();
 
     public RecordingGameSettingsOpener GameSettings { get; } = new();
 

@@ -23,16 +23,24 @@ public sealed partial class LibraryActivityViewModel : ObservableObject
     private readonly ILibraryHistory _history;
     private readonly Func<ModRef, CancellationToken, Task> _open;
     private readonly Func<GameRef, string> _gameName;
+    private readonly Func<GameRef, string?> _siteName;
     private readonly TimeProvider _timeProvider;
     private readonly ILogger _logger;
     private IReadOnlyList<LibraryEvent> _events = [];
 
+    /// <param name="siteName">The game's site's name while sites show, such as Nexus Mods; null while they don't.</param>
     internal LibraryActivityViewModel(
-        ILibraryHistory history, Func<ModRef, CancellationToken, Task> open, Func<GameRef, string> gameName, TimeProvider timeProvider, ILogger logger)
+        ILibraryHistory history,
+        Func<ModRef, CancellationToken, Task> open,
+        Func<GameRef, string> gameName,
+        Func<GameRef, string?> siteName,
+        TimeProvider timeProvider,
+        ILogger logger)
     {
         _history = history;
         _open = open;
         _gameName = gameName;
+        _siteName = siteName;
         _timeProvider = timeProvider;
         _logger = logger;
         Kinds =
@@ -112,6 +120,11 @@ public sealed partial class LibraryActivityViewModel : ObservableObject
         Arrange();
     }
 
+    /// <summary>
+    /// Shows the days read again, such as with each game's site once sites show, or without it once they no longer do.
+    /// </summary>
+    internal void Refresh() => Arrange();
+
     partial void OnSelectedKindChanged(LibraryChoice<LibraryEventKind?> value) => Arrange();
 
     private void Arrange()
@@ -124,7 +137,7 @@ public sealed partial class LibraryActivityViewModel : ObservableObject
                 .GroupBy(happened => Dates.LocalDay(happened.At, _timeProvider))
                 .Select(day => new ActivityDayViewModel(
                     Dates.DayHeading(day.Key, _timeProvider),
-                    [.. day.Select(happened => new ActivityEntryViewModel(happened, _gameName(happened.Mod.Game), _timeProvider, _open))])),
+                    [.. day.Select(happened => new ActivityEntryViewModel(happened, _gameName(happened.Mod.Game), _siteName(happened.Mod.Game), _timeProvider, _open))])),
         ];
         EmptyText = Days.Count > 0 || Problem is not null ? null
             : _events.Count == 0 ? Strings.ActivityEmpty

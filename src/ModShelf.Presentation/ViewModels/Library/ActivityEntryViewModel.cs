@@ -16,7 +16,8 @@ public sealed partial class ActivityEntryViewModel
     private readonly ModRef _mod;
     private readonly Func<ModRef, CancellationToken, Task> _open;
 
-    internal ActivityEntryViewModel(LibraryEvent happened, string gameName, TimeProvider timeProvider, Func<ModRef, CancellationToken, Task> open)
+    /// <param name="siteName">The game's site's name while sites show, such as Nexus Mods; null while they don't.</param>
+    internal ActivityEntryViewModel(LibraryEvent happened, string gameName, string? siteName, TimeProvider timeProvider, Func<ModRef, CancellationToken, Task> open)
     {
         _mod = happened.Mod;
         _open = open;
@@ -25,6 +26,7 @@ public sealed partial class ActivityEntryViewModel
         KindText = TagOf(happened.Kind);
         ModName = happened.ModName;
         GameName = gameName;
+        SiteName = siteName ?? string.Empty;
         Text = Describe(happened);
     }
 
@@ -43,6 +45,16 @@ public sealed partial class ActivityEntryViewModel
     public string ModName { get; }
 
     public string GameName { get; }
+
+    /// <summary>
+    /// The game's site's name, such as Nexus Mods, on its chip; empty while sites don't show.
+    /// </summary>
+    public string SiteName { get; }
+
+    /// <summary>
+    /// Whether the game's site shows, as a chip: once two sites are in use.
+    /// </summary>
+    public bool ShowSite => SiteName.Length > 0;
 
     /// <summary>
     /// What happened, such as "Downloaded SkyUI 5.3 (5.3), replacing 5.2."

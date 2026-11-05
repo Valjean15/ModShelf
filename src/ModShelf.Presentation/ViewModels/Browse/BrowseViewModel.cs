@@ -54,6 +54,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     private readonly IModLibrary _library;
     private readonly INavigationService _navigation;
     private readonly IHiddenGames _hiddenGames;
+    private readonly ISitesInUse _sitesInUse;
     private readonly ModPictures _pictures;
     private readonly IUiThread _uiThread;
     private readonly ILogger<BrowseViewModel> _logger;
@@ -91,6 +92,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         IDialogService dialogs,
         INavigationService navigation,
         IHiddenGames hiddenGames,
+        ISitesInUse sitesInUse,
         ModPictures pictures,
         IUiThread uiThread,
         TimeProvider timeProvider,
@@ -100,6 +102,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(library);
         ArgumentNullException.ThrowIfNull(navigation);
         ArgumentNullException.ThrowIfNull(hiddenGames);
+        ArgumentNullException.ThrowIfNull(sitesInUse);
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(logger);
@@ -108,6 +111,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         _library = library;
         _navigation = navigation;
         _hiddenGames = hiddenGames;
+        _sitesInUse = sitesInUse;
         _pictures = pictures;
         _uiThread = uiThread;
         _logger = logger;

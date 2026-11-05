@@ -30,6 +30,7 @@ public sealed partial class GameSettingsViewModel : ObservableObject
 
     /// <param name="game">The game.</param>
     /// <param name="name">The game's name.</param>
+    /// <param name="siteName">The game's site's name, such as Nexus Mods.</param>
     /// <param name="change">Changes the game's own settings, saying what went wrong, or null.</param>
     /// <param name="saveFolders">Sets or removes the game's own folder pattern, saying what went wrong, or null.</param>
     /// <param name="copyFrom">Asks, then gives the game the settings of the same game on another site.</param>
@@ -38,6 +39,7 @@ public sealed partial class GameSettingsViewModel : ObservableObject
     internal GameSettingsViewModel(
         GameRef game,
         string name,
+        string siteName,
         Func<Func<GameSettings, GameSettings>, Task<string?>> change,
         Func<GameRef?, FolderPattern?, Task<string?>> saveFolders,
         Func<GameRef, Task> copyFrom,
@@ -45,6 +47,7 @@ public sealed partial class GameSettingsViewModel : ObservableObject
         string root)
     {
         ArgumentNullException.ThrowIfNull(game);
+        ArgumentException.ThrowIfNullOrWhiteSpace(siteName);
         ArgumentNullException.ThrowIfNull(change);
         ArgumentNullException.ThrowIfNull(saveFolders);
         ArgumentNullException.ThrowIfNull(copyFrom);
@@ -52,6 +55,7 @@ public sealed partial class GameSettingsViewModel : ObservableObject
 
         Game = game;
         Name = name;
+        SiteName = siteName;
         _change = change;
         _copyFrom = copyFrom;
         _browse = browse;
@@ -69,6 +73,17 @@ public sealed partial class GameSettingsViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HideText))]
     public partial string Name { get; internal set; }
+
+    /// <summary>
+    /// The game's site's name, such as Nexus Mods, on its chip beside its name.
+    /// </summary>
+    public string SiteName { get; }
+
+    /// <summary>
+    /// Whether its site shows, as a chip: once two sites are in use.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool ShowSite { get; internal set; }
 
     /// <summary>
     /// Such as "Also on Example Mods", when another site has a game of the same name; empty otherwise.

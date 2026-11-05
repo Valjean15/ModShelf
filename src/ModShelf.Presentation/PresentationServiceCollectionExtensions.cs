@@ -34,6 +34,7 @@ public static class PresentationServiceCollectionExtensions
         services.TryAddSingleton<IHiddenGames, HiddenGames>();
         services.TryAddSingleton<IGameSettingsOpener, GameSettingsOpener>();
         services.TryAddSingleton<ModPictures>();
+        services.TryAddSingleton<ISitesInUse, SitesInUse>();
         services.TryAddEnumerable(
         [
             ServiceDescriptor.Singleton<ScreenViewModel, LibraryViewModel>(),

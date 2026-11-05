@@ -2783,4 +2783,12 @@
     <value>approvals</value>
     <comment>What a site counts as approval of a mod, when it doesn't say its own word, as in "Most approvals".</comment>
   </data>
+  <data name="LibraryAllSites" xml:space="preserve">
+    <value>All sites</value>
+    <comment>The Library's site filter: every site's games.</comment>
+  </data>
+  <data name="LibrarySiteFilter" xml:space="preserve">
+    <value>Site</value>
+    <comment>Label of the Library's site filter, which shows once two sites are in use.</comment>
+  </data>
 </root>

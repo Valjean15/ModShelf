@@ -190,6 +190,22 @@
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
+    <!-- A game's, mod's or update's site, such as "Nexus Mods", once two sites are in use: a small outlined label. -->
+    <Style Selector="Border.site">
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="5" />
+        <Setter Property="Padding" Value="6,0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <Style Selector="Border.site TextBlock">
+        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfMutedBrush}" />
+    </Style>
+
     <!-- One of a mod's files, in its section. -->
     <Style Selector="Border.file">
         <Setter Property="Padding" Value="16,10" />
