@@ -193,6 +193,8 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
   "Watched for updates, in the library." The Library lists its game, and among the game's mods, it says "Watched only" and "No files".
 - [ ] **9.2a The games.** On the Library screen, with the games shown.
   The heading counts 2 games. "Sort" by **Most mods** (the default), **Name**, **Most space** and **Updates first** reorders them; games that tie go by name. "stardew" in the filter leaves Stardew Valley; "zzz" says "No game's name has “zzz”." With the window narrow, each game's mods and updates go under its name, "Checked" goes, and the sort and previews go below the filter.
+- [ ] **9.2b One site.** Look at the Library's games, an open game and its **Recent activity**, the Updates screen's games, the Downloads screen's rows, the games in Settings › Games, and a mod's page from the Library and from Browse.
+  None says "Nexus Mods" beside its name, and the Library has no "Site" box: Nexus Mods is the only site in use, and direct links aren't a site. In Settings › Games, games go by their names alone.
 - [ ] **9.3 Track** (Premium only). On SMAPI's page in Browse, **Track on Nexus Mods**.
   "Tracked on Nexus Mods." **Tracked mods** for Stardew Valley lists SMAPI under "*N* tracked mods of Stardew Valley on Nexus Mods.", and the website's Tracking Centre shows it.
 - [ ] **9.4 Untrack** (Premium only). **Untrack on Nexus Mods**.
