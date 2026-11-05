@@ -56,15 +56,17 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
 ## 2. Link the account
 
 - [ ] **2.1 The card.** Open the Accounts screen.
-  A card for Nexus Mods: "Nexus Mods needs a linked account." and "No account is linked.", with **Link with an API key**. On Windows and macOS, no warning about a keyring.
+  A card for Nexus Mods: "Nexus Mods needs a linked account." and "No account is linked.", with **Link with an API key**. On Windows and macOS, no warning about a keyring. At the bottom of the sidebar, **Link an account**, "To download mods", which opens Accounts from any screen.
 - [ ] **2.2 A wrong key is refused.** **Link with an API key**, type `not-a-real-key`, and **Link**.
   The dialog hides what you type. Then, on the card: "Nexus Mods refused the API key. Check it, then try again."
 - [ ] **2.3 The API key page.** **Link with an API key**, then **Open the API key page**.
   Your API keys page opens in the browser. **Cancel** closes the dialog, and the card says nothing new.
 - [ ] **2.4 The key links the account.** **Link with an API key**, paste the key, and **Link**.
-  "Linked as *your name*." The card shows your name, "Premium" (or "Free") in a tag, and "Linked on *today*". Under "API requests left, as Nexus Mods last said:", a line per day and per hour, such as "Per day: 19,999 of 20,000 left, until …". **Check** and **Unlink** appear.
+  "Linked as *your name*." The card shows your picture from Nexus Mods (your initial on a colour until it's read), your name, "Premium" (or "Free") in a tag, and "Linked on *today*". The bottom of the sidebar shows the same picture, your name and "Premium · Nexus Mods" (or "Free · Nexus Mods") in place of **Link an account**; clicking it from another screen opens Accounts. With the sidebar's names hidden (the button at its top), the picture shows alone, its tooltip naming you, your level and Nexus Mods. With the network off, closing and starting the app shows the picture saved. Under "API requests left, as Nexus Mods last said:", a line per day and per hour, such as "Per day: 19,999 of 20,000 left, until …". **Check** and **Unlink** appear.
 - [ ] **2.5 Check.** **Check**.
   "Checked at *now*." The requests left went down by one or two.
+- [ ] **2.6 Linked from the command line.** With the app open on another screen, run `dotnet run --project src/ModShelf.Cli -- account unlink nexus`, then open Accounts; link it again from the command line (`account link nexus`), and open Accounts again. Link it in the app afterwards if you unlinked it there.
+  Opening Accounts shows the account gone, and the sidebar **Link an account**; then linked again, in both, without restarting the app.
 
 ## 3. Browse
 
@@ -313,7 +315,7 @@ Nexus Mods' **Mod manager download** buttons hand a download over with an `nxm:/
 ## 14. Unlink the account
 
 - [ ] **14.1 Unlink.** On the Accounts screen, **Unlink**.
-  "Unlink Nexus Mods?" **Unlink**: "Unlinked. Its stored credentials are deleted." The card says "No account is linked." On Windows, `account_nexus.secret` is gone from the test folder's `Secrets` folder.
+  "Unlink Nexus Mods?" **Unlink**: "Unlinked. Its stored credentials are deleted." The card says "No account is linked.", and the sidebar **Link an account**. On Windows, `account_nexus.secret` is gone from the test folder's `Secrets` folder.
 - [ ] **14.2 Browse needs it.** Open the Browse screen, and **Try again** if it shows a message.
   "Nexus Mods needs your account linked, or refused the one linked. …", with **Go to Accounts**, which opens the Accounts screen.
 
@@ -351,6 +353,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 2.3 API key page | | | |
 | 2.4 Key links the account | | | |
 | 2.5 Check | | | |
+| 2.6 Linked from the command line | | | |
 | 3.1 Games | | | |
 | 3.1a Games by name | | | |
 | 3.2 Search | | | |
