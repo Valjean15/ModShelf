@@ -62,6 +62,7 @@ internal sealed class BrowseHarness : IDisposable
             Navigation,
             Hidden,
             Sites,
+            UiState,
             Pictures.Pictures,
             UiThread,
             Time,
@@ -75,6 +76,8 @@ internal sealed class BrowseHarness : IDisposable
     public HiddenGames Hidden { get; } = new();
 
     public ScriptedSitesInUse Sites { get; } = new();
+
+    public MemoryUiState UiState { get; } = new();
 
     public ScriptedLibraryDownloads LibraryDownloads { get; } = new();
 

@@ -18,4 +18,7 @@ public sealed partial class BrowseViewModel
 
     [LoggerMessage(EventId = 946, Level = LogLevel.Warning, Message = "Reading the categories of game {Game} from {Source} failed")]
     private static partial void LogCategoriesFailed(ILogger logger, Exception exception, string game, string source);
+
+    [LoggerMessage(EventId = 951, Level = LogLevel.Warning, Message = "Couldn't remember Browse's search, so the game picker doesn't offer it")]
+    private static partial void LogSearchNotRemembered(ILogger logger, Exception exception);
 }

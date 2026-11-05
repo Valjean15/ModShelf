@@ -1,0 +1,87 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ModShelf.Presentation.ViewModels.Games"
+             xmlns:res="using:ModShelf.Presentation.Resources"
+             xmlns:views="using:ModShelf.Desktop.Views"
+             xmlns:pictures="using:ModShelf.Desktop.Views.Pictures"
+             x:Class="ModShelf.Desktop.Views.Games.GamePickerList"
+             x:DataType="vm:GamePickerViewModel">
+
+    <!-- The game picker's list: the recent searches, the library's games then the others found, what's to say of them,
+         and which keys do what. -->
+    <DockPanel>
+        <Border DockPanel.Dock="Bottom" Classes="pickerKeys">
+            <WrapPanel ItemSpacing="16" LineSpacing="4">
+                <TextBlock Text="{x:Static res:Strings.GamePickerKeysMove}" />
+                <TextBlock Text="{x:Static res:Strings.GamePickerKeysChoose}" />
+                <TextBlock Text="{x:Static res:Strings.GamePickerKeysClose}" />
+            </WrapPanel>
+        </Border>
+
+        <StackPanel DockPanel.Dock="Top" Margin="18,12,18,4" Spacing="8" IsVisible="{Binding HasRecent}">
+            <TextBlock Classes="pickerHeading" Text="{x:Static res:Strings.GamePickerRecent}" />
+            <ItemsControl ItemsSource="{Binding Recent}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel ItemSpacing="6" LineSpacing="6" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:RecentSearchViewModel">
+                        <Button Classes="recentSearch" Content="{Binding Text}" Command="{Binding SearchCommand}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+
+        <StackPanel DockPanel.Dock="Bottom" Margin="18,6,18,12" Spacing="4">
+            <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding Hint}" IsVisible="{Binding Hint, Converter={x:Static ObjectConverters.IsNotNull}}" />
+            <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding NothingFound}" IsVisible="{Binding NothingFound, Converter={x:Static ObjectConverters.IsNotNull}}" />
+            <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding MoreText}" IsVisible="{Binding MoreText, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        </StackPanel>
+
+        <ScrollViewer MaxHeight="380" HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl x:Name="EntriesList"
+                          Margin="8,4,8,0"
+                          ItemsSource="{Binding Entries}"
+                          AutomationProperties.Name="{x:Static res:Strings.GamePickerList}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:GamePickerEntryViewModel">
+                        <StackPanel>
+                            <TextBlock Classes="pickerHeading" Margin="10,8,10,4" Text="{Binding Heading}" IsVisible="{Binding HasHeading}" />
+                            <Button Classes="pickerRow" Classes.highlighted="{Binding IsHighlighted}" Command="{Binding PickCommand}">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                    <Border Classes="cover"
+                                            Width="44"
+                                            Height="26"
+                                            CornerRadius="4"
+                                            VerticalAlignment="Center"
+                                            Background="{Binding CoverHue, Converter={x:Static views:CoverBrushConverter.Instance}}">
+                                        <Panel>
+                                            <TextBlock FontSize="13" Text="{Binding Initial}" IsVisible="{Binding !Cover.HasFile}" />
+                                            <pictures:ModImage File="{Binding Cover.File}"
+                                                               DecodeWidth="180"
+                                                               Stretch="UniformToFill"
+                                                               RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                        </Panel>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
+                                        <TextBlock Classes="note"
+                                                   FontSize="12.5"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   Text="{Binding Meta}"
+                                                   IsVisible="{Binding Meta, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                    </StackPanel>
+                                    <Border Grid.Column="2" Classes="site" IsVisible="{Binding ShowSite}">
+                                        <TextBlock Text="{Binding SiteName}" />
+                                    </Border>
+                                </Grid>
+                            </Button>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

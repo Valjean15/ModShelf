@@ -3,6 +3,7 @@
              xmlns:vm="using:ModShelf.Presentation.ViewModels.Browse"
              xmlns:res="using:ModShelf.Presentation.Resources"
              xmlns:views="using:ModShelf.Desktop.Views"
+             xmlns:games="using:ModShelf.Desktop.Views.Games"
              xmlns:pictures="using:ModShelf.Desktop.Views.Pictures"
              xmlns:modPages="using:ModShelf.Desktop.Views.ModPages"
              x:Class="ModShelf.Desktop.Views.BrowseView"
@@ -12,14 +13,8 @@
         <TextBlock DockPanel.Dock="Top" Classes="heading" Text="{Binding Title}" />
 
         <!-- The game, and the mods the account follows on its site. -->
-        <Grid DockPanel.Dock="Top" ColumnDefinitions="300,*,Auto" ColumnSpacing="8">
-            <!-- The view model finds the games whose names match what's typed, those starting with it first. -->
-            <AutoCompleteBox ItemsSource="{Binding GameMatches}"
-                             SelectedItem="{Binding Game}"
-                             Text="{Binding GameText, Mode=TwoWay}"
-                             FilterMode="None"
-                             PlaceholderText="{x:Static res:Strings.BrowseGameHint}"
-                             IsEnabled="{Binding !IsReadingGames}" />
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="2*,*,Auto" ColumnSpacing="8">
+            <games:GamePicker DataContext="{Binding Picker}" />
             <Button Grid.Column="2" Content="{Binding ShowFollowedText}" Command="{Binding ShowTrackedCommand}" IsVisible="{Binding CanFollow}" />
         </Grid>
 

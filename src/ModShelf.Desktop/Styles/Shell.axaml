@@ -541,6 +541,107 @@
         <Setter Property="Foreground" Value="{DynamicResource ShelfAccentTextBrush}" />
     </Style>
 
+    <!-- The game picker's field: the chosen game's chip and what's typed, in a box that takes the accent while focused. -->
+    <Style Selector="Border.pickerField">
+        <Setter Property="MinHeight" Value="40" />
+        <Setter Property="Padding" Value="4,3,6,3" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="Background" Value="{DynamicResource ShelfSurfaceBrush}" />
+        <Setter Property="Cursor" Value="IBeam" />
+    </Style>
+
+    <Style Selector="Border.pickerField:focus-within">
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfAccentBrush}" />
+    </Style>
+
+    <!-- A text box without its own box, inside one that's drawn around it, such as the game picker's. -->
+    <Style Selector="TextBox.bare">
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="TextBox.bare /template/ Border#PART_BorderElement, TextBox.bare:pointerover /template/ Border#PART_BorderElement, TextBox.bare:focus /template/ Border#PART_BorderElement">
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <!-- The game chosen, as a chip in the game picker's field. -->
+    <Style Selector="Border.pickedGame">
+        <Setter Property="Margin" Value="0,0,6,0" />
+        <Setter Property="Padding" Value="4,2,2,2" />
+        <Setter Property="CornerRadius" Value="7" />
+        <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.pickerClear">
+        <Setter Property="Width" Value="28" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfMutedBrush}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <!-- A heading in the game picker's list, such as "Your games": small and faint. -->
+    <Style Selector="TextBlock.pickerHeading">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfFaintBrush}" />
+    </Style>
+
+    <!-- A game in the game picker's list: the one Enter chooses on the raised colour. -->
+    <Style Selector="Button.pickerRow">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="MinHeight" Value="48" />
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+
+    <Style Selector="Button.pickerRow.highlighted /template/ ContentPresenter#PART_ContentPresenter, Button.pickerRow:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+
+    <!-- One of Browse's recent searches, in the game picker: a pill. -->
+    <Style Selector="Button.recentSearch">
+        <Setter Property="MinHeight" Value="30" />
+        <Setter Property="Padding" Value="12,2" />
+        <Setter Property="CornerRadius" Value="15" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <!-- The game picker's list in place, under its field, as in a dialog. -->
+    <Style Selector="Border.pickerInline">
+        <Setter Property="Margin" Value="0,8,0,0" />
+        <Setter Property="Height" Value="340" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+
+    <!-- The game picker's foot: which keys do what. -->
+    <Style Selector="Border.pickerKeys">
+        <Setter Property="Padding" Value="18,10" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="BorderThickness" Value="0,1,0,0" />
+        <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />
+        <Setter Property="CornerRadius" Value="0,0,12,12" />
+    </Style>
+
+    <Style Selector="Border.pickerKeys TextBlock">
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfFaintBrush}" />
+    </Style>
+
     <!-- A card over the content, such as Browse's filters: raised with a shadow. -->
     <Style Selector="Border.overCard">
         <Setter Property="Background" Value="{DynamicResource ShelfSurfaceBrush}" />

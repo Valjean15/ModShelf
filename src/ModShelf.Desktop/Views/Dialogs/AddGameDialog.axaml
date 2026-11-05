@@ -1,0 +1,33 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ModShelf.Presentation.ViewModels.Settings"
+        xmlns:res="using:ModShelf.Presentation.Resources"
+        xmlns:games="using:ModShelf.Desktop.Views.Games"
+        x:Class="ModShelf.Desktop.Views.Dialogs.AddGameDialog"
+        x:DataType="vm:AddGameViewModel"
+        Title="{x:Static res:Strings.SettingsAddGameTitle}"
+        Width="560"
+        Classes="dialog">
+
+    <DockPanel>
+        <!-- Cancel first, so the main button sits in the corner. Add chooses the game the arrow keys are on, or adds what's
+             typed by its key when no game is listed. -->
+        <StackPanel DockPanel.Dock="Bottom" Classes="dialogButtons">
+            <Button IsCancel="True" Content="{x:Static res:Strings.DialogCancel}" Click="OnCancel" />
+            <Button Classes="accent" Content="{x:Static res:Strings.SettingsAddGameConfirm}" Command="{Binding Picker.ChooseCommand}" />
+        </StackPanel>
+        <TextBlock DockPanel.Dock="Top" Classes="dialogTitle" Text="{x:Static res:Strings.SettingsAddGameTitle}" />
+        <StackPanel Spacing="12" Margin="0,0,0,8">
+            <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.SettingsAddGameMessage}" />
+            <games:GamePicker x:Name="Picker" IsInline="True" DataContext="{Binding Picker}" />
+            <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsReading}">
+                <ProgressBar Width="80" IsIndeterminate="True" VerticalAlignment="Center" />
+                <TextBlock Classes="note" Text="{x:Static res:Strings.SettingsAddGameReading}" />
+            </StackPanel>
+            <TextBlock Classes="problem"
+                       TextWrapping="Wrap"
+                       Text="{Binding Problem}"
+                       IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        </StackPanel>
+    </DockPanel>
+</Window>

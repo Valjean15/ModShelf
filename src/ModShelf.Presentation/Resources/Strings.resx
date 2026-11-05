@@ -678,10 +678,6 @@
     <value>The site couldn't give the changelog: {0}</value>
     <comment>{0} is the site's reason.</comment>
   </data>
-  <data name="BrowseGameHint" xml:space="preserve">
-    <value>Choose a game</value>
-    <comment>The game box's hint.</comment>
-  </data>
   <data name="BrowseSearchHint" xml:space="preserve">
     <value>Words in the mods' names, or a link to a mod</value>
     <comment>The search box's hint.</comment>
@@ -1251,12 +1247,8 @@
     <comment>The title of the dialog that asks for a game.</comment>
   </data>
   <data name="SettingsAddGameMessage" xml:space="preserve">
-    <value>Enter the game as its site names it in links, such as skyrimspecialedition for Skyrim Special Edition on Nexus Mods. To name its site too, put it first, as in nexus/skyrimspecialedition. It can then have settings of its own.</value>
+    <value>Find the game by its name. One the sites can't list can be added by the key its site names it by in links, such as skyrimspecialedition, or nexus/skyrimspecialedition to name its site too. It can then have settings of its own.</value>
     <comment>Asks for a game to give its own folder pattern.</comment>
-  </data>
-  <data name="SettingsAddGameHint" xml:space="preserve">
-    <value>skyrimspecialedition</value>
-    <comment>An example of a game's name in links.</comment>
   </data>
   <data name="SettingsAddGameConfirm" xml:space="preserve">
     <value>Add</value>
@@ -2886,5 +2878,81 @@
   <data name="BrowseWithinMonth" xml:space="preserve">
     <value>Month</value>
     <comment>The filter card, under Updated within: mods updated in the last month.</comment>
+  </data>
+  <data name="GamePickerHint" xml:space="preserve">
+    <value>Find a game</value>
+    <comment>What the game picker's field says while empty.</comment>
+  </data>
+  <data name="GamePickerList" xml:space="preserve">
+    <value>Games</value>
+    <comment>What the game picker's list says to a screen reader.</comment>
+  </data>
+  <data name="GamePickerYours" xml:space="preserve">
+    <value>Your games</value>
+    <comment>The game picker's heading over the games the library has mods of.</comment>
+  </data>
+  <data name="GamePickerOthers" xml:space="preserve">
+    <value>Other games on {0}</value>
+    <comment>The game picker's heading over the other games found: {0} is the sites, such as Nexus Mods, or Nexus Mods and Example Mods.</comment>
+  </data>
+  <data name="GamePickerAll" xml:space="preserve">
+    <value>Games on {0}</value>
+    <comment>The game picker's heading over the games found, when the library has none: {0} is the sites.</comment>
+  </data>
+  <data name="GamePickerOneMod" xml:space="preserve">
+    <value>1 mod in your library</value>
+    <comment>Under a game in the game picker.</comment>
+  </data>
+  <data name="GamePickerMods" xml:space="preserve">
+    <value>{0:N0} mods in your library</value>
+    <comment>Under a game in the game picker: {0} is how many.</comment>
+  </data>
+  <data name="GamePickerNotYours" xml:space="preserve">
+    <value>Not in your library</value>
+    <comment>Under a game in the game picker that the library has no mods of.</comment>
+  </data>
+  <data name="GamePickerTypeToFind" xml:space="preserve">
+    <value>Type to find any of the {0:N0} games on {1}.</value>
+    <comment>The game picker while nothing's typed: {0} is how many games, {1} the sites.</comment>
+  </data>
+  <data name="GamePickerNothingFound" xml:space="preserve">
+    <value>No game's name has “{0}”.</value>
+    <comment>The game picker when no game matches: {0} is what was typed.</comment>
+  </data>
+  <data name="GamePickerMore" xml:space="preserve">
+    <value>{0:N0} more: type more of the name.</value>
+    <comment>The game picker when more games match than it lists: {0} is how many more.</comment>
+  </data>
+  <data name="GamePickerRecent" xml:space="preserve">
+    <value>Recent searches</value>
+    <comment>The game picker's heading over Browse's recent searches.</comment>
+  </data>
+  <data name="GamePickerKeysMove" xml:space="preserve">
+    <value>↑ ↓ to move</value>
+    <comment>The game picker's foot: the arrow keys move from game to game.</comment>
+  </data>
+  <data name="GamePickerKeysChoose" xml:space="preserve">
+    <value>Enter to choose</value>
+    <comment>The game picker's foot.</comment>
+  </data>
+  <data name="GamePickerKeysClose" xml:space="preserve">
+    <value>Esc to close</value>
+    <comment>The game picker's foot.</comment>
+  </data>
+  <data name="GamePickerClear" xml:space="preserve">
+    <value>Choose another game</value>
+    <comment>The × on the chosen game's chip in the game picker.</comment>
+  </data>
+  <data name="SettingsAddGameCantList" xml:space="preserve">
+    <value>{0} couldn't list its games: {1}</value>
+    <comment>Settings' Add a game…: {0} is the site, {1} what went wrong.</comment>
+  </data>
+  <data name="SettingsAddGameByKey" xml:space="preserve">
+    <value>Type a game's key to add it, such as skyrimspecialedition.</value>
+    <comment>Settings' Add a game…, after a site couldn't list its games.</comment>
+  </data>
+  <data name="SettingsAddGameReading" xml:space="preserve">
+    <value>Reading the sites' games…</value>
+    <comment>Settings' Add a game… while the sites' games are read.</comment>
   </data>
 </root>

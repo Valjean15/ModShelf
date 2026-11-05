@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Downloads;
+using ModShelf.Application.State;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
@@ -149,6 +150,11 @@ public sealed partial class BrowseViewModel
 
         // Only what the site can search by, as the toolbar shows: an author typed for another site's game is kept for it.
         string? words = AsLink(SearchText) is null ? SearchText : null;
+        if (!string.IsNullOrWhiteSpace(words))
+        {
+            RememberingSearch = RememberSearchAsync(words);
+        }
+
         DateTimeOffset? since = SelectedTimeWindow.Within is { } within && CanSearchByUpdated ? _services.TimeProvider.GetUtcNow() - within : null;
         SearchQuery query = new(
             words,
@@ -161,6 +167,37 @@ public sealed partial class BrowseViewModel
             CanSearchByCategory ? SelectedCategory?.Category : null,
             since);
         return ListingAsync(game.Game.Source, Strings.BrowseSearchFailed, token => ShowSearchAsync(game.Game, query, token));
+    }
+
+    /// <summary>
+    /// Searches a recent search again in the chosen game, as choosing it in the game picker does.
+    /// </summary>
+    private void SearchAgainFor(string text)
+    {
+        SearchText = text;
+        Listing = SearchListingAsync();
+    }
+
+    /// <summary>
+    /// Remembers the words as Browse's newest search, for the game picker to offer. One that can't be remembered is
+    /// logged, and the search goes on.
+    /// </summary>
+    private async Task RememberSearchAsync(string words)
+    {
+        try
+        {
+            await _uiState.ChangeAsync(state => state.WithBrowseSearch(words), _stopping);
+            UiState remembered = await _uiState.GetAsync(_stopping);
+            _uiThread.Post(() => Picker.ShowRecent(remembered.BrowseSearches));
+        }
+        catch (IOException exception)
+        {
+            LogSearchNotRemembered(_logger, exception);
+        }
+        catch (OperationCanceledException) when (_stopping.IsCancellationRequested)
+        {
+            // The app is closing.
+        }
     }
 
     /// <summary>

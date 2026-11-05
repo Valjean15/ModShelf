@@ -10,6 +10,7 @@ using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.Dialogs;
 using ModShelf.Presentation.ViewModels.FirstRun;
+using ModShelf.Presentation.ViewModels.Settings;
 
 namespace ModShelf.Desktop.Services;
 
@@ -87,6 +88,18 @@ internal sealed class AvaloniaDialogService : IDialogService
             IReadOnlyList<IStorageFolder> folders = await owner.StorageProvider.OpenFolderPickerAsync(
                 new FolderPickerOpenOptions { Title = title, AllowMultiple = false });
             return folders.Count > 0 ? folders[0].TryGetLocalPath() : null;
+        });
+    }
+
+    public Task<bool> AddGameAsync(AddGameViewModel adding, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(adding);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            AddGameDialog dialog = new() { DataContext = adding };
+            return await ShowAsync(dialog, () => dialog.Confirmed, cancellationToken);
         });
     }
 

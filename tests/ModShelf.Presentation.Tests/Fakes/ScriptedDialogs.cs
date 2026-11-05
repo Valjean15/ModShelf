@@ -1,5 +1,6 @@
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.FirstRun;
+using ModShelf.Presentation.ViewModels.Settings;
 
 namespace ModShelf.Presentation.Tests.Fakes;
 
@@ -57,6 +58,41 @@ internal sealed class ScriptedDialogs : IDialogService
     {
         FolderPickers.Add(title);
         return Task.FromResult(Folders.TryDequeue(out string? folder) ? folder : null);
+    }
+
+    /// <summary>
+    /// Each Add a game… shown.
+    /// </summary>
+    public List<AddGameViewModel> AddingGames { get; } = [];
+
+    /// <summary>
+    /// What the user does in Add a game…: whether they added a game, once it's done. By default, once the sites' games are
+    /// read, they type the next of <see cref="Answers"/> and press Enter, or close it when there's none.
+    /// </summary>
+    public Func<AddGameViewModel, Task<bool>>? InAddGame { get; set; }
+
+    public Task<bool> AddGameAsync(AddGameViewModel adding, CancellationToken cancellationToken)
+    {
+        AddingGames.Add(adding);
+        return InAddGame?.Invoke(adding) ?? TypeAnswerAsync(adding);
+    }
+
+    /// <summary>
+    /// Types the next answer in the picker and presses Enter, as a game's key is added.
+    /// </summary>
+    private async Task<bool> TypeAnswerAsync(AddGameViewModel adding)
+    {
+        await adding.Reading;
+        if (!Answers.TryDequeue(out string? answer) || answer is null)
+        {
+            return false;
+        }
+
+        bool added = false;
+        adding.AddRequested += (_, _) => added = true;
+        adding.Picker.Query = answer;
+        adding.Picker.ChooseCommand.Execute(null);
+        return added;
     }
 
     /// <summary>

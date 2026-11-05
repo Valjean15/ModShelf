@@ -5,8 +5,8 @@ using ModShelf.Sources.Abstractions.Catalog;
 namespace ModShelf.Presentation.Tests.ViewModels.Browse;
 
 /// <summary>
-/// The game box finds games by the starts of their names' words, in any order, those that start with what's typed
-/// first.
+/// The game picker finds games by the starts of their names' words, in any order, those that start with what's typed
+/// first. The library has none of these games.
 /// </summary>
 public sealed class BrowseGameBoxTests : IDisposable
 {
@@ -30,12 +30,13 @@ public sealed class BrowseGameBoxTests : IDisposable
     public void Dispose() => _harness.Dispose();
 
     [Fact]
-    public async Task ListsEveryGameByNameWhileNothingsTyped()
+    public async Task SaysHowManyGamesItFindsWhileNothingsTyped()
     {
         await StartAsync();
 
-        Assert.Equal(Screen.Games, Screen.GameMatches);
-        Assert.Equal(6, Screen.GameMatches.Count);
+        Assert.Empty(Screen.Picker.Entries);
+        Assert.Equal("Type to find any of the 6 games on Nexus Mods.", Screen.Picker.Hint);
+        Assert.Equal(6, Screen.Games.Count);
     }
 
     [Theory]
@@ -47,9 +48,9 @@ public sealed class BrowseGameBoxTests : IDisposable
     {
         await StartAsync();
 
-        Screen.GameText = typed;
+        Screen.Picker.Query = typed;
 
-        Assert.Equal([game], Screen.GameMatches.Select(match => match.Name));
+        Assert.Equal([game], Names());
     }
 
     [Fact]
@@ -57,9 +58,9 @@ public sealed class BrowseGameBoxTests : IDisposable
     {
         await StartAsync();
 
-        Screen.GameText = "valley";
+        Screen.Picker.Query = "valley";
 
-        Assert.Equal(["Valley Life", "Stardew Valley"], Screen.GameMatches.Select(match => match.Name));
+        Assert.Equal(["Valley Life", "Stardew Valley"], Names());
     }
 
     [Fact]
@@ -67,23 +68,28 @@ public sealed class BrowseGameBoxTests : IDisposable
     {
         await StartAsync();
 
-        Screen.GameText = "dew";
+        Screen.Picker.Query = "dew";
 
-        Assert.Empty(Screen.GameMatches);
+        Assert.Empty(Screen.Picker.Entries);
+        Assert.Equal("No game's name has “dew”.", Screen.Picker.NothingFound);
     }
 
     [Fact]
-    public async Task EveryGameAgainOnceTheTextIsCleared()
+    public async Task TheHintAgainOnceTheTextIsCleared()
     {
         await StartAsync();
-        Screen.GameText = "fallout";
+        Screen.Picker.Query = "fallout";
 
-        Screen.GameText = string.Empty;
+        Screen.Picker.Query = string.Empty;
 
-        Assert.Equal(Screen.Games, Screen.GameMatches);
+        Assert.Empty(Screen.Picker.Entries);
+        Assert.NotNull(Screen.Picker.Hint);
+        Assert.Null(Screen.Picker.NothingFound);
     }
 
     private static GameInfo Game(string key, string name) => new(new GameRef(TestData.Nexus, key), name);
+
+    private string[] Names() => [.. Screen.Picker.Entries.Select(entry => entry.Name)];
 
     private async Task StartAsync()
     {

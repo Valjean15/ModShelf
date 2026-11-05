@@ -34,6 +34,7 @@ internal sealed class SettingsHarness
             Tray,
             Dialogs,
             example is null ? new FakeSourceRegistry(Catalog) : new FakeSourceRegistry(Catalog, example),
+            Lookup,
             Hidden,
             GameSettings,
             Sites,
@@ -60,6 +61,11 @@ internal sealed class SettingsHarness
     public HiddenGames Hidden { get; } = new();
 
     public ScriptedSitesInUse Sites { get; } = new();
+
+    /// <summary>
+    /// The sites' games, for Add a game….
+    /// </summary>
+    public ScriptedLookup Lookup { get; } = new();
 
     public GameSettingsOpener GameSettings { get; }
 

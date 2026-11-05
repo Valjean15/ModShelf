@@ -1,0 +1,77 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ModShelf.Presentation.ViewModels.Games"
+             xmlns:res="using:ModShelf.Presentation.Resources"
+             xmlns:views="using:ModShelf.Desktop.Views"
+             xmlns:pictures="using:ModShelf.Desktop.Views.Pictures"
+             xmlns:games="using:ModShelf.Desktop.Views.Games"
+             x:Class="ModShelf.Desktop.Views.Games.GamePicker"
+             x:DataType="vm:GamePickerViewModel">
+
+    <!-- The chosen game as a chip, then what's typed to find another; under it, while open, the library's games, the
+         sites' others found, and the recent searches. The arrow keys, Enter and Escape work from the field. -->
+    <DockPanel>
+        <!-- In a dialog, the list stays under the field, in place of the popup. -->
+        <Border x:Name="InlineList" DockPanel.Dock="Bottom" Classes="pickerInline" IsVisible="False">
+            <games:GamePickerList />
+        </Border>
+
+        <Border x:Name="FieldBorder" DockPanel.Dock="Top" Classes="pickerField">
+            <DockPanel>
+                <Border DockPanel.Dock="Left" Classes="pickedGame" IsVisible="{Binding HasPicked}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Border Classes="cover"
+                                Width="36"
+                                Height="22"
+                                CornerRadius="4"
+                                VerticalAlignment="Center"
+                                Background="{Binding Picked.CoverHue, Converter={x:Static views:CoverBrushConverter.Instance}, FallbackValue={x:Null}}">
+                            <Panel>
+                                <TextBlock FontSize="12" Text="{Binding Picked.Initial, FallbackValue=''}" IsVisible="{Binding !Picked.Cover.HasFile, FallbackValue=True}" />
+                                <pictures:ModImage File="{Binding Picked.Cover.File, FallbackValue={x:Null}}"
+                                                   DecodeWidth="120"
+                                                   Stretch="UniformToFill"
+                                                   RenderOptions.BitmapInterpolationMode="HighQuality" />
+                            </Panel>
+                        </Border>
+                        <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Text="{Binding Picked.Name, FallbackValue=''}" />
+                        <Border Classes="site" IsVisible="{Binding Picked.ShowSite, FallbackValue=False}">
+                            <TextBlock Text="{Binding Picked.SiteName, FallbackValue=''}" />
+                        </Border>
+                        <Button Classes="pickerClear"
+                                Command="{Binding ClearCommand}"
+                                ToolTip.Tip="{x:Static res:Strings.GamePickerClear}"
+                                AutomationProperties.Name="{x:Static res:Strings.GamePickerClear}">
+                            <PathIcon Width="12" Height="12" Data="{StaticResource CloseIcon}" />
+                        </Button>
+                    </StackPanel>
+                </Border>
+                <TextBox x:Name="Field"
+                         Classes="bare"
+                         Text="{Binding Query}"
+                         PlaceholderText="{x:Static res:Strings.GamePickerHint}"
+                         AutomationProperties.Name="{x:Static res:Strings.GamePickerHint}">
+                    <TextBox.KeyBindings>
+                        <KeyBinding Gesture="Down" Command="{Binding MoveDownCommand}" />
+                        <KeyBinding Gesture="Up" Command="{Binding MoveUpCommand}" />
+                        <KeyBinding Gesture="Enter" Command="{Binding ChooseCommand}" />
+                        <KeyBinding Gesture="Escape" Command="{Binding CloseCommand}" />
+                    </TextBox.KeyBindings>
+                </TextBox>
+            </DockPanel>
+        </Border>
+
+        <Popup x:Name="ListPopup"
+               IsOpen="{Binding IsOpen, Mode=TwoWay}"
+               PlacementTarget="{Binding #FieldBorder}"
+               Placement="BottomEdgeAlignedLeft"
+               VerticalOffset="6"
+               IsLightDismissEnabled="True"
+               OverlayDismissEventPassThrough="True"
+               ShouldUseOverlayLayer="True">
+            <Border Classes="overCard" Width="{Binding #FieldBorder.Bounds.Width}" MinWidth="360">
+                <games:GamePickerList />
+            </Border>
+        </Popup>
+    </DockPanel>
+</UserControl>

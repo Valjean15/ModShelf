@@ -505,13 +505,8 @@ public sealed class SettingsViewModelTests
 
         await Screen.AddGameCommand.ExecuteAsync(null);
 
-        Assert.Equal(
-            new TextQuestion(
-                "Add a game",
-                "Enter the game as its site names it in links, such as skyrimspecialedition for Skyrim Special Edition on Nexus Mods. To name its site too, put it first, as in nexus/skyrimspecialedition. It can then have settings of its own.",
-                "skyrimspecialedition",
-                "Add"),
-            Assert.Single(_harness.Dialogs.Questions));
+        Assert.Single(_harness.Dialogs.AddingGames);
+        Assert.Empty(_harness.Dialogs.Questions);
         GameSettingsViewModel game = Assert.IsType<GameSettingsViewModel>(Screen.Game);
         Assert.Equal((Nexus("stardewvalley"), "Uses the defaults"), (Assert.Single(Screen.Games).Game, Screen.Games[0].Note));
         Assert.Equal((Nexus("stardewvalley"), false, "Every game's: {source}/{game}/{modid}/{file}"), (game.Game, game.HasOwnFolders, game.EveryGamesFolders));

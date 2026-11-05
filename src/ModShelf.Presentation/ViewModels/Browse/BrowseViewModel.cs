@@ -13,6 +13,7 @@ using ModShelf.Application.Library;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
+using ModShelf.Application.State;
 using ModShelf.Application.Watchlist;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
@@ -20,8 +21,10 @@ using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.Downloads;
+using ModShelf.Presentation.ViewModels.Games;
 using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Presentation.ViewModels.ModPages;
+using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Search;
 
 namespace ModShelf.Presentation.ViewModels.Browse;
@@ -55,6 +58,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     private readonly INavigationService _navigation;
     private readonly IHiddenGames _hiddenGames;
     private readonly ISitesInUse _sitesInUse;
+    private readonly IUiState _uiState;
     private readonly ModPictures _pictures;
     private readonly IUiThread _uiThread;
     private readonly ILogger<BrowseViewModel> _logger;
@@ -69,8 +73,8 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     private SourceId? _trackedSource;
     private bool _gamesRead;
 
-    // Every game the sites listed, the hidden ones too.
-    private List<GameChoice> _allGames = [];
+    // Every game the sites listed, the hidden ones too, as the game picker and the tests know them.
+    private List<(GameChoice Choice, GameInfo Info)> _allGames = [];
     private bool _picturesShown;
 
     // While the screen changes a choice itself, such as the category when the game changes, that's no search.
@@ -93,6 +97,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         INavigationService navigation,
         IHiddenGames hiddenGames,
         ISitesInUse sitesInUse,
+        IUiState uiState,
         ModPictures pictures,
         IUiThread uiThread,
         TimeProvider timeProvider,
@@ -103,6 +108,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(navigation);
         ArgumentNullException.ThrowIfNull(hiddenGames);
         ArgumentNullException.ThrowIfNull(sitesInUse);
+        ArgumentNullException.ThrowIfNull(uiState);
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(logger);
@@ -112,10 +118,12 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         _navigation = navigation;
         _hiddenGames = hiddenGames;
         _sitesInUse = sitesInUse;
+        _uiState = uiState;
         _pictures = pictures;
         _uiThread = uiThread;
         _logger = logger;
         Filters = new BrowseFiltersViewModel(this);
+        Picker = new GamePickerViewModel(pictures, sources, ChooseGame, SearchAgainFor);
         _services = new ModPageServices(
             library,
             libraryDownloads,
@@ -164,16 +172,9 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     public ObservableCollection<GameChoice> Games { get; } = [];
 
     /// <summary>
-    /// What's typed in the game box, to find a game by its name.
+    /// The game picker: the game chosen, the library's games and the sites' others, and the recent searches.
     /// </summary>
-    [ObservableProperty]
-    public partial string GameText { get; set; } = string.Empty;
-
-    /// <summary>
-    /// The games whose names match <see cref="GameText"/>, as <see cref="NameQuery"/> reads it, those that start with it
-    /// first, each by name otherwise; every game while nothing's typed.
-    /// </summary>
-    public ObservableCollection<GameChoice> GameMatches { get; } = [];
+    public GamePickerViewModel Picker { get; }
 
     /// <summary>
     /// The game whose mods are searched; null until one is chosen. Choosing one searches it.
@@ -372,13 +373,19 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     internal Task GamesWork { get; private set; } = Task.CompletedTask;
 
     /// <summary>
-    /// Reads the previews from the settings, lists the library, and follows its changes while the app runs, so each mod
-    /// shows what the library has of it. The games are read the first time the screen is shown.
+    /// The last search being remembered, for tests to wait on.
+    /// </summary>
+    internal Task RememberingSearch { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
+    /// Reads the previews from the settings and the recent searches, lists the library, and follows its changes while the
+    /// app runs, so each mod shows what the library has of it. The games are read the first time the screen is shown.
     /// </summary>
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
         _stopping = cancellationToken;
         await ReadHiddenGamesAsync(cancellationToken);
+        Picker.ShowRecent((await _uiState.GetAsync(cancellationToken)).BrowseSearches);
         _hiddenGames.Changed += (_, _) => _uiThread.Post(ShowGameChoices);
         await _pictures.LoadAsync();
         Previews.Refresh();
@@ -397,6 +404,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
                 mods =>
                 {
                     _inLibrary.Keep(mods);
+                    ShowLibraryGames();
                     if (_navigation.Current == Screen.Browse)
                     {
                         GamesWork = ReadingGamesAsync();
@@ -492,6 +500,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     private void ShowLibrary(LibraryChange change)
     {
         _inLibrary.Apply(change);
+        ShowLibraryGames();
         foreach (BrowseModViewModel row in Results.Concat(Rows.SelectMany(listed => listed.Mods)).Where(row => row.Mod == change.Mod))
         {
             row.ShowLibrary(change.After);
@@ -500,4 +509,10 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         // Also for a change to a mod the open mod needs.
         Mod?.ShowLibrary();
     }
+
+    /// <summary>
+    /// Tells the game picker how many mods the library has of each game.
+    /// </summary>
+    private void ShowLibraryGames()
+        => Picker.ShowLibrary(_inLibrary.Keys.GroupBy(mod => mod.Game).ToDictionary(game => game.Key, game => game.Count()));
 }

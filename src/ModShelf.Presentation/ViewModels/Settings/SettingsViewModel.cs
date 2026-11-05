@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Accounts.Ports;
+using ModShelf.Application.Catalog;
 using ModShelf.Application.Desktop.Ports;
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
@@ -54,6 +55,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     private readonly ITrayHost _tray;
     private readonly IDialogService _dialogs;
     private readonly ISourceRegistry _sources;
+    private readonly IModLookup _lookup;
     private readonly IHiddenGames _hiddenGames;
     private readonly ISitesInUse _sitesInUse;
     private readonly ModPictures _covers;
@@ -72,6 +74,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         ITrayHost tray,
         IDialogService dialogs,
         ISourceRegistry sources,
+        IModLookup lookup,
         IHiddenGames hiddenGames,
         IGameSettingsOpener gameSettings,
         ISitesInUse sitesInUse,
@@ -91,6 +94,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(tray);
         ArgumentNullException.ThrowIfNull(dialogs);
         ArgumentNullException.ThrowIfNull(sources);
+        ArgumentNullException.ThrowIfNull(lookup);
         ArgumentNullException.ThrowIfNull(hiddenGames);
         ArgumentNullException.ThrowIfNull(gameSettings);
         ArgumentNullException.ThrowIfNull(sitesInUse);
@@ -109,6 +113,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         _tray = tray;
         _dialogs = dialogs;
         _sources = sources;
+        _lookup = lookup;
         _hiddenGames = hiddenGames;
         _sitesInUse = sitesInUse;
         _covers = covers;
@@ -411,13 +416,20 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     [RelayCommand(CanExecute = nameof(IsLoaded))]
     private async Task AddGameAsync(CancellationToken cancellationToken)
     {
-        string? typed = (await _dialogs.AskTextAsync(
-                new TextQuestion(Strings.SettingsAddGameTitle, Strings.SettingsAddGameMessage, Strings.SettingsAddGameHint, Strings.SettingsAddGameConfirm),
-                cancellationToken))
-            ?.Trim();
-        if (!string.IsNullOrEmpty(typed) && await GameTypedAsync(typed, cancellationToken) is { } game)
+        AddGameViewModel adding = new(_lookup, _sources, _covers, ListedGames(), _logger);
+        adding.StartReading(cancellationToken);
+        if (!await _dialogs.AddGameAsync(adding, cancellationToken))
+        {
+            return;
+        }
+
+        if (adding.Game is { } game)
         {
             AddGame(game);
+        }
+        else if (adding.TypedKey is { } typed && await GameTypedAsync(typed, cancellationToken) is { } byKey)
+        {
+            AddGame(byKey);
         }
     }
 

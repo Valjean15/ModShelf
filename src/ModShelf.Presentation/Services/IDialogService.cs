@@ -1,4 +1,5 @@
 using ModShelf.Presentation.ViewModels.FirstRun;
+using ModShelf.Presentation.ViewModels.Settings;
 
 namespace ModShelf.Presentation.Services;
 
@@ -37,6 +38,14 @@ public interface IDialogService
     /// </summary>
     /// <returns>The folder's full path; null when they cancelled, or picked a place that isn't a folder on this computer.</returns>
     Task<string?> PickFolderAsync(string title, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Asks the user to find a game to add, by its name or its key, as Settings' Add a game… does, until they choose one,
+    /// type a key and add it (<see cref="AddGameViewModel.AddRequested"/>), or close the dialog.
+    /// </summary>
+    /// <returns>Whether they added one: <see cref="AddGameViewModel.Game"/> or <see cref="AddGameViewModel.TypedKey"/> says
+    /// which.</returns>
+    Task<bool> AddGameAsync(AddGameViewModel adding, CancellationToken cancellationToken);
 
     /// <summary>
     /// Shows the first-run setup over the main window, until it asks to close (<see cref="FirstRunViewModel.CloseRequested"/>)

@@ -43,6 +43,7 @@ public sealed partial class BrowseViewModel
         }
 
         Filters.Hide();
+        Picker.ShowPicked(newValue?.Game);
         Previews.ShowFor(newValue?.Game);
         if (newValue is not null)
         {
@@ -98,7 +99,7 @@ public sealed partial class BrowseViewModel
         IsReadingGames = true;
         GamesFailed = false;
         Tell(null, needsAccount: false);
-        List<GameChoice> games = [];
+        List<(GameChoice Choice, GameInfo Info)> games = [];
         try
         {
             foreach (SourceId source in sources)
@@ -107,9 +108,9 @@ public sealed partial class BrowseViewModel
                 try
                 {
                     IReadOnlyList<GameInfo> read = await _lookup.GetGamesAsync(source, _stopping);
-                    games.AddRange(read.Select(game => new GameChoice(
-                        game.Game,
-                        sources.Count == 1 ? game.Name : Text.Format(Strings.BrowseGameOnSite, game.Name, site))));
+                    games.AddRange(read.Select(game => (
+                        new GameChoice(game.Game, sources.Count == 1 ? game.Name : Text.Format(Strings.BrowseGameOnSite, game.Name, site)),
+                        game)));
                 }
                 catch (OperationCanceledException) when (_stopping.IsCancellationRequested)
                 {
@@ -136,28 +137,27 @@ public sealed partial class BrowseViewModel
         _gamesRead = !GamesFailed;
         _allGames = games;
         ShowGameChoices();
-        if (Game is null && Favourite(games) is { } favourite)
+        if (Game is null && Favourite([.. games.Select(game => game.Choice)]) is { } favourite)
         {
             Game = favourite;
         }
     }
 
     /// <summary>
-    /// Lists the sites' games by name, but those the settings hide.
+    /// Lists the sites' games by name, but those the settings hide, and offers them in the game picker.
     /// </summary>
     private void ShowGameChoices()
     {
         StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
-        Games.SyncWith([.. _allGames.Where(game => !_hiddenGames.IsHidden(game.Game)).OrderBy(game => game.Name, byName)]);
-        ShowGameMatches();
+        (GameChoice Choice, GameInfo Info)[] shown = [.. _allGames.Where(game => !_hiddenGames.IsHidden(game.Choice.Game))];
+        Games.SyncWith([.. shown.Select(game => game.Choice).OrderBy(game => game.Name, byName)]);
+        Picker.ShowGames(shown.Select(game => game.Info));
     }
 
-    partial void OnGameTextChanged(string value) => ShowGameMatches();
-
     /// <summary>
-    /// Lists the games whose names match what's typed in the game box, those that start with it first.
+    /// Chooses the game picked in the game picker.
     /// </summary>
-    private void ShowGameMatches() => GameMatches.SyncWith(NameQuery.Parse(GameText).Find(Games, game => game.Name));
+    private void ChooseGame(GameRef game) => Game = Games.FirstOrDefault(choice => choice.Game == game) ?? Game;
 
     /// <summary>
     /// Starts the toolbar as the game's own settings say, when it has some: its order, how recently its mods were
