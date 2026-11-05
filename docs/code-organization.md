@@ -90,7 +90,8 @@ Other projects see a project only through what it makes public, so keep that to 
 | 1400–1499 | CLI: the MCP server |
 | 1500–1599 | Pictures and mod details |
 | 1600–1699 | Infrastructure: the UI state file |
-| 1700 onward | Next free block |
+| 1700–1799 | Deprecated calls: counting them, and their file |
+| 1800 onward | Next free block |
 
 ## 7. Files
 

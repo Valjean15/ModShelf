@@ -22,6 +22,13 @@ you should see.
   Nexus Mods linked, at its level, such as Premium; never the account's name or key.
 - [ ] **1.4 A game by its name.** Ask the agent for the key of "stalker 2", then of "final fantasy 12".
   It calls `mod_games`: S.T.A.L.K.E.R. 2: Heart of Chornobyl first with its key, then Final Fantasy XII: The Zodiac Age.
+- [ ] **1.5 What a search can do.** Ask the agent for Stardew Valley's user interface mods updated in the last 30 days,
+  then what else it could search them by.
+  It calls `mod_search` with `category` "User Interface" (or as you wrote it) and `updatedWithin` 30, and lists only
+  those. Its result's `search` names Nexus Mods, its eight orders each both ways, the filters `words`, `author`,
+  `category`, `updatedWithin` and `adult`, 100 a page, `endorsements`, and Stardew Valley's categories, which the agent
+  can tell you. Asked for a category the game doesn't have, such as Armour: "Stardew Valley has no category 'Armour' on
+  Nexus Mods. Its categories: …".
 
 ## 2. Downloads
 
@@ -40,9 +47,12 @@ you should see.
   One call to `download` with three links: two downloading or waiting for you, and the third's result says why it
   couldn't be downloaded. The summary says "Of 3 links, …".
 - [ ] **2.3b The old `link`.** Ask the agent to call `download` with `link` set to one update's link, not `links`.
-  It downloads; the result's message starts "Note: 'link' is the old way to call download and will stop working", and
-  `deprecated` says `DL_LINK_ARG`, with the call as it should be made. The log has a warning starting `DL_LINK_ARG`,
-  without the link. With both `link` and `links`: "Pass only 'links'; 'link' is the old name for a single link."
+  It downloads; the result's message starts "Note: 'link' is deprecated and stops working in ModShelf 2.0", and
+  `deprecated` says `DL_LINK_ARG`, `removedIn` `2.0`, with the call as it should be made. The log has a warning starting
+  `DL_LINK_ARG download called with deprecated 'link'; use 'links'`, with the agent's app's name and without the link.
+  With both `link` and `links`: "Pass only 'links'; 'link' is the old name for a single link." Then ask for the
+  diagnostics: the last line is "Legacy arguments: download.link ×1 (last …, …)", with the time in UTC and the agent's
+  app's name, and `deprecated-calls.json` beside the test library's `settings.json` counts it. Ask again with `link`: ×2.
 - [ ] **2.4 What came in.** Ask the agent what came into the library since this morning, and which versions they
   replaced.
   The new files, each with the version it replaced and what became of it (`replaces`: archived when
@@ -108,10 +118,12 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 1.2 Reading | | |
 | 1.3 Accounts | | |
 | 1.4 A game by its name | | |
+| 1.5 What a search can do | | |
 | 2.1 Without the desktop app | | |
 | 2.2 With the desktop app | | |
 | 2.3 Changing a download | | |
 | 2.3a Several links | | |
+| 2.3b The old `link`, counted | | |
 | 2.4 What came in | | |
 | 2.5 New optional files | | |
 | 2.6 Hashes | | |

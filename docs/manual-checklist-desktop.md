@@ -239,7 +239,7 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
 - [ ] **10.8 The version.** "About ModShelf", in **About**.
   "ModShelf 0.9.0-alpha.0.N (…)", where the part in brackets is the commit you built, as `git rev-parse --short=7 HEAD` shows it. Once a version is tagged, such as `v0.9.0`, a build of that commit shows "ModShelf 0.9.0 (…)".
 - [ ] **10.9 Copy diagnostics.** **Copy diagnostics**, then paste into a text editor.
-  "The diagnostics are on the clipboard. Paste them into your bug report." The report's first line is the version from 10.8. Then the system, the folders with your home folder as `~`, the settings from 10.1 to 10.5, the library's counts, the downloads by what they're doing, and "nexus linked (ApiKey, Premium)" (Free for the free account). Nowhere does it hold your account's name, a mod's or file's name, a key or an `nxm://` link.
+  "The diagnostics are on the clipboard. Paste them into your bug report." The report's first line is the version from 10.8. Then the system, the folders with your home folder as `~`, the settings from 10.1 to 10.5, the library's counts, the downloads by what they're doing, "nexus linked (ApiKey, Premium)" (Free for the free account), and last "Legacy arguments: none", or the deprecated calls an agent made. Nowhere does it hold your account's name, a mod's or file's name, a key or an `nxm://` link.
 - [ ] **10.10 Open log folder.** **Open log folder**.
   The system's file manager opens the test folder's `logs` folder, with today's `desktop-….log` in it.
 - [ ] **10.11 ModShelf's own updates.** Under the version in "About ModShelf".

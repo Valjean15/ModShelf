@@ -68,6 +68,8 @@ A new terminal needs all these lines again, with the same folders. Never paste a
   S.T.A.L.K.E.R. 2: Heart of Chornobyl, with its key; Final Fantasy XII: The Zodiac Age; Stardew Valley, key `stardewvalley`. Each says how many match, and "To search a game's mods: mod search --game <its key>".
 - [ ] **3.5 The site's own order, and endorsements.** `ms mod search --game stardewvalley`, then the same with `--sort Endorsements`.
   "*N* mods match, in the site's own order. These are 1 to 20.", the most endorsed at the top, then "…, most endorsements first." with the same mods. The table's columns are ID, Name, Author, Endorsements, Downloads, Updated and Link.
+- [ ] **3.6 A category, and how long since updated.** `ms mod search --game stardewvalley --category "user interface" --updated-within 30`, then `ms mod search --game stardewvalley --category Armour`.
+  Only User Interface mods, each updated in the last 30 days (the Updated column). Then "Stardew Valley has no category 'Armour' on Nexus Mods. Its categories: …", listing the game's categories as the website's mod categories for Stardew Valley. Exit code 2.
 
 ## 4. Download straight away (Premium only)
 
@@ -134,13 +136,13 @@ Use a file of a few hundred MB, so there's time to stop it: for example a textur
 This section changes your account. If SMAPI is tracked when you start, track it again at the end.
 
 - [ ] **8.1 The list.** `ms mod tracked`.
-  "The account tracks *N* mods on nexus.", by game and then by number. It matches the Tracking Centre on the website.
+  "*N* tracked mods on Nexus Mods.", by game and then by number, and "To untrack one: mod untrack "<its link>"". It matches the Tracking Centre on the website.
 - [ ] **8.2 Track.** `ms mod track "https://www.nexusmods.com/stardewvalley/mods/2400"`.
-  "Tracking mod 2400 of stardewvalley on nexus." Exit code 0. `ms mod tracked` lists `stardewvalley 2400`, and the website shows SMAPI as tracked.
+  "Tracked on Nexus Mods: mod 2400 of stardewvalley." Exit code 0. `ms mod tracked` lists `stardewvalley 2400`, and the website shows SMAPI as tracked.
 - [ ] **8.3 Track again.** The same command.
   The same message, exit code 0.
 - [ ] **8.4 Untrack.** `ms mod untrack "https://www.nexusmods.com/stardewvalley/mods/2400"`.
-  "No longer tracking mod 2400 of stardewvalley on nexus." It's gone from `ms mod tracked` and from the website.
+  "No longer tracked on Nexus Mods: mod 2400 of stardewvalley." It's gone from `ms mod tracked` and from the website.
 - [ ] **8.5 Untrack again.** The same command.
   The same message, exit code 0.
 
@@ -184,7 +186,7 @@ This section changes your account. If SMAPI is tracked when you start, track it 
   ms diagnostics
   ```
 
-  The first line is "ModShelf 0.9.0-alpha.0.N (…)", where the part in brackets is the commit you built, as `git rev-parse --short=7 HEAD` shows it. Then the system, the folders with your home folder as `~`, the settings, the library's counts, the downloads by what they're doing, and "nexus linked (ApiKey, Premium)" (Free for the free account). Nowhere does it hold your account's name, a mod's or file's name, a key or an `nxm://` link. Exit code 0.
+  The first line is "ModShelf 0.9.0-alpha.0.N (…)", where the part in brackets is the commit you built, as `git rev-parse --short=7 HEAD` shows it. Then the system, the folders with your home folder as `~` (and ", 1 game in folders of their own" after 7.5b, while a game has one), the settings, the library's counts, the downloads by what they're doing, "nexus linked (ApiKey, Premium)" (Free for the free account), and last "Legacy arguments: none", or the deprecated calls an agent made (the MCP checklist's 2.3b). Nowhere does it hold your account's name, a mod's or file's name, a key or an `nxm://` link. Exit code 0.
 
 ## 11. Links from websites
 
@@ -247,6 +249,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 3.4 No match | | | |
 | 3.4a Games by name | | | |
 | 3.5 Own order and endorsements | | | |
+| 3.6 Category and updated within | | | |
 | 4.1 Download a mod's page | | – | |
 | 4.2 Download a file's link | | – | |
 | 4.3 Queue | | – | |
