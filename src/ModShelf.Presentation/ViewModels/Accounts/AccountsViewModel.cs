@@ -9,12 +9,14 @@ using ModShelf.Application.Accounts.Ports;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
+using ModShelf.Presentation.ViewModels.Pictures;
 
 namespace ModShelf.Presentation.ViewModels.Accounts;
 
 /// <summary>
-/// A card per site that can link an account: the account linked there, linking one, checking it and unlinking it. It
-/// says when no keyring protects the credentials.
+/// A card per site that can link an account: the account linked there, with its picture, linking one, checking it and
+/// unlinking it. It says when no keyring protects the credentials. Each time it's shown, it lists the accounts again, as
+/// one linked from the command line meanwhile; the menu shows them as the cards do.
 /// </summary>
 public sealed partial class AccountsViewModel : ScreenViewModel
 {
@@ -30,6 +32,8 @@ public sealed partial class AccountsViewModel : ScreenViewModel
         IDialogService dialogs,
         IUiThread uiThread,
         TimeProvider timeProvider,
+        ModPictures pictures,
+        AccountMenuViewModel menu,
         ILogger<AccountsViewModel> logger)
     {
         ArgumentNullException.ThrowIfNull(accounts);
@@ -40,7 +44,7 @@ public sealed partial class AccountsViewModel : ScreenViewModel
         _accounts = accounts;
         _uiThread = uiThread;
         _logger = logger;
-        _services = new AccountServices(accounts, browser, dialogs, uiThread, timeProvider, logger);
+        _services = new AccountServices(accounts, browser, dialogs, uiThread, timeProvider, pictures, menu, logger);
         IsStoreUnprotected = !secrets.IsProtectedByOs;
     }
 
@@ -76,6 +80,11 @@ public sealed partial class AccountsViewModel : ScreenViewModel
     public bool IsStoreUnprotected { get; }
 
     /// <summary>
+    /// The last listing of the accounts as the screen was shown, for tests to wait on.
+    /// </summary>
+    internal Task Refreshing { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
     /// Lists the sites that can link an account, with the account linked on each. The sites aren't asked anything.
     /// </summary>
     public override Task StartAsync(CancellationToken cancellationToken)
@@ -103,4 +112,38 @@ public sealed partial class AccountsViewModel : ScreenViewModel
             }),
             exception => LogListFailed(_logger, exception),
             cancellationToken);
+
+    /// <summary>
+    /// Lists the accounts again, once the screen has listed them, and shows each card's but those busy linking, checking
+    /// or unlinking. The sites aren't asked anything.
+    /// </summary>
+    public override void OnShown() => Refreshing = RefreshAsync();
+
+    private async Task RefreshAsync()
+    {
+        if (IsLoading)
+        {
+            return;
+        }
+
+        try
+        {
+            IReadOnlyList<SourceAccountStatus> statuses = await _accounts.ListAsync(CancellationToken.None);
+            _uiThread.Post(() =>
+            {
+                foreach (SourceAccountStatus status in statuses)
+                {
+                    if (Sources.FirstOrDefault(card => card.Source == status.Source) is { IsBusy: false } card)
+                    {
+                        card.Show(status);
+                    }
+                }
+            });
+        }
+        catch (Exception exception)
+        {
+            // The cards show the accounts as they were.
+            LogListFailed(_logger, exception);
+        }
+    }
 }

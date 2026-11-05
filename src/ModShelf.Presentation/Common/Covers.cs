@@ -3,7 +3,7 @@ using System.Globalization;
 namespace ModShelf.Presentation.Common;
 
 /// <summary>
-/// A game's cover until it has a picture: its initial on a hue of its own.
+/// A game's cover, or an account's picture, until it has a picture of its own: its initial on a hue of its own.
 /// </summary>
 internal static class Covers
 {

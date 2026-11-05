@@ -799,6 +799,55 @@
         <Setter Property="BorderBrush" Value="Transparent" />
     </Style>
 
+    <!-- The accounts at the bottom of the sidebar: in a quiet box, each a row with its round picture; collapsed, the
+         pictures alone, without the box. -->
+    <Style Selector="Border.accountMenu">
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Background" Value="{DynamicResource ShelfSurfaceBrush}" />
+    </Style>
+
+    <Style Selector="Border.accountMenu.collapsed">
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <Style Selector="Button.accountRow">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Padding" Value="5" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+    </Style>
+
+    <Style Selector="Button.accountRow:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfSidebarHoverBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+
+    <Style Selector="Border.avatar">
+        <Setter Property="ClipToBounds" Value="True" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Border.avatar TextBlock">
+        <Setter Property="Foreground" Value="#FFFFFF" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Border.avatar.link">
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <Style Selector="Border.avatar.link PathIcon">
+        <Setter Property="Foreground" Value="{DynamicResource ShelfMutedBrush}" />
+    </Style>
+
     <Style Selector="ListBox.sidebar">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Padding" Value="6,0" />

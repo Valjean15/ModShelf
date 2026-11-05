@@ -78,6 +78,22 @@
     <value>Downloads</value>
     <comment>The screen of the download queue.</comment>
   </data>
+  <data name="AccountMenuLevel" xml:space="preserve">
+    <value>{0} · {1}</value>
+    <comment>An account's level and site, under its name at the bottom of the menu, such as "Premium · Nexus Mods". {0}: the level; {1}: the site.</comment>
+  </data>
+  <data name="AccountMenuTip" xml:space="preserve">
+    <value>{0} · {1}</value>
+    <comment>The tooltip of an account at the bottom of the menu, such as "Kestrel · Premium · Nexus Mods". {0}: the account's name; {1}: its level and site, or its site.</comment>
+  </data>
+  <data name="AccountMenuLink" xml:space="preserve">
+    <value>Link an account</value>
+    <comment>At the bottom of the menu while no account is linked; it opens Accounts.</comment>
+  </data>
+  <data name="AccountMenuLinkNote" xml:space="preserve">
+    <value>To download mods</value>
+    <comment>Under "Link an account" at the bottom of the menu.</comment>
+  </data>
   <data name="AccountsTitle" xml:space="preserve">
     <value>Accounts</value>
     <comment>The screen of the accounts linked on each mod site.</comment>

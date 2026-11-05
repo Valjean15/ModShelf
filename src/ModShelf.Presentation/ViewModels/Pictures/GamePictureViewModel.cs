@@ -3,9 +3,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 namespace ModShelf.Presentation.ViewModels.Pictures;
 
 /// <summary>
-/// A game's picture on its cover, such as its banner on the site: the saved file, once there is one. Until then, and when
-/// the site gives none, can't be reached, or the screen shows no pictures, the cover shows the game's initial on its
-/// colour. A newer picture asked for replaces one still being read.
+/// A game's picture on its cover, such as its banner on the site, or an account's picture: the saved file, once there is
+/// one. Until then, and when the site gives none, can't be reached, or the screen shows no pictures, the cover shows the
+/// game's initial on its colour, or the account's. A newer picture asked for replaces one still being read.
 /// </summary>
 public sealed partial class GamePictureViewModel : ObservableObject
 {

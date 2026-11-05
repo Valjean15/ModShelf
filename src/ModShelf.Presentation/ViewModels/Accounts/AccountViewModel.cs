@@ -10,6 +10,7 @@ using ModShelf.Application.Accounts;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
+using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Quota;
 
@@ -39,6 +40,8 @@ public sealed partial class AccountViewModel : ObservableObject
         [
             .. status.AuthKinds.Select((kind, index) => new LinkMethodViewModel(kind, index == 0, new AsyncRelayCommand(() => LinkAsync(kind), CanAct))),
         ];
+        Picture = new GamePictureViewModel(services.Pictures);
+        Picture.Show(CancellationToken.None);
         Show(status);
     }
 
@@ -69,7 +72,23 @@ public sealed partial class AccountViewModel : ObservableObject
     /// The account's name on the site; empty without an account.
     /// </summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Initial), nameof(Hue))]
     public partial string AccountName { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// The account's picture on the site, beside its name; its initial on its colour while there's none.
+    /// </summary>
+    public GamePictureViewModel Picture { get; }
+
+    /// <summary>
+    /// The first letter of the account's name, in place of its picture while there's none.
+    /// </summary>
+    public string Initial => Covers.InitialOf(AccountName);
+
+    /// <summary>
+    /// The hue behind the initial, from the account's name, as in the menu.
+    /// </summary>
+    public int Hue => Covers.HueOf(AccountName);
 
     /// <summary>
     /// The account's membership on the site, such as "Premium"; null when the site gives none, or without an account.
@@ -274,6 +293,8 @@ public sealed partial class AccountViewModel : ObservableObject
 
         AccountName = account?.Profile.DisplayName ?? string.Empty;
         Tier = account?.Profile.Tier;
+        Picture.Place(account?.Profile.AvatarUrl, CancellationToken.None);
+        _services.Menu.Show(Source, SiteName, account);
         LinkedText = account is null
             ? Strings.AccountNotLinked
             : Text.Format(Strings.AccountLinkedOn, Dates.Day(account.LinkedAt, _services.TimeProvider));

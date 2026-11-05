@@ -4,6 +4,8 @@
              xmlns:sys="using:System"
              xmlns:vm="using:ModShelf.Presentation.ViewModels.Accounts"
              xmlns:res="using:ModShelf.Presentation.Resources"
+             xmlns:views="using:ModShelf.Desktop.Views"
+             xmlns:pictures="using:ModShelf.Desktop.Views.Pictures"
              x:Class="ModShelf.Desktop.Views.AccountCard"
              x:DataType="vm:AccountViewModel">
 
@@ -14,8 +16,23 @@
                 <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding AboutText}" />
             </StackPanel>
 
-            <!-- The account: its name, its membership and when it was linked. -->
+            <!-- The account: its picture, or its initial on its colour, its name, its membership and when it was linked. -->
             <StackPanel Orientation="Horizontal" Spacing="8">
+                <Border Classes="avatar"
+                        Width="40"
+                        Height="40"
+                        CornerRadius="20"
+                        Margin="0,0,4,0"
+                        Background="{Binding Hue, Converter={x:Static views:CoverBrushConverter.Instance}}"
+                        IsVisible="{Binding IsLinked}">
+                    <Panel>
+                        <TextBlock FontSize="17" Text="{Binding Initial}" IsVisible="{Binding !Picture.HasFile}" />
+                        <pictures:ModImage File="{Binding Picture.File}"
+                                           DecodeWidth="120"
+                                           Stretch="UniformToFill"
+                                           RenderOptions.BitmapInterpolationMode="HighQuality" />
+                    </Panel>
+                </Border>
                 <TextBlock FontWeight="SemiBold"
                            VerticalAlignment="Center"
                            Text="{Binding AccountName}"

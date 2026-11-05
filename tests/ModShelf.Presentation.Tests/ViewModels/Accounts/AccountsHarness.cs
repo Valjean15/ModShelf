@@ -2,6 +2,7 @@ using Microsoft.Extensions.Time.Testing;
 
 using ModShelf.Application.Accounts;
 using ModShelf.Domain.Mods;
+using ModShelf.Presentation.Services;
 using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.ViewModels.Accounts;
 using ModShelf.Sources.Abstractions.Accounts;
@@ -27,7 +28,8 @@ internal sealed class AccountsHarness
     public AccountsHarness(bool protectedByOs = true)
     {
         Time.SetLocalTimeZone(TimeZoneInfo.Utc);
-        Screen = new AccountsViewModel(Accounts, new FixedSecretStore(protectedByOs), Browser, Dialogs, UiThread, Time, Logger);
+        Menu = new AccountMenuViewModel(Pictures.Pictures, Navigation);
+        Screen = new AccountsViewModel(Accounts, new FixedSecretStore(protectedByOs), Browser, Dialogs, UiThread, Time, Pictures.Pictures, Menu, Logger);
     }
 
     public ScriptedAccounts Accounts { get; } = new();
@@ -42,10 +44,20 @@ internal sealed class AccountsHarness
 
     public RecordingLogger<AccountsViewModel> Logger { get; } = new();
 
+    public TestPictures Pictures { get; } = new();
+
+    public NavigationService Navigation { get; } = new();
+
+    /// <summary>
+    /// The accounts at the bottom of the menu, which the screen's cards tell.
+    /// </summary>
+    public AccountMenuViewModel Menu { get; }
+
     public AccountsViewModel Screen { get; }
 
-    public static LinkedAccount Account(SourceId source, AuthKind kind = AuthKind.ApiKey, string name = "Jean", string? tier = "Premium", DateTimeOffset? linkedAt = null)
-        => new(source, kind, new AccountProfile(name, null, tier), linkedAt ?? TestData.Now.AddDays(-7));
+    public static LinkedAccount Account(
+        SourceId source, AuthKind kind = AuthKind.ApiKey, string name = "Jean", string? tier = "Premium", DateTimeOffset? linkedAt = null, Uri? picture = null)
+        => new(source, kind, new AccountProfile(name, picture, tier), linkedAt ?? TestData.Now.AddDays(-7));
 
     /// <summary>
     /// Adds the two sites, with the accounts given, then lists them, as the main window starts the screen.

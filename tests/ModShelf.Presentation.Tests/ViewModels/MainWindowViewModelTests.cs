@@ -6,6 +6,7 @@ using ModShelf.Presentation.Services;
 using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.Tests.ViewModels.Downloads;
 using ModShelf.Presentation.ViewModels;
+using ModShelf.Presentation.ViewModels.Accounts;
 using ModShelf.Testing;
 
 namespace ModShelf.Presentation.Tests.ViewModels;
@@ -246,5 +247,14 @@ public sealed class MainWindowViewModelTests : IDisposable
         Assert.Equal([TestData.HandoffLink], downloads.Opened.Opened);
     }
 
-    private MainWindowViewModel Window(IEnumerable<ScreenViewModel> screens) => new(_navigation, _uiThread, screens, _logger);
+    [Fact]
+    public void TheAccountsAtTheBottomOpenAccounts()
+    {
+        _window.Accounts.OpenAccountsCommand.Execute(null);
+
+        Assert.Equal((Screen.Accounts, Screen.Accounts), (_navigation.Current, _window.CurrentScreen.Screen));
+    }
+
+    private MainWindowViewModel Window(IEnumerable<ScreenViewModel> screens)
+        => new(_navigation, _uiThread, screens, new AccountMenuViewModel(new TestPictures().Pictures, _navigation), _logger);
 }

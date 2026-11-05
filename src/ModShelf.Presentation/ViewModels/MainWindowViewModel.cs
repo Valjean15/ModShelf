@@ -5,13 +5,14 @@ using Microsoft.Extensions.Logging;
 
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
+using ModShelf.Presentation.ViewModels.Accounts;
 using ModShelf.Presentation.ViewModels.Downloads;
 
 namespace ModShelf.Presentation.ViewModels;
 
 /// <summary>
-/// The main window: the sidebar of screens, and the screen it shows, which follows <see cref="INavigationService"/>. It
-/// starts every screen's own work, and stops it when disposed.
+/// The main window: the sidebar of screens, with the accounts at its bottom, and the screen it shows, which follows
+/// <see cref="INavigationService"/>. It starts every screen's own work, and stops it when disposed.
 /// </summary>
 public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
 {
@@ -34,16 +35,19 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         INavigationService navigation,
         IUiThread uiThread,
         IEnumerable<ScreenViewModel> screens,
+        AccountMenuViewModel accounts,
         ILogger<MainWindowViewModel> logger)
     {
         ArgumentNullException.ThrowIfNull(navigation);
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(screens);
+        ArgumentNullException.ThrowIfNull(accounts);
         ArgumentNullException.ThrowIfNull(logger);
 
         _navigation = navigation;
         _uiThread = uiThread;
         _logger = logger;
+        Accounts = accounts;
         Screens = [.. screens.OrderBy(screen => screen.Screen)];
         if (!Screens.Select(screen => screen.Screen).SequenceEqual(Enum.GetValues<Screen>()))
         {
@@ -60,6 +64,11 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
     /// Every screen, in the sidebar's order.
     /// </summary>
     public IReadOnlyList<ScreenViewModel> Screens { get; }
+
+    /// <summary>
+    /// The accounts at the bottom of the sidebar, each opening Accounts.
+    /// </summary>
+    public AccountMenuViewModel Accounts { get; }
 
     /// <summary>
     /// The screen shown. Setting it, as selecting it in the sidebar does, goes to it.
