@@ -69,9 +69,9 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
 ## 3. Browse
 
 - [ ] **3.1 The games.** Open the Browse screen.
-  The game box lists Nexus Mods' games. With nothing in the library yet, it starts with none chosen: "Choose a game to search its mods."
-- [ ] **3.1a Games by name.** Type each in the game box: `stalker 2`, `final fantasy 12`, `dragons dogma`, `valley`, `dew`.
-  S.T.A.L.K.E.R. 2: Heart of Chornobyl; Final Fantasy XII: The Zodiac Age; Dragon's Dogma 2; for `valley`, the games whose names start with "Valley" first, then Stardew Valley and the others; for `dew`, none. Clearing the box lists every game again.
+  The game picker's field says "Find a game"; clicking it opens a list under it saying "Type to find any of the *N* games on Nexus Mods." and which keys do what. With nothing in the library yet, it starts with none chosen: "Choose a game to search its mods."
+- [ ] **3.1a Games by name.** Type each in the game picker: `stalker 2`, `final fantasy 12`, `dragons dogma`, `valley`, `dew`. Then type `star`, press ↓ twice and Enter; open it again, type `sky`, and press Escape.
+  S.T.A.L.K.E.R. 2: Heart of Chornobyl; Final Fantasy XII: The Zodiac Age; Dragon's Dogma 2; for `valley`, the games whose names start with "Valley" first, then Stardew Valley and the others; for `dew`, "No game's name has “dew”." Clearing the field shows the hint again. ↓ moves the highlight, and Enter chooses the third game: it shows as a chip in the field, and its rows load. Escape closes the list, forgetting `sky`, the chip still there.
 - [ ] **3.2 Search.** Choose Stardew Valley (type to filter the list), type `smapi` in the search box, and **Search**.
   "*N* mods match." SMAPI is near the top, with its downloads, endorsements and last update.
 - [ ] **3.2a The game's rows.** Clear the search box.
@@ -199,6 +199,8 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
   The heading counts 2 games. "Sort" by **Most mods** (the default), **Name**, **Most space** and **Updates first** reorders them; games that tie go by name. "stardew" in the filter leaves Stardew Valley; "zzz" says "No game's name has “zzz”." With the window narrow, each game's mods and updates go under its name, "Checked" goes, and the sort and previews go below the filter.
 - [ ] **9.2b One site.** Look at the Library's games, an open game and its **Recent activity**, the Updates screen's games, the Downloads screen's rows, the games in Settings › Games, and a mod's page from the Library and from Browse.
   None says "Nexus Mods" beside its name, and the Library has no "Site" box: Nexus Mods is the only site in use, and direct links aren't a site. In Settings › Games, games go by their names alone.
+- [ ] **9.2c The game picker.** In Browse, click the game picker, then one of the recent searches. Close the app and start it again, and click the game picker.
+  "Your games" lists the library's games, the one with the most mods first, each saying "*N* mods in your library", with its cover; typing `s` lists the other games whose names have it under "Other games on Nexus Mods", "Not in your library". "Recent searches" shows the words searched in Browse so far, the newest first (`outfit`, `smapi`, …); clicking one searches it in the chosen game. After the restart they're still there.
 - [ ] **9.3 Track** (Premium only). On SMAPI's page in Browse, **Track on Nexus Mods**.
   "Tracked on Nexus Mods." **Tracked mods** for Stardew Valley lists SMAPI under "*N* tracked mods of Stardew Valley on Nexus Mods.", and the website's Tracking Centre shows it.
 - [ ] **9.4 Untrack** (Premium only). **Untrack on Nexus Mods**.
@@ -216,7 +218,7 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
   It opens on **General**: the theme, closing the window, and pictures and mod details. **Library**: the library folder, the folder pattern, old versions and **Rescan the library**. **Updates**, **Links**, **Games** (each game's own settings, the library's games each with its banner from Nexus Mods) and **About** show theirs. Type `folder` in **Search settings**: the library folder, the folder pattern, old versions (the _archive folder), the rescan, the games' patterns and About (the log folder), under "Settings that match “folder”", and General, Updates and Links fade in the list. `zzz`: "No setting matches “zzz”." Type `stardew`: **Games** shows Stardew Valley alone, its page open. Escape, or choosing a category, ends the search. **Rescan the library** says what it found, as on the Library screen. Make the window narrow: the categories move above the settings, side by side.
 - [ ] **10.1 Folder patterns.** In **Library**, under "Folder pattern", change every game's pattern to `{source}/{game}/{modid}/{file}`.
   The example under it changes as you type. `{mod}/{file}x` says what's wrong, and **Save** is disabled. With the right pattern, **Save**: a mod the library doesn't have yet then downloads to `nexus\<game>\<mod's ID>\…`. Mods in the library keep their folders, and files downloaded already stay where they are.
-- [ ] **10.2 A game's own settings.** In **Games**, **Add a game…**, type `stardewvalley`. On its page, **Override** each setting in turn: under "Folder pattern" change its pattern and **Save**; under "Old versions" choose the _archive folder; under "Update checks" choose **Every day**; under "Notices" untick the box; under "Previews" choose **Cards**; under "Browse" choose **Recently updated**, **Updated in the last week** and **50 per page**. Then **Use default** for each.
+- [ ] **10.2 A game's own settings.** In **Games**, **Add a game…**, type `stardewvalley` and press Enter. On its page, **Override** each setting in turn: under "Folder pattern" change its pattern and **Save**; under "Old versions" choose the _archive folder; under "Update checks" choose **Every day**; under "Notices" untick the box; under "Previews" choose **Cards**; under "Browse" choose **Recently updated**, **Updated in the last week** and **50 per page**. Then **Use default** for each.
   Every setting says **Uses default** and what every game's is, until **Override** shows it, set as every game's, with **Overridden**. The pattern's example shows the game. The game's row counts the settings overridden, and the settings file holds each under `"games": { "stardewvalley": … }`. Each **Use default** takes it out; with none left, the row says "Uses the defaults" and the file holds no `games`.
 - [ ] **10.2a Browse as a game says.** Override stardewvalley's Browse as in 10.2, then choose Stardew Valley on the Browse screen, and **Search**.
   The toolbar starts on **Recently updated**, **Updated in the last week** and **50 per page**, and the search lists 50 mods updated in the last week, the most recent first. Choosing another game without its own leaves the toolbar as it is.
@@ -230,6 +232,8 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
   "Notices" says **Overridden**, with the box unticked, without restarting the app.
 - [ ] **10.2f A game's own folder.** With Stardew Valley's files in the library, run `dotnet run --project src/ModShelf.Cli -- library move-game stardewvalley "<a new folder>" --yes`, then look at Stardew Valley in the Library, its SMAPI page, and its page in Settings › Games. Move it back with `library move-game stardewvalley --yes` afterwards.
   No file of Stardew Valley says it's missing; **Open folder** on SMAPI opens its folder under the new folder; the folder pattern's example on Stardew Valley's Settings page starts with the new folder. **Choose another folder…** for the library moves only the other games' files, and refuses a folder that holds Stardew Valley's.
+- [ ] **10.2g Add a game by its name.** In **Games**, **Add a game…**, type `starf`, and click Starfield.
+  The dialog lists Nexus Mods' games but those listed already, "Type to find any of the *N* games on Nexus Mods." until you type; Starfield is added, chosen, and "Uses the defaults". Typing a key no game has, such as `notagame`, and **Add** adds it by its key.
 - [ ] **10.3 Old versions.** Choose **Move the old versions to an _archive folder beside it**, then **Keep the newest versions** with 3.
   Each is kept at once: the settings file (10.7) holds `"oldVersions": 3`. The rule applies when a newer version of a file is downloaded from then on.
 - [ ] **10.4 Updates.** Choose **Every hour**, and untick **Show a notice when a check finds new updates**.
@@ -397,6 +401,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 9.2 Watch from Browse | | | |
 | 9.2a The games | | | |
 | 9.2b One site | | | |
+| 9.2c The game picker | | | |
 | 9.3 Track | | – | |
 | 9.4 Untrack | | – | |
 | 9.5 Remove from the library | | | |
@@ -411,6 +416,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 10.2d A game's previews | | | |
 | 10.2e A change from the command line | | | |
 | 10.2f A game's own folder | | | |
+| 10.2g Add a game by its name | | | |
 | 10.3 Old versions | | | |
 | 10.4 Updates | | | |
 | 10.5 Theme | | | |
