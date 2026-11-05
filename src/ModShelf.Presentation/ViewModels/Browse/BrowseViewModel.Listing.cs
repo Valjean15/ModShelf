@@ -102,6 +102,7 @@ public sealed partial class BrowseViewModel
                 Results.Clear();
                 IsShowingRows = false;
                 IsShowingTracked = true;
+                OrderText = string.Empty;
                 string site = _services.Sources.SiteName(source);
                 ResultsText = _trackedToShow.Count switch
                 {
@@ -180,6 +181,9 @@ public sealed partial class BrowseViewModel
             Mod = null;
             _query = query;
             _searched = game;
+            OrderText = Sorts.FirstOrDefault(choice => choice.Sort == query.Sort && choice.Direction == query.Direction) is { } order
+                ? Text.Format(Strings.BrowseOrderNote, order.Name)
+                : string.Empty;
         }
 
         HashSet<ModRef> listed = [.. Results.Select(row => row.Mod)];

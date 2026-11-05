@@ -2791,4 +2791,100 @@
     <value>Site</value>
     <comment>Label of the Library's site filter, which shows once two sites are in use.</comment>
   </data>
+  <data name="BrowseFilters" xml:space="preserve">
+    <value>Filters</value>
+    <comment>Browse's button that opens the filter card, with no filter applied; and the card's heading.</comment>
+  </data>
+  <data name="BrowseFiltersCount" xml:space="preserve">
+    <value>Filters · {0}</value>
+    <comment>Browse's filter button with filters applied: {0} is how many, as the chips under the search.</comment>
+  </data>
+  <data name="BrowseFiltersApply" xml:space="preserve">
+    <value>Apply</value>
+    <comment>The filter card's button that searches with what it holds.</comment>
+  </data>
+  <data name="BrowseFiltersReset" xml:space="preserve">
+    <value>Reset</value>
+    <comment>The filter card's button that puts it back to how the game starts, to apply.</comment>
+  </data>
+  <data name="BrowseFiltersClose" xml:space="preserve">
+    <value>Close</value>
+    <comment>The filter card's button that closes it, leaving what was applied.</comment>
+  </data>
+  <data name="BrowseFiltersCloseHint" xml:space="preserve">
+    <value>Close the filters</value>
+    <comment>What the filter card's × says to a screen reader.</comment>
+  </data>
+  <data name="BrowseFiltersClearAll" xml:space="preserve">
+    <value>Clear all</value>
+    <comment>Under Browse's search, after the chips: removes every filter applied.</comment>
+  </data>
+  <data name="BrowseFilterOrder" xml:space="preserve">
+    <value>Order</value>
+    <comment>The filter card's order box.</comment>
+  </data>
+  <data name="BrowseFilterUpdated" xml:space="preserve">
+    <value>Updated within</value>
+    <comment>The filter card's choices of how recently the mods were updated.</comment>
+  </data>
+  <data name="BrowseFilterCategory" xml:space="preserve">
+    <value>Category</value>
+    <comment>The filter card's category box.</comment>
+  </data>
+  <data name="BrowseFilterAuthor" xml:space="preserve">
+    <value>Author</value>
+    <comment>The filter card's author box.</comment>
+  </data>
+  <data name="BrowseFilterAuthorHint" xml:space="preserve">
+    <value>Any author</value>
+    <comment>What the filter card's author box says while empty.</comment>
+  </data>
+  <data name="BrowseFilterPageSize" xml:space="preserve">
+    <value>Per page</value>
+    <comment>The filter card's choices of how many mods a page lists.</comment>
+  </data>
+  <data name="BrowseCategoryChip" xml:space="preserve">
+    <value>Category: {0}</value>
+    <comment>A chip under Browse's search: {0} is the category applied.</comment>
+  </data>
+  <data name="BrowseAuthorChip" xml:space="preserve">
+    <value>Author: {0}</value>
+    <comment>A chip under Browse's search: {0} is the author applied.</comment>
+  </data>
+  <data name="BrowseAdultChip" xml:space="preserve">
+    <value>Adult content included</value>
+    <comment>A chip under Browse's search, while the search includes mods with adult content.</comment>
+  </data>
+  <data name="BrowseChipRemove" xml:space="preserve">
+    <value>Remove {0}</value>
+    <comment>What a chip's × says to a screen reader: {0} is the chip, such as Category: Armour.</comment>
+  </data>
+  <data name="BrowseOrderNote" xml:space="preserve">
+    <value>Order: {0}</value>
+    <comment>Beside a search's count: {0} is the order, such as Most endorsements.</comment>
+  </data>
+  <data name="BrowseView" xml:space="preserve">
+    <value>View</value>
+    <comment>What Browse's view switch says to a screen reader: rows, thumbnails or cards.</comment>
+  </data>
+  <data name="PreviewsRows" xml:space="preserve">
+    <value>Rows</value>
+    <comment>Browse's view switch: rows without pictures.</comment>
+  </data>
+  <data name="BrowseWithinAnyTime" xml:space="preserve">
+    <value>Any time</value>
+    <comment>The filter card, under Updated within: mods updated any time.</comment>
+  </data>
+  <data name="BrowseWithinDay" xml:space="preserve">
+    <value>24 hours</value>
+    <comment>The filter card, under Updated within: mods updated in the last 24 hours.</comment>
+  </data>
+  <data name="BrowseWithinWeek" xml:space="preserve">
+    <value>Week</value>
+    <comment>The filter card, under Updated within: mods updated in the last week.</comment>
+  </data>
+  <data name="BrowseWithinMonth" xml:space="preserve">
+    <value>Month</value>
+    <comment>The filter card, under Updated within: mods updated in the last month.</comment>
+  </data>
 </root>

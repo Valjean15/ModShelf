@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ModShelf.Presentation.ViewModels.Pictures"
+             xmlns:res="using:ModShelf.Presentation.Resources"
+             x:Class="ModShelf.Desktop.Views.Pictures.ViewSwitch"
+             x:DataType="vm:PreviewsViewModel">
+
+    <!-- Browse's view: rows, rows with thumbnails, or cards, as icons named by their tooltips. The tooltip of the whole
+         says when they're the chosen game's own. -->
+    <Border Classes="segments" ToolTip.Tip="{Binding Hint}">
+        <StackPanel Orientation="Horizontal" Spacing="2" AutomationProperties.Name="{x:Static res:Strings.BrowseView}">
+            <RadioButton Classes="segment icon"
+                         IsChecked="{Binding IsOff}"
+                         ToolTip.Tip="{x:Static res:Strings.PreviewsRows}"
+                         AutomationProperties.Name="{x:Static res:Strings.PreviewsRows}">
+                <PathIcon Width="18" Height="18" Data="{StaticResource RowsIcon}" />
+            </RadioButton>
+            <RadioButton Classes="segment icon"
+                         IsChecked="{Binding IsThumbnails}"
+                         ToolTip.Tip="{x:Static res:Strings.PreviewsThumbnails}"
+                         AutomationProperties.Name="{x:Static res:Strings.PreviewsThumbnails}">
+                <PathIcon Width="18" Height="18" Data="{StaticResource ThumbnailsIcon}" />
+            </RadioButton>
+            <RadioButton Classes="segment icon"
+                         IsChecked="{Binding IsCards}"
+                         IsVisible="{Binding OffersCards}"
+                         ToolTip.Tip="{x:Static res:Strings.PreviewsCards}"
+                         AutomationProperties.Name="{x:Static res:Strings.PreviewsCards}">
+                <PathIcon Width="18" Height="18" Data="{StaticResource CardsIcon}" />
+            </RadioButton>
+        </StackPanel>
+    </Border>
+</UserControl>

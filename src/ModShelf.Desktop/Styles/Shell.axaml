@@ -496,6 +496,65 @@
         <Setter Property="BoxShadow" Value="0 1 2 0 #40000000" />
     </Style>
 
+    <!-- A segment showing an icon, such as Browse's views: narrower. -->
+    <Style Selector="RadioButton.segment.icon /template/ Border#PART_Segment">
+        <Setter Property="Padding" Value="9,0" />
+    </Style>
+
+    <!-- Browse's filter button: in the accent's soft colour while filters are applied. -->
+    <Style Selector="Button.filters.applied /template/ ContentPresenter#PART_ContentPresenter, Button.filters.applied:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfAccentSoftBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfAccentBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfAccentTextBrush}" />
+    </Style>
+
+    <!-- A filter applied, under Browse's search: a soft pill whose × removes it. -->
+    <Style Selector="Border.filterChip">
+        <Setter Property="MinHeight" Value="30" />
+        <Setter Property="Padding" Value="12,0,3,0" />
+        <Setter Property="CornerRadius" Value="15" />
+        <Setter Property="Background" Value="{DynamicResource ShelfAccentSoftBrush}" />
+    </Style>
+
+    <Style Selector="Border.filterChip TextBlock">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfAccentTextBrush}" />
+    </Style>
+
+    <Style Selector="Border.filterChip Button">
+        <Setter Property="Width" Value="26" />
+        <Setter Property="Height" Value="26" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="CornerRadius" Value="13" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfAccentTextBrush}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Border.filterChip Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfAccentTextBrush}" />
+    </Style>
+
+    <!-- A card over the content, such as Browse's filters: raised with a shadow. -->
+    <Style Selector="Border.overCard">
+        <Setter Property="Background" Value="{DynamicResource ShelfSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="BoxShadow" Value="0 24 60 0 #59000000" />
+    </Style>
+
+    <Style Selector="Border.overCard TextBlock.label">
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Margin" Value="0,0,0,6" />
+    </Style>
+
     <!-- A mod's picture: on the raised colour until it's there, with a faint sign for none. -->
     <Style Selector="Border.picture">
         <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />

@@ -11,8 +11,8 @@
     <DockPanel>
         <TextBlock DockPanel.Dock="Top" Classes="heading" Text="{Binding Title}" />
 
-        <!-- The game, and what to look for in it: words, or a link to a mod. -->
-        <Grid DockPanel.Dock="Top" ColumnDefinitions="260,*,Auto" ColumnSpacing="8">
+        <!-- The game, and the mods the account follows on its site. -->
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="300,*,Auto" ColumnSpacing="8">
             <!-- The view model finds the games whose names match what's typed, those starting with it first. -->
             <AutoCompleteBox ItemsSource="{Binding GameMatches}"
                              SelectedItem="{Binding Game}"
@@ -20,45 +20,59 @@
                              FilterMode="None"
                              PlaceholderText="{x:Static res:Strings.BrowseGameHint}"
                              IsEnabled="{Binding !IsReadingGames}" />
-            <TextBox Grid.Column="1"
-                     Text="{Binding SearchText}"
-                     PlaceholderText="{x:Static res:Strings.BrowseSearchHint}">
+            <Button Grid.Column="2" Content="{Binding ShowFollowedText}" Command="{Binding ShowTrackedCommand}" IsVisible="{Binding CanFollow}" />
+        </Grid>
+
+        <!-- What to look for: words, or a link to a mod; the filter card, which counts the filters applied; the view. -->
+        <Grid DockPanel.Dock="Top" Margin="0,10,0,0" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8">
+            <TextBox Text="{Binding SearchText}" PlaceholderText="{x:Static res:Strings.BrowseSearchHint}">
                 <TextBox.KeyBindings>
                     <KeyBinding Gesture="Enter" Command="{Binding SearchCommand}" />
                 </TextBox.KeyBindings>
             </TextBox>
-            <Button Grid.Column="2"
+            <Button Grid.Column="1"
                     Classes="accent"
                     Content="{x:Static res:Strings.BrowseSearch}"
                     Command="{Binding SearchCommand}" />
+            <Button Grid.Column="2"
+                    Classes="filters"
+                    Classes.applied="{Binding HasChips}"
+                    Command="{Binding ToggleFiltersCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <PathIcon Width="16" Height="16" Data="{StaticResource FilterIcon}" />
+                    <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Text="{Binding FiltersText}" />
+                </StackPanel>
+            </Button>
+            <pictures:ViewSwitch Grid.Column="3" VerticalAlignment="Center" DataContext="{Binding Previews}" />
         </Grid>
 
-        <!-- How to search, as far as the game's site can, and the mods the account follows there instead. -->
-        <WrapPanel DockPanel.Dock="Top" Margin="0,8,0,0" ItemSpacing="8" LineSpacing="8">
-            <ComboBox MinWidth="200" ItemsSource="{Binding Sorts}" SelectedItem="{Binding SelectedSort}" />
-            <ComboBox MinWidth="230"
-                      ItemsSource="{Binding TimeWindows}"
-                      SelectedItem="{Binding SelectedTimeWindow}"
-                      IsVisible="{Binding CanSearchByUpdated}" />
-            <ComboBox MinWidth="180"
-                      MaxWidth="260"
-                      ItemsSource="{Binding Categories}"
-                      SelectedItem="{Binding SelectedCategory}"
-                      IsVisible="{Binding CanSearchByCategory}" />
-            <ComboBox ItemsSource="{Binding PageSizes}" SelectedItem="{Binding SelectedPageSize}" />
-            <TextBox Width="200"
-                     Text="{Binding Author}"
-                     PlaceholderText="{x:Static res:Strings.BrowseAuthorHint}"
-                     IsVisible="{Binding CanSearchByAuthor}">
-                <TextBox.KeyBindings>
-                    <KeyBinding Gesture="Enter" Command="{Binding SearchCommand}" />
-                </TextBox.KeyBindings>
-            </TextBox>
-            <CheckBox Content="{x:Static res:Strings.BrowseAdultContent}"
-                      IsChecked="{Binding IncludeAdultContent}"
-                      IsVisible="{Binding CanIncludeAdult}" />
-            <Button Content="{Binding ShowFollowedText}" Command="{Binding ShowTrackedCommand}" IsVisible="{Binding CanFollow}" />
-            <pictures:PreviewsPicker DataContext="{Binding Previews}" />
+        <!-- A chip per filter applied: its × removes it at once, and Clear all removes them all. -->
+        <WrapPanel DockPanel.Dock="Top" Margin="0,10,0,0" ItemSpacing="8" LineSpacing="8" IsVisible="{Binding HasChips}">
+            <ItemsControl ItemsSource="{Binding Chips}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel ItemSpacing="8" LineSpacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:BrowseFilterChipViewModel">
+                        <Border Classes="filterChip">
+                            <StackPanel Orientation="Horizontal" Spacing="2">
+                                <TextBlock Text="{Binding Label}" />
+                                <Button Command="{Binding RemoveCommand}"
+                                        ToolTip.Tip="{Binding RemoveLabel}"
+                                        AutomationProperties.Name="{Binding RemoveLabel}">
+                                    <PathIcon Width="12" Height="12" Data="{StaticResource CloseIcon}" />
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Button Classes="quiet"
+                    VerticalAlignment="Center"
+                    Content="{x:Static res:Strings.BrowseFiltersClearAll}"
+                    Command="{Binding ClearFiltersCommand}" />
         </WrapPanel>
 
         <Panel DockPanel.Dock="Top" Margin="0,12,0,0">
@@ -181,6 +195,10 @@
                               Content="{x:Static res:Strings.SelectAllShown}"
                               IsVisible="{Binding !!Results.Count}" />
                     <TextBlock Classes="note" VerticalAlignment="Center" Text="{Binding ResultsText}" />
+                    <TextBlock Classes="note"
+                               VerticalAlignment="Center"
+                               Text="{Binding OrderText}"
+                               IsVisible="{Binding OrderText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                     <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding HasSelection}">
                         <TextBlock Classes="note" VerticalAlignment="Center" Text="{Binding SelectionText}" />
                         <Button Classes="accent" Content="{Binding DownloadSelectedText}" Command="{Binding DownloadSelectedCommand}" />
@@ -341,6 +359,101 @@
                     <modPages:ModPageView Margin="0,0,16,16" DataContext="{Binding Mod}" />
                 </ScrollViewer>
             </DockPanel>
+
+            <!-- The filter card, over the results on the right: only what the game's site can search by. Its choices
+                 apply with Apply; Close and Escape leave what was applied. -->
+            <Border x:Name="FilterCard"
+                    Classes="overCard"
+                    Width="380"
+                    MaxWidth="{Binding $parent[Panel].Bounds.Width}"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    IsVisible="{Binding Filters.IsOpen}">
+                <Border.KeyBindings>
+                    <KeyBinding Gesture="Escape" Command="{Binding Filters.CloseCommand}" />
+                </Border.KeyBindings>
+                <Panel DataContext="{Binding Filters}">
+                    <DockPanel x:DataType="vm:BrowseFiltersViewModel">
+                        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="20,14,12,8">
+                            <TextBlock Classes="subheading" Margin="0" VerticalAlignment="Center" Text="{x:Static res:Strings.BrowseFilters}" />
+                            <Button Grid.Column="1"
+                                    Classes="quiet"
+                                    Command="{Binding CloseCommand}"
+                                    ToolTip.Tip="{x:Static res:Strings.BrowseFiltersCloseHint}"
+                                    AutomationProperties.Name="{x:Static res:Strings.BrowseFiltersCloseHint}">
+                                <PathIcon Width="14" Height="14" Data="{StaticResource CloseIcon}" />
+                            </Button>
+                        </Grid>
+                        <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource ShelfLineBrush}" BorderThickness="0,1,0,0" Padding="20,14,20,16">
+                            <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8">
+                                <Button Classes="quiet" Content="{x:Static res:Strings.BrowseFiltersReset}" Command="{Binding ResetCommand}" />
+                                <Button Grid.Column="2" Content="{x:Static res:Strings.BrowseFiltersClose}" Command="{Binding CloseCommand}" />
+                                <Button Grid.Column="3" Classes="accent" Content="{x:Static res:Strings.BrowseFiltersApply}" Command="{Binding ApplyCommand}" />
+                            </Grid>
+                        </Border>
+                        <ScrollViewer MaxHeight="560">
+                            <StackPanel Margin="20,4,20,18" Spacing="16">
+                                <StackPanel>
+                                    <TextBlock Classes="label" Text="{x:Static res:Strings.BrowseFilterOrder}" />
+                                    <ComboBox x:Name="FirstFilter"
+                                              HorizontalAlignment="Stretch"
+                                              ItemsSource="{Binding Sorts}"
+                                              SelectedItem="{Binding SelectedSort}"
+                                              AutomationProperties.Name="{x:Static res:Strings.BrowseFilterOrder}" />
+                                </StackPanel>
+                                <StackPanel IsVisible="{Binding CanSearchByUpdated}">
+                                    <TextBlock Classes="label" Text="{x:Static res:Strings.BrowseFilterUpdated}" />
+                                    <ListBox Classes="tabs"
+                                             AutoScrollToSelectedItem="False"
+                                             ItemsSource="{Binding TimeWindows}"
+                                             SelectedItem="{Binding SelectedTimeWindow}"
+                                             AutomationProperties.Name="{x:Static res:Strings.BrowseFilterUpdated}">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:TimeWindowChoice">
+                                                <TextBlock Text="{Binding ShortName}" />
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </StackPanel>
+                                <StackPanel IsVisible="{Binding CanSearchByCategory}">
+                                    <TextBlock Classes="label" Text="{x:Static res:Strings.BrowseFilterCategory}" />
+                                    <ComboBox HorizontalAlignment="Stretch"
+                                              ItemsSource="{Binding Categories}"
+                                              SelectedItem="{Binding SelectedCategory}"
+                                              AutomationProperties.Name="{x:Static res:Strings.BrowseFilterCategory}" />
+                                </StackPanel>
+                                <StackPanel IsVisible="{Binding CanSearchByAuthor}">
+                                    <TextBlock Classes="label" Text="{x:Static res:Strings.BrowseFilterAuthor}" />
+                                    <TextBox Text="{Binding Author}"
+                                             PlaceholderText="{x:Static res:Strings.BrowseFilterAuthorHint}"
+                                             AutomationProperties.Name="{x:Static res:Strings.BrowseFilterAuthor}">
+                                        <TextBox.KeyBindings>
+                                            <KeyBinding Gesture="Enter" Command="{Binding ApplyCommand}" />
+                                        </TextBox.KeyBindings>
+                                    </TextBox>
+                                </StackPanel>
+                                <CheckBox Content="{x:Static res:Strings.BrowseAdultContent}"
+                                          IsChecked="{Binding IncludeAdultContent}"
+                                          IsVisible="{Binding CanIncludeAdult}" />
+                                <StackPanel>
+                                    <TextBlock Classes="label" Text="{x:Static res:Strings.BrowseFilterPageSize}" />
+                                    <ListBox Classes="tabs"
+                                             AutoScrollToSelectedItem="False"
+                                             ItemsSource="{Binding PageSizes}"
+                                             SelectedItem="{Binding SelectedPageSize}"
+                                             AutomationProperties.Name="{x:Static res:Strings.BrowseFilterPageSize}">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:PageSizeChoice">
+                                                <TextBlock Text="{Binding Count}" />
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </DockPanel>
+                </Panel>
+            </Border>
         </Panel>
     </DockPanel>
 </UserControl>

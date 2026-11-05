@@ -31,18 +31,29 @@ public sealed partial class BrowseViewModel
     internal Task DefaultsWork { get; private set; } = Task.CompletedTask;
 
     /// <summary>
-    /// Shows the chosen game's previews, offers what its site can search by, shows its rows, reads its categories, and
-    /// starts the toolbar as the game's own settings say.
+    /// Keeps the filters of the game chosen before, closing the filter card; then shows the chosen game's previews,
+    /// offers what its site can search by, shows its rows and reads its categories. A game chosen before while the app
+    /// runs gets its filters back; another starts the filters as its own settings say.
     /// </summary>
-    partial void OnGameChanged(GameChoice? value)
+    partial void OnGameChanged(GameChoice? oldValue, GameChoice? newValue)
     {
-        Previews.ShowFor(value?.Game);
-        if (value is not null)
+        if (oldValue is not null)
         {
-            Offer(value.Game);
-            ShowRows(value.Game, closeMod: true);
-            CategoriesWork = ReadCategoriesAsync(value.Game);
-            DefaultsWork = StartAsTheGameSaysAsync(value.Game);
+            KeepFilters(oldValue.Game);
+        }
+
+        Filters.Hide();
+        Previews.ShowFor(newValue?.Game);
+        if (newValue is not null)
+        {
+            Offer(newValue.Game);
+            BrowseFilterSet? kept = RestoreFilters(newValue.Game);
+            ShowRows(newValue.Game, closeMod: true);
+            CategoriesWork = ReadCategoriesAsync(newValue.Game, kept?.Category.Category);
+            if (kept is null)
+            {
+                DefaultsWork = StartAsTheGameSaysAsync(newValue.Game);
+            }
         }
     }
 
@@ -180,7 +191,7 @@ public sealed partial class BrowseViewModel
         try
         {
             // An order or page size the game's site lacks, as one set by hand, starts on its own.
-            SelectedSort = defaults.Sort is { } sort ? _offer.SortOf(sort, defaults.Direction) ?? _offer.Default : _offer.Default;
+            SelectedSort = StartingSort(defaults);
             SelectedTimeWindow = _offer.SameTimeWindow(defaults.UpdatedWithin);
             SelectedPageSize = _offer.SamePageSize(defaults.PageSize);
         }
@@ -220,6 +231,8 @@ public sealed partial class BrowseViewModel
         {
             _choosingQuietly = false;
         }
+
+        ShowChips();
 
         string? followed = _services.Tracked.CanTrack(game.Source) ? words.Followed : null;
         CanFollow = followed is not null;

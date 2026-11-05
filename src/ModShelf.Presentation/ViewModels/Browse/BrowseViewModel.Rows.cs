@@ -92,6 +92,7 @@ public sealed partial class BrowseViewModel
         IsShowingTracked = false;
         HasMore = false;
         ResultsText = string.Empty;
+        OrderText = string.Empty;
         IsShowingRows = true;
         if (_rowsListed != (game, IncludeAdultContent))
         {
@@ -216,16 +217,19 @@ public sealed partial class BrowseViewModel
     }
 
     /// <summary>
-    /// Chooses every category, then reads the game's categories from its site for the category box, by name. When the
-    /// site can't say, or can't search by them, the box offers every category only.
+    /// Chooses every category, or the one the game had, then reads the game's categories from its site for the category
+    /// box, by name. When the site can't say, the box offers every category, and the one the game had; when it no longer
+    /// has that one, every category is chosen.
     /// </summary>
-    private async Task ReadCategoriesAsync(GameRef game)
+    /// <param name="had">The category the game had when another was chosen; null for every category.</param>
+    private async Task ReadCategoriesAsync(GameRef game, string? had)
     {
+        CategoryChoice? kept = had is null ? null : new CategoryChoice(had, had);
         _choosingQuietly = true;
         try
         {
-            SelectedCategory = _allCategories;
-            Categories.SyncWith([_allCategories]);
+            Categories.SyncWith(kept is null ? [_allCategories] : [_allCategories, kept]);
+            SelectedCategory = kept ?? _allCategories;
         }
         finally
         {
@@ -243,7 +247,23 @@ public sealed partial class BrowseViewModel
             if (Game?.Game == game)
             {
                 StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
-                Categories.SyncWith([_allCategories, .. info.Categories.Order(byName).Select(category => new CategoryChoice(category, category))]);
+                Categories.SyncWith(
+                [
+                    _allCategories,
+                    .. info.Categories.Order(byName).Select(category => kept is not null && category == kept.Category ? kept : new CategoryChoice(category, category)),
+                ]);
+                if (kept is not null && !Categories.Contains(kept))
+                {
+                    _choosingQuietly = true;
+                    try
+                    {
+                        SelectedCategory = _allCategories;
+                    }
+                    finally
+                    {
+                        _choosingQuietly = false;
+                    }
+                }
             }
         }
         catch (OperationCanceledException) when (_stopping.IsCancellationRequested)

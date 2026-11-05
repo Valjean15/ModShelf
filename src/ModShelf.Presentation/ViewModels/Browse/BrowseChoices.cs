@@ -37,10 +37,10 @@ internal static class BrowseChoices
     /// </summary>
     private static readonly TimeWindowChoice[] TimeWindows =
     [
-        new(null, Strings.BrowseUpdatedAnyTime),
-        new(TimeSpan.FromDays(1), Strings.BrowseUpdatedDay),
-        new(TimeSpan.FromDays(7), Strings.BrowseUpdatedWeek),
-        new(TimeSpan.FromDays(30), Strings.BrowseUpdatedMonth),
+        new(null, Strings.BrowseUpdatedAnyTime) { ShortName = Strings.BrowseWithinAnyTime },
+        new(TimeSpan.FromDays(1), Strings.BrowseUpdatedDay) { ShortName = Strings.BrowseWithinDay },
+        new(TimeSpan.FromDays(7), Strings.BrowseUpdatedWeek) { ShortName = Strings.BrowseWithinWeek },
+        new(TimeSpan.FromDays(30), Strings.BrowseUpdatedMonth) { ShortName = Strings.BrowseWithinMonth },
     ];
 
     /// <summary>

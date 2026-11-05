@@ -128,9 +128,15 @@ public sealed class BrowseExampleSiteTests : IDisposable
 
         Screen.SelectedSort = Screen.Sorts.Single(sort => sort.Name == "Oldest");
         Screen.SelectedPageSize = Screen.PageSizes.Single(size => size.Count == 50);
-        await _harness.ChooseAsync(BrowseHarness.Skyrim);
+        await _harness.ChooseAsync(BrowseHarness.Stardew);
 
         Assert.Equal(("Oldest", 50), (Screen.SelectedSort.Name, Screen.SelectedPageSize.Count));
+        Assert.Contains(Screen.SelectedSort, Screen.Sorts);
+
+        // A game chosen before gets back its own, while the app runs.
+        await _harness.ChooseAsync(BrowseHarness.Skyrim);
+
+        Assert.Equal(("Largest", 100), (Screen.SelectedSort.Name, Screen.SelectedPageSize.Count));
         Assert.Contains(Screen.SelectedSort, Screen.Sorts);
     }
 

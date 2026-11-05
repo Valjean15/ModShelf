@@ -115,6 +115,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         _pictures = pictures;
         _uiThread = uiThread;
         _logger = logger;
+        Filters = new BrowseFiltersViewModel(this);
         _services = new ModPageServices(
             library,
             libraryDownloads,
@@ -199,7 +200,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     public partial string SearchText { get; set; } = string.Empty;
 
     /// <summary>
-    /// Only mods by this author; empty for any.
+    /// Only mods by this author; empty for any. Changing it searches nothing: the filter card's Apply does.
     /// </summary>
     [ObservableProperty]
     public partial string Author { get; set; } = string.Empty;
@@ -412,9 +413,17 @@ public sealed partial class BrowseViewModel : ScreenViewModel
 
     partial void OnSelectedSortChanged(SortChoice value) => SearchAgain();
 
-    partial void OnSelectedTimeWindowChanged(TimeWindowChoice value) => SearchAgain();
+    partial void OnSelectedTimeWindowChanged(TimeWindowChoice value)
+    {
+        ShowChips();
+        SearchAgain();
+    }
 
-    partial void OnSelectedCategoryChanged(CategoryChoice? value) => SearchAgain();
+    partial void OnSelectedCategoryChanged(CategoryChoice? value)
+    {
+        ShowChips();
+        SearchAgain();
+    }
 
     partial void OnSelectedPageSizeChanged(PageSizeChoice value) => SearchAgain();
 
@@ -423,6 +432,12 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     /// </summary>
     partial void OnIncludeAdultContentChanged(bool value)
     {
+        ShowChips();
+        if (_choosingQuietly)
+        {
+            return;
+        }
+
         if (IsShowingRows && Game is { } game)
         {
             RowsWork = ListRowsAsync(game.Game);
