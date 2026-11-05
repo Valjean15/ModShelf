@@ -126,14 +126,15 @@ internal static partial class ModShelfMcpServer
         object[] targets =
         [
             ActivatorUtilities.CreateInstance<LibraryTools>(services),
-            ActivatorUtilities.CreateInstance<DownloadTools>(services, queue),
+            ActivatorUtilities.CreateInstance<DownloadTools>(services, queue, ActivatorUtilities.CreateInstance<McpDeprecations>(services)),
             ActivatorUtilities.CreateInstance<ModTools>(services),
             ActivatorUtilities.CreateInstance<SettingsTools>(services),
             ActivatorUtilities.CreateInstance<StatusTools>(services),
         ];
 
         // The output schemas list every property as required, null allowed where it's optional; the SDK's own options
-        // leave nulls out of the results, which clients that check results against the schemas refuse.
+        // leave nulls out of the results, which clients that check results against the schemas refuse. A deprecated
+        // argument's input schema says so.
         McpServerToolCreateOptions options = new() { SerializerOptions = Json };
         McpServerPrimitiveCollection<McpServerTool> tools = [];
         foreach (object target in targets)
@@ -142,7 +143,9 @@ internal static partial class ModShelfMcpServer
             {
                 if (method.GetCustomAttribute<McpServerToolAttribute>() is not null)
                 {
-                    tools.Add(McpServerTool.Create(method, target, options));
+                    McpServerTool tool = McpServerTool.Create(method, target, options);
+                    McpDeprecations.MarkDeprecated(tool.ProtocolTool, method);
+                    tools.Add(tool);
                 }
             }
         }

@@ -57,7 +57,7 @@ public sealed class LibraryCommandTests : IAsyncDisposable
         CliResult listed = await ListAsync();
 
         Assert.Equal(Done, watched.ExitCode);
-        Assert.Equal("Watching Example Mod (mod 1 of game on fake-catalog).", watched.Output.Trim());
+        Assert.Equal("Watching Example Mod (mod 1 of game on Fake catalog site).", watched.Output.Trim());
         Assert.Contains("The library has 1 mod.", listed.Output, StringComparison.Ordinal);
         Assert.Equal([["game", "1", "Example", "Mod", "yes", "0", ModLink("1").AbsoluteUri]], Rows(listed));
     }
@@ -133,7 +133,7 @@ public sealed class LibraryCommandTests : IAsyncDisposable
         CliResult unwatched = await RunAsync("unwatch", ModLink("1").AbsoluteUri);
 
         Assert.Equal(Done, unwatched.ExitCode);
-        Assert.Equal("Mod 1 of game on fake-catalog isn't in the library.", unwatched.Output.Trim());
+        Assert.Equal("Mod 1 of game on Fake catalog site isn't in the library.", unwatched.Output.Trim());
     }
 
     [Theory]
@@ -217,7 +217,7 @@ public sealed class LibraryCommandTests : IAsyncDisposable
 
         Assert.Equal(Failed, rescan.ExitCode);
         Assert.Equal("Rescanned 1 mod.\nRead the SHA-256 of 1 file.", rescan.Output.TrimEnd().ReplaceLineEndings("\n"));
-        Assert.Equal("Couldn't match the files of mod 7 of broken on fake-catalog: Service unavailable.", rescan.Errors.Trim());
+        Assert.Equal("Couldn't match the files of mod 7 of broken on Fake catalog site: Service unavailable.", rescan.Errors.Trim());
     }
 
     [Fact]
@@ -226,7 +226,7 @@ public sealed class LibraryCommandTests : IAsyncDisposable
         CliResult forgot = await RunAsync("forget", ModLink("1").AbsoluteUri);
 
         Assert.Equal(Done, forgot.ExitCode);
-        Assert.Equal("Mod 1 of game on fake-catalog isn't in the library.", forgot.Output.Trim());
+        Assert.Equal("Mod 1 of game on Fake catalog site isn't in the library.", forgot.Output.Trim());
     }
 
     [Fact]

@@ -19,7 +19,7 @@ namespace ModShelf.Application.Diagnostics;
 
 /// <summary>
 /// Writes the diagnostics report from what the app knows: its version and system, its folders, the settings, the
-/// library, the queue and the linked accounts.
+/// library, the queue, the linked accounts, and the deprecated arguments callers still use.
 /// </summary>
 internal sealed partial class DiagnosticsReport(
     AppInfo app,
@@ -29,6 +29,7 @@ internal sealed partial class DiagnosticsReport(
     IDownloadService downloads,
     IAccountService accounts,
     ISecretStore secrets,
+    IDeprecatedCalls deprecatedCalls,
     TimeProvider timeProvider,
     ILogger<DiagnosticsReport> logger) : IDiagnostics
 {
@@ -43,11 +44,12 @@ internal sealed partial class DiagnosticsReport(
         Line(Text($"Written: {timeProvider.GetUtcNow():yyyy-MM-dd HH:mm} UTC"));
         Line($"System: {RuntimeInformation.OSDescription}, {RuntimeInformation.OSArchitecture}, {RuntimeInformation.FrameworkDescription}");
         Line(await PartAsync("Folders", async () =>
-            $"data {Tilde(folders.DataFolder)}, logs {Tilde(folders.LogFolder)}, library {Tilde(await settings.GetLibraryRootAsync(cancellationToken).ConfigureAwait(false))}").ConfigureAwait(false));
+            Describe(folders, await settings.GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false))).ConfigureAwait(false));
         Line(await PartAsync("Settings", async () => Describe(await settings.GetAsync(cancellationToken).ConfigureAwait(false))).ConfigureAwait(false));
         Line(await PartAsync("Library", async () => Describe(await library.ListAsync(cancellationToken).ConfigureAwait(false))).ConfigureAwait(false));
         Line(await PartAsync("Downloads", async () => Describe(await downloads.ListAsync(cancellationToken).ConfigureAwait(false))).ConfigureAwait(false));
         Line(await PartAsync("Accounts", async () => Describe(await accounts.ListAsync(cancellationToken).ConfigureAwait(false))).ConfigureAwait(false));
+        Line(await PartAsync("Legacy arguments", async () => Describe(await deprecatedCalls.ListAsync(cancellationToken).ConfigureAwait(false))).ConfigureAwait(false));
         return report.ToString();
 
         // A part that can't be read names the error's type only: its message could hold a path or a name.
@@ -64,6 +66,13 @@ internal sealed partial class DiagnosticsReport(
             }
         }
     }
+
+    /// <summary>
+    /// The games' own folders are counted, not shown: there may be many.
+    /// </summary>
+    private static string Describe(IAppFolders folders, LibraryRoots roots)
+        => $"data {Tilde(folders.DataFolder)}, logs {Tilde(folders.LogFolder)}, library {Tilde(roots.Root)}"
+            + (roots.Games.Count == 0 ? string.Empty : $", {Count(roots.Games.Count, "game")} in folders of their own");
 
     private static string Describe(AppSettings stored)
     {
@@ -128,6 +137,20 @@ internal sealed partial class DiagnosticsReport(
         string kept = secrets.IsProtectedByOs ? "secrets kept by the system" : "secrets in files encrypted for this computer, no keyring";
         return $"{string.Join("; ", each)}; {kept}";
     }
+
+    /// <summary>
+    /// Such as <c>download.link ×3 (last 2026-11-03 22:31 UTC, claude-ai)</c>, by name; <c>none</c> when no call is
+    /// counted. What the count's file says is kept to a line.
+    /// </summary>
+    private static string Describe(IReadOnlyList<DeprecatedCall> calls)
+        => calls.Count == 0
+            ? "none"
+            : string.Join(
+                "; ",
+                calls
+                    .OrderBy(call => call.Name, StringComparer.Ordinal)
+                    .Select(call => Text(
+                        $"{DeprecatedCalls.OneLine(call.Name, DeprecatedCalls.LongestClient)} ×{call.Count} (last {call.Last.ToUniversalTime():yyyy-MM-dd HH:mm} UTC{(DeprecatedCalls.OneLine(call.Client, DeprecatedCalls.LongestClient) is { } client ? $", {client}" : string.Empty)})")));
 
     /// <summary>
     /// <paramref name="path"/> with the user's home folder as <c>~</c>, which leaves the user's name out.

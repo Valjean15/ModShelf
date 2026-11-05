@@ -215,6 +215,88 @@ public sealed class ModCommandSearchTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task ACategoryAndHowLongSinceUpdatedNarrowTheSearch()
+    {
+        DateTimeOffset before = DateTimeOffset.UtcNow;
+        CliResult found = await SearchAsync("--category", " armour ", "--updated-within", "7");
+        DateTimeOffset after = DateTimeOffset.UtcNow;
+
+        Assert.Equal(Done, found.ExitCode);
+        SearchQuery asked = _catalog.LastQuery!;
+        Assert.Equal("Armour", asked.Category);
+        DateTimeOffset since = Assert.NotNull(asked.UpdatedSince);
+        Assert.Equal((TimeSpan.Zero, 0, 0, 0), (since.Offset, since.Minute, since.Second, since.Millisecond));
+        Assert.InRange(since, before.AddDays(-7).AddHours(-1), after.AddDays(-7));
+        Assert.Equal(1, _catalog.GameReads);
+    }
+
+    [Fact]
+    public async Task WithoutACategoryTheGameIsntRead()
+    {
+        await SearchAsync("--updated-within", "1");
+
+        Assert.Null(_catalog.LastQuery!.Category);
+        Assert.Equal(0, _catalog.GameReads);
+    }
+
+    [Theory]
+    [InlineData("Weapons", "Example Game has no category 'Weapons' on Fake catalog site. Its categories: Armour, Audio, Gameplay.")]
+    [InlineData(" weap ", "Example Game has no category 'weap' on Fake catalog site. Its categories: Armour, Audio, Gameplay.")]
+    public async Task RefusesACategoryTheGameDoesntHaveNamingThoseItHas(string category, string problem)
+    {
+        CliResult refused = await SearchAsync("--category", category);
+
+        Assert.Equal((BadInput, problem), (refused.ExitCode, refused.Errors.Trim()));
+        Assert.Null(_catalog.LastQuery);
+    }
+
+    [Fact]
+    public async Task SaysWhenTheGameHasNoCategories()
+    {
+        _catalog.Categories = [];
+
+        CliResult refused = await SearchAsync("--category", "Armour");
+
+        Assert.Equal((BadInput, "Example Game has no categories on Fake catalog site."), (refused.ExitCode, refused.Errors.Trim()));
+    }
+
+    [Theory]
+    [InlineData("Fake catalog site can't search by category. It can search by words.", "--category", "Armour")]
+    [InlineData("Fake catalog site can't search by when mods were updated. It can search by words.", "--updated-within", "7")]
+    public async Task ASiteThatCantFilterSoRefusesIt(string problem, params string[] arguments)
+    {
+        _catalog.Capabilities = new([new(SearchSort.Relevance, SearchDirection.Descending)], SearchFilters.Text, 50);
+
+        CliResult refused = await SearchAsync(arguments);
+
+        Assert.Equal((BadInput, problem), (refused.ExitCode, refused.Errors.Trim()));
+        Assert.Equal(0, _catalog.GameReads);
+        Assert.Null(_catalog.LastQuery);
+    }
+
+    [Theory]
+    [InlineData("0")]
+    [InlineData("36501")]
+    public async Task RefusesDaysThatCantBe(string days)
+    {
+        CliResult refused = await SearchAsync("--updated-within", days);
+
+        Assert.Equal((BadInput, "--updated-within must be from 1 to 36500 days."), (refused.ExitCode, refused.Errors.Trim()));
+        Assert.Null(_catalog.LastQuery);
+    }
+
+    [Fact]
+    public async Task SaysWhenTheGamesCategoriesCantBeRead()
+    {
+        _catalog.GameFailure = new HttpRequestException("Service unavailable.");
+
+        CliResult refused = await SearchAsync("--category", "Armour");
+
+        Assert.Equal((Failed, "The site couldn't search: Service unavailable."), (refused.ExitCode, refused.Errors.Trim()));
+        Assert.Null(_catalog.LastQuery);
+    }
+
+    [Fact]
     public async Task NamesApprovalInTheSitesWords()
     {
         _catalog.Words = new() { Approval = "like", Approvals = "likes" };

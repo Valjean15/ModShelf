@@ -17,6 +17,7 @@ using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Pictures;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Application.State.Ports;
+using ModShelf.Infrastructure.Diagnostics;
 using ModShelf.Infrastructure.Downloads;
 using ModShelf.Infrastructure.Library;
 using ModShelf.Infrastructure.Logging;
@@ -132,7 +133,8 @@ public static class InfrastructureServiceCollectionExtensions
     /// Registers ModShelf's files: the library database at <paramref name="databasePath"/>, or by default
     /// <c>library.db</c> in a ModShelf folder under the user's local application data (<c>%LOCALAPPDATA%\ModShelf</c>
     /// on Windows, <c>~/Library/Application Support/ModShelf</c> on macOS, <c>~/.local/share/ModShelf</c> on Linux);
-    /// and beside it the settings, <c>settings.json</c>, and the log files, in a <c>logs</c> folder. A database moved
+    /// and beside it the settings, <c>settings.json</c>, the count of deprecated calls, <c>deprecated-calls.json</c>, and
+    /// the log files, in a <c>logs</c> folder. A database moved
     /// elsewhere, such as for tests, takes them along. Where they are is registered as <see cref="IAppFolders"/>.
     /// </summary>
     /// <param name="databasePath">The database's absolute path, or null for its default one.</param>
@@ -148,6 +150,7 @@ public static class InfrastructureServiceCollectionExtensions
         string logs = Path.Combine(folder, "logs");
         services.AddLibraryDatabase(database);
         services.AddSettingsFile(Path.Combine(folder, "settings.json"));
+        services.AddDeprecatedCallsFile(Path.Combine(folder, "deprecated-calls.json"));
         services.AddLogFiles(logs, app);
         services.AddSingleton<IAppFolders>(new AppFolders(folder, logs));
         return folder;
@@ -185,6 +188,24 @@ public static class InfrastructureServiceCollectionExtensions
         }
 
         services.AddSingleton<IUiStateStore>(provider => new JsonUiStateStore(path, provider.GetRequiredService<ILogger<JsonUiStateStore>>()));
+
+        return services;
+    }
+
+    /// <summary>
+    /// Keeps the count of deprecated calls in the JSON file at <paramref name="path"/>, an absolute path, as the
+    /// <see cref="IDeprecatedCallStore"/>. The file and its folder are created when a call is first counted.
+    /// </summary>
+    public static IServiceCollection AddDeprecatedCallsFile(this IServiceCollection services, string path)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        if (!Path.IsPathFullyQualified(path))
+        {
+            throw new ArgumentException($"'{path}' is not an absolute path.", nameof(path));
+        }
+
+        services.AddSingleton<IDeprecatedCallStore>(provider => new JsonDeprecatedCallStore(path, provider.GetRequiredService<ILogger<JsonDeprecatedCallStore>>()));
 
         return services;
     }

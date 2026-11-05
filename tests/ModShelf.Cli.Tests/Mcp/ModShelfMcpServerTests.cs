@@ -1,9 +1,12 @@
+using System.Reflection;
 using System.Security.Cryptography;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 using ModelContextProtocol.Client;
+using ModelContextProtocol.Protocol;
+using ModelContextProtocol.Server;
 
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Downloads.Ports;
@@ -15,6 +18,7 @@ using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Search;
 
 using static ModShelf.Cli.Tests.Fakes.FakeHandoffSource;
@@ -363,19 +367,41 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         DownloadsResult downloaded = await mcp.CallAsync<DownloadsResult>("download", Arguments(("link", link)), Cancellation);
 
         Assert.True(Assert.Single(downloaded.Results).AlreadySaved);
-        DeprecatedArgument deprecated = Assert.IsType<DeprecatedArgument>(downloaded.Deprecated);
-        Assert.Equal(("DL_LINK_ARG", "link", "links"), (deprecated.Code, deprecated.Argument, deprecated.Use));
+        DeprecatedArgument<DownloadLinks> deprecated = Assert.IsType<DeprecatedArgument<DownloadLinks>>(downloaded.Deprecated);
+        Assert.Equal(("DL_LINK_ARG", "link", "links", "2.0"), (deprecated.Code, deprecated.Argument, deprecated.Use, deprecated.RemovedIn));
         Assert.Equal([link], deprecated.Example.Links);
         Assert.Equal(
-            "Note: 'link' is the old way to call download and will stop working; pass 'links' as a list instead, as in the example. "
+            "Note: 'link' is deprecated and stops working in ModShelf 2.0; pass 'links' as a list instead, as in the example. "
             + "The library has this file already, so nothing downloads.",
             downloaded.Message);
         string warning = Assert.Single(Cli.Logs.Entries, entry => entry.Contains("DL_LINK_ARG", StringComparison.Ordinal));
         Assert.StartsWith(
-            $"[ModShelf.Cli.Mcp.DownloadTools] DL_LINK_ARG download called with legacy 'link'; normalized to links=[1 link] (client: {McpSession.ClientName}) |",
+            $"[ModShelf.Cli.Mcp.McpDeprecations] DL_LINK_ARG download called with deprecated 'link'; use 'links' (client: {McpSession.ClientName}) |",
             warning,
             StringComparison.Ordinal);
         Assert.DoesNotContain(link, warning, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task CountsTheCallsWithTheOldLinkForTheDiagnostics()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await DownloadAndWaitAsync(mcp, "3");
+        DiagnosticsReport before = await mcp.CallAsync<DiagnosticsReport>("diagnostics", null, Cancellation);
+
+        await mcp.CallAsync<DownloadsResult>("download", Arguments(("link", HandoffLink("3").AbsoluteUri)), Cancellation);
+        await mcp.CallAsync<DownloadsResult>("download", Arguments(("link", HandoffLink("3").AbsoluteUri)), Cancellation);
+        await mcp.CallAsync<DownloadsResult>("download", Arguments(("links", new[] { HandoffLink("3").AbsoluteUri })), Cancellation);
+        DiagnosticsReport after = await mcp.CallAsync<DiagnosticsReport>("diagnostics", null, Cancellation);
+
+        Assert.Contains("\nLegacy arguments: none\n", before.Report, StringComparison.Ordinal);
+        Assert.Matches(
+            $"\nLegacy arguments: download\\.link ×2 \\(last \\d{{4}}-\\d\\d-\\d\\d \\d\\d:\\d\\d UTC, {McpSession.ClientName}\\)\n",
+            after.Report);
+        System.Text.Json.Nodes.JsonObject counted = Assert.IsType<System.Text.Json.Nodes.JsonObject>(
+            System.Text.Json.Nodes.JsonNode.Parse(await File.ReadAllTextAsync(Path.Combine(Cli.Folder, "deprecated-calls.json"), Cancellation))!["download.link"]);
+        Assert.Equal(("DL_LINK_ARG", 2, McpSession.ClientName), ((string?)counted["code"], (int?)counted["count"], (string?)counted["client"]));
+        Assert.DoesNotContain(HandoffLink("3").AbsoluteUri, after.Report, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -401,6 +427,49 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         Assert.Equal(["link", "links"], schema.GetProperty("properties").EnumerateObject().Select(property => property.Name).Order(StringComparer.Ordinal));
         Assert.False(schema.TryGetProperty("required", out System.Text.Json.JsonElement required) && required.GetArrayLength() > 0);
         Assert.EndsWith("(link, a single link, still works but is deprecated.)", schema.GetProperty("properties").GetProperty("links").GetProperty("description").GetString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task EachDeprecatedArgumentSaysSoInItsToolsSchemas()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        IList<McpClientTool> tools = await mcp.Client.ListToolsAsync(cancellationToken: Cancellation);
+
+        Assert.NotEmpty(Deprecations.All);
+        Assert.Equal(Deprecations.All.Count, Deprecations.All.Select(deprecation => deprecation.Code).Distinct(StringComparer.Ordinal).Count());
+        foreach (Deprecation deprecation in Deprecations.All)
+        {
+            Tool tool = Assert.Single(tools, listed => listed.Name == deprecation.Tool).ProtocolTool;
+            System.Text.Json.JsonElement arguments = tool.InputSchema.GetProperty("properties");
+            System.Text.Json.JsonElement old = arguments.GetProperty(deprecation.Argument);
+            Assert.True(old.GetProperty("deprecated").GetBoolean());
+            Assert.StartsWith("Deprecated, and stops working in ModShelf " + deprecation.RemovedIn + ":", old.GetProperty("description").GetString(), StringComparison.Ordinal);
+            Assert.Contains($"Pass {deprecation.Use}", old.GetProperty("description").GetString(), StringComparison.Ordinal);
+            Assert.False(arguments.GetProperty(deprecation.Use).TryGetProperty("deprecated", out _));
+            Assert.True(tool.OutputSchema?.GetProperty("properties").TryGetProperty("deprecated", out _));
+            Assert.StartsWith($"'{deprecation.Argument}' is deprecated and stops working in ModShelf {deprecation.RemovedIn}; pass '{deprecation.Use}'", deprecation.Note, StringComparison.Ordinal);
+        }
+
+        // Every argument marked deprecated is listed, by its code, and no other argument's schema says it's deprecated.
+        (string Tool, string Argument, string Code)[] marked =
+        [
+            .. typeof(ModShelfMcpServer).Assembly.GetTypes()
+                .SelectMany(type => type.GetMethods())
+                .Where(method => method.GetCustomAttribute<McpServerToolAttribute>() is not null)
+                .SelectMany(method => method.GetParameters()
+                    .Where(parameter => parameter.GetCustomAttribute<DeprecatedAttribute>() is not null)
+                    .Select(parameter => (method.GetCustomAttribute<McpServerToolAttribute>()!.Name!, parameter.Name!, parameter.GetCustomAttribute<DeprecatedAttribute>()!.Code))),
+        ];
+        Assert.Equal(
+            Deprecations.All.Select(deprecation => (deprecation.Tool, deprecation.Argument, deprecation.Code)).Order(),
+            marked.Order());
+        Assert.Equal(
+            Deprecations.All.Select(deprecation => deprecation.Name).Order(StringComparer.Ordinal),
+            tools
+                .SelectMany(tool => tool.ProtocolTool.InputSchema.GetProperty("properties").EnumerateObject()
+                    .Where(argument => argument.Value.TryGetProperty("deprecated", out _))
+                    .Select(argument => $"{tool.Name}.{argument.Name}"))
+                .Order(StringComparer.Ordinal));
     }
 
     [Fact]
@@ -854,7 +923,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
 
         Assert.Contains(
-            "Mod mod of game on fake-handoff isn't in the library.",
+            "Mod mod of game on Fake handoff site isn't in the library.",
             await mcp.CallFailingAsync(tool, Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation),
             StringComparison.Ordinal);
     }
@@ -870,7 +939,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         UpdateListing updates = await mcp.CallAsync<UpdateListing>("library_updates", Arguments(("changelog", true)), Cancellation);
 
         Assert.True(watched.Watched);
-        Assert.Equal($"Watching {ModName} (mod mod of game on fake-handoff).", watched.Message);
+        Assert.Equal($"Watching {ModName} (mod mod of game on Fake handoff site).", watched.Message);
         Assert.Equal(1, check.Checked);
         Assert.Empty(check.Failures);
         UpdateFound newest = Assert.Single(check.Found);
@@ -899,7 +968,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         Assert.Equal((Path.Combine(ModFolder, FileNameOf("1")), false), (library.Mods[1].Files?[0].Path, library.Mods[1].Files?[0].Missing));
         Assert.Equal("Stopped watching Example Mod. It had no downloaded files, so it's out of the library.", unwatched.Message);
         Assert.Null(unwatched.Mod);
-        Assert.Equal("Mod 1 of game on fake-catalog isn't in the library.", again.Message);
+        Assert.Equal("Mod 1 of game on Fake catalog site isn't in the library.", again.Message);
     }
 
     [Fact]
@@ -920,7 +989,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
             forgot.Message);
         Assert.Equal((Path.Combine(ModFolder, FileNameOf("1")), false), (forgot.Mod?.Files?[0].Path, forgot.Mod?.Files?[0].Missing));
         Assert.Equal(Content, await File.ReadAllBytesAsync(Path.Combine(ModFolder, FileNameOf("1")), Cancellation));
-        Assert.Equal((false, "Mod mod of game on fake-handoff isn't in the library.", (LibraryModEntry?)null), (again.Forgotten, again.Message, again.Mod));
+        Assert.Equal((false, "Mod mod of game on Fake handoff site isn't in the library.", (LibraryModEntry?)null), (again.Forgotten, again.Message, again.Mod));
         Assert.EndsWith("It had no downloaded files.", withoutFiles.Message, StringComparison.Ordinal);
         Assert.Equal(0, library.Total);
 
@@ -1081,6 +1150,84 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task ACategoryAndHowLongSinceUpdatedNarrowTheSearch()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        DateTimeOffset before = DateTimeOffset.UtcNow;
+        await mcp.CallAsync<SearchResult>("mod_search", Arguments(("game", "game"), ("source", "fake-catalog"), ("category", "AUDIO"), ("updatedWithin", 30)), Cancellation);
+        DateTimeOffset after = DateTimeOffset.UtcNow;
+
+        SearchQuery asked = _catalog.LastQuery!;
+        Assert.Equal("Audio", asked.Category);
+        DateTimeOffset since = Assert.NotNull(asked.UpdatedSince);
+        Assert.Equal((TimeSpan.Zero, 0, 0, 0), (since.Offset, since.Minute, since.Second, since.Millisecond));
+        Assert.InRange(since, before.AddDays(-30).AddHours(-1), after.AddDays(-30));
+    }
+
+    [Fact]
+    public async Task EachPageSaysWhatTheSitesSearchCanDoForTheGame()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        SearchResult first = await mcp.CallAsync<SearchResult>("mod_search", Arguments(("game", "game"), ("source", "fake-catalog")), Cancellation);
+        SearchResult second = await mcp.CallAsync<SearchResult>("mod_search", Arguments(("game", "game"), ("source", "fake-catalog"), ("page", 2), ("category", "armour")), Cancellation);
+
+        Assert.Equal("Fake catalog site", first.Search.Site);
+        Assert.Equal(
+            ["Relevance", "Endorsements", "Downloads", "Updated", "Newest", "Name", "Size", "UniqueDownloads"],
+            first.Search.Orders.Select(order => order.Sort));
+        Assert.All(first.Search.Orders, order => Assert.True(order.Descending && order.Ascending));
+        Assert.Equal(["words", "author", "category", "updatedWithin", "adult"], first.Search.Filters);
+        Assert.Equal((100, "endorsements"), (first.Search.MaxPageSize, first.Search.Approvals));
+        Assert.Equal(["Armour", "Audio", "Gameplay"], first.Search.Categories);
+        Assert.Equal(first.Search.Categories, second.Search.Categories);
+        Assert.Equal(1, _catalog.GameReads);
+    }
+
+    [Fact]
+    public async Task ANarrowSitesSearchSaysOnlyWhatItCan()
+    {
+        // The site's own order first, as it lists them, not as ModShelf does.
+        _catalog.Capabilities = new([new(SearchSort.Name, SearchDirection.Ascending), new(SearchSort.Newest, SearchDirection.Descending), new(SearchSort.Newest, SearchDirection.Ascending)], SearchFilters.Text | SearchFilters.AdultContent, 10);
+        _catalog.Words = SiteWords.None;
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        SearchResult found = await mcp.CallAsync<SearchResult>("mod_search", Arguments(("game", "game"), ("source", "fake-catalog")), Cancellation);
+
+        Assert.Equal([new SiteSearchOrder("Name", false, true), new SiteSearchOrder("Newest", true, true)], found.Search.Orders);
+        Assert.Equal(["words", "adult"], found.Search.Filters);
+        Assert.Equal((10, null, null), (found.Search.MaxPageSize, found.Search.Approvals, found.Search.Categories));
+        Assert.Equal(0, _catalog.GameReads);
+    }
+
+    [Fact]
+    public async Task CategoriesThatCantBeReadAreLeftOutOfTheSearchItself()
+    {
+        _catalog.GameFailure = new HttpRequestException("Service unavailable.");
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        SearchResult found = await mcp.CallAsync<SearchResult>("mod_search", Arguments(("game", "game"), ("source", "fake-catalog")), Cancellation);
+        string refused = await mcp.CallFailingAsync("mod_search", Arguments(("game", "game"), ("source", "fake-catalog"), ("category", "Armour")), Cancellation);
+
+        Assert.Equal(44, found.Total);
+        Assert.Null(found.Search.Categories);
+        Assert.Contains("Service unavailable.", refused, StringComparison.Ordinal);
+        Assert.Equal(2, _catalog.GameReads);
+    }
+
+    [Fact]
+    public async Task ACategoryTheGameDoesntHaveIsRefusedNamingThoseItHas()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        string refused = await mcp.CallFailingAsync("mod_search", Arguments(("game", "game"), ("source", "fake-catalog"), ("category", "Weapons")), Cancellation);
+
+        Assert.EndsWith("Example Game has no category 'Weapons' on Fake catalog site. Its categories: Armour, Audio, Gameplay.", refused, StringComparison.Ordinal);
+        Assert.Null(_catalog.LastQuery);
+    }
+
+    [Fact]
     public async Task FindsASitesGameByTheStartsOfItsNamesWords()
     {
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
@@ -1156,6 +1303,8 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     [InlineData("author", "Someone", "Fake catalog site can't search by author. It can search by words.")]
     [InlineData("pageSize", 100, "Fake catalog site lists at most 50 mods a page.")]
     [InlineData("sort", "Size", "Fake catalog site can't sort by Size. It can sort by Relevance.")]
+    [InlineData("category", "Armour", "Fake catalog site can't search by category. It can search by words.")]
+    [InlineData("updatedWithin", 7, "Fake catalog site can't search by when mods were updated. It can search by words.")]
     public async Task ASearchTheSiteCantDoIsRefusedSayingWhatItCan(string name, object value, string problem)
     {
         _catalog.Capabilities = new([new(SearchSort.Relevance, SearchDirection.Descending)], SearchFilters.Text, 50);
@@ -1164,6 +1313,9 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
 
         Assert.Contains(problem, await mcp.CallFailingAsync("mod_search", arguments, Cancellation), StringComparison.Ordinal);
         Assert.Null(_catalog.LastQuery);
+
+        // A site that can't search by category refuses one without the game being read.
+        Assert.Equal(0, _catalog.GameReads);
     }
 
     [Theory]
@@ -1171,6 +1323,8 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     [InlineData("sort", "9", "sort must be one of")]
     [InlineData("pageSize", 0, "pageSize must be from 1 to 100.")]
     [InlineData("page", 0, "page must be 1 or more")]
+    [InlineData("updatedWithin", 0, "updatedWithin must be from 1 to 36500 days.")]
+    [InlineData("updatedWithin", 36501, "updatedWithin must be from 1 to 36500 days.")]
     [InlineData("source", "fake-handoff", "'fake-handoff' can't search. Sites that can: ")]
     public async Task ASearchItCantMakeIsRefused(string name, object value, string problem)
     {

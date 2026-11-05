@@ -11,4 +11,4 @@ namespace ModShelf.Cli.Mcp;
 /// How many are downloading, were in the library already, or couldn't be downloaded; after a note first when the call
 /// used a deprecated argument.
 /// </param>
-internal sealed record DownloadsResult(IReadOnlyList<LinkDownloadResult> Results, DeprecatedArgument? Deprecated, string Message);
+internal sealed record DownloadsResult(IReadOnlyList<LinkDownloadResult> Results, DeprecatedArgument<DownloadLinks>? Deprecated, string Message);

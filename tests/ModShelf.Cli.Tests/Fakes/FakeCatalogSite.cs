@@ -73,11 +73,31 @@ internal sealed partial class FakeCatalogSite : ILinkRecognizer, IModCatalog, IM
     /// </summary>
     public List<GameInfo> MoreGames { get; } = [];
 
+    /// <summary>
+    /// Example Game's categories, in the site's order.
+    /// </summary>
+    public IReadOnlyList<string> Categories { get; set; } = ["Armour", "Audio", "Gameplay"];
+
+    /// <summary>
+    /// How often a game was read on its own.
+    /// </summary>
+    public int GameReads { get; private set; }
+
+    /// <summary>
+    /// What reading a game on its own throws, while set.
+    /// </summary>
+    public Exception? GameFailure { get; set; }
+
     public Task<IReadOnlyList<GameInfo>> GetGamesAsync(CancellationToken cancellationToken)
-        => Task.FromResult<IReadOnlyList<GameInfo>>([new GameInfo(new GameRef(Id, "game"), "Example Game", new Uri($"https://{Host}/game")), .. MoreGames]);
+        => Task.FromResult<IReadOnlyList<GameInfo>>([new GameInfo(new GameRef(Id, "game"), "Example Game", new Uri($"https://{Host}/game"), Categories), .. MoreGames]);
 
     public Task<GameInfo> GetGameAsync(GameRef game, CancellationToken cancellationToken)
-        => Task.FromResult(new GameInfo(game, "Example Game", new Uri($"https://{Host}/game")));
+    {
+        GameReads++;
+        return GameFailure is { } failure
+            ? Task.FromException<GameInfo>(failure)
+            : Task.FromResult(new GameInfo(game, "Example Game", new Uri($"https://{Host}/game"), Categories));
+    }
 
     public Task<ModInfo> GetModAsync(ModRef modRef, CancellationToken cancellationToken)
     {

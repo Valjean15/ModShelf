@@ -100,7 +100,7 @@ public sealed class WatchlistsTests
 
         UnsupportedLinkException refused = await Assert.ThrowsAsync<UnsupportedLinkException>(() => watchlists.UnwatchAsync(Link, Cancellation));
 
-        Assert.Contains("can track mods", refused.Message, StringComparison.Ordinal);
+        Assert.Contains("isn't to a mod on a site where ModShelf can follow mods.", refused.Message, StringComparison.Ordinal);
     }
 
     [Fact]

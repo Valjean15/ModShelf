@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Sources;
+using ModShelf.Cli.Common;
 using ModShelf.Cli.Hosting;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Accounts;
@@ -40,6 +41,16 @@ internal static partial class ModCommand
         {
             Description = "Only mods by this author.",
             HelpName = "name",
+        };
+        Option<string?> category = new("--category")
+        {
+            Description = "Only mods in this category of the game, by its name in any case, where the site can search by category. One the game doesn't have is refused, naming those it has.",
+            HelpName = "name",
+        };
+        Option<int?> updatedWithin = new("--updated-within")
+        {
+            Description = $"Only mods updated within this many days, from 1 to {SearchArguments.MostDays}, such as 7, where the site can search by when mods were updated. The days count from the start of the hour.",
+            HelpName = "days",
         };
         Option<bool> adult = new("--adult")
         {
@@ -82,6 +93,8 @@ internal static partial class ModCommand
             words,
             game,
             author,
+            category,
+            updatedWithin,
             adult,
             sort,
             ascending,
@@ -98,6 +111,13 @@ internal static partial class ModCommand
                 return Task.FromResult(ExitCodes.BadInput);
             }
 
+            int? days = parsed.GetValue(updatedWithin);
+            if (days is < 1 or > SearchArguments.MostDays)
+            {
+                environment.Error.WriteLine($"--updated-within must be from 1 to {SearchArguments.MostDays} days.");
+                return Task.FromResult(ExitCodes.BadInput);
+            }
+
             int pageNumber = parsed.GetValue(page);
             string text = string.Join(' ', parsed.GetValue(words) ?? []);
             SearchSort? sortBy = parsed.GetValue(sort);
@@ -106,8 +126,8 @@ internal static partial class ModCommand
             bool withAdult = parsed.GetValue(adult);
 
             // The site's own order and page size unless asked otherwise, once the site is known; a whole number of pages
-            // in, so each page starts where the last ended.
-            SearchQuery QueryFor(SearchCapabilities? capabilities)
+            // in, so each page starts where the last ended. The category as the game names it.
+            SearchQuery QueryFor(SearchCapabilities? capabilities, string? categoryNamed, DateTimeOffset now)
             {
                 ArgumentOutOfRangeException.ThrowIfLessThan(pageNumber, 1, "--page");
                 SearchOrder own = capabilities?.Orders[0] ?? new SearchOrder(SearchSort.Relevance, SearchDirection.Descending);
@@ -120,10 +140,12 @@ internal static partial class ModCommand
                     count,
                     by,
                     withAdult,
-                    reversed ? Reverse(direction) : direction);
+                    reversed ? Reverse(direction) : direction,
+                    categoryNamed,
+                    days is { } within ? SearchArguments.UpdatedSince(now, within) : null);
             }
 
-            return SearchAsync(environment, parsed.GetValue(game)!, parsed.GetValue(source), QueryFor, cancellationToken);
+            return SearchAsync(environment, parsed.GetValue(game)!, parsed.GetValue(source), parsed.GetValue(category), QueryFor, cancellationToken);
         });
         return search;
     }
@@ -131,12 +153,15 @@ internal static partial class ModCommand
     private static SearchDirection Reverse(SearchDirection direction)
         => direction == SearchDirection.Ascending ? SearchDirection.Descending : SearchDirection.Ascending;
 
-    /// <param name="queryFor">The search to make, for what the chosen site's search can do.</param>
+    /// <param name="category">The category asked for, as typed.</param>
+    /// <param name="queryFor">The search to make, for what the chosen site's search can do, with the category as the game
+    /// names it, at the time it is now.</param>
     private static async Task<int> SearchAsync(
         CliEnvironment environment,
         string gameKey,
         string? sourceText,
-        Func<SearchCapabilities?, SearchQuery> queryFor,
+        string? category,
+        Func<SearchCapabilities?, string?, DateTimeOffset, SearchQuery> queryFor,
         CancellationToken cancellationToken)
     {
         return await CommandHost.RunAsync(
@@ -152,22 +177,33 @@ internal static partial class ModCommand
                     }
 
                     ISourceRegistry sources = services.GetRequiredService<ISourceRegistry>();
+                    IModSearch? search = sources.Find<IModSearch>(source);
                     SearchQuery query;
-                    try
-                    {
-                        query = queryFor(sources.Find<IModSearch>(source)?.Capabilities);
-                    }
-                    catch (Exception exception) when (exception is ArgumentOutOfRangeException or OverflowException)
-                    {
-                        await environment.Error.WriteLineAsync("--page must be 1 or more, and not that many pages in.").ConfigureAwait(false);
-                        return ExitCodes.BadInput;
-                    }
-
                     SearchPage found;
                     try
                     {
-                        // Inside, so a blank game is refused as the source refuses an unknown one.
-                        found = await lookup.SearchAsync(new GameRef(source, gameKey.Trim()), query, cancellationToken).ConfigureAwait(false);
+                        // Inside, so a blank game is refused as the source refuses an unknown one. A category is the
+                        // game's, as the site names it; a site that can't search by category refuses it, as Application
+                        // does.
+                        GameRef searched = new(source, gameKey.Trim());
+                        if (category is not null
+                            && search?.Capabilities.Has(SearchFilters.Category) == true
+                            && sources.Find<IModCatalog>(source) is { } catalog)
+                        {
+                            category = SearchArguments.Category(category, await catalog.GetGameAsync(searched, cancellationToken).ConfigureAwait(false), search.DisplayName);
+                        }
+
+                        try
+                        {
+                            query = queryFor(search?.Capabilities, category, services.GetRequiredService<TimeProvider>().GetUtcNow());
+                        }
+                        catch (Exception exception) when (exception is ArgumentOutOfRangeException or OverflowException)
+                        {
+                            await environment.Error.WriteLineAsync("--page must be 1 or more, and not that many pages in.").ConfigureAwait(false);
+                            return ExitCodes.BadInput;
+                        }
+
+                        found = await lookup.SearchAsync(searched, query, cancellationToken).ConfigureAwait(false);
                     }
                     catch (Exception exception) when (SearchProblem(exception) is { } problem)
                     {

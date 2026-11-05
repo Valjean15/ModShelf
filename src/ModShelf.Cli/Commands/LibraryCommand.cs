@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
+using ModShelf.Application.Sources;
 using ModShelf.Cli.Hosting;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
@@ -291,17 +292,18 @@ internal static partial class LibraryCommand
                 async services =>
                 {
                     IModLibrary library = services.GetRequiredService<IModLibrary>();
+                    ISourceRegistry sources = services.GetRequiredService<ISourceRegistry>();
                     try
                     {
                         if (watch)
                         {
                             LibraryMod watched = await library.WatchAsync(link, cancellationToken).ConfigureAwait(false);
-                            await environment.Output.WriteLineAsync($"Watching {watched.Name} ({Describe(watched.Mod)}).").ConfigureAwait(false);
+                            await environment.Output.WriteLineAsync($"Watching {watched.Name} ({CliText.ModOn(sources, watched.Mod)}).").ConfigureAwait(false);
                         }
                         else
                         {
                             LibraryChange change = await library.UnwatchAsync(link, cancellationToken).ConfigureAwait(false);
-                            await environment.Output.WriteLineAsync(Unwatched(change)).ConfigureAwait(false);
+                            await environment.Output.WriteLineAsync(Unwatched(change, sources)).ConfigureAwait(false);
                         }
                     }
                     catch (Exception exception) when (LinkProblems.Describe(exception) is { } problem)
@@ -361,9 +363,9 @@ internal static partial class LibraryCommand
         _ => string.Create(CultureInfo.CurrentCulture, $"{forgotten.Name} is out of the library. Its {forgotten.Files.Count:N0} downloaded files stay on disk."),
     };
 
-    private static string Unwatched(LibraryChange change) => change switch
+    private static string Unwatched(LibraryChange change, ISourceRegistry sources) => change switch
     {
-        { Before: null } => $"Mod {change.Mod.Id} of {change.Mod.Game.Key} on {change.Mod.Game.Source} isn't in the library.",
+        { Before: null } => $"{CliText.Capitalized(CliText.ModOn(sources, change.Mod))} isn't in the library.",
         { Before.IsWatched: false } => $"{change.Before.Name} isn't watched.",
         { After: null } => $"Stopped watching {change.Before.Name}. It had no downloaded files, so it's out of the library.",
         { After.Files.Count: 1 } => $"Stopped watching {change.Before.Name}. Its downloaded file stays in the library.",
@@ -371,6 +373,4 @@ internal static partial class LibraryCommand
             CultureInfo.CurrentCulture,
             $"Stopped watching {change.Before.Name}. Its {change.After.Files.Count:N0} downloaded files stay in the library."),
     };
-
-    private static string Describe(ModRef mod) => $"mod {mod.Id} of {mod.Game.Key} on {mod.Game.Source}";
 }

@@ -116,12 +116,12 @@ public sealed class LibraryCheckQuotaTests : IAsyncDisposable
         string[] errors = ErrorLines(stopped);
         Assert.Equal(1 + Games.Length - 1, errors.Length);
         Assert.StartsWith(
-            $"Couldn't check mod {ModId(Games[0], 31)} of {Games[0]} on nexus: The Nexus Mods API's rate limit for this account is used up until ",
+            $"Couldn't check mod {ModId(Games[0], 31)} of {Games[0]} on Nexus Mods: The Nexus Mods API's rate limit for this account is used up until ",
             errors[0],
             StringComparison.Ordinal);
         Assert.All(
             errors[1..],
-            error => Assert.Contains(" on nexus: Not checked: nexus refused an earlier question in this check. The Nexus Mods API's rate limit", error, StringComparison.Ordinal));
+            error => Assert.Contains(" on Nexus Mods: Not checked: nexus refused an earlier question in this check. The Nexus Mods API's rate limit", error, StringComparison.Ordinal));
 
         // The 30 mods checked are asked about through the feed; the other 170 on their own.
         Assert.Equal(Done, finished.ExitCode);

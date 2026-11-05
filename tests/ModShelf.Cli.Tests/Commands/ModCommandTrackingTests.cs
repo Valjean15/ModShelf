@@ -44,9 +44,9 @@ public sealed class ModCommandTrackingTests : IAsyncDisposable
         CliResult listed = await TrackedAsync();
 
         Assert.Equal(Done, listed.ExitCode);
-        Assert.Contains("The account tracks 4 mods on fake-catalog.", listed.Output, StringComparison.Ordinal);
+        Assert.Contains("4 tracked mods on Fake catalog site.", listed.Output, StringComparison.Ordinal);
         Assert.Equal(["game 7", "game 120", "game 1000", "othergame 5"], Rows(listed));
-        Assert.Contains("To stop tracking one: mod untrack", listed.Output, StringComparison.Ordinal);
+        Assert.Contains("To untrack one: mod untrack \"<its link>\"", listed.Output, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -55,7 +55,7 @@ public sealed class ModCommandTrackingTests : IAsyncDisposable
         CliResult tracked = await _cli.RunAsync(["mod", "track", FileLink("42", "12").AbsoluteUri], Cancellation);
 
         Assert.Equal(Done, tracked.ExitCode);
-        Assert.Equal("Tracking mod 42 of game on fake-catalog.", tracked.Output.Trim());
+        Assert.Equal("Tracked on Fake catalog site: mod 42 of game.", tracked.Output.Trim());
         Assert.Contains(Mod("42"), _catalog.Tracked);
         Assert.Contains("game 42", Rows(await TrackedAsync()));
     }
@@ -75,7 +75,7 @@ public sealed class ModCommandTrackingTests : IAsyncDisposable
         CliResult untracked = await _cli.RunAsync(["mod", "untrack", ModLink("120").AbsoluteUri], Cancellation);
 
         Assert.Equal(Done, untracked.ExitCode);
-        Assert.Equal("No longer tracking mod 120 of game on fake-catalog.", untracked.Output.Trim());
+        Assert.Equal("No longer tracked on Fake catalog site: mod 120 of game.", untracked.Output.Trim());
         Assert.DoesNotContain("game 120", Rows(await TrackedAsync()));
     }
 
@@ -99,17 +99,17 @@ public sealed class ModCommandTrackingTests : IAsyncDisposable
         CliResult listed = await TrackedAsync();
 
         Assert.Equal(Done, listed.ExitCode);
-        Assert.Equal("The account tracks no mods on fake-catalog.", listed.Output.Trim());
+        Assert.Equal("No tracked mods on Fake catalog site.", listed.Output.Trim());
     }
 
     [Theory]
     [InlineData("track", "not a link", BadInput, "isn't a complete link")]
     [InlineData("track", "ftp://elsewhere.example/mod.zip", BadInput, "No source knows this link.")]
-    [InlineData("untrack", "https://elsewhere.example/files/mod.zip", BadInput, "isn't to a mod on a site where ModShelf can track mods.")]
+    [InlineData("untrack", "https://elsewhere.example/files/mod.zip", BadInput, "isn't to a mod on a site where ModShelf can follow mods.")]
     [InlineData("track", "https://catalog.example/game/mods/404", BadInput, "The site has no such mod or file.")]
-    [InlineData("track", "https://catalog.example/game/mods/401", Failed, "linked account to track mods")]
-    [InlineData("track", "https://catalog.example/game/mods/503", Failed, "The site couldn't track the mod: Service unavailable.")]
-    [InlineData("untrack", "https://catalog.example/game/mods/503", Failed, "The site couldn't stop tracking the mod: Service unavailable.")]
+    [InlineData("track", "https://catalog.example/game/mods/401", Failed, "The site needs a linked account to follow the mod, or refused the one linked. Link it with account link")]
+    [InlineData("track", "https://catalog.example/game/mods/503", Failed, "The site couldn't follow the mod: Service unavailable.")]
+    [InlineData("untrack", "https://catalog.example/game/mods/503", Failed, "The site couldn't stop following the mod: Service unavailable.")]
     public async Task SaysWhyItCantTrackOrUntrack(string command, string link, int exitCode, string message)
     {
         CliResult refused = await _cli.RunAsync(["mod", command, link], Cancellation);
@@ -130,7 +130,7 @@ public sealed class ModCommandTrackingTests : IAsyncDisposable
 
         Assert.Equal(Failed, refused.ExitCode);
         Assert.Equal(
-            $"The site couldn't list the tracked mods: Response status code does not indicate success: {(int)refusal}.",
+            $"Fake catalog site couldn't list the tracked mods: Response status code does not indicate success: {(int)refusal}.",
             refused.Errors.Trim());
     }
 
@@ -143,8 +143,35 @@ public sealed class ModCommandTrackingTests : IAsyncDisposable
         CliResult tracked = await _cli.RunAsync(["mod", "track", ModLink("42").AbsoluteUri], Cancellation);
 
         Assert.Equal((Failed, Failed), (listed.ExitCode, tracked.ExitCode));
-        Assert.Contains("The site needs a linked account to track mods", listed.Errors, StringComparison.Ordinal);
+        Assert.Contains("Fake catalog site needs a linked account to list its tracked mods, or refused the one linked. Link it with account link", listed.Errors, StringComparison.Ordinal);
         Assert.Contains("account link", tracked.Errors, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SaysItInTheSitesOwnWords()
+    {
+        _catalog.Words = new() { Follow = "follow", Unfollow = "unfollow", Followed = "followed" };
+
+        CliResult tracked = await _cli.RunAsync(["mod", "track", ModLink("42").AbsoluteUri], Cancellation);
+        CliResult untracked = await _cli.RunAsync(["mod", "untrack", ModLink("120").AbsoluteUri], Cancellation);
+        CliResult listed = await TrackedAsync();
+
+        Assert.Equal("Followed on Fake catalog site: mod 42 of game.", tracked.Output.Trim());
+        Assert.Equal("No longer followed on Fake catalog site: mod 120 of game.", untracked.Output.Trim());
+        Assert.StartsWith("4 followed mods on Fake catalog site.", listed.Output, StringComparison.Ordinal);
+        Assert.Contains("To unfollow one: mod untrack \"<its link>\"", listed.Output, StringComparison.Ordinal);
+        Assert.DoesNotContain("track", listed.Output.Replace("mod untrack", string.Empty, StringComparison.Ordinal), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task OneTrackedModIsOne()
+    {
+        foreach (ModRef mod in _catalog.Tracked.Skip(1).ToList())
+        {
+            await _catalog.UnwatchAsync(mod, Cancellation);
+        }
+
+        Assert.StartsWith("1 tracked mod on Fake catalog site.", (await TrackedAsync()).Output, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -153,7 +180,7 @@ public sealed class ModCommandTrackingTests : IAsyncDisposable
         CliResult refused = await _cli.RunAsync(["mod", "tracked"], Cancellation);
 
         Assert.Equal(BadInput, refused.ExitCode);
-        Assert.Contains("More than one site can track mods; choose one with --source", refused.Errors, StringComparison.Ordinal);
+        Assert.Contains("More than one site can follow mods; choose one with --source", refused.Errors, StringComparison.Ordinal);
         Assert.Contains("nexus", refused.Errors, StringComparison.Ordinal);
         Assert.Contains("fake-catalog", refused.Errors, StringComparison.Ordinal);
     }
@@ -164,7 +191,7 @@ public sealed class ModCommandTrackingTests : IAsyncDisposable
         CliResult refused = await _cli.RunAsync(["mod", "tracked", "--source", "direct"], Cancellation);
 
         Assert.Equal(BadInput, refused.ExitCode);
-        Assert.Contains("'direct' can't track mods.", refused.Errors, StringComparison.Ordinal);
+        Assert.Contains("'direct' can't follow mods.", refused.Errors, StringComparison.Ordinal);
     }
 
     private static ModRef Mod(string id) => new(new GameRef(FakeCatalogSite.SourceId, "game"), id);

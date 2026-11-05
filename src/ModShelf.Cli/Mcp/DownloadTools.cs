@@ -1,7 +1,5 @@
 using System.ComponentModel;
 
-using Microsoft.Extensions.Logging;
-
 using ModelContextProtocol;
 using ModelContextProtocol.Server;
 
@@ -15,7 +13,7 @@ namespace ModShelf.Cli.Mcp;
 /// cancelling a download. The desktop app runs the queue when it runs; otherwise this server does (<see cref="McpQueue"/>).
 /// </summary>
 [McpServerToolType]
-internal sealed partial class DownloadTools(McpQueue queue, IDownloadService downloads, ILogger<DownloadTools> logger)
+internal sealed class DownloadTools(McpQueue queue, IDownloadService downloads, McpDeprecations deprecations)
 {
     private const string DesktopApp = "desktop app";
     private const string ThisServer = "this MCP server";
@@ -27,9 +25,6 @@ internal sealed partial class DownloadTools(McpQueue queue, IDownloadService dow
 
     // The most links one call to download takes.
     private const int MostLinks = 50;
-
-    // The code of a call to download with the old link, in the result and the log's warning.
-    private const string LinkArgumentCode = "DL_LINK_ARG";
 
     [McpServerTool(Name = "downloads_list", Title = "List the downloads", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
     [Description("Lists the downloads in the queue, the oldest first: each one's status, progress and where the file goes. For one waiting for the user to start it on the site, the page to open, while this server runs the downloads; the desktop app, when it runs them, shows the user that page itself.")]
@@ -47,11 +42,11 @@ internal sealed partial class DownloadTools(McpQueue queue, IDownloadService dow
     public Task<DownloadsResult> DownloadAsync(
         McpServer server,
         [Description("Links to files or mods, one or more, up to 50, such as updates' links from library_updates, files' from mod_show, or nxm:// links the site handed over. (link, a single link, still works but is deprecated.)")] string[]? links = null,
-        [Description("Deprecated: one link, as download took before 0.9.3. Pass links, a list, instead.")] string? link = null,
+        [Description("Deprecated, and stops working in ModShelf 2.0: one link, as download took before 0.9.3. Pass links, a list, instead.")][Deprecated("DL_LINK_ARG")] string? link = null,
         CancellationToken cancellationToken = default)
         => McpProblems.GuardAsync(async () =>
         {
-            DeprecatedArgument? deprecated = null;
+            DeprecatedArgument<DownloadLinks>? deprecated = null;
             if (link is not null)
             {
                 if (links is not null)
@@ -60,8 +55,7 @@ internal sealed partial class DownloadTools(McpQueue queue, IDownloadService dow
                 }
 
                 links = [link];
-                deprecated = new DeprecatedArgument(LinkArgumentCode, "link", "links", new DownloadLinks(links));
-                LogLegacyLink(logger, LinkArgumentCode, links.Length, server?.ClientInfo?.Name ?? "unknown");
+                deprecated = await deprecations.NoteAsync(Deprecations.DownloadLink, new DownloadLinks(links), server, cancellationToken).ConfigureAwait(false);
             }
 
             if (links is not { Length: > 0 })
@@ -85,10 +79,7 @@ internal sealed partial class DownloadTools(McpQueue queue, IDownloadService dow
             return new DownloadsResult(
                 results,
                 deprecated,
-                deprecated is null
-                    ? message
-                    : "Note: 'link' is the old way to call download and will stop working; pass 'links' as a list instead, as in "
-                        + $"the example. {message}");
+                deprecated is null ? message : McpDeprecations.Message(Deprecations.DownloadLink, message));
         });
 
     [McpServerTool(Name = "downloads_pause", Title = "Pause a download", Idempotent = true, Destructive = false, OpenWorld = false, UseStructuredContent = true)]

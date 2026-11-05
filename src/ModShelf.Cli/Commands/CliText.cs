@@ -40,6 +40,17 @@ internal static class CliText
         => word.Length == 0 ? word : char.ToUpper(word[0], CultureInfo.CurrentCulture) + word[1..];
 
     /// <summary>
+    /// The site's name, such as Nexus Mods; its ID when no source of that ID is registered.
+    /// </summary>
+    public static string SiteName(ISourceRegistry sources, SourceId source) => sources.Find<IModSource>(source)?.DisplayName ?? source.Value;
+
+    /// <summary>
+    /// A mod as prose names it, such as "mod 12604 of skyrimspecialedition on Nexus Mods": its ID and its game's as they
+    /// are in links, and its site by name.
+    /// </summary>
+    public static string ModOn(ISourceRegistry sources, ModRef mod) => $"mod {mod.Id} of {mod.Game.Key} on {SiteName(sources, mod.Game.Source)}";
+
+    /// <summary>
     /// What the site calls following a mod and approving one; none when no source of that ID is registered.
     /// </summary>
     public static SiteWords Words(ISourceRegistry sources, SourceId source) => sources.Find<IModSource>(source)?.Words ?? SiteWords.None;

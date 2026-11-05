@@ -62,7 +62,7 @@ internal sealed class Watchlists : IWatchlists
         ModRef mod = (inLibrary ? LibraryLinks.ModAt(await _library.ListAsync(cancellationToken).ConfigureAwait(false), link) : null)
             ?? (await _sources.RecognizeLinkAsync(link, cancellationToken).ConfigureAwait(false)).File.Mod;
         IWatchlistSync watchlist = _sources.Find<IWatchlistSync>(mod.Game.Source)
-            ?? throw new UnsupportedLinkException("This link isn't to a mod on a site where ModShelf can track mods.");
+            ?? throw new UnsupportedLinkException("This link isn't to a mod on a site where ModShelf can follow mods.");
         await change(watchlist, mod).ConfigureAwait(false);
         return mod;
     }

@@ -159,7 +159,7 @@ public sealed class LibraryUpdatesCommandTests : IAsyncDisposable
 
         Assert.Equal(Failed, check.ExitCode);
         Assert.Equal("Checked 0 mods with 1 request.", Lines(check)[0]);
-        Assert.Equal("Couldn't check broken on fake-catalog: Service unavailable.", check.Errors.Trim());
+        Assert.Equal("Couldn't check broken on Fake catalog site: Service unavailable.", check.Errors.Trim());
     }
 
     [Fact]

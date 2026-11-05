@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Library;
+using ModShelf.Application.Sources;
 using ModShelf.Application.Updates;
 using ModShelf.Cli.Hosting;
 using ModShelf.Domain.Library;
@@ -68,10 +69,11 @@ internal static partial class LibraryCommand
                             environment.Output.WriteLine("To see every update: library updates");
                         }
 
+                        ISourceRegistry sources = services.GetRequiredService<ISourceRegistry>();
                         foreach (UpdateCheckFailure failure in check.Failures)
                         {
                             string what = failure.Mod is { } mod ? $"mod {mod.Id} of {failure.Game.Key}" : failure.Game.Key;
-                            await environment.Error.WriteLineAsync($"Couldn't check {what} on {failure.Game.Source}: {failure.Reason}").ConfigureAwait(false);
+                            await environment.Error.WriteLineAsync($"Couldn't check {what} on {CliText.SiteName(sources, failure.Game.Source)}: {failure.Reason}").ConfigureAwait(false);
                         }
 
                         return check.Failures.Count == 0 ? ExitCodes.Done : ExitCodes.Failed;

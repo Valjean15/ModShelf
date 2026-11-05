@@ -454,6 +454,26 @@ public sealed class ModLibraryTests : IDisposable
     }
 
     [Fact]
+    public async Task AModNotInTheLibraryIsNamedWithItsSitesName()
+    {
+        ModLibrary library = Library(new FakeModSite());
+
+        KeyNotFoundException refused = await Assert.ThrowsAsync<KeyNotFoundException>(() => library.SetPinnedAsync(new ModRef(FakeModSite.Game, "7"), true, Cancellation));
+
+        Assert.Equal("Mod 7 of skyrimspecialedition on Fake mod site isn't in the library.", refused.Message);
+    }
+
+    [Fact]
+    public async Task AModOfASiteNoLongerHereIsNamedWithTheSitesId()
+    {
+        ModLibrary library = Library();
+
+        KeyNotFoundException refused = await Assert.ThrowsAsync<KeyNotFoundException>(() => library.ForgetAsync(SkyUi, Cancellation));
+
+        Assert.Equal("Mod 12604 of skyrimspecialedition on nexus isn't in the library.", refused.Message);
+    }
+
+    [Fact]
     public async Task ForgettingAModNotInTheLibraryIsRefused()
     {
         ModLibrary library = Library(_site);

@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
+using ModShelf.Application.Sources;
 using ModShelf.Cli.Hosting;
 using ModShelf.Domain.Library;
 
@@ -62,10 +63,10 @@ internal static partial class LibraryCommand
                     }
 
                     WriteRescan(environment.Output, rescan, roots);
+                    ISourceRegistry sources = services.GetRequiredService<ISourceRegistry>();
                     foreach (RescanFailure failure in rescan.Failures)
                     {
-                        await environment.Error.WriteLineAsync(
-                                $"Couldn't match the files of mod {failure.Mod.Id} of {failure.Mod.Game.Key} on {failure.Mod.Game.Source}: {failure.Reason}")
+                        await environment.Error.WriteLineAsync($"Couldn't match the files of {CliText.ModOn(sources, failure.Mod)}: {failure.Reason}")
                             .ConfigureAwait(false);
                     }
 

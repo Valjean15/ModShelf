@@ -39,8 +39,9 @@ public sealed class DiagnosticsCommandTests : IAsyncDisposable
         string[] lines = written.Output.ReplaceLineEndings("\n").Split('\n', StringSplitOptions.RemoveEmptyEntries);
         Assert.Matches(@"^ModShelf \d+\.\d+\.\d+", lines[0]);
         Assert.Equal(
-            ["ModShelf", "Written", "System", "Folders", "Settings", "Library", "Downloads", "Accounts"],
+            ["ModShelf", "Written", "System", "Folders", "Settings", "Library", "Downloads", "Accounts", "Legacy"],
             lines.Select(line => line.Split([' ', ':'], 2)[0]));
+        Assert.Equal("Legacy arguments: none", lines[^1]);
         // The test's folder, under the home folder as a tilde where the temporary folder is in it, as on Windows.
         Assert.Contains($"{Path.GetFileName(_cli.Folder)}, logs ", written.Output, StringComparison.Ordinal);
     }

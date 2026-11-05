@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Globalization;
 
@@ -9,8 +10,10 @@ using ModShelf.Application.Common;
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
+using ModShelf.Cli.Common;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
+using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Search;
 
@@ -21,7 +24,7 @@ namespace ModShelf.Cli.Mcp;
 /// site's games by name. Nothing is downloaded or saved.
 /// </summary>
 [McpServerToolType]
-internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettingsService settings, ISourceRegistry sources)
+internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettingsService settings, ISourceRegistry sources, TimeProvider timeProvider)
 {
     /// <summary>
     /// How many mods a page lists unless pageSize says otherwise, or fewer when the site's pages hold fewer.
@@ -36,6 +39,19 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
     // The sections listed unless all files are asked for, as the sites show them.
     private static readonly ModFileCategory[] CurrentSections =
         [ModFileCategory.Main, ModFileCategory.Update, ModFileCategory.Optional, ModFileCategory.Miscellaneous];
+
+    // The filters a search can take, by the argument that takes each.
+    private static readonly (SearchFilters Filter, string Argument)[] FilterArguments =
+    [
+        (SearchFilters.Text, "words"),
+        (SearchFilters.Author, "author"),
+        (SearchFilters.Category, "category"),
+        (SearchFilters.UpdatedSince, "updatedWithin"),
+        (SearchFilters.AdultContent, "adult"),
+    ];
+
+    // Each game's categories, read once while the server runs: every page of a search says them.
+    private readonly ConcurrentDictionary<GameRef, GameInfo> _games = new();
 
     [McpServerTool(Name = "mod_show", Title = "Show a mod", ReadOnly = true, Idempotent = true, OpenWorld = true, UseStructuredContent = true)]
     [Description("Shows a mod as its site describes it, with its files, each with the link to download it, the newer file that replaces it by the site's word, where the library has it, if it does, and whether it's an update skipped; and whether the library has the mod pinned, and its note. Old versions, archived files and files in no section are left out unless allFiles is set, but for the one the link points to. The library's files that the site no longer lists, such as a pulled file, are in libraryOnly; newerInLibrary says when one of them is newer than everything the site lists.")]
@@ -115,11 +131,13 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
         });
 
     [McpServerTool(Name = "mod_search", Title = "Search a game's mods", ReadOnly = true, Idempotent = true, OpenWorld = true, UseStructuredContent = true)]
-    [Description("Lists a game's mods on its site that match, a page at a time, each with the link mod_show and download take. Mods with adult content are left out unless asked for. A site searches only by what it can, in its own orders: one asked more is refused, saying what it can. endorsements counts whatever the site counts as approval.")]
+    [Description("Lists a game's mods on its site that match, a page at a time, each with the link mod_show and download take. Mods with adult content are left out unless asked for. A site searches only by what it can, in its own orders: one asked more is refused, saying what it can. Each result's search says what the site can do for the game: its orders, the filters it takes, its largest page, its word for approval, and the game's categories. endorsements counts whatever the site counts as approval.")]
     public Task<SearchResult> SearchAsync(
         [Description("The game, as the site names it in its links, such as stardewvalley on Nexus Mods.")] string game,
         [Description("Words to look for in the mods' names; none to list every mod of the game.")] string? words = null,
         [Description("Only mods by this author, where the site can search by author.")] string? author = null,
+        [Description("Only mods in this category of the game, by its name in any case, where the site can search by category; a result's search.categories lists them. One the game doesn't have is refused, naming those it has.")] string? category = null,
+        [Description("Only mods updated within this many days, from 1, such as 7, where the site can search by when mods were updated. The days count from the start of the hour, so a search's pages asked within the hour find the same mods.")] int? updatedWithin = null,
         [Description("Include mods with adult content. A site without adult content has none to include.")] bool adult = false,
         [Description("The order, as far as the site has it: Relevance, Endorsements (whatever the site counts as approval), Downloads, UniqueDownloads, Updated, Newest, Size or Name. The site's own unless set: Relevance on Nexus Mods, which without words is the site's own order. The most comes first; by Name, Z first.")] string? sort = null,
         [Description("Turn the order around, so the least comes first.")] bool ascending = false,
@@ -145,11 +163,18 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
                 throw new McpException($"pageSize must be from 1 to {SearchQuery.MaxCount}.");
             }
 
+            if (updatedWithin is < 1 or > SearchArguments.MostDays)
+            {
+                throw new McpException($"updatedWithin must be from 1 to {SearchArguments.MostDays} days.");
+            }
+
             SourceId site = ChooseSource(lookup.SearchableSources, source, "search");
+            GameRef searched = new(site, game.Trim());
 
             // The site's own order and page size unless asked otherwise; a whole number of pages in, so each page starts
             // where the last ended.
-            SearchCapabilities? capabilities = sources.Find<IModSearch>(site)?.Capabilities;
+            IModSearch? search = sources.Find<IModSearch>(site);
+            SearchCapabilities? capabilities = search?.Capabilities;
             SearchOrder own = capabilities?.Orders[0] ?? new SearchOrder(SearchSort.Relevance, SearchDirection.Descending);
             int count = pageSize ?? Math.Min(DefaultPageSize, capabilities?.MaxCount ?? DefaultPageSize);
             if (page < 1 || (long)(page - 1) * count > int.MaxValue)
@@ -163,8 +188,16 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
                 direction = direction == SearchDirection.Ascending ? SearchDirection.Descending : SearchDirection.Ascending;
             }
 
-            SearchQuery query = new(words ?? string.Empty, order ?? own.Sort, (page - 1) * count, count, author, adult, direction);
-            SearchPage found = await lookup.SearchAsync(new GameRef(site, game.Trim()), query, cancellationToken).ConfigureAwait(false);
+            // A category is the game's, as the site names it. A site that can't search by category refuses it, as
+            // Application does.
+            if (category is not null && capabilities?.Has(SearchFilters.Category) == true && await GameAsync(searched, cancellationToken).ConfigureAwait(false) is { } described)
+            {
+                category = SearchArguments.Category(category, described, search!.DisplayName);
+            }
+
+            DateTimeOffset? since = updatedWithin is { } days ? SearchArguments.UpdatedSince(timeProvider.GetUtcNow(), days) : null;
+            SearchQuery query = new(words ?? string.Empty, order ?? own.Sort, (page - 1) * count, count, author, adult, direction, category, since);
+            SearchPage found = await lookup.SearchAsync(searched, query, cancellationToken).ConfigureAwait(false);
             return new SearchResult(
                 found.TotalCount,
                 found.Offset,
@@ -184,7 +217,8 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
                         mod.HasAdultContent,
                         mod.IsAvailable,
                         mod.PageUrl?.AbsoluteUri)),
-                ]);
+                ],
+                await SiteSearchAsync(search!, searched, cancellationToken).ConfigureAwait(false));
         });
 
     [McpServerTool(Name = "mod_games", Title = "Find a site's games", ReadOnly = true, Idempotent = true, OpenWorld = true, UseStructuredContent = true)]
@@ -219,6 +253,55 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
             ];
             return new GamesResult(found.Count, offset, offset + shown.Length < found.Count, shown);
         });
+
+    /// <summary>
+    /// The game as its site describes it, read the first time it's asked for; null when its site has no catalog.
+    /// </summary>
+    private async Task<GameInfo?> GameAsync(GameRef game, CancellationToken cancellationToken)
+    {
+        if (_games.TryGetValue(game, out GameInfo? kept))
+        {
+            return kept;
+        }
+
+        return sources.Find<IModCatalog>(game.Source) is { } catalog
+            ? _games.GetOrAdd(game, await catalog.GetGameAsync(game, cancellationToken).ConfigureAwait(false))
+            : null;
+    }
+
+    /// <summary>
+    /// What <paramref name="search"/> can do for <paramref name="game"/>. Categories that can't be read are left out: the
+    /// search itself went well.
+    /// </summary>
+    private async Task<SiteSearch> SiteSearchAsync(IModSearch search, GameRef game, CancellationToken cancellationToken)
+    {
+        SearchCapabilities capabilities = search.Capabilities;
+        IReadOnlyList<string>? categories = null;
+        if (capabilities.Has(SearchFilters.Category))
+        {
+            try
+            {
+                categories = (await GameAsync(game, cancellationToken).ConfigureAwait(false))?.Categories;
+            }
+            catch (Exception exception) when (exception is HttpRequestException or AuthenticationFailedException or InvalidDataException or ArgumentException)
+            {
+                categories = null;
+            }
+        }
+
+        return new SiteSearch(
+            search.DisplayName,
+            [
+                .. capabilities.Orders.Select(order => order.Sort).Distinct().Select(sort => new SiteSearchOrder(
+                    sort.ToString(),
+                    capabilities.Has(new SearchOrder(sort, SearchDirection.Descending)),
+                    capabilities.Has(new SearchOrder(sort, SearchDirection.Ascending)))),
+            ],
+            [.. FilterArguments.Where(filter => capabilities.Has(filter.Filter)).Select(filter => filter.Argument)],
+            capabilities.MaxCount,
+            search.Words.Approvals,
+            categories);
+    }
 
     /// <summary>
     /// The site asked for, or the only one that can.

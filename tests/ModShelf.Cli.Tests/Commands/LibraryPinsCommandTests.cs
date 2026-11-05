@@ -187,7 +187,7 @@ public sealed class LibraryPinsCommandTests : IAsyncDisposable
     {
         CliResult refused = await RunAsync("library", command, FileLink("1", "2").AbsoluteUri);
 
-        Assert.Equal((Failed, "Mod 1 of game on fake-catalog isn't in the library."), (refused.ExitCode, refused.Errors.Trim()));
+        Assert.Equal((Failed, "Mod 1 of game on Fake catalog site isn't in the library."), (refused.ExitCode, refused.Errors.Trim()));
     }
 
     [Fact]

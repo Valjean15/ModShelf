@@ -7,6 +7,7 @@ using ModShelf.Application.Sources;
 using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
+using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Links;
 
@@ -170,8 +171,12 @@ internal sealed partial class ModLibrary : IModLibrary
 
     public IAsyncEnumerable<LibraryChange> ChangesAsync(CancellationToken cancellationToken) => _changes.Watch(cancellationToken);
 
-    private static KeyNotFoundException NotInLibrary(ModRef modRef)
-        => new($"Mod {modRef.Id} of {modRef.Game.Key} on {modRef.Game.Source} isn't in the library.");
+    /// <summary>
+    /// Such as "Mod 12604 of skyrimspecialedition on Nexus Mods isn't in the library.": the site by its name, or its ID
+    /// when it's no longer here.
+    /// </summary>
+    private KeyNotFoundException NotInLibrary(ModRef modRef)
+        => new($"Mod {modRef.Id} of {modRef.Game.Key} on {_sources.Find<IModSource>(modRef.Game.Source)?.DisplayName ?? modRef.Game.Source.Value} isn't in the library.");
 
     /// <summary>
     /// Adds the mod to the library, watched, or watches it again, with its details as its site gives them now.

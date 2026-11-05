@@ -29,6 +29,7 @@ public sealed class DiagnosticsReportTests
     private readonly ListedAccounts _accounts = new();
     private readonly MemorySecretStore _secrets = new();
     private readonly RecordingLogger<DiagnosticsReport> _logger = new();
+    private readonly MemoryDeprecatedCallStore _calls = new();
     private readonly List<DownloadJobSnapshot> _jobs = [];
     private readonly Folders _folders = new(Path.Combine(Home, ".local", "share", "ModShelf"), Path.Combine(Home, ".local", "share", "ModShelf", "logs"));
 
@@ -53,6 +54,36 @@ public sealed class DiagnosticsReportTests
         Assert.Equal(
             $"Folders: data ~{separator}.local{separator}share{separator}ModShelf, logs ~{separator}.local{separator}share{separator}ModShelf{separator}logs, library ~{separator}Mods",
             folders);
+    }
+
+    [Fact]
+    public async Task CountsTheGamesInFoldersOfTheirOwnWithoutShowingThem()
+    {
+        string elsewhere = Path.Combine(Path.GetPathRoot(Home)!, "ModShelf.Skyrim");
+        _store.Settings = new AppSettings
+        {
+            LibraryRoot = Path.Combine(Home, "Mods"),
+            Games = new Dictionary<GameRef, GameSettings>
+            {
+                [new GameRef(TestData.Nexus, "skyrimspecialedition")] = new() { Root = elsewhere },
+                [new GameRef(TestData.Nexus, "stardewvalley")] = new() { Root = Path.Combine(Home, "Stardew") },
+                [new GameRef(TestData.Nexus, "fallout4")] = new() { Hidden = true },
+            },
+        };
+
+        string folders = Line(await LinesAsync(), "Folders");
+
+        Assert.EndsWith($"library ~{Path.DirectorySeparatorChar}Mods, 2 games in folders of their own", folders, StringComparison.Ordinal);
+        Assert.DoesNotContain("Skyrim", folders, StringComparison.Ordinal);
+        Assert.DoesNotContain("Stardew", folders, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task OneGameInAFolderOfItsOwnIsOneGame()
+    {
+        _store.Settings = new AppSettings { Games = new Dictionary<GameRef, GameSettings> { [new GameRef(TestData.Nexus, "skyrimspecialedition")] = new() { Root = Path.Combine(Home, "Skyrim") } } };
+
+        Assert.EndsWith(", 1 game in folders of their own", Line(await LinesAsync(), "Folders"), StringComparison.Ordinal);
     }
 
     [Fact]
@@ -219,8 +250,39 @@ public sealed class DiagnosticsReportTests
 
         Assert.Equal("Library: couldn't be read (IOException)", Line(lines, "Library"));
         Assert.Equal("Downloads: none", Line(lines, "Downloads"));
-        Assert.StartsWith("Accounts:", lines[^1], StringComparison.Ordinal);
+        Assert.StartsWith("Accounts:", lines[^2], StringComparison.Ordinal);
+        Assert.Equal("Legacy arguments: none", lines[^1]);
         Assert.StartsWith("Warning: The diagnostics report couldn't read its Library", Assert.Single(_logger.Entries), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SaysTheDeprecatedArgumentsUsedByNameWithTheLastCallAndItsClient()
+    {
+        _calls.Calls.Add(new DeprecatedCall("download.link", "DL_LINK_ARG", 3, TestData.Now.AddDays(-2), new DateTimeOffset(2026, 11, 3, 23, 31, 40, TimeSpan.FromHours(1)), "claude-ai"));
+        _calls.Calls.Add(new DeprecatedCall("a_tool.old", "A_OLD_ARG", 1, TestData.Now, TestData.Now, null));
+
+        Assert.Equal(
+            "Legacy arguments: a_tool.old ×1 (last 2026-10-21 12:00 UTC); download.link ×3 (last 2026-11-03 22:31 UTC, claude-ai)",
+            Line(await LinesAsync(), "Legacy arguments"));
+    }
+
+    [Fact]
+    public async Task KeepsWhatTheCountsFileSaysToALine()
+    {
+        _calls.Calls.Add(new DeprecatedCall("download.link\nAccounts: forged", "DL_LINK_ARG", 1, TestData.Now, TestData.Now, "client\r\nwith lines"));
+
+        string[] lines = await LinesAsync();
+
+        Assert.Equal("Legacy arguments: download.link ×1 (last 2026-10-21 12:00 UTC, client)", lines[^1]);
+        Assert.Single(lines, line => line.StartsWith("Accounts:", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task DeprecatedArgumentsThatCantBeReadSaySo()
+    {
+        _calls.Failure = new IOException($"{Home} is locked.");
+
+        Assert.Equal("Legacy arguments: couldn't be read (IOException)", Line(await LinesAsync(), "Legacy arguments"));
     }
 
     [Fact]
@@ -230,7 +292,7 @@ public sealed class DiagnosticsReportTests
 
         Assert.EndsWith("\n", report, StringComparison.Ordinal);
         Assert.DoesNotContain("\r", report, StringComparison.Ordinal);
-        Assert.Equal(8, report.Split('\n', StringSplitOptions.RemoveEmptyEntries).Length);
+        Assert.Equal(9, report.Split('\n', StringSplitOptions.RemoveEmptyEntries).Length);
     }
 
     private static string Line(string[] lines, string part) => Assert.Single(lines, line => line.StartsWith($"{part}:", StringComparison.Ordinal));
@@ -256,6 +318,7 @@ public sealed class DiagnosticsReportTests
             new RecordingDownloadService([.. _jobs]),
             _accounts,
             _secrets,
+            new DeprecatedCalls(_calls, new FakeTimeProvider(TestData.Now), new RecordingLogger<DeprecatedCalls>()),
             new FakeTimeProvider(TestData.Now),
             _logger);
 

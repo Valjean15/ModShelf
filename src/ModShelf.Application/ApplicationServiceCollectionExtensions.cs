@@ -248,9 +248,10 @@ public static class ApplicationServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers this ModShelf's <see cref="AppInfo"/> and <see cref="IDiagnostics"/>, its report for bug reports. Needs
-    /// the accounts, the library, the download engine and the settings, and Infrastructure's
-    /// <see cref="Diagnostics.Ports.IAppFolders"/>.
+    /// Registers this ModShelf's <see cref="AppInfo"/>, <see cref="IDiagnostics"/>, its report for bug reports, and
+    /// <see cref="IDeprecatedCalls"/>, which counts the calls that use a deprecated argument for it. Needs the accounts,
+    /// the library, the download engine and the settings, and Infrastructure's <see cref="Diagnostics.Ports.IAppFolders"/>
+    /// and <see cref="Diagnostics.Ports.IDeprecatedCallStore"/>.
     /// </summary>
     public static IServiceCollection AddDiagnostics(this IServiceCollection services, AppInfo app)
     {
@@ -259,6 +260,7 @@ public static class ApplicationServiceCollectionExtensions
 
         services.TryAddSingleton(app);
         services.TryAddSingleton(TimeProvider.System);
+        services.TryAddSingleton<IDeprecatedCalls, DeprecatedCalls>();
         services.TryAddSingleton<IDiagnostics, DiagnosticsReport>();
 
         return services;

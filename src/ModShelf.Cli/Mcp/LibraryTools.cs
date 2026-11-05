@@ -7,7 +7,9 @@ using ModelContextProtocol.Server;
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
+using ModShelf.Application.Sources;
 using ModShelf.Application.Updates;
+using ModShelf.Cli.Commands;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 
@@ -25,6 +27,7 @@ internal sealed class LibraryTools(
     IUpdateChecker checker,
     IModLookup lookup,
     ILibraryRescan rescanner,
+    ISourceRegistry sources,
     TimeProvider time)
 {
     // The most mods a page of the library lists.
@@ -171,7 +174,7 @@ internal sealed class LibraryTools(
             Uri mod = McpProblems.Link(link);
             LibraryMod watched = await library.WatchAsync(mod, cancellationToken).ConfigureAwait(false);
             LibraryRoots roots = await settings.GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false);
-            return new WatchResult(true, $"Watching {watched.Name} ({Describe(watched.Mod)}).", McpEntries.Mod(watched, roots));
+            return new WatchResult(true, $"Watching {watched.Name} ({CliText.ModOn(sources, watched.Mod)}).", McpEntries.Mod(watched, roots));
         });
 
     [McpServerTool(Name = "library_unwatch", Title = "Stop watching a mod", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
@@ -186,7 +189,7 @@ internal sealed class LibraryTools(
             LibraryRoots roots = await settings.GetLibraryRootsAsync(cancellationToken).ConfigureAwait(false);
             string message = change switch
             {
-                { Before: null } => $"{char.ToUpperInvariant(Describe(change.Mod)[0])}{Describe(change.Mod)[1..]} isn't in the library.",
+                { Before: null } => $"{CliText.Capitalized(CliText.ModOn(sources, change.Mod))} isn't in the library.",
                 { Before.IsWatched: false } => $"{change.Before.Name} isn't watched.",
                 { After: null } => $"Stopped watching {change.Before.Name}. It had no downloaded files, so it's out of the library.",
                 _ => $"Stopped watching {change.Before.Name}. Its downloaded files stay in the library.",
@@ -323,8 +326,6 @@ internal sealed class LibraryTools(
                 rescan.Unmatched,
                 [.. rescan.Failures.Select(failure => new RescanFailureEntry(failure.Mod.Game.Source.Value, failure.Mod.Game.Key, failure.Mod.Id, failure.Reason))]);
         });
-
-    private static string Describe(ModRef mod) => $"mod {mod.Id} of {mod.Game.Key} on {mod.Game.Source}";
 
     /// <summary>
     /// Changes a mod in the library, saying so when it isn't in it.
