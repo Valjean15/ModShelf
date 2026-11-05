@@ -37,15 +37,15 @@ public sealed class PreviewsViewModelGameTests
         PreviewsViewModel previews = await StartedAsync(screen);
 
         previews.ShowFor(Stardew);
-        (PreviewLevel, bool, string, string?) stardew = (previews.Level, previews.IsGamesOwn, previews.Label, previews.Hint);
+        (PreviewLevel, bool, string?) stardew = (previews.Level, previews.IsGamesOwn, previews.Hint);
         previews.ShowFor(Skyrim);
-        (PreviewLevel, bool, string, string?) skyrim = (previews.Level, previews.IsGamesOwn, previews.Label, previews.Hint);
+        (PreviewLevel, bool, string?) skyrim = (previews.Level, previews.IsGamesOwn, previews.Hint);
         previews.ShowFor(null);
 
         Assert.Equal(
-            (PreviewLevel.Off, true, "This game's previews", "This game has previews of its own, so a choice here changes them. Its settings, in Settings › Games, can set it back to the screen's."),
+            (PreviewLevel.Off, true, "This game has previews of its own, so a choice here changes them. Its settings, in Settings › Games, can set it back to the screen's."),
             stardew);
-        Assert.Equal((screens, false, "Previews", (string?)null), skyrim);
+        Assert.Equal((screens, false, (string?)null), skyrim);
         Assert.Equal((screens, false), (previews.Level, previews.IsGamesOwn));
     }
 
@@ -154,14 +154,33 @@ public sealed class PreviewsViewModelGameTests
                 .Add(Skyrim, new GameSettings { Previews = PreviewLevel.Cards, Hidden = true }),
         };
 
-        Pictures.ShowGames(_pictures.Settings.Stored);
+        Pictures.Show(_pictures.Settings.Stored);
         int unchanged = changes;
-        Pictures.ShowGames(changed);
+        Pictures.Show(changed);
         PreviewLevel? skyrim = Pictures.OwnLevelOf(PreviewScreen.Library, Skyrim);
-        Pictures.ShowGames(new AppSettings());
+        Pictures.Show(new AppSettings());
 
         Assert.Equal((0, PreviewLevel.Cards, 2), (unchanged, skyrim, changes));
         Assert.Null(Pictures.OwnLevelOf(PreviewScreen.Browse, Stardew));
+    }
+
+    [Fact]
+    public async Task ShowsTheScreensPreviewsTheSettingsScreenReadsTellingTheScreensOnlyOfAChange()
+    {
+        await Pictures.LoadAsync();
+        int changes = 0;
+        Pictures.Changed += (_, _) => changes++;
+        AppSettings stored = _pictures.Settings.Stored;
+
+        // The defaults, stored, are no change.
+        Pictures.Show(stored with { Previews = new Dictionary<PreviewScreen, PreviewLevel> { [PreviewScreen.Browse] = PreviewLevel.Cards } });
+        int unchanged = changes;
+        Pictures.Show(stored with { Previews = new Dictionary<PreviewScreen, PreviewLevel> { [PreviewScreen.Downloads] = PreviewLevel.Thumbnails } });
+        (PreviewLevel, PreviewLevel) shown = (Pictures.LevelOf(PreviewScreen.Downloads), Pictures.LevelOf(PreviewScreen.Library));
+        Pictures.Show(stored);
+
+        Assert.Equal((0, (PreviewLevel.Thumbnails, PreviewLevel.Thumbnails), 2), (unchanged, shown, changes));
+        Assert.Equal(PreviewLevel.Off, Pictures.LevelOf(PreviewScreen.Downloads));
     }
 
     [Fact]

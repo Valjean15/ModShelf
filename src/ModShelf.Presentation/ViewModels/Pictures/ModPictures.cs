@@ -12,8 +12,8 @@ namespace ModShelf.Presentation.ViewModels.Pictures;
 /// <summary>
 /// What the screens show mods' pictures with: the previews each screen shows, and each game that has its own, how adult
 /// mods' pictures look, the mods' saved details and the saved pictures. The choices are read from the settings once; one
-/// changed through it is saved, and <see cref="Changed"/> tells every screen. The Settings screen shows it the games'
-/// previews as it reads them.
+/// changed through it is saved, and <see cref="Changed"/> tells every screen. The Settings screen shows it the screens'
+/// previews and the games' as it reads them.
 /// </summary>
 public sealed partial class ModPictures
 {
@@ -126,17 +126,21 @@ public sealed partial class ModPictures
     }
 
     /// <summary>
-    /// Shows the games' own previews as <paramref name="settings"/> stores them, telling the screens when they changed.
+    /// Shows the screens' previews and the games' own as <paramref name="settings"/> stores them, telling the screens when
+    /// they changed.
     /// </summary>
-    internal void ShowGames(AppSettings settings)
+    internal void Show(AppSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
 
         ImmutableDictionary<GameRef, PreviewLevel> levels = GameLevelsOf(settings);
-        if (levels.Count != _gameLevels.Count
-            || levels.Any(stored => !_gameLevels.TryGetValue(stored.Key, out PreviewLevel shown) || shown != stored.Value))
+        bool changed = Enum.GetValues<PreviewScreen>().Any(screen => settings.PreviewFor(screen) != LevelOf(screen))
+            || levels.Count != _gameLevels.Count
+            || levels.Any(stored => !_gameLevels.TryGetValue(stored.Key, out PreviewLevel shown) || shown != stored.Value);
+        _levels = settings.Previews.ToImmutableDictionary();
+        _gameLevels = levels;
+        if (changed)
         {
-            _gameLevels = levels;
             Changed?.Invoke(this, EventArgs.Empty);
         }
     }

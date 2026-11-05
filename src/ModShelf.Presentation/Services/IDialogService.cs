@@ -48,6 +48,12 @@ public interface IDialogService
     Task<bool> AddGameAsync(AddGameViewModel adding, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Shows the dialog that moves a game's files, until it asks to close (<see cref="GameMoveViewModel.CloseRequested"/>):
+    /// once they've moved, when there was nothing to move, or when the user closes it, which can't happen while they move.
+    /// </summary>
+    Task MoveGameAsync(GameMoveViewModel moving, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Shows the first-run setup over the main window, until it asks to close (<see cref="FirstRunViewModel.CloseRequested"/>)
     /// or the user closes it.
     /// </summary>

@@ -6,23 +6,6 @@
              x:Class="ModShelf.Desktop.Views.DownloadsView"
              x:DataType="vm:DownloadsViewModel">
 
-    <!--
-      The previews at the end of the tabs' row; in a narrow window, below the tabs. Their place is set here rather than on
-      them, so the narrow window's can replace it.
-    -->
-    <UserControl.Styles>
-        <Style Selector="pictures|PreviewsPicker#Previews">
-            <Setter Property="Grid.Column" Value="1" />
-        </Style>
-        <ContainerQuery Name="DownloadsScreen" Query="max-width:700">
-            <Style Selector="pictures|PreviewsPicker#Previews">
-                <Setter Property="Grid.Row" Value="1" />
-                <Setter Property="Grid.Column" Value="0" />
-                <Setter Property="Margin" Value="0,10,0,0" />
-            </Style>
-        </ContainerQuery>
-    </UserControl.Styles>
-
     <DockPanel Container.Name="DownloadsScreen" Container.Sizing="Width">
         <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" ColumnSpacing="16" Margin="0,0,0,16">
             <StackPanel Spacing="2">
@@ -76,8 +59,8 @@
             </Grid>
         </Border>
 
-        <!-- The tabs, each with its count, and the previews at the end. -->
-        <Grid DockPanel.Dock="Top" Margin="0,16,0,0" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="16" IsVisible="{Binding HasJobs}">
+        <!-- The tabs, each with its count. -->
+        <Grid DockPanel.Dock="Top" Margin="0,16,0,0" IsVisible="{Binding HasJobs}">
             <ListBox Classes="tabs" ItemsSource="{Binding Tabs}" SelectedItem="{Binding SelectedTab}">
                 <ListBox.ItemTemplate>
                     <DataTemplate x:DataType="vm:DownloadTabViewModel">
@@ -88,10 +71,6 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
-            <pictures:PreviewsPicker Name="Previews"
-                                     HorizontalAlignment="Left"
-                                     VerticalAlignment="Top"
-                                     DataContext="{Binding Previews}" />
         </Grid>
 
         <Panel Margin="0,14,0,0">

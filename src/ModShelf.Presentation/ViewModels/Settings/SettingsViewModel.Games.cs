@@ -4,6 +4,7 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 using ModShelf.Application.Common;
+using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
@@ -26,6 +27,9 @@ public sealed partial class SettingsViewModel
     private readonly HashSet<GameRef> _libraryGames = new(AppSettings.GameComparer);
     private readonly Dictionary<GameRef, GameInfo> _gameInfos = new(AppSettings.GameComparer);
     private readonly HashSet<GameRef> _addedGames = new(AppSettings.GameComparer);
+
+    // How many of the library's mods are of each game, with files, and the room their files take.
+    private readonly Dictionary<GameRef, (int Mods, long Bytes)> _gameFiles = new(AppSettings.GameComparer);
 
     /// <summary>
     /// The games, by name: the library's, those with settings of their own, and those added.
@@ -109,20 +113,24 @@ public sealed partial class SettingsViewModel
             SaveFoldersAsync,
             other => CopyGameAsync(other, game),
             BrowseChoices.For(_sources.Find<IModSearch>(game.Source)?.Capabilities, _sources.Words(game.Source)),
-            LibraryRoot);
+            LibraryRoot,
+            title => _dialogs.PickFolderAsync(title, CancellationToken.None),
+            folder => MoveGameFilesAsync(game, folder));
         page.ShowSite = ShowSites;
         page.Show(_shown, LibraryRoot);
+        ShowFiles(page);
         ShowSameNamed(page);
         Game = page;
     }
 
     /// <summary>
-    /// What a game's row says of its settings: none of its own, how many, or that it's hidden.
+    /// What a game's row says of its settings: none of its own, how many, its own folder among them, or that it's hidden.
     /// </summary>
     private static string NoteOf(GameSettings own)
     {
         int overridden = new[]
         {
+            own.Root is not null,
             own.Folders is not null,
             own.OldVersions is not null,
             own.CheckUpdates is not null || own.UpdateInterval is not null,
@@ -245,7 +253,31 @@ public sealed partial class SettingsViewModel
     }
 
     /// <summary>
-    /// Lists the library's games, then asks their sites for the names not known yet.
+    /// Moves a game's files to <paramref name="folder"/>, or to the library's with null, in the dialog that says what
+    /// moves and asks; then shows the settings as stored.
+    /// </summary>
+    /// <returns>What the move did; null when nothing moved.</returns>
+    private async Task<LibraryMove?> MoveGameFilesAsync(GameRef game, string? folder)
+    {
+        GameMoveViewModel moving = new(
+            game,
+            NameOf(game),
+            folder,
+            _mover,
+            title => _dialogs.PickFolderAsync(title, CancellationToken.None),
+            _uiThread,
+            _logger);
+        moving.StartPlanning();
+        await _dialogs.MoveGameAsync(moving, CancellationToken.None);
+
+        // Whatever happened, what's shown is what's stored: the game's folder, its own or the library's.
+        await ShowStoredAsync();
+        return moving.Result;
+    }
+
+    /// <summary>
+    /// Lists the library's games, with how many of their mods have files and the room those take, then asks their sites
+    /// for the names not known yet.
     /// </summary>
     private async Task ReadGamesAsync()
     {
@@ -258,6 +290,12 @@ public sealed partial class SettingsViewModel
         {
             LogGamesUnreadable(_logger, exception);
             return;
+        }
+
+        _gameFiles.Clear();
+        foreach (IGrouping<GameRef, LibraryMod> game in mods.Where(mod => mod.Files.Count > 0).GroupBy(mod => mod.Mod.Game, AppSettings.GameComparer))
+        {
+            _gameFiles[game.Key] = (game.Count(), game.Sum(mod => mod.Files.Sum(file => file.SizeInBytes)));
         }
 
         List<GameRef> unnamed = [];
@@ -315,6 +353,7 @@ public sealed partial class SettingsViewModel
             page.Name = NameOf(page.Game);
             page.ShowSite = ShowSites;
             page.Show(_shown, LibraryRoot);
+            ShowFiles(page);
             ShowSameNamed(page);
         }
 
@@ -328,6 +367,15 @@ public sealed partial class SettingsViewModel
             // Names read since the search was typed may match it.
             ShowSections();
         }
+    }
+
+    /// <summary>
+    /// Says on <paramref name="page"/> how many of the library's mods are of its game, with files, and the room they take.
+    /// </summary>
+    private void ShowFiles(GameSettingsViewModel page)
+    {
+        (int mods, long bytes) = _gameFiles.GetValueOrDefault(page.Game);
+        page.ShowFiles(mods, bytes);
     }
 
     /// <summary>

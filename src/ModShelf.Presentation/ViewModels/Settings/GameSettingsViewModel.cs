@@ -3,7 +3,9 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
+using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
+using ModShelf.Domain.Common;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Domain.Updates;
@@ -15,17 +17,23 @@ using ModShelf.Sources.Abstractions.Search;
 namespace ModShelf.Presentation.ViewModels.Settings;
 
 /// <summary>
-/// One game's own settings, in the Settings screen's Games category: its folder pattern, old versions, update checks,
-/// notices, previews and how Browse starts for it, each using every game's, or the screens', which it says, until it's
-/// overridden, which shows it to change; and whether the lists hide the game. Each is saved as it's chosen, a folder pattern when the user saves
-/// it, and the page then shows the settings as stored.
+/// One game's own settings, in the Settings screen's Games category: its folder, the library's or its own, which choosing
+/// another moves its files to; its folder pattern, old versions, update checks, notices, previews and how Browse starts
+/// for it, each using every game's, or the screens', which it says, until it's overridden, which shows it to change; and
+/// whether the lists hide the game. Each is saved as it's chosen, a folder pattern when the user saves it, and the page
+/// then shows the settings as stored.
 /// </summary>
 public sealed partial class GameSettingsViewModel : ObservableObject
 {
     private readonly Func<Func<GameSettings, GameSettings>, Task<string?>> _change;
     private readonly Func<GameRef, Task> _copyFrom;
     private readonly BrowseOffer _browse;
+    private readonly Func<string, Task<string?>> _pickFolder;
+    private readonly Func<string?, Task<LibraryMove?>> _moveFiles;
     private AppSettings _shown = new();
+    private string _root = string.Empty;
+    private int _mods;
+    private long _bytes;
     private bool _showing;
 
     /// <param name="game">The game.</param>
@@ -36,6 +44,11 @@ public sealed partial class GameSettingsViewModel : ObservableObject
     /// <param name="copyFrom">Asks, then gives the game the settings of the same game on another site.</param>
     /// <param name="browse">What Browse offers for the game's site, for how Browse starts.</param>
     /// <param name="root">The library's folder, for the folder pattern's example.</param>
+    /// <param name="pickFolder">Asks the user for a folder, with the title given; null when they don't choose one.</param>
+    /// <param name="moveFiles">
+    /// Moves the game's files to a folder, or to the library's with null, as the user confirms; what the move did, or null
+    /// when nothing moved.
+    /// </param>
     internal GameSettingsViewModel(
         GameRef game,
         string name,
@@ -44,7 +57,9 @@ public sealed partial class GameSettingsViewModel : ObservableObject
         Func<GameRef?, FolderPattern?, Task<string?>> saveFolders,
         Func<GameRef, Task> copyFrom,
         BrowseOffer browse,
-        string root)
+        string root,
+        Func<string, Task<string?>> pickFolder,
+        Func<string?, Task<LibraryMove?>> moveFiles)
     {
         ArgumentNullException.ThrowIfNull(game);
         ArgumentException.ThrowIfNullOrWhiteSpace(siteName);
@@ -52,6 +67,9 @@ public sealed partial class GameSettingsViewModel : ObservableObject
         ArgumentNullException.ThrowIfNull(saveFolders);
         ArgumentNullException.ThrowIfNull(copyFrom);
         ArgumentNullException.ThrowIfNull(browse);
+        ArgumentNullException.ThrowIfNull(root);
+        ArgumentNullException.ThrowIfNull(pickFolder);
+        ArgumentNullException.ThrowIfNull(moveFiles);
 
         Game = game;
         Name = name;
@@ -59,6 +77,9 @@ public sealed partial class GameSettingsViewModel : ObservableObject
         _change = change;
         _copyFrom = copyFrom;
         _browse = browse;
+        _pickFolder = pickFolder;
+        _moveFiles = moveFiles;
+        _root = root;
         Folders = new FolderPatternViewModel(game, FolderPattern.Default, root, saveFolders);
     }
 
@@ -112,6 +133,31 @@ public sealed partial class GameSettingsViewModel : ObservableObject
     /// The last change saved, for tests to wait on.
     /// </summary>
     internal Task Saving { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
+    /// Whether the game's files are in a folder of their own, rather than the library's.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(MoveBackCommand))]
+    public partial bool HasOwnRoot { get; private set; }
+
+    /// <summary>
+    /// The folder the game's files are in: its own, or the library's.
+    /// </summary>
+    [ObservableProperty]
+    public partial string FolderPath { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// Such as "Its 73 mods' files, 18.4 GB, are in the library's folder."
+    /// </summary>
+    [ObservableProperty]
+    public partial string FolderText { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// What the last move of its files did, such as "Moved 211 files."; null for nothing to say.
+    /// </summary>
+    [ObservableProperty]
+    public partial string? FolderNote { get; private set; }
 
     /// <summary>
     /// Whether the game has a folder pattern of its own.
@@ -325,7 +371,12 @@ public sealed partial class GameSettingsViewModel : ObservableObject
         try
         {
             _shown = settings;
+            _root = root;
             GameSettings own = settings.GameFor(Game);
+            HasOwnRoot = own.Root is not null;
+            FolderPath = own.Root ?? root;
+            ShowFolder();
+
             FolderPattern everyGamesFolders = settings.LibraryFolders ?? FolderPattern.Default;
             HasOwnFolders = own.Folders is not null;
             EveryGamesFolders = Text.Format(Strings.GameEveryGames, everyGamesFolders.Text);
@@ -404,6 +455,16 @@ public sealed partial class GameSettingsViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Says how many of the library's mods are of the game, with files, and how much room their files take.
+    /// </summary>
+    internal void ShowFiles(int mods, long bytes)
+    {
+        _mods = mods;
+        _bytes = bytes;
+        ShowFolder();
+    }
+
+    /// <summary>
     /// What a rule does with old versions, in a few words, such as "keep the newest 2".
     /// </summary>
     internal static string Describe(OldVersionRule rule) => rule.Action switch
@@ -444,6 +505,24 @@ public sealed partial class GameSettingsViewModel : ObservableObject
     partial void OnSelectedPageSizeChanged(PageSizeChoice? value) => SaveBrowse();
 
     partial void OnIsHiddenChanged(bool value) => Save(own => own with { Hidden = value ? true : null });
+
+    /// <summary>
+    /// Gives the game a folder the user picks, moving its files there; the library's own folder moves them back to it.
+    /// </summary>
+    [RelayCommand]
+    private async Task ChooseFolderAsync()
+    {
+        if (await _pickFolder(Text.Format(Strings.GameFolderChooseTitle, Name)) is { } folder)
+        {
+            await MoveToAsync(FilePaths.Same(folder, _root) ? null : folder);
+        }
+    }
+
+    /// <summary>
+    /// Moves the game's files back to the library's folder.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(HasOwnRoot))]
+    private Task MoveBackAsync() => MoveToAsync(null);
 
     /// <summary>
     /// Gives the game a folder pattern of its own: every game's, to change.
@@ -514,6 +593,59 @@ public sealed partial class GameSettingsViewModel : ObservableObject
     /// Every game's interval in a sentence, such as "every 6 hours" from "Every 6 hours".
     /// </summary>
     private static string Lower(string label) => label.Length == 0 ? label : char.ToLowerInvariant(label[0]) + label[1..];
+
+    /// <summary>
+    /// Says where the game's files are, and how many there are.
+    /// </summary>
+    private void ShowFolder()
+    {
+        string size = Sizes.Format(_bytes);
+        FolderText = (HasOwnRoot, _mods) switch
+        {
+            (false, 0) => Strings.GameFolderLibraryNone,
+            (false, 1) => Text.Format(Strings.GameFolderLibraryOne, size),
+            (false, _) => Text.Format(Strings.GameFolderLibrary, _mods, size),
+            (true, 0) => Strings.GameFolderOwnNone,
+            (true, 1) => Text.Format(Strings.GameFolderOwnOne, size),
+            _ => Text.Format(Strings.GameFolderOwn, _mods, size),
+        };
+    }
+
+    /// <summary>
+    /// Makes <paramref name="folder"/> the game's, or the library's with null: at once while the game has no files, or
+    /// else by moving them, as the user confirms.
+    /// </summary>
+    private async Task MoveToAsync(string? folder)
+    {
+        if (FilePaths.Same(folder ?? _root, FolderPath))
+        {
+            return;
+        }
+
+        FolderNote = null;
+        if (_mods == 0)
+        {
+            // Nothing to move: the folder is the game's at once.
+            await ChangeAsync(own => own with { Root = folder });
+            return;
+        }
+
+        if (await _moveFiles(folder) is { } move)
+        {
+            string moved = move.Moved switch
+            {
+                0 => Strings.GameFolderMovedNone,
+                1 => Strings.GameFolderMovedOne,
+                int count => Text.Format(Strings.GameFolderMovedMany, count),
+            };
+            FolderNote = move.Missing switch
+            {
+                0 => moved,
+                1 => Text.Format(Strings.GameFolderMovedMissing, moved, Strings.SettingsMissingOne),
+                int missing => Text.Format(Strings.GameFolderMovedMissing, moved, Text.Format(Strings.SettingsMissing, missing)),
+            };
+        }
+    }
 
     private void Choose(bool chosen, OldVersionAction action)
     {

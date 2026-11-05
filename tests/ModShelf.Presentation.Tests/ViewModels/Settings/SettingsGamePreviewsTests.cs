@@ -39,7 +39,7 @@ public sealed class SettingsGamePreviewsTests
         await StartAsync();
 
         Assert.False(Game.HasOwnPreviews);
-        Assert.Equal("The screens' own: no pictures in the Library, cards in Browse.", Game.EveryGamesPreviews);
+        Assert.Equal("The screens' own: rows in the Library, cards in Browse.", Game.EveryGamesPreviews);
         Assert.Equal((PreviewLevel.Off, true, false, false), (Game.Previews, Game.IsPreviewsOff, Game.IsPreviewsThumbnails, Game.IsPreviewsCards));
         Assert.Equal("Uses the defaults", Screen.Games[0].Note);
         await Game.Saving;

@@ -41,7 +41,6 @@
                 <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding SummaryText}" />
             </StackPanel>
             <StackPanel Classes="tools" Orientation="Horizontal" Spacing="10" VerticalAlignment="Top">
-                <pictures:PreviewsPicker DataContext="{Binding Previews}" />
                 <Button Content="{x:Static res:Strings.UpdatesCheckNow}" Command="{Binding CheckNowCommand}" />
                 <Button Classes="accent"
                         Content="{Binding UpdateAllText}"

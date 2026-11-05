@@ -7,9 +7,10 @@ using ModShelf.Presentation.Resources;
 namespace ModShelf.Presentation.ViewModels.Pictures;
 
 /// <summary>
-/// The previews a screen shows its mods with: none, thumbnails beside them, or, where the screen offers them, cards with
-/// large pictures. A choice is saved, and the settings' is shown as the screen starts. While the Library or Browse shows
-/// a game that has previews of its own, those show, and a choice changes them.
+/// The previews a screen shows its mods with: rows, rows with thumbnails, or, where the screen offers them, cards with
+/// large pictures, as Settings › General › Previews says. The settings' are shown as the screen starts, and again when
+/// they change. While the Library or Browse shows a game that has previews of its own, those show. Browse's view switch
+/// makes a choice, which is saved: the game's own while it has some, or else the screen's.
 /// </summary>
 public sealed partial class PreviewsViewModel : ObservableObject
 {
@@ -31,13 +32,8 @@ public sealed partial class PreviewsViewModel : ObservableObject
     /// Whether the previews are the shown game's own, which a choice changes, rather than the screen's.
     /// </summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Label), nameof(Hint))]
+    [NotifyPropertyChangedFor(nameof(Hint))]
     public partial bool IsGamesOwn { get; private set; }
-
-    /// <summary>
-    /// "Previews", or "This game's previews" while they're the game's own.
-    /// </summary>
-    public string Label => IsGamesOwn ? Strings.PreviewsGamesOwn : Strings.Previews;
 
     /// <summary>
     /// What a choice changes while the previews are the game's own; null otherwise.

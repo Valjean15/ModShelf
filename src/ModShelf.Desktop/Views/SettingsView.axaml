@@ -167,6 +167,44 @@
                             </StackPanel>
                         </Border>
 
+                        <!-- How each screen shows mods: its name, what its previews cover, and its levels. -->
+                        <Border Classes="card" IsVisible="{Binding PreviewsSection.IsShown}">
+                            <StackPanel Spacing="14">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Classes="subheading" Text="{x:Static res:Strings.Previews}" />
+                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.SettingsPreviewsNote}" />
+                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding ScreenPreviews}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Spacing="16" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <!-- The levels have no group name: each row's are grouped by their panel. -->
+                                        <DataTemplate x:DataType="vm:ScreenPreviewsViewModel">
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                                <StackPanel Spacing="2" VerticalAlignment="Center">
+                                                    <TextBlock FontWeight="SemiBold" Text="{Binding Name}" />
+                                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding Note}" IsVisible="{Binding HasNote}" />
+                                                </StackPanel>
+                                                <Border Grid.Column="1" Classes="segments" VerticalAlignment="Center">
+                                                    <StackPanel Orientation="Horizontal" Spacing="2" AutomationProperties.Name="{Binding Name}">
+                                                        <RadioButton Classes="segment" Content="{x:Static res:Strings.PreviewsRows}" IsChecked="{Binding IsRows}" />
+                                                        <RadioButton Classes="segment" Content="{x:Static res:Strings.PreviewsThumbnails}" IsChecked="{Binding IsThumbnails}" />
+                                                        <RadioButton Classes="segment"
+                                                                     Content="{x:Static res:Strings.PreviewsCards}"
+                                                                     IsChecked="{Binding IsCards}"
+                                                                     IsVisible="{Binding OffersCards}" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+
                         <!-- Pictures and mod details: each setting beside what it is, divided by lines. -->
                         <!-- A panel holds whether it shows: the card's own data is the part's. -->
                         <Panel IsVisible="{Binding PicturesSection.IsShown}">
@@ -377,6 +415,24 @@
                                                     </ItemsControl>
                                                 </StackPanel>
 
+                                                <!-- The game's folder: the library's, or its own; choosing another moves its files there. -->
+                                                <StackPanel Spacing="4">
+                                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                                        <WrapPanel ItemSpacing="8" LineSpacing="4">
+                                                            <TextBlock Classes="settingName" Text="{x:Static res:Strings.GameFolderHeading}" />
+                                                            <Border Classes="pill" IsVisible="{Binding !HasOwnRoot}"><TextBlock Text="{x:Static res:Strings.GameFolderUsesLibrary}" /></Border>
+                                                            <Border Classes="pill own" IsVisible="{Binding HasOwnRoot}"><TextBlock Text="{x:Static res:Strings.GameFolderOwnPill}" /></Border>
+                                                        </WrapPanel>
+                                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                                            <Button Classes="quiet" Content="{x:Static res:Strings.GameFolderMoveBack}" Command="{Binding MoveBackCommand}" IsVisible="{Binding HasOwnRoot}" />
+                                                            <Button Content="{x:Static res:Strings.GameFolderChoose}" Command="{Binding ChooseFolderCommand}" />
+                                                        </StackPanel>
+                                                    </Grid>
+                                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding FolderText}" />
+                                                    <SelectableTextBlock FontFamily="{DynamicResource ShelfMonoFont}" FontSize="13" TextWrapping="Wrap" Text="{Binding FolderPath}" />
+                                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding FolderNote}" IsVisible="{Binding FolderNote, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                                </StackPanel>
+
                                                 <!-- Folder pattern. -->
                                                 <StackPanel Spacing="4">
                                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
@@ -488,7 +544,7 @@
                                                     <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding EveryGamesPreviews}" />
                                                     <Border Classes="segments" HorizontalAlignment="Left" Margin="0,4,0,0" IsVisible="{Binding HasOwnPreviews}">
                                                         <StackPanel Orientation="Horizontal" Spacing="2" AutomationProperties.Name="{x:Static res:Strings.GamePreviewsHeading}">
-                                                            <RadioButton Classes="segment" GroupName="GamePreviews" Content="{x:Static res:Strings.PreviewsOff}" IsChecked="{Binding IsPreviewsOff}" />
+                                                            <RadioButton Classes="segment" GroupName="GamePreviews" Content="{x:Static res:Strings.PreviewsRows}" IsChecked="{Binding IsPreviewsOff}" />
                                                             <RadioButton Classes="segment" GroupName="GamePreviews" Content="{x:Static res:Strings.PreviewsThumbnails}" IsChecked="{Binding IsPreviewsThumbnails}" />
                                                             <RadioButton Classes="segment" GroupName="GamePreviews" Content="{x:Static res:Strings.PreviewsCards}" IsChecked="{Binding IsPreviewsCards}" />
                                                         </StackPanel>

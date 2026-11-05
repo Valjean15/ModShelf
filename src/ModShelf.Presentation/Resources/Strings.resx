@@ -1588,19 +1588,22 @@
   </data>
   <data name="Previews" xml:space="preserve">
     <value>Previews</value>
-    <comment>Label of the buttons that choose how a screen shows its mods' pictures.</comment>
+    <comment>Heading of the setting of how each screen shows its mods.</comment>
   </data>
-  <data name="PreviewsGamesOwn" xml:space="preserve">
-    <value>This game's previews</value>
-    <comment>Label of the previews buttons while the game shown has previews of its own, from its settings.</comment>
+  <data name="SettingsPreviewsNote" xml:space="preserve">
+    <value>How each screen shows mods: as rows, rows with thumbnails, or cards. A game can have its own, in Games.</value>
+  </data>
+  <data name="SettingsPreviewsLibraryNote" xml:space="preserve">
+    <value>Its games, a game's mods and a mod's page</value>
+    <comment>Under the Library, in Settings › General › Previews.</comment>
+  </data>
+  <data name="SettingsPreviewsBrowseNote" xml:space="preserve">
+    <value>The mods a search finds, and a mod's page</value>
+    <comment>Under Browse, in Settings › General › Previews.</comment>
   </data>
   <data name="PreviewsGamesOwnHint" xml:space="preserve">
     <value>This game has previews of its own, so a choice here changes them. Its settings, in Settings › Games, can set it back to the screen's.</value>
-    <comment>Tooltip of the previews buttons while the game shown has previews of its own.</comment>
-  </data>
-  <data name="PreviewsOff" xml:space="preserve">
-    <value>Off</value>
-    <comment>Previews button: no pictures.</comment>
+    <comment>Tooltip of Browse's view switch while the game chosen has previews of its own.</comment>
   </data>
   <data name="PreviewsThumbnails" xml:space="preserve">
     <value>Thumbnails</value>
@@ -2446,20 +2449,209 @@
     <value>With the other games ({0})</value>
     <comment>The first choice of a game's update interval. {0}: every game's, such as every 6 hours.</comment>
   </data>
+  <data name="GameFolderHeading" xml:space="preserve">
+    <value>Folder</value>
+    <comment>Heading of a game's folder setting.</comment>
+  </data>
+  <data name="GameFolderUsesLibrary" xml:space="preserve">
+    <value>Uses the library</value>
+    <comment>Pill beside a game's folder setting while its files are in the library's folder.</comment>
+  </data>
+  <data name="GameFolderOwnPill" xml:space="preserve">
+    <value>Its own</value>
+    <comment>Pill beside a game's folder setting while its files are in a folder of their own.</comment>
+  </data>
+  <data name="GameFolderChoose" xml:space="preserve">
+    <value>Choose…</value>
+    <comment>Button that picks a game's folder, then moves its files there.</comment>
+  </data>
+  <data name="GameFolderMoveBack" xml:space="preserve">
+    <value>Move back to the library</value>
+    <comment>Button that moves a game's files back to the library's folder.</comment>
+  </data>
+  <data name="GameFolderChooseTitle" xml:space="preserve">
+    <value>Choose a folder for {0}'s files</value>
+    <comment>Title of the folder picker. {0}: the game.</comment>
+  </data>
+  <data name="GameFolderLibraryNone" xml:space="preserve">
+    <value>Its mods' files go in the library's folder.</value>
+  </data>
+  <data name="GameFolderLibraryOne" xml:space="preserve">
+    <value>Its mod's files, {0}, are in the library's folder.</value>
+    <comment>{0}: the room they take, such as 1.2 GB.</comment>
+  </data>
+  <data name="GameFolderLibrary" xml:space="preserve">
+    <value>Its {0} mods' files, {1}, are in the library's folder.</value>
+    <comment>{0}: how many mods; {1}: the room their files take, such as 18.4 GB.</comment>
+  </data>
+  <data name="GameFolderOwnNone" xml:space="preserve">
+    <value>Its mods' files go in a folder of their own. The folder pattern still says where in it.</value>
+  </data>
+  <data name="GameFolderOwnOne" xml:space="preserve">
+    <value>Its mod's files, {0}, are in a folder of their own. The folder pattern still says where in it.</value>
+    <comment>{0}: the room they take, such as 1.2 GB.</comment>
+  </data>
+  <data name="GameFolderOwn" xml:space="preserve">
+    <value>Its {0} mods' files, {1}, are in a folder of their own. The folder pattern still says where in it.</value>
+    <comment>{0}: how many mods; {1}: the room their files take, such as 18.4 GB.</comment>
+  </data>
+  <data name="GameFolderMovedNone" xml:space="preserve">
+    <value>No file needed moving.</value>
+    <comment>Said once a game's files moved, when none had to.</comment>
+  </data>
+  <data name="GameFolderMovedOne" xml:space="preserve">
+    <value>Moved 1 file.</value>
+  </data>
+  <data name="GameFolderMovedMany" xml:space="preserve">
+    <value>Moved {0} files.</value>
+    <comment>{0}: how many.</comment>
+  </data>
+  <data name="GameFolderMovedMissing" xml:space="preserve">
+    <value>{0} {1}</value>
+    <comment>{0}: what moved, in a sentence; {1}: the files that weren't on disk, in a sentence.</comment>
+  </data>
+  <data name="GameMoveAskTitle" xml:space="preserve">
+    <value>Move {0}'s files?</value>
+    <comment>Title of the dialog that moves a game's files. {0}: the game.</comment>
+  </data>
+  <data name="GameMoveFinding" xml:space="preserve">
+    <value>Finding its files…</value>
+  </data>
+  <data name="GameMoveFrom" xml:space="preserve">
+    <value>From</value>
+    <comment>The folder a game's files move from.</comment>
+  </data>
+  <data name="GameMoveTo" xml:space="preserve">
+    <value>To</value>
+    <comment>The folder a game's files move to.</comment>
+  </data>
+  <data name="GameMoveMoving" xml:space="preserve">
+    <value>Moving</value>
+    <comment>How many of a game's files move.</comment>
+  </data>
+  <data name="GameMoveMovingNone" xml:space="preserve">
+    <value>No files</value>
+    <comment>None of a game's files move: they're there already, or missing.</comment>
+  </data>
+  <data name="GameMoveMovingOne" xml:space="preserve">
+    <value>1 file, {0}</value>
+    <comment>{0}: its size, such as 1.2 GB.</comment>
+  </data>
+  <data name="GameMoveMovingMany" xml:space="preserve">
+    <value>{0} files, {1}</value>
+    <comment>{0}: how many; {1}: their size, such as 18.2 GB.</comment>
+  </data>
+  <data name="GameMoveRoomOn" xml:space="preserve">
+    <value>Room on {0}</value>
+    <comment>{0}: the drive, such as E:.</comment>
+  </data>
+  <data name="GameMoveRoom" xml:space="preserve">
+    <value>Room there</value>
+    <comment>The room on the drive a game's files move to, where drives have no names.</comment>
+  </data>
+  <data name="GameMoveFree" xml:space="preserve">
+    <value>{0} free</value>
+    <comment>{0}: the room, such as 412 GB.</comment>
+  </data>
+  <data name="GameMoveAlreadyThere" xml:space="preserve">
+    <value>Already there</value>
+    <comment>A game's files in the new folder already.</comment>
+  </data>
+  <data name="GameMoveAlreadyThereOne" xml:space="preserve">
+    <value>1 file, kept as it is</value>
+  </data>
+  <data name="GameMoveAlreadyThereMany" xml:space="preserve">
+    <value>{0} files, kept as they are</value>
+  </data>
+  <data name="GameMoveCopyKept" xml:space="preserve">
+    <value>{0}; 1 copy stays in the old folder too</value>
+    <comment>{0}: the files there already, such as "3 files, kept as they are".</comment>
+  </data>
+  <data name="GameMoveCopiesKept" xml:space="preserve">
+    <value>{0}; {1} copies stay in the old folder too</value>
+    <comment>{0}: the files there already, such as "3 files, kept as they are"; {1}: how many copies.</comment>
+  </data>
+  <data name="GameMoveMissing" xml:space="preserve">
+    <value>Missing</value>
+    <comment>A game's files that aren't on disk.</comment>
+  </data>
+  <data name="GameMoveMissingOne" xml:space="preserve">
+    <value>1 file isn't on disk, so it can't move</value>
+  </data>
+  <data name="GameMoveMissingMany" xml:space="preserve">
+    <value>{0} files aren't on disk, so they can't move</value>
+  </data>
+  <data name="GameMoveStopNote" xml:space="preserve">
+    <value>Stopping puts back every file moved, and {0} stays where it was.</value>
+    <comment>{0}: the game.</comment>
+  </data>
+  <data name="GameMoveConfirm" xml:space="preserve">
+    <value>Move</value>
+    <comment>Button that moves a game's files.</comment>
+  </data>
+  <data name="GameMoveNoRoomTitleOn" xml:space="preserve">
+    <value>There isn't room on {0}</value>
+    <comment>{0}: the drive, such as E:.</comment>
+  </data>
+  <data name="GameMoveNoRoomTitle" xml:space="preserve">
+    <value>There isn't room there</value>
+    <comment>Where drives have no names.</comment>
+  </data>
+  <data name="GameMoveNoRoomOn" xml:space="preserve">
+    <value>{0}'s files need {1}, and {2} has {3} free. Choose another folder, or make room on {2} first.</value>
+    <comment>{0}: the game; {1}: the room its files need; {2}: the drive, such as E:; {3}: the room there.</comment>
+  </data>
+  <data name="GameMoveNoRoom" xml:space="preserve">
+    <value>{0}'s files need {1}, and that folder's drive has {2} free. Choose another folder, or make room there first.</value>
+    <comment>{0}: the game; {1}: the room its files need; {2}: the room there.</comment>
+  </data>
+  <data name="GameMoveChooseAnother" xml:space="preserve">
+    <value>Choose another folder…</value>
+  </data>
+  <data name="GameMoveRefusedTitle" xml:space="preserve">
+    <value>{0}'s files can't move</value>
+    <comment>{0}: the game.</comment>
+  </data>
+  <data name="GameMoveRunTitle" xml:space="preserve">
+    <value>Moving {0}'s files</value>
+    <comment>{0}: the game.</comment>
+  </data>
+  <data name="GameMoveProgress" xml:space="preserve">
+    <value>{0} of {1} files · {2} of {3}</value>
+    <comment>{0} and {1}: files moved and in all; {2} and {3}: their sizes, such as 11.7 GB and 18.2 GB.</comment>
+  </data>
+  <data name="GameMoveStop" xml:space="preserve">
+    <value>Stop</value>
+    <comment>Button that stops moving a game's files.</comment>
+  </data>
+  <data name="GameMoveStopping" xml:space="preserve">
+    <value>Putting back the files moved…</value>
+  </data>
+  <data name="GameMoveStoppedTitle" xml:space="preserve">
+    <value>The move stopped</value>
+  </data>
+  <data name="GameMoveStoppedNothing" xml:space="preserve">
+    <value>Nothing moved, and {0} stays where it was.</value>
+    <comment>{0}: the game.</comment>
+  </data>
+  <data name="GameMoveTryAgain" xml:space="preserve">
+    <value>Try again</value>
+    <comment>Button that moves a game's files again, once a move stopped.</comment>
+  </data>
   <data name="GamePreviewsHeading" xml:space="preserve">
     <value>Previews</value>
     <comment>Heading of a game's previews setting.</comment>
   </data>
   <data name="GamePreviewsNote" xml:space="preserve">
-    <value>How the game's mods show on its page in the Library and in Browse. The previews buttons there change them while it has its own.</value>
+    <value>How the game's mods show on its page in the Library, and in Browse while it's chosen. Browse's view switch changes them while it has its own.</value>
   </data>
   <data name="GamePreviewsDefault" xml:space="preserve">
     <value>The screens' own: {0} in the Library, {1} in Browse.</value>
-    <comment>{0} and {1} are each previews in a word or two, such as "thumbnails" or "no pictures".</comment>
+    <comment>{0} and {1} are each previews in a word or two, such as "thumbnails" or "rows".</comment>
   </data>
   <data name="GamePreviewsOffShort" xml:space="preserve">
-    <value>no pictures</value>
-    <comment>Previews in a few words, in a sentence.</comment>
+    <value>rows</value>
+    <comment>Previews in a few words, in a sentence: the mods as rows, without pictures.</comment>
   </data>
   <data name="GamePreviewsThumbnailsShort" xml:space="preserve">
     <value>thumbnails</value>

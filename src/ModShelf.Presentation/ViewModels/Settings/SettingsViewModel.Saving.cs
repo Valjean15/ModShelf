@@ -105,7 +105,7 @@ public sealed partial class SettingsViewModel
     }
 
     /// <summary>
-    /// Shows the settings as stored, without saving them back, and applies their theme and the games' previews.
+    /// Shows the settings as stored, without saving them back, and applies their theme and previews.
     /// </summary>
     private void Show(AppSettings settings)
     {
@@ -113,7 +113,12 @@ public sealed partial class SettingsViewModel
         try
         {
             _shown = settings;
-            _covers.ShowGames(settings);
+            _covers.Show(settings);
+            foreach (ScreenPreviewsViewModel screen in ScreenPreviews)
+            {
+                screen.Show(settings);
+            }
+
             LibraryRoot = settings.LibraryRoot ?? _settings.DefaultLibraryRoot;
             IsDefaultRoot = FilePaths.Same(LibraryRoot, _settings.DefaultLibraryRoot);
 

@@ -58,6 +58,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     private readonly IModLookup _lookup;
     private readonly IHiddenGames _hiddenGames;
     private readonly ISitesInUse _sitesInUse;
+    private readonly IUiThread _uiThread;
     private readonly ModPictures _covers;
     private readonly ILogger<SettingsViewModel> _logger;
     private AppSettings _shown = new();
@@ -78,6 +79,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         IHiddenGames hiddenGames,
         IGameSettingsOpener gameSettings,
         ISitesInUse sitesInUse,
+        IUiThread uiThread,
         PicturesViewModel pictures,
         ModPictures covers,
         LinksViewModel links,
@@ -98,6 +100,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(hiddenGames);
         ArgumentNullException.ThrowIfNull(gameSettings);
         ArgumentNullException.ThrowIfNull(sitesInUse);
+        ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(covers);
         ArgumentNullException.ThrowIfNull(links);
@@ -116,9 +119,17 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         _lookup = lookup;
         _hiddenGames = hiddenGames;
         _sitesInUse = sitesInUse;
+        _uiThread = uiThread;
         _covers = covers;
         _logger = logger;
         Pictures = pictures;
+        ScreenPreviews =
+        [
+            new(PreviewScreen.Library, Strings.LibraryTitle, Strings.SettingsPreviewsLibraryNote, ChoosePreviews),
+            new(PreviewScreen.Browse, Strings.BrowseTitle, Strings.SettingsPreviewsBrowseNote, ChoosePreviews),
+            new(PreviewScreen.Updates, Strings.UpdatesTitle, null, ChoosePreviews),
+            new(PreviewScreen.Downloads, Strings.DownloadsTitle, null, ChoosePreviews),
+        ];
         Links = links;
         About = about;
         AppUpdate = appUpdate;
@@ -147,6 +158,11 @@ public sealed partial class SettingsViewModel : ScreenViewModel
     /// pictures show.
     /// </summary>
     public PicturesViewModel Pictures { get; }
+
+    /// <summary>
+    /// How each screen shows mods: the Library, Browse, Updates and Downloads.
+    /// </summary>
+    public IReadOnlyList<ScreenPreviewsViewModel> ScreenPreviews { get; }
 
     /// <summary>
     /// Links from websites: which app opens the links each site hands its downloads over with.
@@ -398,6 +414,12 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         _themes.Apply(value);
         Save(token => _settings.SetThemeAsync(value == AppTheme.System ? null : value, token));
     }
+
+    /// <summary>
+    /// Saves a screen's previews, chosen in General › Previews; the screens show them once they're saved.
+    /// </summary>
+    private void ChoosePreviews(PreviewScreen screen, PreviewLevel level)
+        => Save(token => _settings.SetPreviewAsync(screen, level == AppSettings.DefaultPreview(screen) ? null : level, token));
 
     /// <summary>
     /// Rescans the whole library, as the Library screen's Rescan does, then says what it found.

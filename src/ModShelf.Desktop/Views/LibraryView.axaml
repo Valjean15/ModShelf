@@ -22,9 +22,6 @@
         <Style Selector="StackPanel.activityKind">
             <Setter Property="Grid.Column" Value="1" />
         </Style>
-        <Style Selector="pictures|PreviewsPicker#PagePreviews">
-            <Setter Property="Grid.Column" Value="1" />
-        </Style>
         <Style Selector=":is(Control).statusCell">
             <Setter Property="Grid.Column" Value="4" />
         </Style>
@@ -32,7 +29,7 @@
             <Setter Property="IsVisible" Value="False" />
         </Style>
         <ContainerQuery Name="LibraryScreen" Query="max-width:760">
-            <Style Selector="WrapPanel.tools, pictures|PreviewsPicker#PagePreviews, StackPanel.activityKind">
+            <Style Selector="WrapPanel.tools, StackPanel.activityKind">
                 <Setter Property="Grid.Row" Value="1" />
                 <Setter Property="Grid.Column" Value="0" />
                 <Setter Property="Grid.ColumnSpan" Value="3" />
@@ -79,7 +76,7 @@
                 </StackPanel>
             </Grid>
 
-            <!-- The filter as wide as the screen allows, up to a comfortable width; the order and previews at the end. -->
+            <!-- The filter as wide as the screen allows, up to a comfortable width; the order at the end. -->
             <Grid DockPanel.Dock="Top" Margin="0,0,0,14" ColumnSpacing="12" RowDefinitions="Auto,Auto" IsVisible="{Binding !IsEmpty}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="100*" MaxWidth="420" />
@@ -101,7 +98,6 @@
                                   Content="{Binding ShowHiddenGamesText}"
                                   IsChecked="{Binding ShowHiddenGames}"
                                   IsVisible="{Binding HasHiddenGames}" />
-                    <pictures:PreviewsPicker DataContext="{Binding Previews}" />
                 </WrapPanel>
             </Grid>
 
@@ -389,7 +385,6 @@
                             <TextBlock Classes="note" VerticalAlignment="Center" Text="{x:Static res:Strings.LibrarySortLabel}" />
                             <ComboBox MinWidth="190" ItemsSource="{Binding ModOrders}" SelectedItem="{Binding SelectedModOrder}" />
                         </StackPanel>
-                        <pictures:PreviewsPicker DataContext="{Binding Previews}" />
                     </WrapPanel>
                 </Grid>
                 <ItemsControl ItemsSource="{Binding ModFilters}" AutomationProperties.Name="{x:Static res:Strings.LibraryShowOnly}">
@@ -603,16 +598,13 @@
 
         <!-- The mod opened, in place of its game's mods: the way back, then its page. -->
         <DockPanel IsVisible="{Binding IsModOpen}">
-            <Grid DockPanel.Dock="Top" Margin="0,0,0,16" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
-                <WrapPanel VerticalAlignment="Center" ItemSpacing="4" LineSpacing="4">
-                    <Button Classes="crumb" Content="{Binding Title}" Command="{Binding ShowGamesCommand}" />
-                    <TextBlock Classes="note" VerticalAlignment="Center" Text="›" />
-                    <Button Classes="crumb" Content="{Binding BackText}" Command="{Binding BackCommand}" />
-                    <TextBlock Classes="note" VerticalAlignment="Center" Text="›" />
-                    <TextBlock Classes="note" VerticalAlignment="Center" Margin="4,0,0,0" TextWrapping="Wrap" Text="{Binding Mod.Name, FallbackValue=''}" />
-                </WrapPanel>
-                <pictures:PreviewsPicker Name="PagePreviews" HorizontalAlignment="Left" DataContext="{Binding Previews}" />
-            </Grid>
+            <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,16" ItemSpacing="4" LineSpacing="4">
+                <Button Classes="crumb" Content="{Binding Title}" Command="{Binding ShowGamesCommand}" />
+                <TextBlock Classes="note" VerticalAlignment="Center" Text="›" />
+                <Button Classes="crumb" Content="{Binding BackText}" Command="{Binding BackCommand}" />
+                <TextBlock Classes="note" VerticalAlignment="Center" Text="›" />
+                <TextBlock Classes="note" VerticalAlignment="Center" Margin="4,0,0,0" TextWrapping="Wrap" Text="{Binding Mod.Name, FallbackValue=''}" />
+            </WrapPanel>
 
             <!-- Why the site's details aren't shown, with a way to ask again. -->
             <Border DockPanel.Dock="Top"

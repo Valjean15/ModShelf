@@ -38,6 +38,7 @@ internal sealed class SettingsHarness
             Hidden,
             GameSettings,
             Sites,
+            UiThread,
             PicturesCard,
             Pictures.Pictures,
             Links,

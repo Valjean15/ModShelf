@@ -1,0 +1,63 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ModShelf.Presentation.ViewModels.Settings"
+        xmlns:res="using:ModShelf.Presentation.Resources"
+        x:Class="ModShelf.Desktop.Views.Dialogs.GameMoveDialog"
+        x:DataType="vm:GameMoveViewModel"
+        Title="{Binding Title}"
+        Width="560"
+        Classes="dialog">
+
+    <DockPanel>
+        <!-- Cancel, or OK once the move stopped, first, so the main button sits in the corner: Move; Choose another
+             folder… where the files can't go; Stop while they move; Try again once a move stopped. -->
+        <StackPanel DockPanel.Dock="Bottom" Classes="dialogButtons">
+            <Button IsCancel="True" Content="{Binding CloseText}" Command="{Binding CloseCommand}" IsVisible="{Binding CanClose}" />
+            <Button Classes="accent" IsDefault="True" Content="{x:Static res:Strings.GameMoveConfirm}" Command="{Binding MoveCommand}" IsVisible="{Binding IsAsking}" />
+            <Button Classes="accent" Content="{x:Static res:Strings.GameMoveChooseAnother}" Command="{Binding ChooseAnotherCommand}" IsVisible="{Binding OffersAnotherFolder}" />
+            <Button Content="{x:Static res:Strings.GameMoveStop}" Command="{Binding StopCommand}" IsVisible="{Binding IsMoving}" />
+            <Button Classes="accent" Content="{x:Static res:Strings.GameMoveTryAgain}" Command="{Binding MoveCommand}" IsVisible="{Binding IsStopped}" />
+        </StackPanel>
+        <TextBlock DockPanel.Dock="Top" Classes="dialogTitle" TextWrapping="Wrap" Text="{Binding Title}" />
+        <StackPanel Spacing="12" Margin="0,0,0,8">
+            <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsPlanning}">
+                <ProgressBar Width="80" IsIndeterminate="True" VerticalAlignment="Center" />
+                <TextBlock Classes="note" Text="{x:Static res:Strings.GameMoveFinding}" />
+            </StackPanel>
+
+            <!-- What would move: each fact's name in a column as wide as the longest. -->
+            <ItemsControl ItemsSource="{Binding Facts}" IsVisible="{Binding IsAsking}" Grid.IsSharedSizeScope="True">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:GameMoveFact">
+                        <Grid ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="FactName" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Classes="note" Text="{Binding Label}" />
+                            <SelectableTextBlock Grid.Column="1" TextWrapping="Wrap" Text="{Binding Value}" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Why the files can't go there, or why the move stopped. -->
+            <SelectableTextBlock TextWrapping="Wrap"
+                                 Text="{Binding Message}"
+                                 IsVisible="{Binding Message, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+            <StackPanel Spacing="6" IsVisible="{Binding IsMoving}">
+                <ProgressBar MinHeight="6" Minimum="0" Maximum="100" Value="{Binding ProgressPercent}" />
+                <TextBlock Classes="note" Text="{Binding ProgressText}" />
+                <TextBlock Classes="note" Text="{x:Static res:Strings.GameMoveStopping}" IsVisible="{Binding IsStopping}" />
+            </StackPanel>
+
+            <TextBlock Classes="note" FontSize="12.5" TextWrapping="Wrap" Text="{Binding StopNote}" IsVisible="{Binding ShowsStopNote}" />
+        </StackPanel>
+    </DockPanel>
+</Window>

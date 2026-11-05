@@ -96,6 +96,49 @@ internal sealed class ScriptedDialogs : IDialogService
     }
 
     /// <summary>
+    /// Each dialog that moved a game's files, or would have.
+    /// </summary>
+    public List<GameMoveViewModel> MovingGames { get; } = [];
+
+    /// <summary>
+    /// What the user does in the dialog that moves a game's files. By default, once it says what would move, they press
+    /// Move. Once this is done, unless the dialog closed itself, as when the files moved, the user closes it.
+    /// </summary>
+    public Func<GameMoveViewModel, Task>? InMoveGame { get; set; }
+
+    public async Task MoveGameAsync(GameMoveViewModel moving, CancellationToken cancellationToken)
+    {
+        MovingGames.Add(moving);
+        bool closed = false;
+        void Close(object? sender, EventArgs e) => closed = true;
+        moving.CloseRequested += Close;
+        try
+        {
+            await (InMoveGame?.Invoke(moving) ?? PressMoveAsync(moving));
+            if (!closed && moving.CloseCommand.CanExecute(null))
+            {
+                moving.CloseCommand.Execute(null);
+            }
+        }
+        finally
+        {
+            moving.CloseRequested -= Close;
+        }
+    }
+
+    /// <summary>
+    /// Presses Move once the dialog says what would move, when it can.
+    /// </summary>
+    private static async Task PressMoveAsync(GameMoveViewModel moving)
+    {
+        await moving.Planning;
+        if (moving.MoveCommand.CanExecute(null))
+        {
+            await moving.MoveCommand.ExecuteAsync(null);
+        }
+    }
+
+    /// <summary>
     /// Each first-run setup shown.
     /// </summary>
     public List<FirstRunViewModel> FirstRuns { get; } = [];

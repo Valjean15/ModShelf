@@ -78,6 +78,23 @@ public sealed partial class SettingsViewModel
         Strings.SettingsCloseQuit);
 
     /// <summary>
+    /// How each screen shows mods: General.
+    /// </summary>
+    public SettingsSectionViewModel PreviewsSection { get; } = new(
+        SettingsCategory.General,
+        Strings.Previews,
+        Strings.SettingsPreviewsNote,
+        Strings.LibraryTitle,
+        Strings.SettingsPreviewsLibraryNote,
+        Strings.BrowseTitle,
+        Strings.SettingsPreviewsBrowseNote,
+        Strings.UpdatesTitle,
+        Strings.DownloadsTitle,
+        Strings.PreviewsRows,
+        Strings.PreviewsThumbnails,
+        Strings.PreviewsCards);
+
+    /// <summary>
     /// Saved pictures, mod details and adult content: General.
     /// </summary>
     public SettingsSectionViewModel PicturesSection { get; } = new(
@@ -182,6 +199,7 @@ public sealed partial class SettingsViewModel
     [
         ThemeSection,
         WindowSection,
+        PreviewsSection,
         PicturesSection,
         LibraryFolderSection,
         FolderPatternSection,
