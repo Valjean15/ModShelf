@@ -75,29 +75,33 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
 - [ ] **3.2 Search.** Choose Stardew Valley (type to filter the list), type `smapi` in the search box, and **Search**.
   "*N* mods match." SMAPI is near the top, with its downloads, endorsements and last update.
 - [ ] **3.2a The game's rows.** Clear the search box.
-  The results give way to three rows: **Trending**, **Recently added** (each card says "Added *when*") and **Recently updated** ("Updated *when*"), each scrolling sideways, Trending's mods the ones the website's Stardew Valley page calls trending. **Show all** beside Recently added lists every mod, newest first, and the order box says **Newest**; clearing the search box again brings the rows back without them loading again. With **Off** under "Previews", the rows' cards have no pictures.
-- [ ] **3.3 Order and pages.** Choose **Newest** in the order box, then **Load more** at the bottom.
-  The list starts over, newest first, and **Load more** adds the next mods below.
-- [ ] **3.3a Size, name and unique downloads.** Choose **Largest**, then **Name, A to Z**, then **Most unique downloads**.
+  The results give way to three rows: **Trending**, **Recently added** (each card says "Added *when*") and **Recently updated** ("Updated *when*"), each scrolling sideways, Trending's mods the ones the website's Stardew Valley page calls trending. **Show all** beside Recently added lists every mod, newest first, and the results say "Order: Newest"; clearing the search box again brings the rows back without them loading again. With **Rows** in the view switch beside **Filters** (its tooltips name the views), the rows' cards have no pictures.
+- [ ] **3.3 Order and pages.** **Filters**, choose **Newest** in the order box, and **Apply**. Then **Load more** at the bottom.
+  The card opens over the results on the right, and the keyboard is in it. Choosing in it searches nothing; **Apply** closes it, and the list starts over, newest first, saying "Order: Newest". **Load more** adds the next mods below.
+- [ ] **3.3a Size, name and unique downloads.** In **Filters**, apply **Largest**, then **Name, A to Z**, then **Most unique downloads**.
   Largest: each mod says its size, the biggest first (several GB at the top). Name, A to Z: names starting with quotes and digits first, then A. Most unique downloads: SMAPI and Content Patcher near the top.
-- [ ] **3.3a2 Endorsements.** Open the order box, then choose **Most endorsements**, then **Fewest endorsements**.
+- [ ] **3.3a2 Endorsements.** In **Filters**, open the order box, then apply **Most endorsements**, then **Fewest endorsements**.
   It lists 14 orders. Most endorsements: SMAPI and Content Patcher near the top, each mod saying its endorsements. Fewest endorsements: mods with few or none first.
-- [ ] **3.3b Time window, category and page size.** Choose **Updated in the last week**, then **Modding Tools** in the category box, then **50 per page**.
-  Each searches again: every mod listed was updated in the last week (open one to see its last update), then only Modding Tools, then 50 mods before **Load more**, which keeps all three. Choosing another game sets the category box back to **All categories**, with that game's categories.
-- [ ] **3.4 Author.** Type `Pathoschild` in the author box, and search again.
-  Only Pathoschild's mods.
-- [ ] **3.5 A mod's page.** Clear the author box, search `smapi`, and click SMAPI.
+- [ ] **3.3b Time window, category and page size.** In **Filters**, choose **Week** under "Updated within", **Modding Tools** in the category box and **50** under "Per page", then **Apply**.
+  One search: every mod listed was updated in the last week (open one to see its last update), only Modding Tools, 50 mods before **Load more**, which keeps all three. Under the search, chips say "Updated in the last week" and "Category: Modding Tools", and the button says "Filters · 2"; the page size has no chip.
+- [ ] **3.3c Chips, Close and Reset.** Click the × of "Category: Modding Tools". Then open **Filters**, choose another category, and press Escape; open it again, choose another category, and **Close**. Open it again, **Reset**, and **Apply**. Then apply **Week** under "Updated within" again, and **Clear all**.
+  The × searches again at once, without the category, and the chip goes ("Filters · 1"). Escape and **Close** close the card without searching, and it opens again on what's applied. **Reset** puts the card back to the order Browse starts on, any time, all categories, no author, adult content left out and 20 per page (or Stardew Valley's own Browse settings, when it has some), searching only on **Apply**. **Clear all** removes every chip, keeping the order and page size, in one search.
+- [ ] **3.3d Each game keeps its own.** Apply **Modding Tools** for Stardew Valley, choose another game, then Stardew Valley again.
+  The other game starts on every category, with its own. Back on Stardew Valley, its rows show, and **Filters** and the chip still say Modding Tools; searching uses it. After a restart, it starts afresh.
+- [ ] **3.4 Author.** In **Filters**, type `Pathoschild` in the author box, and press Enter.
+  Only Pathoschild's mods, with the chip "Author: Pathoschild".
+- [ ] **3.5 A mod's page.** Click the × of the author chip, search `smapi`, and click SMAPI.
   Its picture across the top (with **Cards**), its name, then "by Pathoschild", "Modding Tools", its version, endorsements, downloads and last update, and its summary. **Open on Nexus Mods**, **Watch** and **Track on Nexus Mods** (Premium). "Files on Nexus Mods" lists its main file with **Download** and **Save to a folder…**; **Show *N* more files: old versions, …** lists the old versions. Beside them (below them in a narrow window), "Changelog" shows the latest three versions, newest first, with **All *N* entries** for the rest, and "Details" says "Mod ID 2400" and "Category Modding Tools".
 - [ ] **3.6 A link in the search box.** **Back to the list**, paste `https://www.nexusmods.com/stardewvalley/mods/2400` into the search box, and **Search**.
   SMAPI's page opens.
 - [ ] **3.7 Links it refuses.** Paste each, and **Search**:
   - `https://www.nexusmods.com/stardewvalley/mods/999999999`: "The site has no such mod."
   - `https://example.com/file.zip`: "No site ModShelf knows has mods at that link."
-- [ ] **3.8 Previews.** **Back to the list**, search `smapi` again, and look at the results with each of **Cards**, **Thumbnails** and **Off** under "Previews".
-  **Cards**, the default: each mod is a card with its picture across the top, as many side by side as fit; clicking one opens it. **Thumbnails**: the list, with each mod's thumbnail beside it. **Off**: the list without pictures. A mod without a picture shows a faint picture sign. The choice stays after closing and starting the app.
-- [ ] **3.9 Adult pictures.** Tick **Include adult content**, choose Skyrim Special Edition, and search `outfit`.
-  The adult mods' pictures are blurred, and their cards say "Adult · blurred". No sharp adult picture shows, even for a moment.
-- [ ] **3.10 Select mods.** Choose Stardew Valley, search `smapi`, and tick the boxes of two mods (at the top left of each card; with **Off**, beside each name).
+- [ ] **3.8 Previews.** **Back to the list**, search `smapi` again, and look at the results with each of **Cards**, **Thumbnails** and **Rows** in the view switch beside **Filters**.
+  Each view's icon names it in a tooltip. **Cards**, the default: each mod is a card with its picture across the top, as many side by side as fit; clicking one opens it. **Thumbnails**: the list, with each mod's thumbnail beside it. **Rows**: the list without pictures. A mod without a picture shows a faint picture sign. The choice stays after closing and starting the app.
+- [ ] **3.9 Adult pictures.** Choose Skyrim Special Edition, tick **Include adult content** in **Filters** and **Apply**, and search `outfit`.
+  A chip says "Adult content included". The adult mods' pictures are blurred, and their cards say "Adult · blurred". No sharp adult picture shows, even for a moment.
+- [ ] **3.10 Select mods.** Choose Stardew Valley, search `smapi`, and tick the boxes of two mods (at the top left of each card; with **Rows**, beside each name).
   "2 selected", with **Download selected (2)** and **Clear selection**, and **Select all shown** is half ticked. Clicking a box doesn't open its mod. Ticking **Select all shown** selects every mod listed; **Load more** keeps them, and **Select all shown** is half ticked again. **Clear selection** clears them all, and a new search starts with none selected. Don't download them here: 9.7 does.
 
 ## 4. Download into the library (Premium only)
@@ -221,7 +225,7 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
 - [ ] **10.2c A game's gear.** On the Library screen, open a game, then click the gear beside its name.
   The Settings screen opens on **Games**, at that game's page.
 - [ ] **10.2d A game's previews.** With the Library's previews on **Thumbnails**, override Stardew Valley's previews and choose **Off**. Open Stardew Valley on the Library screen, then another game; then choose Stardew Valley on the Browse screen and **Search**. On Stardew Valley's Library page, choose **Cards**, go back to Settings, then **Use default** on its previews.
-  Stardew Valley's page shows its mods without pictures, and the buttons say "This game's previews", with a tooltip saying a choice changes the game's; the other game shows thumbnails under "Previews". Browse shows Stardew Valley's results without pictures too, while another game shows cards. After **Cards** on its page, Settings shows Stardew Valley's previews on **Cards** at once, and the Library's own are still **Thumbnails**. **Use default** brings back the screens' previews on both.
+  Stardew Valley's page shows its mods without pictures, and the buttons say "This game's previews", with a tooltip saying a choice changes the game's; the other game shows thumbnails under "Previews". Browse shows Stardew Valley's results without pictures too, its view switch on **Rows**, while another game shows cards. After **Cards** on its page, Settings shows Stardew Valley's previews on **Cards** at once, and the Library's own are still **Thumbnails**. **Use default** brings back the screens' previews on both.
 - [ ] **10.2e A change from the command line.** With the app open on another screen, run `dotnet run --project src/ModShelf.Cli -- settings set games.stardewvalley.notify false`, then open the Settings screen at Stardew Valley's page.
   "Notices" says **Overridden**, with the box unticked, without restarting the app.
 - [ ] **10.2f A game's own folder.** With Stardew Valley's files in the library, run `dotnet run --project src/ModShelf.Cli -- library move-game stardewvalley "<a new folder>" --yes`, then look at Stardew Valley in the Library, its SMAPI page, and its page in Settings › Games. Move it back with `library move-game stardewvalley --yes` afterwards.
@@ -347,6 +351,8 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 3.3a Size, name and unique downloads | | | |
 | 3.3a2 Endorsements | | | |
 | 3.3b Time window, category and page size | | | |
+| 3.3c Chips, Close and Reset | | | |
+| 3.3d Each game keeps its own | | | |
 | 3.4 Author | | | |
 | 3.5 Mod's page | | | |
 | 3.6 Link in the search box | | | |
@@ -390,6 +396,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 9.1 Unwatch | | | |
 | 9.2 Watch from Browse | | | |
 | 9.2a The games | | | |
+| 9.2b One site | | | |
 | 9.3 Track | | – | |
 | 9.4 Untrack | | – | |
 | 9.5 Remove from the library | | | |
