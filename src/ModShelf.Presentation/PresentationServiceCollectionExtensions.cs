@@ -9,6 +9,7 @@ using ModShelf.Presentation.ViewModels.Downloads;
 using ModShelf.Presentation.ViewModels.FirstRun;
 using ModShelf.Presentation.ViewModels.Library;
 using ModShelf.Presentation.ViewModels.Pictures;
+using ModShelf.Presentation.ViewModels.QuickSearch;
 using ModShelf.Presentation.ViewModels.Settings;
 using ModShelf.Presentation.ViewModels.Updates;
 
@@ -33,6 +34,7 @@ public static class PresentationServiceCollectionExtensions
         services.TryAddSingleton<INavigationService, NavigationService>();
         services.TryAddSingleton<IHiddenGames, HiddenGames>();
         services.TryAddSingleton<IGameSettingsOpener, GameSettingsOpener>();
+        services.TryAddSingleton<IScreenOpener, ScreenOpener>();
         services.TryAddSingleton<ModPictures>();
         services.TryAddSingleton<AccountMenuViewModel>();
         services.TryAddSingleton<ISitesInUse, SitesInUse>();
@@ -45,6 +47,8 @@ public static class PresentationServiceCollectionExtensions
             ServiceDescriptor.Singleton<ScreenViewModel, AccountsViewModel>(),
             ServiceDescriptor.Singleton<ScreenViewModel, SettingsViewModel>(),
         ]);
+        services.TryAddSingleton<ISettingsIndex>(provider => provider.GetServices<ScreenViewModel>().OfType<SettingsViewModel>().Single());
+        services.TryAddSingleton<QuickSearchViewModel>();
         services.TryAddSingleton<PicturesViewModel>();
         services.TryAddSingleton<LinksViewModel>();
         services.TryAddSingleton<FirstRunViewModel>();

@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using ModShelf.Application.Common;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
+using ModShelf.Presentation.Services;
 
 namespace ModShelf.Presentation.ViewModels.Settings;
 
@@ -195,6 +196,15 @@ public sealed partial class SettingsViewModel
         Strings.AboutCopyDiagnostics,
         Strings.AboutOpenLogFolder);
 
+    /// <summary>
+    /// Each part of the screen, by its category and heading, for quick search to find.
+    /// </summary>
+    IReadOnlyList<SettingsSearchEntry> ISettingsIndex.Entries =>
+    [
+        .. Sections.Select(section => new SettingsSearchEntry(
+            section.Category, Categories.First(category => category.Category == section.Category).Name, section.Heading, section.Words)),
+    ];
+
     private IEnumerable<SettingsSectionViewModel> Sections =>
     [
         ThemeSection,
@@ -224,6 +234,15 @@ public sealed partial class SettingsViewModel
         {
             ShowSections();
         }
+    }
+
+    /// <summary>
+    /// Shows a category, as quick search opens one: the search ends.
+    /// </summary>
+    private void OnSettingsOpening(object? sender, SettingsCategory category)
+    {
+        SearchText = string.Empty;
+        SelectedCategory = Categories.First(shown => shown.Category == category);
     }
 
     partial void OnSearchTextChanged(string value)

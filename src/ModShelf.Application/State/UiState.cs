@@ -2,7 +2,8 @@ namespace ModShelf.Application.State;
 
 /// <summary>
 /// What the desktop app remembers for the user between runs, apart from the settings: where its window was, whether the
-/// menu was collapsed, the screen last open, and Browse's recent searches. Each left null hasn't been remembered yet.
+/// menu was collapsed, the screen last open, and the recent searches of Browse and of quick search. Each left null hasn't
+/// been remembered yet.
 /// </summary>
 /// <remarks>
 /// A value the user sets on purpose is a setting, in the settings; one the app remembers for them is state, here.
@@ -13,6 +14,11 @@ public sealed record UiState
     /// How many of Browse's searches are remembered: 10.
     /// </summary>
     public const int MaxBrowseSearches = 10;
+
+    /// <summary>
+    /// How many of quick search's searches are remembered: 10.
+    /// </summary>
+    public const int MaxQuickSearches = 10;
 
     /// <summary>
     /// Nothing remembered yet.
@@ -49,7 +55,22 @@ public sealed record UiState
         init
         {
             ArgumentNullException.ThrowIfNull(value);
-            field = Searches(value);
+            field = Searches(value, MaxBrowseSearches);
+        }
+    } = [];
+
+    /// <summary>
+    /// Quick search's recent searches, the newest first: at most <see cref="MaxQuickSearches"/>, each once, case aside,
+    /// with none empty.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">The list is null.</exception>
+    public IReadOnlyList<string> QuickSearches
+    {
+        get;
+        init
+        {
+            ArgumentNullException.ThrowIfNull(value);
+            field = Searches(value, MaxQuickSearches);
         }
     } = [];
 
@@ -60,21 +81,29 @@ public sealed record UiState
     public UiState WithBrowseSearch(string? text)
         => string.IsNullOrWhiteSpace(text) ? this : this with { BrowseSearches = [text, .. BrowseSearches] };
 
+    /// <summary>
+    /// The state with <paramref name="text"/> as quick search's newest search: an older one the same, case aside, moves
+    /// up, and the oldest goes once there are more than <see cref="MaxQuickSearches"/>. Empty text changes nothing.
+    /// </summary>
+    public UiState WithQuickSearch(string? text)
+        => string.IsNullOrWhiteSpace(text) ? this : this with { QuickSearches = [text, .. QuickSearches] };
+
     public bool Equals(UiState? other)
         => other is not null
             && Window == other.Window
             && MenuCollapsed == other.MenuCollapsed
             && Screen == other.Screen
-            && BrowseSearches.SequenceEqual(other.BrowseSearches);
+            && BrowseSearches.SequenceEqual(other.BrowseSearches)
+            && QuickSearches.SequenceEqual(other.QuickSearches);
 
-    public override int GetHashCode() => HashCode.Combine(Window, MenuCollapsed, Screen, BrowseSearches.Count);
+    public override int GetHashCode() => HashCode.Combine(Window, MenuCollapsed, Screen, BrowseSearches.Count, QuickSearches.Count);
 
-    private static string[] Searches(IEnumerable<string> searches)
+    private static string[] Searches(IEnumerable<string> searches, int most)
         => [
             .. searches
                 .Where(search => !string.IsNullOrWhiteSpace(search))
                 .Select(search => search.Trim())
                 .Distinct(StringComparer.OrdinalIgnoreCase)
-                .Take(MaxBrowseSearches),
+                .Take(most),
         ];
 }

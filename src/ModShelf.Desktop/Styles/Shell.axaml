@@ -656,6 +656,88 @@
         <Setter Property="Margin" Value="0,0,0,6" />
     </Style>
 
+    <!-- Quick search: the window dimmed, and the box near its top, at most 640 wide and 520 high. -->
+    <Style Selector="Border.quickSearchScrim">
+        <Setter Property="Background" Value="#59000000" />
+    </Style>
+
+    <Style Selector="Border.quickSearch">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="Margin" Value="24,72,24,24" />
+        <Setter Property="MaxWidth" Value="640" />
+        <Setter Property="MaxHeight" Value="520" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+
+    <Style Selector="Border.quickSearchField">
+        <Setter Property="Padding" Value="14,8" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <Style Selector="Border.quickSearchField PathIcon">
+        <Setter Property="Foreground" Value="{DynamicResource ShelfMutedBrush}" />
+    </Style>
+
+    <Style Selector="PathIcon.quickIcon">
+        <Setter Property="Width" Value="18" />
+        <Setter Property="Height" Value="18" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfMutedBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.quickAction">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfMutedBrush}" />
+    </Style>
+
+    <!-- Quick search's field at the top of the sidebar: what opens it, and its keys; collapsed, its icon alone. -->
+    <Style Selector="Button.quickSearchOpen">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Margin" Value="8,0,8,8" />
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Background" Value="{DynamicResource ShelfSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfMutedBrush}" />
+    </Style>
+
+    <Style Selector="Button.quickSearchOpen.collapsed">
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="Width" Value="40" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+
+    <Style Selector="Button.quickSearchOpen:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfSidebarHoverBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfTextBrush}" />
+    </Style>
+
+    <Style Selector="Button.quickSearchOpen.collapsed:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+
+    <Style Selector="Border.keyCap">
+        <Setter Property="Padding" Value="6,1" />
+        <Setter Property="CornerRadius" Value="5" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Border.keyCap TextBlock">
+        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfFaintBrush}" />
+    </Style>
+
     <!-- A mod's picture: on the raised colour until it's there, with a faint sign for none. -->
     <Style Selector="Border.picture">
         <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />

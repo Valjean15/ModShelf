@@ -1,0 +1,106 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ModShelf.Presentation.ViewModels.QuickSearch"
+             xmlns:res="using:ModShelf.Presentation.Resources"
+             xmlns:views="using:ModShelf.Desktop.Views"
+             xmlns:quick="using:ModShelf.Desktop.Views.QuickSearch"
+             xmlns:pictures="using:ModShelf.Desktop.Views.Pictures"
+             x:Class="ModShelf.Desktop.Views.QuickSearch.QuickSearchBox"
+             x:DataType="vm:QuickSearchViewModel">
+
+    <!-- Quick search, over the whole window: the screens dimmed, and, near the top, what's typed, the rows found under
+         their headings, and which keys do what. Clicking outside the box closes it; the arrow keys, Enter and Escape work
+         from the field. -->
+    <Panel IsVisible="{Binding IsOpen}">
+        <Border x:Name="Scrim" Classes="quickSearchScrim" />
+
+        <Border Classes="overCard quickSearch"
+                KeyboardNavigation.TabNavigation="Cycle"
+                AutomationProperties.Name="{x:Static res:Strings.QuickSearchTitle}">
+            <DockPanel>
+                <Border DockPanel.Dock="Top" Classes="quickSearchField">
+                    <DockPanel>
+                        <PathIcon DockPanel.Dock="Left" Width="16" Height="16" Margin="4,0,8,0" Data="{StaticResource BrowseIcon}" />
+                        <TextBox x:Name="Field"
+                                 Classes="bare"
+                                 FontSize="16"
+                                 Text="{Binding Query}"
+                                 PlaceholderText="{x:Static res:Strings.QuickSearchPlaceholder}"
+                                 AutomationProperties.Name="{x:Static res:Strings.QuickSearchPlaceholder}">
+                            <TextBox.KeyBindings>
+                                <KeyBinding Gesture="Down" Command="{Binding MoveDownCommand}" />
+                                <KeyBinding Gesture="Up" Command="{Binding MoveUpCommand}" />
+                                <KeyBinding Gesture="Enter" Command="{Binding ChooseCommand}" />
+                                <KeyBinding Gesture="Escape" Command="{Binding CloseCommand}" />
+                            </TextBox.KeyBindings>
+                        </TextBox>
+                    </DockPanel>
+                </Border>
+
+                <Border DockPanel.Dock="Bottom" Classes="pickerKeys">
+                    <TextBlock Text="{x:Static res:Strings.QuickSearchKeys}" />
+                </Border>
+
+                <TextBlock DockPanel.Dock="Bottom"
+                           Classes="note"
+                           Margin="20,4,20,16"
+                           TextWrapping="Wrap"
+                           Text="{Binding NothingFound}"
+                           IsVisible="{Binding NothingFound, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+                <ScrollViewer x:Name="Scroller" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl x:Name="EntriesList"
+                                  Margin="8,4,8,8"
+                                  ItemsSource="{Binding Entries}"
+                                  AutomationProperties.Name="{x:Static res:Strings.QuickSearchTitle}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:QuickSearchEntryViewModel">
+                                <StackPanel>
+                                    <TextBlock Classes="pickerHeading" Margin="10,10,10,4" Text="{Binding Heading}" IsVisible="{Binding HasHeading}" />
+                                    <Button Classes="pickerRow quickRow"
+                                            Classes.highlighted="{Binding IsHighlighted}"
+                                            Command="{Binding OpenCommand}"
+                                            AutomationProperties.Name="{Binding Name}">
+                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                            <Panel Width="40" VerticalAlignment="Center">
+                                                <Border Classes="cover"
+                                                        Width="40"
+                                                        Height="26"
+                                                        CornerRadius="4"
+                                                        IsVisible="{Binding HasColour}"
+                                                        Background="{Binding Hue, Converter={x:Static views:CoverBrushConverter.Instance}}">
+                                                    <Panel>
+                                                        <TextBlock FontSize="13" Text="{Binding Initial}" IsVisible="{Binding !Picture.HasFile, FallbackValue=True}" />
+                                                        <pictures:ModImage File="{Binding Picture.File, FallbackValue={x:Null}}"
+                                                                           DecodeWidth="160"
+                                                                           Stretch="UniformToFill"
+                                                                           RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                                    </Panel>
+                                                </Border>
+                                                <PathIcon Classes="quickIcon"
+                                                          IsVisible="{Binding !HasColour}"
+                                                          Data="{Binding Converter={x:Static quick:QuickSearchIconConverter.Instance}}" />
+                                            </Panel>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
+                                                <TextBlock Classes="note"
+                                                           FontSize="12.5"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           Text="{Binding Meta}"
+                                                           IsVisible="{Binding HasMeta}" />
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="2"
+                                                       Classes="quickAction"
+                                                       Text="{Binding Action}"
+                                                       IsVisible="{Binding IsHighlighted}" />
+                                        </Grid>
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+    </Panel>
+</UserControl>

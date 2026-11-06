@@ -26,6 +26,11 @@ public sealed partial class BrowseViewModel
     private BrowseOffer _offer = BrowseChoices.Every;
 
     /// <summary>
+    /// The game quick search opened Browse on before the games were read; chosen once they are.
+    /// </summary>
+    private GameRef? _asked;
+
+    /// <summary>
     /// The last reading of the chosen game's own settings, for tests to wait on.
     /// </summary>
     internal Task DefaultsWork { get; private set; } = Task.CompletedTask;
@@ -137,7 +142,13 @@ public sealed partial class BrowseViewModel
         _gamesRead = !GamesFailed;
         _allGames = games;
         ShowGameChoices();
-        if (Game is null && Favourite([.. games.Select(game => game.Choice)]) is { } favourite)
+        GameRef? asked = _asked;
+        _asked = null;
+        if (asked is not null && Games.FirstOrDefault(choice => choice.Game == asked) is { } chosen)
+        {
+            Game = chosen;
+        }
+        else if (Game is null && Favourite([.. games.Select(game => game.Choice)]) is { } favourite)
         {
             Game = favourite;
         }
@@ -158,6 +169,21 @@ public sealed partial class BrowseViewModel
     /// Chooses the game picked in the game picker.
     /// </summary>
     private void ChooseGame(GameRef game) => Game = Games.FirstOrDefault(choice => choice.Game == game) ?? Game;
+
+    /// <summary>
+    /// Chooses the game quick search opens Browse on; before the games are read, once they are.
+    /// </summary>
+    private void OnGameOpening(object? sender, GameRef game)
+    {
+        if (Games.FirstOrDefault(choice => choice.Game == game) is { } chosen)
+        {
+            Game = chosen;
+        }
+        else
+        {
+            _asked = game;
+        }
+    }
 
     /// <summary>
     /// Starts the toolbar as the game's own settings say, when it has some: its order, how recently its mods were

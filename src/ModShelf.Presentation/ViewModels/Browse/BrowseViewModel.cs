@@ -95,6 +95,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         IClipboard clipboard,
         IDialogService dialogs,
         INavigationService navigation,
+        IScreenOpener screens,
         IHiddenGames hiddenGames,
         ISitesInUse sitesInUse,
         IUiState uiState,
@@ -106,6 +107,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(lookup);
         ArgumentNullException.ThrowIfNull(library);
         ArgumentNullException.ThrowIfNull(navigation);
+        ArgumentNullException.ThrowIfNull(screens);
         ArgumentNullException.ThrowIfNull(hiddenGames);
         ArgumentNullException.ThrowIfNull(sitesInUse);
         ArgumentNullException.ThrowIfNull(uiState);
@@ -122,6 +124,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         _pictures = pictures;
         _uiThread = uiThread;
         _logger = logger;
+        screens.BrowseGameOpening += OnGameOpening;
         Filters = new BrowseFiltersViewModel(this);
         Picker = new GamePickerViewModel(pictures, sources, ChooseGame, SearchAgainFor);
         _services = new ModPageServices(

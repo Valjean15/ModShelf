@@ -3163,4 +3163,96 @@
     <value>Reading the sites' games…</value>
     <comment>Settings' Add a game… while the sites' games are read.</comment>
   </data>
+  <data name="QuickSearchTitle" xml:space="preserve">
+    <value>Quick search</value>
+    <comment>The quick search box, as screen readers name it.</comment>
+  </data>
+  <data name="QuickSearchPlaceholder" xml:space="preserve">
+    <value>Search games, mods and settings</value>
+    <comment>The quick search box, before anything is typed.</comment>
+  </data>
+  <data name="QuickSearchField" xml:space="preserve">
+    <value>Search</value>
+    <comment>The field at the top of the menu that opens quick search.</comment>
+  </data>
+  <data name="QuickSearchShortcut" xml:space="preserve">
+    <value>Ctrl+K</value>
+    <comment>The keys that open quick search, beside the menu's field, on Windows and Linux.</comment>
+  </data>
+  <data name="QuickSearchShortcutMac" xml:space="preserve">
+    <value>⌘K</value>
+    <comment>The keys that open quick search, beside the menu's field, on macOS.</comment>
+  </data>
+  <data name="QuickSearchTip" xml:space="preserve">
+    <value>Quick search ({0})</value>
+    <comment>The tooltip of the menu's field that opens quick search: {0} is its keys, such as Ctrl+K.</comment>
+  </data>
+  <data name="QuickSearchKeys" xml:space="preserve">
+    <value>↑↓ to move · Enter to open · Esc to close</value>
+    <comment>At the bottom of the quick search box.</comment>
+  </data>
+  <data name="QuickSearchRecent" xml:space="preserve">
+    <value>Recent searches</value>
+    <comment>Quick search, nothing typed: the heading of the searches that opened something.</comment>
+  </data>
+  <data name="QuickSearchScreens" xml:space="preserve">
+    <value>Screens</value>
+    <comment>Quick search: the heading of the screens.</comment>
+  </data>
+  <data name="QuickSearchGames" xml:space="preserve">
+    <value>Games</value>
+    <comment>Quick search: the heading of the games found.</comment>
+  </data>
+  <data name="QuickSearchMods" xml:space="preserve">
+    <value>Mods in your library</value>
+    <comment>Quick search: the heading of the library's mods found.</comment>
+  </data>
+  <data name="QuickSearchSettings" xml:space="preserve">
+    <value>Settings</value>
+    <comment>Quick search: the heading of the settings found.</comment>
+  </data>
+  <data name="QuickSearchNothingFound" xml:space="preserve">
+    <value>Nothing found for “{0}”.</value>
+    <comment>Quick search: {0} is what was typed.</comment>
+  </data>
+  <data name="QuickSearchInLibrary" xml:space="preserve">
+    <value>In your library · {0}</value>
+    <comment>Quick search, a game the library has mods of: {0} is how many, such as "73 mods".</comment>
+  </data>
+  <data name="QuickSearchOneMod" xml:space="preserve">
+    <value>1 mod</value>
+    <comment>Quick search, a game's mods in the library: exactly one.</comment>
+  </data>
+  <data name="QuickSearchModCount" xml:space="preserve">
+    <value>{0:N0} mods</value>
+    <comment>Quick search, a game's mods in the library: {0} is how many.</comment>
+  </data>
+  <data name="QuickSearchOnSite" xml:space="preserve">
+    <value>On {0}</value>
+    <comment>Quick search, a game the library has no mods of: {0} is the site, such as Nexus Mods.</comment>
+  </data>
+  <data name="QuickSearchOpenInLibrary" xml:space="preserve">
+    <value>Open in the Library</value>
+    <comment>Quick search, beside the game highlighted that the library has mods of.</comment>
+  </data>
+  <data name="QuickSearchOpenInBrowse" xml:space="preserve">
+    <value>Open in Browse</value>
+    <comment>Quick search, beside the game highlighted that the library has no mods of.</comment>
+  </data>
+  <data name="QuickSearchModState" xml:space="preserve">
+    <value>{0} · {1}</value>
+    <comment>Quick search, a mod: {0} is its game, {1} "update found" or "pinned".</comment>
+  </data>
+  <data name="QuickSearchUpdateFound" xml:space="preserve">
+    <value>update found</value>
+    <comment>Quick search, a mod with an update found.</comment>
+  </data>
+  <data name="QuickSearchPinned" xml:space="preserve">
+    <value>pinned</value>
+    <comment>Quick search, a mod pinned to its version.</comment>
+  </data>
+  <data name="QuickSearchSettingPath" xml:space="preserve">
+    <value>{0} › {1}</value>
+    <comment>Quick search, a setting: {0} is its category, such as Downloads, {1} its section or game.</comment>
+  </data>
 </root>

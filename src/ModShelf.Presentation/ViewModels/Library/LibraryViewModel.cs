@@ -80,6 +80,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         ISourceRegistry sources,
         IHiddenGames hiddenGames,
         IGameSettingsOpener gameSettings,
+        IScreenOpener screens,
         ISitesInUse sitesInUse,
         ModPictures pictures,
         IUiThread uiThread,
@@ -92,6 +93,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(hiddenGames);
         ArgumentNullException.ThrowIfNull(gameSettings);
+        ArgumentNullException.ThrowIfNull(screens);
         ArgumentNullException.ThrowIfNull(sitesInUse);
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(uiThread);
@@ -125,6 +127,8 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             timeProvider,
             logger);
         _timeProvider = timeProvider;
+        screens.ModOpening += OnModOpening;
+        screens.LibraryGameOpening += OnGameOpening;
         _allSites = new LibraryChoice<SourceId?>(null, Strings.LibraryAllSites);
         SiteChoices.Add(_allSites);
         GameOrders =
@@ -462,6 +466,32 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         if (OpenGame is { } game)
         {
             _gameSettings.Open(game.Game);
+        }
+    }
+
+    /// <summary>
+    /// Opens a mod's page, as quick search does: from its game's mods, out of the recent activity.
+    /// </summary>
+    private void OnModOpening(object? sender, ModRef mod)
+    {
+        IsShowingActivity = false;
+        if (OpenGame?.Game != mod.Game && Games.FirstOrDefault(game => game.Game == mod.Game) is { } its)
+        {
+            Open(its);
+        }
+
+        _ = OpenAsync(mod, CancellationToken.None);
+    }
+
+    /// <summary>
+    /// Shows a game's mods, as quick search does, out of a mod's page or the recent activity.
+    /// </summary>
+    private void OnGameOpening(object? sender, GameRef game)
+    {
+        IsShowingActivity = false;
+        if (Games.FirstOrDefault(shown => shown.Game == game) is { } its)
+        {
+            Open(its);
         }
     }
 

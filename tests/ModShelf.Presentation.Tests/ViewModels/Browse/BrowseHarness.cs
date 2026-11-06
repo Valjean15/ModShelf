@@ -40,6 +40,7 @@ internal sealed class BrowseHarness : IDisposable
         Lookup.Searchable.Add(TestData.Nexus);
         Lookup.Games[TestData.Nexus] = [Stardew, Skyrim, Fallout];
         Watchlists.Tracking.Add(TestData.Nexus);
+        Screens = new ScreenOpener(Navigation);
         Screen = new BrowseViewModel(
             Lookup,
             Library,
@@ -60,6 +61,7 @@ internal sealed class BrowseHarness : IDisposable
             Clipboard,
             Dialogs,
             Navigation,
+            Screens,
             Hidden,
             Sites,
             UiState,
@@ -104,6 +106,11 @@ internal sealed class BrowseHarness : IDisposable
     public ScriptedDialogs Dialogs { get; } = new();
 
     public NavigationService Navigation { get; } = new();
+
+    /// <summary>
+    /// What opens Browse at a game, as quick search does.
+    /// </summary>
+    public ScreenOpener Screens { get; }
 
     public TestPictures Pictures { get; } = new();
 

@@ -61,4 +61,7 @@
 
     <!-- Link an account, at the bottom of the sidebar. -->
     <StreamGeometry x:Key="PlusIcon">M11,4 H13 V11 H20 V13 H13 V20 H11 V13 H4 V11 H11 Z</StreamGeometry>
+
+    <!-- A clock: a recent search, in quick search. -->
+    <StreamGeometry x:Key="RecentIcon">M12,3 A9,9 0 1 1 12,21 A9,9 0 1 1 12,3 Z M12,5 A7,7 0 1 0 12,19 A7,7 0 1 0 12,5 Z M11,7 H13 V11.6 L16.2,14.8 L14.8,16.2 L11,12.4 Z</StreamGeometry>
 </ResourceDictionary>

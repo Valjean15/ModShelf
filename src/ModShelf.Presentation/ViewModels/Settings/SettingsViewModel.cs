@@ -30,7 +30,7 @@ namespace ModShelf.Presentation.ViewModels.Settings;
 /// settings as stored after it. The theme is applied at start and as it's chosen. The screen's badge says a newer
 /// ModShelf waits for the user.
 /// </summary>
-public sealed partial class SettingsViewModel : ScreenViewModel
+public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
 {
     // The intervals offered, besides the one set when it's another; a game's too.
     internal static readonly TimeSpan[] OfferedIntervals =
@@ -78,6 +78,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         IModLookup lookup,
         IHiddenGames hiddenGames,
         IGameSettingsOpener gameSettings,
+        IScreenOpener screens,
         ISitesInUse sitesInUse,
         IUiThread uiThread,
         PicturesViewModel pictures,
@@ -99,6 +100,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(lookup);
         ArgumentNullException.ThrowIfNull(hiddenGames);
         ArgumentNullException.ThrowIfNull(gameSettings);
+        ArgumentNullException.ThrowIfNull(screens);
         ArgumentNullException.ThrowIfNull(sitesInUse);
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(pictures);
@@ -147,6 +149,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel
         Folders = new FolderPatternViewModel(null, FolderPattern.Default, settings.DefaultLibraryRoot, SaveFoldersAsync);
         SelectedCategory = Categories[0];
         gameSettings.Opening += OnGameSettingsOpening;
+        screens.SettingsOpening += OnSettingsOpening;
     }
 
     public override Screen Screen => Screen.Settings;

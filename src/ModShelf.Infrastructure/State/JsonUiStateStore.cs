@@ -16,7 +16,8 @@ namespace ModShelf.Infrastructure.State;
 ///   "window": { "x": 120, "y": 80, "width": 1280, "height": 800, "maximized": false },
 ///   "menuCollapsed": true,
 ///   "screen": "browse",
-///   "browseSearches": [ "skyui", "armour" ]
+///   "browseSearches": [ "skyui", "armour" ],
+///   "quickSearches": [ "dragon", "old versions" ]
 /// }
 /// </code>
 /// A file that can't be read is forgotten, and replaced when the state is next saved; a value that isn't what it should
@@ -33,6 +34,7 @@ internal sealed partial class JsonUiStateStore : IUiStateStore
     private const string MenuCollapsed = "menuCollapsed";
     private const string Screen = "screen";
     private const string BrowseSearches = "browseSearches";
+    private const string QuickSearches = "quickSearches";
 
     private static readonly JsonDocumentOptions Reading = new() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
     private static readonly JsonSerializerOptions Writing = new() { WriteIndented = true };
@@ -69,6 +71,7 @@ internal sealed partial class JsonUiStateStore : IUiStateStore
             MenuCollapsed = Flag(file[MenuCollapsed]),
             Screen = Text(file[Screen]),
             BrowseSearches = file[BrowseSearches] is JsonArray searches ? [.. searches.Select(Text).OfType<string>()] : [],
+            QuickSearches = file[QuickSearches] is JsonArray quick ? [.. quick.Select(Text).OfType<string>()] : [],
         };
     }
 
@@ -96,6 +99,7 @@ internal sealed partial class JsonUiStateStore : IUiStateStore
         Set(file, MenuCollapsed, state.MenuCollapsed is { } collapsed ? JsonValue.Create(collapsed) : null);
         Set(file, Screen, state.Screen is { } screen ? JsonValue.Create(screen) : null);
         Set(file, BrowseSearches, state.BrowseSearches.Count > 0 ? new JsonArray([.. state.BrowseSearches.Select(search => JsonValue.Create(search))]) : null);
+        Set(file, QuickSearches, state.QuickSearches.Count > 0 ? new JsonArray([.. state.QuickSearches.Select(search => JsonValue.Create(search))]) : null);
 
         try
         {

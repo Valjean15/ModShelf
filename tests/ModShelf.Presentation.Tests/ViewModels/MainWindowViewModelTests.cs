@@ -5,6 +5,7 @@ using ModShelf.Application.Links;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.Tests.ViewModels.Downloads;
+using ModShelf.Presentation.Tests.ViewModels.QuickSearch;
 using ModShelf.Presentation.ViewModels;
 using ModShelf.Presentation.ViewModels.Accounts;
 using ModShelf.Testing;
@@ -256,6 +257,24 @@ public sealed class MainWindowViewModelTests : IDisposable
         Assert.Equal((Screen.Accounts, Screen.Accounts), (_navigation.Current, _window.CurrentScreen.Screen));
     }
 
+    [Fact]
+    public async Task QuickSearchGoesToAScreen()
+    {
+        _window.QuickSearch.OpenCommand.Execute(null);
+        await _window.QuickSearch.Reading;
+        _window.QuickSearch.Query = "downl";
+        _window.QuickSearch.ChooseCommand.Execute(null);
+
+        Assert.Equal((Screen.Downloads, Screen.Downloads, false), (_navigation.Current, _window.CurrentScreen.Screen, _window.QuickSearch.IsOpen));
+    }
+
     private MainWindowViewModel Window(IEnumerable<ScreenViewModel> screens)
-        => new(_navigation, _uiThread, screens, new AccountMenuViewModel(new TestPictures().Pictures, _navigation), _uiState, _logger);
+        => new(
+            _navigation,
+            _uiThread,
+            screens,
+            new AccountMenuViewModel(new TestPictures().Pictures, _navigation),
+            new QuickSearchHarness(_navigation).Search,
+            _uiState,
+            _logger);
 }

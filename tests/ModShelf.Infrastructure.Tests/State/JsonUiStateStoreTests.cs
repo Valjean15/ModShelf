@@ -41,6 +41,7 @@ public sealed class JsonUiStateStoreTests : IDisposable
             MenuCollapsed = true,
             Screen = "browse",
             BrowseSearches = ["skyui", "armour"],
+            QuickSearches = ["dragon", "old versions"],
         };
 
         await Store().SaveAsync(saved, Cancellation);
@@ -60,6 +61,10 @@ public sealed class JsonUiStateStoreTests : IDisposable
               "browseSearches": [
                 "skyui",
                 "armour"
+              ],
+              "quickSearches": [
+                "dragon",
+                "old versions"
               ]
             }
             """;
@@ -167,6 +172,28 @@ public sealed class JsonUiStateStoreTests : IDisposable
 
         Assert.Equal(new UiState { BrowseSearches = ["skyui", "armour"] }, state);
         Assert.Empty(_logger.Entries);
+    }
+
+    [Fact]
+    public async Task QuickSearchesThatArentTextOrAListAreLeftOut()
+    {
+        await WriteAsync("""{ "quickSearches": [ "dragon", 2, null, " ", "pawn" ], "browseSearches": "skyui" }""");
+        UiState listed = await Store().LoadAsync(Cancellation);
+        await WriteAsync("""{ "quickSearches": "dragon" }""");
+
+        Assert.Equal(new UiState { QuickSearches = ["dragon", "pawn"] }, listed);
+        Assert.Equal(UiState.None, await Store().LoadAsync(Cancellation));
+    }
+
+    [Fact]
+    public async Task OneQuickSearchIsKeptAndNoneLeavesTheFile()
+    {
+        await Store().SaveAsync(new UiState { QuickSearches = ["dragon"] }, Cancellation);
+
+        Assert.Equal(new UiState { QuickSearches = ["dragon"] }, await Store().LoadAsync(Cancellation));
+
+        await Store().SaveAsync(new UiState { Screen = "updates" }, Cancellation);
+        Assert.DoesNotContain("quickSearches", await File.ReadAllTextAsync(FilePath, Cancellation), StringComparison.Ordinal);
     }
 
     [Fact]

@@ -75,6 +75,22 @@ public sealed class UiStateTests
     }
 
     [Fact]
+    public void QuickSearchesKeepTheNewestTenFirstApartFromBrowses()
+    {
+        UiState state = UiState.None.WithBrowseSearch("skyui");
+        foreach (int search in Enumerable.Range(1, 12))
+        {
+            state = state.WithQuickSearch($" search {search} ");
+        }
+
+        state = state.WithQuickSearch("SEARCH 5").WithQuickSearch("  ").WithQuickSearch(null);
+
+        Assert.Equal(["SEARCH 5", "search 12", "search 11", "search 10", "search 9", "search 8", "search 7", "search 6", "search 4", "search 3"], state.QuickSearches);
+        Assert.Equal(["skyui"], state.BrowseSearches);
+        Assert.Equal(10, UiState.MaxQuickSearches);
+    }
+
+    [Fact]
     public void StatesThatRememberTheSameAreEqual()
     {
         UiState state = new()
@@ -83,6 +99,7 @@ public sealed class UiStateTests
             MenuCollapsed = true,
             Screen = "library",
             BrowseSearches = ["skyui", "armour"],
+            QuickSearches = ["dragon", "old versions"],
         };
         UiState same = new()
         {
@@ -90,6 +107,7 @@ public sealed class UiStateTests
             MenuCollapsed = true,
             Screen = " library",
             BrowseSearches = ["skyui", "armour"],
+            QuickSearches = ["dragon", "old versions"],
         };
 
         Assert.Equal(state, same);
@@ -98,6 +116,8 @@ public sealed class UiStateTests
         Assert.NotEqual(state, same with { MenuCollapsed = false });
         Assert.NotEqual(state, same with { Window = new WindowPlacement(10, -20, 1280, 800, maximized: false) });
         Assert.NotEqual(state, same with { Screen = "browse" });
+        Assert.NotEqual(state, same with { QuickSearches = ["dragon"] });
+        Assert.NotEqual(state, same with { QuickSearches = ["old versions", "dragon"] });
         Assert.False(state.Equals(null));
     }
 

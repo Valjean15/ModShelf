@@ -24,6 +24,7 @@ internal sealed class SettingsHarness
         Pictures = new TestPictures(Settings);
         PicturesCard = new PicturesViewModel(Settings, Pictures.Pictures, PicturesLogger);
         GameSettings = new GameSettingsOpener(Navigation);
+        Screens = new ScreenOpener(Navigation);
         Screen = new SettingsViewModel(
             Settings,
             Library,
@@ -37,6 +38,7 @@ internal sealed class SettingsHarness
             Lookup,
             Hidden,
             GameSettings,
+            Screens,
             Sites,
             UiThread,
             PicturesCard,
@@ -69,6 +71,11 @@ internal sealed class SettingsHarness
     public ScriptedLookup Lookup { get; } = new();
 
     public GameSettingsOpener GameSettings { get; }
+
+    /// <summary>
+    /// What opens the settings at a category, as quick search does.
+    /// </summary>
+    public ScreenOpener Screens { get; }
 
     public ScriptedLibraryMover Mover { get; }
 

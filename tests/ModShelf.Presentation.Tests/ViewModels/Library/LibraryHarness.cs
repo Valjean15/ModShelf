@@ -25,6 +25,7 @@ internal sealed class LibraryHarness : IDisposable
         Lookup = new ScriptedLookup { Others = example is null ? null : AppLookup.Over(new FakeSourceRegistry(example)) };
         Catalog.GameNames["skyrimspecialedition"] = "Skyrim Special Edition";
         Time.SetLocalTimeZone(TimeZoneInfo.Utc);
+        Screens = new ScreenOpener(Navigation);
         Screen = new LibraryViewModel(
             Library,
             History,
@@ -42,6 +43,7 @@ internal sealed class LibraryHarness : IDisposable
             sources,
             Hidden,
             GameSettings,
+            Screens,
             Sites,
             Pictures.Pictures,
             UiThread,
@@ -58,6 +60,13 @@ internal sealed class LibraryHarness : IDisposable
     public ScriptedSitesInUse Sites { get; } = new();
 
     public RecordingGameSettingsOpener GameSettings { get; } = new();
+
+    public NavigationService Navigation { get; } = new();
+
+    /// <summary>
+    /// What opens the Library at a mod or a game, as quick search does.
+    /// </summary>
+    public ScreenOpener Screens { get; }
 
     public ScriptedRescan Rescan { get; } = new();
 

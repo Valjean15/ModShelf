@@ -1,6 +1,7 @@
 using ModShelf.Application.State;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.Tests.Fakes;
+using ModShelf.Presentation.Tests.ViewModels.QuickSearch;
 using ModShelf.Presentation.ViewModels;
 using ModShelf.Presentation.ViewModels.Accounts;
 using ModShelf.Testing;
@@ -28,6 +29,7 @@ public sealed class MainWindowRememberingTests : IDisposable
             _uiThread,
             TestScreen.OneOfEach(),
             new AccountMenuViewModel(new TestPictures().Pictures, _navigation),
+            new QuickSearchHarness(_navigation).Search,
             _uiState,
             _logger);
     }

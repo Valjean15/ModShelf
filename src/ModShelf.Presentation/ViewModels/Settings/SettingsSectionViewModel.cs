@@ -10,18 +10,31 @@ namespace ModShelf.Presentation.ViewModels.Settings;
 /// </summary>
 public sealed partial class SettingsSectionViewModel : ObservableObject
 {
-    private readonly string _words;
-
-    /// <param name="words">What the section says, which a search looks in: its heading, what it explains, its choices.</param>
+    /// <param name="words">What the section says, which a search looks in: its heading first, what it explains, its choices.</param>
     internal SettingsSectionViewModel(SettingsCategory category, params string[] words)
     {
         ArgumentNullException.ThrowIfNull(words);
+        if (words.Length == 0)
+        {
+            throw new ArgumentException("A section has a heading at least.", nameof(words));
+        }
 
         Category = category;
-        _words = string.Join(' ', words);
+        Heading = words[0];
+        Words = string.Join(' ', words);
     }
 
     public SettingsCategory Category { get; }
+
+    /// <summary>
+    /// The section's heading, such as "Previews".
+    /// </summary>
+    public string Heading { get; }
+
+    /// <summary>
+    /// What the section says, which a search looks in.
+    /// </summary>
+    internal string Words { get; }
 
     [ObservableProperty]
     public partial bool IsShown { get; internal set; }
@@ -30,5 +43,5 @@ public sealed partial class SettingsSectionViewModel : ObservableObject
     /// Whether each word searched for starts a word the section says, as <see cref="NameQuery"/> reads names: in any
     /// case, with or without accents.
     /// </summary>
-    internal bool Matches(NameQuery search) => search.Matches(_words);
+    internal bool Matches(NameQuery search) => search.Matches(Words);
 }

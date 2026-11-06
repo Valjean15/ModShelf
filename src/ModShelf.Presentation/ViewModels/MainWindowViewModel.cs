@@ -7,6 +7,7 @@ using ModShelf.Application.State;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.Accounts;
+using ModShelf.Presentation.ViewModels.QuickSearch;
 using ModShelf.Presentation.ViewModels.Downloads;
 
 namespace ModShelf.Presentation.ViewModels;
@@ -43,6 +44,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         IUiThread uiThread,
         IEnumerable<ScreenViewModel> screens,
         AccountMenuViewModel accounts,
+        QuickSearchViewModel quickSearch,
         IUiState uiState,
         ILogger<MainWindowViewModel> logger)
     {
@@ -50,6 +52,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(screens);
         ArgumentNullException.ThrowIfNull(accounts);
+        ArgumentNullException.ThrowIfNull(quickSearch);
         ArgumentNullException.ThrowIfNull(uiState);
         ArgumentNullException.ThrowIfNull(logger);
 
@@ -58,6 +61,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         _uiState = uiState;
         _logger = logger;
         Accounts = accounts;
+        QuickSearch = quickSearch;
         Screens = [.. screens.OrderBy(screen => screen.Screen)];
         if (!Screens.Select(screen => screen.Screen).SequenceEqual(Enum.GetValues<Screen>()))
         {
@@ -82,6 +86,11 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
     /// The accounts at the bottom of the sidebar, each opening Accounts.
     /// </summary>
     public AccountMenuViewModel Accounts { get; }
+
+    /// <summary>
+    /// Quick search, over any screen: Ctrl+K, or the field at the top of the sidebar.
+    /// </summary>
+    public QuickSearchViewModel QuickSearch { get; }
 
     /// <summary>
     /// The screen shown. Setting it, as selecting it in the sidebar does, goes to it.
