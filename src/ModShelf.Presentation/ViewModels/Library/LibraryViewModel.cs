@@ -23,6 +23,7 @@ using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.Downloads;
 using ModShelf.Presentation.ViewModels.ModPages;
 using ModShelf.Presentation.ViewModels.Pictures;
+using ModShelf.Presentation.ViewModels.Undo;
 using ModShelf.Sources.Abstractions.Catalog;
 
 namespace ModShelf.Presentation.ViewModels.Library;
@@ -81,6 +82,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         IHiddenGames hiddenGames,
         IGameSettingsOpener gameSettings,
         IScreenOpener screens,
+        UndoBarViewModel undo,
         ISitesInUse sitesInUse,
         ModPictures pictures,
         IUiThread uiThread,
@@ -94,6 +96,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(hiddenGames);
         ArgumentNullException.ThrowIfNull(gameSettings);
         ArgumentNullException.ThrowIfNull(screens);
+        ArgumentNullException.ThrowIfNull(undo);
         ArgumentNullException.ThrowIfNull(sitesInUse);
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(uiThread);
@@ -109,7 +112,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         _pictures = pictures;
         _uiThread = uiThread;
         _logger = logger;
-        _services = new LibraryServices(library, rescan, settings, browser, folders, dialogs, pictures, OpenAsync, ShowSelection, timeProvider, logger);
+        _services = new LibraryServices(library, rescan, settings, browser, folders, dialogs, pictures, undo, OpenAsync, ShowSelection, timeProvider, logger);
         _pageServices = new ModPageServices(
             library,
             libraryDownloads,
@@ -124,6 +127,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             clipboard,
             dialogs,
             pictures,
+            undo,
             timeProvider,
             logger);
         _timeProvider = timeProvider;

@@ -7,6 +7,7 @@ using ModShelf.Presentation.Services;
 using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.ViewModels.Browse;
 using ModShelf.Presentation.ViewModels.ModPages;
+using ModShelf.Presentation.ViewModels.Undo;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Search;
@@ -41,6 +42,7 @@ internal sealed class BrowseHarness : IDisposable
         Lookup.Games[TestData.Nexus] = [Stardew, Skyrim, Fallout];
         Watchlists.Tracking.Add(TestData.Nexus);
         Screens = new ScreenOpener(Navigation);
+        Undo = new UndoBarViewModel(Library, UiThread, Time, UndoLogger);
         Screen = new BrowseViewModel(
             Lookup,
             Library,
@@ -62,6 +64,7 @@ internal sealed class BrowseHarness : IDisposable
             Dialogs,
             Navigation,
             Screens,
+            Undo,
             Hidden,
             Sites,
             UiState,
@@ -74,6 +77,13 @@ internal sealed class BrowseHarness : IDisposable
     public ScriptedLookup Lookup { get; }
 
     public InMemoryModLibrary Library { get; } = new();
+
+    /// <summary>
+    /// The bar that offers to undo a change.
+    /// </summary>
+    public UndoBarViewModel Undo { get; }
+
+    public RecordingLogger<UndoBarViewModel> UndoLogger { get; } = new();
 
     public HiddenGames Hidden { get; } = new();
 
@@ -254,5 +264,6 @@ internal sealed class BrowseHarness : IDisposable
         _disposed = true;
         _stopping.Cancel();
         _stopping.Dispose();
+        Undo.Dispose();
     }
 }

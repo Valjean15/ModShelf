@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
+using ModShelf.Application.Library;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
@@ -217,7 +218,8 @@ public sealed partial class UpdateViewModel : ObservableObject
             cancellationToken);
 
     /// <summary>
-    /// Skips the update until a newer one comes. Once the library has skipped it, it leaves the screen.
+    /// Skips the update until a newer one comes, offering to undo it. Once the library has skipped it, it leaves the
+    /// screen.
     /// </summary>
     [RelayCommand]
     private Task SkipAsync(CancellationToken cancellationToken)
@@ -227,7 +229,11 @@ public sealed partial class UpdateViewModel : ObservableObject
             {
                 try
                 {
-                    await _services.Library.SkipUpdateAsync(File, true, cancellationToken);
+                    LibraryChange change = await _services.Library.SkipUpdateAsync(File, true, cancellationToken);
+                    if (!ReferenceEquals(change.Before, change.After))
+                    {
+                        _services.Undo.Offer(Text.Format(Strings.UndoSkipped, ModName, _update.VersionLabel ?? Name), change);
+                    }
                 }
                 catch (Exception exception) when (exception is KeyNotFoundException or ArgumentException)
                 {

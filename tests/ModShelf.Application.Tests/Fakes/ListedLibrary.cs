@@ -44,5 +44,7 @@ internal sealed class ListedLibrary : IModLibrary
 
     public Task<LibraryChange> SetNoteAsync(Uri link, string? note, CancellationToken cancellationToken) => throw new NotSupportedException();
 
+    public Task<LibraryChange> RestoreAsync(LibraryChange change, CancellationToken cancellationToken) => throw new NotSupportedException();
+
     public IAsyncEnumerable<LibraryChange> ChangesAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
 }

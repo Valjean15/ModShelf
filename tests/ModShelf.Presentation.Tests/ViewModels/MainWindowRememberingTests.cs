@@ -4,6 +4,7 @@ using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.Tests.ViewModels.QuickSearch;
 using ModShelf.Presentation.ViewModels;
 using ModShelf.Presentation.ViewModels.Accounts;
+using ModShelf.Presentation.ViewModels.Undo;
 using ModShelf.Testing;
 
 namespace ModShelf.Presentation.Tests.ViewModels;
@@ -30,6 +31,7 @@ public sealed class MainWindowRememberingTests : IDisposable
             TestScreen.OneOfEach(),
             new AccountMenuViewModel(new TestPictures().Pictures, _navigation),
             new QuickSearchHarness(_navigation).Search,
+            new UndoBarViewModel(new InMemoryModLibrary(), _uiThread, TimeProvider.System, new RecordingLogger<UndoBarViewModel>()),
             _uiState,
             _logger);
     }

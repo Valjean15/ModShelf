@@ -6,6 +6,7 @@ using ModShelf.Application.Settings;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.Pictures;
+using ModShelf.Presentation.ViewModels.Undo;
 
 namespace ModShelf.Presentation.ViewModels.Library;
 
@@ -20,6 +21,7 @@ internal sealed class LibraryServices(
     IFolderOpener folders,
     IDialogService dialogs,
     ModPictures pictures,
+    UndoBarViewModel undo,
     Func<ModRef, CancellationToken, Task> open,
     Action selectionChanged,
     TimeProvider timeProvider,
@@ -38,6 +40,11 @@ internal sealed class LibraryServices(
     public IDialogService Dialogs { get; } = dialogs ?? throw new ArgumentNullException(nameof(dialogs));
 
     public ModPictures Pictures { get; } = pictures ?? throw new ArgumentNullException(nameof(pictures));
+
+    /// <summary>
+    /// The bar that offers to undo a change.
+    /// </summary>
+    public UndoBarViewModel Undo { get; } = undo ?? throw new ArgumentNullException(nameof(undo));
 
     /// <summary>
     /// Opens a mod on its page, in place of the list.

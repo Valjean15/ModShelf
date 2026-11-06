@@ -68,6 +68,20 @@ public sealed class UpdatesPinsTests : IDisposable
     }
 
     [Fact]
+    public async Task SkippingOffersToUndoIt()
+    {
+        await _harness.StartAsync(UpdatesHarness.ModWithUpdates(SkyUi, "SkyUI", TestData.Now, "52", "53"));
+        UpdateViewModel row = _harness.Row("53");
+
+        await row.SkipCommand.ExecuteAsync(null);
+
+        Assert.Equal("SkyUI: update 53 skipped.", _harness.Undo.Message);
+        await _harness.Undo.UndoCommand.ExecuteAsync(null);
+        Assert.Equal(["52", "53"], Screen.Updates.Select(update => update.File.Id).Order());
+        Assert.Empty(Assert.Single(_harness.Library.Mods).SkippedUpdates);
+    }
+
+    [Fact]
     public async Task SkippingAnUpdateThatLeftMeanwhileSaysNothing()
     {
         await _harness.StartAsync(UpdatesHarness.ModWithUpdates(SkyUi, "SkyUI", TestData.Now, "52"));

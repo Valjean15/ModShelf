@@ -150,6 +150,21 @@ public interface IModLibrary
     Task<LibraryChange> SetNoteAsync(Uri link, string? note, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Undoes a change to a mod the library had, such as forgetting, unwatching, pinning, unpinning, skipping an update or
+    /// removing a note: puts the mod back as it was before it, with its records, updates, pin, skipped updates and note,
+    /// but its files as the library has them now, so a download recorded since stays, and a file deleted since stays
+    /// deleted. Nothing on disk is touched, and its site isn't asked.
+    /// </summary>
+    /// <param name="change">The change, as the method that made it returned it.</param>
+    /// <returns>What undoing it did.</returns>
+    /// <exception cref="ArgumentException">The change added the mod to the library, which this doesn't undo.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// The change took the mod out of the library, and it's back in since; or it left it in, and it's gone since. Nothing
+    /// changed.
+    /// </exception>
+    Task<LibraryChange> RestoreAsync(LibraryChange change, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Every change to the library from now on, made by anything in this app: watching and unwatching, downloads recorded
     /// and their old versions, update checks, deleted files, and forgotten mods. A change that leaves a mod as it was isn't
     /// listed. The stream ends when <paramref name="cancellationToken"/> is cancelled.

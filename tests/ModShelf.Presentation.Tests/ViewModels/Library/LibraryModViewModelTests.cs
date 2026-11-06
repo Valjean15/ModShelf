@@ -93,33 +93,74 @@ public sealed class LibraryModViewModelTests : IDisposable
     }
 
     [Fact]
-    public async Task RemovesTheModFromTheLibraryOnceTheUserConfirms()
+    public async Task RemovesTheModFromTheLibraryAtOnceOfferingToUndoIt()
     {
         LibraryModViewModel row = await ShowAsync(TestData.LibraryMod(SkyUi, "SkyUI", watched: true, TestData.LibraryFile(SkyUi, "1", "a.7z")));
-        _harness.Dialogs.Confirm.Enqueue(true);
 
         await row.RemoveCommand.ExecuteAsync(null);
 
-        Assert.Equal(
-            [(
-                "Remove this mod from the library?",
-                "SkyUI leaves the library with its updates, and isn't watched any more. Its files stay in the folder, no longer the library's, and its completed downloads leave the Downloads list.",
-                "Remove")],
-            _harness.Dialogs.Confirmations);
+        Assert.Empty(_harness.Dialogs.Confirmations);
         Assert.Equal(["Forget 12604"], _harness.Library.Asked);
         Assert.Empty(_harness.Screen.Games);
+        Assert.Equal((true, true, "SkyUI removed from the library; its files stay in its folder."), (_harness.Undo.IsShown, _harness.Undo.CanUndo, _harness.Undo.Message));
     }
 
     [Fact]
-    public async Task NotConfirmingKeepsTheMod()
+    public async Task UndoingTheRemovalBringsTheModBack()
     {
-        LibraryModViewModel row = await ShowAsync(TestData.LibraryMod(SkyUi, "SkyUI"));
-        _harness.Dialogs.Confirm.Enqueue(false);
-
+        LibraryMod kept = TestData.LibraryMod(SkyUi, "SkyUI", watched: true, TestData.LibraryFile(SkyUi, "1", "a.7z"));
+        LibraryModViewModel row = await ShowAsync(kept);
         await row.RemoveCommand.ExecuteAsync(null);
 
-        Assert.Empty(_harness.Library.Asked);
-        Assert.Single(_harness.Library.Mods);
+        await _harness.Undo.UndoCommand.ExecuteAsync(null);
+
+        Assert.Equal(["Forget 12604", "Restore 12604"], _harness.Library.Asked);
+        Assert.Same(kept, Assert.Single(_harness.Library.Mods));
+        Assert.Equal(["SkyUI"], _harness.Lines().Skip(1));
+        Assert.False(_harness.Undo.IsShown);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task PinningAndUnpinningOfferToUndoIt(bool pinned)
+    {
+        LibraryModViewModel row = await ShowAsync(TestData.LibraryMod(SkyUi, "SkyUI").WithPinned(!pinned));
+
+        await (pinned ? row.PinCommand : row.UnpinCommand).ExecuteAsync(null);
+
+        Assert.Equal(pinned ? "SkyUI pinned." : "SkyUI unpinned.", _harness.Undo.Message);
+        await _harness.Undo.UndoCommand.ExecuteAsync(null);
+        Assert.Equal(!pinned, Assert.Single(_harness.Library.Mods).IsPinned);
+    }
+
+    [Fact]
+    public async Task UnwatchingOffersToUndoItAndWatchingDoesnt()
+    {
+        LibraryModViewModel row = await ShowAsync(TestData.LibraryMod(SkyUi, "SkyUI", watched: true, TestData.LibraryFile(SkyUi, "1", "a.7z")));
+
+        await row.UnwatchCommand.ExecuteAsync(null);
+
+        Assert.Equal((true, "SkyUI is no longer watched."), (_harness.Undo.IsShown, _harness.Undo.Message));
+        _harness.Undo.CloseCommand.Execute(null);
+        await row.WatchCommand.ExecuteAsync(null);
+        Assert.False(_harness.Undo.IsShown);
+    }
+
+    [Fact]
+    public async Task RemovingANoteOffersToUndoItAndChangingOneDoesnt()
+    {
+        LibraryModViewModel row = await ShowAsync(TestData.LibraryMod(SkyUi, "SkyUI").WithNote("Keep 5.2."));
+        _harness.Dialogs.Answers.Enqueue("Keep 5.3.");
+        await row.EditNoteCommand.ExecuteAsync(null);
+        Assert.False(_harness.Undo.IsShown);
+
+        _harness.Dialogs.Answers.Enqueue("  ");
+        await row.EditNoteCommand.ExecuteAsync(null);
+
+        Assert.Equal("Note removed from SkyUI.", _harness.Undo.Message);
+        await _harness.Undo.UndoCommand.ExecuteAsync(null);
+        Assert.Equal("Keep 5.3.", Assert.Single(_harness.Library.Mods).Note);
     }
 
     [Theory]
@@ -128,7 +169,6 @@ public sealed class LibraryModViewModelTests : IDisposable
     public async Task AModThatCantBeRemovedSaysWhy(Type failure, string reason)
     {
         LibraryModViewModel row = await ShowAsync(TestData.LibraryMod(SkyUi, "SkyUI"));
-        _harness.Dialogs.Confirm.Enqueue(true);
         _harness.Library.Refusal = (Exception)Activator.CreateInstance(failure, reason)!;
 
         await row.RemoveCommand.ExecuteAsync(null);
@@ -141,7 +181,6 @@ public sealed class LibraryModViewModelTests : IDisposable
     public async Task AModRemovedMeanwhileIsLeftAlone()
     {
         LibraryModViewModel row = await ShowAsync(TestData.LibraryMod(SkyUi, "SkyUI"));
-        _harness.Dialogs.Confirm.Enqueue(true);
         _harness.Library.Refusal = new KeyNotFoundException();
 
         await row.RemoveCommand.ExecuteAsync(null);
@@ -154,7 +193,6 @@ public sealed class LibraryModViewModelTests : IDisposable
     public async Task ARemoveThatFailsUnexpectedlyIsLoggedAndTold()
     {
         LibraryModViewModel row = await ShowAsync(TestData.LibraryMod(SkyUi, "SkyUI"));
-        _harness.Dialogs.Confirm.Enqueue(true);
         _harness.Library.Refusal = new IOException("The disk is full.");
 
         await row.RemoveCommand.ExecuteAsync(null);

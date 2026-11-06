@@ -25,6 +25,17 @@ internal sealed class InMemoryModLibrary : IModLibrary
     public Exception? Refusal { get; set; }
 
     /// <summary>
+    /// What undoing a change throws, such as an <see cref="InvalidOperationException"/> for a mod back in the library
+    /// since; null for none.
+    /// </summary>
+    public Exception? RestoreRefusal { get; set; }
+
+    /// <summary>
+    /// Holds each undoing until set; null to undo at once.
+    /// </summary>
+    public TaskCompletionSource? RestoreHeld { get; set; }
+
+    /// <summary>
     /// The names mods' sites give them, by mod ID, for watching a mod from its site.
     /// </summary>
     public Dictionary<string, string> SiteNames { get; } = new(StringComparer.Ordinal);
@@ -189,6 +200,21 @@ internal sealed class InMemoryModLibrary : IModLibrary
     }
 
     public Task<LibraryChange> SetNoteAsync(Uri link, string? note, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    /// <summary>
+    /// Puts the mod back as it was before the change.
+    /// </summary>
+    public async Task<LibraryChange> RestoreAsync(LibraryChange change, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(change);
+        Asked.Add($"Restore {change.Mod.Id}");
+        if (RestoreHeld is { } held)
+        {
+            await held.Task.WaitAsync(cancellationToken);
+        }
+
+        return RestoreRefusal is { } refusal ? throw refusal : Change(change.Mod, change.Before);
+    }
 
     public IAsyncEnumerable<LibraryChange> ChangesAsync(CancellationToken cancellationToken) => _watchers.Watch(cancellationToken);
 

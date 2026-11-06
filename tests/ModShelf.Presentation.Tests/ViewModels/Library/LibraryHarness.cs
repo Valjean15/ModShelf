@@ -5,6 +5,7 @@ using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.ViewModels.Library;
+using ModShelf.Presentation.ViewModels.Undo;
 using ModShelf.Testing;
 
 namespace ModShelf.Presentation.Tests.ViewModels.Library;
@@ -26,6 +27,7 @@ internal sealed class LibraryHarness : IDisposable
         Catalog.GameNames["skyrimspecialedition"] = "Skyrim Special Edition";
         Time.SetLocalTimeZone(TimeZoneInfo.Utc);
         Screens = new ScreenOpener(Navigation);
+        Undo = new UndoBarViewModel(Library, UiThread, Time, UndoLogger);
         Screen = new LibraryViewModel(
             Library,
             History,
@@ -44,6 +46,7 @@ internal sealed class LibraryHarness : IDisposable
             Hidden,
             GameSettings,
             Screens,
+            Undo,
             Sites,
             Pictures.Pictures,
             UiThread,
@@ -52,6 +55,13 @@ internal sealed class LibraryHarness : IDisposable
     }
 
     public InMemoryModLibrary Library { get; } = new();
+
+    /// <summary>
+    /// The bar that offers to undo a change.
+    /// </summary>
+    public UndoBarViewModel Undo { get; }
+
+    public RecordingLogger<UndoBarViewModel> UndoLogger { get; } = new();
 
     public ScriptedLibraryHistory History { get; } = new();
 
@@ -188,5 +198,6 @@ internal sealed class LibraryHarness : IDisposable
         _disposed = true;
         _stopping.Cancel();
         _stopping.Dispose();
+        Undo.Dispose();
     }
 }

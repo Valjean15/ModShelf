@@ -8,6 +8,7 @@ using ModShelf.Application.Sources;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.Downloads;
 using ModShelf.Presentation.ViewModels.Pictures;
+using ModShelf.Presentation.ViewModels.Undo;
 
 namespace ModShelf.Presentation.ViewModels.ModPages;
 
@@ -28,6 +29,7 @@ internal sealed class ModPageServices(
     IClipboard clipboard,
     IDialogService dialogs,
     ModPictures pictures,
+    UndoBarViewModel undo,
     TimeProvider timeProvider,
     ILogger logger)
 {
@@ -56,6 +58,11 @@ internal sealed class ModPageServices(
     public IDialogService Dialogs { get; } = dialogs ?? throw new ArgumentNullException(nameof(dialogs));
 
     public ModPictures Pictures { get; } = pictures ?? throw new ArgumentNullException(nameof(pictures));
+
+    /// <summary>
+    /// The bar that offers to undo a change.
+    /// </summary>
+    public UndoBarViewModel Undo { get; } = undo ?? throw new ArgumentNullException(nameof(undo));
 
     public TimeProvider TimeProvider { get; } = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
 

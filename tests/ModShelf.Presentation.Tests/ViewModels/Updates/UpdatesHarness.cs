@@ -4,6 +4,7 @@ using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.Tests.Fakes;
+using ModShelf.Presentation.ViewModels.Undo;
 using ModShelf.Presentation.ViewModels.Updates;
 using ModShelf.Testing;
 
@@ -30,6 +31,7 @@ internal sealed class UpdatesHarness : IDisposable
         FakeSourceRegistry sources = example is null
             ? new(Catalog, new FakeSource(Plain, "Plain Site"))
             : new(Catalog, new FakeSource(Plain, "Plain Site"), example);
+        Undo = new UndoBarViewModel(Library, UiThread, Time, UndoLogger);
         Screen = new UpdatesViewModel(
             Library,
             Checker,
@@ -37,6 +39,7 @@ internal sealed class UpdatesHarness : IDisposable
             sources,
             AppLookup.Over(sources),
             Dialogs,
+            Undo,
             Settings,
             Hidden,
             Sites,
@@ -47,6 +50,13 @@ internal sealed class UpdatesHarness : IDisposable
     }
 
     public InMemoryModLibrary Library { get; } = new();
+
+    /// <summary>
+    /// The bar that offers to undo a change.
+    /// </summary>
+    public UndoBarViewModel Undo { get; }
+
+    public RecordingLogger<UndoBarViewModel> UndoLogger { get; } = new();
 
     public HiddenGames Hidden { get; } = new();
 
@@ -156,6 +166,7 @@ internal sealed class UpdatesHarness : IDisposable
         _disposed = true;
         _stopping.Cancel();
         _stopping.Dispose();
+        Undo.Dispose();
         Screen.Dispose();
     }
 }

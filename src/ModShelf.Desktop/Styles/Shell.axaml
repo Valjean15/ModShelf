@@ -656,6 +656,20 @@
         <Setter Property="Margin" Value="0,0,0,6" />
     </Style>
 
+    <!-- The undo bar: a card at the bottom of the screen shown, over it, at most 560 wide. -->
+    <Style Selector="Border.undoBar">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Bottom" />
+        <Setter Property="MaxWidth" Value="560" />
+        <Setter Property="Margin" Value="24,0,24,24" />
+        <Setter Property="Padding" Value="16,8,8,8" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BoxShadow" Value="0 12 32 0 #40000000" />
+    </Style>
+
     <!-- Quick search: the window dimmed, and the box near its top, at most 640 wide and 520 high. -->
     <Style Selector="Border.quickSearchScrim">
         <Setter Property="Background" Value="#59000000" />

@@ -242,6 +242,20 @@ internal sealed partial class ModLibrary : IModLibrary
         return await SetNoteAsync(mod, note, cancellationToken).ConfigureAwait(false);
     }
 
+    public async Task<LibraryChange> RestoreAsync(LibraryChange change, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(change);
+        if (change.Before is not { } before)
+        {
+            throw new ArgumentException("Only a change to a mod the library had can be undone.", nameof(change));
+        }
+
+        LibraryChange restored = await UpdateAsync(change.Mod, current => Restored(before, change.After, current), cancellationToken)
+            .ConfigureAwait(false);
+        LogRestored(_logger, change.Mod.Id, change.Mod.Game.Key);
+        return restored;
+    }
+
     private async Task<ModRef> ModAtAsync(Uri link, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(link);
@@ -253,6 +267,34 @@ internal sealed partial class ModLibrary : IModLibrary
     /// The mod no longer watched; the same mod when it wasn't, so nothing is told of a change that changed nothing.
     /// </summary>
     private static LibraryMod? Unwatched(LibraryMod? stored) => stored is { IsWatched: true } ? stored.Unwatched() : stored;
+
+    /// <summary>
+    /// The mod as it was before a change, with the files the library has now; when the change took it out, as it was.
+    /// </summary>
+    private static LibraryMod Restored(LibraryMod before, LibraryMod? after, LibraryMod? current)
+    {
+        if (after is null)
+        {
+            return current is null
+                ? before
+                : throw new InvalidOperationException($"{before.Name} is in the library again since, so it stays as it is now.");
+        }
+
+        if (current is null)
+        {
+            throw new InvalidOperationException($"{before.Name} left the library since, so it stays out.");
+        }
+
+        // Its files as they are now: those recorded since stay, and those deleted since stay deleted. Added first, they
+        // keep it in the library as those gone leave.
+        LibraryMod restored = current.Files.Aggregate(before, (mod, file) => mod.WithFile(file));
+        foreach (ModFileRef gone in before.Files.Select(file => file.File).Where(file => current.Files.All(now => now.File != file)))
+        {
+            restored = restored.WithoutFile(gone) ?? throw new InvalidOperationException($"{before.Name} has no files left to keep it in the library.");
+        }
+
+        return restored;
+    }
 
     /// <summary>
     /// Changes the mod in one transaction, and publishes what that did.

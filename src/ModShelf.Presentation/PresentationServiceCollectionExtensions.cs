@@ -11,6 +11,7 @@ using ModShelf.Presentation.ViewModels.Library;
 using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Presentation.ViewModels.QuickSearch;
 using ModShelf.Presentation.ViewModels.Settings;
+using ModShelf.Presentation.ViewModels.Undo;
 using ModShelf.Presentation.ViewModels.Updates;
 
 namespace ModShelf.Presentation;
@@ -37,6 +38,7 @@ public static class PresentationServiceCollectionExtensions
         services.TryAddSingleton<IScreenOpener, ScreenOpener>();
         services.TryAddSingleton<ModPictures>();
         services.TryAddSingleton<AccountMenuViewModel>();
+        services.TryAddSingleton<UndoBarViewModel>();
         services.TryAddSingleton<ISitesInUse, SitesInUse>();
         services.TryAddEnumerable(
         [

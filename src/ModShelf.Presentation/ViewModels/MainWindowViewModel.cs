@@ -8,6 +8,7 @@ using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.Accounts;
 using ModShelf.Presentation.ViewModels.QuickSearch;
+using ModShelf.Presentation.ViewModels.Undo;
 using ModShelf.Presentation.ViewModels.Downloads;
 
 namespace ModShelf.Presentation.ViewModels;
@@ -45,6 +46,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         IEnumerable<ScreenViewModel> screens,
         AccountMenuViewModel accounts,
         QuickSearchViewModel quickSearch,
+        UndoBarViewModel undo,
         IUiState uiState,
         ILogger<MainWindowViewModel> logger)
     {
@@ -53,6 +55,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         ArgumentNullException.ThrowIfNull(screens);
         ArgumentNullException.ThrowIfNull(accounts);
         ArgumentNullException.ThrowIfNull(quickSearch);
+        ArgumentNullException.ThrowIfNull(undo);
         ArgumentNullException.ThrowIfNull(uiState);
         ArgumentNullException.ThrowIfNull(logger);
 
@@ -62,6 +65,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         _logger = logger;
         Accounts = accounts;
         QuickSearch = quickSearch;
+        Undo = undo;
         Screens = [.. screens.OrderBy(screen => screen.Screen)];
         if (!Screens.Select(screen => screen.Screen).SequenceEqual(Enum.GetValues<Screen>()))
         {
@@ -91,6 +95,11 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
     /// Quick search, over any screen: Ctrl+K, or the field at the top of the sidebar.
     /// </summary>
     public QuickSearchViewModel QuickSearch { get; }
+
+    /// <summary>
+    /// The bar at the bottom that offers to undo a change to the library.
+    /// </summary>
+    public UndoBarViewModel Undo { get; }
 
     /// <summary>
     /// The screen shown. Setting it, as selecting it in the sidebar does, goes to it.

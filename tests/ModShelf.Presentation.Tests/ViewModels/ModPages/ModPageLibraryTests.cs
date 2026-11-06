@@ -389,19 +389,34 @@ public sealed class ModPageLibraryTests : IDisposable
         Assert.Equal("Rescan finished", Assert.Single(_harness.Dialogs.Messages).Title);
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task RemovesTheModFromTheLibraryOnceTheUserConfirms(bool confirmed)
+    [Fact]
+    public async Task RemovesTheModFromTheLibraryAtOnceOfferingToUndoIt()
     {
         await _harness.StartAsync(TestData.LibraryMod(SkyUi, "SkyUI"));
-        ModPageViewModel mod = await OpenAsync();
-        _harness.Dialogs.Confirm.Enqueue(confirmed);
+        ModPageViewModel mod = await OpenAsync(BrowseHarness.Info(SkyUi, "SkyUI from the site"));
 
         await mod.RemoveCommand.ExecuteAsync(null);
 
-        Assert.Equal(confirmed ? ["Forget 12604"] : [], _harness.Library.Asked);
-        Assert.Equal(!confirmed, mod.IsInLibrary);
+        Assert.Equal(["Forget 12604"], _harness.Library.Asked);
+        Assert.False(mod.IsInLibrary);
+        Assert.Empty(_harness.Dialogs.Confirmations);
+        Assert.Equal("SkyUI removed from the library; its files stay in its folder.", _harness.Undo.Message);
+
+        await _harness.Undo.UndoCommand.ExecuteAsync(null);
+        Assert.True(mod.IsInLibrary);
+    }
+
+    [Fact]
+    public async Task UnwatchingOffersToUndoIt()
+    {
+        await _harness.StartAsync(TestData.LibraryMod(SkyUi, "SkyUI", files: [TestData.LibraryFile(SkyUi, "1", "SkyUI.7z")]));
+        ModPageViewModel mod = await OpenAsync();
+
+        await mod.ToggleWatchCommand.ExecuteAsync(null);
+
+        Assert.Equal((false, "SkyUI is no longer watched."), (mod.IsWatched, _harness.Undo.Message));
+        await _harness.Undo.UndoCommand.ExecuteAsync(null);
+        Assert.True(mod.IsWatched);
     }
 
     [Fact]

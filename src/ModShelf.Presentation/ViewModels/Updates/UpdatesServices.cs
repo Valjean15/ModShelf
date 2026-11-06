@@ -4,6 +4,7 @@ using ModShelf.Application.Catalog;
 using ModShelf.Application.Library;
 using ModShelf.Application.Sources;
 using ModShelf.Presentation.Services;
+using ModShelf.Presentation.ViewModels.Undo;
 
 namespace ModShelf.Presentation.ViewModels.Updates;
 
@@ -16,6 +17,7 @@ internal sealed class UpdatesServices(
     ISourceRegistry sources,
     IModLookup lookup,
     IDialogService dialogs,
+    UndoBarViewModel undo,
     TimeProvider timeProvider,
     ILogger logger)
 {
@@ -28,6 +30,11 @@ internal sealed class UpdatesServices(
     public IModLookup Lookup { get; } = lookup ?? throw new ArgumentNullException(nameof(lookup));
 
     public IDialogService Dialogs { get; } = dialogs ?? throw new ArgumentNullException(nameof(dialogs));
+
+    /// <summary>
+    /// The bar that offers to undo a change.
+    /// </summary>
+    public UndoBarViewModel Undo { get; } = undo ?? throw new ArgumentNullException(nameof(undo));
 
     public TimeProvider TimeProvider { get; } = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
 

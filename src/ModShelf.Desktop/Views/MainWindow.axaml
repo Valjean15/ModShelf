@@ -6,6 +6,7 @@
         xmlns:accounts="using:ModShelf.Presentation.ViewModels.Accounts"
         xmlns:pictures="using:ModShelf.Desktop.Views.Pictures"
         xmlns:quick="using:ModShelf.Desktop.Views.QuickSearch"
+        xmlns:undo="using:ModShelf.Presentation.ViewModels.Undo"
         x:Class="ModShelf.Desktop.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Width="1024" Height="640"
@@ -18,7 +19,8 @@
         <KeyBinding Gesture="Meta+K" Command="{Binding QuickSearch.OpenCommand}" />
     </Window.KeyBindings>
 
-    <!-- The sidebar and the screen shown; quick search over both while it's open. -->
+    <!-- The sidebar and the screen shown, with the undo bar at its bottom while it shows; quick search over both while
+         it's open. -->
     <Panel>
         <SplitView IsPaneOpen="{Binding IsSidebarOpen}"
                    DisplayMode="CompactInline"
@@ -141,8 +143,32 @@
                 </Border>
             </SplitView.Pane>
 
-            <!-- App.axaml's data templates pick each screen's view. -->
-            <ContentControl Margin="32,28,32,24" Content="{Binding CurrentScreen}" />
+            <Panel>
+                <!-- App.axaml's data templates pick each screen's view. -->
+                <ContentControl Margin="32,28,32,24" Content="{Binding CurrentScreen}" />
+
+                <!-- What a change to the library did, with Undo, for ten seconds. -->
+                <Border Classes="undoBar" DataContext="{Binding Undo}" x:DataType="undo:UndoBarViewModel" IsVisible="{Binding IsShown}">
+                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                        <TextBlock VerticalAlignment="Center"
+                                   TextWrapping="Wrap"
+                                   Text="{Binding Message}"
+                                   AutomationProperties.LiveSetting="Polite" />
+                        <Button Grid.Column="1"
+                                Classes="accent"
+                                Content="{x:Static res:Strings.UndoAction}"
+                                Command="{Binding UndoCommand}"
+                                IsVisible="{Binding CanUndo}" />
+                        <Button Grid.Column="2"
+                                Classes="pickerClear"
+                                Command="{Binding CloseCommand}"
+                                ToolTip.Tip="{x:Static res:Strings.UndoDismiss}"
+                                AutomationProperties.Name="{x:Static res:Strings.UndoDismiss}">
+                            <PathIcon Width="12" Height="12" Data="{StaticResource CloseIcon}" />
+                        </Button>
+                    </Grid>
+                </Border>
+            </Panel>
         </SplitView>
 
         <quick:QuickSearchBox DataContext="{Binding QuickSearch}" />

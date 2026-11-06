@@ -833,6 +833,150 @@ public sealed class ModLibraryTests : IDisposable
         Assert.Same(before, Assert.Single(_repository.Mods));
     }
 
+    [Fact]
+    public async Task UndoingAForgetPutsTheModBackWithItsFilesUpdatesPinSkipAndNote()
+    {
+        LibraryMod kept = Kept();
+        string[] onDisk = [.. _storage.Files];
+        ModLibrary library = Library(_site);
+        LibraryChange forgotten = await library.ForgetAsync(SkyUi, Cancellation);
+        using WatchedChanges seen = new(_changes);
+
+        LibraryChange restored = await library.RestoreAsync(forgotten, Cancellation);
+
+        Assert.Null(restored.Before);
+        Assert.Same(restored.After, Assert.Single(_repository.Mods));
+        Assert.Equal(Facts(kept), Facts(restored.After!));
+        Assert.Equal([restored], await seen.StopAsync());
+        Assert.Equal(onDisk, _storage.Files);
+        Assert.Empty(_site.Asked);
+        Assert.Equal("Information: Undid a change to mod 12604 of skyrimspecialedition ", _logger.Entries.Last());
+    }
+
+    [Fact]
+    public async Task UndoingAnUnwatchWatchesItAgainWithItsUpdates()
+    {
+        LibraryMod kept = Kept();
+        ModLibrary library = Library(_site);
+        LibraryChange unwatched = await library.SetWatchedAsync(SkyUi, false, Cancellation);
+        Assert.Empty(unwatched.After!.Updates);
+
+        LibraryChange restored = await library.RestoreAsync(unwatched, Cancellation);
+
+        Assert.Equal(Facts(kept), Facts(restored.After!));
+    }
+
+    [Fact]
+    public async Task UndoesAPinAnUnpinASkipAndANoteRemoved()
+    {
+        LibraryMod kept = Kept();
+        ModLibrary library = Library(_site);
+
+        LibraryChange[] changes =
+        [
+            await library.SetPinnedAsync(SkyUi, false, Cancellation),
+            await library.SkipUpdateAsync(new ModFileRef(SkyUi, "35409"), false, Cancellation),
+            await library.SetNoteAsync(SkyUi, null, Cancellation),
+        ];
+        Assert.Equal((false, 0, (string?)null), (changes[^1].After!.IsPinned, changes[^1].After!.SkippedUpdates.Count, changes[^1].After!.Note));
+        foreach (LibraryChange change in changes.Reverse())
+        {
+            await library.RestoreAsync(change, Cancellation);
+        }
+
+        Assert.Equal(Facts(kept), Facts(Assert.Single(_repository.Mods)));
+
+        LibraryChange pinned = await library.SetPinnedAsync(SkyUi, false, Cancellation);
+        LibraryChange unpinned = await library.RestoreAsync(pinned, Cancellation);
+        Assert.True(unpinned.After!.IsPinned);
+    }
+
+    [Fact]
+    public async Task UndoingKeepsTheFilesAsTheLibraryHasThemNow()
+    {
+        Kept();
+        ModLibrary library = Library(_site);
+        LibraryChange unpinned = await library.SetPinnedAsync(SkyUi, false, Cancellation);
+        LibraryFile recorded = File("35410", "nexus/skyrimspecialedition/SkyUI (12604)/SkyUI_5_4_SE.7z");
+        await _repository.UpdateAsync(SkyUi, mod => mod!.WithFile(recorded).WithoutFile(new ModFileRef(SkyUi, "35407")), Cancellation);
+
+        LibraryChange restored = await library.RestoreAsync(unpinned, Cancellation);
+
+        Assert.True(restored.After!.IsPinned);
+        Assert.Equal(["35408", "35410"], restored.After.Files.Select(file => file.File.Id).Order());
+        Assert.Equal(["35409"], restored.After.Updates.Select(update => update.File.Id));
+    }
+
+    [Fact]
+    public async Task AModForgottenAndBackSinceStaysAsItIs()
+    {
+        Kept();
+        ModLibrary library = Library(_site);
+        LibraryChange forgotten = await library.ForgetAsync(SkyUi, Cancellation);
+        LibraryMod back = await library.WatchAsync(SkyUi, Cancellation);
+
+        InvalidOperationException refused = await Assert.ThrowsAsync<InvalidOperationException>(() => library.RestoreAsync(forgotten, Cancellation));
+
+        Assert.Equal("SkyUI is in the library again since, so it stays as it is now.", refused.Message);
+        Assert.Same(back, Assert.Single(_repository.Mods));
+    }
+
+    [Fact]
+    public async Task AModGoneSinceStaysOut()
+    {
+        Kept();
+        ModLibrary library = Library(_site);
+        LibraryChange unpinned = await library.SetPinnedAsync(SkyUi, false, Cancellation);
+        await library.ForgetAsync(SkyUi, Cancellation);
+
+        InvalidOperationException refused = await Assert.ThrowsAsync<InvalidOperationException>(() => library.RestoreAsync(unpinned, Cancellation));
+
+        Assert.Equal("SkyUI left the library since, so it stays out.", refused.Message);
+        Assert.Empty(_repository.Mods);
+    }
+
+    [Fact]
+    public async Task AChangeThatAddedTheModIsntUndone()
+    {
+        ModLibrary library = Library(_site);
+        LibraryMod watched = await library.WatchAsync(Link, Cancellation);
+
+        await Assert.ThrowsAsync<ArgumentException>(() => library.RestoreAsync(new LibraryChange(SkyUi, null, watched), Cancellation));
+
+        Assert.Same(watched, Assert.Single(_repository.Mods));
+    }
+
+    /// <summary>
+    /// SkyUI watched, with two files on disk, an update to the newer one skipped, pinned, and with a note.
+    /// </summary>
+    private LibraryMod Kept()
+    {
+        LibraryFile older = File("35407", "nexus/skyrimspecialedition/SkyUI (12604)/SkyUI_5_1_SE.7z");
+        LibraryFile newer = File("35408", "nexus/skyrimspecialedition/SkyUI (12604)/SkyUI_5_2_SE.7z");
+        LibraryMod stored = LibraryMod.Restore(SkyUi, "SkyUI", null, null, isWatched: true, TestData.Now, null, [older, newer])
+            .WithUpdates([new LibraryUpdate(new ModFileRef(SkyUi, "35409"), "SkyUI 5.3", "SkyUI_5_3_SE.7z", "5.3", ModFileCategory.Main, TestData.Now, newer.File, TestData.Now)])
+            .WithUpdateSkipped(new ModFileRef(SkyUi, "35409"), true)
+            .WithPinned(true)
+            .WithNote("Keep 5.2 for now.");
+        _repository.Add(stored);
+        _storage.Add(LibraryPaths.Resolve(Root, older.RelativePath));
+        _storage.Add(LibraryPaths.Resolve(Root, newer.RelativePath));
+        return stored;
+    }
+
+    /// <summary>
+    /// What undoing puts back, as text: watched or not, the files, the updates, pinned or not, those skipped, the note.
+    /// </summary>
+    private static string Facts(LibraryMod mod)
+        => string.Join(
+            " | ",
+            mod.IsWatched,
+            string.Join(',', mod.Files.Select(file => file.File.Id).Order(StringComparer.Ordinal)),
+            string.Join(',', mod.Updates.Select(update => update.File.Id)),
+            mod.IsPinned,
+            string.Join(',', mod.SkippedUpdates.Select(file => file.Id)),
+            mod.Note);
+
     private LibraryUpdate Update(string id, Uri? page)
         => new(new ModFileRef(SkyUi, id), $"SkyUI {id}", $"SkyUI_{id}.7z", "5.3", ModFileCategory.Main, TestData.Now, page is null ? null : new ModFileRef(SkyUi, "35407"), TestData.Now, page);
 

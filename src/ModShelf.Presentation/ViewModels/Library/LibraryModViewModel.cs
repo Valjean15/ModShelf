@@ -359,7 +359,11 @@ public sealed partial class LibraryModViewModel : ObservableObject
 
                 try
                 {
-                    await _services.Library.SetNoteAsync(Mod, note, cancellationToken);
+                    LibraryChange change = await _services.Library.SetNoteAsync(Mod, note, cancellationToken);
+                    if (change.Before?.Note is not null && change.After?.Note is null)
+                    {
+                        _services.Undo.Offer(Text.Format(Strings.UndoNoteRemoved, Name), change);
+                    }
                 }
                 catch (KeyNotFoundException)
                 {
@@ -399,7 +403,7 @@ public sealed partial class LibraryModViewModel : ObservableObject
     private Task UnwatchAsync(CancellationToken cancellationToken) => SetWatchedAsync(ModAction.Unwatch, false, cancellationToken);
 
     /// <summary>
-    /// Takes the mod out of the library once the user confirms. Its files stay where they are. The screen shows the change
+    /// Takes the mod out of the library, offering to undo it. Its files stay where they are. The screen shows the change
     /// once the library makes it.
     /// </summary>
     [RelayCommand]
@@ -408,15 +412,10 @@ public sealed partial class LibraryModViewModel : ObservableObject
             ModAction.Remove,
             async () =>
             {
-                string message = Text.Format(Strings.RemoveModMessage, Name);
-                if (!await _services.Dialogs.ConfirmAsync(Strings.RemoveModTitle, message, Strings.RemoveModConfirm, cancellationToken))
-                {
-                    return;
-                }
-
                 try
                 {
-                    await _services.Library.ForgetAsync(Mod, cancellationToken);
+                    LibraryChange change = await _services.Library.ForgetAsync(Mod, cancellationToken);
+                    _services.Undo.Offer(Text.Format(Strings.UndoRemoved, Name), change);
                 }
                 catch (KeyNotFoundException)
                 {
@@ -443,7 +442,7 @@ public sealed partial class LibraryModViewModel : ObservableObject
     private bool CanPin() => !IsPinned;
 
     /// <summary>
-    /// Pins or unpins the mod. The screen shows the change once the library makes it.
+    /// Pins or unpins the mod, offering to undo it. The screen shows the change once the library makes it.
     /// </summary>
     private Task SetPinnedAsync(ModAction action, bool pinned, CancellationToken cancellationToken)
         => RunAsync(
@@ -452,7 +451,7 @@ public sealed partial class LibraryModViewModel : ObservableObject
             {
                 try
                 {
-                    await _services.Library.SetPinnedAsync(Mod, pinned, cancellationToken);
+                    OfferUndo(pinned ? Strings.UndoPinned : Strings.UndoUnpinned, await _services.Library.SetPinnedAsync(Mod, pinned, cancellationToken));
                 }
                 catch (KeyNotFoundException)
                 {
@@ -462,8 +461,8 @@ public sealed partial class LibraryModViewModel : ObservableObject
             cancellationToken);
 
     /// <summary>
-    /// Watches or unwatches the mod. The screen shows the change once the library makes it; a mod unwatched without
-    /// files leaves it.
+    /// Watches or unwatches the mod, offering to undo unwatching it. The screen shows the change once the library makes
+    /// it; a mod unwatched without files leaves it.
     /// </summary>
     private Task SetWatchedAsync(ModAction action, bool watched, CancellationToken cancellationToken)
         => RunAsync(
@@ -472,7 +471,11 @@ public sealed partial class LibraryModViewModel : ObservableObject
             {
                 try
                 {
-                    await _services.Library.SetWatchedAsync(Mod, watched, cancellationToken);
+                    LibraryChange change = await _services.Library.SetWatchedAsync(Mod, watched, cancellationToken);
+                    if (!watched)
+                    {
+                        OfferUndo(Strings.UndoUnwatched, change);
+                    }
                 }
                 catch (KeyNotFoundException)
                 {
@@ -480,6 +483,17 @@ public sealed partial class LibraryModViewModel : ObservableObject
                 }
             },
             cancellationToken);
+
+    /// <summary>
+    /// Offers to undo a change that changed the mod, saying what it did, such as "{0} pinned.", with the mod's name.
+    /// </summary>
+    private void OfferUndo(string said, LibraryChange change)
+    {
+        if (!ReferenceEquals(change.Before, change.After))
+        {
+            _services.Undo.Offer(Text.Format(said, Name), change);
+        }
+    }
 
     /// <summary>
     /// Whether it's pinned, such as "Pinned at 2.7"; its updates offered: "Update to" the new version when one replaces a

@@ -533,8 +533,8 @@ public sealed partial class ModPageViewModel : ObservableObject
             cancellationToken);
 
     /// <summary>
-    /// Watches the mod for updates, adding it to the library with its details from its site, or stops watching it. A mod
-    /// unwatched without files leaves the library.
+    /// Watches the mod for updates, adding it to the library with its details from its site, or stops watching it,
+    /// offering to undo that. A mod unwatched without files leaves the library.
     /// </summary>
     [RelayCommand]
     private Task ToggleWatchAsync(CancellationToken cancellationToken)
@@ -545,11 +545,22 @@ public sealed partial class ModPageViewModel : ObservableObject
             async () =>
             {
                 LibraryMod? now;
+                string name = _inLibrary?.Name ?? Name;
                 try
                 {
-                    now = watch
-                        ? await _services.Library.WatchAsync(Mod, cancellationToken)
-                        : (await _services.Library.SetWatchedAsync(Mod, watched: false, cancellationToken)).After;
+                    if (watch)
+                    {
+                        now = await _services.Library.WatchAsync(Mod, cancellationToken);
+                    }
+                    else
+                    {
+                        LibraryChange change = await _services.Library.SetWatchedAsync(Mod, watched: false, cancellationToken);
+                        now = change.After;
+                        if (!ReferenceEquals(change.Before, change.After))
+                        {
+                            _services.Undo.Offer(Text.Format(Strings.UndoUnwatched, name), change);
+                        }
+                    }
                 }
                 catch (KeyNotFoundException)
                 {
@@ -648,7 +659,7 @@ public sealed partial class ModPageViewModel : ObservableObject
             cancellationToken);
 
     /// <summary>
-    /// Takes the mod out of the library once the user confirms. Its files stay where they are.
+    /// Takes the mod out of the library, offering to undo it. Its files stay where they are.
     /// </summary>
     [RelayCommand(CanExecute = nameof(IsInLibrary))]
     private Task RemoveAsync(CancellationToken cancellationToken)
@@ -656,15 +667,11 @@ public sealed partial class ModPageViewModel : ObservableObject
             PageAction.Remove,
             async () =>
             {
-                string message = Text.Format(Strings.RemoveModMessage, _inLibrary?.Name ?? Name);
-                if (!await _services.Dialogs.ConfirmAsync(Strings.RemoveModTitle, message, Strings.RemoveModConfirm, cancellationToken))
-                {
-                    return;
-                }
-
+                string name = _inLibrary?.Name ?? Name;
                 try
                 {
-                    await _services.Library.ForgetAsync(Mod, cancellationToken);
+                    LibraryChange change = await _services.Library.ForgetAsync(Mod, cancellationToken);
+                    _services.Undo.Offer(Text.Format(Strings.UndoRemoved, name), change);
                 }
                 catch (KeyNotFoundException)
                 {

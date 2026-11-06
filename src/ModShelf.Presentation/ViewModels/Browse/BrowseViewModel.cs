@@ -24,6 +24,7 @@ using ModShelf.Presentation.ViewModels.Downloads;
 using ModShelf.Presentation.ViewModels.Games;
 using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Presentation.ViewModels.ModPages;
+using ModShelf.Presentation.ViewModels.Undo;
 using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Search;
 
@@ -96,6 +97,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         IDialogService dialogs,
         INavigationService navigation,
         IScreenOpener screens,
+        UndoBarViewModel undo,
         IHiddenGames hiddenGames,
         ISitesInUse sitesInUse,
         IUiState uiState,
@@ -108,6 +110,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(library);
         ArgumentNullException.ThrowIfNull(navigation);
         ArgumentNullException.ThrowIfNull(screens);
+        ArgumentNullException.ThrowIfNull(undo);
         ArgumentNullException.ThrowIfNull(hiddenGames);
         ArgumentNullException.ThrowIfNull(sitesInUse);
         ArgumentNullException.ThrowIfNull(uiState);
@@ -141,6 +144,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
             clipboard,
             dialogs,
             pictures,
+            undo,
             timeProvider,
             logger);
         SelectedSort = Sorts[0];

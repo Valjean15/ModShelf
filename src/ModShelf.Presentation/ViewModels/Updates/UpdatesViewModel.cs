@@ -18,6 +18,7 @@ using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.Pictures;
+using ModShelf.Presentation.ViewModels.Undo;
 
 namespace ModShelf.Presentation.ViewModels.Updates;
 
@@ -59,6 +60,7 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
         ISourceRegistry sources,
         IModLookup lookup,
         IDialogService dialogs,
+        UndoBarViewModel undo,
         ISettingsService settings,
         IHiddenGames hiddenGames,
         ISitesInUse sitesInUse,
@@ -69,6 +71,7 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
     {
         ArgumentNullException.ThrowIfNull(library);
         ArgumentNullException.ThrowIfNull(checker);
+        ArgumentNullException.ThrowIfNull(undo);
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(hiddenGames);
@@ -88,7 +91,7 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
         _uiThread = uiThread;
         _timeProvider = timeProvider;
         _logger = logger;
-        _services = new UpdatesServices(library, downloads, sources, lookup, dialogs, timeProvider, logger);
+        _services = new UpdatesServices(library, downloads, sources, lookup, dialogs, undo, timeProvider, logger);
         Previews = new PreviewsViewModel(PreviewScreen.Updates, pictures);
         Previews.PropertyChanged += (_, changed) =>
         {

@@ -559,20 +559,8 @@
     <comment>{0} is how many other mods' files a rescan couldn't match.</comment>
   </data>
   <data name="LibraryRemoveMod" xml:space="preserve">
-    <value>Remove from library…</value>
-    <comment>Button on a mod: take it out of the library, after asking. Its files stay on disk.</comment>
-  </data>
-  <data name="RemoveModTitle" xml:space="preserve">
-    <value>Remove this mod from the library?</value>
-    <comment>Title of the dialog confirming that a mod leaves the library.</comment>
-  </data>
-  <data name="RemoveModMessage" xml:space="preserve">
-    <value>{0} leaves the library with its updates, and isn't watched any more. Its files stay in the folder, no longer the library's, and its completed downloads leave the Downloads list.</value>
-    <comment>{0} is the mod's name.</comment>
-  </data>
-  <data name="RemoveModConfirm" xml:space="preserve">
-    <value>Remove</value>
-    <comment>Button that takes a mod out of the library. Its files stay.</comment>
+    <value>Remove from library</value>
+    <comment>Button on a mod: take it out of the library, offering to undo it. Its files stay on disk.</comment>
   </data>
   <data name="RemoveModFailedTitle" xml:space="preserve">
     <value>The mod wasn't removed</value>
@@ -3254,5 +3242,41 @@
   <data name="QuickSearchSettingPath" xml:space="preserve">
     <value>{0} › {1}</value>
     <comment>Quick search, a setting: {0} is its category, such as Downloads, {1} its section or game.</comment>
+  </data>
+  <data name="UndoAction" xml:space="preserve">
+    <value>Undo</value>
+    <comment>The undo bar: puts the library back as it was before the change it says.</comment>
+  </data>
+  <data name="UndoDismiss" xml:space="preserve">
+    <value>Dismiss</value>
+    <comment>The undo bar: the tooltip of its ×, which closes it.</comment>
+  </data>
+  <data name="UndoRemoved" xml:space="preserve">
+    <value>{0} removed from the library; its files stay in its folder.</value>
+    <comment>The undo bar, after a mod was removed from the library: {0} is its name.</comment>
+  </data>
+  <data name="UndoUnwatched" xml:space="preserve">
+    <value>{0} is no longer watched.</value>
+    <comment>The undo bar, after a mod was unwatched: {0} is its name.</comment>
+  </data>
+  <data name="UndoPinned" xml:space="preserve">
+    <value>{0} pinned.</value>
+    <comment>The undo bar, after a mod was pinned: {0} is its name.</comment>
+  </data>
+  <data name="UndoUnpinned" xml:space="preserve">
+    <value>{0} unpinned.</value>
+    <comment>The undo bar, after a mod was unpinned: {0} is its name.</comment>
+  </data>
+  <data name="UndoNoteRemoved" xml:space="preserve">
+    <value>Note removed from {0}.</value>
+    <comment>The undo bar, after a mod's note was removed: {0} is its name.</comment>
+  </data>
+  <data name="UndoSkipped" xml:space="preserve">
+    <value>{0}: update {1} skipped.</value>
+    <comment>The undo bar, after an update was skipped: {0} is the mod's name, {1} the update's version, or its name.</comment>
+  </data>
+  <data name="UndoFailed" xml:space="preserve">
+    <value>Couldn't undo: {0}</value>
+    <comment>The undo bar, when undoing failed: {0} says why.</comment>
   </data>
 </root>
