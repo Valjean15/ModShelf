@@ -91,6 +91,34 @@ Install the 0.9.0 `.pkg`, then start the app from the terminal with the settings
   As 1.5 to 1.7: ModShelf.app runs 0.9.1 after the restart.
 - [ ] **3.5 Before deleting it.** **Give them back** (or **Stop opening them**) under "Links from websites", then quit and move ModShelf.app to the Bin.
 
+## 4. From 0.9 to 1.0.0
+
+1.0.0 is the first release that isn't a pre-release, and the 0.9 copies in use must update to it. The tests open the databases and `settings.json` of each 0.9 release, and check which GitHub releases a 0.9 copy and a 1.0 copy take; here, on Windows, an installed 0.9.4 updates to 1.0.0 before the tag, and a 0.9 copy finds it on GitHub after the release is published.
+
+After 1.9, pack 0.9.4 from its tag and 1.0.0 from the commit to be tagged, into a feed of their own, and point the test settings at it:
+
+```powershell
+$upgrade = Join-Path $test 'upgrade'
+git switch --detach v0.9.4
+./build/pack.ps1 -Version 0.9.4 -Output $upgrade
+Copy-Item (Join-Path $upgrade 'ModShelf.App-win-x64-Setup.exe') (Join-Path $test 'Setup-0.9.4.exe')
+git switch -
+Set-Content (Join-Path $test 'notes-1.0.0.md') "## 1.0.0`n`n- The first stable release."
+./build/pack.ps1 -Version 1.0.0 -Notes (Join-Path $test 'notes-1.0.0.md') -Output $upgrade
+$env:ModShelf__UpdateFeed = $upgrade
+[Environment]::SetEnvironmentVariable('ModShelf__UpdateFeed', $upgrade, 'User')
+Remove-Item (Join-Path $test 'library.db*'), (Join-Path $test 'settings.json') -ErrorAction SilentlyContinue
+```
+
+- [ ] **4.1 Install 0.9.4.** Run `Setup-0.9.4.exe` from the test folder, and **Skip setup**.
+  "About ModShelf" says "ModShelf 0.9.4 (…)" and "ModShelf 1.0.0 is available.", with its notes.
+- [ ] **4.2 A library in 0.9.4.** Link the account; download a file of a mod; watch another mod; pin the first and add a note to it; skip an update, if one is offered; give a game a folder pattern of its own, and its previews as **Cards**; and make the theme light.
+  As 0.9.4 shows them. Note the file's SHA-256 from its mod's page.
+- [ ] **4.3 Update to 1.0.0.** **Download**, then **Restart to update**.
+  "ModShelf 1.0.0 (…)" and "This is the newest ModShelf." Everything from 4.2 is kept: the account, still linked; the file on disk, with the same SHA-256; the watched mod; the pin, the note and the skipped update; the game's folder pattern and cards; the light theme. Settings › Updates, "Requests to the sites", says "When below 10% are left (the default)". **Recent activity** works, and the log (`logs\desktop-….log` in the test folder) has no errors.
+- [ ] **4.4 From GitHub.** Once the 1.0.0 draft is published, on a computer with 0.9.4 or 0.9.5 installed from GitHub and used as usual, without the test settings: Settings, **Check for updates**.
+  "ModShelf 1.0.0 is available.", with the release's notes. **Download** and **Restart to update** bring 1.0.0, with your library, settings and accounts as they were; then **Check for updates** says "This is the newest ModShelf."
+
 ## Clean up
 
 On Windows, remove the user's settings from the start, then the test folder:
@@ -129,3 +157,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 3.3 Links | | |
 | 3.4 Download, wait and restart | | |
 | 3.5 Before deleting it | | |
+| 4.1 Install 0.9.4 | | |
+| 4.2 A library in 0.9.4 | | |
+| 4.3 Update to 1.0.0 | | |
+| 4.4 From GitHub | | |
