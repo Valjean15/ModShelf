@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Desktop.Ports;
 using ModShelf.Application.Releases;
+using ModShelf.Application.State;
 using ModShelf.Desktop.Hosting;
 using ModShelf.Desktop.Views.Dialogs;
 using ModShelf.Infrastructure.Logging;
@@ -83,9 +84,15 @@ internal static partial class Program
             return 1;
         }
 
+        // The window comes back as it was left. Read before Avalonia starts, so the window opens there rather than moving
+        // once shown: Main stays synchronous for Avalonia's STA thread, with no SynchronizationContext yet to block, and
+        // reading the state never fails.
+        UiState remembered = host.Services.GetRequiredService<IUiState>().GetAsync(CancellationToken.None).GetAwaiter().GetResult();
+        MainWindowViewModel? window = null;
         try
         {
-            return CreateAppBuilder(host.Services, instance, args).StartWithClassicDesktopLifetime(args);
+            return CreateAppBuilder(host.Services, () => window = host.Services.GetRequiredService<MainWindowViewModel>(), instance, remembered, args)
+                .StartWithClassicDesktopLifetime(args);
         }
         finally
         {
@@ -93,6 +100,13 @@ internal static partial class Program
             // stopped. Clear it, or a continuation in a hosted service's StopAsync (or in an async
             // Dispose) would be posted to the dead dispatcher and the process would never exit.
             SynchronizationContext.SetSynchronizationContext(null);
+
+            // The window's place, told as the window closed, is saved off the UI thread: given a moment to finish, as
+            // Main stays synchronous.
+            if (window is not null)
+            {
+                Task.WhenAny(window.Remembering, Task.Delay(TimeSpan.FromSeconds(2))).GetAwaiter().GetResult();
+            }
 
             // Avalonia needs an STA thread on Windows, so Main stays synchronous and stops the
             // host through its synchronous helpers: WaitForShutdown waits for StopApplication.
@@ -105,13 +119,15 @@ internal static partial class Program
     public static AppBuilder BuildAvaloniaApp()
         => Configure(AppBuilder.Configure<App>());
 
-    private static AppBuilder CreateAppBuilder(IServiceProvider services, ISingleInstance instance, string[] args)
+    private static AppBuilder CreateAppBuilder(
+        IServiceProvider services, Func<MainWindowViewModel> createMainWindowViewModel, ISingleInstance instance, UiState remembered, string[] args)
         => Configure(AppBuilder.Configure(
             () => new App(
-                () => services.GetRequiredService<MainWindowViewModel>(),
+                createMainWindowViewModel,
                 () => services.GetRequiredService<TrayViewModel>(),
                 () => services.GetRequiredService<FirstRunViewModel>(),
                 instance,
+                remembered,
                 args)));
 
     /// <summary>

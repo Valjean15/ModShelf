@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 
 using Microsoft.Extensions.Logging;
 
+using ModShelf.Application.State;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.Accounts;
@@ -12,7 +13,9 @@ namespace ModShelf.Presentation.ViewModels;
 
 /// <summary>
 /// The main window: the sidebar of screens, with the accounts at its bottom, and the screen it shows, which follows
-/// <see cref="INavigationService"/>. It starts every screen's own work, and stops it when disposed.
+/// <see cref="INavigationService"/>. It starts every screen's own work, and stops it when disposed. It comes back as it
+/// was left: the sidebar open or collapsed and the screen last open, which it remembers as they change, with the window's
+/// place the view tells it of (<see cref="IUiState"/>).
 /// </summary>
 public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
 {
@@ -23,6 +26,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
 
     private readonly INavigationService _navigation;
     private readonly IUiThread _uiThread;
+    private readonly IUiState _uiState;
     private readonly ILogger<MainWindowViewModel> _logger;
     private readonly CancellationTokenSource _stopping = new();
     private readonly List<Task> _screensWork = [];
@@ -30,22 +34,28 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
     // The screen last shown, which a sidebar that clears its selection, and selects it again, doesn't show anew.
     private ScreenViewModel? _shown;
 
+    // Whether the state remembered is being shown, which isn't remembered again.
+    private bool _restoring;
+
     /// <param name="screens">One of each <see cref="Services.Screen"/>, in any order.</param>
     public MainWindowViewModel(
         INavigationService navigation,
         IUiThread uiThread,
         IEnumerable<ScreenViewModel> screens,
         AccountMenuViewModel accounts,
+        IUiState uiState,
         ILogger<MainWindowViewModel> logger)
     {
         ArgumentNullException.ThrowIfNull(navigation);
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(screens);
         ArgumentNullException.ThrowIfNull(accounts);
+        ArgumentNullException.ThrowIfNull(uiState);
         ArgumentNullException.ThrowIfNull(logger);
 
         _navigation = navigation;
         _uiThread = uiThread;
+        _uiState = uiState;
         _logger = logger;
         Accounts = accounts;
         Screens = [.. screens.OrderBy(screen => screen.Screen)];
@@ -54,7 +64,10 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
             throw new ArgumentException("The main window needs one of each screen.", nameof(screens));
         }
 
+        // The first screen isn't one the user chose, so it isn't remembered.
+        _restoring = true;
         CurrentScreen = ScreenFor(navigation.Current);
+        _restoring = false;
         navigation.Navigated += OnNavigated;
     }
 
@@ -86,6 +99,46 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
     /// The screens' work, while it runs: done once <see cref="Dispose"/> has stopped it.
     /// </summary>
     public Task ScreensWork => Task.WhenAll(_screensWork);
+
+    /// <summary>
+    /// Remembering what changed, the last change after those before it: for the app to wait on, briefly, as it ends.
+    /// Remembering never fails: what can't be remembered is logged.
+    /// </summary>
+    public Task Remembering { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
+    /// Shows the sidebar and the screen as <paramref name="remembered"/> says they were left, without remembering them
+    /// again. A screen it doesn't know, as from a later version, is passed over.
+    /// </summary>
+    public void Restore(UiState remembered)
+    {
+        ArgumentNullException.ThrowIfNull(remembered);
+
+        _restoring = true;
+        try
+        {
+            IsSidebarOpen = remembered.MenuCollapsed is not true;
+            if (Enum.TryParse(remembered.Screen, ignoreCase: true, out Screen screen) && Enum.IsDefined(screen))
+            {
+                _navigation.NavigateTo(screen);
+                CurrentScreen = ScreenFor(screen);
+            }
+        }
+        finally
+        {
+            _restoring = false;
+        }
+    }
+
+    /// <summary>
+    /// Remembers where the window is, as the view tells it: as it's moved, resized, maximized or hidden.
+    /// </summary>
+    public void RememberWindow(WindowPlacement placement)
+    {
+        ArgumentNullException.ThrowIfNull(placement);
+
+        Remember(state => state with { Window = placement });
+    }
 
     /// <summary>
     /// Starts every screen's work (<see cref="ScreenViewModel.StartAsync"/>), once, on the UI thread. Work that fails is
@@ -170,6 +223,8 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void ToggleSidebar() => IsSidebarOpen = !IsSidebarOpen;
 
+    partial void OnIsSidebarOpenChanged(bool value) => Remember(state => state with { MenuCollapsed = !value });
+
     partial void OnCurrentScreenChanged(ScreenViewModel value)
     {
         // The sidebar can clear its selection; the screen shown stays.
@@ -184,6 +239,33 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         {
             _shown = value;
             value.OnShown();
+            Remember(state => state with { Screen = value.Screen.ToString() });
+        }
+    }
+
+    /// <summary>
+    /// Remembers what <paramref name="change"/> makes of the state, after what was remembered before; not while the state
+    /// remembered is being shown.
+    /// </summary>
+    private void Remember(Func<UiState, UiState> change)
+    {
+        if (!_restoring)
+        {
+            Remembering = RememberAfterAsync(Remembering, change);
+        }
+    }
+
+    private async Task RememberAfterAsync(Task before, Func<UiState, UiState> change)
+    {
+        // Off the UI thread, so the app can wait for it as it ends, once the UI thread has stopped.
+        await before.ConfigureAwait(false);
+        try
+        {
+            await _uiState.ChangeAsync(change, CancellationToken.None).ConfigureAwait(false);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            LogNotRemembered(_logger, exception);
         }
     }
 

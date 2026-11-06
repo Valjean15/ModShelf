@@ -4,6 +4,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 
 using ModShelf.Application.Desktop.Ports;
+using ModShelf.Application.State;
 using ModShelf.Desktop.Hosting;
 using ModShelf.Desktop.Views;
 using ModShelf.Desktop.Views.Dialogs;
@@ -20,6 +21,7 @@ public sealed partial class App : Avalonia.Application
     private readonly Func<FirstRunViewModel>? _createFirstRunViewModel;
     private readonly ISingleInstance? _instance;
     private readonly IReadOnlyList<string> _arguments = [];
+    private readonly UiState _remembered = UiState.None;
     private readonly MessageDialogContent? _startupProblem;
 
     // Used by the XAML previewer, which runs without the host.
@@ -29,18 +31,21 @@ public sealed partial class App : Avalonia.Application
 
     /// <param name="createFirstRunViewModel">The first-run setup, shown over the main window for a new library.</param>
     /// <param name="instance">The app's claim to the library, which tells it of each launch after it.</param>
+    /// <param name="remembered">How the window was left: its place, the sidebar and the screen last open.</param>
     /// <param name="arguments">The app's command-line arguments, such as a link the system started it with.</param>
     internal App(
         Func<MainWindowViewModel> createMainWindowViewModel,
         Func<TrayViewModel> createTrayViewModel,
         Func<FirstRunViewModel> createFirstRunViewModel,
         ISingleInstance instance,
+        UiState remembered,
         IReadOnlyList<string> arguments)
     {
         _createMainWindowViewModel = createMainWindowViewModel;
         _createTrayViewModel = createTrayViewModel;
         _createFirstRunViewModel = createFirstRunViewModel;
         _instance = instance;
+        _remembered = remembered;
         _arguments = arguments;
     }
 
@@ -75,7 +80,9 @@ public sealed partial class App : Avalonia.Application
             && _instance is not null)
         {
             MainWindowViewModel viewModel = _createMainWindowViewModel();
+            viewModel.Restore(_remembered);
             MainWindow window = new() { DataContext = viewModel };
+            window.Place(_remembered.Window);
             desktop.MainWindow = window;
 
             // The screens' own work, such as watching the download queue, runs while the app does, with or without

@@ -16,6 +16,7 @@ public sealed class MainWindowViewModelTests : IDisposable
     private readonly NavigationService _navigation = new();
     private readonly QueuedUiThread _uiThread = new();
     private readonly RecordingLogger<MainWindowViewModel> _logger = new();
+    private readonly MemoryUiState _uiState = new();
     private readonly MainWindowViewModel _window;
 
     public MainWindowViewModelTests()
@@ -256,5 +257,5 @@ public sealed class MainWindowViewModelTests : IDisposable
     }
 
     private MainWindowViewModel Window(IEnumerable<ScreenViewModel> screens)
-        => new(_navigation, _uiThread, screens, new AccountMenuViewModel(new TestPictures().Pictures, _navigation), _logger);
+        => new(_navigation, _uiThread, screens, new AccountMenuViewModel(new TestPictures().Pictures, _navigation), _uiState, _logger);
 }
