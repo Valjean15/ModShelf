@@ -52,6 +52,8 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
   ModShelf's icon is there. Hovering over it says "ModShelf". Right-clicking it shows **Open ModShelf**, **Check for updates now** and **Quit ModShelf**.
 - [ ] **1.6 One app at a time.** Minimize the window, then run `app` again.
   No second window opens: the first one comes back. The log (section 13) has "ModShelf was launched again, and the launch was handed over to this app".
+- [ ] **1.7 The window comes back as it was.** Move the window and make it smaller, collapse the sidebar with the button at its top, open Downloads, and **Quit ModShelf** from the tray menu; run `app`. Then maximize it, quit, and run `app` again, and restore it. With two monitors, leave it on the second one, quit, unplug that monitor (or set Windows to show only the first), and run `app`.
+  It opens where and as large as it was, the sidebar collapsed, on Downloads. Maximized, it opens maximized, and restoring it gives the size before. With its monitor gone, it opens whole and centred on the main one, no larger than that screen. `ui-state.json` in the test folder has the window's place, `"menuCollapsed"` and `"screen"`.
 
 ## 2. Link the account
 
@@ -348,6 +350,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 1.4 Done | | | |
 | 1.5 Tray icon | | | |
 | 1.6 One app at a time | | | |
+| 1.7 The window comes back as it was | | | |
 | 2.1 Card | | | |
 | 2.2 Wrong key refused | | | |
 | 2.3 API key page | | | |
