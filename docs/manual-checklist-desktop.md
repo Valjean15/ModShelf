@@ -67,6 +67,8 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
   "Linked as *your name*." The card shows your picture from Nexus Mods (your initial on a colour until it's read), your name, "Premium" (or "Free") in a tag, and "Linked on *today*". The bottom of the sidebar shows the same picture, your name and "Premium · Nexus Mods" (or "Free · Nexus Mods") in place of **Link an account**; clicking it from another screen opens Accounts. With the sidebar's names hidden (the button at its top), the picture shows alone, its tooltip naming you, your level and Nexus Mods. With the network off, closing and starting the app shows the picture saved. Under "API requests left, as Nexus Mods last said:", a line per day and per hour, such as "Per day: 19,999 of 20,000 left, until …". **Check** and **Unlink** appear.
 - [ ] **2.5 Check.** **Check**.
   "Checked at *now*." The requests left went down by one or two.
+- [ ] **2.5a Requests running low.** In Settings › Updates, set "Warn about a site's requests for the hour or the day" to **When below 30% are left**, then use the app until fewer than 30% of the hour's requests are left (or set it to a share above what Accounts shows left), and wait half a minute. Click the strip's ×. Then, on the Updates screen with fewer requests left than the watched mods, **Check now**. Set the warning back to **When below 10% are left (the default)**.
+  A strip at the top of the window says "Nexus Mods has *N* of its *M* requests left this hour. They renew at *time*." (or "today", for the day's); × hides it until they renew. **Check now** asks first, "Requests may run out", saying about how many requests the check may take, how many are left and when they renew; **Cancel** checks nothing, **Go on** checks. `settings show` in a terminal says `quota.warnBelow` 30, then 10 (default).
 - [ ] **2.6 Linked from the command line.** With the app open on another screen, run `dotnet run --project src/ModShelf.Cli -- account unlink nexus`, then open Accounts; link it again from the command line (`account link nexus`), and open Accounts again. Link it in the app afterwards if you unlinked it there.
   Opening Accounts shows the account gone, and the sidebar **Link an account**; then linked again, in both, without restarting the app.
 
@@ -360,6 +362,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 2.3 API key page | | | |
 | 2.4 Key links the account | | | |
 | 2.5 Check | | | |
+| 2.5a Requests running low | | | |
 | 2.6 Linked from the command line | | | |
 | 3.1 Games | | | |
 | 3.1a Games by name | | | |
