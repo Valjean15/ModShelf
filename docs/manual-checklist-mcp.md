@@ -9,6 +9,39 @@ Use a test library, as the installer checklist's settings do (`ModShelf__Databas
 there. Never paste an API key or an `nxm://` link into a report: both carry keys. Each check says what to do, then what
 you should see.
 
+## 0. Agents allowed, and connecting them
+
+Settings › **Agents** in the desktop app. Agents are off until you turn them on; the other sections need them on.
+
+- [ ] **0.1 Off.** With **Allow agents to use ModShelf** off, ask the agent for the library.
+  It says AI agents are off in ModShelf, and to turn on "Allow agents to use ModShelf" in Settings, Agents; it can
+  still list ModShelf's tools. The Agents card says "Not served: agents are off."
+- [ ] **0.2 On, without a restart.** Turn it on, and ask again in the same conversation.
+  The library, without restarting the agent's app. The card says "Served at http://127.0.0.1:47823/mcp while
+  ModShelf runs."; `settings.json` holds `"agents": { "enabled": true }`.
+- [ ] **0.3 Copy prompt.** In Claude Code, **Copy prompt** and paste it into its chat.
+  Claude Code adds the server named `modshelf` for your user, with the command line's path, `mcp`, and the test
+  library's `ModShelf__…` variables; `claude mcp list` shows it connected, and a new session lists its tools.
+- [ ] **0.4 View details.** **View details**, then **Copy** beside each.
+  The name, the command, `mcp`, the variables, the address, Claude Desktop's JSON and Claude Code's two commands; each
+  **Copy** puts its value on the clipboard and says "Copied".
+- [ ] **0.5 Add to Claude Desktop.** Quit Claude Desktop; note its other servers. **Add to Claude Desktop…**, then **Add**.
+  The question names its `claude_desktop_config.json` (on Windows, `%APPDATA%\Claude`, or the Store app's copy under
+  `%LOCALAPPDATA%\Packages\Claude_…\LocalCache\Roaming\Claude`) and the copy kept beside it,
+  `claude_desktop_config.modshelf-backup.json`. Then "Added to Claude Desktop"; the card says "Claude Desktop has
+  ModShelf.", and the button is off. The file has `modshelf` and the other servers as they were. Start Claude Desktop:
+  its tools are ModShelf's 25.
+- [ ] **0.6 The address.** With the desktop app running and agents on, in a terminal:
+  `claude mcp add --transport http --scope user modshelf-address http://127.0.0.1:47823/mcp`, then a new Claude Code
+  session.
+  Its tools are ModShelf's. Quit the desktop app: the address ends (the session's calls fail), and Task Manager shows
+  no `ModShelf.Cli.exe` left. `claude mcp remove modshelf-address` afterwards.
+- [ ] **0.7 A port in use.** Type a port another app listens on, such as one a local web server has, and **Save**.
+  "Port … is in use by another app. Choose another port, then Save.", in the warm colour. **Save** the default again:
+  served.
+- [ ] **0.8 The agent can't.** Ask the agent to turn agents off, or to change their port.
+  It says those are the user's to change, in ModShelf's Settings, Agents, or with the CLI; `settings.json` is as it was.
+
 ## 1. The server
 
 - [ ] **1.1 Tools.** Start the agent's app, and ask it which ModShelf tools it has.
@@ -114,6 +147,14 @@ asked, what the agent and the app showed, and the matching lines of the log.
 
 | Check | Result | Notes |
 |---|---|---|
+| 0.1 Off | | |
+| 0.2 On, without a restart | | |
+| 0.3 Copy prompt | | |
+| 0.4 View details | | |
+| 0.5 Add to Claude Desktop | | |
+| 0.6 The address | | |
+| 0.7 A port in use | | |
+| 0.8 The agent can't | | |
 | 1.1 Tools | | |
 | 1.2 Reading | | |
 | 1.3 Accounts | | |
