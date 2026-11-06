@@ -205,6 +205,8 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
   None says "Nexus Mods" beside its name, and the Library has no "Site" box: Nexus Mods is the only site in use, and direct links aren't a site. In Settings › Games, games go by their names alone.
 - [ ] **9.2c The game picker.** In Browse, click the game picker, then one of the recent searches. Close the app and start it again, and click the game picker.
   "Your games" lists the library's games, the one with the most mods first, each saying "*N* mods in your library", with its cover; typing `s` lists the other games whose names have it under "Other games on Nexus Mods", "Not in your library". "Recent searches" shows the words searched in Browse so far, the newest first (`outfit`, `smapi`, …); clicking one searches it in the chosen game. After the restart they're still there.
+- [ ] **9.2d Quick search.** On the Downloads screen, press Ctrl+K (⌘K on macOS), then Escape; click **Search** at the top of the sidebar. Type `stardew`, press ↓ and ↑, and Enter. Press Ctrl+K and type `smapi`, and Enter; again with `skyrim`, choosing the Skyrim Special Edition game; again with `folder`, and Enter; again with `updates`, and Enter. Press Ctrl+K once more, and click the first recent search. Collapse the sidebar and hover over its search icon.
+  A box opens over the screen, the screen dimmed, with the cursor in its field: with nothing typed, the recent searches, then the screens. Escape closes it, and the keyboard is back where it was. `stardew` lists Stardew Valley under "Games", "In your library · *N* mods", with its cover, saying **Open in the Library** while highlighted; ↓ and ↑ move the highlight; Enter opens the Library at Stardew Valley's mods. `smapi` lists SMAPI under "Mods in your library", opening its page. Skyrim Special Edition, which the library no longer has after 9.5, says "On Nexus Mods" and opens Browse on it. `folder` lists settings such as "Library › Library folder", opening that category. `updates` lists the Updates screen. The recent searches are those that opened something, the newest first, and clicking one searches it again. The collapsed sidebar's icon says "Quick search (Ctrl+K)". `ui-state.json` has `"quickSearches"`.
 - [ ] **9.3 Track** (Premium only). On SMAPI's page in Browse, **Track on Nexus Mods**.
   "Tracked on Nexus Mods." **Tracked mods** for Stardew Valley lists SMAPI under "*N* tracked mods of Stardew Valley on Nexus Mods.", and the website's Tracking Centre shows it.
 - [ ] **9.4 Untrack** (Premium only). **Untrack on Nexus Mods**.
@@ -412,6 +414,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 9.2a The games | | | |
 | 9.2b One site | | | |
 | 9.2c The game picker | | | |
+| 9.2d Quick search | | | |
 | 9.3 Track | | – | |
 | 9.4 Untrack | | – | |
 | 9.5 Remove from the library | | | |
