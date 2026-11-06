@@ -131,7 +131,7 @@ public sealed class VelopackAppReleasesTests : IDisposable
     {
         GithubSource github = Assert.IsType<GithubSource>(AppReleaseSources.For(null));
         Assert.Equal(new Uri("https://github.com/Valjean15/ModShelf"), github.RepoUri);
-        Assert.True(github.Prerelease);
+        Assert.False(github.Prerelease);
         Assert.IsType<SimpleWebSource>(AppReleaseSources.For("https://releases.example/modshelf/"));
         Assert.IsType<SimpleWebSource>(AppReleaseSources.For("http://localhost:8080/modshelf/"));
         SimpleFileSource folder = Assert.IsType<SimpleFileSource>(AppReleaseSources.For(Feed));

@@ -114,7 +114,9 @@ jobs:
           name: release-notes
 
       # The newest published release of this channel, so that vpk packs a delta beside the full package: an update
-      # then downloads only what changed. Drafts aren't seen. Before the first release there's none, and the update is
+      # then downloads only what changed. Drafts aren't seen. A pre-release's is the newest release of either kind; a
+      # stable version's is the newest stable release, which the installed copies update from, or, for 1.0.0, the
+      # newest pre-release, as the 0.9 copies update from it. Before the first release there's none, and the update is
       # the full package.
       - name: Get the release before
         shell: bash
@@ -122,8 +124,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           dotnet tool restore
-          dotnet vpk download github --repoUrl "$REPOSITORY" --channel "$RUNTIME" --pre --outputDir artifacts/releases --token "$GITHUB_TOKEN" \
-            || echo "::notice::No earlier release of $RUNTIME to make a delta from."
+          download() {
+            dotnet vpk download github --repoUrl "$REPOSITORY" --channel "$RUNTIME" "$@" --outputDir artifacts/releases --token "$GITHUB_TOKEN" || true
+          }
+          found() { compgen -G 'artifacts/releases/*-full.nupkg' > /dev/null; }
+          if [[ "$VERSION" == 0.* || "$VERSION" == *-* ]]; then
+            download --pre
+          else
+            download
+            found || download --pre
+          fi
+          found || echo "::notice::No earlier release of $RUNTIME to make a delta from."
 
       - name: Pack (Windows)
         if: runner.os == 'Windows'
