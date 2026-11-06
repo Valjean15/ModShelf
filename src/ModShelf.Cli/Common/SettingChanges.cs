@@ -32,8 +32,9 @@ internal static class SettingChanges
     public const string PicturesMaxSize = "pictures.maxSize";
     public const string AdultPictures = "pictures.adult";
     public const string DetailsMaxAge = "details.maxAge";
+    public const string QuotaWarnBelow = "quota.warnBelow";
     public const string GamesPrefix = "games.";
-    public const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<site>/<game>, {OldVersions}, {Interval}, {Notify}, {Theme}, {CloseToTray}, {SetupDone}, {CheckForAppUpdates}, {PreviewsPrefix}library, {PreviewsPrefix}updates, {PreviewsPrefix}browse, {PreviewsPrefix}downloads, {PicturesMaxSize}, {AdultPictures}, {DetailsMaxAge}, "
+    public const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<site>/<game>, {OldVersions}, {Interval}, {Notify}, {Theme}, {CloseToTray}, {SetupDone}, {CheckForAppUpdates}, {PreviewsPrefix}library, {PreviewsPrefix}updates, {PreviewsPrefix}browse, {PreviewsPrefix}downloads, {PicturesMaxSize}, {AdultPictures}, {DetailsMaxAge}, {QuotaWarnBelow}, "
         + $"{GamesPrefix}<site>/<game>.{GameRoot}, {GamesPrefix}<site>/<game>.{GameFolders}, {GamesPrefix}<site>/<game>.{GameOldVersions}, {GamesPrefix}<site>/<game>.{GameCheckUpdates}, {GamesPrefix}<site>/<game>.{GameInterval}, {GamesPrefix}<site>/<game>.{GameNotify}, {GamesPrefix}<site>/<game>.{GamePreviews}, {GamesPrefix}<site>/<game>.{GameHidden}, "
         + $"{GamesPrefix}<site>/<game>.{BrowseSort}, {GamesPrefix}<site>/<game>.{BrowseDirection}, {GamesPrefix}<site>/<game>.{BrowseWindow}, {GamesPrefix}<site>/<game>.{BrowsePageSize}, "
         + "such as games.nexus/stardewvalley.notify; a game's key alone, as games.stardewvalley.notify, does while only one site's game has it";
@@ -65,7 +66,7 @@ internal static class SettingChanges
         + "library.oldVersions; minutes, hours or days, such as 30m, 6h or 1d, for updates.interval and details.maxAge; true or false for "
         + "updates.notify, window.closeToTray, setup.done and app.checkForUpdates; system, light or dark for appearance.theme; "
         + "off, thumbnails or cards for previews.<screen> and games.<site>/<game>.previews; a number of megabytes from 64 to 8192 for pictures.maxSize; "
-        + "hidden, blurred or shown for pictures.adult; for a game of its own, as every game's for games.<site>/<game>.oldVersions, "
+        + "hidden, blurred or shown for pictures.adult; a percent from 0, for never, to 90 for quota.warnBelow; for a game of its own, as every game's for games.<site>/<game>.oldVersions, "
         + "games.<site>/<game>.updateInterval and games.<site>/<game>.notify, true or false for games.<site>/<game>.checkUpdates and games.<site>/<game>.hidden, "
         + "relevance, endorsements, downloads, updated, newest, name, size or uniquedownloads for games.<site>/<game>.browse.sort, ascending or descending "
         + "for games.<site>/<game>.browse.direction, 1d, 7d or 30d for games.<site>/<game>.browse.window, and 20, 50 or 100 for games.<site>/<game>.browse.pageSize; "
@@ -83,6 +84,7 @@ internal static class SettingChanges
             || setting.Equals(PicturesMaxSize, StringComparison.OrdinalIgnoreCase)
             || setting.Equals(AdultPictures, StringComparison.OrdinalIgnoreCase)
             || setting.Equals(DetailsMaxAge, StringComparison.OrdinalIgnoreCase)
+            || setting.Equals(QuotaWarnBelow, StringComparison.OrdinalIgnoreCase)
             || setting.Equals(CloseToTray, StringComparison.OrdinalIgnoreCase)
             || setting.Equals(CheckForAppUpdates, StringComparison.OrdinalIgnoreCase)
             || setting.Equals(OldVersions, StringComparison.OrdinalIgnoreCase)
@@ -137,6 +139,7 @@ internal static class SettingChanges
             Of(PicturesMaxSize, stored.PicturesMegabytes?.ToString(CultureInfo.InvariantCulture), AppSettings.DefaultPicturesMegabytes.ToString(CultureInfo.InvariantCulture)),
             Of(AdultPictures, stored.AdultPictures is { } adult ? Name(adult) : null, Name(Application.Settings.AdultPictures.Blurred)),
             Of(DetailsMaxAge, stored.DetailsMaxAge is { } age ? UpdateInterval.Format(age) : null, UpdateInterval.Format(AppSettings.DefaultDetailsMaxAge)),
+            Of(QuotaWarnBelow, stored.QuotaWarnBelow?.ToString(CultureInfo.InvariantCulture), AppSettings.DefaultQuotaWarnBelow.ToString(CultureInfo.InvariantCulture)),
             .. stored.Games
                 .OrderBy(game => game.Key.ToString(), StringComparer.OrdinalIgnoreCase)
                 .SelectMany(game => GameValues(game.Key, game.Value)),
@@ -255,6 +258,19 @@ internal static class SettingChanges
             string now = UpdateInterval.Format(age ?? AppSettings.DefaultDetailsMaxAge);
             string what = $"saved mod details are read from their site again once they're {now} old.";
             return age is null ? $"{DetailsMaxAge} is back to its default, {now}: {what}" : $"{DetailsMaxAge} is now {now}: {what}";
+        }
+
+        if (setting.Equals(QuotaWarnBelow, StringComparison.OrdinalIgnoreCase))
+        {
+            int? percent = value is null ? null : ParsePercent(value);
+            await settings.SetQuotaWarnBelowAsync(percent, cancellationToken).ConfigureAwait(false);
+            int now = percent ?? AppSettings.DefaultQuotaWarnBelow;
+            string what = now == 0
+                ? "the desktop app doesn't warn when a site's requests run low."
+                : $"the desktop app warns when fewer than {now.ToString(CultureInfo.InvariantCulture)}% of a site's requests for the hour or the day are left.";
+            return percent is null
+                ? $"{QuotaWarnBelow} is back to its default, {now.ToString(CultureInfo.InvariantCulture)}: {what}"
+                : $"{QuotaWarnBelow} is now {now.ToString(CultureInfo.InvariantCulture)}: {what}";
         }
 
         if (setting.Equals(CheckForAppUpdates, StringComparison.OrdinalIgnoreCase))
@@ -648,6 +664,13 @@ internal static class SettingChanges
     private static T Parse<T>(string value, string names) where T : struct, Enum
         => Enum.GetValues<T>().Cast<T?>().FirstOrDefault(each => Name(each!.Value).Equals(value.Trim(), StringComparison.OrdinalIgnoreCase))
             ?? throw new ArgumentException($"'{value}' isn't {names}.", nameof(value));
+
+    /// <exception cref="ArgumentException"><paramref name="value"/> isn't a whole percent within the limits.</exception>
+    private static int ParsePercent(string value)
+        => int.TryParse(value.Trim().TrimEnd('%'), NumberStyles.None, CultureInfo.InvariantCulture, out int percent)
+            && percent is >= 0 and <= AppSettings.MaxQuotaWarnBelow
+            ? percent
+            : throw new ArgumentException($"'{value}' isn't a percent from 0 to {AppSettings.MaxQuotaWarnBelow}.", nameof(value));
 
     /// <exception cref="ArgumentException"><paramref name="value"/> isn't a whole number of megabytes within the limits.</exception>
     private static int ParseMegabytes(string value)

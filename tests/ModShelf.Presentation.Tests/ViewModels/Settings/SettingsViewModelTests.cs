@@ -221,6 +221,28 @@ public sealed class SettingsViewModelTests
     }
 
     [Fact]
+    public async Task OffersWhenToWarnThatRequestsRunLowAndSavesIt()
+    {
+        _harness.Settings.Stored = new AppSettings { QuotaWarnBelow = 15 };
+        await _harness.StartAsync();
+
+        Assert.Equal(
+            ["Never", "When below 5% are left", "When below 10% are left (the default)", "When below 15% are left", "When below 20% are left", "When below 30% are left"],
+            Screen.QuotaChoices.Select(choice => choice.Label));
+        Assert.Equal(15, Screen.SelectedQuota?.Value);
+
+        Screen.SelectedQuota = Screen.QuotaChoices[0];
+        await Screen.Saving.WaitAsync(Patience, Cancellation);
+        Screen.SelectedQuota = Screen.QuotaChoices.Single(choice => choice.Value == 10);
+        await Screen.Saving.WaitAsync(Patience, Cancellation);
+
+        Assert.Equal(["quotaWarnBelow 0", "quotaWarnBelow null"], _harness.Settings.Changes);
+        Assert.Null(_harness.Settings.Stored.QuotaWarnBelow);
+        Assert.True(Screen.QuotaSection.Matches(Application.Common.NameQuery.Parse("requests")));
+        Assert.Equal(SettingsCategory.Updates, Screen.QuotaSection.Category);
+    }
+
+    [Fact]
     public async Task ChoicesBackAtTheirDefaultsLeaveTheSettings()
     {
         _harness.Settings.Stored = new AppSettings { UpdateInterval = TimeSpan.FromDays(1), NotifyOfUpdates = false, Theme = AppTheme.Light };

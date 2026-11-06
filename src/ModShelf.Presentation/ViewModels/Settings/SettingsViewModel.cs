@@ -33,6 +33,11 @@ namespace ModShelf.Presentation.ViewModels.Settings;
 public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
 {
     // The intervals offered, besides the one set when it's another; a game's too.
+    /// <summary>
+    /// The shares of a site's requests offered to warn below, in percent; 0 for never.
+    /// </summary>
+    internal static readonly int[] OfferedQuotaWarnings = [0, 5, AppSettings.DefaultQuotaWarnBelow, 20, 30];
+
     internal static readonly TimeSpan[] OfferedIntervals =
     [
         TimeSpan.FromMinutes(15),
@@ -291,6 +296,14 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
     public partial IntervalChoice? SelectedInterval { get; set; }
 
     /// <summary>
+    /// Below what share of a site's requests the app warns, as the list offers it: never, then each percent.
+    /// </summary>
+    public ObservableCollection<SettingChoice<int>> QuotaChoices { get; } = [];
+
+    [ObservableProperty]
+    public partial SettingChoice<int>? SelectedQuota { get; set; }
+
+    /// <summary>
     /// Whether a background check that finds new updates shows a notice.
     /// </summary>
     [ObservableProperty]
@@ -403,6 +416,14 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
         if (value is not null)
         {
             Save(token => _settings.SetUpdateIntervalAsync(value.Interval == UpdateInterval.Default ? null : value.Interval, token));
+        }
+    }
+
+    partial void OnSelectedQuotaChanged(SettingChoice<int>? value)
+    {
+        if (value is not null)
+        {
+            Save(token => _settings.SetQuotaWarnBelowAsync(value.Value == AppSettings.DefaultQuotaWarnBelow ? null : value.Value, token));
         }
     }
 

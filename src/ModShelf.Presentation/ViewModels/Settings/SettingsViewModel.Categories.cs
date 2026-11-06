@@ -160,6 +160,15 @@ public sealed partial class SettingsViewModel
         Strings.SettingsNotify);
 
     /// <summary>
+    /// When to warn that a site's requests run low: Updates.
+    /// </summary>
+    public SettingsSectionViewModel QuotaSection { get; } = new(
+        SettingsCategory.Updates,
+        Strings.SettingsQuotaHeading,
+        Strings.SettingsQuotaWarn,
+        Strings.SettingsQuotaNote);
+
+    /// <summary>
     /// Which apps open the links websites hand downloads over with: Links.
     /// </summary>
     public SettingsSectionViewModel LinksSection { get; } = new(
@@ -216,6 +225,7 @@ public sealed partial class SettingsViewModel
         OldVersionsSection,
         RescanSection,
         UpdatesSection,
+        QuotaSection,
         LinksSection,
         GamesSection,
         AboutSection,

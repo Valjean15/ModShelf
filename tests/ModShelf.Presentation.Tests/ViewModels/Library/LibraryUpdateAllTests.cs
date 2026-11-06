@@ -5,6 +5,7 @@ using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Tests.Common;
 using ModShelf.Presentation.ViewModels.Library;
 using ModShelf.Sources.Abstractions.Accounts;
+using ModShelf.Sources.Abstractions.Quota;
 
 namespace ModShelf.Presentation.Tests.ViewModels.Library;
 
@@ -159,6 +160,22 @@ public sealed class LibraryUpdateAllTests : IDisposable
         Assert.Equal(
             ("Queued 1 update. It shows on the Downloads screen. 1 was in the library already.", false),
             (skyrim.UpdateNote, skyrim.IsUpdateNoteAProblem));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task AsksFirstWhenTheUpdatesLikelyUseUpTheRequests(bool goOn)
+    {
+        await _harness.StartAsync(WithUpdates(SkyUi, "SkyUI", Update(SkyUi, "2", linked: true, daysAgo: 2), Update(SkyUi, "3", linked: true, daysAgo: 1)));
+        _harness.Catalog.Quota = new ApiQuota([new QuotaAllowance(TimeSpan.FromHours(1), 100, 3, TestData.Now.AddMinutes(30))]);
+        _harness.Dialogs.Confirm.Enqueue(goOn);
+        _harness.LibraryDownloads.Answer = _ => Queued();
+
+        await _harness.Game(SkyUi.Game).UpdateAllCommand.ExecuteAsync(null);
+
+        Assert.StartsWith("This may take about 4 requests to Nexus Mods, and 3 are left this hour.", Assert.Single(_harness.Dialogs.Confirmations).Message, StringComparison.Ordinal);
+        Assert.Equal(goOn ? 2 : 0, _harness.LibraryDownloads.Added.Count);
     }
 
     private static string Of(Uri link) => $"{link.Segments[^1]}{link.Query.Replace("?tab=files&file_id=", "/", StringComparison.Ordinal)}";

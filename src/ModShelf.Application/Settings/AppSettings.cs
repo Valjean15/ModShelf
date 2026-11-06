@@ -26,6 +26,17 @@ public sealed record AppSettings
     public const int MaxPicturesMegabytes = 8192;
 
     /// <summary>
+    /// Below what share of a site's allowance of requests the desktop app warns, in percent, when
+    /// <see cref="QuotaWarnBelow"/> isn't set.
+    /// </summary>
+    public const int DefaultQuotaWarnBelow = 10;
+
+    /// <summary>
+    /// The highest share of an allowance <see cref="QuotaWarnBelow"/> can be, in percent; 0 turns the warning off.
+    /// </summary>
+    public const int MaxQuotaWarnBelow = 90;
+
+    /// <summary>
     /// How long saved mod details count as current when <see cref="DetailsMaxAge"/> isn't set.
     /// </summary>
     public static TimeSpan DefaultDetailsMaxAge { get; } = TimeSpan.FromDays(1);
@@ -109,6 +120,12 @@ public sealed record AppSettings
     /// How the pictures of mods with adult content show; null for <see cref="Settings.AdultPictures.Blurred"/>.
     /// </summary>
     public AdultPictures? AdultPictures { get; init; }
+
+    /// <summary>
+    /// Below what share of a site's allowance of requests, an hour's or a day's, the desktop app warns that they're running
+    /// low, in percent from 0, for never, to <see cref="MaxQuotaWarnBelow"/>; null for <see cref="DefaultQuotaWarnBelow"/>.
+    /// </summary>
+    public int? QuotaWarnBelow { get; init; }
 
     /// <summary>
     /// The previews <paramref name="screen"/> shows: as set, or its default, thumbnails on the Library screen, cards on

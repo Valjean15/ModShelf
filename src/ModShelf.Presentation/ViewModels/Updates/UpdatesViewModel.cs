@@ -275,6 +275,11 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
     [RelayCommand(CanExecute = nameof(CanCheckNow))]
     private async Task CheckNowAsync(CancellationToken cancellationToken)
     {
+        if (!await QuotaChecks.GoOnAsync(_sources, _services.Dialogs, _timeProvider, CheckNeeds(), cancellationToken))
+        {
+            return;
+        }
+
         IsChecking = true;
         CheckResult = Strings.UpdatesChecking;
         IsCheckResultAProblem = false;
@@ -319,6 +324,12 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
     /// </summary>
     private async Task DownloadAsync(IReadOnlyList<UpdateViewModel> updates, CancellationToken cancellationToken)
     {
+        IEnumerable<(SourceId, int)> needs = updates.Where(update => update.CanDownload).Select(update => (update.File.Mod.Game.Source, QuotaChecks.PerDownload));
+        if (!await QuotaChecks.GoOnAsync(_sources, _services.Dialogs, _timeProvider, needs, cancellationToken))
+        {
+            return;
+        }
+
         IsUpdating = true;
         ShowUpdateAll();
         try
@@ -334,6 +345,16 @@ public sealed partial class UpdatesViewModel : ScreenViewModel, IDisposable
             ShowUpdateAll();
         }
     }
+
+    /// <summary>
+    /// The requests a check likely takes from each site: one for each game's feed, and one for each mod never checked or
+    /// due a full check, which is asked about on its own.
+    /// </summary>
+    private IEnumerable<(SourceId Source, int Requests)> CheckNeeds()
+        => _mods.Values
+            .Where(mod => mod.IsWatched)
+            .GroupBy(mod => mod.Mod.Game)
+            .Select(game => (game.Key.Source, 1 + game.Count(mod => mod.NeedsFullCheck || mod.CheckedAt is null)));
 
     /// <summary>
     /// Reads the changelog entries of the updates not read yet, a few at a time, once the screen has been shown.

@@ -7,6 +7,7 @@ using ModShelf.Application.State;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.Accounts;
+using ModShelf.Presentation.ViewModels.Quota;
 using ModShelf.Presentation.ViewModels.QuickSearch;
 using ModShelf.Presentation.ViewModels.Undo;
 using ModShelf.Presentation.ViewModels.Downloads;
@@ -47,6 +48,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         AccountMenuViewModel accounts,
         QuickSearchViewModel quickSearch,
         UndoBarViewModel undo,
+        QuotaWarningViewModel quota,
         IUiState uiState,
         ILogger<MainWindowViewModel> logger)
     {
@@ -56,6 +58,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         ArgumentNullException.ThrowIfNull(accounts);
         ArgumentNullException.ThrowIfNull(quickSearch);
         ArgumentNullException.ThrowIfNull(undo);
+        ArgumentNullException.ThrowIfNull(quota);
         ArgumentNullException.ThrowIfNull(uiState);
         ArgumentNullException.ThrowIfNull(logger);
 
@@ -66,6 +69,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         Accounts = accounts;
         QuickSearch = quickSearch;
         Undo = undo;
+        Quota = quota;
         Screens = [.. screens.OrderBy(screen => screen.Screen)];
         if (!Screens.Select(screen => screen.Screen).SequenceEqual(Enum.GetValues<Screen>()))
         {
@@ -100,6 +104,11 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
     /// The bar at the bottom that offers to undo a change to the library.
     /// </summary>
     public UndoBarViewModel Undo { get; }
+
+    /// <summary>
+    /// The strip at the top while a site's requests run low.
+    /// </summary>
+    public QuotaWarningViewModel Quota { get; }
 
     /// <summary>
     /// The screen shown. Setting it, as selecting it in the sidebar does, goes to it.
@@ -159,8 +168,8 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// Starts every screen's work (<see cref="ScreenViewModel.StartAsync"/>), once, on the UI thread. Work that fails is
-    /// logged, and the other screens' work goes on.
+    /// Starts every screen's work (<see cref="ScreenViewModel.StartAsync"/>), once, on the UI thread, and the quota strip's
+    /// looks. Work that fails is logged, and the other screens' work goes on.
     /// </summary>
     /// <exception cref="InvalidOperationException">The screens have started already.</exception>
     public void Start()
@@ -175,6 +184,8 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         {
             _screensWork.Add(RunAsync(screen));
         }
+
+        Quota.Start();
     }
 
     /// <summary>

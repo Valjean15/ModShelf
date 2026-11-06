@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
+using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.ViewModels.Downloads;
@@ -69,6 +70,12 @@ public sealed partial class BrowseViewModel
     private async Task DownloadSelectedAsync(CancellationToken cancellationToken)
     {
         BrowseModViewModel[] selected = [.. Results.Where(row => row.IsSelected)];
+        IEnumerable<(SourceId, int)> needs = selected.Select(row => (row.Mod.Game.Source, QuotaChecks.PerDownload));
+        if (!await QuotaChecks.GoOnAsync(_services.Sources, _services.Dialogs, _services.TimeProvider, needs, cancellationToken))
+        {
+            return;
+        }
+
         IsDownloadingSelected = true;
         ShowSelection();
         (string Note, bool IsProblem) done = (string.Empty, false);

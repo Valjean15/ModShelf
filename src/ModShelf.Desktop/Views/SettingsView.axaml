@@ -332,6 +332,17 @@
                             </StackPanel>
                         </Border>
 
+                        <Border Classes="card" IsVisible="{Binding QuotaSection.IsShown}">
+                            <StackPanel Spacing="8">
+                                <TextBlock Classes="subheading" Text="{x:Static res:Strings.SettingsQuotaHeading}" />
+                                <WrapPanel ItemSpacing="12" LineSpacing="8">
+                                    <TextBlock VerticalAlignment="Center" Text="{x:Static res:Strings.SettingsQuotaWarn}" />
+                                    <ComboBox MinWidth="160" ItemsSource="{Binding QuotaChoices}" SelectedItem="{Binding SelectedQuota}" />
+                                </WrapPanel>
+                                <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.SettingsQuotaNote}" />
+                            </StackPanel>
+                        </Border>
+
                         <!-- A panel holds whether it shows: the card's own data is the part's. -->
                         <Panel IsVisible="{Binding LinksSection.IsShown}">
                             <Border Classes="card" DataContext="{Binding Links}">

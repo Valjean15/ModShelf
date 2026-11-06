@@ -9,6 +9,7 @@ using ModShelf.Presentation.ViewModels.Downloads;
 using ModShelf.Presentation.ViewModels.FirstRun;
 using ModShelf.Presentation.ViewModels.Library;
 using ModShelf.Presentation.ViewModels.Pictures;
+using ModShelf.Presentation.ViewModels.Quota;
 using ModShelf.Presentation.ViewModels.QuickSearch;
 using ModShelf.Presentation.ViewModels.Settings;
 using ModShelf.Presentation.ViewModels.Undo;
@@ -39,6 +40,7 @@ public static class PresentationServiceCollectionExtensions
         services.TryAddSingleton<ModPictures>();
         services.TryAddSingleton<AccountMenuViewModel>();
         services.TryAddSingleton<UndoBarViewModel>();
+        services.TryAddSingleton<QuotaWarningViewModel>();
         services.TryAddSingleton<ISitesInUse, SitesInUse>();
         services.TryAddEnumerable(
         [

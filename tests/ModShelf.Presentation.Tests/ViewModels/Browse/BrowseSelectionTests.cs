@@ -4,6 +4,7 @@ using ModShelf.Domain.Mods;
 using ModShelf.Presentation.ViewModels.Browse;
 using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Quota;
 
 namespace ModShelf.Presentation.Tests.ViewModels.Browse;
 
@@ -138,6 +139,21 @@ public sealed class BrowseSelectionTests : IDisposable
 
         Assert.Equal("Queued 1 file. It shows on the Downloads screen.", one);
         Assert.Equal("1 file couldn't be queued: settings.json isn't JSON.", Screen.SelectionNote);
+    }
+
+    [Fact]
+    public async Task AsksFirstWhenTheDownloadsLikelyUseUpTheRequests()
+    {
+        await ListAsync(3);
+        Screen.AreAllShownSelected = true;
+        _harness.Catalog.Quota = new ApiQuota([new QuotaAllowance(TimeSpan.FromDays(1), 1000, 5, TestData.Now.AddHours(5))]);
+        _harness.LibraryDownloads.Answer = _ => Queued();
+
+        await Screen.DownloadSelectedCommand.ExecuteAsync(null);
+
+        Assert.StartsWith("This may take about 6 requests to Nexus Mods, and 5 are left today.", Assert.Single(_harness.Dialogs.Confirmations).Message, StringComparison.Ordinal);
+        Assert.Empty(_harness.LibraryDownloads.Added);
+        Assert.Equal((true, false), (Screen.HasSelection, Screen.IsDownloadingSelected));
     }
 
     private BrowseModViewModel Row(string name) => Assert.Single(Screen.Results, row => row.Name == name);

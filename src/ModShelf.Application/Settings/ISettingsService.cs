@@ -155,4 +155,13 @@ public interface ISettingsService
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="pictures"/> isn't an <see cref="AdultPictures"/>.</exception>
     Task SetAdultPicturesAsync(AdultPictures? pictures, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets below what share of a site's allowance of requests the desktop app warns, in percent, 0 for never; or sets it
+    /// back to <see cref="AppSettings.DefaultQuotaWarnBelow"/> with null.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="percent"/> is below 0 or above <see cref="AppSettings.MaxQuotaWarnBelow"/>.
+    /// </exception>
+    Task SetQuotaWarnBelowAsync(int? percent, CancellationToken cancellationToken);
 }

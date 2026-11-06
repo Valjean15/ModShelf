@@ -74,7 +74,7 @@ public sealed class JsonSettingsStoreTests : IDisposable
     [Fact]
     public async Task SettingsBackToTheirDefaultsLeaveTheFile()
     {
-        await Store().SaveAsync(Settings(Path.Combine(_folder.Path, "Mods"), FolderPattern.Default), Cancellation);
+        await Store().SaveAsync(Settings(Path.Combine(_folder.Path, "Mods"), FolderPattern.Default) with { QuotaWarnBelow = 5 }, Cancellation);
 
         await Store().SaveAsync(new AppSettings(), Cancellation);
 
@@ -383,6 +383,23 @@ public sealed class JsonSettingsStoreTests : IDisposable
     }
 
     [Fact]
+    public async Task KeepsTheQuotaWarningAndItsDefaultLeavesTheFile()
+    {
+        await WriteAsync("""{ "quota": { "warnBelow": 10, "later": true } }""");
+
+        await Store().SaveAsync(new AppSettings { QuotaWarnBelow = 0 }, Cancellation);
+        AppSettings loaded = await Store().LoadAsync(Cancellation);
+        string off = await File.ReadAllTextAsync(FilePath, Cancellation);
+        await Store().SaveAsync(new AppSettings(), Cancellation);
+        string reset = await File.ReadAllTextAsync(FilePath, Cancellation);
+
+        Assert.Equal(0, loaded.QuotaWarnBelow);
+        Assert.Contains("\"warnBelow\": 0", off, StringComparison.Ordinal);
+        Assert.DoesNotContain("warnBelow", reset, StringComparison.Ordinal);
+        Assert.Contains("\"later\": true", reset, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task ThePreviewsPicturesAndDetailsDefaultsLeaveTheFile()
     {
         await Store().SaveAsync(
@@ -421,6 +438,8 @@ public sealed class JsonSettingsStoreTests : IDisposable
     [InlineData("""{ "pictures": { "maxSize": "512" } }""", "pictures.maxSize must be a number of megabytes from 64 to 8192.")]
     [InlineData("""{ "pictures": { "adult": "maybe" } }""", "pictures.adult must be hidden, blurred or shown.")]
     [InlineData("""{ "details": { "maxAge": "a year" } }""", "'a year' isn't an interval.")]
+    [InlineData("""{ "quota": { "warnBelow": 91 } }""", "quota.warnBelow must be a percent from 0 to 90.")]
+    [InlineData("""{ "quota": { "warnBelow": "10%" } }""", "quota.warnBelow must be a percent from 0 to 90.")]
     public async Task SaysWhenAPreviewPictureOrDetailsSettingIsWrong(string content, string message)
     {
         await WriteAsync(content);

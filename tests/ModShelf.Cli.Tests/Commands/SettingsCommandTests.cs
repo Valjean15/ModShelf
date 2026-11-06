@@ -77,6 +77,7 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         Assert.Equal("512 (default)", Value(shown, "pictures.maxSize"));
         Assert.Equal("blurred (default)", Value(shown, "pictures.adult"));
         Assert.Equal("1d (default)", Value(shown, "details.maxAge"));
+        Assert.Equal("10 (default)", Value(shown, "quota.warnBelow"));
         Assert.Contains("To change a setting: settings set <setting> <value>", shown.Output, StringComparison.Ordinal);
     }
 
@@ -255,7 +256,7 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     [InlineData("set", "library.root", "Mods", "isn't a full path")]
     [InlineData("set", "library.folders", "{mod}", "The last part must be exactly {file}.")]
     [InlineData("set", "library.folders.skyrimspecialedition", "{name}/{file}", "{name} isn't a folder's part.")]
-    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<site>/<game>, library.oldVersions, updates.interval, updates.notify, appearance.theme, window.closeToTray, setup.done, app.checkForUpdates, previews.library, previews.updates, previews.browse, previews.downloads, pictures.maxSize, pictures.adult, details.maxAge, games.<site>/<game>.root, games.<site>/<game>.folders, games.<site>/<game>.oldVersions, games.<site>/<game>.checkUpdates, games.<site>/<game>.updateInterval, games.<site>/<game>.notify, games.<site>/<game>.previews, games.<site>/<game>.hidden, games.<site>/<game>.browse.sort, games.<site>/<game>.browse.direction, games.<site>/<game>.browse.window, games.<site>/<game>.browse.pageSize, such as games.nexus/stardewvalley.notify; a game's key alone, as games.stardewvalley.notify, does while only one site's game has it.")]
+    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<site>/<game>, library.oldVersions, updates.interval, updates.notify, appearance.theme, window.closeToTray, setup.done, app.checkForUpdates, previews.library, previews.updates, previews.browse, previews.downloads, pictures.maxSize, pictures.adult, details.maxAge, quota.warnBelow, games.<site>/<game>.root, games.<site>/<game>.folders, games.<site>/<game>.oldVersions, games.<site>/<game>.checkUpdates, games.<site>/<game>.updateInterval, games.<site>/<game>.notify, games.<site>/<game>.previews, games.<site>/<game>.hidden, games.<site>/<game>.browse.sort, games.<site>/<game>.browse.direction, games.<site>/<game>.browse.window, games.<site>/<game>.browse.pageSize, such as games.nexus/stardewvalley.notify; a game's key alone, as games.stardewvalley.notify, does while only one site's game has it.")]
     [InlineData("reset", "library.folders.", null, "There's no setting called library.folders.")]
     [InlineData("set", "library.oldVersions", "0", "'0' isn't a rule for old versions. Use all, archive, or how many versions to keep, from 1 to 99, such as 2.")]
     [InlineData("set", "appearance.theme", "blue", "'blue' isn't system, light or dark.")]
@@ -266,6 +267,8 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     [InlineData("set", "pictures.maxSize", "1GB", "'1GB' isn't a number of megabytes from 64 to 8192.")]
     [InlineData("set", "pictures.adult", "maybe", "'maybe' isn't hidden, blurred or shown.")]
     [InlineData("set", "details.maxAge", "8d", "'8d' isn't an interval.")]
+    [InlineData("set", "quota.warnBelow", "91", "'91' isn't a percent from 0 to 90.")]
+    [InlineData("set", "quota.warnBelow", "-1", "'-1' isn't a percent from 0 to 90.")]
     [InlineData("set", "games.fallout4.hidden", "yes", "'yes' isn't true or false.")]
     [InlineData("set", "games.fallout4.updateInterval", "10m", "'10m' isn't an interval.")]
     [InlineData("set", "games.fallout4.oldVersions", "none", "'none' isn't a rule for old versions.")]
@@ -320,6 +323,21 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         Assert.Equal("cards", shownSet);
         Assert.Equal("previews.library is back to its default, thumbnails: the desktop app's Library screen shows a small picture at the start of each row.", reset.Output.Trim());
         Assert.Equal("thumbnails (default)", Value(await RunAsync("show"), "previews.library"));
+    }
+
+    [Fact]
+    public async Task SetsTheQuotaWarningTurnsItOffAndResetsIt()
+    {
+        CliResult set = await RunAsync("set", "quota.warnBelow", "25%");
+        string file = await File.ReadAllTextAsync(SettingsFile, Cancellation);
+        CliResult off = await RunAsync("set", "quota.warnBelow", "0");
+        CliResult reset = await RunAsync("reset", "quota.warnBelow");
+
+        Assert.Equal("quota.warnBelow is now 25: the desktop app warns when fewer than 25% of a site's requests for the hour or the day are left.", set.Output.Trim());
+        Assert.Contains("\"quota\": {\n    \"warnBelow\": 25\n  }", file.ReplaceLineEndings("\n"), StringComparison.Ordinal);
+        Assert.Equal("quota.warnBelow is now 0: the desktop app doesn't warn when a site's requests run low.", off.Output.Trim());
+        Assert.Equal("quota.warnBelow is back to its default, 10: the desktop app warns when fewer than 10% of a site's requests for the hour or the day are left.", reset.Output.Trim());
+        Assert.Equal("10 (default)", Value(await RunAsync("show"), "quota.warnBelow"));
     }
 
     [Fact]

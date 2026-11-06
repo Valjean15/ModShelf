@@ -211,6 +211,19 @@ internal sealed class SettingsService : ISettingsService, IDisposable
         return ChangeAsync((settings, _) => Task.FromResult(settings with { DetailsMaxAge = age }), cancellationToken);
     }
 
+    public Task SetQuotaWarnBelowAsync(int? percent, CancellationToken cancellationToken)
+    {
+        if (percent is < 0 or > AppSettings.MaxQuotaWarnBelow)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(percent),
+                percent,
+                $"The warning can be from 0, for never, to {AppSettings.MaxQuotaWarnBelow} percent.");
+        }
+
+        return ChangeAsync((settings, _) => Task.FromResult(settings with { QuotaWarnBelow = percent }), cancellationToken);
+    }
+
     public Task SetAdultPicturesAsync(AdultPictures? pictures, CancellationToken cancellationToken)
     {
         if (pictures is { } value && !Enum.IsDefined(value))

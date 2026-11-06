@@ -122,6 +122,9 @@ internal sealed class InMemorySettingsService : ISettingsService
     public Task SetAdultPicturesAsync(AdultPictures? pictures, CancellationToken cancellationToken)
         => ChangeAsync($"adultPictures {pictures?.ToString() ?? "null"}", settings => settings with { AdultPictures = pictures });
 
+    public Task SetQuotaWarnBelowAsync(int? percent, CancellationToken cancellationToken)
+        => ChangeAsync($"quotaWarnBelow {percent?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "null"}", settings => settings with { QuotaWarnBelow = percent });
+
     /// <summary>
     /// The settings with the game's own as <paramref name="own"/>; without the game when it has none.
     /// </summary>

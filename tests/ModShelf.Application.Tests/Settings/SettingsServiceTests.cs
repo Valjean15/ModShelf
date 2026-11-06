@@ -299,6 +299,32 @@ public sealed class SettingsServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task SetsTheQuotaWarningAndBackToItsDefault()
+    {
+        await _settings.SetQuotaWarnBelowAsync(0, Cancellation);
+        AppSettings off = await _settings.GetAsync(Cancellation);
+        await _settings.SetQuotaWarnBelowAsync(AppSettings.MaxQuotaWarnBelow, Cancellation);
+        AppSettings most = await _settings.GetAsync(Cancellation);
+        await _settings.SetQuotaWarnBelowAsync(null, Cancellation);
+
+        Assert.Equal((0, 90), (off.QuotaWarnBelow!.Value, most.QuotaWarnBelow!.Value));
+        Assert.Null((await _settings.GetAsync(Cancellation)).QuotaWarnBelow);
+        Assert.Equal(10, AppSettings.DefaultQuotaWarnBelow);
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(AppSettings.MaxQuotaWarnBelow + 1)]
+    public async Task RefusesAQuotaWarningOutsideTheLimits(int percent)
+    {
+        await _settings.SetQuotaWarnBelowAsync(20, Cancellation);
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _settings.SetQuotaWarnBelowAsync(percent, Cancellation));
+
+        Assert.Equal(20, (await _settings.GetAsync(Cancellation)).QuotaWarnBelow);
+    }
+
+    [Fact]
     public async Task RefusesDetailsAgesOutsideTheLimitsAndAdultPicturesThatArentOnes()
     {
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _settings.SetDetailsMaxAgeAsync(TimeSpan.FromMinutes(14), Cancellation));

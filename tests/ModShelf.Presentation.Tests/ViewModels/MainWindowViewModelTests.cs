@@ -8,6 +8,7 @@ using ModShelf.Presentation.Tests.ViewModels.Downloads;
 using ModShelf.Presentation.Tests.ViewModels.QuickSearch;
 using ModShelf.Presentation.ViewModels;
 using ModShelf.Presentation.ViewModels.Accounts;
+using ModShelf.Presentation.ViewModels.Quota;
 using ModShelf.Presentation.ViewModels.Undo;
 using ModShelf.Testing;
 
@@ -277,6 +278,7 @@ public sealed class MainWindowViewModelTests : IDisposable
             new AccountMenuViewModel(new TestPictures().Pictures, _navigation),
             new QuickSearchHarness(_navigation).Search,
             new UndoBarViewModel(new InMemoryModLibrary(), _uiThread, TimeProvider.System, new RecordingLogger<UndoBarViewModel>()),
+            new QuotaWarningViewModel(new FakeSourceRegistry(), new InMemorySettingsService(), _uiThread, TimeProvider.System, new RecordingLogger<QuotaWarningViewModel>()),
             _uiState,
             _logger);
 }

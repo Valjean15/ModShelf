@@ -3,14 +3,15 @@ using System.Collections.Concurrent;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Common;
+using ModShelf.Sources.Abstractions.Quota;
 
 namespace ModShelf.Presentation.Tests.Fakes;
 
 /// <summary>
-/// A mod site that names its games and gives their pictures, and gives its mods' details and changelogs, as the test
-/// says, recording what it was asked.
+/// A mod site that names its games and gives their pictures, its mods' details and changelogs, and what's left of its
+/// requests, as the test says, recording what it was asked.
 /// </summary>
-internal sealed class ScriptedCatalog(SourceId id, string displayName) : IModCatalog
+internal sealed class ScriptedCatalog(SourceId id, string displayName) : IModCatalog, IApiQuota
 {
     private int _readingChangelogs;
     private int _mostChangelogs;
@@ -18,6 +19,11 @@ internal sealed class ScriptedCatalog(SourceId id, string displayName) : IModCat
     public SourceId Id { get; } = id;
 
     public string DisplayName { get; } = displayName;
+
+    /// <summary>
+    /// What's left of the account's requests, as the test sets it; null, as before the site has said, by default.
+    /// </summary>
+    public ApiQuota? Quota { get; set; }
 
     /// <summary>
     /// What the site calls following a mod and approving one: Nexus Mods' words unless the test says otherwise.

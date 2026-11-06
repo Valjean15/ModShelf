@@ -42,7 +42,8 @@ namespace ModShelf.Infrastructure.Settings;
 ///   "app": { "checkForUpdates": false },
 ///   "previews": { "library": "cards", "updates": "thumbnails" },
 ///   "pictures": { "maxSize": 1024, "adult": "hidden" },
-///   "details": { "maxAge": "7d" }
+///   "details": { "maxAge": "7d" },
+///   "quota": { "warnBelow": 15 }
 /// }
 /// </code>
 /// </summary>
@@ -77,6 +78,8 @@ internal sealed class JsonSettingsStore : ISettingsStore
     private const string Adult = "adult";
     private const string Details = "details";
     private const string MaxAge = "maxAge";
+    private const string Quota = "quota";
+    private const string WarnBelow = "warnBelow";
     private const string Games = "games";
     private const string CheckUpdates = "checkUpdates";
     private const string UpdateIntervalName = "updateInterval";
@@ -124,6 +127,7 @@ internal sealed class JsonSettingsStore : ISettingsStore
         JsonObject previews = file?[Previews] as JsonObject ?? [];
         JsonObject pictures = file?[Pictures] as JsonObject ?? [];
         JsonObject details = file?[Details] as JsonObject ?? [];
+        JsonObject quota = file?[Quota] as JsonObject ?? [];
         try
         {
             string? root = Text(library, Root);
@@ -153,6 +157,7 @@ internal sealed class JsonSettingsStore : ISettingsStore
                     ? Named<AdultPictures>(adult) ?? throw new InvalidDataException($"{Pictures}.{Adult} must be hidden, blurred or shown.")
                     : null,
                 DetailsMaxAge = Text(details, MaxAge, Details) is { } age ? UpdateInterval.Parse(age) : null,
+                QuotaWarnBelow = ReadWarnBelow(quota),
             };
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or InvalidDataException or FormatException)
@@ -289,6 +294,18 @@ internal sealed class JsonSettingsStore : ISettingsStore
         Set(detailsSection, MaxAge, settings.DetailsMaxAge is { } maxAge ? UpdateInterval.Format(maxAge) : null);
         Keep(file, Details, detailsSection);
 
+        JsonObject quotaSection = file[Quota] as JsonObject ?? [];
+        if (settings.QuotaWarnBelow is { } warnBelow)
+        {
+            quotaSection[WarnBelow] = warnBelow;
+        }
+        else
+        {
+            quotaSection.Remove(WarnBelow);
+        }
+
+        Keep(file, Quota, quotaSection);
+
         JsonObject appearanceSection = file[Appearance] as JsonObject ?? [];
         Set(appearanceSection, Theme, settings.Theme is { } theme ? ThemeName(theme) : null);
         if (appearanceSection.Count == 0)
@@ -402,6 +419,16 @@ internal sealed class JsonSettingsStore : ISettingsStore
 
         return levels.ToImmutable();
     }
+
+    /// <summary>
+    /// Below what share of an allowance of requests the app warns: a whole percent from 0 to the most.
+    /// </summary>
+    private static int? ReadWarnBelow(JsonObject quota) => quota[WarnBelow] switch
+    {
+        null => null,
+        JsonValue value when value.TryGetValue(out int percent) && percent is >= 0 and <= AppSettings.MaxQuotaWarnBelow => percent,
+        _ => throw new InvalidDataException($"{Quota}.{WarnBelow} must be a percent from 0 to {AppSettings.MaxQuotaWarnBelow}."),
+    };
 
     /// <summary>
     /// The room saved pictures take, a whole number of megabytes within the limits.

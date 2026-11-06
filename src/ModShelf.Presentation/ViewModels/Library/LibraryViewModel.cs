@@ -761,6 +761,12 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     /// </summary>
     private async Task QueueAsync(LibraryGameViewModel game, IReadOnlyList<LibraryUpdate> updates, CancellationToken cancellationToken)
     {
+        IEnumerable<(SourceId, int)> needs = updates.Select(update => (update.File.Mod.Game.Source, QuotaChecks.PerDownload));
+        if (!await QuotaChecks.GoOnAsync(_sources, _services.Dialogs, _timeProvider, needs, cancellationToken))
+        {
+            return;
+        }
+
         game.ShowUpdating(null, false);
         ShowSelection();
         (string Note, bool IsProblem) done = (string.Empty, false);

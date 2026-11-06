@@ -141,6 +141,14 @@ public sealed partial class SettingsViewModel
             ]);
             SelectedInterval = IntervalChoices.First(choice => choice.Interval == interval);
 
+            int warnBelow = settings.QuotaWarnBelow ?? AppSettings.DefaultQuotaWarnBelow;
+            QuotaChoices.SyncWith(
+            [
+                .. OfferedQuotaWarnings.Append(warnBelow).Distinct().Order()
+                    .Select(offered => QuotaChoices.FirstOrDefault(choice => choice.Value == offered) ?? QuotaChoice(offered)),
+            ]);
+            SelectedQuota = QuotaChoices.First(choice => choice.Value == warnBelow);
+
             NotifyOfUpdates = settings.NotifyOfUpdates ?? true;
             CheckForAppUpdates = settings.CheckForAppUpdates ?? true;
             Theme = settings.Theme ?? AppTheme.System;
@@ -152,4 +160,14 @@ public sealed partial class SettingsViewModel
             _showing = false;
         }
     }
+
+    /// <summary>
+    /// A share of a site's requests to warn below, as the list says it: "Never", or "Below 10%", the default saying so.
+    /// </summary>
+    private static SettingChoice<int> QuotaChoice(int percent)
+    {
+        string label = percent == 0 ? Strings.SettingsQuotaNever : Text.Format(Strings.SettingsQuotaBelow, percent);
+        return new SettingChoice<int>(percent, percent == AppSettings.DefaultQuotaWarnBelow ? Text.Format(Strings.IntervalDefault, label) : label);
+    }
+
 }

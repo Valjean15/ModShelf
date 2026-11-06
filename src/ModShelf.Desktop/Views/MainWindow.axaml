@@ -7,6 +7,7 @@
         xmlns:pictures="using:ModShelf.Desktop.Views.Pictures"
         xmlns:quick="using:ModShelf.Desktop.Views.QuickSearch"
         xmlns:undo="using:ModShelf.Presentation.ViewModels.Undo"
+        xmlns:quota="using:ModShelf.Presentation.ViewModels.Quota"
         x:Class="ModShelf.Desktop.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Width="1024" Height="640"
@@ -144,8 +145,32 @@
             </SplitView.Pane>
 
             <Panel>
-                <!-- App.axaml's data templates pick each screen's view. -->
-                <ContentControl Margin="32,28,32,24" Content="{Binding CurrentScreen}" />
+                <DockPanel>
+                    <!-- While a site's requests run low: calm, or warm once they're used up, with when they renew. -->
+                    <Border DockPanel.Dock="Top"
+                            Classes="quotaStrip"
+                            DataContext="{Binding Quota}"
+                            x:DataType="quota:QuotaWarningViewModel"
+                            Classes.usedUp="{Binding IsUsedUp}"
+                            IsVisible="{Binding IsShown}">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <TextBlock VerticalAlignment="Center"
+                                       TextWrapping="Wrap"
+                                       Text="{Binding Message}"
+                                       AutomationProperties.LiveSetting="Polite" />
+                            <Button Grid.Column="1"
+                                    Classes="pickerClear"
+                                    Command="{Binding DismissCommand}"
+                                    ToolTip.Tip="{x:Static res:Strings.QuotaDismiss}"
+                                    AutomationProperties.Name="{x:Static res:Strings.QuotaDismiss}">
+                                <PathIcon Width="12" Height="12" Data="{StaticResource CloseIcon}" />
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <!-- App.axaml's data templates pick each screen's view. -->
+                    <ContentControl Margin="32,28,32,24" Content="{Binding CurrentScreen}" />
+                </DockPanel>
 
                 <!-- What a change to the library did, with Undo, for ten seconds. -->
                 <Border Classes="undoBar" DataContext="{Binding Undo}" x:DataType="undo:UndoBarViewModel" IsVisible="{Binding IsShown}">

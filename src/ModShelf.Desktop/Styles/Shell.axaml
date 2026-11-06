@@ -656,6 +656,21 @@
         <Setter Property="Margin" Value="0,0,0,6" />
     </Style>
 
+    <!-- The quota strip: calm at the top of the screen shown while a site's requests run low, warm once they're used up. -->
+    <Style Selector="Border.quotaStrip">
+        <Setter Property="Margin" Value="32,16,32,0" />
+        <Setter Property="Padding" Value="16,6,6,6" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <Style Selector="Border.quotaStrip.usedUp">
+        <Setter Property="Background" Value="{DynamicResource ShelfWarnSoftBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+
     <!-- The undo bar: a card at the bottom of the screen shown, over it, at most 560 wide. -->
     <Style Selector="Border.undoBar">
         <Setter Property="HorizontalAlignment" Value="Stretch" />

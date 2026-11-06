@@ -3279,4 +3279,68 @@
     <value>Couldn't undo: {0}</value>
     <comment>The undo bar, when undoing failed: {0} says why.</comment>
   </data>
+  <data name="SettingsQuotaHeading" xml:space="preserve">
+    <value>Requests to the sites</value>
+    <comment>Settings › Updates: the heading of when to warn that a site's requests run low.</comment>
+  </data>
+  <data name="SettingsQuotaWarn" xml:space="preserve">
+    <value>Warn about a site's requests for the hour or the day</value>
+    <comment>Settings › Updates, before the list of shares, such as "below 10%".</comment>
+  </data>
+  <data name="SettingsQuotaNote" xml:space="preserve">
+    <value>A strip at the top of the window says so, and when they renew; a big check or download asks first. Accounts shows how many are left.</value>
+    <comment>Settings › Updates, under the quota warning.</comment>
+  </data>
+  <data name="SettingsQuotaNever" xml:space="preserve">
+    <value>Never</value>
+    <comment>Settings › Updates: no quota warning.</comment>
+  </data>
+  <data name="SettingsQuotaBelow" xml:space="preserve">
+    <value>When below {0}% are left</value>
+    <comment>Settings › Updates: warn below a share of the requests; {0} is the percent.</comment>
+  </data>
+  <data name="QuotaLowHour" xml:space="preserve">
+    <value>{0} has {1:N0} of its {2:N0} requests left this hour. They renew at {3}.</value>
+    <comment>The strip at the top when a site's hourly requests run low: {0} the site, {1} left, {2} the hour's, {3} when they renew.</comment>
+  </data>
+  <data name="QuotaLowDay" xml:space="preserve">
+    <value>{0} has {1:N0} of its {2:N0} requests left today. They renew at {3}.</value>
+    <comment>The strip at the top when a site's daily requests run low: {0} the site, {1} left, {2} the day's, {3} when they renew.</comment>
+  </data>
+  <data name="QuotaLow" xml:space="preserve">
+    <value>{0} has {1:N0} of its {2:N0} requests left. They renew at {3}.</value>
+    <comment>The strip at the top when a site's requests run low, for a period that isn't an hour or a day.</comment>
+  </data>
+  <data name="QuotaUsedUp" xml:space="preserve">
+    <value>The requests to {0} are used up until {1}. Checks and downloads from it wait until then.</value>
+    <comment>The strip at the top when a site's requests are used up: {0} the site, {1} when they renew.</comment>
+  </data>
+  <data name="QuotaDismiss" xml:space="preserve">
+    <value>Hide until they renew</value>
+    <comment>The tooltip of the quota strip's ×.</comment>
+  </data>
+  <data name="QuotaAskTitle" xml:space="preserve">
+    <value>Requests may run out</value>
+    <comment>The question before a big check or download that may use up a site's requests.</comment>
+  </data>
+  <data name="QuotaAskMessage" xml:space="preserve">
+    <value>This may take about {1:N0} requests to {0}, and {2}. Once they're used up, the rest waits until {3}.</value>
+    <comment>{0} the site, {1} the requests it may take, {2} how many are left, such as "40 are left this hour", {3} when they renew.</comment>
+  </data>
+  <data name="QuotaLeftThisHour" xml:space="preserve">
+    <value>{0:N0} are left this hour</value>
+    <comment>In the quota question: how many requests are left of the hour's.</comment>
+  </data>
+  <data name="QuotaLeftToday" xml:space="preserve">
+    <value>{0:N0} are left today</value>
+    <comment>In the quota question: how many requests are left of the day's.</comment>
+  </data>
+  <data name="QuotaLeft" xml:space="preserve">
+    <value>{0:N0} are left</value>
+    <comment>In the quota question: how many requests are left, for a period that isn't an hour or a day.</comment>
+  </data>
+  <data name="QuotaAskGoOn" xml:space="preserve">
+    <value>Go on</value>
+    <comment>The button that starts a check or download that may use up a site's requests.</comment>
+  </data>
 </root>

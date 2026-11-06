@@ -27,7 +27,7 @@ public sealed class SettingsCategoriesTests
         Assert.Equal(["General", "Library", "Updates", "Links", "Games", "About"], Screen.Categories.Select(category => category.ToString()));
         Assert.Equal(["Theme", "Window", "Pictures"], shown["General"]);
         Assert.Equal(["LibraryFolder", "FolderPattern", "OldVersions", "Rescan"], shown["Library"]);
-        Assert.Equal(["Updates"], shown["Updates"]);
+        Assert.Equal(["Updates", "Quota"], shown["Updates"]);
         Assert.Equal(["Links"], shown["Links"]);
         Assert.Equal(["Games"], shown["Games"]);
         Assert.Equal(["About"], shown["About"]);
@@ -116,7 +116,7 @@ public sealed class SettingsCategoriesTests
         Screen.SelectedCategory = Screen.Categories[2];
 
         Assert.Equal(string.Empty, Screen.SearchText);
-        Assert.Equal(["Updates"], Shown());
+        Assert.Equal(["Updates", "Quota"], Shown());
     }
 
     [Fact]
@@ -170,6 +170,7 @@ public sealed class SettingsCategoriesTests
             ("OldVersions", Screen.OldVersionsSection),
             ("Rescan", Screen.RescanSection),
             ("Updates", Screen.UpdatesSection),
+            ("Quota", Screen.QuotaSection),
             ("Links", Screen.LinksSection),
             ("Games", Screen.GamesSection),
             ("About", Screen.AboutSection),
