@@ -15,7 +15,7 @@ namespace ModShelf.Presentation.ViewModels.Settings;
 public sealed partial class SettingsViewModel
 {
     /// <summary>
-    /// General, Library, Updates, Links, Games and About.
+    /// General, Library, Updates, Links, Agents, Games and About.
     /// </summary>
     public IReadOnlyList<SettingsCategoryViewModel> Categories { get; } =
     [
@@ -23,6 +23,7 @@ public sealed partial class SettingsViewModel
         new(SettingsCategory.Library, Strings.SettingsCategoryLibrary),
         new(SettingsCategory.Updates, Strings.SettingsCategoryUpdates),
         new(SettingsCategory.Links, Strings.SettingsCategoryLinks),
+        new(SettingsCategory.Agents, Strings.SettingsCategoryAgents),
         new(SettingsCategory.Games, Strings.SettingsCategoryGames),
         new(SettingsCategory.About, Strings.SettingsCategoryAbout),
     ];
@@ -178,6 +179,21 @@ public sealed partial class SettingsViewModel
         Strings.LinksTake);
 
     /// <summary>
+    /// Whether AI agents may use ModShelf, and connecting them: Agents.
+    /// </summary>
+    public SettingsSectionViewModel AgentsSection { get; } = new(
+        SettingsCategory.Agents,
+        Strings.AgentsHeading,
+        Strings.AgentsAllow,
+        Strings.AgentsAllowNote,
+        Strings.AgentsConnectHeading,
+        Strings.AgentsCopyPrompt,
+        Strings.AgentsViewDetails,
+        Strings.AgentsAddToClaudeDesktop,
+        Strings.AgentsAddressHeading,
+        Strings.AgentsPortLabel);
+
+    /// <summary>
     /// Single games' own settings: Games.
     /// </summary>
     public SettingsSectionViewModel GamesSection { get; } = new(
@@ -227,6 +243,7 @@ public sealed partial class SettingsViewModel
         UpdatesSection,
         QuotaSection,
         LinksSection,
+        AgentsSection,
         GamesSection,
         AboutSection,
     ];

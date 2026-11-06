@@ -125,6 +125,12 @@ internal sealed class InMemorySettingsService : ISettingsService
     public Task SetQuotaWarnBelowAsync(int? percent, CancellationToken cancellationToken)
         => ChangeAsync($"quotaWarnBelow {percent?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "null"}", settings => settings with { QuotaWarnBelow = percent });
 
+    public Task SetAgentsEnabledAsync(bool? enabled, CancellationToken cancellationToken)
+        => ChangeAsync($"agentsEnabled {enabled?.ToString() ?? "null"}", settings => settings with { AgentsEnabled = enabled });
+
+    public Task SetAgentsPortAsync(int? port, CancellationToken cancellationToken)
+        => ChangeAsync($"agentsPort {port?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "null"}", settings => settings with { AgentsPort = port });
+
     /// <summary>
     /// The settings with the game's own as <paramref name="own"/>; without the game when it has none.
     /// </summary>

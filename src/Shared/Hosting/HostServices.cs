@@ -5,6 +5,7 @@ using ModShelf.Application;
 using ModShelf.Application.Diagnostics;
 using ModShelf.Infrastructure;
 using ModShelf.Platform;
+using ModShelf.Platform.Agents;
 using ModShelf.Platform.Links;
 using ModShelf.Platform.Secrets;
 using ModShelf.Sources.DirectUrl;
@@ -56,6 +57,13 @@ internal static class HostServices
     /// release feed, which an installed ModShelf updates itself from in place of its GitHub releases, such as for testing.
     /// </summary>
     public const string UpdateFeedKey = "ModShelf:UpdateFeed";
+
+    /// <summary>
+    /// The configuration key, or <c>ModShelf__CommandLine</c>, for the command line's executable, which serves the MCP
+    /// server's address and which agents' apps start. By default it's beside the desktop app, as in an installed ModShelf,
+    /// or, in a build from source, in its own build folder (ADR 0080).
+    /// </summary>
+    public const string CommandLineKey = "ModShelf:CommandLine";
 
     /// <summary>
     /// Registers ModShelf's files, where the configuration says, and every service both hosts have.
@@ -115,6 +123,31 @@ internal static class HostServices
         return new SchemeHandlerOptions(
             string.IsNullOrWhiteSpace(desktopApp) ? PlatformServiceCollectionExtensions.DefaultDesktopApp : Path.GetFullPath(desktopApp),
             arguments);
+    }
+
+    /// <summary>
+    /// The command line, for agents, with the environment that keeps it on this library and these secrets when they
+    /// aren't in their default places, such as <c>ModShelf__DatabasePath</c>: an agent's app starts it without this app's
+    /// environment. Never a secret, such as the Nexus Mods client ID.
+    /// </summary>
+    internal static AgentServerOptions AgentServerOptionsFrom(IConfiguration configuration)
+    {
+        string? commandLine = configuration[CommandLineKey];
+        Dictionary<string, string> environment = new(StringComparer.Ordinal);
+        foreach (string key in new[] { DatabasePathKey, SecretsFolderKey })
+        {
+            if (!string.IsNullOrWhiteSpace(configuration[key]))
+            {
+                environment[key.Replace(":", "__", StringComparison.Ordinal)] = Path.GetFullPath(configuration[key]!);
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(configuration[SecretScopeKey]))
+        {
+            environment[SecretScopeKey.Replace(":", "__", StringComparison.Ordinal)] = configuration[SecretScopeKey]!;
+        }
+
+        return new AgentServerOptions(string.IsNullOrWhiteSpace(commandLine) ? null : Path.GetFullPath(commandLine), environment);
     }
 
     private static SecretStoreOptions SecretStoreOptionsFrom(IConfiguration configuration)

@@ -312,6 +312,37 @@ public sealed class SettingsServiceTests : IDisposable
         Assert.Equal(10, AppSettings.DefaultQuotaWarnBelow);
     }
 
+    [Fact]
+    public async Task SetsAgentsAccessAndItsPortAndBackToTheirDefaults()
+    {
+        await _settings.SetAgentsEnabledAsync(true, Cancellation);
+        await _settings.SetAgentsPortAsync(AppSettings.MinAgentsPort, Cancellation);
+        AppSettings lowest = await _settings.GetAsync(Cancellation);
+        await _settings.SetAgentsPortAsync(AppSettings.MaxAgentsPort, Cancellation);
+        AppSettings highest = await _settings.GetAsync(Cancellation);
+        await _settings.SetAgentsEnabledAsync(null, Cancellation);
+        await _settings.SetAgentsPortAsync(null, Cancellation);
+
+        Assert.Equal((true, 1024, 65535), (lowest.AgentsEnabled, lowest.AgentsPort!.Value, highest.AgentsPort!.Value));
+        AppSettings reset = await _settings.GetAsync(Cancellation);
+        Assert.Equal(((bool?)null, (int?)null), (reset.AgentsEnabled, reset.AgentsPort));
+        Assert.Equal(47823, AppSettings.DefaultAgentsPort);
+    }
+
+    [Theory]
+    [InlineData(AppSettings.MinAgentsPort - 1)]
+    [InlineData(AppSettings.MaxAgentsPort + 1)]
+    [InlineData(0)]
+    public async Task RefusesAnAgentsPortOutsideTheLimits(int port)
+    {
+        await _settings.SetAgentsPortAsync(50000, Cancellation);
+
+        ArgumentOutOfRangeException refused = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _settings.SetAgentsPortAsync(port, Cancellation));
+
+        Assert.StartsWith("The port can be from 1024 to 65535.", refused.Message, StringComparison.Ordinal);
+        Assert.Equal(50000, (await _settings.GetAsync(Cancellation)).AgentsPort);
+    }
+
     [Theory]
     [InlineData(-1)]
     [InlineData(AppSettings.MaxQuotaWarnBelow + 1)]

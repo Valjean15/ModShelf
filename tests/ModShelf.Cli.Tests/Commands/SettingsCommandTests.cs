@@ -78,6 +78,8 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         Assert.Equal("blurred (default)", Value(shown, "pictures.adult"));
         Assert.Equal("1d (default)", Value(shown, "details.maxAge"));
         Assert.Equal("10 (default)", Value(shown, "quota.warnBelow"));
+        Assert.Equal("false (default)", Value(shown, "agents.enabled"));
+        Assert.Equal("47823 (default)", Value(shown, "agents.port"));
         Assert.Contains("To change a setting: settings set <setting> <value>", shown.Output, StringComparison.Ordinal);
     }
 
@@ -256,7 +258,7 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     [InlineData("set", "library.root", "Mods", "isn't a full path")]
     [InlineData("set", "library.folders", "{mod}", "The last part must be exactly {file}.")]
     [InlineData("set", "library.folders.skyrimspecialedition", "{name}/{file}", "{name} isn't a folder's part.")]
-    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<site>/<game>, library.oldVersions, updates.interval, updates.notify, appearance.theme, window.closeToTray, setup.done, app.checkForUpdates, previews.library, previews.updates, previews.browse, previews.downloads, pictures.maxSize, pictures.adult, details.maxAge, quota.warnBelow, games.<site>/<game>.root, games.<site>/<game>.folders, games.<site>/<game>.oldVersions, games.<site>/<game>.checkUpdates, games.<site>/<game>.updateInterval, games.<site>/<game>.notify, games.<site>/<game>.previews, games.<site>/<game>.hidden, games.<site>/<game>.browse.sort, games.<site>/<game>.browse.direction, games.<site>/<game>.browse.window, games.<site>/<game>.browse.pageSize, such as games.nexus/stardewvalley.notify; a game's key alone, as games.stardewvalley.notify, does while only one site's game has it.")]
+    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<site>/<game>, library.oldVersions, updates.interval, updates.notify, appearance.theme, window.closeToTray, setup.done, app.checkForUpdates, previews.library, previews.updates, previews.browse, previews.downloads, pictures.maxSize, pictures.adult, details.maxAge, quota.warnBelow, agents.enabled, agents.port, games.<site>/<game>.root, games.<site>/<game>.folders, games.<site>/<game>.oldVersions, games.<site>/<game>.checkUpdates, games.<site>/<game>.updateInterval, games.<site>/<game>.notify, games.<site>/<game>.previews, games.<site>/<game>.hidden, games.<site>/<game>.browse.sort, games.<site>/<game>.browse.direction, games.<site>/<game>.browse.window, games.<site>/<game>.browse.pageSize, such as games.nexus/stardewvalley.notify; a game's key alone, as games.stardewvalley.notify, does while only one site's game has it.")]
     [InlineData("reset", "library.folders.", null, "There's no setting called library.folders.")]
     [InlineData("set", "library.oldVersions", "0", "'0' isn't a rule for old versions. Use all, archive, or how many versions to keep, from 1 to 99, such as 2.")]
     [InlineData("set", "appearance.theme", "blue", "'blue' isn't system, light or dark.")]
@@ -269,6 +271,9 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     [InlineData("set", "details.maxAge", "8d", "'8d' isn't an interval.")]
     [InlineData("set", "quota.warnBelow", "91", "'91' isn't a percent from 0 to 90.")]
     [InlineData("set", "quota.warnBelow", "-1", "'-1' isn't a percent from 0 to 90.")]
+    [InlineData("set", "agents.enabled", "yes", "'yes' isn't true or false.")]
+    [InlineData("set", "agents.port", "80", "'80' isn't a port from 1024 to 65535.")]
+    [InlineData("set", "agents.port", "65536", "'65536' isn't a port from 1024 to 65535.")]
     [InlineData("set", "games.fallout4.hidden", "yes", "'yes' isn't true or false.")]
     [InlineData("set", "games.fallout4.updateInterval", "10m", "'10m' isn't an interval.")]
     [InlineData("set", "games.fallout4.oldVersions", "none", "'none' isn't a rule for old versions.")]
@@ -323,6 +328,25 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         Assert.Equal("cards", shownSet);
         Assert.Equal("previews.library is back to its default, thumbnails: the desktop app's Library screen shows a small picture at the start of each row.", reset.Output.Trim());
         Assert.Equal("thumbnails (default)", Value(await RunAsync("show"), "previews.library"));
+    }
+
+    [Fact]
+    public async Task AllowsAgentsAndSetsTheirPortAndResetsBoth()
+    {
+        CliResult allowed = await RunAsync("set", "agents.enabled", "true");
+        CliResult port = await RunAsync("set", "agents.port", "50000");
+        string file = await File.ReadAllTextAsync(SettingsFile, Cancellation);
+        CliResult off = await RunAsync("set", "agents.enabled", "false");
+        CliResult reset = await RunAsync("reset", "agents.enabled");
+        CliResult portReset = await RunAsync("reset", "agents.port");
+
+        Assert.Equal("agents.enabled is now true: AI agents may use ModShelf through its MCP server.", allowed.Output.Trim());
+        Assert.Equal("agents.port is now 50000: while agents may use ModShelf, the desktop app serves its MCP server at http://127.0.0.1:50000/mcp.", port.Output.Trim());
+        Assert.Contains("\"agents\": {\n    \"enabled\": true,\n    \"port\": 50000\n  }", file.ReplaceLineEndings("\n"), StringComparison.Ordinal);
+        Assert.Equal("agents.enabled is now false: ModShelf's MCP server answers every agent's call saying agents are off.", off.Output.Trim());
+        Assert.Equal("agents.enabled is back to its default, false: ModShelf's MCP server answers every agent's call saying agents are off.", reset.Output.Trim());
+        Assert.Equal("agents.port is back to its default, 47823: while agents may use ModShelf, the desktop app serves its MCP server at http://127.0.0.1:47823/mcp.", portReset.Output.Trim());
+        Assert.DoesNotContain("agents", await File.ReadAllTextAsync(SettingsFile, Cancellation), StringComparison.Ordinal);
     }
 
     [Fact]

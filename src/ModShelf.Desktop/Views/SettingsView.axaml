@@ -354,6 +354,60 @@
                             </Border>
                         </Panel>
 
+                        <!-- AI agents: whether they may use ModShelf, connecting them, and the address the app serves them. -->
+                        <Panel IsVisible="{Binding AgentsSection.IsShown}">
+                            <Border Classes="card" DataContext="{Binding Agents}">
+                                <StackPanel Spacing="16" x:DataType="vm:AgentsViewModel">
+                                    <TextBlock Classes="subheading" Text="{x:Static res:Strings.AgentsHeading}" />
+
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                        <StackPanel Spacing="4">
+                                            <TextBlock Text="{x:Static res:Strings.AgentsAllow}" />
+                                            <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.AgentsAllowNote}" />
+                                        </StackPanel>
+                                        <ToggleSwitch Grid.Column="1"
+                                                      VerticalAlignment="Top"
+                                                      OnContent=""
+                                                      OffContent=""
+                                                      IsChecked="{Binding IsEnabled}"
+                                                      AutomationProperties.Name="{x:Static res:Strings.AgentsAllow}" />
+                                    </Grid>
+
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Text="{x:Static res:Strings.AgentsConnectHeading}" />
+                                        <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.AgentsConnectNote}" />
+                                        <WrapPanel ItemSpacing="8" LineSpacing="8" Margin="0,4,0,0">
+                                            <Button Classes="accent" Content="{x:Static res:Strings.AgentsCopyPrompt}" Command="{Binding CopyPromptCommand}" />
+                                            <Button Content="{x:Static res:Strings.AgentsViewDetails}" Command="{Binding ShowDetailsCommand}" />
+                                            <Button Content="{x:Static res:Strings.AgentsAddToClaudeDesktop}" Command="{Binding AddToClaudeDesktopCommand}" />
+                                        </WrapPanel>
+                                        <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding Done}" IsVisible="{Binding Done, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                        <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding ClaudeDesktopNote}" />
+                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                            <TextBlock Classes="note" Text="{x:Static res:Strings.AgentsCommandLabel}" />
+                                            <SelectableTextBlock Grid.Column="1" FontFamily="{DynamicResource ShelfMonoFont}" FontSize="12" TextWrapping="Wrap" Text="{Binding CommandNote}" />
+                                        </Grid>
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Text="{x:Static res:Strings.AgentsAddressHeading}" />
+                                        <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.AgentsAddressNote}" />
+                                        <TextBlock Classes="note" Classes.problem="{Binding HasStatusProblem}" TextWrapping="Wrap" Text="{Binding Status}" />
+                                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                            <TextBlock VerticalAlignment="Center" Text="{x:Static res:Strings.AgentsPortLabel}" />
+                                            <TextBox Width="96"
+                                                     FontFamily="{DynamicResource ShelfMonoFont}"
+                                                     Text="{Binding PortText}"
+                                                     AutomationProperties.Name="{x:Static res:Strings.AgentsPortLabel}" />
+                                            <Button Content="{x:Static res:Strings.AgentsPortSave}" Command="{Binding SavePortCommand}" />
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <TextBlock Classes="problem" TextWrapping="Wrap" Text="{Binding Problem}" IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                </StackPanel>
+                            </Border>
+                        </Panel>
+
                         <!-- The games, and the chosen one's own settings beside them; in a narrow card, below them. -->
                         <Border Classes="card" IsVisible="{Binding GamesSection.IsShown}" Container.Name="GamesCard" Container.Sizing="Width">
                             <StackPanel Spacing="12">

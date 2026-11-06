@@ -24,11 +24,12 @@ public sealed class SettingsCategoriesTests
             shown[category.Name] = Shown();
         }
 
-        Assert.Equal(["General", "Library", "Updates", "Links", "Games", "About"], Screen.Categories.Select(category => category.ToString()));
+        Assert.Equal(["General", "Library", "Updates", "Links", "Agents", "Games", "About"], Screen.Categories.Select(category => category.ToString()));
         Assert.Equal(["Theme", "Window", "Pictures"], shown["General"]);
         Assert.Equal(["LibraryFolder", "FolderPattern", "OldVersions", "Rescan"], shown["Library"]);
         Assert.Equal(["Updates", "Quota"], shown["Updates"]);
         Assert.Equal(["Links"], shown["Links"]);
+        Assert.Equal(["Agents"], shown["Agents"]);
         Assert.Equal(["Games"], shown["Games"]);
         Assert.Equal(["About"], shown["About"]);
         Assert.All(Screen.Categories, category => Assert.True(category.HasMatches));
@@ -45,7 +46,7 @@ public sealed class SettingsCategoriesTests
     [Fact]
     public void ASearchShowsWhatMatchesFromEveryCategory()
     {
-        Screen.SelectedCategory = Screen.Categories[4];
+        Screen.SelectedCategory = Screen.Categories[5];
 
         Screen.SearchText = "  FOLDER ";
 
@@ -53,7 +54,7 @@ public sealed class SettingsCategoriesTests
         Assert.Equal("Settings that match “FOLDER”", Screen.SearchHeading);
         // The archive folder, the mods' folders, the log folder.
         Assert.Equal(["LibraryFolder", "FolderPattern", "OldVersions", "Rescan", "Games", "About"], Shown());
-        Assert.Equal([false, true, false, false, true, true], Screen.Categories.Select(category => category.HasMatches));
+        Assert.Equal([false, true, false, false, false, true, true], Screen.Categories.Select(category => category.HasMatches));
         Assert.Null(Screen.NothingMatches);
     }
 
@@ -122,7 +123,7 @@ public sealed class SettingsCategoriesTests
     [Fact]
     public void BlankSearchesSearchNothing()
     {
-        Screen.SelectedCategory = Screen.Categories[5];
+        Screen.SelectedCategory = Screen.Categories[6];
 
         Screen.SearchText = " \t ";
 
@@ -172,6 +173,7 @@ public sealed class SettingsCategoriesTests
             ("Updates", Screen.UpdatesSection),
             ("Quota", Screen.QuotaSection),
             ("Links", Screen.LinksSection),
+            ("Agents", Screen.AgentsSection),
             ("Games", Screen.GamesSection),
             ("About", Screen.AboutSection),
         }.Where(section => section.Section.IsShown).Select(section => section.Name)];

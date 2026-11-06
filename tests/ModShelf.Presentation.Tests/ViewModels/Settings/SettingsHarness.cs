@@ -20,6 +20,7 @@ internal sealed class SettingsHarness
         Mover = new ScriptedLibraryMover(Settings);
         About = new AboutViewModel(new AppInfo("0.9.0", "a60d76b"), Diagnostics, Diagnostics, new RecordingClipboard(), new ScriptedFolders(), new RecordingLogger<AboutViewModel>());
         Links = new LinksViewModel(LinkHandlers, Navigation, UiThread, LinksLogger);
+        Agents = new AgentsViewModel(Settings, AgentServer, ClaudeDesktop, Clipboard, Dialogs, Navigation, UiThread, AgentsLogger);
         AppUpdate = new AppUpdateViewModel(Releases, Exit, UiThread, AppUpdateLogger);
         Pictures = new TestPictures(Settings);
         PicturesCard = new PicturesViewModel(Settings, Pictures.Pictures, PicturesLogger);
@@ -44,6 +45,7 @@ internal sealed class SettingsHarness
             PicturesCard,
             Pictures.Pictures,
             Links,
+            Agents,
             About,
             AppUpdate,
             Logger);
@@ -98,6 +100,16 @@ internal sealed class SettingsHarness
     public RecordingLogger<LinksViewModel> LinksLogger { get; } = new();
 
     public LinksViewModel Links { get; }
+
+    public ScriptedAgentServer AgentServer { get; } = new();
+
+    public ScriptedClaudeDesktop ClaudeDesktop { get; } = new();
+
+    public RecordingClipboard Clipboard { get; } = new();
+
+    public RecordingLogger<AgentsViewModel> AgentsLogger { get; } = new();
+
+    public AgentsViewModel Agents { get; }
 
     public AboutViewModel About { get; }
 

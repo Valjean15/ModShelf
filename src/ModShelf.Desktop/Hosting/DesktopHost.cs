@@ -60,6 +60,9 @@ internal static class DesktopHost
         // Other processes of this user, such as the CLI's MCP server, ask this app to change its queue (ADR 0040).
         builder.Services.AddQueueListener(folder);
 
+        // While agents may use ModShelf, the command line serves the MCP server's address beside the app (ADR 0080).
+        builder.Services.AddAgentServer(HostServices.AgentServerOptionsFrom(builder.Configuration));
+
         // What the app remembers for the user, such as where its window was, in ui-state.json beside the settings.
         builder.Services.AddUiStateFile(Path.Combine(folder, "ui-state.json"));
         builder.Services.AddUiState();

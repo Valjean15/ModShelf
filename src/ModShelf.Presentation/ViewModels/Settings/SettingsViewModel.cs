@@ -24,7 +24,8 @@ namespace ModShelf.Presentation.ViewModels.Settings;
 /// The settings, by category: General, whether the app is light or dark, what closing its window does, saved pictures
 /// and mod details, and how adult mods' pictures show; Library, where the library is, moving its files when it has
 /// some, how its folders are named, what happens to old versions, and rescanning it; Updates, how often to check for
-/// them and whether to say so; Links, which apps open the links websites hand downloads over with; Games, single games'
+/// them and whether to say so; Links, which apps open the links websites hand downloads over with; Agents, whether AI
+/// agents may use ModShelf, and connecting them; Games, single games'
 /// folder patterns; and About, this ModShelf, with its own updates. A search shows the settings that match from every
 /// category. Choices are saved as they're made, folder patterns when the user saves them, and each change shows the
 /// settings as stored after it. The theme is applied at start and as it's chosen. The screen's badge says a newer
@@ -89,6 +90,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
         PicturesViewModel pictures,
         ModPictures covers,
         LinksViewModel links,
+        AgentsViewModel agents,
         AboutViewModel about,
         AppUpdateViewModel appUpdate,
         ILogger<SettingsViewModel> logger)
@@ -111,6 +113,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(covers);
         ArgumentNullException.ThrowIfNull(links);
+        ArgumentNullException.ThrowIfNull(agents);
         ArgumentNullException.ThrowIfNull(about);
         ArgumentNullException.ThrowIfNull(appUpdate);
         ArgumentNullException.ThrowIfNull(logger);
@@ -138,6 +141,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
             new(PreviewScreen.Downloads, Strings.DownloadsTitle, null, ChoosePreviews),
         ];
         Links = links;
+        Agents = agents;
         About = about;
         AppUpdate = appUpdate;
         appUpdate.PropertyChanged += (_, changed) =>
@@ -176,6 +180,11 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
     /// Links from websites: which app opens the links each site hands its downloads over with.
     /// </summary>
     public LinksViewModel Links { get; }
+
+    /// <summary>
+    /// Whether AI agents may use ModShelf, the address the app serves them, and connecting them.
+    /// </summary>
+    public AgentsViewModel Agents { get; }
 
     /// <summary>
     /// About this ModShelf: its version, its log folder and its diagnostics report.
@@ -384,7 +393,8 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
 
     /// <summary>
     /// Reads the settings, shows them, and applies the theme; then the room saved pictures take; then asks whether the
-    /// system shows tray icons, and which apps open the sites' links; then, unless the settings say not to, looks for a
+    /// system shows tray icons, and which apps open the sites' links; serves the agents' address as the settings say;
+    /// then, unless the settings say not to, looks for a
     /// newer ModShelf, only to say so.
     /// </summary>
     public override async Task StartAsync(CancellationToken cancellationToken)
@@ -393,6 +403,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
         await Pictures.LoadAsync(cancellationToken);
         IsTrayAvailable = await _tray.IsAvailableAsync(cancellationToken);
         await Links.LoadAsync(cancellationToken);
+        await Agents.LoadAsync(cancellationToken);
 
         // Settings that can't be read leave the default, which is to look.
         if (_shown.CheckForAppUpdates ?? true)

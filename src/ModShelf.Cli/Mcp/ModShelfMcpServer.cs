@@ -10,8 +10,10 @@ using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
+using ModShelf.Application.Agents;
 using ModShelf.Application.Diagnostics;
 using ModShelf.Application.Downloads.Ports;
+using ModShelf.Application.Settings;
 using ModShelf.Cli.Commands;
 using ModShelf.Cli.Hosting;
 
@@ -84,26 +86,16 @@ internal static partial class ModShelfMcpServer
                 services.GetRequiredService<ILogger<McpQueue>>());
             await using (queue.ConfigureAwait(false))
             {
-                McpServerOptions options = new()
-                {
-                    ServerInfo = new Implementation
-                    {
-                        Name = "modshelf",
-                        Title = "ModShelf",
-                        Version = AppInfo.Of(typeof(ModShelfMcpServer).Assembly).Version,
-                    },
-                    ServerInstructions = Instructions,
-                    ToolCollection = Tools(services, queue),
-                };
-                options.Filters.Request.CallToolFilters.Add(ToolArguments.Explained);
+                McpServerOptions options = new();
+                Configure(options, services, queue);
 
-                StreamServerTransport transport = new(streams.Input, streams.Output, "modshelf", sdkLogging);
+                StreamServerTransport transport = new(streams.Input, streams.Output, AgentAddress.ServerName, sdkLogging);
                 await using (transport.ConfigureAwait(false))
                 {
                     McpServer server = McpServer.Create(transport, options, sdkLogging, services);
                     await using (server.ConfigureAwait(false))
                     {
-                        LogStarted(logger, options.ToolCollection.Count);
+                        LogStarted(logger, options.ToolCollection!.Count);
                         await server.RunAsync(cancellationToken).ConfigureAwait(false);
                         LogEnded(logger);
                     }
@@ -116,6 +108,29 @@ internal static partial class ModShelfMcpServer
         {
             await host.StopAsync(CancellationToken.None).ConfigureAwait(false);
         }
+    }
+
+    /// <summary>
+    /// The server's options, over standard input and output or at its address alike: what it says it is, its
+    /// instructions and tools, and the checks of each call, whether agents may use ModShelf first.
+    /// </summary>
+    internal static void Configure(McpServerOptions options, IServiceProvider services, McpQueue queue)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(services);
+
+        options.ServerInfo = new Implementation
+        {
+            Name = AgentAddress.ServerName,
+            Title = "ModShelf",
+            Version = AppInfo.Of(typeof(ModShelfMcpServer).Assembly).Version,
+        };
+        options.ServerInstructions = Instructions;
+        options.ToolCollection = Tools(services, queue);
+        options.Filters.Request.CallToolFilters.Add(AgentAccess.Checked(
+            services.GetRequiredService<ISettingsService>(),
+            services.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(AgentAccess).FullName!)));
+        options.Filters.Request.CallToolFilters.Add(ToolArguments.Explained);
     }
 
     /// <summary>

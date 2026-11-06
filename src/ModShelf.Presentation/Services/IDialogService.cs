@@ -58,4 +58,9 @@ public interface IDialogService
     /// or the user closes it.
     /// </summary>
     Task ShowFirstRunAsync(FirstRunViewModel setup, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Shows the MCP server's details, each to copy, until the user closes them.
+    /// </summary>
+    Task ShowAgentDetailsAsync(AgentDetailsViewModel details, CancellationToken cancellationToken);
 }

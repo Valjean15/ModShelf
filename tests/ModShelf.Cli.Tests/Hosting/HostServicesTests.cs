@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ModShelf.Application.Releases.Ports;
 using ModShelf.Hosting;
 using ModShelf.Platform;
+using ModShelf.Platform.Agents;
 using ModShelf.Platform.Links;
 using ModShelf.Testing;
 
@@ -80,5 +81,41 @@ public sealed class HostServicesTests
 
         Assert.Equal(PlatformServiceCollectionExtensions.DefaultDesktopApp, options.DesktopApp);
         Assert.Empty(options.Arguments);
+    }
+
+    [Fact]
+    public void AgentsAppsStartTheCommandLineOnThisLibraryWithoutItsSecrets()
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "ModShelf checklist");
+        IConfiguration configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                [HostServices.DatabasePathKey] = Path.Combine(folder, "library.db"),
+                [HostServices.SecretsFolderKey] = Path.Combine(folder, "Secrets"),
+                [HostServices.SecretScopeKey] = "ModShelf.Checklist",
+                [HostServices.NexusClientIdKey] = "a-client-id",
+                [HostServices.CommandLineKey] = Path.Combine("tools", "ModShelf.Cli"),
+            })
+            .Build();
+
+        AgentServerOptions options = HostServices.AgentServerOptionsFrom(configuration);
+
+        Assert.Equal(Path.GetFullPath(Path.Combine("tools", "ModShelf.Cli")), options.CommandLine);
+        Assert.Equal(
+            [
+                new("ModShelf__DatabasePath", Path.Combine(folder, "library.db")),
+                new("ModShelf__SecretScope", "ModShelf.Checklist"),
+                new("ModShelf__SecretsFolder", Path.Combine(folder, "Secrets")),
+            ],
+            options.Environment.OrderBy(variable => variable.Key, StringComparer.Ordinal));
+    }
+
+    [Fact]
+    public void ByDefaultAgentsAppsStartTheCommandLineBesideTheAppAsItIs()
+    {
+        AgentServerOptions options = HostServices.AgentServerOptionsFrom(new ConfigurationBuilder().Build());
+
+        Assert.Null(options.CommandLine);
+        Assert.Empty(options.Environment);
     }
 }

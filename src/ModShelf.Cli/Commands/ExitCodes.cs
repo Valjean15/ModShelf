@@ -19,6 +19,9 @@ internal static class ExitCodes
     /// <summary>The download waits to be started on the site, and the input ended without the link that does it.</summary>
     public const int Waiting = 3;
 
+    /// <summary>The MCP server's address can't be served: another app has its port.</summary>
+    public const int PortInUse = 4;
+
     /// <summary>
     /// Something went wrong that ModShelf didn't expect, such as a bug: said in a line, with the details in the log.
     /// EX_SOFTWARE, by the convention of BSD's sysexits.h.

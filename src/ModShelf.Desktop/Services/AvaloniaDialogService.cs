@@ -119,6 +119,14 @@ internal sealed class AvaloniaDialogService : IDialogService
         return Dispatcher.UIThread.InvokeAsync(() => ShowAsync(new FirstRunWindow { DataContext = setup }, () => true, cancellationToken));
     }
 
+    public Task ShowAgentDetailsAsync(AgentDetailsViewModel details, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(details);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Dispatcher.UIThread.InvokeAsync(() => ShowAsync(new AgentDetailsDialog { DataContext = details }, () => true, cancellationToken));
+    }
+
     private static Task<bool> ShowAsync(MessageDialogContent content, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(content.Title);

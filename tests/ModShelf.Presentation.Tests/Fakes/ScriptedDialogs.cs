@@ -149,6 +149,17 @@ internal sealed class ScriptedDialogs : IDialogService
     /// </summary>
     public Func<FirstRunViewModel, Task> InFirstRun { get; set; } = _ => Task.CompletedTask;
 
+    /// <summary>
+    /// The MCP server's details each time they were shown.
+    /// </summary>
+    public List<AgentDetailsViewModel> AgentDetails { get; } = [];
+
+    public Task ShowAgentDetailsAsync(AgentDetailsViewModel details, CancellationToken cancellationToken)
+    {
+        AgentDetails.Add(details);
+        return Task.CompletedTask;
+    }
+
     public async Task ShowFirstRunAsync(FirstRunViewModel setup, CancellationToken cancellationToken)
     {
         FirstRuns.Add(setup);

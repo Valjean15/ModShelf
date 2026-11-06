@@ -1,5 +1,6 @@
 using System.Globalization;
 
+using ModShelf.Application.Agents;
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
@@ -33,8 +34,10 @@ internal static class SettingChanges
     public const string AdultPictures = "pictures.adult";
     public const string DetailsMaxAge = "details.maxAge";
     public const string QuotaWarnBelow = "quota.warnBelow";
+    public const string AgentsEnabled = "agents.enabled";
+    public const string AgentsPort = "agents.port";
     public const string GamesPrefix = "games.";
-    public const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<site>/<game>, {OldVersions}, {Interval}, {Notify}, {Theme}, {CloseToTray}, {SetupDone}, {CheckForAppUpdates}, {PreviewsPrefix}library, {PreviewsPrefix}updates, {PreviewsPrefix}browse, {PreviewsPrefix}downloads, {PicturesMaxSize}, {AdultPictures}, {DetailsMaxAge}, {QuotaWarnBelow}, "
+    public const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<site>/<game>, {OldVersions}, {Interval}, {Notify}, {Theme}, {CloseToTray}, {SetupDone}, {CheckForAppUpdates}, {PreviewsPrefix}library, {PreviewsPrefix}updates, {PreviewsPrefix}browse, {PreviewsPrefix}downloads, {PicturesMaxSize}, {AdultPictures}, {DetailsMaxAge}, {QuotaWarnBelow}, {AgentsEnabled}, {AgentsPort}, "
         + $"{GamesPrefix}<site>/<game>.{GameRoot}, {GamesPrefix}<site>/<game>.{GameFolders}, {GamesPrefix}<site>/<game>.{GameOldVersions}, {GamesPrefix}<site>/<game>.{GameCheckUpdates}, {GamesPrefix}<site>/<game>.{GameInterval}, {GamesPrefix}<site>/<game>.{GameNotify}, {GamesPrefix}<site>/<game>.{GamePreviews}, {GamesPrefix}<site>/<game>.{GameHidden}, "
         + $"{GamesPrefix}<site>/<game>.{BrowseSort}, {GamesPrefix}<site>/<game>.{BrowseDirection}, {GamesPrefix}<site>/<game>.{BrowseWindow}, {GamesPrefix}<site>/<game>.{BrowsePageSize}, "
         + "such as games.nexus/stardewvalley.notify; a game's key alone, as games.stardewvalley.notify, does while only one site's game has it";
@@ -66,7 +69,7 @@ internal static class SettingChanges
         + "library.oldVersions; minutes, hours or days, such as 30m, 6h or 1d, for updates.interval and details.maxAge; true or false for "
         + "updates.notify, window.closeToTray, setup.done and app.checkForUpdates; system, light or dark for appearance.theme; "
         + "off, thumbnails or cards for previews.<screen> and games.<site>/<game>.previews; a number of megabytes from 64 to 8192 for pictures.maxSize; "
-        + "hidden, blurred or shown for pictures.adult; a percent from 0, for never, to 90 for quota.warnBelow; for a game of its own, as every game's for games.<site>/<game>.oldVersions, "
+        + "hidden, blurred or shown for pictures.adult; a percent from 0, for never, to 90 for quota.warnBelow; true or false for agents.enabled; a port from 1024 to 65535 for agents.port; for a game of its own, as every game's for games.<site>/<game>.oldVersions, "
         + "games.<site>/<game>.updateInterval and games.<site>/<game>.notify, true or false for games.<site>/<game>.checkUpdates and games.<site>/<game>.hidden, "
         + "relevance, endorsements, downloads, updated, newest, name, size or uniquedownloads for games.<site>/<game>.browse.sort, ascending or descending "
         + "for games.<site>/<game>.browse.direction, 1d, 7d or 30d for games.<site>/<game>.browse.window, and 20, 50 or 100 for games.<site>/<game>.browse.pageSize; "
@@ -85,11 +88,22 @@ internal static class SettingChanges
             || setting.Equals(AdultPictures, StringComparison.OrdinalIgnoreCase)
             || setting.Equals(DetailsMaxAge, StringComparison.OrdinalIgnoreCase)
             || setting.Equals(QuotaWarnBelow, StringComparison.OrdinalIgnoreCase)
+            || IsAgentSetting(setting)
             || setting.Equals(CloseToTray, StringComparison.OrdinalIgnoreCase)
             || setting.Equals(CheckForAppUpdates, StringComparison.OrdinalIgnoreCase)
             || setting.Equals(OldVersions, StringComparison.OrdinalIgnoreCase)
             || (setting.StartsWith(GamePrefix, StringComparison.Ordinal) && !string.IsNullOrWhiteSpace(name.Trim()[GamePrefix.Length..]))
             || GameSettingOf(name) is not null;
+    }
+
+    /// <summary>
+    /// Whether <paramref name="name"/> is one of the settings of agents' access, <see cref="AgentsEnabled"/> and
+    /// <see cref="AgentsPort"/>, which are the user's to change, never an agent's.
+    /// </summary>
+    public static bool IsAgentSetting(string name)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        return name.Trim().Equals(AgentsEnabled, StringComparison.OrdinalIgnoreCase) || name.Trim().Equals(AgentsPort, StringComparison.OrdinalIgnoreCase);
     }
 
     public static bool IsLibraryRoot(string name)
@@ -140,6 +154,8 @@ internal static class SettingChanges
             Of(AdultPictures, stored.AdultPictures is { } adult ? Name(adult) : null, Name(Application.Settings.AdultPictures.Blurred)),
             Of(DetailsMaxAge, stored.DetailsMaxAge is { } age ? UpdateInterval.Format(age) : null, UpdateInterval.Format(AppSettings.DefaultDetailsMaxAge)),
             Of(QuotaWarnBelow, stored.QuotaWarnBelow?.ToString(CultureInfo.InvariantCulture), AppSettings.DefaultQuotaWarnBelow.ToString(CultureInfo.InvariantCulture)),
+            Of(AgentsEnabled, stored.AgentsEnabled is { } agents ? Text(agents) : null, Text(false)),
+            Of(AgentsPort, stored.AgentsPort?.ToString(CultureInfo.InvariantCulture), AppSettings.DefaultAgentsPort.ToString(CultureInfo.InvariantCulture)),
             .. stored.Games
                 .OrderBy(game => game.Key.ToString(), StringComparer.OrdinalIgnoreCase)
                 .SelectMany(game => GameValues(game.Key, game.Value)),
@@ -271,6 +287,25 @@ internal static class SettingChanges
             return percent is null
                 ? $"{QuotaWarnBelow} is back to its default, {now.ToString(CultureInfo.InvariantCulture)}: {what}"
                 : $"{QuotaWarnBelow} is now {now.ToString(CultureInfo.InvariantCulture)}: {what}";
+        }
+
+        if (setting.Equals(AgentsEnabled, StringComparison.OrdinalIgnoreCase))
+        {
+            bool? enabled = value is null ? null : ParseBool(value);
+            await settings.SetAgentsEnabledAsync(enabled, cancellationToken).ConfigureAwait(false);
+            return enabled ?? false
+                ? $"{AgentsEnabled} is now true: AI agents may use ModShelf through its MCP server."
+                : $"{AgentsEnabled} is {(enabled is null ? "back to its default, false" : "now false")}: ModShelf's MCP server answers every agent's call saying agents are off.";
+        }
+
+        if (setting.Equals(AgentsPort, StringComparison.OrdinalIgnoreCase))
+        {
+            int? port = value is null ? null : ParsePort(value);
+            await settings.SetAgentsPortAsync(port, cancellationToken).ConfigureAwait(false);
+            string address = AgentAddress.Of(port ?? AppSettings.DefaultAgentsPort).ToString();
+            return port is null
+                ? $"{AgentsPort} is back to its default, {AppSettings.DefaultAgentsPort.ToString(CultureInfo.InvariantCulture)}: while agents may use ModShelf, the desktop app serves its MCP server at {address}."
+                : $"{AgentsPort} is now {port.Value.ToString(CultureInfo.InvariantCulture)}: while agents may use ModShelf, the desktop app serves its MCP server at {address}.";
         }
 
         if (setting.Equals(CheckForAppUpdates, StringComparison.OrdinalIgnoreCase))
@@ -671,6 +706,13 @@ internal static class SettingChanges
             && percent is >= 0 and <= AppSettings.MaxQuotaWarnBelow
             ? percent
             : throw new ArgumentException($"'{value}' isn't a percent from 0 to {AppSettings.MaxQuotaWarnBelow}.", nameof(value));
+
+    /// <exception cref="ArgumentException"><paramref name="value"/> isn't a port within the limits.</exception>
+    private static int ParsePort(string value)
+        => int.TryParse(value.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out int port)
+            && port is >= AppSettings.MinAgentsPort and <= AppSettings.MaxAgentsPort
+            ? port
+            : throw new ArgumentException($"'{value}' isn't a port from {AppSettings.MinAgentsPort} to {AppSettings.MaxAgentsPort}.", nameof(value));
 
     /// <exception cref="ArgumentException"><paramref name="value"/> isn't a whole number of megabytes within the limits.</exception>
     private static int ParseMegabytes(string value)

@@ -9,6 +9,7 @@ public enum SettingsCategory
     Library,
     Updates,
     Links,
+    Agents,
     Games,
     About,
 }

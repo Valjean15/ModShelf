@@ -3343,4 +3343,244 @@
     <value>Go on</value>
     <comment>The button that starts a check or download that may use up a site's requests.</comment>
   </data>
+  <data name="SettingsCategoryAgents" xml:space="preserve">
+    <value>Agents</value>
+    <comment>A category of the Settings screen: AI agents and the MCP server.</comment>
+  </data>
+  <data name="AgentsHeading" xml:space="preserve">
+    <value>AI agents</value>
+    <comment>Heading of the Settings card about letting AI agents use ModShelf.</comment>
+  </data>
+  <data name="AgentsAllow" xml:space="preserve">
+    <value>Allow agents to use ModShelf</value>
+    <comment>The toggle that lets AI agents use ModShelf through its MCP server.</comment>
+  </data>
+  <data name="AgentsAllowNote" xml:space="preserve">
+    <value>Through ModShelf's MCP server, an AI agent such as Claude can see the library, its updates and the downloads, download files into the library, and change the settings. It can't link accounts, delete files or move the library. While this is off, the server answers every call saying agents are off.</value>
+    <comment>Under the Allow agents toggle.</comment>
+  </data>
+  <data name="AgentsConnectHeading" xml:space="preserve">
+    <value>Connect your agent</value>
+    <comment>Heading of the part of the Agents card that connects an agent to ModShelf.</comment>
+  </data>
+  <data name="AgentsConnectNote" xml:space="preserve">
+    <value>Copy a prompt and paste it into your agent's chat, and the agent adds ModShelf to its app; or see the details to add it by hand.</value>
+    <comment>Under Connect your agent.</comment>
+  </data>
+  <data name="AgentsCopyPrompt" xml:space="preserve">
+    <value>Copy prompt</value>
+    <comment>Button: puts a prompt for an agent on the clipboard.</comment>
+  </data>
+  <data name="AgentsViewDetails" xml:space="preserve">
+    <value>View details</value>
+    <comment>Button: shows the MCP server details, each to copy.</comment>
+  </data>
+  <data name="AgentsAddToClaudeDesktop" xml:space="preserve">
+    <value>Add to Claude Desktop…</value>
+    <comment>Button: adds ModShelf to Claude Desktop configuration, after asking.</comment>
+  </data>
+  <data name="AgentsCommandLabel" xml:space="preserve">
+    <value>Command</value>
+    <comment>Label of the command an agent app starts.</comment>
+  </data>
+  <data name="AgentsAddressHeading" xml:space="preserve">
+    <value>Address</value>
+    <comment>Heading of the part of the Agents card about the address the app serves.</comment>
+  </data>
+  <data name="AgentsAddressNote" xml:space="preserve">
+    <value>For agents' apps that reach servers by address. ModShelf serves it while it runs and agents are allowed, to the apps on this computer alone.</value>
+    <comment>Under the Address heading.</comment>
+  </data>
+  <data name="AgentsPortLabel" xml:space="preserve">
+    <value>Port</value>
+    <comment>Label of the box for the address port.</comment>
+  </data>
+  <data name="AgentsPortSave" xml:space="preserve">
+    <value>Save</value>
+    <comment>Button: saves the port typed.</comment>
+  </data>
+  <data name="AgentsStatusOff" xml:space="preserve">
+    <value>Not served: agents are off.</value>
+    <comment>The address status while agents are off.</comment>
+  </data>
+  <data name="AgentsStatusStarting" xml:space="preserve">
+    <value>Starting…</value>
+    <comment>The address status while it starts.</comment>
+  </data>
+  <data name="AgentsStatusRunning" xml:space="preserve">
+    <value>Served at {0} while ModShelf runs.</value>
+    <comment>The address status while served. {0}: the address.</comment>
+  </data>
+  <data name="AgentsStatusPortInUse" xml:space="preserve">
+    <value>Port {0} is in use by another app. Choose another port, then Save.</value>
+    <comment>The address status when the port is taken. {0}: the port.</comment>
+  </data>
+  <data name="AgentsStatusNoCommand" xml:space="preserve">
+    <value>Can't be served: the command line, ModShelf.Cli, isn't beside the app.</value>
+    <comment>The address status when the command line is missing.</comment>
+  </data>
+  <data name="AgentsStatusEnded" xml:space="preserve">
+    <value>Stopped, with exit code {0}; the log says why. Turn agents off and on to try again.</value>
+    <comment>The address status when it stopped. {0}: the exit code.</comment>
+  </data>
+  <data name="AgentsStatusSlow" xml:space="preserve">
+    <value>Didn't start in time; the log says why. Turn agents off and on to try again.</value>
+    <comment>The address status when it never started.</comment>
+  </data>
+  <data name="AgentsNoCommand" xml:space="preserve">
+    <value>Not found: the command line, ModShelf.Cli, isn't beside the app at a path that lasts, as in an AppImage. Agents' apps can use the address.</value>
+    <comment>Shown in place of the command when there is none.</comment>
+  </data>
+  <data name="AgentsPortInvalid" xml:space="preserve">
+    <value>The port can be from {0} to {1}.</value>
+    <comment>When the port typed is out of range. {0}, {1}: the lowest and highest.</comment>
+  </data>
+  <data name="AgentsCantSave" xml:space="preserve">
+    <value>The change couldn't be saved: {0}</value>
+    <comment>When a change of the Agents settings fails. {0}: why.</comment>
+  </data>
+  <data name="AgentsPromptCopied" xml:space="preserve">
+    <value>The prompt is copied: paste it into your agent's chat.</value>
+    <comment>After Copy prompt.</comment>
+  </data>
+  <data name="AgentsPromptCopiedWhileOff" xml:space="preserve">
+    <value>The prompt is copied: paste it into your agent's chat. Turn on Allow agents to use ModShelf too, or its calls are refused.</value>
+    <comment>After Copy prompt while agents are off.</comment>
+  </data>
+  <data name="AgentsPromptCommand" xml:space="preserve">
+    <value>Add a local MCP server named "{0}" to my user-level MCP configuration on this PC. It starts the command "{1}" with the argument "{2}". If you can only add servers by address, add a Streamable HTTP MCP server named "{0}" at {3} instead, which works while the ModShelf app runs. If you cannot configure MCP servers directly, show me where to add it manually.</value>
+    <comment>The prompt for an agent, in its own words for agents. {0}: the server name; {1}: the command; {2}: its arguments; {3}: the address.</comment>
+  </data>
+  <data name="AgentsPromptCommandWithEnvironment" xml:space="preserve">
+    <value>Add a local MCP server named "{0}" to my user-level MCP configuration on this PC. It starts the command "{1}" with the argument "{2}" and these environment variables: {4}. If you can only add servers by address, add a Streamable HTTP MCP server named "{0}" at {3} instead, which works while the ModShelf app runs. If you cannot configure MCP servers directly, show me where to add it manually.</value>
+    <comment>The prompt for an agent, with environment variables. {4}: name=value pairs, comma separated.</comment>
+  </data>
+  <data name="AgentsPromptAddress" xml:space="preserve">
+    <value>Add a Streamable HTTP MCP server named "{0}" at {1} to my user-level MCP configuration on this PC. It works while the ModShelf app runs. If you cannot configure MCP servers directly, show me where to add it manually.</value>
+    <comment>The prompt for an agent when there is no command. {0}: the server name; {1}: the address.</comment>
+  </data>
+  <data name="AgentsDetailsTitle" xml:space="preserve">
+    <value>ModShelf's MCP server</value>
+    <comment>Title of the MCP server details dialog.</comment>
+  </data>
+  <data name="AgentsDetailName" xml:space="preserve">
+    <value>Name</value>
+    <comment>Detail: the server name.</comment>
+  </data>
+  <data name="AgentsDetailCommand" xml:space="preserve">
+    <value>Command</value>
+    <comment>Detail: the command an agent app starts.</comment>
+  </data>
+  <data name="AgentsDetailArguments" xml:space="preserve">
+    <value>Arguments</value>
+    <comment>Detail: its arguments.</comment>
+  </data>
+  <data name="AgentsDetailEnvironment" xml:space="preserve">
+    <value>Environment variables</value>
+    <comment>Detail: the environment variables it needs.</comment>
+  </data>
+  <data name="AgentsDetailAddress" xml:space="preserve">
+    <value>Address (Streamable HTTP)</value>
+    <comment>Detail: the address.</comment>
+  </data>
+  <data name="AgentsDetailClaudeDesktop" xml:space="preserve">
+    <value>Claude Desktop: claude_desktop_config.json (Settings, Developer, Edit Config)</value>
+    <comment>Detail: the JSON for Claude Desktop.</comment>
+  </data>
+  <data name="AgentsDetailClaudeCode" xml:space="preserve">
+    <value>Claude Code: with the command</value>
+    <comment>Detail: the claude mcp add command for the command.</comment>
+  </data>
+  <data name="AgentsDetailClaudeCodeAddress" xml:space="preserve">
+    <value>Claude Code: with the address</value>
+    <comment>Detail: the claude mcp add command for the address.</comment>
+  </data>
+  <data name="AgentsDetailsNoCommand" xml:space="preserve">
+    <value>There's no command for agents' apps to start: the command line, ModShelf.Cli, isn't beside the app at a path that lasts. Use the address.</value>
+    <comment>In the details dialog when there is no command.</comment>
+  </data>
+  <data name="AgentsDetailsClose" xml:space="preserve">
+    <value>Close</value>
+    <comment>Button: closes the details dialog.</comment>
+  </data>
+  <data name="AgentsCopy" xml:space="preserve">
+    <value>Copy</value>
+    <comment>Button: copies a detail.</comment>
+  </data>
+  <data name="AgentsCopied" xml:space="preserve">
+    <value>Copied</value>
+    <comment>The Copy button once its detail is copied.</comment>
+  </data>
+  <data name="AgentsClaudeDesktopHasIt" xml:space="preserve">
+    <value>Claude Desktop has ModShelf.</value>
+    <comment>Under Add to Claude Desktop, when it has it.</comment>
+  </data>
+  <data name="AgentsClaudeDesktopHasntIt" xml:space="preserve">
+    <value>Claude Desktop doesn't have ModShelf yet.</value>
+    <comment>Under Add to Claude Desktop, when it does not.</comment>
+  </data>
+  <data name="AgentsClaudeDesktopHasOther" xml:space="preserve">
+    <value>Claude Desktop has a server named modshelf that starts something else.</value>
+    <comment>Under Add to Claude Desktop, when another server has the name.</comment>
+  </data>
+  <data name="AgentsClaudeDesktopNotFound" xml:space="preserve">
+    <value>Claude Desktop wasn't found on this computer. Start it once, then come back.</value>
+    <comment>When Claude Desktop is not found.</comment>
+  </data>
+  <data name="AgentsClaudeDesktopNoCommand" xml:space="preserve">
+    <value>Claude Desktop starts its servers by command, and there's none here: the command line isn't beside the app.</value>
+    <comment>Under Add to Claude Desktop, when there is no command.</comment>
+  </data>
+  <data name="AgentsClaudeDesktopUnreadable" xml:space="preserve">
+    <value>Claude Desktop's configuration can't be read: {0}</value>
+    <comment>Under Add to Claude Desktop, when its file is broken. {0}: why.</comment>
+  </data>
+  <data name="AgentsClaudeDesktopCantTitle" xml:space="preserve">
+    <value>Can't add ModShelf to Claude Desktop</value>
+    <comment>Title of a message when adding fails.</comment>
+  </data>
+  <data name="AgentsClaudeDesktopAddTitle" xml:space="preserve">
+    <value>Add ModShelf to Claude Desktop?</value>
+    <comment>Title of the question before adding.</comment>
+  </data>
+  <data name="AgentsClaudeDesktopAddMessage" xml:space="preserve">
+    <value>ModShelf adds its MCP server to Claude Desktop's configuration, {0}, keeping its other servers and settings, and keeps a copy of the file as it was, {1}.</value>
+    <comment>The question before adding. {0}: the file; {1}: the copy.</comment>
+  </data>
+  <data name="AgentsClaudeDesktopAddConfirm" xml:space="preserve">
+    <value>Add</value>
+    <comment>Confirms adding.</comment>
+  </data>
+  <data name="AgentsClaudeDesktopReplaceTitle" xml:space="preserve">
+    <value>Replace modshelf in Claude Desktop?</value>
+    <comment>Title of the question before replacing.</comment>
+  </data>
+  <data name="AgentsClaudeDesktopReplaceMessage" xml:space="preserve">
+    <value>Claude Desktop's configuration, {0}, has a server named modshelf that starts something else. ModShelf replaces it with its own, keeping the other servers and settings, and keeps a copy of the file as it was, {1}.</value>
+    <comment>The question before replacing. {0}: the file; {1}: the copy.</comment>
+  </data>
+  <data name="AgentsClaudeDesktopReplaceConfirm" xml:space="preserve">
+    <value>Replace</value>
+    <comment>Confirms replacing.</comment>
+  </data>
+  <data name="AgentsClaudeDesktopSameTitle" xml:space="preserve">
+    <value>Claude Desktop has ModShelf</value>
+    <comment>Title when Claude Desktop has it already.</comment>
+  </data>
+  <data name="AgentsClaudeDesktopSameMessage" xml:space="preserve">
+    <value>Claude Desktop's configuration has ModShelf's MCP server already. If its tools don't show in Claude, quit Claude Desktop completely, from its menu or the tray, and start it again.</value>
+    <comment>When Claude Desktop has it already.</comment>
+  </data>
+  <data name="AgentsClaudeDesktopAddedTitle" xml:space="preserve">
+    <value>Added to Claude Desktop</value>
+    <comment>Title after adding.</comment>
+  </data>
+  <data name="AgentsClaudeDesktopAdded" xml:space="preserve">
+    <value>Quit Claude Desktop completely, from its menu or the tray, and start it again: ModShelf's tools are then in its chats.</value>
+    <comment>After adding.</comment>
+  </data>
+  <data name="AgentsClaudeDesktopAddedWhileOff" xml:space="preserve">
+    <value>Quit Claude Desktop completely, from its menu or the tray, and start it again: ModShelf's tools are then in its chats. Turn on Allow agents to use ModShelf too, or their calls are refused.</value>
+    <comment>After adding while agents are off.</comment>
+  </data>
 </root>

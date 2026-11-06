@@ -84,9 +84,25 @@ internal sealed class InProcessCli : IAsyncDisposable
     public CliRun Start(string[] arguments, TextReader input) => new(arguments, input, BuildHost);
 
     /// <summary>
+    /// Starts <c>mcp</c>, with a client connected to it, as an agent's app starts it, agents allowed, as the user allows
+    /// them.
+    /// </summary>
+    public Task<McpSession> StartMcpAsync(CancellationToken cancellationToken) => StartMcpAsync(agentsAllowed: true, cancellationToken);
+
+    /// <summary>
     /// Starts <c>mcp</c>, with a client connected to it, as an agent's app starts it.
     /// </summary>
-    public Task<McpSession> StartMcpAsync(CancellationToken cancellationToken) => McpSession.StartAsync(BuildHost, cancellationToken);
+    /// <param name="agentsAllowed">Whether the user allowed agents first (<c>agents.enabled</c>); otherwise it's as it was.</param>
+    public async Task<McpSession> StartMcpAsync(bool agentsAllowed, CancellationToken cancellationToken)
+    {
+        if (agentsAllowed)
+        {
+            CliResult allowed = await RunAsync(["settings", "set", "agents.enabled", "true"], cancellationToken).ConfigureAwait(false);
+            Assert.True(allowed.ExitCode == 0, allowed.Errors);
+        }
+
+        return await McpSession.StartAsync(BuildHost, cancellationToken).ConfigureAwait(false);
+    }
 
     /// <summary>
     /// Starts the app as the CLI builds it, without a command, runs <paramref name="work"/>, and stops the app again:

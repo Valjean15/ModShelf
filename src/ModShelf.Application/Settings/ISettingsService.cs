@@ -164,4 +164,18 @@ public interface ISettingsService
     /// <paramref name="percent"/> is below 0 or above <see cref="AppSettings.MaxQuotaWarnBelow"/>.
     /// </exception>
     Task SetQuotaWarnBelowAsync(int? percent, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets whether AI agents may use ModShelf through its MCP server, or sets it back to no with null.
+    /// </summary>
+    Task SetAgentsEnabledAsync(bool? enabled, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets the port of the address the desktop app serves the MCP server at, or sets it back to
+    /// <see cref="AppSettings.DefaultAgentsPort"/> with null.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="port"/> is below <see cref="AppSettings.MinAgentsPort"/> or above <see cref="AppSettings.MaxAgentsPort"/>.
+    /// </exception>
+    Task SetAgentsPortAsync(int? port, CancellationToken cancellationToken);
 }

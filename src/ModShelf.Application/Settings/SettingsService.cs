@@ -224,6 +224,22 @@ internal sealed class SettingsService : ISettingsService, IDisposable
         return ChangeAsync((settings, _) => Task.FromResult(settings with { QuotaWarnBelow = percent }), cancellationToken);
     }
 
+    public Task SetAgentsEnabledAsync(bool? enabled, CancellationToken cancellationToken)
+        => ChangeAsync((settings, _) => Task.FromResult(settings with { AgentsEnabled = enabled }), cancellationToken);
+
+    public Task SetAgentsPortAsync(int? port, CancellationToken cancellationToken)
+    {
+        if (port is < AppSettings.MinAgentsPort or > AppSettings.MaxAgentsPort)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(port),
+                port,
+                $"The port can be from {AppSettings.MinAgentsPort} to {AppSettings.MaxAgentsPort}.");
+        }
+
+        return ChangeAsync((settings, _) => Task.FromResult(settings with { AgentsPort = port }), cancellationToken);
+    }
+
     public Task SetAdultPicturesAsync(AdultPictures? pictures, CancellationToken cancellationToken)
     {
         if (pictures is { } value && !Enum.IsDefined(value))

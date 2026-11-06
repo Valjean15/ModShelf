@@ -383,6 +383,25 @@ public sealed class JsonSettingsStoreTests : IDisposable
     }
 
     [Fact]
+    public async Task KeepsAgentsAccessAndItsPortAndTheirDefaultsLeaveTheFile()
+    {
+        await WriteAsync("""{ "agents": { "later": true } }""");
+
+        await Store().SaveAsync(new AppSettings { AgentsEnabled = true, AgentsPort = 50000 }, Cancellation);
+        AppSettings loaded = await Store().LoadAsync(Cancellation);
+        string allowed = await File.ReadAllTextAsync(FilePath, Cancellation);
+        await Store().SaveAsync(new AppSettings(), Cancellation);
+        string reset = await File.ReadAllTextAsync(FilePath, Cancellation);
+
+        Assert.Equal((true, 50000), (loaded.AgentsEnabled, loaded.AgentsPort));
+        Assert.Contains("\"enabled\": true", allowed, StringComparison.Ordinal);
+        Assert.Contains("\"port\": 50000", allowed, StringComparison.Ordinal);
+        Assert.DoesNotContain("enabled", reset, StringComparison.Ordinal);
+        Assert.DoesNotContain("port", reset, StringComparison.Ordinal);
+        Assert.Contains("\"later\": true", reset, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task KeepsTheQuotaWarningAndItsDefaultLeavesTheFile()
     {
         await WriteAsync("""{ "quota": { "warnBelow": 10, "later": true } }""");
@@ -440,6 +459,10 @@ public sealed class JsonSettingsStoreTests : IDisposable
     [InlineData("""{ "details": { "maxAge": "a year" } }""", "'a year' isn't an interval.")]
     [InlineData("""{ "quota": { "warnBelow": 91 } }""", "quota.warnBelow must be a percent from 0 to 90.")]
     [InlineData("""{ "quota": { "warnBelow": "10%" } }""", "quota.warnBelow must be a percent from 0 to 90.")]
+    [InlineData("""{ "agents": { "enabled": "yes" } }""", "agents.enabled must be true or false.")]
+    [InlineData("""{ "agents": { "port": 80 } }""", "agents.port must be a port from 1024 to 65535.")]
+    [InlineData("""{ "agents": { "port": 65536 } }""", "agents.port must be a port from 1024 to 65535.")]
+    [InlineData("""{ "agents": { "port": "47823" } }""", "agents.port must be a port from 1024 to 65535.")]
     public async Task SaysWhenAPreviewPictureOrDetailsSettingIsWrong(string content, string message)
     {
         await WriteAsync(content);

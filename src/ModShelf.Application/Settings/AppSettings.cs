@@ -37,6 +37,22 @@ public sealed record AppSettings
     public const int MaxQuotaWarnBelow = 90;
 
     /// <summary>
+    /// The port of the address agents reach ModShelf's MCP server at, on this computer alone, when
+    /// <see cref="AgentsPort"/> isn't set.
+    /// </summary>
+    public const int DefaultAgentsPort = 47823;
+
+    /// <summary>
+    /// The lowest port <see cref="AgentsPort"/> can be: below it, ports are the system's.
+    /// </summary>
+    public const int MinAgentsPort = 1024;
+
+    /// <summary>
+    /// The highest port <see cref="AgentsPort"/> can be.
+    /// </summary>
+    public const int MaxAgentsPort = 65535;
+
+    /// <summary>
     /// How long saved mod details count as current when <see cref="DetailsMaxAge"/> isn't set.
     /// </summary>
     public static TimeSpan DefaultDetailsMaxAge { get; } = TimeSpan.FromDays(1);
@@ -126,6 +142,18 @@ public sealed record AppSettings
     /// low, in percent from 0, for never, to <see cref="MaxQuotaWarnBelow"/>; null for <see cref="DefaultQuotaWarnBelow"/>.
     /// </summary>
     public int? QuotaWarnBelow { get; init; }
+
+    /// <summary>
+    /// Whether AI agents may use ModShelf through its MCP server, which the user turns on; null for no. While it's off, the
+    /// server answers every call saying so, and the desktop app doesn't serve the address.
+    /// </summary>
+    public bool? AgentsEnabled { get; init; }
+
+    /// <summary>
+    /// The port of the address the desktop app serves the MCP server at while agents may use ModShelf, from
+    /// <see cref="MinAgentsPort"/> to <see cref="MaxAgentsPort"/>; null for <see cref="DefaultAgentsPort"/>.
+    /// </summary>
+    public int? AgentsPort { get; init; }
 
     /// <summary>
     /// The previews <paramref name="screen"/> shows: as set, or its default, thumbnails on the Library screen, cards on

@@ -126,6 +126,9 @@ public sealed class McpCommandProcessTests : IDisposable
         start.Environment["ModShelf__SecretsFolder"] = Path.Combine(_folder.Path, "Secrets");
         start.Environment["ModShelf__SecretScope"] = string.Create(CultureInfo.InvariantCulture, $"ModShelf.Tests.{Guid.NewGuid():N}");
 
+        // As the user allows agents.
+        File.WriteAllText(Path.Combine(_folder.Path, "settings.json"), """{ "agents": { "enabled": true } }""");
+
         Process server = new() { StartInfo = start };
         server.ErrorDataReceived += (_, line) =>
         {

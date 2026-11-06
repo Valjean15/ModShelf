@@ -1,0 +1,55 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ModShelf.Presentation.ViewModels.Settings"
+        xmlns:res="using:ModShelf.Presentation.Resources"
+        x:Class="ModShelf.Desktop.Views.Dialogs.AgentDetailsDialog"
+        x:DataType="vm:AgentDetailsViewModel"
+        Title="{x:Static res:Strings.AgentsDetailsTitle}"
+        Width="640"
+        MaxHeight="720"
+        Classes="dialog">
+
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Bottom" Classes="dialogButtons">
+            <Button Classes="accent" IsDefault="True" IsCancel="True" Content="{x:Static res:Strings.AgentsDetailsClose}" Click="OnClose" />
+        </StackPanel>
+        <TextBlock DockPanel.Dock="Top" Classes="dialogTitle" Text="{x:Static res:Strings.AgentsDetailsTitle}" />
+        <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,12">
+            <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding Status}" />
+            <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding NoCommand}" IsVisible="{Binding NoCommand, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        </StackPanel>
+
+        <!-- Each detail: its label, then its value to select or copy, code in the monospaced font. -->
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl ItemsSource="{Binding Details}" Margin="0,0,16,0">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="14" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:AgentDetail">
+                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="4">
+                            <TextBlock Classes="label" Text="{Binding Label}" TextWrapping="Wrap" />
+                            <SelectableTextBlock Grid.Row="1"
+                                                 FontFamily="{DynamicResource ShelfMonoFont}"
+                                                 FontSize="13"
+                                                 TextWrapping="Wrap"
+                                                 Text="{Binding Value}" />
+                            <Button Grid.Column="1"
+                                    Grid.RowSpan="2"
+                                    VerticalAlignment="Top"
+                                    Command="{Binding CopyCommand}"
+                                    AutomationProperties.Name="{Binding Label}">
+                                <Panel>
+                                    <TextBlock Text="{x:Static res:Strings.AgentsCopy}" IsVisible="{Binding !IsCopied}" />
+                                    <TextBlock Text="{x:Static res:Strings.AgentsCopied}" IsVisible="{Binding IsCopied}" />
+                                </Panel>
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
+</Window>

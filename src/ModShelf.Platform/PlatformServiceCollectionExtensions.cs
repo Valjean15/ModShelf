@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Accounts.Ports;
+using ModShelf.Application.Agents.Ports;
 using ModShelf.Application.Desktop.Ports;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Downloads.Ports;
@@ -9,6 +10,7 @@ using ModShelf.Application.Links.Ports;
 using ModShelf.Application.Notifications.Ports;
 using ModShelf.Application.Releases.Ports;
 using ModShelf.Application.Settings.Ports;
+using ModShelf.Platform.Agents;
 using ModShelf.Platform.Browser;
 using ModShelf.Platform.Folders;
 using ModShelf.Platform.Instances;
@@ -154,6 +156,29 @@ public static class PlatformServiceCollectionExtensions
     /// <summary>
     /// Registers the desktop app's <see cref="ITrayHost"/>, which says whether this system shows tray icons now.
     /// </summary>
+    /// <summary>
+    /// Registers the MCP server the desktop app offers agents (<see cref="IAgentServer"/>): the command line's command, and
+    /// its address, which it serves while agents may use ModShelf; and Claude Desktop's configuration, to add the server
+    /// to (<see cref="IClaudeDesktopConfig"/>).
+    /// </summary>
+    public static IServiceCollection AddAgentServer(this IServiceCollection services, AgentServerOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(options);
+
+        services.AddSingleton<IAgentServer>(provider => new AgentServerProcess(
+            CommandLinePath.Find(options.CommandLine, AppContext.BaseDirectory, File.Exists),
+
+            // An AppImage's files are where the system mounts it while it runs, somewhere new each time.
+            lasting: options.CommandLine is not null || string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPIMAGE")),
+            options.Environment,
+            new ProcessAgentServerLauncher(),
+            provider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(AgentServerProcess).FullName!)));
+        services.AddSingleton<IClaudeDesktopConfig>(_ => new ClaudeDesktopConfigFile(ClaudeDesktopFolder.ForThisSystem()));
+
+        return services;
+    }
+
     public static IServiceCollection AddTrayHost(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);

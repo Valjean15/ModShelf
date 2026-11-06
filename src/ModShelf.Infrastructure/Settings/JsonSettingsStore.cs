@@ -43,7 +43,8 @@ namespace ModShelf.Infrastructure.Settings;
 ///   "previews": { "library": "cards", "updates": "thumbnails" },
 ///   "pictures": { "maxSize": 1024, "adult": "hidden" },
 ///   "details": { "maxAge": "7d" },
-///   "quota": { "warnBelow": 15 }
+///   "quota": { "warnBelow": 15 },
+///   "agents": { "enabled": true, "port": 47823 }
 /// }
 /// </code>
 /// </summary>
@@ -80,6 +81,9 @@ internal sealed class JsonSettingsStore : ISettingsStore
     private const string MaxAge = "maxAge";
     private const string Quota = "quota";
     private const string WarnBelow = "warnBelow";
+    private const string Agents = "agents";
+    private const string Enabled = "enabled";
+    private const string Port = "port";
     private const string Games = "games";
     private const string CheckUpdates = "checkUpdates";
     private const string UpdateIntervalName = "updateInterval";
@@ -128,6 +132,7 @@ internal sealed class JsonSettingsStore : ISettingsStore
         JsonObject pictures = file?[Pictures] as JsonObject ?? [];
         JsonObject details = file?[Details] as JsonObject ?? [];
         JsonObject quota = file?[Quota] as JsonObject ?? [];
+        JsonObject agents = file?[Agents] as JsonObject ?? [];
         try
         {
             string? root = Text(library, Root);
@@ -158,6 +163,8 @@ internal sealed class JsonSettingsStore : ISettingsStore
                     : null,
                 DetailsMaxAge = Text(details, MaxAge, Details) is { } age ? UpdateInterval.Parse(age) : null,
                 QuotaWarnBelow = ReadWarnBelow(quota),
+                AgentsEnabled = Flag(agents, Enabled, Agents),
+                AgentsPort = ReadPort(agents),
             };
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or InvalidDataException or FormatException)
@@ -306,6 +313,19 @@ internal sealed class JsonSettingsStore : ISettingsStore
 
         Keep(file, Quota, quotaSection);
 
+        JsonObject agentsSection = file[Agents] as JsonObject ?? [];
+        SetFlag(agentsSection, Enabled, settings.AgentsEnabled);
+        if (settings.AgentsPort is { } port)
+        {
+            agentsSection[Port] = port;
+        }
+        else
+        {
+            agentsSection.Remove(Port);
+        }
+
+        Keep(file, Agents, agentsSection);
+
         JsonObject appearanceSection = file[Appearance] as JsonObject ?? [];
         Set(appearanceSection, Theme, settings.Theme is { } theme ? ThemeName(theme) : null);
         if (appearanceSection.Count == 0)
@@ -428,6 +448,16 @@ internal sealed class JsonSettingsStore : ISettingsStore
         null => null,
         JsonValue value when value.TryGetValue(out int percent) && percent is >= 0 and <= AppSettings.MaxQuotaWarnBelow => percent,
         _ => throw new InvalidDataException($"{Quota}.{WarnBelow} must be a percent from 0 to {AppSettings.MaxQuotaWarnBelow}."),
+    };
+
+    /// <summary>
+    /// The port of the address agents reach the MCP server at: a whole number within the limits.
+    /// </summary>
+    private static int? ReadPort(JsonObject agents) => agents[Port] switch
+    {
+        null => null,
+        JsonValue value when value.TryGetValue(out int port) && port is >= AppSettings.MinAgentsPort and <= AppSettings.MaxAgentsPort => port,
+        _ => throw new InvalidDataException($"{Agents}.{Port} must be a port from {AppSettings.MinAgentsPort} to {AppSettings.MaxAgentsPort}."),
     };
 
     /// <summary>

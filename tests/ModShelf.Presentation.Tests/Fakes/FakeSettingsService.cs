@@ -84,4 +84,8 @@ internal sealed class FakeSettingsService : ISettingsService
     public Task SetAdultPicturesAsync(AdultPictures? pictures, CancellationToken cancellationToken) => throw new NotSupportedException();
 
     public Task SetQuotaWarnBelowAsync(int? percent, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    public Task SetAgentsEnabledAsync(bool? enabled, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    public Task SetAgentsPortAsync(int? port, CancellationToken cancellationToken) => throw new NotSupportedException();
 }
