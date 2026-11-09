@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Http.Headers;
 
@@ -59,6 +60,33 @@ public sealed class DiskPictureCacheTests : IDisposable
         Assert.Equal(Path.Combine(_folder.Path, "pictures", DiskPictureCache.NameOf(Picture)), first);
         Assert.Equal(Png, await File.ReadAllBytesAsync(first, Cancellation));
         Assert.Equal(Picture, Assert.Single(_site.Requests).Uri);
+    }
+
+    [Fact]
+    public async Task ASavedPictureIsFoundOffTheCallersThread()
+    {
+        ClockReaders clock = new(_time);
+        using DiskPictureCache pictures = new(
+            new SingleHandlerHttpClientFactory(_site),
+            _settings,
+            new AppFolders(_folder.Path, Path.Combine(_folder.Path, "logs")),
+            clock,
+            _logger);
+        _site.Respond(() => Image(Png));
+        await pictures.GetAsync(Picture, Cancellation);
+        clock.Threads.Clear();
+
+        // Marking it as just shown reads the clock, wherever the file's looked at.
+        using (CallingThread caller = new(() => pictures.GetAsync(Picture, Cancellation)))
+        {
+            await caller.Work;
+
+            Assert.NotEmpty(clock.Threads);
+            Assert.DoesNotContain(caller.Id, clock.Threads);
+        }
+
+        using CallingThread sizing = new(() => pictures.GetSizeAsync(Cancellation));
+        Assert.Equal(Png.Length, await (Task<long>)sizing.Work);
     }
 
     [Fact]
@@ -367,6 +395,20 @@ public sealed class DiskPictureCacheTests : IDisposable
             // A site answers whether or not anyone still waits, as the one download does for every caller.
             await _released.Task.WaitAsync(TimeSpan.FromSeconds(10), CancellationToken.None);
             return Image(Png);
+        }
+    }
+
+    /// <summary>
+    /// The test's clock, noting the thread of each reading.
+    /// </summary>
+    private sealed class ClockReaders(TimeProvider clock) : TimeProvider
+    {
+        public ConcurrentQueue<int> Threads { get; } = new();
+
+        public override DateTimeOffset GetUtcNow()
+        {
+            Threads.Enqueue(Environment.CurrentManagedThreadId);
+            return clock.GetUtcNow();
         }
     }
 }

@@ -75,9 +75,10 @@ internal sealed partial class DiskPictureCache : IPictureCache, IDisposable
 
         string name = NameOf(picture);
         string path = Path.Combine(Folder, name);
-        if (File.Exists(path))
+
+        // On the thread pool: a screen asks for a picture of each mod it shows, from its UI thread (ADR 0084).
+        if (await Task.Run(() => IsSaved(path), cancellationToken).ConfigureAwait(false))
         {
-            Touch(path);
             return path;
         }
 
@@ -87,18 +88,19 @@ internal sealed partial class DiskPictureCache : IPictureCache, IDisposable
     }
 
     public Task<long> GetSizeAsync(CancellationToken cancellationToken)
-        => Task.FromResult(Saved().Sum(file => file.Length));
+        => Task.Run(() => Saved().Sum(file => file.Length), cancellationToken);
 
     public Task ClearAsync(CancellationToken cancellationToken)
-    {
-        foreach (FileInfo file in Saved())
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            Delete(file);
-        }
-
-        return Task.CompletedTask;
-    }
+        => Task.Run(
+            () =>
+            {
+                foreach (FileInfo file in Saved())
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    Delete(file);
+                }
+            },
+            cancellationToken);
 
     public void Dispose()
     {
@@ -293,6 +295,18 @@ internal sealed partial class DiskPictureCache : IPictureCache, IDisposable
         return folder.Exists
             ? folder.EnumerateFiles().Where(file => !file.Name.EndsWith(PartialExtension, StringComparison.Ordinal))
             : [];
+    }
+
+    /// <returns>Whether the picture is saved; marked as just shown when it is.</returns>
+    private bool IsSaved(string path)
+    {
+        if (!File.Exists(path))
+        {
+            return false;
+        }
+
+        Touch(path);
+        return true;
     }
 
     /// <summary>
