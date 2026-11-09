@@ -27,6 +27,9 @@ The plan for 1.0.1 (step 1) makes the logs say so, before the fixes (WAL, step 2
   library database command that takes a second or more (`DefaultThreshold`), from EF Core's own timing of it:
   - "The library database took 12.3 s for SELECT from Mods" (event 205);
   - "The library database failed INSERT into DownloadJobs after 30.0 s" (206), for one that fails after as long.
+- **In the log files alone** on the command line (`appsettings.cli.json`'s `Console` rules): on standard error, a slow
+  command would sit among a command's own words, or an MCP server's, as if something had gone wrong. Windows' CI found
+  it so (2026-11-09), a first start's `COMMIT` taking a second while an MCP server's test expected nothing there.
 - **A transaction's start and commit count**, as `BEGIN` and `COMMIT`: a change made in a transaction, such as the
   library's (`LibraryRepository.UpdateAsync`, `BEGIN IMMEDIATE`), waits for the lock as its transaction starts, and a
   commit can wait for readers.
@@ -69,4 +72,6 @@ The plan for 1.0.1 (step 1) makes the logs say so, before the fixes (WAL, step 2
 - The command line: what a command's line says, its words and options, never a value (an `nxm://` link's key, a
   folder); a command's logs start with it, before the database's; started as a process of its own, it names the test as
   the process that started it, on each system CI runs.
+- A command whose first read waits for another program's database says nothing of it on standard error, and its log
+  file has the slow command.
 - 18 deliberate bugs, all caught.
