@@ -46,6 +46,9 @@ internal static class DesktopHost
 
         builder.Services.AddSingleton<IHostLifetime, DesktopHostLifetime>();
 
+        // Its first log line says what this process is, before the library database opens (ADR 0081).
+        builder.Services.AddProcessStartLog("the desktop app");
+
         // What the CLI has too, then one app at a time for each library, and the tray.
         string folder = builder.Services.AddModShelf(builder.Configuration, LogFilePrefix);
         builder.Services.AddSingleInstance(folder);

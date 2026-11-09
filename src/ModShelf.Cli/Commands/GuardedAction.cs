@@ -39,6 +39,7 @@ internal sealed partial class GuardedAction(AsynchronousCommandLineAction action
     {
         ArgumentNullException.ThrowIfNull(parseResult);
 
+        RunningCommand.Set(parseResult);
         try
         {
             return await action.InvokeAsync(parseResult, cancellationToken).ConfigureAwait(false);

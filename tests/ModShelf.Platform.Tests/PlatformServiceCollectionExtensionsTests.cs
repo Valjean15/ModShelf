@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Desktop.Ports;
+using ModShelf.Application.Diagnostics;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Links;
@@ -13,6 +14,7 @@ using ModShelf.Application.Notifications.Ports;
 using ModShelf.Application.Releases.Ports;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Platform.Browser;
+using ModShelf.Platform.Diagnostics;
 using ModShelf.Platform.Instances;
 using ModShelf.Platform.Links;
 using ModShelf.Platform.OAuth;
@@ -166,6 +168,19 @@ public sealed class PlatformServiceCollectionExtensionsTests : IDisposable
     }
 
     [Fact]
+    public void RegistersTheStartLineToRunWithTheHost()
+    {
+        ServiceCollection services = new();
+        services.AddProcessStartLog("the desktop app");
+
+        object line = Single<IHostedService>(services).ImplementationFactory!(new StubServiceProvider());
+
+        Assert.IsType<ProcessStartLog>(line);
+        Assert.Equal(ServiceLifetime.Singleton, Single<IHostedService>(services).Lifetime);
+        Assert.Throws<ArgumentException>(() => new ServiceCollection().AddProcessStartLog(" "));
+    }
+
+    [Fact]
     public void ABlankScopeIsRefused()
     {
         Assert.Throws<ArgumentException>(() => new ServiceCollection().AddPlatformServices(new SecretStoreOptions { Scope = " " }));
@@ -178,6 +193,7 @@ public sealed class PlatformServiceCollectionExtensionsTests : IDisposable
     {
         public object? GetService(Type serviceType)
             => serviceType == typeof(ILoggerFactory) ? NullLoggerFactory.Instance
+            : serviceType == typeof(AppInfo) ? new AppInfo("1.0.1", null)
             : serviceType == typeof(ISchemeRegistration) ? new MemorySchemeRegistration()
             : serviceType == typeof(IQueueRequests) ? new NoQueueRequests()
             : null;

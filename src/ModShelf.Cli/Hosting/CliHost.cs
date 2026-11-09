@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 
 using ModShelf.Application;
+using ModShelf.Cli.Commands;
 using ModShelf.Hosting;
 using ModShelf.Platform;
 
@@ -61,6 +62,9 @@ internal static class CliHost
         });
         builder.Logging.AddConsoleFormatter<CliConsoleFormatter, ConsoleFormatterOptions>();
         builder.Services.AddSingleton<IHostLifetime, CliHostLifetime>();
+
+        // Its first log line says what this process runs, before the library database opens (ADR 0081).
+        builder.Services.AddProcessStartLog(RunningCommand.Description);
 
         // The desktop app, when it runs this library's queue, carries out the queue requests of a host that doesn't.
         string folder = builder.Services.AddModShelf(builder.Configuration, LogFilePrefix);

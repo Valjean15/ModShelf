@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Agents.Ports;
 using ModShelf.Application.Desktop.Ports;
+using ModShelf.Application.Diagnostics;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Links.Ports;
@@ -12,6 +13,7 @@ using ModShelf.Application.Releases.Ports;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Platform.Agents;
 using ModShelf.Platform.Browser;
+using ModShelf.Platform.Diagnostics;
 using ModShelf.Platform.Folders;
 using ModShelf.Platform.Instances;
 using ModShelf.Platform.Links;
@@ -175,6 +177,25 @@ public static class PlatformServiceCollectionExtensions
             new ProcessAgentServerLauncher(),
             provider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(AgentServerProcess).FullName!)));
         services.AddSingleton<IClaudeDesktopConfig>(_ => new ClaudeDesktopConfigFile(ClaudeDesktopFolder.ForThisSystem()));
+
+        return services;
+    }
+
+    /// <summary>
+    /// Has the host say first, as it starts, which ModShelf this is, what it runs (<paramref name="runs"/>), its process ID
+    /// and the process that started it. Registered before the library database, it's said even when the database can't
+    /// be opened. Needs Application's <see cref="AppInfo"/>.
+    /// </summary>
+    /// <param name="runs">What the process runs, such as <c>the desktop app</c>.</param>
+    public static IServiceCollection AddProcessStartLog(this IServiceCollection services, string runs)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentException.ThrowIfNullOrWhiteSpace(runs);
+
+        services.AddHostedService(provider => new ProcessStartLog(
+            runs,
+            provider.GetRequiredService<AppInfo>(),
+            provider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(ProcessStartLog).FullName!)));
 
         return services;
     }
