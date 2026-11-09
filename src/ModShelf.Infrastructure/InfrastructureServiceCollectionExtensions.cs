@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 using ModShelf.Application.Accounts;
 using ModShelf.Application.Accounts.Ports;
@@ -228,7 +229,8 @@ public static class InfrastructureServiceCollectionExtensions
     /// factory, the repositories (<see cref="IDownloadJobRepository"/>, <see cref="ILinkedAccountRepository"/>,
     /// <see cref="ILibraryRepository"/>, <see cref="IModDetailsRepository"/>, <see cref="ILibraryHistoryRepository"/>), the
     /// <see cref="IDownloadQueueLock"/> beside the database, and a hosted service that creates or migrates the database
-    /// before any other hosted service starts.
+    /// before any other hosted service starts. Its commands wait for another connection's lock as long as they may run, and
+    /// those that take a second or more are logged (ADR 0081).
     /// </summary>
     /// <param name="databasePath">The absolute path of the database file. Its folder is created if missing.</param>
     public static IServiceCollection AddLibraryDatabase(this IServiceCollection services, string databasePath)
@@ -248,7 +250,11 @@ public static class InfrastructureServiceCollectionExtensions
         }.ToString();
 
         services.AddSingleton(new LibraryDatabaseOptions(databasePath));
-        services.AddDbContextFactory<ModShelfDbContext>(options => options.UseSqlite(connectionString).AddInterceptors(new SqliteBusyTimeout()));
+        services.AddDbContextFactory<ModShelfDbContext>((provider, options) => options
+            .UseSqlite(connectionString)
+            .AddInterceptors(
+                new SqliteBusyTimeout(),
+                new SlowCommandLog(provider.GetService<ILogger<SlowCommandLog>>() ?? NullLogger<SlowCommandLog>.Instance)));
         services.AddSingleton<IDownloadJobRepository, DownloadJobRepository>();
         services.AddSingleton<ILinkedAccountRepository, LinkedAccountRepository>();
         services.AddSingleton<ILibraryRepository, LibraryRepository>();
