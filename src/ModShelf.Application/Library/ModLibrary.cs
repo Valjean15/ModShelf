@@ -69,6 +69,9 @@ internal sealed partial class ModLibrary : IModLibrary
     public Task<IReadOnlyList<LibraryMod>> ListAsync(CancellationToken cancellationToken)
         => _repository.ListAsync(cancellationToken);
 
+    public Task<IReadOnlyList<LibraryGameTotals>> ListGamesAsync(CancellationToken cancellationToken)
+        => _repository.ListGamesAsync(cancellationToken);
+
     public Task<LibraryMod?> FindAsync(ModRef modRef, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(modRef);

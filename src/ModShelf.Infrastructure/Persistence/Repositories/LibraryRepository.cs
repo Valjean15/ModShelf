@@ -45,6 +45,33 @@ internal sealed class LibraryRepository : ILibraryRepository
         }
     }
 
+    public async Task<IReadOnlyList<LibraryGameTotals>> ListGamesAsync(CancellationToken cancellationToken)
+    {
+        await ThreadPoolSwitch.Now;
+
+        ModShelfDbContext context = await _contextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
+        await using (context.ConfigureAwait(false))
+        {
+            // A row a mod, its files counted and summed by SQLite; then a row a game.
+            List<ModTotals> mods = await context.LibraryMods
+                .AsNoTracking()
+                .Select(record => new ModTotals(record.SourceId, record.GameKey, record.Files.Count, record.Files.Sum(file => file.SizeInBytes)))
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            return
+            [
+                .. mods
+                    .GroupBy(mod => (mod.SourceId, mod.GameKey))
+                    .Select(game => new LibraryGameTotals(
+                        new GameRef(new SourceId(game.Key.SourceId), game.Key.GameKey),
+                        game.Count(),
+                        game.Count(mod => mod.Files > 0),
+                        game.Sum(mod => mod.SizeInBytes))),
+            ];
+        }
+    }
+
     /// <exception cref="InvalidDataException">The stored rows hold values no library mod can have.</exception>
     public async Task<LibraryMod?> FindAsync(ModRef modRef, CancellationToken cancellationToken)
     {
@@ -125,4 +152,9 @@ internal sealed class LibraryRepository : ILibraryRepository
             .AsSplitQuery()
             .Where(record => record.SourceId == source && record.GameKey == game && record.ModId == mod);
     }
+
+    /// <summary>
+    /// A mod's game, and how many files it has in the library and the room they take.
+    /// </summary>
+    private sealed record ModTotals(string SourceId, string GameKey, int Files, long SizeInBytes);
 }

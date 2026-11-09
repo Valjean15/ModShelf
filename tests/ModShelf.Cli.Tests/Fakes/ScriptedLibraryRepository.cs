@@ -13,6 +13,8 @@ internal sealed class ScriptedLibraryRepository(ILibraryRepository library, Func
 {
     public Task<IReadOnlyList<LibraryMod>> ListAsync(CancellationToken cancellationToken) => library.ListAsync(cancellationToken);
 
+    public Task<IReadOnlyList<LibraryGameTotals>> ListGamesAsync(CancellationToken cancellationToken) => library.ListGamesAsync(cancellationToken);
+
     public Task<LibraryMod?> FindAsync(ModRef modRef, CancellationToken cancellationToken) => library.FindAsync(modRef, cancellationToken);
 
     public async Task<LibraryChange> UpdateAsync(ModRef modRef, Func<LibraryMod?, LibraryMod?> change, CancellationToken cancellationToken)

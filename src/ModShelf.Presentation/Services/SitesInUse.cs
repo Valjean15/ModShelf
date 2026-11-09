@@ -15,7 +15,7 @@ internal sealed partial class SitesInUse(IModLibrary library, IAccountService ac
     {
         try
         {
-            HashSet<SourceId> sites = [.. (await library.ListAsync(cancellationToken)).Select(mod => mod.Mod.Game.Source)];
+            HashSet<SourceId> sites = [.. (await library.ListGamesAsync(cancellationToken)).Select(game => game.Game.Source)];
             if (sites.Count < 2)
             {
                 sites.UnionWith((await accounts.ListAsync(cancellationToken)).Where(site => site.Account is not null).Select(site => site.Source));

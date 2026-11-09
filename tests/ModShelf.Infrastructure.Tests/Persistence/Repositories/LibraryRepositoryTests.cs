@@ -359,6 +359,28 @@ public sealed class LibraryRepositoryTests : IAsyncLifetime
         Assert.Null(await _database.Library.FindAsync(Smapi, Cancellation));
     }
 
+    [Fact]
+    public async Task ListsTheGamesInTotalsWithoutTheirMods()
+    {
+        GameRef skyrim = new(new SourceId("nexus"), "skyrimspecialedition");
+        LibraryFile main = File(Smapi, "160380", "nexus/stardewvalley/2400/SMAPI 4.5.2.zip");
+        LibraryFile old = File(Smapi, "153075", "nexus/stardewvalley/2400/SMAPI 4.4.0.zip");
+        LibraryFile patcher = File(ContentPatcher, "1", "nexus/stardewvalley/1915/Content Patcher.zip");
+        await StoreAsync(LibraryMod.Restore(Smapi, "SMAPI", null, null, isWatched: true, Added, Added, [main, old]));
+        await StoreAsync(LibraryMod.Restore(ContentPatcher, "Content Patcher", null, null, isWatched: false, Added, Added, [patcher]));
+        await StoreAsync(Watched(new ModRef(Stardew, "3000")));
+        await StoreAsync(Watched(new ModRef(skyrim, "12604")));
+
+        IReadOnlyList<LibraryGameTotals> games = await _database.Library.ListGamesAsync(Cancellation);
+
+        Assert.Equal(
+            [new LibraryGameTotals(skyrim, 1, 0, 0), new LibraryGameTotals(Stardew, 3, 2, 3 * 41_889_142L)],
+            games.OrderBy(game => game.Game.Key, StringComparer.Ordinal));
+    }
+
+    [Fact]
+    public async Task AnEmptyLibraryHasNoGames() => Assert.Empty(await _database.Library.ListGamesAsync(Cancellation));
+
     private static LibraryMod Watched(ModRef mod) => LibraryMod.Watch(mod, "Mod " + mod.Id, null, null, Added);
 
     private static LibraryFile File(ModRef mod, string id, string path, string? sha256 = null)

@@ -41,6 +41,18 @@ internal sealed class InMemoryLibraryRepository : ILibraryRepository
     public Task<IReadOnlyList<LibraryMod>> ListAsync(CancellationToken cancellationToken)
         => ListFailure is { } failure ? Task.FromException<IReadOnlyList<LibraryMod>>(failure) : Task.FromResult(Mods);
 
+    public Task<IReadOnlyList<LibraryGameTotals>> ListGamesAsync(CancellationToken cancellationToken)
+        => ListFailure is { } failure
+            ? Task.FromException<IReadOnlyList<LibraryGameTotals>>(failure)
+            : Task.FromResult<IReadOnlyList<LibraryGameTotals>>(
+            [
+                .. Mods.GroupBy(mod => mod.Mod.Game).Select(game => new LibraryGameTotals(
+                    game.Key,
+                    game.Count(),
+                    game.Count(mod => mod.Files.Count > 0),
+                    game.Sum(mod => mod.Files.Sum(file => file.SizeInBytes)))),
+            ]);
+
     public Task<LibraryMod?> FindAsync(ModRef modRef, CancellationToken cancellationToken)
         => Task.FromResult(Mods.FirstOrDefault(mod => mod.Mod == modRef));
 

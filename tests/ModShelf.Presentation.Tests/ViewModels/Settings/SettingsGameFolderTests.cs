@@ -48,6 +48,9 @@ public sealed class SettingsGameFolderTests
             (false, TestData.LibraryRoot, "Its 2 mods' files, 44.0 MB, are in the library's folder.", (string?)null),
             (Game.HasOwnRoot, Game.FolderPath, Game.FolderText, Game.FolderNote));
         Assert.False(Game.MoveBackCommand.CanExecute(null));
+
+        // From the library's games in totals, never its every mod and file (ADR 0084).
+        Assert.Equal(0, _harness.Library.ModsListed);
     }
 
     [Fact]

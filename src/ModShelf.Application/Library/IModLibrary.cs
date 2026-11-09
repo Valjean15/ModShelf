@@ -11,6 +11,12 @@ public interface IModLibrary
     /// <returns>Every mod in the library, in the order they were added.</returns>
     Task<IReadOnlyList<LibraryMod>> ListAsync(CancellationToken cancellationToken);
 
+    /// <returns>
+    /// Each game of the library's mods once, in no particular order, with how many mods it has, how many of them have
+    /// files, and the room their files take: what a screen shows of the games, read without every mod and file (ADR 0084).
+    /// </returns>
+    Task<IReadOnlyList<LibraryGameTotals>> ListGamesAsync(CancellationToken cancellationToken);
+
     /// <returns>The mod as the library has it, or null when it isn't in the library.</returns>
     Task<LibraryMod?> FindAsync(ModRef modRef, CancellationToken cancellationToken);
 

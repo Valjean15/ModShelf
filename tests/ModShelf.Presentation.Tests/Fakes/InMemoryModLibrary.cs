@@ -104,14 +104,38 @@ internal sealed class InMemoryModLibrary : IModLibrary
     /// </summary>
     public Exception? ListRefusal { get; set; }
 
+    /// <summary>
+    /// How many times every mod was listed, as a screen that reads the whole library does.
+    /// </summary>
+    public int ModsListed { get; private set; }
+
     public async Task<IReadOnlyList<LibraryMod>> ListAsync(CancellationToken cancellationToken)
     {
+        ModsListed++;
         if (ListingHeld is { } held)
         {
             await held.Task.WaitAsync(cancellationToken);
         }
 
         return ListRefusal is null ? Mods : throw ListRefusal;
+    }
+
+    public async Task<IReadOnlyList<LibraryGameTotals>> ListGamesAsync(CancellationToken cancellationToken)
+    {
+        if (ListingHeld is { } held)
+        {
+            await held.Task.WaitAsync(cancellationToken);
+        }
+
+        return ListRefusal is null
+            ? [
+                .. Mods.GroupBy(mod => mod.Mod.Game).Select(game => new LibraryGameTotals(
+                    game.Key,
+                    game.Count(),
+                    game.Count(mod => mod.Files.Count > 0),
+                    game.Sum(mod => mod.Files.Sum(file => file.SizeInBytes)))),
+            ]
+            : throw ListRefusal;
     }
 
     public Task<LibraryMod?> FindAsync(ModRef modRef, CancellationToken cancellationToken)

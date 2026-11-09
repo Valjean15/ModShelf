@@ -281,10 +281,11 @@ public sealed partial class SettingsViewModel
     /// </summary>
     private async Task ReadGamesAsync()
     {
-        IReadOnlyList<LibraryMod> mods;
+        // The games in totals, not every mod and file: a library of thousands of mods reads as fast as a few (ADR 0084).
+        IReadOnlyList<LibraryGameTotals> games;
         try
         {
-            mods = await _library.ListAsync(CancellationToken.None);
+            games = await _library.ListGamesAsync(CancellationToken.None);
         }
         catch (Exception exception) when (exception is InvalidDataException or InvalidOperationException)
         {
@@ -293,13 +294,13 @@ public sealed partial class SettingsViewModel
         }
 
         _gameFiles.Clear();
-        foreach (IGrouping<GameRef, LibraryMod> game in mods.Where(mod => mod.Files.Count > 0).GroupBy(mod => mod.Mod.Game, AppSettings.GameComparer))
+        foreach (IGrouping<GameRef, LibraryGameTotals> game in games.Where(game => game.ModsWithFiles > 0).GroupBy(game => game.Game, AppSettings.GameComparer))
         {
-            _gameFiles[game.Key] = (game.Count(), game.Sum(mod => mod.Files.Sum(file => file.SizeInBytes)));
+            _gameFiles[game.Key] = (game.Sum(totals => totals.ModsWithFiles), game.Sum(totals => totals.SizeInBytes));
         }
 
         List<GameRef> unnamed = [];
-        foreach (GameRef game in mods.Select(mod => mod.Mod.Game).Distinct())
+        foreach (GameRef game in games.Select(totals => totals.Game).Distinct())
         {
             if (_libraryGames.Add(game))
             {

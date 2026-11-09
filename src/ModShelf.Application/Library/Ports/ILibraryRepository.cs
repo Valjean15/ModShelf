@@ -11,6 +11,9 @@ public interface ILibraryRepository
     /// <returns>Every mod in the library, in the order they were added.</returns>
     Task<IReadOnlyList<LibraryMod>> ListAsync(CancellationToken cancellationToken);
 
+    /// <returns>Each game of the library's mods once, in no particular order, in totals.</returns>
+    Task<IReadOnlyList<LibraryGameTotals>> ListGamesAsync(CancellationToken cancellationToken);
+
     /// <returns>The mod as stored, or null when it isn't in the library.</returns>
     Task<LibraryMod?> FindAsync(ModRef modRef, CancellationToken cancellationToken);
 

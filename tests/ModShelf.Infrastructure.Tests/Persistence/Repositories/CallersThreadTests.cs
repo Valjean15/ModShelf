@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using System.Data.Common;
-using System.Diagnostics;
 
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +13,7 @@ using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Infrastructure.Persistence;
 using ModShelf.Infrastructure.Persistence.Repositories;
+using ModShelf.Infrastructure.Tests.Fakes;
 using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Testing;
@@ -43,7 +43,7 @@ public sealed class CallersThreadTests : IAsyncLifetime
     [
         "DownloadJobs.Add", "DownloadJobs.Update", "DownloadJobs.List", "DownloadJobs.Delete",
         "LinkedAccounts.List", "LinkedAccounts.Save", "LinkedAccounts.Delete",
-        "Library.List", "Library.Find", "Library.Update",
+        "Library.List", "Library.ListGames", "Library.Find", "Library.Update",
         "ModDetails.Find", "ModDetails.Save",
         "History.Add", "History.List",
     ];
@@ -109,6 +109,7 @@ public sealed class CallersThreadTests : IAsyncLifetime
             "LinkedAccounts.Save" => accounts.SaveAsync(new LinkedAccount(Nexus, AuthKind.ApiKey, new AccountProfile("Jean"), Now), Cancellation),
             "LinkedAccounts.Delete" => accounts.DeleteAsync(Nexus, Cancellation),
             "Library.List" => library.ListAsync(Cancellation),
+            "Library.ListGames" => library.ListGamesAsync(Cancellation),
             "Library.Find" => library.FindAsync(Smapi, Cancellation),
             "Library.Update" => library.UpdateAsync(Smapi, _ => LibraryMod.Watch(Smapi, "SMAPI", null, null, Now), Cancellation),
             "ModDetails.Find" => details.FindAsync(Smapi, Cancellation),
@@ -117,51 +118,6 @@ public sealed class CallersThreadTests : IAsyncLifetime
             "History.List" => history.ListAsync(null, 10, Cancellation),
             _ => throw new ArgumentOutOfRangeException(nameof(call), call, "No such call."),
         };
-    }
-
-    /// <summary>
-    /// A call made on a thread of its own, which is no thread pool's, and which waits, doing nothing else, until disposed.
-    /// </summary>
-    private sealed class CallingThread : IDisposable
-    {
-        private readonly ManualResetEventSlim _called = new();
-        private readonly ManualResetEventSlim _released = new();
-        private readonly Thread _thread;
-
-        public CallingThread(Func<Task> call)
-        {
-            _thread = new Thread(() =>
-            {
-                Id = Environment.CurrentManagedThreadId;
-                Stopwatch calling = Stopwatch.StartNew();
-                Work = call();
-                Calling = calling.Elapsed;
-                _called.Set();
-                _released.Wait();
-            })
-            {
-                IsBackground = true,
-            };
-            _thread.Start();
-            _called.Wait(Cancellation);
-        }
-
-        public int Id { get; private set; }
-
-        public Task Work { get; private set; } = Task.CompletedTask;
-
-        /// <summary>
-        /// How long the call held the thread before it returned.
-        /// </summary>
-        public TimeSpan Calling { get; private set; }
-
-        public void Dispose()
-        {
-            _released.Set();
-            _thread.Join();
-            _called.Dispose();
-            _released.Dispose();
-        }
     }
 
     /// <summary>

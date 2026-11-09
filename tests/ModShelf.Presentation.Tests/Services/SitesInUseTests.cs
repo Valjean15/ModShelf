@@ -45,6 +45,9 @@ public sealed class SitesInUseTests
 
         Assert.True(await AreSeveralAsync());
         Assert.Empty(_accounts.Calls);
+
+        // From the library's games, never its every mod and file (ADR 0084).
+        Assert.Equal(0, _library.ModsListed);
     }
 
     [Fact]
