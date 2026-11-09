@@ -18,4 +18,13 @@ internal sealed partial class LibraryDatabaseMigrator
 
     [LoggerMessage(EventId = 204, Level = LogLevel.Warning, Message = "Cleared the lock an update of the library database left when it stopped part-way")]
     private static partial void LogClearedStoppedUpdate(ILogger logger);
+
+    [LoggerMessage(EventId = 207, Level = LogLevel.Information, Message = "The library database now writes ahead of its file (WAL), so reading it never waits for a change")]
+    private static partial void LogWritingAhead(ILogger logger);
+
+    [LoggerMessage(EventId = 208, Level = LogLevel.Warning, Message = "The library database can't write ahead of its file (WAL) where it is, so it keeps its {Mode} journal, and reading it can wait for a change")]
+    private static partial void LogCantWriteAhead(ILogger logger, string mode);
+
+    [LoggerMessage(EventId = 209, Level = LogLevel.Warning, Message = "The library database couldn't start writing ahead of its file (WAL) while another program used it; the next start tries again")]
+    private static partial void LogWriteAheadLater(ILogger logger, Exception exception);
 }

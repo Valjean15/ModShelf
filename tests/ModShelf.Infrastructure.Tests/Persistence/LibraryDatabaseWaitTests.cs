@@ -11,8 +11,9 @@ using ModShelf.Infrastructure.Persistence.Tables;
 namespace ModShelf.Infrastructure.Tests.Persistence;
 
 /// <summary>
-/// Changes to the library database while another connection reads it, as another ModShelf, or a read in this one, does:
-/// SQLite can't finish a change while a reader holds the file, so the change waits for the read to end.
+/// Changes to the library database while another connection changes it, as another ModShelf, or a change in this one,
+/// does: SQLite lets one connection change the file at a time, so the change waits for the other to end. Since the
+/// database writes ahead (ADR 0082), a read no longer holds a change: <see cref="WriteAheadTests"/>.
 /// </summary>
 public sealed class LibraryDatabaseWaitTests : IAsyncLifetime
 {
@@ -20,7 +21,7 @@ public sealed class LibraryDatabaseWaitTests : IAsyncLifetime
     private static readonly DateTimeOffset Now = new(2026, 10, 29, 20, 48, 25, TimeSpan.Zero);
 
     // Long enough that a change that doesn't wait has failed by then.
-    private static readonly TimeSpan ReadFor = TimeSpan.FromMilliseconds(500);
+    private static readonly TimeSpan ChangeFor = TimeSpan.FromMilliseconds(500);
 
     private readonly TestLibraryDatabase _database = new();
 
@@ -31,18 +32,18 @@ public sealed class LibraryDatabaseWaitTests : IAsyncLifetime
     public async ValueTask DisposeAsync() => await _database.DisposeAsync();
 
     [Fact]
-    public async Task AJobAddedDuringAReadIsSavedOnceTheReadEnds()
+    public async Task AJobAddedDuringAnotherChangeIsSavedOnceItEnds()
     {
         await _database.Repository.AddAsync(Job("1"), Cancellation);
         DownloadJob job = Job("2");
 
-        await WhileReadingAsync(() => _database.Repository.AddAsync(job, Cancellation));
+        await WhileChangingAsync(() => _database.Repository.AddAsync(job, Cancellation));
 
         Assert.Contains(job.Id, (await _database.Repository.ListAsync(Cancellation)).Select(stored => stored.Id));
     }
 
     [Fact]
-    public async Task AJobChangedDuringAReadIsSavedOnceTheReadEnds()
+    public async Task AJobChangedDuringAnotherChangeIsSavedOnceItEnds()
     {
         DownloadJob job = Job("1");
         await _database.Repository.AddAsync(job, Cancellation);
@@ -50,7 +51,7 @@ public sealed class LibraryDatabaseWaitTests : IAsyncLifetime
         await _database.Repository.UpdateAsync(job, Cancellation);
         job.StartDownloading(resumeFromByte: 0, totalBytes: 1_024);
 
-        await WhileReadingAsync(() => _database.Repository.UpdateAsync(job, Cancellation));
+        await WhileChangingAsync(() => _database.Repository.UpdateAsync(job, Cancellation));
 
         Assert.Equal(DownloadJobStatus.Downloading, Assert.Single(await _database.Repository.ListAsync(Cancellation)).Status);
     }
@@ -72,18 +73,18 @@ public sealed class LibraryDatabaseWaitTests : IAsyncLifetime
         Save(Job("1"));
         DownloadJob job = Job("2");
 
-        await WhileReadingAsync(() => Task.Run(() => Save(job), Cancellation));
+        await WhileChangingAsync(() => Task.Run(() => Save(job), Cancellation));
 
         Assert.Contains(job.Id, (await _database.Repository.ListAsync(Cancellation)).Select(stored => stored.Id));
     }
 
     [Fact]
-    public async Task AModAddedDuringAReadIsSavedOnceTheReadEnds()
+    public async Task AModAddedDuringAnotherChangeIsSavedOnceItEnds()
     {
         ModRef contentPatcher = new(Smapi.Game, "1915");
         await _database.Library.UpdateAsync(contentPatcher, _ => LibraryMod.Watch(contentPatcher, "Content Patcher", null, null, Now), Cancellation);
 
-        await WhileReadingAsync(() => _database.Library.UpdateAsync(Smapi, _ => LibraryMod.Watch(Smapi, "SMAPI", null, null, Now), Cancellation));
+        await WhileChangingAsync(() => _database.Library.UpdateAsync(Smapi, _ => LibraryMod.Watch(Smapi, "SMAPI", null, null, Now), Cancellation));
 
         Assert.Contains("SMAPI", (await _database.Library.ListAsync(Cancellation)).Select(mod => mod.Name));
     }
@@ -95,28 +96,29 @@ public sealed class LibraryDatabaseWaitTests : IAsyncLifetime
         => DownloadJob.Create(new ModFileRef(Smapi, fileId), Path.GetDirectoryName(_database.DatabasePath)!, $"SMAPI {fileId}.zip", Now);
 
     /// <summary>
-    /// Runs <paramref name="change"/> while another connection holds a read of the database, and ends the read after
-    /// <see cref="ReadFor"/>: the change is still waiting then, and done once the read ends. Each test makes the same kind
-    /// of change once before, so the change reaches the database within that time rather than spending it starting up.
+    /// Runs <paramref name="change"/> while another connection holds a change of the database, and ends that after
+    /// <see cref="ChangeFor"/>: the change is still waiting then, and done once the other ends. Each test makes the same
+    /// kind of change once before, so the change reaches the database within that time rather than spending it starting
+    /// up.
     /// </summary>
-    private async Task WhileReadingAsync(Func<Task> change)
+    private async Task WhileChangingAsync(Func<Task> change)
     {
-        await using SqliteConnection reader = new(new SqliteConnectionStringBuilder { DataSource = _database.DatabasePath, Pooling = false }.ToString());
-        await reader.OpenAsync(Cancellation);
-        await using SqliteTransaction reading = reader.BeginTransaction(deferred: true);
-        await using (SqliteCommand read = reader.CreateCommand())
+        await using SqliteConnection other = new(new SqliteConnectionStringBuilder { DataSource = _database.DatabasePath, Pooling = false }.ToString());
+        await other.OpenAsync(Cancellation);
+        await using SqliteTransaction changingToo = other.BeginTransaction(deferred: false);
+        await using (SqliteCommand write = other.CreateCommand())
         {
-            read.Transaction = reading;
-            read.CommandText = "SELECT COUNT(*) FROM DownloadJobs";
-            await read.ExecuteScalarAsync(Cancellation);
+            write.Transaction = changingToo;
+            write.CommandText = "DELETE FROM DownloadJobs WHERE 0";
+            await write.ExecuteNonQueryAsync(Cancellation);
         }
 
-        // On a thread of its own: SQLite waits for the read by blocking the thread it runs on.
+        // On a thread of its own: SQLite waits for the other change by blocking the thread it runs on.
         Task changing = Task.Run(change, Cancellation);
-        await Task.WhenAny(changing, Task.Delay(ReadFor, Cancellation));
-        Assert.False(changing.IsCompleted, changing.Exception?.ToString() ?? "The change didn't wait for the read.");
+        await Task.WhenAny(changing, Task.Delay(ChangeFor, Cancellation));
+        Assert.False(changing.IsCompleted, changing.Exception?.ToString() ?? "The change didn't wait for the other.");
 
-        await reading.CommitAsync(Cancellation);
+        await changingToo.CommitAsync(Cancellation);
         await changing.WaitAsync(TimeSpan.FromSeconds(10), Cancellation);
     }
 }

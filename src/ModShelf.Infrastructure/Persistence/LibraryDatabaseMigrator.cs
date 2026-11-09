@@ -1,3 +1,4 @@
+using System.Data.Common;
 using System.Diagnostics;
 
 using Microsoft.Data.Sqlite;
@@ -8,7 +9,8 @@ using Microsoft.Extensions.Logging;
 namespace ModShelf.Infrastructure.Persistence;
 
 /// <summary>
-/// Creates the library database, or brings its schema up to date, when the host starts.
+/// Creates the library database, or brings its schema up to date, when the host starts, and has it write ahead of its
+/// file (WAL).
 /// </summary>
 /// <remarks>
 /// The work happens in <see cref="StartingAsync"/>, which the host runs before any hosted service's
@@ -41,6 +43,9 @@ internal sealed partial class LibraryDatabaseMigrator(
     // EF Core's lock on updating a SQLite database: a row in this table while an update runs.
     private const string UpdateLockTable = "__EFMigrationsLock";
 
+    // SQLite's write-ahead log, as PRAGMA journal_mode names it.
+    private const string WriteAheadMode = "wal";
+
     private static readonly TimeSpan UpdateLockRetry = TimeSpan.FromMilliseconds(100);
 
     /// <summary>
@@ -69,11 +74,14 @@ internal sealed partial class LibraryDatabaseMigrator(
                     await using (updating.ConfigureAwait(false))
                     {
                         await UpdateAsync(context, cancellationToken).ConfigureAwait(false);
-                        return;
                     }
                 }
+                else
+                {
+                    LogUpToDate(logger);
+                }
 
-                LogUpToDate(logger);
+                await WriteAheadAsync(context, cancellationToken).ConfigureAwait(false);
             }
         }
         catch (SqliteException exception)
@@ -136,6 +144,53 @@ internal sealed partial class LibraryDatabaseMigrator(
 
         LogApplyingMigrations(logger, pending.Count, pending[^1]);
         await context.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Has the database write ahead of its file (SQLite's WAL), where a read never waits for a change, nor a change for a
+    /// read, in this process or another (ADR 0082). SQLite keeps the mode in the file, so it's set once, and every
+    /// ModShelf, older ones too, then opens the database so. Where SQLite can't, the database keeps its journal; while
+    /// another program holds it, the next start tries again.
+    /// </summary>
+    private async Task WriteAheadAsync(ModShelfDbContext context, CancellationToken cancellationToken)
+    {
+        DbConnection connection = context.Database.GetDbConnection();
+        await context.Database.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            if (string.Equals(await JournalModeAsync(connection, "PRAGMA journal_mode", cancellationToken).ConfigureAwait(false), WriteAheadMode, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            string? mode = await JournalModeAsync(connection, $"PRAGMA journal_mode = {WriteAheadMode}", cancellationToken).ConfigureAwait(false);
+            if (string.Equals(mode, WriteAheadMode, StringComparison.OrdinalIgnoreCase))
+            {
+                LogWritingAhead(logger);
+            }
+            else
+            {
+                LogCantWriteAhead(logger, mode ?? "unknown");
+            }
+        }
+        catch (SqliteException exception) when (exception.SqliteErrorCode is SqliteBusy or SqliteLocked)
+        {
+            LogWriteAheadLater(logger, exception);
+        }
+        finally
+        {
+            await context.Database.CloseConnectionAsync().ConfigureAwait(false);
+        }
+    }
+
+    private static async Task<string?> JournalModeAsync(DbConnection connection, string pragma, CancellationToken cancellationToken)
+    {
+        DbCommand command = connection.CreateCommand();
+        await using (command.ConfigureAwait(false))
+        {
+            command.CommandText = pragma;
+            return await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false) as string;
+        }
     }
 
     /// <summary>
