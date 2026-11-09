@@ -207,6 +207,38 @@ public sealed class FileLoggerProviderTests : IDisposable
         Assert.EndsWith("Information ModShelf.Tests[0]: Written", Assert.Single(Lines("app-20261029.log")), StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task PollysAttemptsAreLeftOutButNotItsWarnings()
+    {
+        // As the command line's settings and the desktop app's say: the files, and the rest, from Information.
+        IConfiguration configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Logging:LogLevel:Default"] = "Information",
+                ["Logging:File:LogLevel:Default"] = "Information",
+            })
+            .Build();
+        ServiceCollection services = new();
+        services.AddSingleton<TimeProvider>(_time);
+        services.AddLogging(logging => logging.AddConfiguration(configuration.GetSection("Logging")));
+        services.AddLogFiles(Logs, "app");
+
+        await using (ServiceProvider provider = services.BuildServiceProvider())
+        {
+            ILoggerFactory loggers = provider.GetRequiredService<ILoggerFactory>();
+            Write(loggers.CreateLogger("Polly"), LogLevel.Information, "Execution attempt. Result: '200'");
+            Write(loggers.CreateLogger("Polly"), LogLevel.Warning, "Execution attempt. Result: '503'");
+            Write(loggers.CreateLogger("ModShelf.Tests"), LogLevel.Information, "Written");
+        }
+
+        Assert.Equal(
+            [
+                "2026-10-29 09:00:00.000 +01:00 Warning Polly[0]: Execution attempt. Result: '503'",
+                "2026-10-29 09:00:00.000 +01:00 Information ModShelf.Tests[0]: Written",
+            ],
+            Lines("app-20261029.log"));
+    }
+
     [Theory]
     [InlineData("logs", "app")]
     [InlineData(null, "app/desktop")]

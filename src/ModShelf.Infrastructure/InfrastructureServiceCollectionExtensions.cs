@@ -267,9 +267,15 @@ public static class InfrastructureServiceCollectionExtensions
     }
 
     /// <summary>
+    /// What Polly logs as.
+    /// </summary>
+    private const string PollyCategory = "Polly";
+
+    /// <summary>
     /// Writes the logs to files in <paramref name="folder"/>, an absolute path, a file a day for the last week, such as
     /// <c>desktop-20261029.log</c>, and registers the <see cref="LogFolder"/>. The configuration's <c>Logging:File</c>
     /// section sets what's written, as <c>Logging:Console</c> does for the console; without it, the general rules do.
+    /// Polly's messages are kept to its warnings and errors, whatever the configuration says.
     /// </summary>
     /// <param name="app">What the files' names start with, such as <c>desktop</c>; each app keeps its own files.</param>
     public static IServiceCollection AddLogFiles(this IServiceCollection services, string folder, string app)
@@ -287,6 +293,15 @@ public static class InfrastructureServiceCollectionExtensions
             folder,
             app,
             provider.GetService<TimeProvider>() ?? TimeProvider.System));
+
+        // Polly, which retries the HTTP requests, writes a line for each attempt of each request: its warnings say what
+        // went wrong, and ModShelf's own messages the rest (ADR 0086). The files' own rule is the configuration's, so
+        // they get one of their own.
+        services.Configure<LoggerFilterOptions>(options =>
+        {
+            options.AddFilter(PollyCategory, LogLevel.Warning);
+            options.AddFilter<FileLoggerProvider>(PollyCategory, LogLevel.Warning);
+        });
         return services;
     }
 }
