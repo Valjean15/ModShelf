@@ -58,6 +58,19 @@ internal sealed partial class ModDetails : IModDetails, IDisposable
         return (await FindAsync(modRef, cancellationToken).ConfigureAwait(false))?.Details;
     }
 
+    public async Task<IReadOnlyDictionary<ModRef, ModInfo>> GetSavedAsync(IReadOnlyCollection<ModRef> mods, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(mods);
+
+        if (mods.Count == 0)
+        {
+            return new Dictionary<ModRef, ModInfo>();
+        }
+
+        IReadOnlyDictionary<ModRef, SavedModDetails> saved = await _repository.FindAsync(mods, cancellationToken).ConfigureAwait(false);
+        return saved.ToDictionary(pair => pair.Key, pair => pair.Value.Details);
+    }
+
     public async Task<ModInfo?> GetAsync(ModRef modRef, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(modRef);

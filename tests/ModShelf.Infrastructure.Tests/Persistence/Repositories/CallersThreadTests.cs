@@ -44,7 +44,7 @@ public sealed class CallersThreadTests : IAsyncLifetime
         "DownloadJobs.Add", "DownloadJobs.Update", "DownloadJobs.List", "DownloadJobs.Delete",
         "LinkedAccounts.List", "LinkedAccounts.Save", "LinkedAccounts.Delete",
         "Library.List", "Library.ListGames", "Library.Find", "Library.Update",
-        "ModDetails.Find", "ModDetails.Save",
+        "ModDetails.Find", "ModDetails.FindMany", "ModDetails.Save",
         "History.Add", "History.List",
     ];
 
@@ -113,6 +113,7 @@ public sealed class CallersThreadTests : IAsyncLifetime
             "Library.Find" => library.FindAsync(Smapi, Cancellation),
             "Library.Update" => library.UpdateAsync(Smapi, _ => LibraryMod.Watch(Smapi, "SMAPI", null, null, Now), Cancellation),
             "ModDetails.Find" => details.FindAsync(Smapi, Cancellation),
+            "ModDetails.FindMany" => details.FindAsync([Smapi], Cancellation),
             "ModDetails.Save" => details.SaveAsync(new SavedModDetails(new ModInfo(Smapi, "SMAPI"), Now), Cancellation),
             "History.Add" => history.AddAsync([new LibraryEvent(Now, LibraryEventKind.Removed, Smapi, "SMAPI")], Now.AddYears(-1), Cancellation),
             "History.List" => history.ListAsync(null, 10, Cancellation),

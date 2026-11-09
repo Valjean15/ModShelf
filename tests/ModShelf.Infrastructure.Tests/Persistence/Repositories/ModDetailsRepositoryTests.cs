@@ -114,4 +114,49 @@ public sealed class ModDetailsRepositoryTests : IAsyncLifetime
         Assert.Contains("couldn't be saved in the library database", logged[1], StringComparison.Ordinal);
         Assert.All(logged, entry => Assert.Contains("ModId=2400", entry, StringComparison.Ordinal));
     }
+
+    [Fact]
+    public async Task FindsTheSavedDetailsOfManyModsAtOnce()
+    {
+        ModRef contentPatcher = new(Smapi.Game, "1915");
+        ModRef skyUi = new(new GameRef(new SourceId("nexus"), "skyrimspecialedition"), "12604");
+        ModRef unsaved = new(Smapi.Game, "9999");
+        await _database.ModDetails.SaveAsync(new SavedModDetails(new ModInfo(Smapi, "SMAPI"), SavedAt), Cancellation);
+        await _database.ModDetails.SaveAsync(new SavedModDetails(new ModInfo(contentPatcher, "Content Patcher"), SavedAt), Cancellation);
+        await _database.ModDetails.SaveAsync(new SavedModDetails(new ModInfo(skyUi, "SkyUI"), SavedAt), Cancellation);
+        await _database.ModDetails.SaveAsync(new SavedModDetails(new ModInfo(new ModRef(Smapi.Game, "4000"), "Not asked"), SavedAt), Cancellation);
+
+        IReadOnlyDictionary<ModRef, SavedModDetails> found = await _database.ModDetails.FindAsync([Smapi, contentPatcher, skyUi, unsaved, Smapi], Cancellation);
+
+        Assert.Equal(
+            new Dictionary<ModRef, string> { [Smapi] = "SMAPI", [contentPatcher] = "Content Patcher", [skyUi] = "SkyUI" },
+            found.ToDictionary(pair => pair.Key, pair => pair.Value.Details.Name));
+        Assert.Equal(SavedAt, found[skyUi].SavedAt);
+        Assert.Empty(await _database.ModDetails.FindAsync([], Cancellation));
+    }
+
+    [Fact]
+    public async Task LeavesOutSavedDetailsThatCantBeReadAmongMany()
+    {
+        ModRef contentPatcher = new(Smapi.Game, "1915");
+        await _database.ModDetails.SaveAsync(new SavedModDetails(new ModInfo(Smapi, "SMAPI"), SavedAt), Cancellation);
+        await _database.ModDetails.SaveAsync(new SavedModDetails(new ModInfo(contentPatcher, "Content Patcher"), SavedAt), Cancellation);
+        await _database.QueryAsync("UPDATE ModDetails SET PictureUrl = 'javascript:alert(1)' WHERE ModId = '2400'");
+
+        IReadOnlyDictionary<ModRef, SavedModDetails> found = await _database.ModDetails.FindAsync([Smapi, contentPatcher], Cancellation);
+
+        Assert.Equal([contentPatcher], found.Keys);
+        Assert.Contains(_database.Logs.Entries, entry => entry.Contains("The saved details of mod 2400 of stardewvalley on nexus can't be read, so they're left out", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task LogsADatabaseThatCantBeReadForManyModsRatherThanThrowing()
+    {
+        await _database.QueryAsync("DROP TABLE ModDetails");
+
+        IReadOnlyDictionary<ModRef, SavedModDetails> found = await _database.ModDetails.FindAsync([Smapi, new ModRef(Smapi.Game, "1915")], Cancellation);
+
+        Assert.Empty(found);
+        Assert.Contains(_database.Logs.Entries, entry => entry.Contains("The saved details of 2 mods couldn't be read from the library database", StringComparison.Ordinal));
+    }
 }

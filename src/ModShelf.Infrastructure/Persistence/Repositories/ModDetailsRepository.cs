@@ -57,6 +57,60 @@ internal sealed partial class ModDetailsRepository : IModDetailsRepository
         return record?.ToSaved();
     }
 
+    public async Task<IReadOnlyDictionary<ModRef, SavedModDetails>> FindAsync(IReadOnlyCollection<ModRef> mods, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(mods);
+
+        Dictionary<ModRef, SavedModDetails> found = [];
+        HashSet<ModRef> asked = [.. mods];
+        if (asked.Count == 0)
+        {
+            return found;
+        }
+
+        try
+        {
+            await ThreadPoolSwitch.Now;
+
+            ModShelfDbContext context = await _contextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
+            await using (context.ConfigureAwait(false))
+            {
+                // A query a game, its mods' details at once.
+                foreach (IGrouping<GameRef, ModRef> game in asked.GroupBy(mod => mod.Game))
+                {
+                    string source = game.Key.Source.Value;
+                    string key = game.Key.Key;
+                    string[] ids = [.. game.Select(mod => mod.Id)];
+                    List<ModDetailsRecord> records = await context.ModDetails
+                        .AsNoTracking()
+                        .Where(row => row.SourceId == source && row.GameKey == key && ids.Contains(row.ModId))
+                        .ToListAsync(cancellationToken)
+                        .ConfigureAwait(false);
+                    foreach (ModDetailsRecord record in records)
+                    {
+                        try
+                        {
+                            SavedModDetails saved = record.ToSaved();
+                            found[saved.Details.Mod] = saved;
+                        }
+                        catch (InvalidDataException exception)
+                        {
+                            // Left out: the mod shows without them, and its own picture reads them again.
+                            LogUnreadable(_logger, record.ModId, key, source, exception.Message);
+                        }
+                    }
+                }
+            }
+        }
+        catch (SqliteException exception)
+        {
+            LogCantFindMany(_logger, asked.Count, LibraryDatabaseMigrator.Problem(exception));
+            return new Dictionary<ModRef, SavedModDetails>();
+        }
+
+        return found;
+    }
+
     public async Task SaveAsync(SavedModDetails details, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(details);

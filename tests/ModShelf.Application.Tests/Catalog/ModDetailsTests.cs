@@ -186,6 +186,23 @@ public sealed class ModDetailsTests : IDisposable
     }
 
     [Fact]
+    public async Task GivesTheSavedDetailsOfManyModsAtOnceWithoutAskingTheSite()
+    {
+        ModRef other = new(Mod.Game, "1");
+        SavedModDetails saved = new(new ModInfo(Mod, "SkyUI, as saved"), TestData.Now - TimeSpan.FromDays(30));
+        _repository.Add(saved);
+
+        IReadOnlyDictionary<ModRef, ModInfo> details = await _details.GetSavedAsync([Mod, other], Cancellation);
+        IReadOnlyDictionary<ModRef, ModInfo> none = await _details.GetSavedAsync([], Cancellation);
+
+        Assert.Equal(saved.Details, Assert.Single(details, pair => pair.Key == Mod).Value);
+        Assert.False(details.ContainsKey(other));
+        Assert.Empty(none);
+        Assert.Equal(1, _repository.Finds);
+        Assert.Empty(_site.Asked);
+    }
+
+    [Fact]
     public async Task CallersAskingMeanwhileShareOneRead()
     {
         HeldCatalog site = new();

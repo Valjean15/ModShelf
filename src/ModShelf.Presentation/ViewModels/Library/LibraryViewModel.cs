@@ -918,11 +918,8 @@ public sealed partial class LibraryViewModel : ScreenViewModel
                         mod => mod.Mod,
                         mod => mod.Files.Count(file => !_pageServices.Storage.FileExists(roots.Resolve(file)))),
                     cancellationToken);
-            Dictionary<ModRef, DateTimeOffset?> updated = [];
-            foreach (LibraryMod mod in mods)
-            {
-                updated[mod.Mod] = (await _pictures.Details.GetSavedAsync(mod.Mod, cancellationToken))?.UpdatedAt;
-            }
+            // The game's saved details at once, not a read a mod (ADR 0084).
+            IReadOnlyDictionary<ModRef, ModInfo> saved = await _pictures.Details.GetSavedAsync([.. mods.Select(mod => mod.Mod)], cancellationToken);
 
             _uiThread.Post(() =>
             {
@@ -936,7 +933,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
                     if (_mods.TryGetValue(mod.Mod, out LibraryModViewModel? row))
                     {
                         row.ShowMissing(missing.GetValueOrDefault(mod.Mod));
-                        row.ShowSiteUpdate(updated.GetValueOrDefault(mod.Mod));
+                        row.ShowSiteUpdate(saved.GetValueOrDefault(mod.Mod)?.UpdatedAt);
                     }
                 }
 

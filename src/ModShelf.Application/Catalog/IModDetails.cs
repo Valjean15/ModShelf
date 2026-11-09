@@ -16,6 +16,12 @@ public interface IModDetails
     /// <see cref="GetAsync"/> answers.</returns>
     Task<ModInfo?> GetSavedAsync(ModRef modRef, CancellationToken cancellationToken);
 
+    /// <returns>
+    /// The details saved for each of the mods that has some, however old, read at once: for a screen showing many mods,
+    /// such as a game's in the Library (ADR 0084).
+    /// </returns>
+    Task<IReadOnlyDictionary<ModRef, ModInfo>> GetSavedAsync(IReadOnlyCollection<ModRef> mods, CancellationToken cancellationToken);
+
     /// <summary>
     /// The mod's details: the saved ones while they're younger than the settings' <c>DetailsMaxAge</c>, otherwise the
     /// site's, which are saved. Callers asking about a mod while its site is being asked share the answer.

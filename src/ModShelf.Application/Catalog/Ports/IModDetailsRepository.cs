@@ -15,6 +15,12 @@ public interface IModDetailsRepository
     /// <exception cref="InvalidDataException">The saved row holds values no details can have.</exception>
     Task<SavedModDetails?> FindAsync(ModRef modRef, CancellationToken cancellationToken);
 
+    /// <returns>
+    /// The saved details of each of the mods that has some; none when the database can't be read. Saved details that hold
+    /// values no details can have are left out, and logged.
+    /// </returns>
+    Task<IReadOnlyDictionary<ModRef, SavedModDetails>> FindAsync(IReadOnlyCollection<ModRef> mods, CancellationToken cancellationToken);
+
     /// <summary>
     /// Saves the details, replacing the mod's saved ones.
     /// </summary>

@@ -261,6 +261,9 @@ public sealed class LibraryByGameTests : IDisposable
         await Screen.Checking;
 
         Assert.Equal(["Address Library: —", "SkyUI: 2 days ago"], Screen.GameMods.Select(mod => $"{mod.Name}: {mod.UpdatedText}"));
+
+        // The game's saved details at once, never a read a mod (ADR 0084).
+        Assert.Equal([2], _harness.Pictures.Details.AskedAtOnce);
     }
 
     [Fact]
