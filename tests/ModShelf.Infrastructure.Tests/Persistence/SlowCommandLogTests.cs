@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -15,7 +17,7 @@ namespace ModShelf.Infrastructure.Tests.Persistence;
 /// A library database command that takes a second or more, as one waiting for another process's lock does, is logged:
 /// how long, and what it was, never its values (ADR 0081).
 /// </summary>
-public sealed class SlowCommandLogTests : IAsyncLifetime
+public sealed partial class SlowCommandLogTests : IAsyncLifetime
 {
     private static readonly ModRef Smapi = new(new GameRef(new SourceId("nexus"), "stardewvalley"), "2400");
     private static readonly DateTimeOffset Now = new(2026, 11, 9, 13, 28, 0, TimeSpan.Zero);
@@ -80,12 +82,17 @@ public sealed class SlowCommandLogTests : IAsyncLifetime
             await using ModShelfDbContext context = new(options);
             context.DownloadJobs.Add(DownloadJobRecord.From(Job("2")));
 
-            // SQLite gives up after the connection's second.
+            // SQLite gives up after the connection's second, or a little more: how much more is each system's own.
             await Assert.ThrowsAnyAsync<DbUpdateException>(() => Task.Run(() => context.SaveChangesAsync(Cancellation), Cancellation));
         }
 
-        Assert.Contains(logs.Entries, entry => entry.Contains("The library database failed INSERT into DownloadJobs after 1.", StringComparison.Ordinal));
+        Assert.True(
+            logs.Entries.Any(entry => FailedAfterWaiting().IsMatch(entry)),
+            $"No failed command was logged, only: {string.Join(" / ", logs.Entries)}");
     }
+
+    [GeneratedRegex(@"The library database failed INSERT into DownloadJobs after [1-9]\d*\.\d s \|")]
+    private static partial Regex FailedAfterWaiting();
 
     private IEnumerable<string> Slow()
         => _database.Logs.Entries.Where(entry => entry.StartsWith($"[{typeof(SlowCommandLog).FullName}]", StringComparison.Ordinal));
