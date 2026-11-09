@@ -13,21 +13,6 @@
         <Style Selector="StackPanel.stripButtons">
             <Setter Property="Grid.Column" Value="1" />
         </Style>
-        <!-- Narrow: the words get the whole row, the buttons go under them; a problem's buttons go under it too. -->
-        <ContainerQuery Name="BrowseScreen" Query="max-width:620">
-            <Style Selector="TextBox.searchWords">
-                <Setter Property="Grid.ColumnSpan" Value="4" />
-            </Style>
-            <Style Selector="Grid.searchRow > :is(Control).searchTool">
-                <Setter Property="Grid.Row" Value="1" />
-                <Setter Property="Margin" Value="0,8,0,0" />
-            </Style>
-            <Style Selector="StackPanel.stripButtons">
-                <Setter Property="Grid.Row" Value="1" />
-                <Setter Property="Grid.Column" Value="0" />
-                <Setter Property="Margin" Value="0,8,0,0" />
-            </Style>
-        </ContainerQuery>
     </UserControl.Styles>
 
     <DockPanel Container.Name="BrowseScreen" Container.Sizing="Width">
@@ -41,6 +26,19 @@
 
         <!-- What to look for: words, or a link to a mod; the filter card, which counts the filters applied; the view. -->
         <Grid DockPanel.Dock="Top" Classes="searchRow" Margin="0,10,0,0" ColumnDefinitions="*,Auto,Auto,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="8">
+            <!-- Narrow: the words get the whole row, the buttons go under them. On the row rather than the screen: a container query
+                 watches every control within its reach, a page of cards too (ADR 0084). -->
+            <Grid.Styles>
+                <ContainerQuery Name="BrowseScreen" Query="max-width:620">
+                    <Style Selector="TextBox.searchWords">
+                        <Setter Property="Grid.ColumnSpan" Value="4" />
+                    </Style>
+                    <Style Selector="Grid.searchRow > :is(Control).searchTool">
+                        <Setter Property="Grid.Row" Value="1" />
+                        <Setter Property="Margin" Value="0,8,0,0" />
+                    </Style>
+                </ContainerQuery>
+            </Grid.Styles>
             <TextBox Classes="searchWords" Text="{Binding SearchText}" PlaceholderText="{x:Static res:Strings.BrowseSearchHint}">
                 <TextBox.KeyBindings>
                     <KeyBinding Gesture="Enter" Command="{Binding SearchCommand}" />
@@ -104,6 +102,16 @@
             <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="8">
                 <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Text="{Binding Problem}" />
                 <StackPanel Classes="stripButtons" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <!-- Narrow: a problem's buttons go under it. -->
+                    <StackPanel.Styles>
+                        <ContainerQuery Name="BrowseScreen" Query="max-width:620">
+                            <Style Selector="StackPanel.stripButtons">
+                                <Setter Property="Grid.Row" Value="1" />
+                                <Setter Property="Grid.Column" Value="0" />
+                                <Setter Property="Margin" Value="0,8,0,0" />
+                            </Style>
+                        </ContainerQuery>
+                    </StackPanel.Styles>
                     <Button Content="{x:Static res:Strings.BrowseGoToAccounts}"
                             Command="{Binding GoToAccountsCommand}"
                             IsVisible="{Binding NeedsAccount}" />

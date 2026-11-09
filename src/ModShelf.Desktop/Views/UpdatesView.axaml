@@ -10,7 +10,9 @@
 
     <!--
       The previews and buttons beside the heading, and an update's Skip and Download beside what it says; in a narrow
-      window, below them. Their places are set here rather than on them, so the narrow window's can replace them.
+      window, below them. Their places are set here rather than on them, so the narrow window's can replace them. The
+      narrow window's are on what holds the controls they place, never on the whole screen: a container query watches
+      every control within its reach (ADR 0084).
     -->
     <UserControl.Styles>
         <Style Selector="StackPanel.tools">
@@ -19,23 +21,19 @@
         <Style Selector="StackPanel.updateButtons">
             <Setter Property="Grid.Column" Value="2" />
         </Style>
-        <ContainerQuery Name="UpdatesScreen" Query="max-width:620">
-            <Style Selector="StackPanel.tools">
-                <Setter Property="Grid.Row" Value="1" />
-                <Setter Property="Grid.Column" Value="0" />
-                <Setter Property="Margin" Value="0,0,0,16" />
-            </Style>
-            <Style Selector="StackPanel.updateButtons">
-                <Setter Property="Grid.Row" Value="1" />
-                <Setter Property="Grid.Column" Value="1" />
-                <Setter Property="HorizontalAlignment" Value="Left" />
-                <Setter Property="Margin" Value="0,8,0,0" />
-            </Style>
-        </ContainerQuery>
     </UserControl.Styles>
 
     <DockPanel Container.Name="UpdatesScreen" Container.Sizing="Width">
         <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="16">
+            <Grid.Styles>
+                <ContainerQuery Name="UpdatesScreen" Query="max-width:620">
+                    <Style Selector="StackPanel.tools">
+                        <Setter Property="Grid.Row" Value="1" />
+                        <Setter Property="Grid.Column" Value="0" />
+                        <Setter Property="Margin" Value="0,0,0,16" />
+                    </Style>
+                </ContainerQuery>
+            </Grid.Styles>
             <StackPanel Spacing="2" Margin="0,0,0,16">
                 <TextBlock Classes="heading" Margin="0" Text="{Binding Title}" />
                 <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding SummaryText}" />
@@ -161,6 +159,16 @@
                                                         </StackPanel>
 
                                                         <StackPanel Classes="updateButtons" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
+                                                            <StackPanel.Styles>
+                                                                <ContainerQuery Name="UpdatesScreen" Query="max-width:620">
+                                                                    <Style Selector="StackPanel.updateButtons">
+                                                                        <Setter Property="Grid.Row" Value="1" />
+                                                                        <Setter Property="Grid.Column" Value="1" />
+                                                                        <Setter Property="HorizontalAlignment" Value="Left" />
+                                                                        <Setter Property="Margin" Value="0,8,0,0" />
+                                                                    </Style>
+                                                                </ContainerQuery>
+                                                            </StackPanel.Styles>
                                                             <Button Classes="quiet"
                                                                     Content="{x:Static res:Strings.UpdateSkip}"
                                                                     Command="{Binding SkipCommand}"

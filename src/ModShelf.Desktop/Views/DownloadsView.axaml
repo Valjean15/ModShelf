@@ -6,19 +6,6 @@
              x:Class="ModShelf.Desktop.Views.DownloadsView"
              x:DataType="vm:DownloadsViewModel">
 
-    <UserControl.Styles>
-        <!-- Narrow: the link gets the whole row, its buttons go under it. -->
-        <ContainerQuery Name="DownloadsScreen" Query="max-width:620">
-            <Style Selector="TextBox.linkBox">
-                <Setter Property="Grid.ColumnSpan" Value="3" />
-            </Style>
-            <Style Selector="Grid.linkRow > Button">
-                <Setter Property="Grid.Row" Value="1" />
-                <Setter Property="Margin" Value="0,8,0,0" />
-            </Style>
-        </ContainerQuery>
-    </UserControl.Styles>
-
     <DockPanel Container.Name="DownloadsScreen" Container.Sizing="Width">
         <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" ColumnSpacing="16" Margin="0,0,0,16">
             <StackPanel Spacing="2">
@@ -33,6 +20,19 @@
 
         <!-- A link goes into the library, or into a folder the user picks. Enter downloads it into the library. -->
         <Grid DockPanel.Dock="Top" Classes="linkRow" ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="8">
+            <!-- Narrow: the link gets the whole row, its buttons go under it. On the row rather than the screen: a container query
+                 watches every control within its reach (ADR 0084). -->
+            <Grid.Styles>
+                <ContainerQuery Name="DownloadsScreen" Query="max-width:620">
+                    <Style Selector="TextBox.linkBox">
+                        <Setter Property="Grid.ColumnSpan" Value="3" />
+                    </Style>
+                    <Style Selector="Grid.linkRow > Button">
+                        <Setter Property="Grid.Row" Value="1" />
+                        <Setter Property="Margin" Value="0,8,0,0" />
+                    </Style>
+                </ContainerQuery>
+            </Grid.Styles>
             <TextBox Name="LinkBox"
                      Classes="linkBox"
                      Text="{Binding Link}"
