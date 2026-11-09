@@ -28,6 +28,8 @@ internal sealed partial class DownloadJobRepository : IDownloadJobRepository
     {
         ArgumentNullException.ThrowIfNull(job);
 
+        await ThreadPoolSwitch.Now;
+
         ModShelfDbContext context = await _contextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
         await using (context.ConfigureAwait(false))
         {
@@ -49,6 +51,8 @@ internal sealed partial class DownloadJobRepository : IDownloadJobRepository
         long bytesDownloaded = job.BytesDownloaded;
         long? totalBytes = job.TotalBytes;
         DownloadFailureReason? failureReason = job.FailureReason;
+
+        await ThreadPoolSwitch.Now;
 
         ModShelfDbContext context = await _contextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
         await using (context.ConfigureAwait(false))
@@ -77,6 +81,8 @@ internal sealed partial class DownloadJobRepository : IDownloadJobRepository
     /// </summary>
     public async Task<IReadOnlyList<DownloadJob>> ListAsync(CancellationToken cancellationToken)
     {
+        await ThreadPoolSwitch.Now;
+
         ModShelfDbContext context = await _contextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
         await using (context.ConfigureAwait(false))
         {
@@ -112,6 +118,8 @@ internal sealed partial class DownloadJobRepository : IDownloadJobRepository
         }
 
         Guid[] keys = [.. ids.Select(id => id.Value)];
+        await ThreadPoolSwitch.Now;
+
         ModShelfDbContext context = await _contextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
         await using (context.ConfigureAwait(false))
         {

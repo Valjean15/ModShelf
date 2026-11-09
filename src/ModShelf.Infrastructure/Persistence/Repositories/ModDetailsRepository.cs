@@ -36,6 +36,8 @@ internal sealed partial class ModDetailsRepository : IModDetailsRepository
         ModDetailsRecord? record;
         try
         {
+            await ThreadPoolSwitch.Now;
+
             ModShelfDbContext context = await _contextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
             await using (context.ConfigureAwait(false))
             {
@@ -62,6 +64,8 @@ internal sealed partial class ModDetailsRepository : IModDetailsRepository
         ModRef mod = details.Details.Mod;
         try
         {
+            await ThreadPoolSwitch.Now;
+
             ModShelfDbContext context = await _contextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
             await using (context.ConfigureAwait(false))
             {

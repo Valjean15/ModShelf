@@ -26,6 +26,8 @@ internal sealed class LibraryRepository : ILibraryRepository
     /// <exception cref="InvalidDataException">A stored row holds values no library mod can have.</exception>
     public async Task<IReadOnlyList<LibraryMod>> ListAsync(CancellationToken cancellationToken)
     {
+        await ThreadPoolSwitch.Now;
+
         ModShelfDbContext context = await _contextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
         await using (context.ConfigureAwait(false))
         {
@@ -48,6 +50,8 @@ internal sealed class LibraryRepository : ILibraryRepository
     {
         ArgumentNullException.ThrowIfNull(modRef);
 
+        await ThreadPoolSwitch.Now;
+
         ModShelfDbContext context = await _contextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
         await using (context.ConfigureAwait(false))
         {
@@ -69,6 +73,8 @@ internal sealed class LibraryRepository : ILibraryRepository
     {
         ArgumentNullException.ThrowIfNull(modRef);
         ArgumentNullException.ThrowIfNull(change);
+
+        await ThreadPoolSwitch.Now;
 
         ModShelfDbContext context = await _contextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
         await using (context.ConfigureAwait(false))

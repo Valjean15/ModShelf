@@ -17,6 +17,8 @@ internal sealed class LibraryHistoryRepository(IDbContextFactory<ModShelfDbConte
     {
         ArgumentNullException.ThrowIfNull(events);
 
+        await ThreadPoolSwitch.Now;
+
         ModShelfDbContext context = await _contextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
         await using (context.ConfigureAwait(false))
         {
@@ -29,6 +31,8 @@ internal sealed class LibraryHistoryRepository(IDbContextFactory<ModShelfDbConte
     public async Task<IReadOnlyList<LibraryEvent>> ListAsync(DateTimeOffset? since, int limit, CancellationToken cancellationToken)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(limit, 1);
+
+        await ThreadPoolSwitch.Now;
 
         ModShelfDbContext context = await _contextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
         await using (context.ConfigureAwait(false))

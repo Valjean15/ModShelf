@@ -25,6 +25,8 @@ internal sealed class LinkedAccountRepository : ILinkedAccountRepository
     /// <exception cref="InvalidDataException">A stored row holds values no account can have.</exception>
     public async Task<IReadOnlyList<LinkedAccount>> ListAsync(CancellationToken cancellationToken)
     {
+        await ThreadPoolSwitch.Now;
+
         ModShelfDbContext context = await _contextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
         await using (context.ConfigureAwait(false))
         {
@@ -41,6 +43,8 @@ internal sealed class LinkedAccountRepository : ILinkedAccountRepository
     public async Task SaveAsync(LinkedAccount account, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(account);
+
+        await ThreadPoolSwitch.Now;
 
         ModShelfDbContext context = await _contextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
         await using (context.ConfigureAwait(false))
@@ -66,6 +70,8 @@ internal sealed class LinkedAccountRepository : ILinkedAccountRepository
         ArgumentNullException.ThrowIfNull(source);
 
         string sourceId = source.Value;
+        await ThreadPoolSwitch.Now;
+
         ModShelfDbContext context = await _contextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
         await using (context.ConfigureAwait(false))
         {
