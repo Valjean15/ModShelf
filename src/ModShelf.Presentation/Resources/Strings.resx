@@ -3391,6 +3391,10 @@
     <value>For agents' apps that reach servers by address. ModShelf serves it while it runs and agents are allowed, to the apps on this computer alone.</value>
     <comment>Under the Address heading.</comment>
   </data>
+  <data name="AgentsProcessesNote" xml:space="preserve">
+    <value>Each agent's app starts ModShelf's command line for itself while it runs, Claude Desktop on Windows twice, and the address is one more: several ModShelf.Cli processes are expected. They wait for their agents' calls.</value>
+    <comment>Under the Address part of the Agents card: why Task Manager shows several ModShelf.Cli processes.</comment>
+  </data>
   <data name="AgentsPortLabel" xml:space="preserve">
     <value>Port</value>
     <comment>Label of the box for the address port.</comment>

@@ -401,6 +401,7 @@
                                                      AutomationProperties.Name="{x:Static res:Strings.AgentsPortLabel}" />
                                             <Button Content="{x:Static res:Strings.AgentsPortSave}" Command="{Binding SavePortCommand}" />
                                         </StackPanel>
+                                        <TextBlock Classes="note" TextWrapping="Wrap" Margin="0,4,0,0" Text="{x:Static res:Strings.AgentsProcessesNote}" />
                                     </StackPanel>
 
                                     <TextBlock Classes="problem" TextWrapping="Wrap" Text="{Binding Problem}" IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}" />
