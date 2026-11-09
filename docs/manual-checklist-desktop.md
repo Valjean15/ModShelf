@@ -56,6 +56,8 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
   It opens where and as large as it was, the sidebar collapsed, on Downloads. Maximized, it opens maximized, and restoring it gives the size before. With its monitor gone, it opens whole and centred on the main one, no larger than that screen. `ui-state.json` in the test folder has the window's place, `"menuCollapsed"` and `"screen"`.
 - [ ] **1.8 A narrow window.** Make the window about 700 pixels wide, with the sidebar open, and look at the Library, Browse and Downloads screens; then make it wide again.
   Nothing is cut off or squeezed into a narrow column: the Library's **Recent activity** and **Rescan** go under its title and summary; Browse's words box takes the whole row, with **Search**, **Filters** and the view switch under it, and a problem's buttons go under its text; Downloads' link box takes the whole row, with **Download** and **Save to a folder…** under it. Wide again, each is back on one row.
+- [ ] **1.9 The database writes ahead.** While the app runs, list the test folder: `Get-ChildItem $test`.
+  `library.db-wal` and `library.db-shm` are beside `library.db`. The log (section 13) has "The library database now writes ahead of its file (WAL), so reading it never waits for a change" once, from the first start. After **Quit ModShelf**, both files are gone.
 
 ## 2. Link the account
 
@@ -321,6 +323,13 @@ Nexus Mods' **Mod manager download** buttons hand a download over with an `nxm:/
   ```
 
   Every line found reads `apikey: *`, if any: the log names the header but never shows its value. No line holds `key=` or `nxm://`.
+- [ ] **13.2 What each run is.** Look at the start of each run in the newest `desktop-*.log`, and search the files for Polly:
+
+  ```powershell
+  Select-String -Path (Join-Path $test 'logs\desktop-*.log') -Pattern 'ProcessStartLog', 'Polly'
+  ```
+
+  Each start of the app has a line such as "ModShelf 1.0.1 (…): the desktop app, process 4100, started by pwsh (process 3900)", its process ID as Task Manager's **Details** shows it. Polly's lines, if any, are warnings: no "Information Polly" line, though the app spoke to Nexus Mods throughout.
 
 ## 14. Unlink the account
 
@@ -360,6 +369,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 1.6 One app at a time | | | |
 | 1.7 The window comes back as it was | | | |
 | 1.8 A narrow window | | | |
+| 1.9 The database writes ahead | | | |
 | 2.1 Card | | | |
 | 2.2 Wrong key refused | | | |
 | 2.3 API key page | | | |
@@ -468,5 +478,6 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 12.7 Give them back | | | |
 | 12.8 Clicked after | | | |
 | 13.1 Log files | | | |
+| 13.2 What each run is | | | |
 | 14.1 Unlink | | | |
 | 14.2 Browse needs it | | | |

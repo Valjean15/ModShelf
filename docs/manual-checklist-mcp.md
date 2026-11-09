@@ -41,6 +41,12 @@ Settings › **Agents** in the desktop app. Agents are off until you turn them o
   served.
 - [ ] **0.8 The agent can't.** Ask the agent to turn agents off, or to change their port.
   It says those are the user's to change, in ModShelf's Settings, Agents, or with the CLI; `settings.json` is as it was.
+- [ ] **0.9 Several processes.** With Claude Desktop, Claude Code and the desktop app running, agents on, look at
+  Task Manager's **Details**, and the newest `cli-*.log` files in the library's `logs` folder.
+  Several `ModShelf.Cli.exe`: one for the address, and Claude Desktop's (two on Windows) and Claude Code's. Settings ›
+  Agents says so under the port. Each one's log starts with "the command line, mcp" or "the command line, mcp --http
+  --port --parent", its process ID, and the app that started it, such as `claude` or `ModShelf.Desktop`. Ask the agent
+  to rescan the library while you open a game's settings in the app with the gear: the settings open at once.
 
 ## 1. The server
 
@@ -155,6 +161,7 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 0.6 The address | | |
 | 0.7 A port in use | | |
 | 0.8 The agent can't | | |
+| 0.9 Several processes | | |
 | 1.1 Tools | | |
 | 1.2 Reading | | |
 | 1.3 Accounts | | |
