@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/apiv11/Mod/901616879",
+    "query": "_csvProperties=_idRow%2C_sName%2C_aGame"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "text/html; charset=UTF-8"
+    },
+    "body": {
+      "_sErrorCode": "NO_SUCH_RECORD",
+      "_sErrorMessage": "This Mod doesn't exist"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/apiv11/Mod/440088",
+    "query": "_csvProperties=_idRow%2C_sName%2C_aGame"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "body": {
+      "_idRow": 440088,
+      "_sName": "P5R Female Protagonist",
+      "_aGame": {
+        "_idRow": 16951,
+        "_sName": "Persona 5 Royal (PC)",
+        "_sAbbreviation": "P5R (PC)",
+        "_sProfileUrl": "https://gamebanana.com/games/16951",
+        "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png",
+        "_sBannerUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png",
+        "_nSubscriberCount": 8593,
+        "_bHasSubmissionQueue": false,
+        "_bAccessorIsSubscribed": false
+      }
+    }
+  }
+}

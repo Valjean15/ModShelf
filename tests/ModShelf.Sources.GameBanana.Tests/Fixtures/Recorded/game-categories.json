@@ -1,0 +1,113 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/apiv11/Mod/Categories",
+    "query": "_idGameRow=16951&_sSort=a_to_z&_bShowEmpty=true"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "body": [
+      {
+        "_idRow": 20176,
+        "_sName": "Battles",
+        "_nItemCount": 28,
+        "_nCategoryCount": 0,
+        "_sUrl": "https://gamebanana.com/mods/cats/20176",
+        "_bIsObsolete": false,
+        "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8a349649aa.png"
+      },
+      {
+        "_idRow": 19624,
+        "_sName": "Cheats",
+        "_nItemCount": 22,
+        "_nCategoryCount": 0,
+        "_sUrl": "https://gamebanana.com/mods/cats/19624",
+        "_bIsObsolete": false,
+        "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8a7f4d5e89.png"
+      },
+      {
+        "_idRow": 19701,
+        "_sName": "Cutscenes / FMV",
+        "_nItemCount": 22,
+        "_nCategoryCount": 0,
+        "_sUrl": "https://gamebanana.com/mods/cats/19701",
+        "_bIsObsolete": false,
+        "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d80f86eaa.png"
+      },
+      {
+        "_idRow": 20019,
+        "_sName": "Events",
+        "_nItemCount": 44,
+        "_nCategoryCount": 0,
+        "_sUrl": "https://gamebanana.com/mods/cats/20019",
+        "_bIsObsolete": false,
+        "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63824cd033f15.png"
+      },
+      {
+        "_idRow": 19625,
+        "_sName": "Fixes",
+        "_nItemCount": 8,
+        "_nCategoryCount": 0,
+        "_sUrl": "https://gamebanana.com/mods/cats/19625",
+        "_bIsObsolete": false,
+        "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d803403c2.png"
+      },
+      {
+        "_idRow": 19636,
+        "_sName": "Models",
+        "_nItemCount": 421,
+        "_nCategoryCount": 5,
+        "_sUrl": "https://gamebanana.com/mods/cats/19636",
+        "_bIsObsolete": false,
+        "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8ab57cbd95.png"
+      },
+      {
+        "_idRow": 18444,
+        "_sName": "Other/Misc",
+        "_nItemCount": 137,
+        "_nCategoryCount": 0,
+        "_sUrl": "https://gamebanana.com/mods/cats/18444",
+        "_bIsObsolete": false
+      },
+      {
+        "_idRow": 19711,
+        "_sName": "QOL",
+        "_nItemCount": 56,
+        "_nCategoryCount": 0,
+        "_sUrl": "https://gamebanana.com/mods/cats/19711",
+        "_bIsObsolete": false,
+        "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d81a64138.png"
+      },
+      {
+        "_idRow": 19663,
+        "_sName": "Save Files",
+        "_nItemCount": 19,
+        "_nCategoryCount": 0,
+        "_sUrl": "https://gamebanana.com/mods/cats/19663",
+        "_bIsObsolete": false,
+        "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8a894c214d.png"
+      },
+      {
+        "_idRow": 20523,
+        "_sName": "Skill Change",
+        "_nItemCount": 29,
+        "_nCategoryCount": 0,
+        "_sUrl": "https://gamebanana.com/mods/cats/20523",
+        "_bIsObsolete": false,
+        "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/641585b539d35.png"
+      },
+      {
+        "_idRow": 19627,
+        "_sName": "Textures",
+        "_nItemCount": 132,
+        "_nCategoryCount": 8,
+        "_sUrl": "https://gamebanana.com/mods/cats/19627",
+        "_bIsObsolete": false,
+        "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63825a6361dca.png"
+      }
+    ]
+  }
+}

@@ -1,0 +1,175 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/apiv11/Util/Search/Results",
+    "query": "_sModelName=Mod&_sOrder=best_match&_idGameRow=16951&_sSearchString=Workable&_nPage=1"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "body": {
+      "_aMetadata": {
+        "_nRecordCount": 2,
+        "_nPerpage": 15,
+        "_bIsComplete": true
+      },
+      "_aRecords": [
+        {
+          "_idRow": 738438,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Workable Maid Café - Rose & Violet",
+          "_sProfileUrl": "https://gamebanana.com/mods/738438",
+          "_tsDateAdded": 1794242495,
+          "_tsDateModified": 1794287790,
+          "_bHasFiles": true,
+          "_aTags": [],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6af1f9277a526.jpg",
+                "_sFile220": "220-90_6af1f9277a526.jpg",
+                "_hFile220": 146,
+                "_wFile220": 220,
+                "_sFile530": "530-90_6af1f9277a526.jpg",
+                "_hFile530": 351,
+                "_wFile530": 530,
+                "_sFile100": "100-90_6af1f9277a526.jpg",
+                "_hFile100": 66,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6af1f6a671656.jpg",
+                "_sFile100": "100-90_6af1f6a671656.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 5252327,
+            "_sName": "dripping-mercury",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/5252327",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/69ba0125a6cba.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Events",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/20019",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63824cd033f15.png"
+          },
+          "_sVersion": "",
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 7,
+          "_bWasFeatured": false,
+          "_nViewCount": 402,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 463828,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "GARO Knights for Dudes",
+          "_sProfileUrl": "https://gamebanana.com/mods/463828",
+          "_tsDateAdded": 1692637532,
+          "_tsDateModified": 1692637532,
+          "_bHasFiles": true,
+          "_aTags": [],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "64e395379edc8.jpg",
+                "_sFile220": "220-90_64e395379edc8.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_64e395379edc8.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_64e395379edc8.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_64e395379edc8.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "64e395e0ce1eb.jpg",
+                "_sFile100": "100-90_64e395e0ce1eb.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1741778,
+            "_sName": "Ercar",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1741778",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/65179390e22cd.png",
+            "_aClearanceLevels": [
+              "DSTS Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/651793853905f.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/64c99040dd03b.png",
+            "_aSubjectShaper": {
+              "_sBorderStyle": "Stroke",
+              "_sFont": "Arial",
+              "_sTextColor": "#00e1ff",
+              "_sTextHoverColor": "#72fdae",
+              "_sBorderColor": "#000000",
+              "_sBorderHoverColor": "#000000"
+            },
+            "_sSubjectShaperCssCode": "font-family:'Arial';color:#00e1ff;"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Models",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19636",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8ab57cbd95.png"
+          },
+          "_aSubCategory": {
+            "_sName": "Model Packs",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19641",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/638245fa1d41a.png"
+          },
+          "_sVersion": "",
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 50,
+          "_nPostCount": 22,
+          "_bWasFeatured": false,
+          "_nViewCount": 7938,
+          "_bIsOwnedByAccessor": false
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,1984 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/apiv11/Game/Index",
+    "query": "_nPage=57&_nPerpage=50&_sSort=Generic_Alphabetically"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "body": {
+      "_aMetadata": {
+        "_nRecordCount": 4835,
+        "_bIsComplete": false,
+        "_nPerpage": 50
+      },
+      "_aRecords": [
+        {
+          "_idRow": 26080,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Patafour",
+          "_sProfileUrl": "https://gamebanana.com/games/26080",
+          "_tsDateAdded": 1791707331,
+          "_tsDateModified": 1791707331,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6acb48c1af623.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 5540952,
+            "_sName": "TheNothing12gamebanana",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/5540952",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "Patafour",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 23826,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "PATAPON 1+2 REPLAY",
+          "_sProfileUrl": "https://gamebanana.com/games/23826",
+          "_tsDateAdded": 1764000815,
+          "_tsDateModified": 1764000815,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2001516,
+            "_sName": "TimerBunneh",
+            "_bIsOnline": false,
+            "_bHasRipe": true,
+            "_sProfileUrl": "https://gamebanana.com/members/2001516",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6562c067aac39.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/67fd3354558bf.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/64b6acc8c07cf.png",
+            "_sHovatarUrl": "https://images.gamebanana.com/img/av/6562c06e2a7ce.png"
+          },
+          "_sAbbreviation": "PATA1+2RE",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 7442,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Path of Exile",
+          "_sProfileUrl": "https://gamebanana.com/games/7442",
+          "_tsDateAdded": 1564984150,
+          "_tsDateModified": 1565748845,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5d536d47ac2db.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5d536ccccb74e.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1699653,
+            "_sName": "alexander18",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1699653",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "PoE",
+          "_sHomepage": "https://www.pathofexile.com/game",
+          "_dsReleaseDate": "2013-10-23",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22701,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Path of Exile 2",
+          "_sProfileUrl": "https://gamebanana.com/games/22701",
+          "_tsDateAdded": 1749281917,
+          "_tsDateModified": 1749281917,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4365626,
+            "_sName": "Mindwarp575",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4365626",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "PoE2",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 17808,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Pathologic Classic HD",
+          "_sProfileUrl": "https://gamebanana.com/games/17808",
+          "_tsDateAdded": 1673638222,
+          "_tsDateModified": 1750976405,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/685dc78a08d2e.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/685dc78cdcd0c.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2126765,
+            "_sName": "Ghost2126765",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2126765",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "Pathologic",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 16382,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Pavlov Shack",
+          "_sProfileUrl": "https://gamebanana.com/games/16382",
+          "_tsDateAdded": 1651904618,
+          "_tsDateModified": 1651904618,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/62761056c6833.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2127780,
+            "_sName": "turdlar",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2127780",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6276160b053e0.png"
+          },
+          "_sAbbreviation": "Pavlov",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 5240,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "PAYDAY 2",
+          "_sProfileUrl": "https://gamebanana.com/games/5240",
+          "_tsDateAdded": 1378500110,
+          "_tsDateModified": 1691796119,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5ac1b77bbe7fa.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5ac1b6fc5bdab.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1296846,
+            "_sName": "Digital Assassin",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1296846",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/54a69808bb4a7.jpg",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/54a6981dbb572.png"
+          },
+          "_sAbbreviation": "PAYDAY 2",
+          "_sHomepage": "",
+          "_dsReleaseDate": "1970-01-01",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 18861,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "PAYDAY 3",
+          "_sProfileUrl": "https://gamebanana.com/games/18861",
+          "_tsDateAdded": 1691090295,
+          "_tsDateModified": 1760858050,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/64d6c486147c3.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/64d6c488b3e83.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2054165,
+            "_sName": "FlareK7gaming",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2054165",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/631410aa68091.png"
+          },
+          "_sAbbreviation": "PAYDAY 3",
+          "_sHomepage": "https://www.paydaythegame.com/payday3/",
+          "_dsReleaseDate": "2023-09-21",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 5189,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "PAYDAY: The Heist",
+          "_sProfileUrl": "https://gamebanana.com/games/5189",
+          "_tsDateAdded": 1370184491,
+          "_tsDateModified": 1691796360,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5b2e9bd880e19.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5ac1be86f1dc2.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1352668,
+            "_sName": "Napwon",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1352668",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "PAYDAY",
+          "_sHomepage": "",
+          "_dsReleaseDate": "1970-01-01",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22893,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "PEAK",
+          "_sProfileUrl": "https://gamebanana.com/games/22893",
+          "_tsDateAdded": 1750307542,
+          "_tsDateModified": 1750307542,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4365626,
+            "_sName": "Mindwarp575",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4365626",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "PEAK",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 19820,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Peaks of Yore",
+          "_sProfileUrl": "https://gamebanana.com/games/19820",
+          "_tsDateAdded": 1707171394,
+          "_tsDateModified": 1707171394,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/65c15e3e27aef.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2128779,
+            "_sName": "Spleek",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2128779",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/69de6ddf8daea.png"
+          },
+          "_sAbbreviation": "PoY",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 21728,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Peaky Blinders: Masterminds",
+          "_sProfileUrl": "https://gamebanana.com/games/21728",
+          "_tsDateAdded": 1736486821,
+          "_tsDateModified": 1736486821,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4083445,
+            "_sName": "IGTCTeam",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4083445",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "P.Blinders",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 24893,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "PeeWee Purpdrank's FOENEM Clicker",
+          "_sProfileUrl": "https://gamebanana.com/games/24893",
+          "_tsDateAdded": 1779608366,
+          "_tsDateModified": 1779608366,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6a12ab172ac2f.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1635488,
+            "_sName": "spoopypoopys",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1635488",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6a13e25141319.png"
+          },
+          "_sAbbreviation": "FC",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 21245,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Peggle Deluxe",
+          "_sProfileUrl": "https://gamebanana.com/games/21245",
+          "_tsDateAdded": 1729381122,
+          "_tsDateModified": 1729381122,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/671442de75ad1.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 3893733,
+            "_sName": "HeliosWx",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/3893733",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/67143533c52e9.gif"
+          },
+          "_sAbbreviation": "Peggle Dlx",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 6197,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Peggle Nights",
+          "_sProfileUrl": "https://gamebanana.com/games/6197",
+          "_tsDateAdded": 1511833139,
+          "_tsDateModified": 1512052622,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5a1ca6001f6aa.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5a2016d1e865a.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1508044,
+            "_sName": "SneakyKNG",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1508044",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/690a5f3de254e.gif",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/690a6302a4c76.gif",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/690a61d0e03c7.png"
+          },
+          "_sAbbreviation": "Peggle N",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 19181,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Pellet Dodge",
+          "_sProfileUrl": "https://gamebanana.com/games/19181",
+          "_tsDateAdded": 1695612090,
+          "_tsDateModified": 1695612090,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1985108,
+            "_sName": "Lyvri",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1985108",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6541671e07a7c.png"
+          },
+          "_sAbbreviation": "PD",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 19899,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Penny's Big Breakaway",
+          "_sProfileUrl": "https://gamebanana.com/games/19899",
+          "_tsDateAdded": 1708654708,
+          "_tsDateModified": 1708654708,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/65d80001241ab.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2170627,
+            "_sName": "12oat",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2170627",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/64779985cba94.jpg"
+          },
+          "_sAbbreviation": "PennyBreak",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 17786,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Pentiment",
+          "_sProfileUrl": "https://gamebanana.com/games/17786",
+          "_tsDateAdded": 1672992883,
+          "_tsDateModified": 1672992883,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/63b7d8530a8e1.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2029184,
+            "_sName": "Ghost2029184",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2029184",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "Pentiment",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 728,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Penumbra: Overture",
+          "_sProfileUrl": "https://gamebanana.com/games/728",
+          "_tsDateAdded": 1182460653,
+          "_tsDateModified": 1523818646,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/penumbra_icon_2.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5ad3a0948965b.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 118154,
+            "_sName": "nintentofu",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/118154",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/118154.gif"
+          },
+          "_sAbbreviation": "P:O",
+          "_sHomepage": "http://penumbra-overture.com/index.php",
+          "_dsReleaseDate": "2007-03-15",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 7715,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "People Playground",
+          "_sProfileUrl": "https://gamebanana.com/games/7715",
+          "_tsDateAdded": 1575401771,
+          "_tsDateModified": 1575651573,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5de6b925d3040.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5dea86a40b663.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1709642,
+            "_sName": "yawnrock",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1709642",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/61576b1927d58.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/61576a85b7060.png"
+          },
+          "_sAbbreviation": "PP",
+          "_sHomepage": "",
+          "_dsReleaseDate": "2019-07-23",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22744,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "PEP",
+          "_sProfileUrl": "https://gamebanana.com/games/22744",
+          "_tsDateAdded": 1749440117,
+          "_tsDateModified": 1749440117,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4365626,
+            "_sName": "Mindwarp575",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4365626",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "PEP",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22279,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "PEPPERED",
+          "_sProfileUrl": "https://gamebanana.com/games/22279",
+          "_tsDateAdded": 1745103544,
+          "_tsDateModified": 1745103544,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4365626,
+            "_sName": "Mindwarp575",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4365626",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "PEPPERED",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22065,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Pepsiman",
+          "_sProfileUrl": "https://gamebanana.com/games/22065",
+          "_tsDateAdded": 1742432644,
+          "_tsDateModified": 1750892415,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/685c7f736f915.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/685c7f76f086d.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2107938,
+            "_sName": "BlackberryNinji",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2107938",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6a54648c596ba.jpg"
+          },
+          "_sAbbreviation": "PM",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 25505,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Perfect Dark",
+          "_sProfileUrl": "https://gamebanana.com/games/25505",
+          "_tsDateAdded": 1786310379,
+          "_tsDateModified": 1786310379,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6a78eee8803d6.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1383041,
+            "_sName": "Huguito2k",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1383041",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/54b435eae9c1c.jpg",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/68eaaa27a53fd.jpg",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/68a2c2aad2ead.png"
+          },
+          "_sAbbreviation": "PD",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 275,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Perfect Dark Source",
+          "_sProfileUrl": "https://gamebanana.com/games/275",
+          "_tsDateAdded": 1169141716,
+          "_tsDateModified": 1362760215,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/pdark_o.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/logo.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 30016,
+            "_sName": "Duckster",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/30016",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/_266-.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/_32-.png"
+          },
+          "_sAbbreviation": "PDS",
+          "_sHomepage": "http://www.pdark-mod.com/",
+          "_dsReleaseDate": "2007-05-15",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 14130,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona (PSX)",
+          "_sProfileUrl": "https://gamebanana.com/games/14130",
+          "_tsDateAdded": 1632947625,
+          "_tsDateModified": 1669509321,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6154ccb4be35d.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/63052dce0d8f1.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1847570,
+            "_sName": "Quantum_Dog",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1847570",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/61c710dc6342f.jpg",
+            "_aClearanceLevels": [
+              "SMT P1 PSP Manager",
+              "SMT III HD Manager",
+              "P2EP (PSX) Manager",
+              "P2EP (PSP) Manager",
+              "P2IS (PSX) Manager",
+              "SMT: P2IS Manager",
+              "MIP Manager",
+              "Persona Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/62f59cbf833f8.gif",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/63e2bcad0809a.png"
+          },
+          "_sAbbreviation": "Persona",
+          "_sHomepage": "",
+          "_dsReleaseDate": "1996-09-20",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 15590,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 2 Eternal Punishment (PSP)",
+          "_sProfileUrl": "https://gamebanana.com/games/15590",
+          "_tsDateAdded": 1642977380,
+          "_tsDateModified": 1664257474,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/61edd86019b37.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/63328dc1293c0.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1847570,
+            "_sName": "Quantum_Dog",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1847570",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/61c710dc6342f.jpg",
+            "_aClearanceLevels": [
+              "SMT P1 PSP Manager",
+              "SMT III HD Manager",
+              "P2EP (PSX) Manager",
+              "P2EP (PSP) Manager",
+              "P2IS (PSX) Manager",
+              "SMT: P2IS Manager",
+              "MIP Manager",
+              "Persona Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/62f59cbf833f8.gif",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/63e2bcad0809a.png"
+          },
+          "_sAbbreviation": "P2EP (PSP)",
+          "_sHomepage": "https://www.atlus.co.jp/title-archive/p2ep/",
+          "_dsReleaseDate": "2012-06-28",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 15605,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 2 Eternal Punishment (PSX)",
+          "_sProfileUrl": "https://gamebanana.com/games/15605",
+          "_tsDateAdded": 1643085711,
+          "_tsDateModified": 1661398789,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/61ef7f8aeb98e.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/6306ed8e6164e.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1847570,
+            "_sName": "Quantum_Dog",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1847570",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/61c710dc6342f.jpg",
+            "_aClearanceLevels": [
+              "SMT P1 PSP Manager",
+              "SMT III HD Manager",
+              "P2EP (PSX) Manager",
+              "P2EP (PSP) Manager",
+              "P2IS (PSX) Manager",
+              "SMT: P2IS Manager",
+              "MIP Manager",
+              "Persona Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/62f59cbf833f8.gif",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/63e2bcad0809a.png"
+          },
+          "_sAbbreviation": "P2EP (PSX)",
+          "_sHomepage": "",
+          "_dsReleaseDate": "2000-06-29",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 15606,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 2: Innocent Sin (PSX)",
+          "_sProfileUrl": "https://gamebanana.com/games/15606",
+          "_tsDateAdded": 1643086132,
+          "_tsDateModified": 1661454818,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/61ef812fcf088.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/6306ecdb3d163.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1847570,
+            "_sName": "Quantum_Dog",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1847570",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/61c710dc6342f.jpg",
+            "_aClearanceLevels": [
+              "SMT P1 PSP Manager",
+              "SMT III HD Manager",
+              "P2EP (PSX) Manager",
+              "P2EP (PSP) Manager",
+              "P2IS (PSX) Manager",
+              "SMT: P2IS Manager",
+              "MIP Manager",
+              "Persona Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/62f59cbf833f8.gif",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/63e2bcad0809a.png"
+          },
+          "_sAbbreviation": "P2IS (PSX)",
+          "_sHomepage": "",
+          "_dsReleaseDate": "1999-06-24",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 25803,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 3 (PS2)",
+          "_sProfileUrl": "https://gamebanana.com/games/25803",
+          "_tsDateAdded": 1789062973,
+          "_tsDateModified": 1789062973,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6aa2ee7f4b188.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1856468,
+            "_sName": "High Haddock",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1856468",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/65ce5ab9e1e94.jpg"
+          },
+          "_sAbbreviation": "P3 (PS2)",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 8502,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 3 FES",
+          "_sProfileUrl": "https://gamebanana.com/games/8502",
+          "_tsDateAdded": 1601069410,
+          "_tsDateModified": 1692642691,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/609eb54673751.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/64e3ad7fb0386.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1590414,
+            "_sName": "Phoenix!",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1590414",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5f6e64cae7e62.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/5f6e64a1cc641.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/611298eb7c94e.png"
+          },
+          "_sAbbreviation": "P3FES",
+          "_sHomepage": "",
+          "_dsReleaseDate": "2008-04-22",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 16613,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 3 Portable (PC)",
+          "_sProfileUrl": "https://gamebanana.com/games/16613",
+          "_tsDateAdded": 1655070716,
+          "_tsDateModified": 1676204017,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/62a65ffa55bfd.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/63e83fc5ed51e.png"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1738696,
+            "_sName": "wxnder",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1738696",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/693d09225d575.png",
+            "_aClearanceLevels": [
+              "P3P PSP Manager",
+              "P4 (PS2) Manager",
+              "P3P PC Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/693d092548b74.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/626422cdd3ce2.png"
+          },
+          "_sAbbreviation": "P3P PC",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 8583,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 3 Portable (PSP)",
+          "_sProfileUrl": "https://gamebanana.com/games/8583",
+          "_tsDateAdded": 1604064998,
+          "_tsDateModified": 1661104610,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/60d0941603272.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/60c610f59b27a.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1725413,
+            "_sName": "swindlesmccoop",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1725413",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/609bc7b45efcc.png"
+          },
+          "_sAbbreviation": "P3P PSP",
+          "_sHomepage": "https://atlus.com",
+          "_dsReleaseDate": "2010-07-06",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 17434,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 3 Portable (Switch)",
+          "_sProfileUrl": "https://gamebanana.com/games/17434",
+          "_tsDateAdded": 1667081876,
+          "_tsDateModified": 1667081876,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1656874,
+            "_sName": "RikeiD",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1656874",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "P3PS",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 18557,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 3 Reload",
+          "_sProfileUrl": "https://gamebanana.com/games/18557",
+          "_tsDateAdded": 1686505250,
+          "_tsDateModified": 1760858307,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6486070a3c38a.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/65ccd8b78e6bd.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1971520,
+            "_sName": "MeovvCAT",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1971520",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/63854c61c2176.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/63854c4f68b4c.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/6356b06ed2a6a.png"
+          },
+          "_sAbbreviation": "P3R",
+          "_sHomepage": "https://store.steampowered.com/app/2161700/Persona_3_Reload/",
+          "_dsReleaseDate": "2024-02-02",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 8747,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 3: Dancing in Moonlight",
+          "_sProfileUrl": "https://gamebanana.com/games/8747",
+          "_tsDateAdded": 1608183260,
+          "_tsDateModified": 1608942100,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5fdaedda57041.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5fe6811a550ae.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1652560,
+            "_sName": "SMNFXCN",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1652560",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6467f87e28487.jpg",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/6467f8796deb4.jpg"
+          },
+          "_sAbbreviation": "P3D",
+          "_sHomepage": "https://atlus.com/personadancing/p3d/",
+          "_dsReleaseDate": "2018-12-04",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 8761,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 4 (PS2)",
+          "_sProfileUrl": "https://gamebanana.com/games/8761",
+          "_tsDateAdded": 1608594623,
+          "_tsDateModified": 1699678927,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6378108b30dae.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/654f0a96081a8.png"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1729833,
+            "_sName": "Rodney Furball",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1729833",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6a95ec7527958.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/6a95eca4e9868.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/66c63787a4f65.png"
+          },
+          "_sAbbreviation": "P4 (PS2)",
+          "_sHomepage": "",
+          "_dsReleaseDate": "2008-12-09",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 16053,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 4 Arena Ultimax",
+          "_sProfileUrl": "https://gamebanana.com/games/16053",
+          "_tsDateAdded": 1647654534,
+          "_tsDateModified": 1650322193,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/623536802566c.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/625deb106a924.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1742760,
+            "_sName": "AnimatedSwine37",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1742760",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5f7a64bd2615c.png"
+          },
+          "_sAbbreviation": "P4AU",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 17433,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 4 Golden (Switch)",
+          "_sProfileUrl": "https://gamebanana.com/games/17433",
+          "_tsDateAdded": 1667081825,
+          "_tsDateModified": 1667081825,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1656874,
+            "_sName": "RikeiD",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1656874",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "P4GS",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 15703,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 4 Golden (Vita)",
+          "_sProfileUrl": "https://gamebanana.com/games/15703",
+          "_tsDateAdded": 1644120494,
+          "_tsDateModified": 1661079505,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/61ff496005faa.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/63020f8e0ab17.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1742788,
+            "_sName": "ARandomGuy231",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1742788",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/63d717047f839.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/64a7a87457f89.png"
+          },
+          "_sAbbreviation": "P4G",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 8263,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 4 Golden PC (32 Bit)",
+          "_sProfileUrl": "https://gamebanana.com/games/8263",
+          "_tsDateAdded": 1592116688,
+          "_tsDateModified": 1707831408,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5ee5c43a18ce1.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5eecd14461911.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1597390,
+            "_sName": "Jayverest",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1597390",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6101f25c100aa.png",
+            "_aClearanceLevels": [
+              "PPT Manager",
+              "PPVS2 Manager",
+              "PPC Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/6101f2ef698b2.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/65e2bd4cee8e2.png"
+          },
+          "_sAbbreviation": "P4G PC 32",
+          "_sHomepage": "https://atlus.com/atlus-titles/persona4-golden",
+          "_dsReleaseDate": "2020-06-13",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 17755,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 4 Golden PC (64 Bit)",
+          "_sProfileUrl": "https://gamebanana.com/games/17755",
+          "_tsDateAdded": 1672666593,
+          "_tsDateModified": 1707413850,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/65c51158adfad.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/63dacd354be6c.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1707207,
+            "_sName": "MadMax1960",
+            "_bIsOnline": false,
+            "_bHasRipe": true,
+            "_sProfileUrl": "https://gamebanana.com/members/1707207",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5ee8508e4184c.png",
+            "_aClearanceLevels": [
+              "P4G PC 32 Manager",
+              "P3FES Manager",
+              "P5 Manager",
+              "P3P PSP Manager",
+              "P5R (PC) Manager",
+              "P5RS Manager",
+              "P5R Manager",
+              "P3P PC Manager",
+              "P4G64 Manager",
+              "P3R Manager",
+              "MF Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/5ef5628118564.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/60d0954a3cf28.png"
+          },
+          "_sAbbreviation": "P4G64",
+          "_sHomepage": "https://persona.atlus.com",
+          "_dsReleaseDate": "2020-06-13",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22747,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 4 Revival [PC]",
+          "_sProfileUrl": "https://gamebanana.com/games/22747",
+          "_tsDateAdded": 1749442061,
+          "_tsDateModified": 1749442061,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2640373,
+            "_sName": "TITANFALL118",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2640373",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/66d57ecd6aacf.jpeg"
+          },
+          "_sAbbreviation": "P4R",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 16093,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 4: Dancing All Night",
+          "_sProfileUrl": "https://gamebanana.com/games/16093",
+          "_tsDateAdded": 1648263209,
+          "_tsDateModified": 1750979500,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/685dd3a12d7a4.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/685dd3a3d5d09.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1764202,
+            "_sName": "Century_",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1764202",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/66735b31c6c5c.png",
+            "_aClearanceLevels": [
+              "P5S Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/66735b363e7ce.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/66735ce962e70.png"
+          },
+          "_sAbbreviation": "P4D",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 7545,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 5",
+          "_sProfileUrl": "https://gamebanana.com/games/7545",
+          "_tsDateAdded": 1568122873,
+          "_tsDateModified": 1620965689,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/609df92984e1d.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5d79ba0ec8f45.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1683759,
+            "_sName": "Ghost1683759",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1683759",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "P5",
+          "_sHomepage": "",
+          "_dsReleaseDate": "2016-09-15",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 8464,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 5 Royal",
+          "_sProfileUrl": "https://gamebanana.com/games/8464",
+          "_tsDateAdded": 1599784115,
+          "_tsDateModified": 1620933001,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/609d79875526e.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5f5ad3e7c53fb.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1748717,
+            "_sName": "watdahecc",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1748717",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "P5R",
+          "_sHomepage": "https://atlus.com/p5r/",
+          "_dsReleaseDate": "2019-10-31",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 16951,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 5 Royal (PC)",
+          "_sProfileUrl": "https://gamebanana.com/games/16951",
+          "_tsDateAdded": 1659841818,
+          "_tsDateModified": 1712704994,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/6351756090c49.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1665242,
+            "_sName": "DniweTamp",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1665242",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/650dd92f7a569.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/650dd939941c6.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/60302fb4d8ee2.png"
+          },
+          "_sAbbreviation": "P5R (PC)",
+          "_sHomepage": "https://atlus.com/atlus-titles/p5r/",
+          "_dsReleaseDate": "2022-10-21",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 17354,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 5 Royal (Switch)",
+          "_sProfileUrl": "https://gamebanana.com/games/17354",
+          "_tsDateAdded": 1665990937,
+          "_tsDateModified": 1706562197,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/634d01143f6c0.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/6356b6f26ff52.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1739579,
+            "_sName": "Tekka",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1739579",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/603065249d65a.png",
+            "_aClearanceLevels": [
+              "P3FES Manager",
+              "P4G PC 32 Manager",
+              "P5 Manager",
+              "P5S Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/6030655e5a256.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/603078e632b5c.png"
+          },
+          "_sAbbreviation": "P5RS",
+          "_sHomepage": "https://persona.atlus.com/p5r/",
+          "_dsReleaseDate": "2022-10-21",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 9099,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 5 Strikers",
+          "_sProfileUrl": "https://gamebanana.com/games/9099",
+          "_tsDateAdded": 1613766711,
+          "_tsDateModified": 1688936682,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/609d8a6b02fc2.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/6066218a94e2d.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1789271,
+            "_sName": "Akira_Kurusu",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1789271",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "P5S",
+          "_sHomepage": "https://atlus.com/p5s/",
+          "_dsReleaseDate": "2021-02-23",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 19426,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Persona 5 Tactica",
+          "_sProfileUrl": "https://gamebanana.com/games/19426",
+          "_tsDateAdded": 1700205514,
+          "_tsDateModified": 1700205514,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/655713c7ded11.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1964590,
+            "_sName": "HeroArts",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1964590",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/636de2fc94d0e.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/636de318ef048.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/637ce0e203851.png"
+          },
+          "_sAbbreviation": "P5T",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        }
+      ]
+    }
+  }
+}

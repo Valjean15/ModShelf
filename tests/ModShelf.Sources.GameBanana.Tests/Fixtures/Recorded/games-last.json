@@ -1,0 +1,1405 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/apiv11/Game/Index",
+    "query": "_nPage=97&_nPerpage=50&_sSort=Generic_Alphabetically"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "body": {
+      "_aMetadata": {
+        "_nRecordCount": 4835,
+        "_bIsComplete": true,
+        "_nPerpage": 50
+      },
+      "_aRecords": [
+        {
+          "_idRow": 8737,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Yu-Gi-Oh! Legacy of the Duelist",
+          "_sProfileUrl": "https://gamebanana.com/games/8737",
+          "_tsDateAdded": 1607888129,
+          "_tsDateModified": 1607888129,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1702185,
+            "_sName": "mul71ply",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1702185",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "LOTD",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 17161,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Yu-Gi-Oh! Master Duel",
+          "_sProfileUrl": "https://gamebanana.com/games/17161",
+          "_tsDateAdded": 1662689910,
+          "_tsDateModified": 1674957865,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/63d5d362c9448.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/63d5d317d9b87.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2251733,
+            "_sName": "Depracated",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2251733",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6319f4c711666.png"
+          },
+          "_sAbbreviation": "ygomd",
+          "_sHomepage": "https://www.konami.com/yugioh/masterduel/",
+          "_dsReleaseDate": "2022-01-18",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 20268,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Yu-Gi-Oh! Power of Chaos",
+          "_sProfileUrl": "https://gamebanana.com/games/20268",
+          "_tsDateAdded": 1715137558,
+          "_tsDateModified": 1715137558,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/663aebfe1f68a.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1712721,
+            "_sName": "zach115",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1712721",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5e0e971d2495c.png"
+          },
+          "_sAbbreviation": "POC",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22430,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Yu-Gi-Oh! Saikyo Card Battle!",
+          "_sProfileUrl": "https://gamebanana.com/games/22430",
+          "_tsDateAdded": 1746163626,
+          "_tsDateModified": 1746227869,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/68145768311f4.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/681552889390d.png"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1771775,
+            "_sName": "UK1996",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1771775",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/68d0713976074.png"
+          },
+          "_sAbbreviation": "Yugioh 3DS",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 15976,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Yume Nikki",
+          "_sProfileUrl": "https://gamebanana.com/games/15976",
+          "_tsDateAdded": 1647052988,
+          "_tsDateModified": 1647052988,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/622c08ade6dbd.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1784526,
+            "_sName": "legorunnerkid",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1784526",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "YN",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 24905,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Yunyun Syndrome!? Rhythm Psychosis",
+          "_sProfileUrl": "https://gamebanana.com/games/24905",
+          "_tsDateAdded": 1779738545,
+          "_tsDateModified": 1779738545,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6a14a7ad082a8.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1423519,
+            "_sName": "TheLostAndWired",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1423519",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/69377829996b5.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/6937780ac0037.png"
+          },
+          "_sAbbreviation": "YYS",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 25619,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Zach's chance to win it big",
+          "_sProfileUrl": "https://gamebanana.com/games/25619",
+          "_tsDateAdded": 1787333532,
+          "_tsDateModified": 1787405921,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6a888b94b56d0.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 5725604,
+            "_sName": "LumiereLumika",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/5725604",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6a8afb23c1ba6.jpg"
+          },
+          "_sAbbreviation": "ZCTWIB",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 9860,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Zardy's Maze",
+          "_sProfileUrl": "https://gamebanana.com/games/9860",
+          "_tsDateAdded": 1618329345,
+          "_tsDateModified": 1618964637,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/607f709754f61.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/607f709b28fa3.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1804842,
+            "_sName": "TGR",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1804842",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "ZM",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 20702,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Zatch Bell! Mamodo Battles",
+          "_sProfileUrl": "https://gamebanana.com/games/20702",
+          "_tsDateAdded": 1721434128,
+          "_tsDateModified": 1750974725,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/685dc0d820390.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/685dc0daeaf30.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 3461597,
+            "_sName": "Animeweep",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/3461597",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/66e7331873018.jpg",
+            "_aSubjectShaper": {
+              "_sBorderStyle": "Stroke",
+              "_sFont": "MS Sans Serif",
+              "_sTextColor": "#178c19",
+              "_sTextHoverColor": "#26d719",
+              "_sBorderColor": "#80ffbd",
+              "_sBorderHoverColor": "#11afe4"
+            },
+            "_sSubjectShaperCssCode": "font-family:'MS Sans Serif';color:#178c19;"
+          },
+          "_sAbbreviation": "ZBMB",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 20600,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Zatch Bell! Mamodo Fury",
+          "_sProfileUrl": "https://gamebanana.com/games/20600",
+          "_tsDateAdded": 1719968439,
+          "_tsDateModified": 1750974520,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/685dc02ec1367.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/685dc031c886b.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 3461597,
+            "_sName": "Animeweep",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/3461597",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/66e7331873018.jpg",
+            "_aSubjectShaper": {
+              "_sBorderStyle": "Stroke",
+              "_sFont": "MS Sans Serif",
+              "_sTextColor": "#178c19",
+              "_sTextHoverColor": "#26d719",
+              "_sBorderColor": "#80ffbd",
+              "_sBorderHoverColor": "#11afe4"
+            },
+            "_sSubjectShaperCssCode": "font-family:'MS Sans Serif';color:#178c19;"
+          },
+          "_sAbbreviation": "ZBMF",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 6458,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "ZDoom",
+          "_sProfileUrl": "https://gamebanana.com/games/6458",
+          "_tsDateAdded": 1526842124,
+          "_tsDateModified": 1527010507,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5b01c307d4814.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5b01c64f2dd49.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 37,
+            "_sName": "natko",
+            "_bIsOnline": false,
+            "_bHasRipe": true,
+            "_sProfileUrl": "https://gamebanana.com/members/37",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5c34e47d0372f.gif",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/5c34e4708683c.gif"
+          },
+          "_sAbbreviation": "ZDoom",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 7915,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Zelda II: The Adventure of Link",
+          "_sProfileUrl": "https://gamebanana.com/games/7915",
+          "_tsDateAdded": 1583778442,
+          "_tsDateModified": 1583875986,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5e68078e4fccb.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5e67db33cd3c5.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1701022,
+            "_sName": "SariaOfTheKokiri",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1701022",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5e920338a209b.png"
+          },
+          "_sAbbreviation": "Zelda II",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 24851,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Zelda64: Recompiled Majora's Mask",
+          "_sProfileUrl": "https://gamebanana.com/games/24851",
+          "_tsDateAdded": 1779291756,
+          "_tsDateModified": 1779291756,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6a0dd62e49f80.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 881011,
+            "_sName": "EduardoA",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/881011",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/698dfba77d297.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/69f9eb94a444f.png"
+          },
+          "_sAbbreviation": "Zelda MM",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 19567,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Zenless Zone Zero",
+          "_sProfileUrl": "https://gamebanana.com/games/19567",
+          "_tsDateAdded": 1702720236,
+          "_tsDateModified": 1785112282,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/657d72ea51567.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/6a31c49dd5e05.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 3,
+            "_sName": "Anonymous",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/3",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "ZZZ",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 6073,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Zeno Clash 2",
+          "_sProfileUrl": "https://gamebanana.com/games/6073",
+          "_tsDateAdded": 1505394981,
+          "_tsDateModified": 1537209256,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5aaf159dee25e.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/59ba81382d167.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1382,
+            "_sName": "tom",
+            "_bIsOnline": false,
+            "_bHasRipe": true,
+            "_sProfileUrl": "https://gamebanana.com/members/1382",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/645552ee7c739.png",
+            "_aClearanceLevels": [
+              "TBS2 Manager",
+              "TF2 Manager",
+              "KRtDL Manager",
+              "GGST Manager",
+              "CS1.6 Manager",
+              "S3AIR Manager",
+              "GB Manager",
+              "Super Admin"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/645552fb4eb94.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/570e787dd7db9.gif",
+            "_sHovatarUrl": "https://images.gamebanana.com/img/av/645552f2852ba.png",
+            "_aSubjectShaper": {
+              "_sBorderStyle": "none",
+              "_sFont": "default",
+              "_sTextColor": "#ffc800",
+              "_sTextHoverColor": "#00fffb"
+            },
+            "_sSubjectShaperCssCode": "color:#ffc800;"
+          },
+          "_sAbbreviation": "ZC2",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 21955,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Zero Escape: Zero Time Dilemma",
+          "_sProfileUrl": "https://gamebanana.com/games/21955",
+          "_tsDateAdded": 1740623785,
+          "_tsDateModified": 1740623785,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/67bfcfa7bbfe8.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1782773,
+            "_sName": "pearl23",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1782773",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/602409047a99a.png",
+            "_aClearanceLevels": [
+              "Bayo 2 Manager",
+              "Bayo 3 Manager",
+              "BAYO PC Manager"
+            ],
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/64026b6165854.png"
+          },
+          "_sAbbreviation": "ZTD",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 6004,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Ziggurat",
+          "_sProfileUrl": "https://gamebanana.com/games/6004",
+          "_tsDateAdded": 1502054828,
+          "_tsDateModified": 1540049381,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5b9d8dc134307.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/598789cf04169.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1382,
+            "_sName": "tom",
+            "_bIsOnline": false,
+            "_bHasRipe": true,
+            "_sProfileUrl": "https://gamebanana.com/members/1382",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/645552ee7c739.png",
+            "_aClearanceLevels": [
+              "TBS2 Manager",
+              "TF2 Manager",
+              "KRtDL Manager",
+              "GGST Manager",
+              "CS1.6 Manager",
+              "S3AIR Manager",
+              "GB Manager",
+              "Super Admin"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/645552fb4eb94.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/570e787dd7db9.gif",
+            "_sHovatarUrl": "https://images.gamebanana.com/img/av/645552f2852ba.png",
+            "_aSubjectShaper": {
+              "_sBorderStyle": "none",
+              "_sFont": "default",
+              "_sTextColor": "#ffc800",
+              "_sTextHoverColor": "#00fffb"
+            },
+            "_sSubjectShaperCssCode": "color:#ffc800;"
+          },
+          "_sAbbreviation": "ZIG",
+          "_sHomepage": "",
+          "_dsReleaseDate": "2014-10-23",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 5769,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Zombie Escape: Source",
+          "_sProfileUrl": "https://gamebanana.com/games/5769",
+          "_tsDateAdded": 1482693487,
+          "_tsDateModified": 1531759824,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/58601b59209c5.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1332569,
+            "_sName": "Sleggie",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1332569",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/51eb031487ce8.png"
+          },
+          "_sAbbreviation": "ZE:S",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 102,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Zombie Horde: Reloaded",
+          "_sProfileUrl": "https://gamebanana.com/games/102",
+          "_tsDateAdded": 1165275457,
+          "_tsDateModified": 1524342365,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5adb9e5a9cb2d.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/zh.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 311166,
+            "_sName": "russ1250",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/311166",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/_3.png"
+          },
+          "_sAbbreviation": "ZH:R",
+          "_sHomepage": "http://forums.alliedmods.net/showthread.php?t=145532",
+          "_dsReleaseDate": "2010-12-17",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 353,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Zombie Master",
+          "_sProfileUrl": "https://gamebanana.com/games/353",
+          "_tsDateAdded": 1171968352,
+          "_tsDateModified": 1498045335,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/zmico_7.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/594a5b9615e01.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 100925,
+            "_sName": "Killocity",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/100925",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/533bfcf612302.gif",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/533c008288212.gif"
+          },
+          "_sAbbreviation": "ZM",
+          "_sHomepage": "http://www.zombiemaster.org/",
+          "_dsReleaseDate": "2009-12-15",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 24284,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Zombie Panic!",
+          "_sProfileUrl": "https://gamebanana.com/games/24284",
+          "_tsDateAdded": 1771214195,
+          "_tsDateModified": 1771217984,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/69929572179e4.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/6992a21de7915.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 927597,
+            "_sName": "Tabajara 7.7",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/927597",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6978ddeaeeaed.jpg",
+            "_aClearanceLevels": [
+              "ZPS Manager",
+              "ZP Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/6978dddc77429.jpg",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/5d3669f3bb398.png"
+          },
+          "_sAbbreviation": "ZP",
+          "_sHomepage": "https://zp1.zombiepanicsource.com/",
+          "_dsReleaseDate": "2026-03-10",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 119,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Zombie Panic! Source",
+          "_sProfileUrl": "https://gamebanana.com/games/119",
+          "_tsDateAdded": 1165454294,
+          "_tsDateModified": 1571973420,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/59063cda19bf3.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/59063db446c38.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 79774,
+            "_sName": "SPECIALIST",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/79774",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/526b163970e38.png"
+          },
+          "_sAbbreviation": "ZPS",
+          "_sHomepage": "https://zombiepanicsource.com",
+          "_dsReleaseDate": "2007-12-28",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 2561,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Zombie Rampage",
+          "_sProfileUrl": "https://gamebanana.com/games/2561",
+          "_tsDateAdded": 1220134767,
+          "_tsDateModified": 1362761961,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/zombie_rampage_bet3p1_2.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/zombie_rampage_bet3p2.png"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 201438,
+            "_sName": "3R10N",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/201438",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/201438.png"
+          },
+          "_sAbbreviation": "zr",
+          "_sHomepage": "",
+          "_dsReleaseDate": "2008-09-01",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 5062,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Zombie Torrent",
+          "_sProfileUrl": "https://gamebanana.com/games/5062",
+          "_tsDateAdded": 1353789507,
+          "_tsDateModified": 1734130476,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/50b1303bb3c9d.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5ac26b8b07792.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 64383,
+            "_sName": "Guest",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/64383",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "ZT",
+          "_sHomepage": "",
+          "_dsReleaseDate": "1970-01-01",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 1193,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Zombie2D",
+          "_sProfileUrl": "https://gamebanana.com/games/1193",
+          "_tsDateAdded": 1193735208,
+          "_tsDateModified": 1260886833,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/zm1co.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/zmban.png"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 181800,
+            "_sName": "Alfa1337",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/181800",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/57ac0dab98a4b.png",
+            "_aClearanceLevels": [
+              "REDEMPT Manager",
+              "WANTED! Manager",
+              "Moderator"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/5fee0c4ee5b1b.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/65e446a156402.png"
+          },
+          "_sAbbreviation": "Z2D",
+          "_sHomepage": "http://www.fpsbanana.com/games/1193",
+          "_dsReleaseDate": "2007-12-15",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 8635,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Zombies Ate My Neighbors",
+          "_sProfileUrl": "https://gamebanana.com/games/8635",
+          "_tsDateAdded": 1605383446,
+          "_tsDateModified": 1605383446,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1757450,
+            "_sName": "PuyoStuff",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1757450",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/67e5a8acd95e8.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/691d8731b0176.png"
+          },
+          "_sAbbreviation": "ZAMN",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 2298,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Zombies Invasion",
+          "_sProfileUrl": "https://gamebanana.com/games/2298",
+          "_tsDateAdded": 1213042767,
+          "_tsDateModified": 1362761922,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/zi_pub_2.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/banner-zi.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 274643,
+            "_sName": "Hexon",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/274643",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/274643.jpg"
+          },
+          "_sAbbreviation": "ZI",
+          "_sHomepage": "http://zombiesinvasion.e3b.org",
+          "_dsReleaseDate": "2008-09-27",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 4795,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Zoo Tycoon 2",
+          "_sProfileUrl": "https://gamebanana.com/games/4795",
+          "_tsDateAdded": 1325644522,
+          "_tsDateModified": 1529419824,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5b29182ecb221.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5aaead0b5d84a.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1225588,
+            "_sName": "Boizer",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1225588",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/4fd93538617ae.gif"
+          },
+          "_sAbbreviation": "ZT2",
+          "_sHomepage": "",
+          "_dsReleaseDate": "1970-01-01",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22801,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "ZooKeeper",
+          "_sProfileUrl": "https://gamebanana.com/games/22801",
+          "_tsDateAdded": 1749711048,
+          "_tsDateModified": 1749711048,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4365626,
+            "_sName": "Mindwarp575",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4365626",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "ZK",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 8223,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Zuma Deluxe",
+          "_sProfileUrl": "https://gamebanana.com/games/8223",
+          "_tsDateAdded": 1590558710,
+          "_tsDateModified": 1750694282,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5ecdfff43be53.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/6859793bdad3a.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1732262,
+            "_sName": "CrushyGreenRen",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1732262",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5ecf0a51d7f64.png"
+          },
+          "_sAbbreviation": "ZD",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22408,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "ZWAARD",
+          "_sProfileUrl": "https://gamebanana.com/games/22408",
+          "_tsDateAdded": 1745993554,
+          "_tsDateModified": 1745993554,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4365626,
+            "_sName": "Mindwarp575",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4365626",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "ZWAARD",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 8851,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "[PROTOTYPE 2]",
+          "_sProfileUrl": "https://gamebanana.com/games/8851",
+          "_tsDateAdded": 1610797425,
+          "_tsDateModified": 1612230458,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6002d16ed7f24.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/6018aed9e4ce1.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1614404,
+            "_sName": "-Dat Mental Gamer-",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1614404",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/62b508a62e654.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/633ec2a5e23a1.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/5ffac8641e2f0.jpg",
+            "_sHovatarUrl": "https://images.gamebanana.com/img/av/649392f6c00c8.png"
+          },
+          "_sAbbreviation": "[PT2]",
+          "_sHomepage": "http://www.prototypegame.com",
+          "_dsReleaseDate": "2012-07-24",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 8748,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "[PROTOTYPE]",
+          "_sProfileUrl": "https://gamebanana.com/games/8748",
+          "_tsDateAdded": 1608209244,
+          "_tsDateModified": 1636197734,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5fdb5358def9c.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5fe6866d54f49.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1614404,
+            "_sName": "-Dat Mental Gamer-",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1614404",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/62b508a62e654.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/633ec2a5e23a1.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/5ffac8641e2f0.jpg",
+            "_sHovatarUrl": "https://images.gamebanana.com/img/av/649392f6c00c8.png"
+          },
+          "_sAbbreviation": "[PT]",
+          "_sHomepage": "http://www.prototypegame.com",
+          "_dsReleaseDate": "2009-06-10",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 21682,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "ΔV: Rings of Saturn",
+          "_sProfileUrl": "https://gamebanana.com/games/21682",
+          "_tsDateAdded": 1735944833,
+          "_tsDateModified": 1735944833,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/67786a6bd98ff.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4105740,
+            "_sName": "__hev",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4105740",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "DV: RoS",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 14038,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "​Cubeetle - Game of creation",
+          "_sProfileUrl": "https://gamebanana.com/games/14038",
+          "_tsDateAdded": 1632395312,
+          "_tsDateModified": 1632395312,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/614c6016d046f.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2004434,
+            "_sName": "Cubeetle",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2004434",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "Cubeetle",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        }
+      ]
+    }
+  }
+}

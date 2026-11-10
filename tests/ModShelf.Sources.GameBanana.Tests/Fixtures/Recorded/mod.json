@@ -1,0 +1,650 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/apiv11/Mod/440088/ProfilePage",
+    "query": ""
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "body": {
+      "_idRow": 440088,
+      "_nStatus": "0",
+      "_bIsPrivate": false,
+      "_bAccessorIsSubmitter": false,
+      "_bIsTrashed": false,
+      "_bIsWithheld": false,
+      "_sName": "P5R Female Protagonist",
+      "_sCommentsMode": "open",
+      "_tsDateModified": 1793598816,
+      "_tsDateAdded": 1682722918,
+      "_sProfileUrl": "https://gamebanana.com/mods/440088",
+      "_aPreviewMedia": {
+        "_aImages": [
+          {
+            "_sType": "screenshot",
+            "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+            "_sCaption": "Credit: Moeqit @ Vgen (https://vgen.co/moeqit)",
+            "_sFile": "69c9e12c2687c.jpg",
+            "_sFile220": "220-90_69c9e12c2687c.jpg",
+            "_hFile220": 197,
+            "_wFile220": 220,
+            "_sFile530": "530-90_69c9e12c2687c.jpg",
+            "_hFile530": 474,
+            "_wFile530": 530,
+            "_sFile100": "100-90_69c9e12c2687c.jpg",
+            "_hFile100": 89,
+            "_wFile100": 100,
+            "_sFile800": "800-90_69c9e12c2687c.jpg",
+            "_hFile800": 715,
+            "_wFile800": 800
+          },
+          {
+            "_sType": "screenshot",
+            "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+            "_sCaption": "Dungeon traversal",
+            "_sFile": "644c3a21e089a.jpg",
+            "_sFile100": "100-90_644c3a21e089a.jpg",
+            "_hFile100": 56,
+            "_wFile100": 100
+          }
+        ]
+      },
+      "_nUpdatesCount": 44,
+      "_bHasUpdates": true,
+      "_tsDateUpdated": 1780795295,
+      "_nAllTodosCount": 23,
+      "_bHasTodos": true,
+      "_nPostCount": 1162,
+      "_aTags": [
+        {
+          "_sTitle": "Software Used",
+          "_sValue": "3D Studio Max"
+        },
+        {
+          "_sTitle": "Software Used",
+          "_sValue": "Audacity"
+        },
+        {
+          "_sTitle": "Software Used",
+          "_sValue": "Blender"
+        },
+        {
+          "_sTitle": "Software Used",
+          "_sValue": "Notepad++"
+        },
+        {
+          "_sTitle": "Software Used",
+          "_sValue": "Photoshop"
+        }
+      ],
+      "_bCreatedBySubmitter": true,
+      "_bIsPorted": false,
+      "_nThanksCount": 201,
+      "_sInitialVisibility": "show",
+      "_sDownloadUrl": "https://gamebanana.com/mods/download/440088",
+      "_nDownloadCount": 1224413,
+      "_aArchivedFiles": [
+        {
+          "_idRow": 1662070,
+          "_sFile": "p5r_female_protagonist1_2_27.7z",
+          "_nFilesize": 218239961,
+          "_tsDateAdded": 1774836430,
+          "_nDownloadCount": 5672,
+          "_sDownloadUrl": "https://gamebanana.com/dl/1662070",
+          "_sMd5Checksum": "ffdde8907168086d88fa43efef107f4b",
+          "_sAnalysisState": "done",
+          "_sAnalysisResult": "ok",
+          "_sAnalysisResultVerbose": "File passed preliminary analysis",
+          "_sAvState": "done",
+          "_sAvResult": "clean",
+          "_bIsArchived": true,
+          "_bHasContents": true,
+          "_sVersion": "1.2.27",
+          "_aAnalysisWarnings": {
+            "contains_exe": [
+              "FEmulator/PAK/INIT/CMM.BIN",
+              "FEmulator/PAK/INIT/CMPTABLE.BIN",
+              "P5REssentials/CPK/BASE.CPK/BUSTUP/B002_008_01.bin"
+            ]
+          },
+          "_aModManagerIntegrations": [
+            {
+              "_sIconClasses": "Reloaded2ModLoaderIcon",
+              "_idToolRow": 6693,
+              "_aGameRowIds": [
+                6061,
+                6218,
+                7486
+              ],
+              "_sModManagerAlias": "Reloaded2ModLoader",
+              "_sInstallerName": "Reloaded II",
+              "_idSubmitterRow": 1614325,
+              "_sInstallerUrl": "https://gamebanana.com/tools/6693",
+              "_sIconUrl": "https://images.gamebanana.com/img/ico/tools/6ac1940a8c255.png",
+              "_sDownloadUrl": "R2:https://gamebanana.com/mmdl/1662070"
+            }
+          ]
+        }
+      ],
+      "_aFiles": [
+        {
+          "_idRow": 1722096,
+          "_sFile": "p5r_female_protagonist1_2_28.7z",
+          "_nFilesize": 218808279,
+          "_tsDateAdded": 1780795077,
+          "_nDownloadCount": 11920,
+          "_sDownloadUrl": "https://gamebanana.com/dl/1722096",
+          "_sMd5Checksum": "29eb8bbfbb91ca848fb84d61d355d493",
+          "_sAnalysisState": "done",
+          "_sAnalysisResult": "ok",
+          "_sAnalysisResultVerbose": "File passed preliminary analysis",
+          "_sAvState": "done",
+          "_sAvResult": "clean",
+          "_bIsArchived": false,
+          "_bHasContents": true,
+          "_sVersion": "1.2.28",
+          "_sDescription": "Main FeMC mod, DOWNLOAD THIS ONE",
+          "_aAnalysisWarnings": {
+            "contains_exe": [
+              "FEmulator/PAK/INIT/CMM.BIN",
+              "FEmulator/PAK/INIT/CMPTABLE.BIN",
+              "P5REssentials/CPK/BASE.CPK/BUSTUP/B002_008_01.bin"
+            ]
+          },
+          "_aModManagerIntegrations": [
+            {
+              "_sIconClasses": "Reloaded2ModLoaderIcon",
+              "_idToolRow": 6693,
+              "_aGameRowIds": [
+                6061,
+                6218,
+                7486
+              ],
+              "_sModManagerAlias": "Reloaded2ModLoader",
+              "_sInstallerName": "Reloaded II",
+              "_idSubmitterRow": 1614325,
+              "_sInstallerUrl": "https://gamebanana.com/tools/6693",
+              "_sIconUrl": "https://images.gamebanana.com/img/ico/tools/6ac1940a8c255.png",
+              "_sDownloadUrl": "R2:https://gamebanana.com/mmdl/1722096"
+            }
+          ]
+        },
+        {
+          "_idRow": 1722099,
+          "_sFile": "p5rpcfemaleprotagonistreleasemetadata_36aa9.json",
+          "_nFilesize": 308,
+          "_tsDateAdded": 1780795138,
+          "_nDownloadCount": 62569,
+          "_sDownloadUrl": "https://gamebanana.com/dl/1722099",
+          "_sMd5Checksum": "fdbd1b52bc43816dfe67deeb47a77366",
+          "_sAnalysisState": "done",
+          "_sAnalysisResult": "ok",
+          "_sAnalysisResultVerbose": "File passed preliminary analysis",
+          "_sAvState": "done",
+          "_sAvResult": "clean",
+          "_bIsArchived": false,
+          "_bHasContents": false,
+          "_sVersion": "1.2.28",
+          "_sDescription": "Update metadata, DO NOT DOWNLOAD THIS"
+        },
+        {
+          "_idRow": 1662075,
+          "_sFile": "p5r_female_protagonist_-_english_voiceover1_1_11.7z",
+          "_nFilesize": 24474714,
+          "_tsDateAdded": 1774836481,
+          "_nDownloadCount": 8236,
+          "_sDownloadUrl": "https://gamebanana.com/dl/1662075",
+          "_sMd5Checksum": "5bc7562b5bc3cf07c66c7d52648fef48",
+          "_sAnalysisState": "done",
+          "_sAnalysisResult": "ok",
+          "_sAnalysisResultVerbose": "File passed preliminary analysis",
+          "_sAvState": "done",
+          "_sAvResult": "clean",
+          "_bIsArchived": false,
+          "_bHasContents": true,
+          "_sVersion": "1.1.11",
+          "_sDescription": "English voiceover pack, DOWNLOAD THIS",
+          "_aModManagerIntegrations": [
+            {
+              "_sIconClasses": "Reloaded2ModLoaderIcon",
+              "_idToolRow": 6693,
+              "_aGameRowIds": [
+                6061,
+                6218,
+                7486
+              ],
+              "_sModManagerAlias": "Reloaded2ModLoader",
+              "_sInstallerName": "Reloaded II",
+              "_idSubmitterRow": 1614325,
+              "_sInstallerUrl": "https://gamebanana.com/tools/6693",
+              "_sIconUrl": "https://images.gamebanana.com/img/ico/tools/6ac1940a8c255.png",
+              "_sDownloadUrl": "R2:https://gamebanana.com/mmdl/1662075"
+            }
+          ]
+        },
+        {
+          "_idRow": 1662077,
+          "_sFile": "p5rpcfemaleprotagonist-engvoreleasemetadata.json",
+          "_nFilesize": 500,
+          "_tsDateAdded": 1774836527,
+          "_nDownloadCount": 62507,
+          "_sDownloadUrl": "https://gamebanana.com/dl/1662077",
+          "_sMd5Checksum": "06327e55996d38d8bd9b5bf229665c29",
+          "_sAnalysisState": "done",
+          "_sAnalysisResult": "ok",
+          "_sAnalysisResultVerbose": "File passed preliminary analysis",
+          "_sAvState": "done",
+          "_sAvResult": "clean",
+          "_bIsArchived": false,
+          "_bHasContents": false,
+          "_sVersion": "1.1.11",
+          "_sDescription": "English voiceover pack update metadata, DO NOT DOWNLOAD"
+        },
+        {
+          "_idRow": 1662078,
+          "_sFile": "p5r_female_protagonist_-_japanese_voiceover1_1_8.7z",
+          "_nFilesize": 8886801,
+          "_tsDateAdded": 1774836549,
+          "_nDownloadCount": 3162,
+          "_sDownloadUrl": "https://gamebanana.com/dl/1662078",
+          "_sMd5Checksum": "656a623c5abab1f9d3f4632dda71837d",
+          "_sAnalysisState": "done",
+          "_sAnalysisResult": "ok",
+          "_sAnalysisResultVerbose": "File passed preliminary analysis",
+          "_sAvState": "done",
+          "_sAvResult": "clean",
+          "_bIsArchived": false,
+          "_bHasContents": true,
+          "_sVersion": "1.1.8",
+          "_sDescription": "Japanese voiceover pack, DOWNLOAD THIS",
+          "_aModManagerIntegrations": [
+            {
+              "_sIconClasses": "Reloaded2ModLoaderIcon",
+              "_idToolRow": 6693,
+              "_aGameRowIds": [
+                6061,
+                6218,
+                7486
+              ],
+              "_sModManagerAlias": "Reloaded2ModLoader",
+              "_sInstallerName": "Reloaded II",
+              "_idSubmitterRow": 1614325,
+              "_sInstallerUrl": "https://gamebanana.com/tools/6693",
+              "_sIconUrl": "https://images.gamebanana.com/img/ico/tools/6ac1940a8c255.png",
+              "_sDownloadUrl": "R2:https://gamebanana.com/mmdl/1662078"
+            }
+          ]
+        },
+        {
+          "_idRow": 1662079,
+          "_sFile": "p5rpcfemaleprotagonist-jpnvoreleasemetadata.json",
+          "_nFilesize": 504,
+          "_tsDateAdded": 1774836569,
+          "_nDownloadCount": 22493,
+          "_sDownloadUrl": "https://gamebanana.com/dl/1662079",
+          "_sMd5Checksum": "fe730a440e9337d3237ffac25a6c1e97",
+          "_sAnalysisState": "done",
+          "_sAnalysisResult": "ok",
+          "_sAnalysisResultVerbose": "File passed preliminary analysis",
+          "_sAvState": "done",
+          "_sAvResult": "clean",
+          "_bIsArchived": false,
+          "_bHasContents": false,
+          "_sVersion": "1.1.8",
+          "_sDescription": "Japanese voiceover pack update metadata, DO NOT DOWNLOAD"
+        }
+      ],
+      "_nSubscriberCount": 824,
+      "_aContributingStudios": [],
+      "_sLicense": "<a rel=\"license\" href=\"http://creativecommons.org/licenses/by-nc-nd/4.0/\"><img alt=\"Creative Commons License\" style=\"border-width:0\" src=\"https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png\" /></a><br />This work is licensed under a <a rel=\"license\" href=\"http://creativecommons.org/licenses/by-nc-nd/4.0/\">Creative Commons Attribution-NonCommercial-NoDerivs 4.0 Unported License</a>.",
+      "_aLicenseChecklist": {
+        "yes": [
+          "Download and install this Mod"
+        ],
+        "ask": [
+          "Redistribute this Mod on other sites",
+          "Modify this Mod and distribute the modified Mod on GameBanana",
+          "Modify this Mod and distribute the modified Mod on another site",
+          "Use parts of this Mod in another Mod and distribute the Mod on GameBanana",
+          "Use parts of this Mod in another Mod and distribute the Mod on another site",
+          "Use this Mod or components of this Mod in adult/NSFW content"
+        ],
+        "no": [
+          "Use this Mod or components of this Mod commercially"
+        ]
+      },
+      "_sDescription": "Play as a female protagonist in the Metaverse and overworld.",
+      "_bGenerateTableOfContents": true,
+      "_sText": "<h1>Overview</h1>Play as a female protagonist in battle and the overworld. New costumes/models, animations, textures, voice lines, field dialogue, and more.<br><br><b><span class=\"GreenColor\">You do not have to start a new playthrough for this mod.</span></b><br><br>There will be updates for the social sim side of things (Confidants, main story, romances, etc.), and for bug fixes and other asset tweaks (e.g. animations) whenever and wherever necessary.<br><br><h1>Features</h1><h2>Metaverse</h2><ul><li>New models for battle costumes, including DLC ones.</li><li>New audio clips for battle (except Showtimes), system, and overworld for Joker for Japanese and English. See the credits section in the sidebar for more details.</li><li>Changed battle costume music:&nbsp;</li><ul><li>P3 DLC Costumes: Mass Destruction -&gt; Wiping All Out<br></li><li>P2 DLC Costumes: Innocent Sin Battle Theme (and Results theme) -&gt; Eternal Punishment (PSP) Battle Theme (and Results theme)</li></ul><li>Changed item and outfit descriptions accordingly<br></li><li>Changed dialogue in Persona fusion events, Shadow negotiations, and field script events (non-main story events) in Palaces and Mementos</li><li>Changed Jose field dialogue in Mementos</li><li>Changed dialogue for Mementos conversations</li><li>Changed dialogue for Safe Rooms</li><li>New in-battle graphics (Finishing Touch, HP/MP party panels, critical cut-in, AOA, status screen)&nbsp;<br></li><li>Retargeted battle animations and Metaverse field animations, including those for the Velvet Room&nbsp;<br></li><li>Changed some social stat name labels (\"Suave\" -&gt; \"Chic\", \"Debonair\" -&gt; \"Bewitching\")<br></li><li>Changed tutorial/story summary text<br></li><li>Tweaked Shadow Kamoshida boss battle (extremely minor mechanics \"spoiler\": <span class=\"Spoiler\">Joker has a chance of being targeted by Lick as well, like Ann</span>)</li><li>Changed equip-ability of all Protectors; Joker can equip female-only and unisex Protectors, but not male-only ones.&nbsp;<b>If you currently have male-only armor equipped on Joker, and then unequip it, you will not be able to re-equip it while the mod is enabled.</b></li></ul><br><h2>Overworld &amp; Others</h2><ul><li>New models for everyday outfits (e.g. winter and summer uniforms, third semester outfits)</li><li>New models for event-specific/special outfits (e.g. incognito hoodie, flashback outfit)</li><li>New loading screen sprites</li><li>New dialogue choice cut-ins</li><li>Overworld field animations (both custom and retargeted)</li><li>Event animations (both custom and retargeted)</li><li>Ann's Confidant (Lovers) no longer requires Kindness to start<br></li><li>Bathrooms at Shujin have been tweaked</li><li>Thieves Den conversations have been tweaked</li><li>Changed overworld NPC dialogue, including passerby chatter</li><li>...And other more minor things that you might be able to spot, if you keep an eye out.</li></ul><br><h1>Frequently Asked Questions (FAQ)</h1><details open=\"\"><summary><b>I found a bug/typo/mistake!</b></summary>If it's a typo, send me a screenshot of where it happens, so I can at least pinpoint the location to fix it.<br>Even better: tell me the exact event PAK/event ID/field script where it happens (e.g. E480_000 or something).<br><br>If it's a bug, post when and where it happened, which other mods you're running, and anything else you think might be relevant to the bug (e.g. which area you were in). The more detail, the better.<br><br>Before posting a bug report comment or issue, <span class=\"RedColor\">read through comments that other people have posted and check to make sure you're not submitting a duplicate bug report</span>, else it'll be easy for me to lose track. If someone else has posted about running into the same problem you're having, <i>reply to that comment with something to let me know you're having the same problem</i>, instead of DMing me or posting a new comment of your own.</details><br><details open=\"\"><summary><b>What about romance options?</b></summary>Romance options have remained unchanged from what I already decided: 4 male (Ryuji, Yusuke, Mishima, Akechi) and 4 female (Haru, Hifumi, Takemi, Ann). There will be updates later on for romances.<br>Kasumi will still have romantic feelings for the protagonist as per her Confidant, but I have no plans to make her a romance option.<br></details><br><details open=\"\"><summary><b>Can you make (X) a romance option?</b></summary>I am open to feedback and suggestions, but do not think I will make changes for the sole purpose of satisfying people who pester me about something enough. I understand that there are fans of various characters who would like to see (X) as a romance option for various reasons of their own, but I have my hands full with what are essentially 4 new romance options.</details><br><details open=\"\"><summary><b>Is it possible to keep the vanilla romance options/Confidants?</b></summary>I have no interest in maintaining multiple folders/separate branches for the vanilla Confidants and different Confidants/vanilla romance options.&nbsp;<br><br>If you want to keep the vanilla Confidants and their events, you can delete the CONFIDANTS.CPK folder in Reloaded II &gt; Mods &gt; p5rpc.femaleprotagonist &gt; P5REssentials &gt; CPK &gt; CONFIDANTS.CPK. This will delete ALL the modded Confidant dialogue and their events, mechanics, etc. including pronoun switches and writing tweaks to account for gender.</details><br><details><summary><b>What about anime cutscenes?</b></summary>I can't do anything about those, either. Unless you happen to have an animation studio in your back pocket, ready to hand over, you'll have to live with it. The most I can think of is a visual-novel-esque/P3R-esque workaround, to display CGs with dialogue boxes on the bottom, or something.</details><br><details><summary><b>Why is the title screen unchanged? The model is still original Joker.</b></summary>Title screen models are cursed beyond belief :corruptedsexo:</details><br><details open=\"\"><summary><b>I have a suggestion!</b></summary>I'm not against suggestions or having mistakes pointed out. Like in any creative endeavor, there's bound to be things I missed or could do better. However, I will meet good faith with good faith, and bad faith with the amount of engagement that it's worth, which is none.&nbsp;<br><br>For suggestions in good faith, I will evaluate it to see if it can be reasonably implemented (some things are hardcoded, not as simple as it sounds, etc.), weigh options, and then decide. \"\"Suggestions\"\" in bad faith, where it's clear that it's mostly about insulting me/putting words in my mouth/making hot takes/pointing out something I already know about, then I will ignore it and you.</details><br><details><summary><b>I don't like the hair design.</b></summary>1. Frequently mentioned, but not a question.<br>2. Any problems you have with it, take it up with Atlus themselves, because it's literally just the P5D hair. As in, I took the model directly from P5D, scaled it down to fit proportions, and made no other modifications.</details><br><details><summary><b>Can you make a version of this mod with (X feature)?</b></summary>No. Maintaining and developing for different feature sets/versions of the same base mod would add overhead that I simply can't handle.&nbsp;The only reason I have stuff like the butler costume add-on is because it's literally 1 model swap, as opposed to entire swathes of functionality.</details><br><details><summary><b>Can I make my own mod intended for use with this mod?</b></summary>Do what you want. I know that it's common practice to make add-on mods, like how others use the BOTW Linkle mod as a base and create outfit mods for it. My only ask (although I know it won't actually be able to stop anyone) is that people not make any mods that are distasteful, disrespectful, and/or passive-aggressive.&nbsp;<br><br>These guidelines apply to commissioned add-on mods as well (aka I don't really care as long as you don't commission anything distasteful, disrespectful, etc.)</details><br><details><summary><b>Can I use files directly from this mod in my own mod?</b></summary><b>You must ask first.</b> Assume \"no\" otherwise. This is because certain assets such as some textures, models, etc. are not mine to determine whether they can be used in X or Y project. I have either received them for this mod project only (and no other projects) or commissioned them out of my own pocket. Therefore, the permission and usage rights are not mine to give. I would have to speak to the ones who actually created such assets.<br><br>I do not determine usage rights for such assets, and for commissioned assets in particular, I doubt the artists involved would want wanton usage of it for projects they were not contracted to do or were not even involved in, without a heads-up or permission.<br><br>Even for assets that I have not commissioned, and instead have just personally created from scratch, it's just common sense to ask for permission for usage.<br><br>Lastly, there's not a lot of point. Stuff like models, textures, animations, etc. have been created specifically for this mod and these designs. I can't imagine why you would want to go through a middleman like this, likely resulting in a subpar result because of all the tweaks and adjustments that would need to be made, when you could just create assets for your own project directly.</details><br><details><summary><b>Can I use the voicepacks for this mod while playing with other mods?</b></summary><ul><li>Japanese voicepack - Go ahead, it's essentially just an audio collection of voice clips from already-released games.</li><li>English voicepack - It's fine as long as the voice actress (Alexa) is credited with names and socials and it's not going to be used in a derogatory manner.<br></li></ul>To \"unbundle\" the voicepack you want from the main mod itself:<br><ol><li>Go to the voicepack mod in Reloaded II</li><li>Right click and select \"Edit Mod\"</li><li>Click \"Next\" until you get to \"Mod Dependencies\"</li><li>Uncheck the main P5R Female Protagonist mod in the list</li></ol>That should make it so that it can work modularly/standalone.</details><br><h1>Mod Compatibilities</h1>Since this mod touches pretty much every aspect of the game, from models to text to cutscenes/events,&nbsp;<b>do not expect much in the way of compatibility</b>. It would be too much work for me to go through and test compatibility with literally every mod available. General rule of thumb:<br><br><h2>Likely Compatible</h2><ul><li>Music mods -&nbsp; Should be compatible. The only music this mod edits is the DLC BGM for P3 and P2 costumes.<br></li><li>Costume mods for non-Joker party members - This mod does not affect other party members' outfits, so non-Joker costume mods should be fine.</li><li>Mod Menu</li></ul><br><h2>Incompatible or Only Partially Compatible</h2><ul><li>Any Joker models/skins/costume mods - Self-explanatory, all Joker models and animations will be changed by this mod. You're just going to get uberjank animations unless it's a mod specifically made to work with this FeMC mod.</li></ul><br><h1>Known Issues</h1><details><summary><b>Some animations clipping and/or lack skirt physics</b></summary><pre>There will be updates for...bug fixes and other asset tweaks (e.g. animations) whenever and wherever necessary.</pre>Read the second paragraph of the description in the <a href=\"https://gamebanana.com/mods/440088#H1_0\">Overview section</a>.<br><br>To give a better idea of the workload, there are over 400+ animation packs for Joker in the EVENT folder alone. Assuming 3 animations per animation pack (some packs have 1 or 2, others have 6+ due to being \"main\" animation packs for certain events), that leaves approximately <b>1200 animations that I need to go through and make manual adjustments for</b>, whether it's to account for skirt physics, animation interpolation that fits the idle pose, or fixing clipping/positioning in events.<br><br>I am 1 person, with no 3D animation background, mocap software, or any of the animation resources that the developer (Atlus) themselves would have, a full-time job, and a life outside of this project. Do the math. If you are reading this and have the willingness and voluntary ability to help out, then by all means, contact me :melting_face: <del>free me from the animation mines, I've been stuck in there for too long</del></details><br><details><summary><b>Why don't you just make the model taller to offset the animation clipping?</b></summary>One word: proportions.<br><br>Model type proportion differences are the reason I cannot simply just stretch the FeMC model's height a couple of units and call it a day. As seen in these comparison images using Sae as an example (as the tallest human female character model out of the main crew), even if I bring Sae to the same height as Joker:<br><ul><li><a href=\"https://files.gamebanana.com/img/ss/mods/6562eb848c15f.jpg\">Hand size differences</a> (hence held items such as pencils, etc. will float)</li><li><a href=\"https://files.gamebanana.com/img/ss/mods/6562ecabeeb13.jpg\">Shoulder width differences</a><br></li><li><a href=\"https://files.gamebanana.com/img/ss/mods/6562edde44109.jpg\">Limb length differences</a> (white diamonds = where the bends of the elbows are). <a href=\"https://files.gamebanana.com/img/ss/mods/6562f0ef7ac25.jpg\">Bending each arm 45 degrees</a>, hands will not end up in the same location.</li><li><a href=\"https://files.gamebanana.com/img/ss/mods/6562f04ef1bfc.jpg\">Differences in leg length ratio</a> compared to whole body</li><li>And so on.</li></ul>Thus, \"\"simply\"\" making the FeMC model taller would not solve the clipping problem, because the game's animations and event camera angles are quite literally built around original male Joker's height and proportions. To fix event camera angles, I have to manually go into every event's EVT and edit the camera angle coordinates. To fix animation clipping, there is no other way besides manually editing the animations (of which there are, again, approximately 1200 of them).<br><br>I should not have to respond to the&nbsp;<a href=\"https://gamebanana.com/posts/11014569\">same</a>&nbsp;<a href=\"https://gamebanana.com/posts/11042441\">comment</a>/<a href=\"https://gamebanana.com/posts/11261354\">suggestion</a>&nbsp;<a href=\"https://gamebanana.com/posts/11261767\">over</a>&nbsp;and&nbsp;<a href=\"https://gamebanana.com/posts/11263836\">over</a>&nbsp;again due to user refusal to read existing comments, so <i>I&nbsp;will not respond to similar comments in the future.</i></details><br><details><summary><b>Wrong pronouns in some events</b></summary><pre>There will be updates for...the social sim side of things (Confidants, main story, romances, etc.)</pre>Read the second paragraph of the description in the Overview section.</details><br><h1>Bug Reporting</h1>Before reporting a bug in the comments or issues:<br><ol><li>Read the above \"Known Common Issues\" section. Consistently-clipping animations is not a bug. Wrong pronouns for some events/cutscenes is not a bug. I already know about those issues. I should not have to repeat the same thing, over and over again.</li><li>Make sure the downloaded mod (and Persona Essentials) is the <i>latest version</i>, with all the bugfixes to date.</li><li>Make sure the actual P5R game itself has been updated to v1.0.4. This mod (and most P5R mods in general) do not work on v1.0.3 anymore, they only work on v1.0.4</li><li>Make sure it is not a general mod setup problem; if other mods don't work either, then your overall mod setup is the problem. Try uninstalling and reinstalling the mod loader and the installed mods.</li><li>Try clearing your Persona Essentials cache by going to the Reloaded II folder &gt; p5rpc.modloader &gt; Cache &gt; delete the P5R folder (Reloaded should recreate it again upon next modded game startup).</li><li>If using Steam, try re-verifying your original game files, since it's possible a file developed an issue along the way. Go to the game in your Steam library &gt; right click Properties &gt; Installed Files &gt; Verify integrity of game files</li><li>Disable other mods to check if it's this specific mod causing the issue.</li><li>Make sure it is an actual bug. Can it be consistently reproduced? Is it a consistent crash? Then that is an actual bug.</li></ol>If you have followed the above steps, used common sense, and have an actual bug pertaining to this mod to report:<br><ol><li>Go to \"CRI FILESystem V2 Hook\" in the mod loader list.</li><li>Right click and Configure it so that \"Print File Access\" is enabled, because I need to know which files are being accessed by the game that may or may not be crashing it.</li><li>Start up the game and reproduce the bug/crashing again.</li><li>Go to the Reloaded II logs folder:&nbsp;<span class=\"GreenColor\">C:\\Users\\[your username here]\\AppData\\Roaming\\Reloaded-Mod-Loader-II\\Logs\\</span></li><li>Copy the crash log and scrub any identifying information that you want, such as your username.</li><li>Upload the crash log to&nbsp;<a href=\"https://pastebin.com/\" target=\"_blank\">https://pastebin.com/</a>&nbsp;and link to it when commenting.&nbsp;</li></ol><br><h1>Installation</h1><a href=\"https://reloaded-project.github.io/Reloaded-II/\" target=\"_blank\"></a><ul><a href=\"https://reloaded-project.github.io/Reloaded-II/\" target=\"_blank\"></a><li><a href=\"https://reloaded-project.github.io/Reloaded-II/\" target=\"_blank\"></a><a href=\"https://reloaded-project.github.io/Reloaded-II/\" target=\"_blank\">Reloaded II</a>&nbsp;- Mod manager for Persona 5 Royal for PC.</li></ul><br>Reloaded II mods required:<br><ul><li><a href=\"https://gamebanana.com/mods/408376\">Persona Essentials</a>&nbsp;- Mod loader for P5R. Necessary to run mods for P5R in the first place. This should automatically download along with the mod.</li><li>AWB Emulator for File Emulation Framework - Needed for the mod's battle BGM changes. This should automatically be downloaded along with the mod and Persona Essentials, but if not: In Reloaded II, go to Add Mods &gt; Search for \"AWB\" &gt; Download \"AWB Emulator for File Emulation Framework\" by Sewer56.<br></li><li>PAK Emulator for File Emulation Framework - Dependency that should be automatically downloaded alongside Persona Essentials. Needed to replace files in containers such as PAK or BIN, to be compatible with other mods that edit similar container files.</li><li class=\"SelectedElement\"><a href=\"https://gamebanana.com/mods/482718\">Unhardcoded Romances Toolkit</a> - Dependency that should be automatically downloaded alongside this mod. Used as a basis to unhardcode romance route hearts in Confidant descriptions. Place above the main FeMC mod in order for the adjusted Confidant text to load properly. However, since the developer of the toolkit hasn't updated the dependency to account for the correct flags used by this mod, there will be wonkiness with some of the Confidant descriptions specifically, although the actual functions and events should play out fine. Putting this here so I don't get flooded with bug reports about things that are out of my control.</li><li><a href=\"https://gamebanana.com/mods/488633\">Costume Framework</a> - Dependency that should be automatically downloaded alongside this mod. Used as the costume handling system for this mod. Not required unless you want the extra costumes and compatibility with <a href=\"https://gamebanana.com/mods/432481\">Custom Bonus Tweaks</a>, though.</li><li><a href=\"https://gamebanana.com/mods/495507\">Ryo Framework</a> - Dependency that should also be automatically downloaded alongside the voiceover pack add-ons. Used for loose audio file replacement, especially VOICE_SINGLEWORD.AWB and SYSTEM.AWB.</li></ul><br>Voiceover packs for the different languages are available.<br><br><i>Before launching P5R in Reloaded, remember to check that the voice pack mod for the language you want is enabled and placed below the main base mod in the priority list.</i><br>",
+      "_bIsObsolete": false,
+      "_nLikeCount": 433,
+      "_nViewCount": 695775,
+      "_sVersion": "1.2.28",
+      "_bAcceptsDonations": false,
+      "_bShowRipePromo": true,
+      "_aEmbeddables": {
+        "_sEmbeddableImageBaseUrl": "https://gamebanana.com/mods/embeddables/440088",
+        "_aVariants": [
+          "small",
+          "small_square",
+          "medium",
+          "medium_square",
+          "medium_square_minimal",
+          "large",
+          "large_minimal",
+          "large_square",
+          "large_minimal_square",
+          "thumbnail"
+        ]
+      },
+      "_aSubmitter": {
+        "_idRow": 1740038,
+        "_sName": "chlorophylls",
+        "_sUserTitle": "Bananite",
+        "_sHonoraryTitle": "",
+        "_tsJoinDate": 1594848084,
+        "_sAvatarUrl": "https://images.gamebanana.com/img/av/60b16b9cd22b0.png",
+        "_sSigUrl": "",
+        "_sProfileUrl": "https://gamebanana.com/members/1740038",
+        "_sPointsUrl": "https://gamebanana.com/members/logs/pointslog/1740038",
+        "_sMedalsUrl": "https://gamebanana.com/members/stats/medals/1740038",
+        "_bIsOnline": false,
+        "_sLocation": "",
+        "_sOnlineTitle": ":hee_shake:",
+        "_sOfflineTitle": "",
+        "_nPoints": 25741,
+        "_nPointsRank": 1157,
+        "_aNormalMedals": [
+          [
+            "m_age_1.png",
+            "One month a member",
+            "normal",
+            314997
+          ],
+          [
+            "m_age_2.png",
+            "6 months a member",
+            "normal",
+            343728
+          ]
+        ],
+        "_aRareMedals": [
+          [
+            "returns_2.png",
+            "Returned 1000 times",
+            "rare",
+            426401
+          ],
+          [
+            "features_2.png",
+            "10 submissions featured",
+            "rare",
+            994238
+          ]
+        ],
+        "_aLegendaryMedals": [
+          [
+            "subscribers_3.png",
+            "Reached 100 subscribers",
+            "legendary",
+            1484359
+          ]
+        ],
+        "_bHasRipe": false,
+        "_nBuddyCount": 5,
+        "_nSubscriberCount": 192,
+        "_aDonationMethods": [],
+        "_bAccessorIsBuddy": false,
+        "_bBuddyRequestExistsWithAccessor": false,
+        "_bAccessorIsSubscribed": false,
+        "_aDefaultLicenseChecklist": [
+          "yes",
+          "ask",
+          "ask",
+          "ask",
+          "ask",
+          "ask",
+          "no",
+          "ask"
+        ],
+        "_sDefaultLicense": "",
+        "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/610a34e9e24a9.png"
+      },
+      "_bFollowLinks": true,
+      "_aGame": {
+        "_idRow": 16951,
+        "_sName": "Persona 5 Royal (PC)",
+        "_sAbbreviation": "P5R (PC)",
+        "_sProfileUrl": "https://gamebanana.com/games/16951",
+        "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png",
+        "_sBannerUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png",
+        "_nSubscriberCount": 8593,
+        "_bHasSubmissionQueue": false,
+        "_bAccessorIsSubscribed": false
+      },
+      "_aCategory": {
+        "_idRow": 18444,
+        "_sName": "Other/Misc",
+        "_sModelName": "ModCategory",
+        "_sProfileUrl": "https://gamebanana.com/mods/cats/18444",
+        "_sIconUrl": "",
+        "_bIsObsolete": false
+      },
+      "_aFeaturings": {
+        "3day": {
+          "_sFeatureGroup": "3day",
+          "_sTitle": "Best of the Banana",
+          "_sIconClasses": "MiscIcon FeaturedBestOfTheBananaIcon",
+          "_tsDate": 1682982001
+        },
+        "yesterday": {
+          "_sFeatureGroup": "yesterday",
+          "_sTitle": "Best of Yesterday",
+          "_sIconClasses": "MiscIcon FeaturedYesterdayIcon",
+          "_tsDate": 1682895601
+        },
+        "today": {
+          "_sFeatureGroup": "today",
+          "_sTitle": "Today's Pick",
+          "_sIconClasses": "MiscIcon FeaturedTodayIcon",
+          "_tsDate": 1682809201
+        }
+      },
+      "_aCredits": [
+        {
+          "_sGroupName": "Key Authors",
+          "_aAuthors": [
+            {
+              "_sRole": "Mod creator: main programmer, modeler, texture editor, writer, event scripter, project manager",
+              "_idRow": 1740038,
+              "_sName": "chlorophylls",
+              "_sProfileUrl": "https://gamebanana.com/members/1740038",
+              "_sAvatarUrl": "https://images.gamebanana.com/img/av/60b16b9cd22b0.png",
+              "_bIsOnline": false
+            }
+          ]
+        },
+        {
+          "_sGroupName": "Tool Developers",
+          "_aAuthors": [
+            {
+              "_sRole": "Amicitia, GFD Studio, AtlusScriptTools",
+              "_idRow": 1736194,
+              "_sName": "TGE",
+              "_sProfileUrl": "https://gamebanana.com/members/1736194",
+              "_sAvatarUrl": "https://images.gamebanana.com/img/av/5eefca5506f9e.png",
+              "_bIsOnline": false
+            },
+            {
+              "_sRole": "Amicitia, GFD Studio, Bustup Param Editor, Mod Menu, Persona Voice Clip Editor",
+              "_idRow": 1568750,
+              "_sName": "ShrineFox",
+              "_sProfileUrl": "https://gamebanana.com/members/1568750",
+              "_sAvatarUrl": "https://images.gamebanana.com/img/av/60e19eebc9159.gif",
+              "_bIsOnline": false
+            },
+            {
+              "_sRole": "P5R NAME.TBL Editor, P5R Binary Templates",
+              "_idRow": 1694106,
+              "_sName": "DeathChaos",
+              "_sProfileUrl": "https://gamebanana.com/members/1694106",
+              "_sAvatarUrl": "https://images.gamebanana.com/img/av/5fe54e42aa8f8.png",
+              "_bIsOnline": false
+            },
+            {
+              "_sRole": "EVT assistance, BMD research and more",
+              "_idRow": 1847256,
+              "_sName": "SecreC.",
+              "_sProfileUrl": "https://gamebanana.com/members/1847256",
+              "_sAvatarUrl": "https://images.gamebanana.com/img/av/60a6157eeb30d.png",
+              "_bIsOnline": false
+            },
+            {
+              "_sRole": "Reloaded II, AWB Emulator",
+              "_idRow": 1614325,
+              "_sName": "Sewer56lol",
+              "_sProfileUrl": "https://gamebanana.com/members/1614325",
+              "_sAvatarUrl": "https://images.gamebanana.com/img/av/5b10014ea8ba4.png",
+              "_bIsOnline": false
+            },
+            {
+              "_sRole": "Unhardcoded Romances Toolkit developer",
+              "_idRow": 2429356,
+              "_sName": "CornflakesCTD",
+              "_sProfileUrl": "https://gamebanana.com/members/2429356",
+              "_sAvatarUrl": "https://images.gamebanana.com/img/av/655d7978bde11.png",
+              "_bIsOnline": false
+            },
+            {
+              "_sRole": "Costume Framework, Ryo Framework developer",
+              "_idRow": 2986979,
+              "_sName": "RyoTune",
+              "_sProfileUrl": "https://gamebanana.com/members/2986979",
+              "_sAvatarUrl": "https://images.gamebanana.com/img/av/68df8ebda43a4.png",
+              "_bIsOnline": false
+            }
+          ]
+        },
+        {
+          "_sGroupName": "Artists",
+          "_aAuthors": [
+            {
+              "_sRole": "2D & 3D asset artist",
+              "_idRow": 1696824,
+              "_sName": "Alan3D",
+              "_sProfileUrl": "https://gamebanana.com/members/1696824",
+              "_sAvatarUrl": "https://images.gamebanana.com/img/av/5fe81e3fa9fde.png",
+              "_bIsOnline": false
+            },
+            {
+              "_sRole": "2D asset artist, pause menu textures and more",
+              "_sName": "Noc",
+              "_sUrl": "https://twitter.com/noctistales"
+            },
+            {
+              "_sRole": "2D asset artist, Crit cut-in and HP/MP party panel & status head icons, AOA & status screen",
+              "_sName": "Intothefrisson",
+              "_sUrl": "https://twitter.com/intothefrisson"
+            },
+            {
+              "_sRole": "2D asset artist, dialogue choice portraits",
+              "_sName": "Yousachi",
+              "_sUrl": "https://twitter.com/yousachines"
+            },
+            {
+              "_sRole": "2D asset artist, Finishing Touch",
+              "_sName": "Nathilustra",
+              "_sUrl": "https://twitter.com/NathilustraArt"
+            },
+            {
+              "_sRole": "Mod thumbnail artist",
+              "_sName": "Moeqit",
+              "_sUrl": "https://vgen.co/moeqit"
+            }
+          ]
+        },
+        {
+          "_sGroupName": "Voiceovers",
+          "_aAuthors": [
+            {
+              "_sRole": "English VO",
+              "_sName": "Alexa Farron",
+              "_sUrl": "https://twitter.com/alexafarron"
+            },
+            {
+              "_sRole": "Japanese VO, clips taken from FGO, Fate Samurai Remnant, Fate Extella Link, P3R, etc",
+              "_sName": "Maaya Sakamoto"
+            }
+          ]
+        },
+        {
+          "_sGroupName": "Special Thanks",
+          "_aAuthors": [
+            {
+              "_sRole": "Physics chunk, texture, and model assistance",
+              "_idRow": 1665242,
+              "_sName": "DniweTamp",
+              "_sUpicUrl": "https://images.gamebanana.com/img/upic/60302fb4d8ee2.png",
+              "_sProfileUrl": "https://gamebanana.com/members/1665242",
+              "_sAvatarUrl": "https://images.gamebanana.com/img/av/650dd92f7a569.png",
+              "_bIsOnline": false
+            },
+            {
+              "_sRole": "Materials and EPL assistance",
+              "_idRow": 1981046,
+              "_sName": "lyncpk",
+              "_sUpicUrl": "https://images.gamebanana.com/img/upic/695e3fbb726fe.png",
+              "_sProfileUrl": "https://gamebanana.com/members/1981046",
+              "_sAvatarUrl": "https://images.gamebanana.com/img/av/6abdb89190545.png",
+              "_bIsOnline": false
+            },
+            {
+              "_sRole": "Audio assistance",
+              "_idRow": 2012756,
+              "_sName": "rabbitgirlkris",
+              "_sUpicUrl": "https://images.gamebanana.com/img/upic/698e4a340cf2d.png",
+              "_sProfileUrl": "https://gamebanana.com/members/2012756",
+              "_sAvatarUrl": "https://images.gamebanana.com/img/av/61a460961c590.png",
+              "_bIsOnline": false
+            }
+          ]
+        },
+        {
+          "_sGroupName": "Original Assets",
+          "_aAuthors": [
+            {
+              "_sRole": "Persona 5 Royal, Persona 5 Strikers, Persona 5 Dancing",
+              "_sName": "Atlus, P-Studio"
+            }
+          ]
+        }
+      ],
+      "_bAdvancedRequirementsExist": true,
+      "_aRequirements": [
+        [
+          "Reloaded II",
+          "https://reloaded-project.github.io/Reloaded-II/",
+          "Installed",
+          "BlueColor",
+          "Required",
+          "OrangeColor"
+        ],
+        [
+          "Persona Essentials",
+          "https://gamebanana.com/mods/408376",
+          "Installed",
+          "BlueColor",
+          "Required",
+          "OrangeColor"
+        ],
+        [
+          "Costume Framework",
+          "https://gamebanana.com/mods/488633"
+        ]
+      ]
+    }
+  }
+}

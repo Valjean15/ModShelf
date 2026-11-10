@@ -1,0 +1,3832 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/apiv11/Mod/Index",
+    "query": "_nPage=1&_nPerpage=50&_sSort=Generic_MostLiked&_aFilters%5BGeneric_Game%5D=16951"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "body": {
+      "_aMetadata": {
+        "_nRecordCount": 918,
+        "_bIsComplete": false,
+        "_nPerpage": 50
+      },
+      "_aRecords": [
+        {
+          "_idRow": 440088,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "P5R Female Protagonist",
+          "_sProfileUrl": "https://gamebanana.com/mods/440088",
+          "_tsDateAdded": 1682722918,
+          "_tsDateModified": 1793598816,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: 3D Studio Max",
+            "Software Used: Audacity",
+            "Software Used: Blender",
+            "Software Used: Notepad++",
+            "Software Used: Photoshop"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Credit: Moeqit @ Vgen (https://vgen.co/moeqit)",
+                "_sFile": "69c9e12c2687c.jpg",
+                "_sFile220": "220-90_69c9e12c2687c.jpg",
+                "_hFile220": 197,
+                "_wFile220": 220,
+                "_sFile530": "530-90_69c9e12c2687c.jpg",
+                "_hFile530": 474,
+                "_wFile530": 530,
+                "_sFile100": "100-90_69c9e12c2687c.jpg",
+                "_hFile100": 89,
+                "_wFile100": 100,
+                "_sFile800": "800-90_69c9e12c2687c.jpg",
+                "_hFile800": 715,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Dungeon traversal",
+                "_sFile": "644c3a21e089a.jpg",
+                "_sFile100": "100-90_644c3a21e089a.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1740038,
+            "_sName": "chlorophylls",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1740038",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/60b16b9cd22b0.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/610a34e9e24a9.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Other/Misc",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/18444",
+            "_sIconUrl": ""
+          },
+          "_sVersion": "1.2.28",
+          "_tsDateUpdated": 1780795295,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 433,
+          "_nPostCount": 1162,
+          "_bWasFeatured": true,
+          "_nViewCount": 695775,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 432481,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "P5R: Custom Bonus Tweaks",
+          "_sProfileUrl": "https://gamebanana.com/mods/432481",
+          "_tsDateAdded": 1678946415,
+          "_tsDateModified": 1765760901,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Yes: Suffering"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6412ad1e07659.jpg",
+                "_sFile220": "220-90_6412ad1e07659.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_6412ad1e07659.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_6412ad1e07659.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_6412ad1e07659.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6412ad1bafa59.jpg",
+                "_sFile100": "100-90_6412ad1bafa59.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1694106,
+            "_sName": "DeathChaos",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1694106",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5fe54e42aa8f8.png",
+            "_aClearanceLevels": [
+              "P5 Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/5fe54de9c02c8.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "QOL",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19711",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d81a64138.png"
+          },
+          "_sVersion": "2.6.9",
+          "_tsDateUpdated": 1754057689,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 325,
+          "_nPostCount": 689,
+          "_bWasFeatured": true,
+          "_nViewCount": 484662,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 573578,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Kasumi as Protagonist (Full Release)",
+          "_sProfileUrl": "https://gamebanana.com/mods/573578",
+          "_tsDateAdded": 1753057004,
+          "_tsDateModified": 1790106771,
+          "_bHasFiles": true,
+          "_aTags": [
+            "GFD Studio",
+            "EVTEditor",
+            "AtlusScriptTools"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "687d8142e5679.jpg",
+                "_sFile220": "220-90_687d8142e5679.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_687d8142e5679.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_687d8142e5679.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_687d8142e5679.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Menu art by L7M3!",
+                "_sFile": "687d84e854d67.jpg",
+                "_sFile100": "100-90_687d84e854d67.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2327232,
+            "_sName": "Wisteria",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2327232",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/643c74ff343ff.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/6439dbd10c020.png",
+            "_aSubjectShaper": {
+              "_sBorderStyle": "none",
+              "_sFont": "Tahoma",
+              "_sTextColor": "#c9a0dc",
+              "_sTextHoverColor": "#e7d3ef",
+              "_sBorderHoverColor": "#c093d7"
+            },
+            "_sSubjectShaperCssCode": "font-family:'Tahoma';color:#c9a0dc;"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Models",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19636",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8ab57cbd95.png"
+          },
+          "_aSubCategory": {
+            "_sName": "Characters",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19637",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d9c875ba0.png"
+          },
+          "_sVersion": "v1.0.8.6",
+          "_tsDateUpdated": 1781556453,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 262,
+          "_nPostCount": 129,
+          "_bWasFeatured": true,
+          "_nViewCount": 204173,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 408100,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Classroom and Confidant Cheat Sheet (PC)",
+          "_sProfileUrl": "https://gamebanana.com/mods/408100",
+          "_tsDateAdded": 1666496631,
+          "_tsDateModified": 1669616285,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: Notepad++"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6354b771ae9c4.jpg",
+                "_sFile220": "220-90_6354b771ae9c4.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_6354b771ae9c4.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_6354b771ae9c4.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_6354b771ae9c4.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6354b7a8077b9.jpg",
+                "_sFile100": "100-90_6354b7a8077b9.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1772151,
+            "_sName": "Haalyle",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1772151",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6ab4fffa0b580.jpg",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/6ab4fffeb4e24.jpg"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Cheats",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19624",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8a7f4d5e89.png"
+          },
+          "_sVersion": "1.1",
+          "_tsDateUpdated": 1667002554,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 255,
+          "_nPostCount": 100,
+          "_bWasFeatured": true,
+          "_nViewCount": 345270,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 493214,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Gay Joker",
+          "_sProfileUrl": "https://gamebanana.com/mods/493214",
+          "_tsDateAdded": 1706748994,
+          "_tsDateModified": 1717795090,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: Notepad++"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "65bb986411209.jpg",
+                "_sFile220": "220-90_65bb986411209.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_65bb986411209.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_65bb986411209.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_65bb986411209.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Yusuke Romance",
+                "_sFile": "65badd3e13d96.jpg",
+                "_sFile100": "100-90_65badd3e13d96.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2906324,
+            "_sName": "Alive_Neptuna",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2906324",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/65bbe267850f1.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Events",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/20019",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63824cd033f15.png"
+          },
+          "_sVersion": "1.2.2",
+          "_tsDateUpdated": 1717603839,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 223,
+          "_nPostCount": 254,
+          "_bWasFeatured": true,
+          "_nViewCount": 307375,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 593378,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "P5R : Rose & Violet - Story Overhaul",
+          "_sProfileUrl": "https://gamebanana.com/mods/593378",
+          "_tsDateAdded": 1753297221,
+          "_tsDateModified": 1790095459,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: Notepad++",
+            "Software Used: Paint.NET",
+            "Software Used: Blender",
+            "BFMessageScriptEditor",
+            "PersonaEditor",
+            "Amicitia",
+            "AtlusScriptCompiler",
+            "P5TableEditor",
+            "010 Editor",
+            "GFDstudio",
+            "EVTtool"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Thumbnail",
+                "_sFile": "681dc752765d4.jpg",
+                "_sFile220": "220-90_681dc752765d4.jpg",
+                "_hFile220": 134,
+                "_wFile220": 220,
+                "_sFile530": "530-90_681dc752765d4.jpg",
+                "_hFile530": 323,
+                "_wFile530": 530,
+                "_sFile100": "100-90_681dc752765d4.jpg",
+                "_hFile100": 61,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Persona 5 Royal Spoilers ahead!",
+                "_sFile": "6876a7b7e26ed.jpg",
+                "_sFile100": "100-90_6876a7b7e26ed.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 3837146,
+            "_sName": "Zylvos",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/3837146",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/687962e8759cf.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/68796249ce497.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Other/Misc",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/18444",
+            "_sIconUrl": ""
+          },
+          "_sVersion": "1.0.12",
+          "_tsDateUpdated": 1783869279,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 217,
+          "_nPostCount": 425,
+          "_bWasFeatured": true,
+          "_nViewCount": 205728,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 408376,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Persona 5 Royal Essentials (Mod Loader)",
+          "_sProfileUrl": "https://gamebanana.com/mods/408376",
+          "_tsDateAdded": 1666610322,
+          "_tsDateModified": 1780094334,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Code Editor: Rider"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "63567339aff41.jpg",
+                "_sFile220": "220-90_63567339aff41.jpg",
+                "_hFile220": 220,
+                "_wFile220": 220,
+                "_sFile530": "530-90_63567339aff41.jpg",
+                "_hFile530": 530,
+                "_wFile530": 530,
+                "_sFile100": "100-90_63567339aff41.jpg",
+                "_hFile100": 100,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6356744f8a766.jpg",
+                "_sFile100": "100-90_6356744f8a766.jpg",
+                "_hFile100": 60,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1614325,
+            "_sName": "Sewer56lol",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1614325",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5b10014ea8ba4.png",
+            "_aClearanceLevels": [
+              "R-II Manager",
+              "SR-GC Manager",
+              "SR-PC Manager"
+            ]
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "QOL",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19711",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d81a64138.png"
+          },
+          "_sVersion": "2.2.0",
+          "_tsDateUpdated": 1685855405,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 211,
+          "_nPostCount": 106,
+          "_bWasFeatured": true,
+          "_nViewCount": 432467,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 414790,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Social Stat Tracker",
+          "_sProfileUrl": "https://gamebanana.com/mods/414790",
+          "_tsDateAdded": 1669875493,
+          "_tsDateModified": 1736234416,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: Visual Studio 2022",
+            "Software Used: Ghidra",
+            "Software Used: Cheat Engine"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Social Stat Tracker",
+                "_sFile": "638841b11cc7f.jpg",
+                "_sFile220": "220-90_638841b11cc7f.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_638841b11cc7f.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_638841b11cc7f.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Maxed Stats (Completed Save From pokehedgehog321)",
+                "_sFile": "638841ecc02ec.jpg",
+                "_sFile100": "100-90_638841ecc02ec.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1742760,
+            "_sName": "AnimatedSwine37",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1742760",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5f7a64bd2615c.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "QOL",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19711",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d81a64138.png"
+          },
+          "_sVersion": "1.0.1",
+          "_tsDateUpdated": 1726981257,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 177,
+          "_nPostCount": 38,
+          "_bWasFeatured": true,
+          "_nViewCount": 202004,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 410862,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Cat Morgana Bustups in Overworld",
+          "_sProfileUrl": "https://gamebanana.com/mods/410862",
+          "_tsDateAdded": 1667771280,
+          "_tsDateModified": 1751373555,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: Persona Editor",
+            "Software Used: Persona Intelligent String Substituter (PISS)"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "63682a22913dc.jpg",
+                "_sFile220": "220-90_63682a22913dc.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_63682a22913dc.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_63682a22913dc.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "63682a2dda221.jpg",
+                "_sFile100": "100-90_63682a2dda221.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2317159,
+            "_sName": "NineNaos",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2317159",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/659b146a01d76.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/67c48ccd0688d.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Textures",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19627",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63825a6361dca.png"
+          },
+          "_aSubCategory": {
+            "_sName": "Portraits",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19628",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/638241ed1e846.png"
+          },
+          "_sVersion": "2.1.0",
+          "_tsDateUpdated": 1705240093,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 150,
+          "_nPostCount": 200,
+          "_bWasFeatured": true,
+          "_nViewCount": 169341,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 446850,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Long Hair Ann",
+          "_sProfileUrl": "https://gamebanana.com/mods/446850",
+          "_tsDateAdded": 1685455844,
+          "_tsDateModified": 1688973560,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: 3D Studio Max",
+            "Software Used: Photoshop"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6475fd6e55c27.jpg",
+                "_sFile220": "220-90_6475fd6e55c27.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_6475fd6e55c27.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_6475fd6e55c27.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_6475fd6e55c27.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6475cc28f3cd3.jpg",
+                "_sFile100": "100-90_6475cc28f3cd3.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2402051,
+            "_sName": "stalkeler",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2402051",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/63ad9fee120a3.jpg"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Models",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19636",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8ab57cbd95.png"
+          },
+          "_aSubCategory": {
+            "_sName": "Characters",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19637",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d9c875ba0.png"
+          },
+          "_sVersion": "1.2.0",
+          "_tsDateUpdated": 1685777574,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 149,
+          "_nPostCount": 102,
+          "_bWasFeatured": true,
+          "_nViewCount": 165930,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 407958,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Persona 5 Royal: Colorful Pack",
+          "_sProfileUrl": "https://gamebanana.com/mods/407958",
+          "_tsDateAdded": 1666442642,
+          "_tsDateModified": 1754842134,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Battle UI: BATTLE/GUI/P5_BATTLE_PARTYPANEL.SPD",
+            "All Out Attack Portraits: BATTLE/GUI/files with .DDS",
+            "Weapon Icons: FONT/ICON.DDS",
+            "Title Screen Models: MODEL/CHARACTER/folders 0001-0010",
+            "Phantom Thieves Loading Logo: INIT/LOADING/both files",
+            "Software Used: Photoshop"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "P5R Colorful Pack",
+                "_sFile": "6353e15ca296f.jpg",
+                "_sFile220": "220-90_6353e15ca296f.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_6353e15ca296f.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_6353e15ca296f.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Colored Phantom Thieves Logo",
+                "_sFile": "6353e16c109a3.jpg",
+                "_sFile100": "100-90_6353e16c109a3.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1737241,
+            "_sName": "HaythamQuake",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1737241",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/61ae58ea6899c.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/61c7aea232c7f.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/607108be0dfd7.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Textures",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19627",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63825a6361dca.png"
+          },
+          "_aSubCategory": {
+            "_sName": "Texture Packs",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19633",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/6382454683241.png"
+          },
+          "_sVersion": "2.0",
+          "_tsDateUpdated": 1754841722,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 137,
+          "_nPostCount": 95,
+          "_bWasFeatured": true,
+          "_nViewCount": 219282,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 440045,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Ponytail Haru",
+          "_sProfileUrl": "https://gamebanana.com/mods/440045",
+          "_tsDateAdded": 1682604618,
+          "_tsDateModified": 1688973768,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: 3D Studio Max",
+            "Software Used: Photoshop"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "644a8575f25e3.jpg",
+                "_sFile220": "220-90_644a8575f25e3.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_644a8575f25e3.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_644a8575f25e3.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_644a8575f25e3.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "644a558c822bc.jpg",
+                "_sFile100": "100-90_644a558c822bc.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2402051,
+            "_sName": "stalkeler",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2402051",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/63ad9fee120a3.jpg"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Models",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19636",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8ab57cbd95.png"
+          },
+          "_aSubCategory": {
+            "_sName": "Characters",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19637",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d9c875ba0.png"
+          },
+          "_sVersion": "1.2.1",
+          "_tsDateUpdated": 1685885817,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 120,
+          "_nPostCount": 60,
+          "_bWasFeatured": true,
+          "_nViewCount": 122584,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 420408,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Persona EXP Share",
+          "_sProfileUrl": "https://gamebanana.com/mods/420408",
+          "_tsDateAdded": 1672717559,
+          "_tsDateModified": 1736245512,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: Visual Studio 2022"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Persona EXP Share (P5R!)",
+                "_sFile": "63b3a01534336.jpg",
+                "_sFile220": "220-90_63b3a01534336.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_63b3a01534336.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_63b3a01534336.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "And they didn't even have Growth!",
+                "_sFile": "63b3a0276e68e.jpg",
+                "_sFile100": "100-90_63b3a0276e68e.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1742760,
+            "_sName": "AnimatedSwine37",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1742760",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5f7a64bd2615c.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "QOL",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19711",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d81a64138.png"
+          },
+          "_sVersion": "1.0",
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 113,
+          "_nPostCount": 33,
+          "_bWasFeatured": true,
+          "_nViewCount": 126170,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 564187,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "BETA FeMC Redux+",
+          "_sProfileUrl": "https://gamebanana.com/mods/564187",
+          "_tsDateAdded": 1735002731,
+          "_tsDateModified": 1781192746,
+          "_bHasFiles": true,
+          "_aTags": [],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6769dd53d2655.jpg",
+                "_sFile220": "220-90_6769dd53d2655.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_6769dd53d2655.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_6769dd53d2655.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "JOKER",
+                "_sFile": "6769de2619ab2.jpg",
+                "_sFile100": "100-90_6769de2619ab2.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1779639,
+            "_sName": "Hayth_OverHeaven",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1779639",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/647c86211dc49.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Other/Misc",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/18444",
+            "_sIconUrl": ""
+          },
+          "_sVersion": "v0.1.6",
+          "_tsDateUpdated": 1781192835,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 113,
+          "_nPostCount": 65,
+          "_bWasFeatured": true,
+          "_nViewCount": 119927,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 412128,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Better Descriptions for P5R",
+          "_sProfileUrl": "https://gamebanana.com/mods/412128",
+          "_tsDateAdded": 1668466526,
+          "_tsDateModified": 1686316434,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: Notepad++"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "63b20d8613336.jpg",
+                "_sFile220": "220-90_63b20d8613336.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_63b20d8613336.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_63b20d8613336.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "63b20c142d130.jpg",
+                "_sFile100": "100-90_63b20c142d130.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2321144,
+            "_sName": "SoraRoxas",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2321144",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6372c82369db1.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/638377c33daa6.gif"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "QOL",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19711",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d81a64138.png"
+          },
+          "_sVersion": "V2.3.3",
+          "_tsDateUpdated": 1686316499,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 111,
+          "_nPostCount": 87,
+          "_bWasFeatured": true,
+          "_nViewCount": 155148,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 414644,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Restored Outfits Dialogue",
+          "_sProfileUrl": "https://gamebanana.com/mods/414644",
+          "_tsDateAdded": 1669786111,
+          "_tsDateModified": 1788241660,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: Notepad++"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6386db3032829.jpg",
+                "_sFile220": "220-90_6386db3032829.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_6386db3032829.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_6386db3032829.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6386dc1494833.jpg",
+                "_sFile100": "100-90_6386dc1494833.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1740038,
+            "_sName": "chlorophylls",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1740038",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/60b16b9cd22b0.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/610a34e9e24a9.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Other/Misc",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/18444",
+            "_sIconUrl": ""
+          },
+          "_sVersion": "1.0.5",
+          "_tsDateUpdated": 1699601746,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 110,
+          "_nPostCount": 46,
+          "_bWasFeatured": true,
+          "_nViewCount": 139107,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 439595,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Classic School Uniform",
+          "_sProfileUrl": "https://gamebanana.com/mods/439595",
+          "_tsDateAdded": 1682194219,
+          "_tsDateModified": 1686769972,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: 3D Studio Max",
+            "Software Used: Photoshop"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "64443fb04b152.jpg",
+                "_sFile220": "220-90_64443fb04b152.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_64443fb04b152.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_64443fb04b152.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_64443fb04b152.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "64442c65e19d0.jpg",
+                "_sFile100": "100-90_64442c65e19d0.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2402051,
+            "_sName": "stalkeler",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2402051",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/63ad9fee120a3.jpg"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Models",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19636",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8ab57cbd95.png"
+          },
+          "_aSubCategory": {
+            "_sName": "Characters",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19637",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d9c875ba0.png"
+          },
+          "_sVersion": "1.1.4",
+          "_tsDateUpdated": 1683744336,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 109,
+          "_nPostCount": 61,
+          "_bWasFeatured": true,
+          "_nViewCount": 84794,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 408348,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "No All-Out-Attack Fade-In v.1.3.0",
+          "_sProfileUrl": "https://gamebanana.com/mods/408348",
+          "_tsDateAdded": 1666592095,
+          "_tsDateModified": 1672013012,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: Photoshop",
+            "Editor Used:: 010 Editor"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "NGL I wasn't gonna release this mod til Keku said \"she's gonna make a banger thumbnail\" ADACHI TRUE!",
+                "_sFile": "63562bbc32260.jpg",
+                "_sFile220": "220-90_63562bbc32260.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_63562bbc32260.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_63562bbc32260.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_63562bbc32260.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "For those of you",
+                "_sFile": "63562c0e22b06.jpg",
+                "_sFile100": "100-90_63562c0e22b06.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1981046,
+            "_sName": "lyncpk",
+            "_bIsOnline": false,
+            "_bHasRipe": true,
+            "_sProfileUrl": "https://gamebanana.com/members/1981046",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6abdb89190545.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/6abdb8e0c1c8e.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/695e3fbb726fe.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "QOL",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19711",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d81a64138.png"
+          },
+          "_sVersion": "1.3",
+          "_tsDateUpdated": 1669332918,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 105,
+          "_nPostCount": 37,
+          "_bWasFeatured": true,
+          "_nViewCount": 146953,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 478577,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Early Violet",
+          "_sProfileUrl": "https://gamebanana.com/mods/478577",
+          "_tsDateAdded": 1699715282,
+          "_tsDateModified": 1717811251,
+          "_bHasFiles": true,
+          "_aTags": [],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "654f8faecc1e7.jpg",
+                "_sFile220": "220-90_654f8faecc1e7.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_654f8faecc1e7.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_654f8faecc1e7.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_654f8faecc1e7.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "654f9816e6209.jpg",
+                "_sFile100": "100-90_654f9816e6209.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2012756,
+            "_sName": "rabbitgirlkris",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2012756",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/61a460961c590.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/698e4a340cf2d.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Battles",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/20176",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8a349649aa.png"
+          },
+          "_sVersion": "1.0.3",
+          "_tsDateUpdated": 1717811035,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 105,
+          "_nPostCount": 113,
+          "_bWasFeatured": true,
+          "_nViewCount": 148406,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 552319,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Kasumi as Protagonist - Alternate models",
+          "_sProfileUrl": "https://gamebanana.com/mods/552319",
+          "_tsDateAdded": 1730324313,
+          "_tsDateModified": 1792089732,
+          "_bHasFiles": true,
+          "_aTags": [
+            "VScode"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Thumbnail",
+                "_sFile": "687c056ca4d6f.jpg",
+                "_sFile220": "220-90_687c056ca4d6f.jpg",
+                "_hFile220": 134,
+                "_wFile220": 220,
+                "_sFile530": "530-90_687c056ca4d6f.jpg",
+                "_hFile530": 323,
+                "_wFile530": 530,
+                "_sFile100": "100-90_687c056ca4d6f.jpg",
+                "_hFile100": 61,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Phantom Thief outfit (Black leotard)",
+                "_sFile": "687c05934ee51.jpg",
+                "_sFile100": "100-90_687c05934ee51.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 3837146,
+            "_sName": "Zylvos",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/3837146",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/687962e8759cf.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/68796249ce497.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Models",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19636",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8ab57cbd95.png"
+          },
+          "_aSubCategory": {
+            "_sName": "Characters",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19637",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d9c875ba0.png"
+          },
+          "_sVersion": "1.4.5",
+          "_tsDateUpdated": 1792089983,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 100,
+          "_nPostCount": 96,
+          "_bWasFeatured": false,
+          "_nViewCount": 179231,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 412852,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Bedhead Becky",
+          "_sProfileUrl": "https://gamebanana.com/mods/412852",
+          "_tsDateAdded": 1668873662,
+          "_tsDateModified": 1669070185,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used:: Amicitia",
+            "Software Used: Photoshop",
+            "Software Used:: GFDStudio",
+            "Software Used: Blender"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6378fbe31fc5a.jpg",
+                "_sFile220": "220-90_6378fbe31fc5a.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_6378fbe31fc5a.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_6378fbe31fc5a.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_6378fbe31fc5a.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6378fbe17b225.jpg",
+                "_sFile100": "100-90_6378fbe17b225.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1780371,
+            "_sName": "Keku",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1780371",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6498831b1108f.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/64988340f0086.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/649f5eff3b7c7.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Other/Misc",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/18444",
+            "_sIconUrl": ""
+          },
+          "_sVersion": "1.0",
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 100,
+          "_nPostCount": 13,
+          "_bWasFeatured": true,
+          "_nViewCount": 87427,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 411759,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "No All-Out-Attack Portraits",
+          "_sProfileUrl": "https://gamebanana.com/mods/411759",
+          "_tsDateAdded": 1668290266,
+          "_tsDateModified": 1680800413,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: Photoshop",
+            "Software Used: Notepad++",
+            "Software Used: 3D Studio Max"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "I'm SO sleepy man I can't be bothered to make a cool thumbnail",
+                "_sFile": "637010580a4de.jpg",
+                "_sFile220": "220-90_637010580a4de.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_637010580a4de.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_637010580a4de.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Wow he just like me fr?",
+                "_sFile": "637013a4a33c0.jpg",
+                "_sFile100": "100-90_637013a4a33c0.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1981046,
+            "_sName": "lyncpk",
+            "_bIsOnline": false,
+            "_bHasRipe": true,
+            "_sProfileUrl": "https://gamebanana.com/members/1981046",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6abdb89190545.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/6abdb8e0c1c8e.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/695e3fbb726fe.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Cutscenes / FMV",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19701",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d80f86eaa.png"
+          },
+          "_sVersion": "1.3.0",
+          "_tsDateUpdated": 1680722591,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 100,
+          "_nPostCount": 41,
+          "_bWasFeatured": true,
+          "_nViewCount": 112718,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 408484,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Negotiation Cheat Sheet",
+          "_sProfileUrl": "https://gamebanana.com/mods/408484",
+          "_tsDateAdded": 1666657161,
+          "_tsDateModified": 1705242726,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: Notepad++"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "63572b21a1fc1.jpg",
+                "_sFile220": "220-90_63572b21a1fc1.jpg",
+                "_hFile220": 122,
+                "_wFile220": 220,
+                "_sFile530": "530-90_63572b21a1fc1.jpg",
+                "_hFile530": 294,
+                "_wFile530": 530,
+                "_sFile100": "100-90_63572b21a1fc1.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "i hate morgana and GB for making me upload 2 images",
+                "_sFile": "63572b7450fb5.jpg",
+                "_sFile100": "100-90_63572b7450fb5.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2317159,
+            "_sName": "NineNaos",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2317159",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/659b146a01d76.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/67c48ccd0688d.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Cheats",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19624",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8a7f4d5e89.png"
+          },
+          "_sVersion": "1.1.0",
+          "_tsDateUpdated": 1705242767,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 97,
+          "_nPostCount": 27,
+          "_bWasFeatured": true,
+          "_nViewCount": 189215,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 470666,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Shujin Lunch Hangouts",
+          "_sProfileUrl": "https://gamebanana.com/mods/470666",
+          "_tsDateAdded": 1695679419,
+          "_tsDateModified": 1695679419,
+          "_bHasFiles": true,
+          "_aTags": [],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6512023e8fd59.jpg",
+                "_sFile220": "220-90_6512023e8fd59.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_6512023e8fd59.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_6512023e8fd59.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_6512023e8fd59.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6512023f439c4.jpg",
+                "_sFile100": "100-90_6512023f439c4.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1694106,
+            "_sName": "DeathChaos",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1694106",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5fe54e42aa8f8.png",
+            "_aClearanceLevels": [
+              "P5 Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/5fe54de9c02c8.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Events",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/20019",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63824cd033f15.png"
+          },
+          "_sVersion": "1.0.0",
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 95,
+          "_nPostCount": 26,
+          "_bWasFeatured": true,
+          "_nViewCount": 57077,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 468684,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Final Fantasy Outfits",
+          "_sProfileUrl": "https://gamebanana.com/mods/468684",
+          "_tsDateAdded": 1694734233,
+          "_tsDateModified": 1698569504,
+          "_bHasFiles": true,
+          "_aTags": [],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Extremely Crowded Thumbnail",
+                "_sFile": "65038aaa0770c.jpg",
+                "_sFile220": "220-90_65038aaa0770c.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_65038aaa0770c.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_65038aaa0770c.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_65038aaa0770c.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Squall Thumbnail",
+                "_sFile": "651c0db4dba12.jpg",
+                "_sFile100": "100-90_651c0db4dba12.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1741778,
+            "_sName": "Ercar",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1741778",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/65179390e22cd.png",
+            "_aClearanceLevels": [
+              "DSTS Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/651793853905f.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/64c99040dd03b.png",
+            "_aSubjectShaper": {
+              "_sBorderStyle": "Stroke",
+              "_sFont": "Arial",
+              "_sTextColor": "#00e1ff",
+              "_sTextHoverColor": "#72fdae",
+              "_sBorderColor": "#000000",
+              "_sBorderHoverColor": "#000000"
+            },
+            "_sSubjectShaperCssCode": "font-family:'Arial';color:#00e1ff;"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Models",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19636",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8ab57cbd95.png"
+          },
+          "_aSubCategory": {
+            "_sName": "Model Packs",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19641",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/638245fa1d41a.png"
+          },
+          "_sVersion": "1.0.1",
+          "_tsDateUpdated": 1696334048,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 91,
+          "_nPostCount": 70,
+          "_bWasFeatured": true,
+          "_nViewCount": 78032,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 412327,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Battle Music Randomizer",
+          "_sProfileUrl": "https://gamebanana.com/mods/412327",
+          "_tsDateAdded": 1668586067,
+          "_tsDateModified": 1741280365,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: Visual Studio 2022"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "637490b31f294.jpg",
+                "_sFile220": "220-90_637490b31f294.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_637490b31f294.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_637490b31f294.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "637490bbe9d62.jpg",
+                "_sFile100": "100-90_637490bbe9d62.jpg",
+                "_hFile100": 100,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2348386,
+            "_sName": "YveltalGriffin",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2348386",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/63715d4d79a37.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "QOL",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19711",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d81a64138.png"
+          },
+          "_sVersion": "2.1.1",
+          "_tsDateUpdated": 1674444657,
+          "_bIsObsolete": true,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 90,
+          "_nPostCount": 200,
+          "_bWasFeatured": true,
+          "_nViewCount": 193517,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 412666,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "2009 SEES Outfits",
+          "_sProfileUrl": "https://gamebanana.com/mods/412666",
+          "_tsDateAdded": 1668791021,
+          "_tsDateModified": 1741458369,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: 3D Studio Max",
+            "Software Used: GIMP"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "P3 Outfits",
+                "_sFile": "6377ae779f67d.jpg",
+                "_sFile220": "220-90_6377ae779f67d.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_6377ae779f67d.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_6377ae779f67d.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "he sleeps every day",
+                "_sFile": "6377ae9455c6e.jpg",
+                "_sFile100": "100-90_6377ae9455c6e.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2140666,
+            "_sName": "Mortyyyy",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2140666",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/654ee30640e57.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/654ee2e07acee.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Models",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19636",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8ab57cbd95.png"
+          },
+          "_aSubCategory": {
+            "_sName": "Model Packs",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19641",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/638245fa1d41a.png"
+          },
+          "_sVersion": "1.2.0",
+          "_tsDateUpdated": 1741458434,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 90,
+          "_nPostCount": 47,
+          "_bWasFeatured": true,
+          "_nViewCount": 94949,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 408665,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Correct Darts Options [PC]",
+          "_sProfileUrl": "https://gamebanana.com/mods/408665",
+          "_tsDateAdded": 1666753344,
+          "_tsDateModified": 1666758566,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software: Atlus Script Tools"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6358a20cb4f94.jpg",
+                "_sFile220": "220-90_6358a20cb4f94.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_6358a20cb4f94.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_6358a20cb4f94.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6358a20ce00f4.jpg",
+                "_sFile100": "100-90_6358a20ce00f4.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1772151,
+            "_sName": "Haalyle",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1772151",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6ab4fffa0b580.jpg",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/6ab4fffeb4e24.jpg"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Cheats",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19624",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8a7f4d5e89.png"
+          },
+          "_sVersion": "",
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 89,
+          "_nPostCount": 1,
+          "_bWasFeatured": false,
+          "_nViewCount": 108549,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 410959,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Sonic the Hedgehog over Joker",
+          "_sProfileUrl": "https://gamebanana.com/mods/410959",
+          "_tsDateAdded": 1667885707,
+          "_tsDateModified": 1673198160,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: Notepad++",
+            "Software Used: GIMP",
+            "Software Used: Audacity",
+            "Software Used: Blender",
+            "Software Used: 3D Studio Max"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "63691c42704fb.jpg",
+                "_sFile220": "220-90_63691c42704fb.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_63691c42704fb.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_63691c42704fb.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_63691c42704fb.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "63691ee9b5747.jpg",
+                "_sFile100": "100-90_63691ee9b5747.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1665242,
+            "_sName": "DniweTamp",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1665242",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/650dd92f7a569.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/650dd939941c6.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/60302fb4d8ee2.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Models",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19636",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8ab57cbd95.png"
+          },
+          "_aSubCategory": {
+            "_sName": "Characters",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19637",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d9c875ba0.png"
+          },
+          "_sVersion": "1.0.1",
+          "_tsDateUpdated": 1673198186,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 85,
+          "_nPostCount": 34,
+          "_bWasFeatured": true,
+          "_nViewCount": 62302,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 446760,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Bayonetta model pack for Ann",
+          "_sProfileUrl": "https://gamebanana.com/mods/446760",
+          "_tsDateAdded": 1685567610,
+          "_tsDateModified": 1721654799,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: GIMP",
+            "Software Used: Blender",
+            "Software Used: Notepad++"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "647533562f305.jpg",
+                "_sFile220": "220-90_647533562f305.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_647533562f305.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_647533562f305.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "64751fe9cf0ea.jpg",
+                "_sFile100": "100-90_64751fe9cf0ea.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1665242,
+            "_sName": "DniweTamp",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1665242",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/650dd92f7a569.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/650dd939941c6.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/60302fb4d8ee2.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Models",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19636",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8ab57cbd95.png"
+          },
+          "_aSubCategory": {
+            "_sName": "Characters",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19637",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d9c875ba0.png"
+          },
+          "_sVersion": "1.0.2",
+          "_tsDateUpdated": 1721654852,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 85,
+          "_nPostCount": 27,
+          "_bWasFeatured": true,
+          "_nViewCount": 48474,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 444458,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Wonder Over Joker",
+          "_sProfileUrl": "https://gamebanana.com/mods/444458",
+          "_tsDateAdded": 1684517457,
+          "_tsDateModified": 1716753574,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: 3D Studio Max",
+            "Software Used: GIMP",
+            "Software Used: Blender"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "646a4bda91fac.jpg",
+                "_sFile220": "220-90_646a4bda91fac.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_646a4bda91fac.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_646a4bda91fac.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "wish skill porting was real (old mats tho)",
+                "_sFile": "6467abb9a006f.jpg",
+                "_sFile100": "100-90_6467abb9a006f.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2140666,
+            "_sName": "Mortyyyy",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2140666",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/654ee30640e57.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/654ee2e07acee.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Models",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19636",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8ab57cbd95.png"
+          },
+          "_aSubCategory": {
+            "_sName": "Model Packs",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19641",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/638245fa1d41a.png"
+          },
+          "_sVersion": "1.5.5",
+          "_tsDateUpdated": 1716753718,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 84,
+          "_nPostCount": 148,
+          "_bWasFeatured": true,
+          "_nViewCount": 97582,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 409151,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Futaba Hair Consistency (Now Featuring Sojiro)",
+          "_sProfileUrl": "https://gamebanana.com/mods/409151",
+          "_tsDateAdded": 1667013188,
+          "_tsDateModified": 1737755408,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: Photoshop"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Thumbnail",
+                "_sFile": "639fe3c94ca6d.jpg",
+                "_sFile220": "220-90_639fe3c94ca6d.jpg",
+                "_hFile220": 143,
+                "_wFile220": 220,
+                "_sFile530": "530-90_639fe3c94ca6d.jpg",
+                "_hFile530": 346,
+                "_wFile530": 530,
+                "_sFile100": "100-90_639fe3c94ca6d.jpg",
+                "_hFile100": 65,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Comparison 1",
+                "_sFile": "639fe3c7bdb94.jpg",
+                "_sFile100": "100-90_639fe3c7bdb94.jpg",
+                "_hFile100": 35,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1676397,
+            "_sName": "Futab",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1676397",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/639ff370bd7e8.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Textures",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19627",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63825a6361dca.png"
+          },
+          "_sVersion": "1.5",
+          "_tsDateUpdated": 1737753062,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 81,
+          "_nPostCount": 28,
+          "_bWasFeatured": true,
+          "_nViewCount": 92870,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 468367,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Evangelion outfits",
+          "_sProfileUrl": "https://gamebanana.com/mods/468367",
+          "_tsDateAdded": 1694554648,
+          "_tsDateModified": 1694554705,
+          "_bHasFiles": true,
+          "_aTags": [],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6500d982d0142.jpg",
+                "_sFile220": "220-90_6500d982d0142.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_6500d982d0142.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_6500d982d0142.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_6500d982d0142.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6500d982c773c.jpg",
+                "_sFile100": "100-90_6500d982c773c.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1276685,
+            "_sName": "Ghost1276685",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1276685",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Models",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19636",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8ab57cbd95.png"
+          },
+          "_aSubCategory": {
+            "_sName": "Characters",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19637",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d9c875ba0.png"
+          },
+          "_sVersion": "",
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 81,
+          "_nPostCount": 14,
+          "_bWasFeatured": true,
+          "_nViewCount": 37474,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 413411,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "P5R Localization Fixes",
+          "_sProfileUrl": "https://gamebanana.com/mods/413411",
+          "_tsDateAdded": 1669169619,
+          "_tsDateModified": 1701545894,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Localization: Fixes"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "637d780871fe7.jpg",
+                "_sFile220": "220-90_637d780871fe7.jpg",
+                "_hFile220": 123,
+                "_wFile220": 220,
+                "_sFile530": "530-90_637d780871fe7.jpg",
+                "_hFile530": 297,
+                "_wFile530": 530,
+                "_sFile100": "100-90_637d780871fe7.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "637df367a1789.jpg",
+                "_sFile100": "100-90_637df367a1789.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2181035,
+            "_sName": "DLON",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2181035",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/66452f9e18693.jpg"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Other/Misc",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/18444",
+            "_sIconUrl": ""
+          },
+          "_sVersion": "1.0.7",
+          "_tsDateUpdated": 1672471498,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "warn",
+          "_bHasContentRatings": true,
+          "_nLikeCount": 81,
+          "_nPostCount": 40,
+          "_bWasFeatured": true,
+          "_nViewCount": 119266,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 408890,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Full DLC Rework",
+          "_sProfileUrl": "https://gamebanana.com/mods/408890",
+          "_tsDateAdded": 1666893938,
+          "_tsDateModified": 1670539218,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: 010 Editor",
+            "Software Used: Notepad++"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "635ac4e0cf3f0.jpg",
+                "_sFile220": "220-90_635ac4e0cf3f0.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_635ac4e0cf3f0.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_635ac4e0cf3f0.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "635ac4f412a48.jpg",
+                "_sFile100": "100-90_635ac4f412a48.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1971520,
+            "_sName": "MeovvCAT",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1971520",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/63854c61c2176.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/63854c4f68b4c.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/6356b06ed2a6a.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Other/Misc",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/18444",
+            "_sIconUrl": ""
+          },
+          "_sVersion": "1.2.1",
+          "_tsDateUpdated": 1670539119,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 79,
+          "_nPostCount": 85,
+          "_bWasFeatured": true,
+          "_nViewCount": 161456,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 482718,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Unhardcoded Romances",
+          "_sProfileUrl": "https://gamebanana.com/mods/482718",
+          "_tsDateAdded": 1701835783,
+          "_tsDateModified": 1733146562,
+          "_bHasFiles": true,
+          "_aTags": [],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "656fef836d2f3.jpg",
+                "_sFile220": "220-90_656fef836d2f3.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_656fef836d2f3.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_656fef836d2f3.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "656fef8295b38.jpg",
+                "_sFile100": "100-90_656fef8295b38.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2429356,
+            "_sName": "CornflakesCTD",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2429356",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/655d7978bde11.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/655d797cf0e5a.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Other/Misc",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/18444",
+            "_sIconUrl": ""
+          },
+          "_sVersion": "1.1.2",
+          "_tsDateUpdated": 1733146639,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 78,
+          "_nPostCount": 45,
+          "_bWasFeatured": true,
+          "_nViewCount": 156020,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 663550,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "AnnShiho Canon",
+          "_sProfileUrl": "https://gamebanana.com/mods/663550",
+          "_tsDateAdded": 1774477448,
+          "_tsDateModified": 1793071448,
+          "_bHasFiles": true,
+          "_aTags": [],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "69c4616911c2a.jpg",
+                "_sFile220": "220-90_69c4616911c2a.jpg",
+                "_hFile220": 146,
+                "_wFile220": 220,
+                "_sFile530": "530-90_69c4616911c2a.jpg",
+                "_hFile530": 351,
+                "_wFile530": 530,
+                "_sFile100": "100-90_69c4616911c2a.jpg",
+                "_hFile100": 66,
+                "_wFile100": 100,
+                "_sFile800": "800-90_69c4616911c2a.jpg",
+                "_hFile800": 530,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "69c45865dc3aa.jpg",
+                "_sFile100": "100-90_69c45865dc3aa.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 5252327,
+            "_sName": "dripping-mercury",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/5252327",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/69ba0125a6cba.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Events",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/20019",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63824cd033f15.png"
+          },
+          "_sVersion": "1.2.2",
+          "_tsDateUpdated": 1786322377,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 77,
+          "_nPostCount": 49,
+          "_bWasFeatured": false,
+          "_nViewCount": 31077,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 451088,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Expansive Persona Compendium",
+          "_sProfileUrl": "https://gamebanana.com/mods/451088",
+          "_tsDateAdded": 1687219131,
+          "_tsDateModified": 1688409115,
+          "_bHasFiles": true,
+          "_aTags": [],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6490de85c5459.jpg",
+                "_sFile220": "220-90_6490de85c5459.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_6490de85c5459.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_6490de85c5459.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_6490de85c5459.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6490e11e08090.jpg",
+                "_sFile100": "100-90_6490e11e08090.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1742213,
+            "_sName": "SCArkadia",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1742213",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5f21b956b9a80.jpg"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Models",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19636",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8ab57cbd95.png"
+          },
+          "_aSubCategory": {
+            "_sName": "Personas",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19638",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8a5ca95d03.png"
+          },
+          "_sVersion": "1.1",
+          "_tsDateUpdated": 1687891009,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 77,
+          "_nPostCount": 233,
+          "_bWasFeatured": true,
+          "_nViewCount": 147246,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 465555,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Kingdom Hearts Outfits",
+          "_sProfileUrl": "https://gamebanana.com/mods/465555",
+          "_tsDateAdded": 1693299869,
+          "_tsDateModified": 1695062490,
+          "_bHasFiles": true,
+          "_aTags": [],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "64edacd91baa0.jpg",
+                "_sFile220": "220-90_64edacd91baa0.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_64edacd91baa0.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_64edacd91baa0.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_64edacd91baa0.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "64edacde6a514.jpg",
+                "_sFile100": "100-90_64edacde6a514.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1741778,
+            "_sName": "Ercar",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1741778",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/65179390e22cd.png",
+            "_aClearanceLevels": [
+              "DSTS Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/651793853905f.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/64c99040dd03b.png",
+            "_aSubjectShaper": {
+              "_sBorderStyle": "Stroke",
+              "_sFont": "Arial",
+              "_sTextColor": "#00e1ff",
+              "_sTextHoverColor": "#72fdae",
+              "_sBorderColor": "#000000",
+              "_sBorderHoverColor": "#000000"
+            },
+            "_sSubjectShaperCssCode": "font-family:'Arial';color:#00e1ff;"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Models",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19636",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8ab57cbd95.png"
+          },
+          "_aSubCategory": {
+            "_sName": "Model Packs",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19641",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/638245fa1d41a.png"
+          },
+          "_sVersion": "1.0.1",
+          "_tsDateUpdated": 1695062796,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 76,
+          "_nPostCount": 64,
+          "_bWasFeatured": false,
+          "_nViewCount": 41276,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 488633,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Costume Framework for P5R",
+          "_sProfileUrl": "https://gamebanana.com/mods/488633",
+          "_tsDateAdded": 1704650216,
+          "_tsDateModified": 1746424639,
+          "_bHasFiles": true,
+          "_aTags": [],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6598db7752ed0.jpg",
+                "_sFile220": "220-90_6598db7752ed0.jpg",
+                "_hFile220": 110,
+                "_wFile220": 220,
+                "_sFile530": "530-90_6598db7752ed0.jpg",
+                "_hFile530": 265,
+                "_wFile530": 530,
+                "_sFile100": "100-90_6598db7752ed0.jpg",
+                "_hFile100": 50,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6598db8994bf2.jpg",
+                "_sFile100": "100-90_6598db8994bf2.jpg",
+                "_hFile100": 60,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2986979,
+            "_sName": "RyoTune",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2986979",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/68df8ebda43a4.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/68047b525349f.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Other/Misc",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/18444",
+            "_sIconUrl": ""
+          },
+          "_sVersion": "1.0.39",
+          "_tsDateUpdated": 1728331904,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 76,
+          "_nPostCount": 163,
+          "_bWasFeatured": true,
+          "_nViewCount": 165493,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 419465,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "P4 Arena Ultimax Outfit Pack",
+          "_sProfileUrl": "https://gamebanana.com/mods/419465",
+          "_tsDateAdded": 1672333249,
+          "_tsDateModified": 1741457613,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: 3D Studio Max",
+            "Software Used: GIMP"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "P4AU Outfit Pack",
+                "_sFile": "63adbf5038093.jpg",
+                "_sFile220": "220-90_63adbf5038093.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_63adbf5038093.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_63adbf5038093.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "fields are fun",
+                "_sFile": "63ad8d44debf2.jpg",
+                "_sFile100": "100-90_63ad8d44debf2.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2140666,
+            "_sName": "Mortyyyy",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2140666",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/654ee30640e57.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/654ee2e07acee.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Models",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19636",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8ab57cbd95.png"
+          },
+          "_aSubCategory": {
+            "_sName": "Model Packs",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19641",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/638245fa1d41a.png"
+          },
+          "_sVersion": "1.1.0",
+          "_tsDateUpdated": 1741457660,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 76,
+          "_nPostCount": 26,
+          "_bWasFeatured": true,
+          "_nViewCount": 55866,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 482214,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Main Menu Only Shows Unlocked Characters",
+          "_sProfileUrl": "https://gamebanana.com/mods/482214",
+          "_tsDateAdded": 1701569338,
+          "_tsDateModified": 1701569338,
+          "_bHasFiles": true,
+          "_aTags": [],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "656be2d5e9b74.jpg",
+                "_sFile220": "220-90_656be2d5e9b74.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_656be2d5e9b74.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_656be2d5e9b74.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_656be2d5e9b74.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "656be1b9a1e76.jpg",
+                "_sFile100": "100-90_656be1b9a1e76.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2429356,
+            "_sName": "CornflakesCTD",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2429356",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/655d7978bde11.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/655d797cf0e5a.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Models",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19636",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8ab57cbd95.png"
+          },
+          "_aSubCategory": {
+            "_sName": "Characters",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19637",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d9c875ba0.png"
+          },
+          "_sVersion": "1.0.0",
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 75,
+          "_nPostCount": 9,
+          "_bWasFeatured": true,
+          "_nViewCount": 28044,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 471152,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Pokémon Outfits",
+          "_sProfileUrl": "https://gamebanana.com/mods/471152",
+          "_tsDateAdded": 1695950926,
+          "_tsDateModified": 1698127191,
+          "_bHasFiles": true,
+          "_aTags": [],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Another crowded thumbnail lmao",
+                "_sFile": "651625b6a4616.jpg",
+                "_sFile220": "220-90_651625b6a4616.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_651625b6a4616.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_651625b6a4616.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_651625b6a4616.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Steven Stone",
+                "_sFile": "6516024d403df.jpg",
+                "_sFile100": "100-90_6516024d403df.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1741778,
+            "_sName": "Ercar",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1741778",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/65179390e22cd.png",
+            "_aClearanceLevels": [
+              "DSTS Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/651793853905f.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/64c99040dd03b.png",
+            "_aSubjectShaper": {
+              "_sBorderStyle": "Stroke",
+              "_sFont": "Arial",
+              "_sTextColor": "#00e1ff",
+              "_sTextHoverColor": "#72fdae",
+              "_sBorderColor": "#000000",
+              "_sBorderHoverColor": "#000000"
+            },
+            "_sSubjectShaperCssCode": "font-family:'Arial';color:#00e1ff;"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Models",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19636",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8ab57cbd95.png"
+          },
+          "_aSubCategory": {
+            "_sName": "Model Packs",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19641",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/638245fa1d41a.png"
+          },
+          "_sVersion": "1.0.1",
+          "_tsDateUpdated": 1698127173,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 75,
+          "_nPostCount": 77,
+          "_bWasFeatured": true,
+          "_nViewCount": 43997,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 439190,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Xenoblade Chronicles Outfits and Weapons",
+          "_sProfileUrl": "https://gamebanana.com/mods/439190",
+          "_tsDateAdded": 1681989177,
+          "_tsDateModified": 1745123398,
+          "_bHasFiles": true,
+          "_aTags": [],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6441199cabefb.jpg",
+                "_sFile220": "220-90_6441199cabefb.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_6441199cabefb.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_6441199cabefb.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "644119c3b8d1a.jpg",
+                "_sFile100": "100-90_644119c3b8d1a.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1741778,
+            "_sName": "Ercar",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1741778",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/65179390e22cd.png",
+            "_aClearanceLevels": [
+              "DSTS Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/651793853905f.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/64c99040dd03b.png",
+            "_aSubjectShaper": {
+              "_sBorderStyle": "Stroke",
+              "_sFont": "Arial",
+              "_sTextColor": "#00e1ff",
+              "_sTextHoverColor": "#72fdae",
+              "_sBorderColor": "#000000",
+              "_sBorderHoverColor": "#000000"
+            },
+            "_sSubjectShaperCssCode": "font-family:'Arial';color:#00e1ff;"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Models",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19636",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8ab57cbd95.png"
+          },
+          "_aSubCategory": {
+            "_sName": "Model Packs",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19641",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/638245fa1d41a.png"
+          },
+          "_sVersion": "1.1.0",
+          "_tsDateUpdated": 1745122852,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 74,
+          "_nPostCount": 36,
+          "_bWasFeatured": true,
+          "_nViewCount": 47922,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 438643,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Early Party Members",
+          "_sProfileUrl": "https://gamebanana.com/mods/438643",
+          "_tsDateAdded": 1681706970,
+          "_tsDateModified": 1682888866,
+          "_bHasFiles": true,
+          "_aTags": [],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Thumbnail",
+                "_sFile": "643cbb6700d84.jpg",
+                "_sFile220": "220-90_643cbb6700d84.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_643cbb6700d84.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_643cbb6700d84.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_643cbb6700d84.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Early Skills Menu",
+                "_sFile": "643cbb612c3be.jpg",
+                "_sFile100": "100-90_643cbb612c3be.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2596032,
+            "_sName": "AbiR539",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2596032",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/643ccf78986a2.jpg"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Skill Change",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/20523",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/641585b539d35.png"
+          },
+          "_sVersion": "0.2.1",
+          "_tsDateUpdated": 1682888937,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 73,
+          "_nPostCount": 171,
+          "_bWasFeatured": true,
+          "_nViewCount": 197847,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 462259,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Exos Heroes Outfits for Females",
+          "_sProfileUrl": "https://gamebanana.com/mods/462259",
+          "_tsDateAdded": 1691947878,
+          "_tsDateModified": 1693015675,
+          "_bHasFiles": true,
+          "_aTags": [],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "64d90667ac425.jpg",
+                "_sFile220": "220-90_64d90667ac425.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_64d90667ac425.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_64d90667ac425.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_64d90667ac425.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "64d9067fcca2b.jpg",
+                "_sFile100": "100-90_64d9067fcca2b.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1741778,
+            "_sName": "Ercar",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1741778",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/65179390e22cd.png",
+            "_aClearanceLevels": [
+              "DSTS Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/651793853905f.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/64c99040dd03b.png",
+            "_aSubjectShaper": {
+              "_sBorderStyle": "Stroke",
+              "_sFont": "Arial",
+              "_sTextColor": "#00e1ff",
+              "_sTextHoverColor": "#72fdae",
+              "_sBorderColor": "#000000",
+              "_sBorderHoverColor": "#000000"
+            },
+            "_sSubjectShaperCssCode": "font-family:'Arial';color:#00e1ff;"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Models",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19636",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8ab57cbd95.png"
+          },
+          "_aSubCategory": {
+            "_sName": "Model Packs",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19641",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/638245fa1d41a.png"
+          },
+          "_sVersion": "1.0.1",
+          "_tsDateUpdated": 1693015044,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 73,
+          "_nPostCount": 34,
+          "_bWasFeatured": true,
+          "_nViewCount": 38376,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 426328,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "She/Her Joker | Replaced Gendered Terms",
+          "_sProfileUrl": "https://gamebanana.com/mods/426328",
+          "_tsDateAdded": 1675977503,
+          "_tsDateModified": 1786472966,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Tool Used: AtlusScriptCompiler",
+            "Tool Used: P5 Table Editor",
+            "Tool Used: CriFsLab",
+            "Tool Used: PersonaEditor"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sCaption": "Mod Thumbnail",
+                "_sFile": "63e1c46b62990.jpg",
+                "_sFile220": "220-90_63e1c46b62990.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_63e1c46b62990.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_63e1c46b62990.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "63e1cefe7f811.jpg",
+                "_sFile100": "100-90_63e1cefe7f811.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2437808,
+            "_sName": "MissRin",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2437808",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/63e535bf78ea9.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Other/Misc",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/18444",
+            "_sIconUrl": ""
+          },
+          "_sVersion": "1.1.6.1",
+          "_tsDateUpdated": 1786152193,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 72,
+          "_nPostCount": 83,
+          "_bWasFeatured": true,
+          "_nViewCount": 166871,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 502763,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Speak Your Mind",
+          "_sProfileUrl": "https://gamebanana.com/mods/502763",
+          "_tsDateAdded": 1711295081,
+          "_tsDateModified": 1713210620,
+          "_bHasFiles": true,
+          "_aTags": [],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "6600491d7d1b1.jpg",
+                "_sFile220": "220-90_6600491d7d1b1.jpg",
+                "_hFile220": 108,
+                "_wFile220": 220,
+                "_sFile530": "530-90_6600491d7d1b1.jpg",
+                "_hFile530": 260,
+                "_wFile530": 530,
+                "_sFile100": "100-90_6600491d7d1b1.jpg",
+                "_hFile100": 49,
+                "_wFile100": 100,
+                "_sFile800": "800-90_6600491d7d1b1.jpg",
+                "_hFile800": 392,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "66004928b855c.jpg",
+                "_sFile100": "100-90_66004928b855c.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2378700,
+            "_sName": "Lightboom",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2378700",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/63909dd62c4e2.jpg"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Events",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/20019",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63824cd033f15.png"
+          },
+          "_sVersion": "1.0.0",
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 72,
+          "_nPostCount": 46,
+          "_bWasFeatured": true,
+          "_nViewCount": 81177,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 441228,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "Shut Up, Sae!",
+          "_sProfileUrl": "https://gamebanana.com/mods/441228",
+          "_tsDateAdded": 1682912691,
+          "_tsDateModified": 1758486691,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: EvtTool",
+            "Software Used: Notepad++"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "68d0606b1f7db.jpg",
+                "_sFile220": "220-90_68d0606b1f7db.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_68d0606b1f7db.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_68d0606b1f7db.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "68cd941889c98.jpg",
+                "_sFile100": "100-90_68cd941889c98.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2327232,
+            "_sName": "Wisteria",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2327232",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/643c74ff343ff.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/6439dbd10c020.png",
+            "_aSubjectShaper": {
+              "_sBorderStyle": "none",
+              "_sFont": "Tahoma",
+              "_sTextColor": "#c9a0dc",
+              "_sTextHoverColor": "#e7d3ef",
+              "_sBorderHoverColor": "#c093d7"
+            },
+            "_sSubjectShaperCssCode": "font-family:'Tahoma';color:#c9a0dc;"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "QOL",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/19711",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d81a64138.png"
+          },
+          "_sVersion": "v2.0.1",
+          "_tsDateUpdated": 1758486694,
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 72,
+          "_nPostCount": 13,
+          "_bWasFeatured": false,
+          "_nViewCount": 65425,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 411917,
+          "_sModelName": "Mod",
+          "_sSingularTitle": "Mod",
+          "_sIconClasses": "SubmissionType Mod",
+          "_sName": "No Adult Romance",
+          "_sProfileUrl": "https://gamebanana.com/mods/411917",
+          "_tsDateAdded": 1668358798,
+          "_tsDateModified": 1668381238,
+          "_bHasFiles": true,
+          "_aTags": [
+            "Software Used: 3D Studio Max"
+          ],
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "637120f932705.jpg",
+                "_sFile220": "220-90_637120f932705.jpg",
+                "_hFile220": 124,
+                "_wFile220": 220,
+                "_sFile530": "530-90_637120f932705.jpg",
+                "_hFile530": 298,
+                "_wFile530": 530,
+                "_sFile100": "100-90_637120f932705.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100,
+                "_sFile800": "800-90_637120f932705.jpg",
+                "_hFile800": 450,
+                "_wFile800": 800
+              },
+              {
+                "_sType": "screenshot",
+                "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                "_sFile": "637120f8acf05.jpg",
+                "_sFile100": "100-90_637120f8acf05.jpg",
+                "_hFile100": 56,
+                "_wFile100": 100
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1707207,
+            "_sName": "MadMax1960",
+            "_bIsOnline": false,
+            "_bHasRipe": true,
+            "_sProfileUrl": "https://gamebanana.com/members/1707207",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5ee8508e4184c.png",
+            "_aClearanceLevels": [
+              "P4G PC 32 Manager",
+              "P3FES Manager",
+              "P5 Manager",
+              "P3P PSP Manager",
+              "P5R (PC) Manager",
+              "P5RS Manager",
+              "P5R Manager",
+              "P3P PC Manager",
+              "P4G64 Manager",
+              "P3R Manager",
+              "MF Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/5ef5628118564.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/60d0954a3cf28.png"
+          },
+          "_aGame": {
+            "_idRow": 16951,
+            "_sName": "Persona 5 Royal (PC)",
+            "_sProfileUrl": "https://gamebanana.com/games/16951",
+            "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          "_aRootCategory": {
+            "_sName": "Other/Misc",
+            "_sProfileUrl": "https://gamebanana.com/mods/cats/18444",
+            "_sIconUrl": ""
+          },
+          "_sVersion": "",
+          "_bIsObsolete": false,
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nLikeCount": 72,
+          "_nPostCount": 118,
+          "_bWasFeatured": true,
+          "_nViewCount": 66764,
+          "_bIsOwnedByAccessor": false
+        }
+      ]
+    }
+  }
+}

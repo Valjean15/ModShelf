@@ -1,0 +1,275 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/apiv11/Mod/413411/ProfilePage",
+    "query": ""
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "body": {
+      "_idRow": 413411,
+      "_nStatus": "0",
+      "_bIsPrivate": false,
+      "_bAccessorIsSubmitter": false,
+      "_bIsTrashed": false,
+      "_bIsWithheld": false,
+      "_sName": "P5R Localization Fixes",
+      "_sCommentsMode": "open",
+      "_tsDateModified": 1701545894,
+      "_tsDateAdded": 1669169619,
+      "_sProfileUrl": "https://gamebanana.com/mods/413411",
+      "_aPreviewMedia": {
+        "_aImages": [
+          {
+            "_sType": "screenshot",
+            "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+            "_sFile": "637d780871fe7.jpg",
+            "_sFile220": "220-90_637d780871fe7.jpg",
+            "_hFile220": 123,
+            "_wFile220": 220,
+            "_sFile530": "530-90_637d780871fe7.jpg",
+            "_hFile530": 297,
+            "_wFile530": 530,
+            "_sFile100": "100-90_637d780871fe7.jpg",
+            "_hFile100": 56,
+            "_wFile100": 100
+          },
+          {
+            "_sType": "screenshot",
+            "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+            "_sFile": "637df367a1789.jpg",
+            "_sFile100": "100-90_637df367a1789.jpg",
+            "_hFile100": 56,
+            "_wFile100": 100
+          }
+        ]
+      },
+      "_nUpdatesCount": 1,
+      "_bHasUpdates": true,
+      "_tsDateUpdated": 1672471498,
+      "_nAllTodosCount": 0,
+      "_bHasTodos": false,
+      "_nPostCount": 40,
+      "_aTags": [
+        {
+          "_sTitle": "Localization",
+          "_sValue": "Fixes"
+        }
+      ],
+      "_bCreatedBySubmitter": true,
+      "_bIsPorted": false,
+      "_nThanksCount": 4,
+      "_aContentRatings": {
+        "st": "Sexual Themes"
+      },
+      "_sInitialVisibility": "warn",
+      "_sDownloadUrl": "https://gamebanana.com/mods/download/413411",
+      "_nDownloadCount": 154552,
+      "_aFiles": [
+        {
+          "_idRow": 913751,
+          "_sFile": "p5r_localization_fixes1_0_7.7z",
+          "_nFilesize": 733019,
+          "_tsDateAdded": 1672471370,
+          "_nDownloadCount": 6623,
+          "_sDownloadUrl": "https://gamebanana.com/dl/913751",
+          "_sMd5Checksum": "f6d81b41ad90872d9153ce3b7eb1e35d",
+          "_sAnalysisState": "done",
+          "_sAnalysisResult": "ok",
+          "_sAnalysisResultVerbose": "File passed preliminary analysis",
+          "_sAvState": "done",
+          "_sAvResult": "clean",
+          "_bIsArchived": false,
+          "_bHasContents": true,
+          "_sDescription": "v1.0.7",
+          "_aModManagerIntegrations": [
+            {
+              "_sIconClasses": "Reloaded2ModLoaderIcon",
+              "_idToolRow": 6693,
+              "_aGameRowIds": [
+                6061,
+                6218,
+                7486
+              ],
+              "_sModManagerAlias": "Reloaded2ModLoader",
+              "_sInstallerName": "Reloaded II",
+              "_idSubmitterRow": 1614325,
+              "_sInstallerUrl": "https://gamebanana.com/tools/6693",
+              "_sIconUrl": "https://images.gamebanana.com/img/ico/tools/6ac1940a8c255.png",
+              "_sDownloadUrl": "R2:https://gamebanana.com/mmdl/913751"
+            }
+          ]
+        },
+        {
+          "_idRow": 913750,
+          "_sFile": "persona5royalfixesp5rlocalizationfixesreleasemetadata_e1bbc.json",
+          "_nFilesize": 409,
+          "_tsDateAdded": 1672471370,
+          "_nDownloadCount": 136631,
+          "_sDownloadUrl": "https://gamebanana.com/dl/913750",
+          "_sMd5Checksum": "22b04831bb6bdd58c4109243ecc50859",
+          "_sAnalysisState": "done",
+          "_sAnalysisResult": "ok",
+          "_sAnalysisResultVerbose": "File passed preliminary analysis",
+          "_sAvState": "done",
+          "_sAvResult": "clean",
+          "_bIsArchived": false,
+          "_bHasContents": false
+        }
+      ],
+      "_nSubscriberCount": 76,
+      "_aContributingStudios": [],
+      "_sLicense": "<a rel=\"license\" href=\"http://creativecommons.org/licenses/by-nc-nd/4.0/\"><img alt=\"Creative Commons License\" style=\"border-width:0\" src=\"https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png\" /></a><br />This work is licensed under a <a rel=\"license\" href=\"http://creativecommons.org/licenses/by-nc-nd/4.0/\">Creative Commons Attribution-NonCommercial-NoDerivs 4.0 Unported License</a>.",
+      "_aLicenseChecklist": {
+        "yes": [
+          "Download and install this Mod"
+        ],
+        "ask": [
+          "Redistribute this Mod on other sites",
+          "Modify this Mod and distribute the modified Mod on GameBanana",
+          "Modify this Mod and distribute the modified Mod on another site",
+          "Use parts of this Mod in another Mod and distribute the Mod on GameBanana",
+          "Use parts of this Mod in another Mod and distribute the Mod on another site",
+          "Use this Mod or components of this Mod in adult/NSFW content"
+        ],
+        "no": [
+          "Use this Mod or components of this Mod commercially"
+        ]
+      },
+      "_sDescription": "Makes the text more accurate to the Japanese script.",
+      "_bGenerateTableOfContents": false,
+      "_sText": "<span class=\"GreenColor\">DESCRIPTION</span><h2><b>The purpose of this mod is to remove dialogue censorship from the game, as well as make various parts of the text more accurate to the original Japanese script. Only for those who play with the Japanese voices.</b></h2>This is an <b>improved</b> compilation of my <a href=\"https://gamebanana.com/mods/409906\">censorship-removal</a>/<a href=\"https://gamebanana.com/mods/410424\">delocalization</a> mods, as well as a foundation for any future expansion.<br><br><h1><span class=\"GreenColor\"><b>The reason for making this</b></span></h1>As I was making my third delocalization mod, I noticed that several files overlapped with those from my existing mods. This meant that I would need to make compatibility patches for them. As the number of my mods grows, this will just end up being a hassle, both for me as well as the mod users.<br><br>That is why I decided that all of my mods, in this category, will now come as a single 'all-in-one' package, instead of each change being its own mod. <br><br><h1><b><span class=\"GreenColor\">IMPORTANT</span></b></h1><b><span class=\"RedColor\">Please DELETE all of my older mods before using this. All future updates will be in the form of this compilation.</span></b><br><span class=\"GreenColor\"><b><br></b></span><h1><span class=\"GreenColor\">What is currently included</span></h1><ol><li><b>An improved version of my '<a href=\"https://gamebanana.com/mods/409906\">P5R Dialogue Uncensor Patch</a>'.</b><br>(Removes the censorship made by Atlus West to the two minor scenes \r\ninvolving Ryuji and the <span role=\"heading\" aria-level=\"1\" class=\"yKMVIe SelectedElement\">creatures of Shinjuku </span>Juliana and Angela, making the \r\ndialogue more faithful to what it is in the Japanese script.</li><li><b>My '<a href=\"https://gamebanana.com/mods/410424\">Futaba Is Navi'</a> mod.</b><br>(Changes Futaba's code name from 'Oracle' to 'Navi', because her code name in the Japanese script is Navi (Navigator). Oracle is a complete fabrication by the English localization team - possibly being a Batman reference.</li><li><b>Principal Kobayakawa is now referred to merely as the 'Principal'.</b><br>(What was supposed to be my third delocalization mod, will now be a part of this compilation. 'Kobayakawa' is a name that was made up for this character by the English localization team. In the original script, he is a no-name, and is simply called 'Principal' by everyone. I've edited the text in such a way that will make this change flow smoothly.</li><li><b>Several other, minor changes, that are not really worth mentioning.<br></b>(Some Kawakami and Sojiro dialogue edits at the very beginning of the game, minor edits to Joker and Ryuji's awakening dialogue. Nothing major.)<b><br></b></li></ol><br><br><h1><b><span class=\"RedColor\"><span class=\"RedColor\"><span class=\"RedColor\"><i>More updates will come over time. The above list will be expanded with any change that I make in future updates. Each change will be labeled properly, with an appropriate description.</i></span></span></span></b><br><br>- DLON<br></h1><h1><span class=\"GreenColor\"></span></h1>",
+      "_bIsObsolete": false,
+      "_nLikeCount": 81,
+      "_nViewCount": 119266,
+      "_sVersion": "1.0.7",
+      "_bAcceptsDonations": false,
+      "_bShowRipePromo": true,
+      "_aEmbeddables": {
+        "_sEmbeddableImageBaseUrl": "https://gamebanana.com/mods/embeddables/413411",
+        "_aVariants": [
+          "small",
+          "small_square",
+          "medium",
+          "medium_square",
+          "medium_square_minimal",
+          "large",
+          "large_minimal",
+          "large_square",
+          "large_minimal_square",
+          "thumbnail"
+        ]
+      },
+      "_aSubmitter": {
+        "_idRow": 2181035,
+        "_sName": "DLON",
+        "_sUserTitle": "Bananite",
+        "_sHonoraryTitle": "",
+        "_tsJoinDate": 1658323738,
+        "_sAvatarUrl": "https://images.gamebanana.com/img/av/66452f9e18693.jpg",
+        "_sSigUrl": "",
+        "_sProfileUrl": "https://gamebanana.com/members/2181035",
+        "_sPointsUrl": "https://gamebanana.com/members/logs/pointslog/2181035",
+        "_sMedalsUrl": "https://gamebanana.com/members/stats/medals/2181035",
+        "_bIsOnline": false,
+        "_sLocation": "",
+        "_sOnlineTitle": "",
+        "_sOfflineTitle": "",
+        "_nPoints": 6235,
+        "_nPointsRank": 7082,
+        "_aNormalMedals": [
+          [
+            "m_age_1.png",
+            "One month a member",
+            "normal",
+            795907
+          ],
+          [
+            "features_1.png",
+            "Submission featured",
+            "normal",
+            796980
+          ]
+        ],
+        "_aRareMedals": [],
+        "_aLegendaryMedals": [],
+        "_bHasRipe": false,
+        "_nBuddyCount": 0,
+        "_nSubscriberCount": 17,
+        "_aDonationMethods": [],
+        "_bAccessorIsBuddy": false,
+        "_bBuddyRequestExistsWithAccessor": false,
+        "_bAccessorIsSubscribed": false,
+        "_aDefaultLicenseChecklist": [
+          "yes",
+          "ask",
+          "ask",
+          "ask",
+          "ask",
+          "ask",
+          "no",
+          "ask"
+        ],
+        "_sDefaultLicense": ""
+      },
+      "_bFollowLinks": true,
+      "_aGame": {
+        "_idRow": 16951,
+        "_sName": "Persona 5 Royal (PC)",
+        "_sAbbreviation": "P5R (PC)",
+        "_sProfileUrl": "https://gamebanana.com/games/16951",
+        "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png",
+        "_sBannerUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png",
+        "_nSubscriberCount": 8593,
+        "_bHasSubmissionQueue": false,
+        "_bAccessorIsSubscribed": false
+      },
+      "_aCategory": {
+        "_idRow": 18444,
+        "_sName": "Other/Misc",
+        "_sModelName": "ModCategory",
+        "_sProfileUrl": "https://gamebanana.com/mods/cats/18444",
+        "_sIconUrl": "",
+        "_bIsObsolete": false
+      },
+      "_aFeaturings": {
+        "yesterday": {
+          "_sFeatureGroup": "yesterday",
+          "_sTitle": "Best of Yesterday",
+          "_sIconClasses": "MiscIcon FeaturedYesterdayIcon",
+          "_tsDate": 1669330801
+        },
+        "today": {
+          "_sFeatureGroup": "today",
+          "_sTitle": "Today's Pick",
+          "_sIconClasses": "MiscIcon FeaturedTodayIcon",
+          "_tsDate": 1669255201
+        }
+      },
+      "_aCredits": [
+        {
+          "_sGroupName": "Original Author",
+          "_aAuthors": [
+            {
+              "_sName": "DLON"
+            }
+          ]
+        }
+      ],
+      "_bAdvancedRequirementsExist": false,
+      "_aRequirements": [
+        [
+          "Reloaded II",
+          "https://github.com/Reloaded-Project/Reloaded-II"
+        ],
+        [
+          "Persona 5 Royal Essentials",
+          "https://gamebanana.com/mods/408376"
+        ]
+      ]
+    }
+  }
+}

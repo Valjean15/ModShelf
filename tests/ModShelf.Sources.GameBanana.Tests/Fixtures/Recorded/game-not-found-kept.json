@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/apiv11/Game/901616879/ProfilePage",
+    "query": ""
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "text/html; charset=UTF-8"
+    },
+    "body": {
+      "_sErrorCode": "NO_SUCH_RECORD",
+      "_sErrorMessage": "This Game doesn't exist"
+    }
+  }
+}

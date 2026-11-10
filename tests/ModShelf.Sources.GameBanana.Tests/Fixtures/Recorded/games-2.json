@@ -1,0 +1,1942 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/apiv11/Game/Index",
+    "query": "_nPage=2&_nPerpage=50&_sSort=Generic_Alphabetically"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "body": {
+      "_aMetadata": {
+        "_nRecordCount": 4835,
+        "_bIsComplete": false,
+        "_nPerpage": 50
+      },
+      "_aRecords": [
+        {
+          "_idRow": 16737,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Action Sandbox",
+          "_sProfileUrl": "https://gamebanana.com/games/16737",
+          "_tsDateAdded": 1657028754,
+          "_tsDateModified": 1657335708,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/62c8eef49f778.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/62c8eef785e41.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1942780,
+            "_sName": "Ghost1942780",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1942780",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "AS",
+          "_sHomepage": "",
+          "_dsReleaseDate": "2022-04-21",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 26307,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Action Taimanin",
+          "_sProfileUrl": "https://gamebanana.com/games/26307",
+          "_tsDateAdded": 1793914583,
+          "_tsDateModified": 1793914583,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6aecf6d39c11a.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2452126,
+            "_sName": "Thickness enjoyer",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2452126",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6ade9efc95ca1.png"
+          },
+          "_sAbbreviation": "AT",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 26303,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Ad Nauseam - The Wrong Side",
+          "_sProfileUrl": "https://gamebanana.com/games/26303",
+          "_tsDateAdded": 1793894958,
+          "_tsDateModified": 1793894958,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6aeca9a144b4f.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 6116319,
+            "_sName": "I_Jedi",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/6116319",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "Ad Nauseam",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 17218,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "ADACA",
+          "_sProfileUrl": "https://gamebanana.com/games/17218",
+          "_tsDateAdded": 1663625345,
+          "_tsDateModified": 1663625345,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6328e87f977eb.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1940759,
+            "_sName": "mike9k1",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1940759",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/60e4b0052480b.jpg"
+          },
+          "_sAbbreviation": "ADACA",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 7786,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Adrenaline Gamer 2",
+          "_sProfileUrl": "https://gamebanana.com/games/7786",
+          "_tsDateAdded": 1578601411,
+          "_tsDateModified": 1760906303,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5e178bc104716.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5e18cda3ddb64.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1661286,
+            "_sName": "Xeller",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1661286",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6a0879cb63c9f.png",
+            "_aClearanceLevels": [
+              "AG2 Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/6a0879ce93318.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/6a087b9d8afde.png"
+          },
+          "_sAbbreviation": "AG2",
+          "_sHomepage": "https://github.com/The-Gmann/ag2",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 15051,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Advance Wars 1 + 2: Re-Boot Camp",
+          "_sProfileUrl": "https://gamebanana.com/games/15051",
+          "_tsDateAdded": 1637900919,
+          "_tsDateModified": 1637900919,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1997562,
+            "_sName": "pas9",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1997562",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "AW1+2:R-BC",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 1961,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Advanced Battlegrounds: The Future of Combat",
+          "_sProfileUrl": "https://gamebanana.com/games/1961",
+          "_tsDateAdded": 1204425323,
+          "_tsDateModified": 1542742830,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5b098f9de23b7.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5bf4632d283e5.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 159688,
+            "_sName": "Sethen",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/159688",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/651b54c7b3426.png"
+          },
+          "_sAbbreviation": "AB:FC",
+          "_sHomepage": "http://www.dreamcatchergames.com/dci/advanced_battlegrounds/index.html",
+          "_dsReleaseDate": "1970-01-01",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 6510,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Advanced Education With Viktor Strobovski",
+          "_sProfileUrl": "https://gamebanana.com/games/6510",
+          "_tsDateAdded": 1529349054,
+          "_tsDateModified": 1529350031,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5b2804f303837.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5b2806216ffe2.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 37,
+            "_sName": "natko",
+            "_bIsOnline": false,
+            "_bHasRipe": true,
+            "_sProfileUrl": "https://gamebanana.com/members/37",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5c34e47d0372f.gif",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/5c34e4708683c.gif"
+          },
+          "_sAbbreviation": "AEWVS",
+          "_sHomepage": "https://mrdrnose.itch.io/v-s",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 11733,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "AdventNEON",
+          "_sProfileUrl": "https://gamebanana.com/games/11733",
+          "_tsDateAdded": 1624328778,
+          "_tsDateModified": 1624328977,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/60d14a3aeb60a.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/60d149d7ef724.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1896402,
+            "_sName": "qdwewqededa",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1896402",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "AdNEON",
+          "_sHomepage": "https://cryogx.itch.io/advent-neon",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 7936,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Adwenture Mario",
+          "_sProfileUrl": "https://gamebanana.com/games/7936",
+          "_tsDateAdded": 1584987127,
+          "_tsDateModified": 1584987127,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1553764,
+            "_sName": "lelikcr",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1553764",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "Mario",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 21772,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Aether Gazer",
+          "_sProfileUrl": "https://gamebanana.com/games/21772",
+          "_tsDateAdded": 1737115675,
+          "_tsDateModified": 1737115675,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/678a480ff1eb6.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 3717787,
+            "_sName": "G Cup Lovers",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/3717787",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/67b99d250e576.jpg"
+          },
+          "_sAbbreviation": "AG",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 84,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Afraid of Monsters",
+          "_sProfileUrl": "https://gamebanana.com/games/84",
+          "_tsDateAdded": 1165018016,
+          "_tsDateModified": 1542745543,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/531176c2b6895.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/aom_copy.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 123010,
+            "_sName": "Shepard",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/123010",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "AoM",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 23014,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "AGAI-CHAN's Wonderful Game Show!",
+          "_sProfileUrl": "https://gamebanana.com/games/23014",
+          "_tsDateAdded": 1751740894,
+          "_tsDateModified": 1751740894,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/686971c7727aa.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2583248,
+            "_sName": "DDThor13",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2583248",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "ACWGS",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22594,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Against the Storm",
+          "_sProfileUrl": "https://gamebanana.com/games/22594",
+          "_tsDateAdded": 1748644785,
+          "_tsDateModified": 1748644785,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4365626,
+            "_sName": "Mindwarp575",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4365626",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "AtS",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 174,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Age of Chivalry",
+          "_sProfileUrl": "https://gamebanana.com/games/174",
+          "_tsDateAdded": 1166587881,
+          "_tsDateModified": 1531672776,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5b291e87f17ea.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5b4b78c559adb.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 332507,
+            "_sName": "Age of Chivalry",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/332507",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "AoC",
+          "_sHomepage": "http://www.age-of-chivalry.com/",
+          "_dsReleaseDate": "2007-12-15",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 13775,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Age of Doom",
+          "_sProfileUrl": "https://gamebanana.com/games/13775",
+          "_tsDateAdded": 1631036297,
+          "_tsDateModified": 1631029707,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/613789c2da0ba.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 10487,
+            "_sName": "DBMerritt",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/10487",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5ecb72a82af11.jpg",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/5ecb72fec371c.png"
+          },
+          "_sAbbreviation": "AOD",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 20717,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Age Of Empires",
+          "_sProfileUrl": "https://gamebanana.com/games/20717",
+          "_tsDateAdded": 1721672029,
+          "_tsDateModified": 1721672029,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 3599702,
+            "_sName": "keremali",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/3599702",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "AOE",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 17980,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Age of Empires II: Definitive Edition",
+          "_sProfileUrl": "https://gamebanana.com/games/17980",
+          "_tsDateAdded": 1676682890,
+          "_tsDateModified": 1676686275,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/63f032224dbb8.png"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 142413,
+            "_sName": "AoM",
+            "_bIsOnline": false,
+            "_bHasRipe": true,
+            "_sProfileUrl": "https://gamebanana.com/members/142413",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5c7099066cc77.png",
+            "_aClearanceLevels": [
+              "AC:NL Manager",
+              "UT2k4 Manager",
+              "SN Manager",
+              "Admin"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/5c70990aee5ec.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/5c70991129c14.png"
+          },
+          "_sAbbreviation": "AoEII:DE",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 5145,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Age of Empires II: HD Edition",
+          "_sProfileUrl": "https://gamebanana.com/games/5145",
+          "_tsDateAdded": 1363739498,
+          "_tsDateModified": 1557377030,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/51490368ec683.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5ac2450b5779e.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 244824,
+            "_sName": "Dr.iCe",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/244824",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/4e6ba91cd32fe.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/5177eaf8169e7.png"
+          },
+          "_sAbbreviation": "AoEII:HD",
+          "_sHomepage": "https://www.ageofempires.com/",
+          "_dsReleaseDate": "2013-04-09",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 1507,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Age of Empires II: The Age of Kings",
+          "_sProfileUrl": "https://gamebanana.com/games/1507",
+          "_tsDateAdded": 1199384660,
+          "_tsDateModified": 1523252815,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/41676532-4150504c-icon-32x32-8bit.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5acafe4dd2c16.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 159574,
+            "_sName": "Fredrik",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/159574",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/4eb592df82f02.png"
+          },
+          "_sAbbreviation": "AoE2",
+          "_sHomepage": "http://www.microsoft.com/games/age2/",
+          "_dsReleaseDate": "2009-12-15",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 1529,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Age of Empires II: The Conquerors",
+          "_sProfileUrl": "https://gamebanana.com/games/1529",
+          "_tsDateAdded": 1199388750,
+          "_tsDateModified": 1523251798,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_150-.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5acafa54b1b3f.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 142413,
+            "_sName": "AoM",
+            "_bIsOnline": false,
+            "_bHasRipe": true,
+            "_sProfileUrl": "https://gamebanana.com/members/142413",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5c7099066cc77.png",
+            "_aClearanceLevels": [
+              "AC:NL Manager",
+              "UT2k4 Manager",
+              "SN Manager",
+              "Admin"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/5c70990aee5ec.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/5c70991129c14.png"
+          },
+          "_sAbbreviation": "AoE2:TC",
+          "_sHomepage": "",
+          "_dsReleaseDate": "2015-12-15",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 1496,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Age of Empires III",
+          "_sProfileUrl": "https://gamebanana.com/games/1496",
+          "_tsDateAdded": 1199383986,
+          "_tsDateModified": 1529421810,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5b291ff0c4fea.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5ad3905f01502.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 159574,
+            "_sName": "Fredrik",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/159574",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/4eb592df82f02.png"
+          },
+          "_sAbbreviation": "AoE3",
+          "_sHomepage": "http://www.ageofempires3.com/",
+          "_dsReleaseDate": "2005-10-15",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 15064,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Age of Empires IV",
+          "_sProfileUrl": "https://gamebanana.com/games/15064",
+          "_tsDateAdded": 1637902892,
+          "_tsDateModified": 1637902892,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1997562,
+            "_sName": "pas9",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1997562",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "AoE4",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22203,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Age of History 3",
+          "_sProfileUrl": "https://gamebanana.com/games/22203",
+          "_tsDateAdded": 1744278707,
+          "_tsDateModified": 1744278707,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/67f794b08d8fe.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4391570,
+            "_sName": "StealthyBoi",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4391570",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/67f7b87b20df0.png"
+          },
+          "_sAbbreviation": "aoh3",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 17334,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Age of History II",
+          "_sProfileUrl": "https://gamebanana.com/games/17334",
+          "_tsDateAdded": 1665661047,
+          "_tsDateModified": 1665661047,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6347f873bf8de.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1980677,
+            "_sName": "Thyablik",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1980677",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/68ab6163f1af0.png"
+          },
+          "_sAbbreviation": "AOC 2",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 5254,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Age of Mythology: The Titans",
+          "_sProfileUrl": "https://gamebanana.com/games/5254",
+          "_tsDateAdded": 1382946747,
+          "_tsDateModified": 1527354339,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5b0993da6b617.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5aa6a3b1154f8.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1295212,
+            "_sName": "2xd",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1295212",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6780f09168656.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/6780f0945daba.png"
+          },
+          "_sAbbreviation": "AoM:TT",
+          "_sHomepage": "",
+          "_dsReleaseDate": "1970-01-01",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 17294,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Ages of Conflict",
+          "_sProfileUrl": "https://gamebanana.com/games/17294",
+          "_tsDateAdded": 1664922857,
+          "_tsDateModified": 1664922857,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/633cb4e7193fd.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2287923,
+            "_sName": "admiralskylar",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2287923",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "AoC",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22191,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Aggretsuko : Match 3 Puzzle",
+          "_sProfileUrl": "https://gamebanana.com/games/22191",
+          "_tsDateAdded": 1744084885,
+          "_tsDateModified": 1744084885,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/67f49f90baf86.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4365626,
+            "_sName": "Mindwarp575",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4365626",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "A:M3P",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22287,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "AI Limit",
+          "_sProfileUrl": "https://gamebanana.com/games/22287",
+          "_tsDateAdded": 1745152326,
+          "_tsDateModified": 1745152326,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4365626,
+            "_sName": "Mindwarp575",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4365626",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "AIL",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 16728,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "AI: The Somnium Files",
+          "_sProfileUrl": "https://gamebanana.com/games/16728",
+          "_tsDateAdded": 1656905478,
+          "_tsDateModified": 1656905478,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/62c25ef960030.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1971520,
+            "_sName": "MeovvCAT",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1971520",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/63854c61c2176.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/63854c4f68b4c.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/6356b06ed2a6a.png"
+          },
+          "_sAbbreviation": "AI:TSF",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 16729,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "AI: THE SOMNIUM FILES - nirvanA Initiative",
+          "_sProfileUrl": "https://gamebanana.com/games/16729",
+          "_tsDateAdded": 1656905906,
+          "_tsDateModified": 1656905906,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/62c260aba8b3f.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1971520,
+            "_sName": "MeovvCAT",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1971520",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/63854c61c2176.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/63854c4f68b4c.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/6356b06ed2a6a.png"
+          },
+          "_sAbbreviation": "AI:NI",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 24353,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "AIR (Steam)",
+          "_sProfileUrl": "https://gamebanana.com/games/24353",
+          "_tsDateAdded": 1772307672,
+          "_tsDateModified": 1772307672,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/69a344d6dba9b.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1957696,
+            "_sName": "mekkiNG",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1957696",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/68ce86b43c4b5.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/68ce860d91eb1.jpeg",
+            "_sHovatarUrl": "https://images.gamebanana.com/img/av/68ce86b839020.png",
+            "_aSubjectShaper": {
+              "_sBorderStyle": "none",
+              "_sFont": "Trebuchet MS",
+              "_sTextColor": "#FFE033",
+              "_sTextHoverColor": "#FD70E1"
+            },
+            "_sSubjectShaperCssCode": "font-family:'Trebuchet MS';color:#FFE033;"
+          },
+          "_sAbbreviation": "AIR",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22927,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Airships: Lost Flotilla",
+          "_sProfileUrl": "https://gamebanana.com/games/22927",
+          "_tsDateAdded": 1750628635,
+          "_tsDateModified": 1750628635,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4365626,
+            "_sName": "Mindwarp575",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4365626",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "A:LF",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 12987,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Aka Manto | 赤マント",
+          "_sProfileUrl": "https://gamebanana.com/games/12987",
+          "_tsDateAdded": 1628905201,
+          "_tsDateModified": 1627721011,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1895541,
+            "_sName": "JadenMudge",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1895541",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/664535aa0b22e.png"
+          },
+          "_sAbbreviation": "AM",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22815,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Ale & Tale Tavern",
+          "_sProfileUrl": "https://gamebanana.com/games/22815",
+          "_tsDateAdded": 1749770395,
+          "_tsDateModified": 1749770395,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4365626,
+            "_sName": "Mindwarp575",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4365626",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "A&TT",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 7022,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Alex Basics in Biology and Zoology",
+          "_sProfileUrl": "https://gamebanana.com/games/7022",
+          "_tsDateAdded": 1550182437,
+          "_tsDateModified": 1760907184,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5c68499eb2208.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5c684850d2f57.png"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1662666,
+            "_sName": "LeGoldenBoots",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1662666",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/60f76a4061b5b.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/60eb584e96196.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/60eb58d051c98.png"
+          },
+          "_sAbbreviation": "Alex",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 7176,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Alex the Allegator 4",
+          "_sProfileUrl": "https://gamebanana.com/games/7176",
+          "_tsDateAdded": 1554983881,
+          "_tsDateModified": 1554994919,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5caf56708960f.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5caf56e5da960.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1223240,
+            "_sName": "Mamorex",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1223240",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5b422c7cac6b0.gif",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/5b422c8167f2f.gif",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/5a444272c9c95.gif"
+          },
+          "_sAbbreviation": "Alex4",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 6624,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Algodoo",
+          "_sProfileUrl": "https://gamebanana.com/games/6624",
+          "_tsDateAdded": 1533283571,
+          "_tsDateModified": 1533310485,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5b64759a934f7.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5b6474e584161.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1659365,
+            "_sName": "Ghost1659365",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1659365",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "Algodoo",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 24532,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Alias",
+          "_sProfileUrl": "https://gamebanana.com/games/24532",
+          "_tsDateAdded": 1775149360,
+          "_tsDateModified": 1775149360,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/69cea11ecc4c1.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2237098,
+            "_sName": "SheikProject",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2237098",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6308fa3cb6824.png"
+          },
+          "_sAbbreviation": "Alias",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 20532,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Alice: Madness Returns",
+          "_sProfileUrl": "https://gamebanana.com/games/20532",
+          "_tsDateAdded": 1719066867,
+          "_tsDateModified": 1750887742,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/685c6d32ae410.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/685c6d374005c.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1545432,
+            "_sName": "user619",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1545432",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5b26d6e200d55.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/5b26d68a18f24.png"
+          },
+          "_sAbbreviation": "A:MR",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 257,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Alien Arena 2010",
+          "_sProfileUrl": "https://gamebanana.com/games/257",
+          "_tsDateAdded": 1168315417,
+          "_tsDateModified": 1277526385,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/alien_arena.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/titlenew.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 156908,
+            "_sName": "Forsaken69",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/156908",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/156908.jpg"
+          },
+          "_sAbbreviation": "AA2010",
+          "_sHomepage": "http://red.planetarena.org/",
+          "_dsReleaseDate": "2010-06-15",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 25143,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Alien Isolation",
+          "_sProfileUrl": "https://gamebanana.com/games/25143",
+          "_tsDateAdded": 1782580374,
+          "_tsDateModified": 1782580374,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6a3ffee6b017f.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 5298923,
+            "_sName": "Scoobert2000",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/5298923",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6a5b7e985e021.jpg",
+            "_aClearanceLevels": [
+              "SAO:FB Manager"
+            ]
+          },
+          "_sAbbreviation": "A:I",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 24863,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Alien Shooter",
+          "_sProfileUrl": "https://gamebanana.com/games/24863",
+          "_tsDateAdded": 1779437431,
+          "_tsDateModified": 1779437431,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6a100f6b67c07.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 5102949,
+            "_sName": "TachyonProject0099",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/5102949",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6a132c03ebd3d.png"
+          },
+          "_sAbbreviation": "AS",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 5929,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Alien Shooter 2: Reloaded",
+          "_sProfileUrl": "https://gamebanana.com/games/5929",
+          "_tsDateAdded": 1500492341,
+          "_tsDateModified": 1636674881,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5b9d8ecfa3728.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/596fb24b93bf9.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1382,
+            "_sName": "tom",
+            "_bIsOnline": false,
+            "_bHasRipe": true,
+            "_sProfileUrl": "https://gamebanana.com/members/1382",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/645552ee7c739.png",
+            "_aClearanceLevels": [
+              "TBS2 Manager",
+              "TF2 Manager",
+              "KRtDL Manager",
+              "GGST Manager",
+              "CS1.6 Manager",
+              "S3AIR Manager",
+              "GB Manager",
+              "Super Admin"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/645552fb4eb94.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/570e787dd7db9.gif",
+            "_sHovatarUrl": "https://images.gamebanana.com/img/av/645552f2852ba.png",
+            "_aSubjectShaper": {
+              "_sBorderStyle": "none",
+              "_sFont": "default",
+              "_sTextColor": "#ffc800",
+              "_sTextHoverColor": "#00fffb"
+            },
+            "_sSubjectShaperCssCode": "color:#ffc800;"
+          },
+          "_sAbbreviation": "AS2:R",
+          "_sHomepage": "http://www.sigma-team.net/games/special-offers/alien-sooter-gold-pack.html",
+          "_dsReleaseDate": "2009-03-14",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 4214,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Alien Swarm",
+          "_sProfileUrl": "https://gamebanana.com/games/4214",
+          "_tsDateAdded": 1279580400,
+          "_tsDateModified": 1527367439,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5b09c70def179.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/594a5a6469359.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 302054,
+            "_sName": "skelet0n",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/302054",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/_7.png"
+          },
+          "_sAbbreviation": "AS",
+          "_sHomepage": "http://www.alienswarm.com/",
+          "_dsReleaseDate": "1970-01-01",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 2663,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Alien Wave",
+          "_sProfileUrl": "https://gamebanana.com/games/2663",
+          "_tsDateAdded": 1223105514,
+          "_tsDateModified": 1279902099,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/icone_aw.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/banner_8.bmp"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 274643,
+            "_sName": "Hexon",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/274643",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/274643.jpg"
+          },
+          "_sAbbreviation": "AW",
+          "_sHomepage": "http://alienwave.comoj.org",
+          "_dsReleaseDate": "2009-01-01",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 20544,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Alien Xenoblaster",
+          "_sProfileUrl": "https://gamebanana.com/games/20544",
+          "_tsDateAdded": 1719210146,
+          "_tsDateModified": 1719210146,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6679108b465ba.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 3374343,
+            "_sName": "StandoinXR",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/3374343",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6772dd33abb6d.png"
+          },
+          "_sAbbreviation": "AXB",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 459,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Aliens versus Predator 2",
+          "_sProfileUrl": "https://gamebanana.com/games/459",
+          "_tsDateAdded": 1175283406,
+          "_tsDateModified": 1718019828,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5b4b785889bf3.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5bba38a920dac.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 125068,
+            "_sName": "Cobalt",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/125068",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/125068.gif"
+          },
+          "_sAbbreviation": "AvP2",
+          "_sHomepage": "http://www.lith.com/home.asp",
+          "_dsReleaseDate": "2001-10-15",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 3448,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Aliens vs. Predator",
+          "_sProfileUrl": "https://gamebanana.com/games/3448",
+          "_tsDateAdded": 1243107468,
+          "_tsDateModified": 1522698801,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/avp3_32.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5ac289e92e1f4.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 125090,
+            "_sName": "Shonuff",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/125090",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5615404e29272.gif",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/561ae4eec1ba1.gif"
+          },
+          "_sAbbreviation": "AvP",
+          "_sHomepage": "http://www.sega.com/games/aliens-vs-predator/",
+          "_dsReleaseDate": "2010-03-02",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 9368,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Aliens vs. Predator: Requiem",
+          "_sProfileUrl": "https://gamebanana.com/games/9368",
+          "_tsDateAdded": 1615613864,
+          "_tsDateModified": 1657759439,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/604b3abcd7365.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/62cf666b50898.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1614404,
+            "_sName": "-Dat Mental Gamer-",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1614404",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/62b508a62e654.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/633ec2a5e23a1.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/5ffac8641e2f0.jpg",
+            "_sHovatarUrl": "https://images.gamebanana.com/img/av/649392f6c00c8.png"
+          },
+          "_sAbbreviation": "AVPR",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/apiv11/Util/Search/Results",
+    "query": "_sModelName=Mod&_sOrder=best_match&_idGameRow=16951&_sSearchString=qqzxjvnomatchqqzxjv&_nPage=1"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "body": {
+      "_aMetadata": {
+        "_nRecordCount": 0,
+        "_nPerpage": 15,
+        "_bIsComplete": true
+      },
+      "_aRecords": []
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "request": {
+    "method": "HEAD",
+    "path": "/mmdl/1722099",
+    "query": ""
+  },
+  "response": {
+    "status": 302,
+    "headers": {
+      "Content-Type": "text/html; charset=UTF-8",
+      "Location": "https://files.gamebanana.com/mods/p5rpcfemaleprotagonistreleasemetadata_36aa9.json"
+    },
+    "body": ""
+  }
+}

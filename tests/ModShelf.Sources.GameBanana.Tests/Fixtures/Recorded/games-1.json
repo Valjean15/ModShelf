@@ -1,0 +1,1968 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/apiv11/Game/Index",
+    "query": "_nPage=1&_nPerpage=50&_sSort=Generic_Alphabetically"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "body": {
+      "_aMetadata": {
+        "_nRecordCount": 4835,
+        "_bIsComplete": false,
+        "_nPerpage": 50
+      },
+      "_aRecords": [
+        {
+          "_idRow": 22680,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "(the) Gnorp Apologue",
+          "_sProfileUrl": "https://gamebanana.com/games/22680",
+          "_tsDateAdded": 1749114531,
+          "_tsDateModified": 1749114531,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4365626,
+            "_sName": "Mindwarp575",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4365626",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "(T)GA",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 17796,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": ".hack//G.U. Last Recode",
+          "_sProfileUrl": "https://gamebanana.com/games/17796",
+          "_tsDateAdded": 1673363606,
+          "_tsDateModified": 1750874414,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/685c38f93d55e.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/685c390dac166.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2340027,
+            "_sName": "RemixV4",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2340027",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": ".h//G.U.LR",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 24915,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "007 First Light",
+          "_sProfileUrl": "https://gamebanana.com/games/24915",
+          "_tsDateAdded": 1779899049,
+          "_tsDateModified": 1779899324,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6a171aa8ae35c.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/6a171bb62a17d.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1947708,
+            "_sName": "MythsList",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1947708",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6a6932ae1e031.jpg",
+            "_aClearanceLevels": [
+              "FNF Manager",
+              "GD Manager",
+              "Ritz Manager",
+              "Super Moderator"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/6a6932b7aaec6.jpg",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/684498805b9e4.png",
+            "_aSubjectShaper": {
+              "_sBorderStyle": "Stroke",
+              "_sFont": "Verdana",
+              "_sTextColor": "#ffff00",
+              "_sTextHoverColor": "#FD70E1",
+              "_sBorderColor": "#000000",
+              "_sBorderHoverColor": "#000000"
+            },
+            "_sSubjectShaperCssCode": "font-family:'Verdana';color:#ffff00;"
+          },
+          "_sAbbreviation": "007FL",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 20158,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "1-2-Switch",
+          "_sProfileUrl": "https://gamebanana.com/games/20158",
+          "_tsDateAdded": 1713338494,
+          "_tsDateModified": 1776884718,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/661f784a86e80.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 3168899,
+            "_sName": "Coffee16",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/3168899",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/685c445896ec5.jpg"
+          },
+          "_sAbbreviation": "12S",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 5708,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "100% Orange Juice",
+          "_sProfileUrl": "https://gamebanana.com/games/5708",
+          "_tsDateAdded": 1472692618,
+          "_tsDateModified": 1760908079,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5a0f1b95ebd43.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5a21bfee73507.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1503965,
+            "_sName": "Roadhog360",
+            "_bIsOnline": false,
+            "_bHasRipe": true,
+            "_sProfileUrl": "https://gamebanana.com/members/1503965",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5fbac62444090.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/5fbac64ba8547.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/5fe63645913b8.png"
+          },
+          "_sAbbreviation": "100% OJ",
+          "_sHomepage": "http://fruitbatfactory.com/100orange/",
+          "_dsReleaseDate": "2009-07-03",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22734,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "12 is Better Than 6",
+          "_sProfileUrl": "https://gamebanana.com/games/22734",
+          "_tsDateAdded": 1749420406,
+          "_tsDateModified": 1749420406,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4365626,
+            "_sName": "Mindwarp575",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4365626",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "12iBT6",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 5412,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "18 Wheels of Steel Haulin",
+          "_sProfileUrl": "https://gamebanana.com/games/5412",
+          "_tsDateAdded": 1424257422,
+          "_tsDateModified": 1760908188,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/54e4718bcc072.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5ac129789a4f5.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1408068,
+            "_sName": "FireBlast98",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1408068",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/61cec9bf35e91.gif",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/61ce37d70bbbc.gif"
+          },
+          "_sAbbreviation": "Haulin",
+          "_sHomepage": "",
+          "_dsReleaseDate": "1970-01-01",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22457,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "1998: The Toll Keeper Story",
+          "_sProfileUrl": "https://gamebanana.com/games/22457",
+          "_tsDateAdded": 1746533832,
+          "_tsDateModified": 1746533832,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4365626,
+            "_sName": "Mindwarp575",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4365626",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "TTKS",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 5732,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "20XX",
+          "_sProfileUrl": "https://gamebanana.com/games/5732",
+          "_tsDateAdded": 1478552564,
+          "_tsDateModified": 1760908027,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5820ebf227769.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5bded09e6268d.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1453279,
+            "_sName": "Ultraspeed7",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1453279",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5a357ee49f767.png"
+          },
+          "_sAbbreviation": "20XX",
+          "_sHomepage": "",
+          "_dsReleaseDate": "2017-08-16",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 25140,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "25 to Life",
+          "_sProfileUrl": "https://gamebanana.com/games/25140",
+          "_tsDateAdded": 1782557999,
+          "_tsDateModified": 1782557999,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 3426060,
+            "_sName": "Some_Modder",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/3426060",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "TTL",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 20371,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "2Ship2Harkinian (Majora's Mask PC Port)",
+          "_sProfileUrl": "https://gamebanana.com/games/20371",
+          "_tsDateAdded": 1716771695,
+          "_tsDateModified": 1792083852,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6653d4fc50793.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/6654bd36a9b85.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1598745,
+            "_sName": "Purple Hato",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1598745",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/61a3b7549edd0.png",
+            "_aClearanceLevels": [
+              "SoH Manager",
+              "2ship Manager",
+              "Starship Manager",
+              "Ghostship Manager",
+              "Spaghetti Manager",
+              "Lighthouse Manager",
+              "PaperBoat Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/6450df3e3aca6.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/6554de842c14a.png",
+            "_aSubjectShaper": {
+              "_sBorderStyle": "Drop Shadow",
+              "_sFont": "Lucida Console Unicode",
+              "_sTextColor": "#c458fe",
+              "_sTextHoverColor": "#f9c4fd",
+              "_sBorderHoverColor": "#ff00a2",
+              "_sBorderColor": "#dfb5f2"
+            },
+            "_sSubjectShaperCssCode": "font-family:'Lucida Console Unicode';color:#c458fe;"
+          },
+          "_sAbbreviation": "2ship",
+          "_sHomepage": "https://github.com/HarbourMasters/2ship2harkinian",
+          "_dsReleaseDate": "2024-05-27",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 23431,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "2XKO",
+          "_sProfileUrl": "https://gamebanana.com/games/23431",
+          "_tsDateAdded": 1758425659,
+          "_tsDateModified": 1758437690,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/68cf7239bc451.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/68cfa0e645311.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4821226,
+            "_sName": "SoulveTheFirst",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4821226",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "2XKO",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 17356,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "30XX",
+          "_sProfileUrl": "https://gamebanana.com/games/17356",
+          "_tsDateAdded": 1666012978,
+          "_tsDateModified": 1750629722,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/68587cccf27f7.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/68587c3f9d572.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2310204,
+            "_sName": "Cosmic-Zero",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2310204",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "30XX",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 16789,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "3Dash",
+          "_sProfileUrl": "https://gamebanana.com/games/16789",
+          "_tsDateAdded": 1657559774,
+          "_tsDateModified": 1750630128,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/68587e1575997.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/68587eef34c7e.png"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2140340,
+            "_sName": "Ghost2140340",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2140340",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "3Dash",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 18545,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "4D Miner",
+          "_sProfileUrl": "https://gamebanana.com/games/18545",
+          "_tsDateAdded": 1686389027,
+          "_tsDateModified": 1686389027,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6484411f1ebef.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2173806,
+            "_sName": "RickGotTaken",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2173806",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/63ecc8e02b529.png"
+          },
+          "_sAbbreviation": "4DM",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 24491,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "6-7",
+          "_sProfileUrl": "https://gamebanana.com/games/24491",
+          "_tsDateAdded": 1774396740,
+          "_tsDateModified": 1774396740,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 5338956,
+            "_sName": "LaPlanteVerte",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/5338956",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "67",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 9277,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "60 Seconds Reatomized",
+          "_sProfileUrl": "https://gamebanana.com/games/9277",
+          "_tsDateAdded": 1615074377,
+          "_tsDateModified": 1750701263,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/685994c447313.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/685994c76fc8a.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1799285,
+            "_sName": "Eltonnywii",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1799285",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "60SRe",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 5538,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "7 Days To Die",
+          "_sProfileUrl": "https://gamebanana.com/games/5538",
+          "_tsDateAdded": 1455759837,
+          "_tsDateModified": 1528220698,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5b16cc187ee6c.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/59fb17b633d46.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 45820,
+            "_sName": "Ankh",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/45820",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5e96ac682b857.jpg",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/5e96ac79bc9c4.png"
+          },
+          "_sAbbreviation": "7DTD",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22592,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "9 Kings",
+          "_sProfileUrl": "https://gamebanana.com/games/22592",
+          "_tsDateAdded": 1748644649,
+          "_tsDateModified": 1748644649,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4365626,
+            "_sName": "Mindwarp575",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4365626",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "9K",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 19709,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "9MM",
+          "_sProfileUrl": "https://gamebanana.com/games/19709",
+          "_tsDateAdded": 1705228402,
+          "_tsDateModified": 1705228402,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/65a3b86396058.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2618093,
+            "_sName": "Saif The Gamer",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2618093",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/69529e9fdafe4.jpg"
+          },
+          "_sAbbreviation": "9mm",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 19707,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "9MM HD",
+          "_sProfileUrl": "https://gamebanana.com/games/19707",
+          "_tsDateAdded": 1705226628,
+          "_tsDateModified": 1705226628,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/65a3b182dba8d.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2618093,
+            "_sName": "Saif The Gamer",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2618093",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/69529e9fdafe4.jpg"
+          },
+          "_sAbbreviation": "9MM",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 24716,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "A Bumpy Ride",
+          "_sProfileUrl": "https://gamebanana.com/games/24716",
+          "_tsDateAdded": 1777829852,
+          "_tsDateModified": 1777918415,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/69f787db1bde8.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/69f8e190bd137.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2531263,
+            "_sName": "Lumacosy!",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2531263",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/685795a393023.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/6a0a146c3ede1.png"
+          },
+          "_sAbbreviation": "ABR",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 9152,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "A Dance Of Fire And Ice",
+          "_sProfileUrl": "https://gamebanana.com/games/9152",
+          "_tsDateAdded": 1614189446,
+          "_tsDateModified": 1614189446,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1792067,
+            "_sName": "Omnerune",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1792067",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "ADOFAI",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 20153,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "A Date with Death",
+          "_sProfileUrl": "https://gamebanana.com/games/20153",
+          "_tsDateAdded": 1713033711,
+          "_tsDateModified": 1713033711,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/661ad1ed37df7.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 2512957,
+            "_sName": "cracktorio",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/2512957",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/65d51312b03e0.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/65e5844446a67.png"
+          },
+          "_sAbbreviation": "ADwD",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 19980,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "A Difficult Game About Climbing",
+          "_sProfileUrl": "https://gamebanana.com/games/19980",
+          "_tsDateAdded": 1710071486,
+          "_tsDateModified": 1750339590,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/65ed9ebd05f19.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/68540ff915d04.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 3246364,
+            "_sName": "WoopaBoi",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/3246364",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "ADGAC",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 23182,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "A Few Quick Matches",
+          "_sProfileUrl": "https://gamebanana.com/games/23182",
+          "_tsDateAdded": 1754503804,
+          "_tsDateModified": 1754771041,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6897ae5f06137.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/6894a6a5d7988.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4294915,
+            "_sName": "Fleig",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4294915",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/68228291d75a5.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/69a7b9bebabf9.png",
+            "_aSubjectShaper": {
+              "_sBorderStyle": "Stroke",
+              "_sFont": "Verdana",
+              "_sTextColor": "#a140b0",
+              "_sTextHoverColor": "#FD70E1",
+              "_sBorderColor": "#390b40",
+              "_sBorderHoverColor": "#390b40"
+            },
+            "_sSubjectShaperCssCode": "font-family:'Verdana';color:#a140b0;"
+          },
+          "_sAbbreviation": "AFQM",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 6219,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "A Hat In Time",
+          "_sProfileUrl": "https://gamebanana.com/games/6219",
+          "_tsDateAdded": 1513103734,
+          "_tsDateModified": 1527183976,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5b06fa6637ae6.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5b06f9b9dee38.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1598116,
+            "_sName": "Wimpyfox",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1598116",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5a075d50a70d1.png"
+          },
+          "_sAbbreviation": "AHIT",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 15603,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "A Juggler's Tale",
+          "_sProfileUrl": "https://gamebanana.com/games/15603",
+          "_tsDateAdded": 1643050277,
+          "_tsDateModified": 1643050277,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/61eef50cf3119.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1545432,
+            "_sName": "user619",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1545432",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5b26d6e200d55.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/5b26d68a18f24.png"
+          },
+          "_sAbbreviation": "AJT",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 19350,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "A Nights Haunting",
+          "_sProfileUrl": "https://gamebanana.com/games/19350",
+          "_tsDateAdded": 1698625256,
+          "_tsDateModified": 1790549398,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6ab99d8db9e4b.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/6545a21214548.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1686694,
+            "_sName": "doctorn0",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1686694",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5ea1b0101d314.png",
+            "_aClearanceLevels": [
+              "anh Manager"
+            ],
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/6666393bf307e.png"
+          },
+          "_sAbbreviation": "anh",
+          "_sHomepage": "https://www.moddb.com/mods/a-nights-haunting/",
+          "_dsReleaseDate": "2023-10-31",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 8453,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "A Short Hike",
+          "_sProfileUrl": "https://gamebanana.com/games/8453",
+          "_tsDateAdded": 1599398915,
+          "_tsDateModified": 1599534120,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5f54e4021eaa6.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5f56f3db4271a.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1740606,
+            "_sName": "Jarrettkills",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1740606",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/60346191ca36a.png"
+          },
+          "_sAbbreviation": "ASH",
+          "_sHomepage": "http://www.ashorthike.com",
+          "_dsReleaseDate": "2019-07-30",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 5991,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "A Story About My Uncle",
+          "_sProfileUrl": "https://gamebanana.com/games/5991",
+          "_tsDateAdded": 1501625036,
+          "_tsDateModified": 1529621526,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5b2c2b9a55b00.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5980fadd2e8e8.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1382,
+            "_sName": "tom",
+            "_bIsOnline": false,
+            "_bHasRipe": true,
+            "_sProfileUrl": "https://gamebanana.com/members/1382",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/645552ee7c739.png",
+            "_aClearanceLevels": [
+              "TBS2 Manager",
+              "TF2 Manager",
+              "KRtDL Manager",
+              "GGST Manager",
+              "CS1.6 Manager",
+              "S3AIR Manager",
+              "GB Manager",
+              "Super Admin"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/645552fb4eb94.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/570e787dd7db9.gif",
+            "_sHovatarUrl": "https://images.gamebanana.com/img/av/645552f2852ba.png",
+            "_aSubjectShaper": {
+              "_sBorderStyle": "none",
+              "_sFont": "default",
+              "_sTextColor": "#ffc800",
+              "_sTextHoverColor": "#00fffb"
+            },
+            "_sSubjectShaperCssCode": "color:#ffc800;"
+          },
+          "_sAbbreviation": "SAMU",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 6484,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "A Tale Of Paper",
+          "_sProfileUrl": "https://gamebanana.com/games/6484",
+          "_tsDateAdded": 1528051419,
+          "_tsDateModified": 1528057977,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5b143b771ad69.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5b145076e017b.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 37,
+            "_sName": "natko",
+            "_bIsOnline": false,
+            "_bHasRipe": true,
+            "_sProfileUrl": "https://gamebanana.com/members/37",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5c34e47d0372f.gif",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/5c34e4708683c.gif"
+          },
+          "_sAbbreviation": "ATOP",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 5245,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "A Valley Without Wind",
+          "_sProfileUrl": "https://gamebanana.com/games/5245",
+          "_tsDateAdded": 1379753454,
+          "_tsDateModified": 1512017820,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/523d5de9ccf8c.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5a1f8f9b41d47.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1088541,
+            "_sName": "Devieus",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1088541",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5a29b9c315ae9.png",
+            "_aClearanceLevels": [
+              "Super Moderator"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/5a29b9c7f0963.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/5a29b9cf23a82.png"
+          },
+          "_sAbbreviation": "AVWW",
+          "_sHomepage": "",
+          "_dsReleaseDate": "1970-01-01",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 24769,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "A Week at Gero's Burgers",
+          "_sProfileUrl": "https://gamebanana.com/games/24769",
+          "_tsDateAdded": 1778511346,
+          "_tsDateModified": 1778511346,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 5221700,
+            "_sName": "fanta_favoritism",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/5221700",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6a8689982c58d.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/6a868bada76df.png"
+          },
+          "_sAbbreviation": "AWaGB",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 23475,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "A World of Keflings",
+          "_sProfileUrl": "https://gamebanana.com/games/23475",
+          "_tsDateAdded": 1759092934,
+          "_tsDateModified": 1759092934,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/68d9a0c507714.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1474161,
+            "_sName": "debugempty",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1474161",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6a5b2cc622c77.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/6a5b2cceb39b5.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/67f4de28960d4.png"
+          },
+          "_sAbbreviation": "AWoK",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22645,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Abiotic Factor",
+          "_sProfileUrl": "https://gamebanana.com/games/22645",
+          "_tsDateAdded": 1748979955,
+          "_tsDateModified": 1748979955,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4365626,
+            "_sName": "Mindwarp575",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4365626",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "AF",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22003,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Abyss School",
+          "_sProfileUrl": "https://gamebanana.com/games/22003",
+          "_tsDateAdded": 1741288659,
+          "_tsDateModified": 1750892923,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/685c816f2caf1.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/685c8172ca6e7.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4244272,
+            "_sName": "Marie Elin Rose",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4244272",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/67b6184fd9e6f.jpg"
+          },
+          "_sAbbreviation": "AS",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 7701,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "ABZÛ",
+          "_sProfileUrl": "https://gamebanana.com/games/7701",
+          "_tsDateAdded": 1574732385,
+          "_tsDateModified": 1574835504,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5dde14766f02d.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5dde139c5f520.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1545432,
+            "_sName": "user619",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1545432",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5b26d6e200d55.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/5b26d68a18f24.png"
+          },
+          "_sAbbreviation": "ABZU",
+          "_sHomepage": "https://abzugame.com/",
+          "_dsReleaseDate": "2016-08-02",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22583,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Academia : School Simulator",
+          "_sProfileUrl": "https://gamebanana.com/games/22583",
+          "_tsDateAdded": 1748564642,
+          "_tsDateModified": 1748564642,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4365626,
+            "_sName": "Mindwarp575",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4365626",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "A:SS",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 21360,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Ace Attorney Investigations Collection",
+          "_sProfileUrl": "https://gamebanana.com/games/21360",
+          "_tsDateAdded": 1730738978,
+          "_tsDateModified": 1734715451,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/6765a839a4350.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 3936318,
+            "_sName": "Gabriel28020",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/3936318",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/698aa71832a6a.png"
+          },
+          "_sAbbreviation": "AAIC",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 25508,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Ace Combat 04: Shattered Skies",
+          "_sProfileUrl": "https://gamebanana.com/games/25508",
+          "_tsDateAdded": 1786332443,
+          "_tsDateModified": 1786332443,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6a7945116886f.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 3343874,
+            "_sName": "MegaMarble",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/3343874",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6ac15ebedf5c4.png"
+          },
+          "_sAbbreviation": "AC4: SS",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 25473,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Ace Combat 5: The Unsung War",
+          "_sProfileUrl": "https://gamebanana.com/games/25473",
+          "_tsDateAdded": 1786041602,
+          "_tsDateModified": 1786041602,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6a74d4fce935d.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 3343874,
+            "_sName": "MegaMarble",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/3343874",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6ac15ebedf5c4.png"
+          },
+          "_sAbbreviation": "AC5: TUW",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 23999,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Ace Combat Zero: The Belkan War",
+          "_sProfileUrl": "https://gamebanana.com/games/23999",
+          "_tsDateAdded": 1766909351,
+          "_tsDateModified": 1766909351,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6950e5a577b5b.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 3343874,
+            "_sName": "MegaMarble",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/3343874",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6ac15ebedf5c4.png"
+          },
+          "_sAbbreviation": "ACZ: TBW",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 6628,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Ace of Seafood",
+          "_sProfileUrl": "https://gamebanana.com/games/6628",
+          "_tsDateAdded": 1533408730,
+          "_tsDateModified": 1535815129,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/5b8aad1a569f4.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5b8aacfc3e9fb.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1614649,
+            "_sName": "Pixel_Pocket",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1614649",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "AoS",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 4637,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Ace of Spades",
+          "_sProfileUrl": "https://gamebanana.com/games/4637",
+          "_tsDateAdded": 1312007796,
+          "_tsDateModified": 1588412817,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/50a8ac055c263.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5949a6fde88ee.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1257185,
+            "_sName": "Barbaric_Numbat",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1257185",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "AoS",
+          "_sHomepage": "http://buildandshoot.com/",
+          "_dsReleaseDate": "2011-04-04",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 5244,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "ACE Online",
+          "_sProfileUrl": "https://gamebanana.com/games/5244",
+          "_tsDateAdded": 1379537078,
+          "_tsDateModified": 1522679712,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/523a0ff800f4a.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5ac23da6d22b0.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1360932,
+            "_sName": "tsimelprup",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1360932",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/6741688e36747.png"
+          },
+          "_sAbbreviation": "AO",
+          "_sHomepage": "",
+          "_dsReleaseDate": "1970-01-01",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22867,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Aces and Adventures",
+          "_sProfileUrl": "https://gamebanana.com/games/22867",
+          "_tsDateAdded": 1750126904,
+          "_tsDateModified": 1750126904,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4365626,
+            "_sName": "Mindwarp575",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4365626",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "AaA",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 22759,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Achromira",
+          "_sProfileUrl": "https://gamebanana.com/games/22759",
+          "_tsDateAdded": 1749507483,
+          "_tsDateModified": 1749507483,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/_.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 4365626,
+            "_sName": "Mindwarp575",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/4365626",
+            "_sAvatarUrl": "https://images.gamebanana.com/static/img/defaults/avatar.gif"
+          },
+          "_sAbbreviation": "Achromira",
+          "_sHomepage": "",
+          "_dsReleaseDate": "0000-00-00",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 1218,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Action Half-Life",
+          "_sProfileUrl": "https://gamebanana.com/games/1218",
+          "_tsDateAdded": 1194996013,
+          "_tsDateModified": 1373327287,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/image1.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/ahl_banner.gif"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 142413,
+            "_sName": "AoM",
+            "_bIsOnline": false,
+            "_bHasRipe": true,
+            "_sProfileUrl": "https://gamebanana.com/members/142413",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5c7099066cc77.png",
+            "_aClearanceLevels": [
+              "AC:NL Manager",
+              "UT2k4 Manager",
+              "SN Manager",
+              "Admin"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/5c70990aee5ec.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/5c70991129c14.png"
+          },
+          "_sAbbreviation": "AHL",
+          "_sHomepage": "http://www.ministryofaction.net/",
+          "_dsReleaseDate": "2003-10-15",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        },
+        {
+          "_idRow": 2464,
+          "_sModelName": "Game",
+          "_sSingularTitle": "Game",
+          "_sIconClasses": "SubmissionType Game",
+          "_sName": "Action Quake 2",
+          "_sProfileUrl": "https://gamebanana.com/games/2464",
+          "_tsDateAdded": 1218016674,
+          "_tsDateModified": 1531769717,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "icon",
+                "_sUrl": "https://images.gamebanana.com/img/ico/games/6961.png"
+              },
+              {
+                "_sType": "banner",
+                "_sUrl": "https://images.gamebanana.com/img/banners/games/5b4cf30bd0e3b.jpg"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 397771,
+            "_sName": "Mehis",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/397771",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/585302b6a7194.gif"
+          },
+          "_sAbbreviation": "AQ2",
+          "_sHomepage": "",
+          "_dsReleaseDate": "1998-11-12",
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_bIsOwnedByAccessor": false
+        }
+      ]
+    }
+  }
+}

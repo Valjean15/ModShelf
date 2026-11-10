@@ -1,0 +1,308 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/apiv11/Game/16951/ProfilePage",
+    "query": ""
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "body": {
+      "_idRow": 16951,
+      "_nStatus": "0",
+      "_bIsPrivate": false,
+      "_bAccessorIsSubmitter": false,
+      "_bIsTrashed": false,
+      "_bIsWithheld": false,
+      "_sName": "Persona 5 Royal (PC)",
+      "_tsDateModified": 1712704994,
+      "_tsDateAdded": 1659841818,
+      "_sProfileUrl": "https://gamebanana.com/games/16951",
+      "_aPreviewMedia": {
+        "_aImages": [
+          {
+            "_sType": "icon",
+            "_sUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+          },
+          {
+            "_sType": "banner",
+            "_sUrl": "https://images.gamebanana.com/img/banners/games/6351756090c49.jpg"
+          }
+        ]
+      },
+      "_sInitialVisibility": "show",
+      "_bHasFiles": false,
+      "_nSubscriberCount": 8593,
+      "_sAbbreviation": "P5R (PC)",
+      "_sHomepage": "https://atlus.com/atlus-titles/p5r/",
+      "_dsReleaseDate": "2022-10-21",
+      "_bShowRipePromo": false,
+      "_bFollowLinks": true,
+      "_aModInstallers": [
+        {
+          "_sIconClasses": "Reloaded2ModLoaderIcon",
+          "_idToolRow": 6693,
+          "_aGameRowIds": [
+            6061,
+            6218,
+            7486
+          ],
+          "_sModManagerAlias": "Reloaded2ModLoader",
+          "_sInstallerName": "Reloaded II",
+          "_idSubmitterRow": 1614325,
+          "_sInstallerUrl": "https://gamebanana.com/tools/6693",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/tools/6ac1940a8c255.png"
+        }
+      ],
+      "_sWelcomeMessage": "<img src=\"https://i.imgur.com/i0y4uh3.png\"><br><br>This section is dedicated to the&nbsp;2022 PC release of <b>Persona 5 Royal</b>&nbsp;on <a href=\"https://store.steampowered.com/app/1687950/Persona_5_Royal/\" target=\"_blank\">Steam</a> and <a href=\"https://www.xbox.com/en-us/games/store/persona-5-royal/9nzdhxl9sjj8\" target=\"_blank\">Microsoft Store</a>.<br><br>Looking to mod a different version of <b>P5R</b>?<br><br><ul><li><a href=\"https://gamebanana.com/games/17354\">Persona 5 Royal (Switch)</a></li><li class=\"SelectedElement\"><a href=\"https://gamebanana.com/games/8464\">Persona 5 Royal (PS4)</a></li></ul><br><hr><br><h2><b><span class=\"GreenColor\">First time here?</span></b><br></h2>Before you download&nbsp;<b><u>anything</u></b>, check out the following to get set up!<br><br><ul><li><a href=\"https://gamebanana.com/tuts/15399\">\"Beginner's Guide to Modding P5R\"</a><br></li><li><a href=\"https://sewer56.dev/p5rpc.modloader/\" target=\"_blank\">\"P5R PC Essentials Documentation\"</a></li></ul><br>If you'd like to chat with the community, check out the <a href=\"https://discord.gg/naoto\" target=\"_blank\">Persona Modding Discord server</a>.<br><br><hr><br><h2><span class=\"GreenColor\">News</span></h2><ul><li>24 Oct 22 - <a href=\"https://gamebanana.com/news/21765\">Modding Status</a></li></ul>",
+      "_aManagers": [
+        {
+          "_sLevel": "senior",
+          "_tsDateAdded": 1666281408,
+          "_aMember": {
+            "_idRow": 1491857,
+            "_sName": "rudiger__gb",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1491857",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5ef8c3f8e23ac.jpg",
+            "_aClearanceLevels": [
+              "P4G PC 32 Manager",
+              "P5R (PC) Manager",
+              "P3P PC Manager",
+              "P3R Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/5f2ec441a93af.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/5f98aa780e4d1.png"
+          }
+        },
+        {
+          "_sLevel": "senior",
+          "_tsDateAdded": 1666284209,
+          "_aMember": {
+            "_idRow": 1707207,
+            "_sName": "MadMax1960",
+            "_bIsOnline": false,
+            "_bHasRipe": true,
+            "_sProfileUrl": "https://gamebanana.com/members/1707207",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/5ee8508e4184c.png",
+            "_aClearanceLevels": [
+              "P4G PC 32 Manager",
+              "P3FES Manager",
+              "P5 Manager",
+              "P3P PSP Manager",
+              "P5R (PC) Manager",
+              "P5RS Manager",
+              "P5R Manager",
+              "P3P PC Manager",
+              "P4G64 Manager",
+              "P3R Manager",
+              "MF Manager"
+            ],
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/5ef5628118564.png",
+            "_sUpicUrl": "https://images.gamebanana.com/img/upic/60d0954a3cf28.png"
+          }
+        }
+      ],
+      "_aSections": [
+        {
+          "_sModelName": "Blog",
+          "_sPluralTitle": "Blogs",
+          "_nItemCount": 5,
+          "_nCategoryCount": 1,
+          "_sUrl": "/blogs/games/16951"
+        },
+        {
+          "_sModelName": "Concept",
+          "_sPluralTitle": "Concepts",
+          "_nItemCount": 2,
+          "_nCategoryCount": 1,
+          "_sUrl": "/concepts/games/16951"
+        },
+        {
+          "_sModelName": "Contest",
+          "_sPluralTitle": "Contests",
+          "_nItemCount": 0,
+          "_nCategoryCount": 1,
+          "_sUrl": "/contests/games/16951"
+        },
+        {
+          "_sModelName": "Thread",
+          "_sPluralTitle": "Threads",
+          "_nItemCount": 3,
+          "_nCategoryCount": 1,
+          "_sUrl": "/threads/games/16951"
+        },
+        {
+          "_sModelName": "News",
+          "_sPluralTitle": "News",
+          "_nItemCount": 1,
+          "_nCategoryCount": 2,
+          "_sUrl": "/news/games/16951"
+        },
+        {
+          "_sModelName": "Poll",
+          "_sPluralTitle": "Polls",
+          "_nItemCount": 3,
+          "_nCategoryCount": 1,
+          "_sUrl": "/polls/games/16951"
+        },
+        {
+          "_sModelName": "Project",
+          "_sPluralTitle": "Projects",
+          "_nItemCount": 4,
+          "_nCategoryCount": 1,
+          "_sUrl": "/projects/games/16951"
+        },
+        {
+          "_sModelName": "Question",
+          "_sPluralTitle": "Questions",
+          "_nItemCount": 364,
+          "_nCategoryCount": 3,
+          "_sUrl": "/questions/games/16951"
+        },
+        {
+          "_sModelName": "Request",
+          "_sPluralTitle": "Requests",
+          "_nItemCount": 622,
+          "_nCategoryCount": 7,
+          "_sUrl": "/requests/games/16951"
+        },
+        {
+          "_sModelName": "Script",
+          "_sPluralTitle": "Scripts",
+          "_nItemCount": 0,
+          "_nCategoryCount": 1,
+          "_sUrl": "/scripts/games/16951"
+        },
+        {
+          "_sModelName": "Sound",
+          "_sPluralTitle": "Sounds",
+          "_nItemCount": 260,
+          "_nCategoryCount": 5,
+          "_sUrl": "/sounds/games/16951"
+        },
+        {
+          "_sModelName": "Spray",
+          "_sPluralTitle": "Sprays",
+          "_nItemCount": 0,
+          "_nCategoryCount": 1,
+          "_sUrl": "/sprays/games/16951"
+        },
+        {
+          "_sModelName": "Tool",
+          "_sPluralTitle": "Tools",
+          "_nItemCount": 10,
+          "_nCategoryCount": 1,
+          "_sUrl": "/tools/games/16951"
+        },
+        {
+          "_sModelName": "Tutorial",
+          "_sPluralTitle": "Tutorials",
+          "_nItemCount": 23,
+          "_nCategoryCount": 1,
+          "_sUrl": "/tuts/games/16951"
+        },
+        {
+          "_sModelName": "Wip",
+          "_sPluralTitle": "WiPs",
+          "_nItemCount": 54,
+          "_nCategoryCount": 3,
+          "_sUrl": "/wips/games/16951"
+        }
+      ],
+      "_aModRootCategories": [
+        {
+          "_idRow": 19636,
+          "_sName": "Models",
+          "_nItemCount": 421,
+          "_nCategoryCount": 5,
+          "_sUrl": "https://gamebanana.com/mods/cats/19636",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8ab57cbd95.png"
+        },
+        {
+          "_idRow": 18444,
+          "_sName": "Other/Misc",
+          "_nItemCount": 137,
+          "_nCategoryCount": 0,
+          "_sUrl": "https://gamebanana.com/mods/cats/18444"
+        },
+        {
+          "_idRow": 19627,
+          "_sName": "Textures",
+          "_nItemCount": 132,
+          "_nCategoryCount": 8,
+          "_sUrl": "https://gamebanana.com/mods/cats/19627",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63825a6361dca.png"
+        },
+        {
+          "_idRow": 19711,
+          "_sName": "QOL",
+          "_nItemCount": 56,
+          "_nCategoryCount": 0,
+          "_sUrl": "https://gamebanana.com/mods/cats/19711",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d81a64138.png"
+        },
+        {
+          "_idRow": 20019,
+          "_sName": "Events",
+          "_nItemCount": 44,
+          "_nCategoryCount": 0,
+          "_sUrl": "https://gamebanana.com/mods/cats/20019",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63824cd033f15.png"
+        },
+        {
+          "_idRow": 20523,
+          "_sName": "Skill Change",
+          "_nItemCount": 29,
+          "_nCategoryCount": 0,
+          "_sUrl": "https://gamebanana.com/mods/cats/20523",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/641585b539d35.png"
+        },
+        {
+          "_idRow": 20176,
+          "_sName": "Battles",
+          "_nItemCount": 28,
+          "_nCategoryCount": 0,
+          "_sUrl": "https://gamebanana.com/mods/cats/20176",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8a349649aa.png"
+        },
+        {
+          "_idRow": 19701,
+          "_sName": "Cutscenes / FMV",
+          "_nItemCount": 22,
+          "_nCategoryCount": 0,
+          "_sUrl": "https://gamebanana.com/mods/cats/19701",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d80f86eaa.png"
+        },
+        {
+          "_idRow": 19624,
+          "_sName": "Cheats",
+          "_nItemCount": 22,
+          "_nCategoryCount": 0,
+          "_sUrl": "https://gamebanana.com/mods/cats/19624",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8a7f4d5e89.png"
+        },
+        {
+          "_idRow": 19663,
+          "_sName": "Save Files",
+          "_nItemCount": 19,
+          "_nCategoryCount": 0,
+          "_sUrl": "https://gamebanana.com/mods/cats/19663",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8a894c214d.png"
+        },
+        {
+          "_idRow": 19625,
+          "_sName": "Fixes",
+          "_nItemCount": 8,
+          "_nCategoryCount": 0,
+          "_sUrl": "https://gamebanana.com/mods/cats/19625",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d803403c2.png"
+        }
+      ],
+      "_bIsApproved": true
+    }
+  }
+}

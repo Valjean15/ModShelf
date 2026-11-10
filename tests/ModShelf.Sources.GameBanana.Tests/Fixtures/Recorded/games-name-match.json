@@ -1,0 +1,29 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/apiv11/Util/Game/NameMatch",
+    "query": "_sName=Persona%205%20Royal%20%28PC%29"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "body": {
+      "_aMetadata": {
+        "_nRecordCount": 1,
+        "_nPerpage": 5,
+        "_bIsComplete": true
+      },
+      "_aRecords": [
+        {
+          "_idRow": 16951,
+          "_sName": "Persona 5 Royal (PC)",
+          "_sProfileUrl": "https://gamebanana.com/games/16951",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/6351756090c49.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+        }
+      ]
+    }
+  }
+}
