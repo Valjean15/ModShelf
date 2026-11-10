@@ -1162,6 +1162,26 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task SaysHowManyAdultModsItLeftOutOfAPageWhenTheSiteCouldnt()
+    {
+        _catalog.Capabilities = new(
+            Enum.GetValues<SearchSort>().SelectMany(SearchOrder.BothWays),
+            SearchFilters.Text | SearchFilters.Author | SearchFilters.Category | SearchFilters.UpdatedSince,
+            SearchQuery.MaxCount,
+            marksAdultContent: true);
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        SearchResult first = await mcp.CallAsync<SearchResult>("mod_search", Arguments(("game", "game"), ("source", "fake-catalog")), Cancellation);
+        SearchResult second = await mcp.CallAsync<SearchResult>("mod_search", Arguments(("game", "game"), ("source", "fake-catalog"), ("page", 2)), Cancellation);
+        SearchResult included = await mcp.CallAsync<SearchResult>("mod_search", Arguments(("game", "game"), ("source", "fake-catalog"), ("adult", true)), Cancellation);
+
+        Assert.Equal((45, 0, true, 1, 19), (first.Total, first.Offset, first.HasMore, first.LeftOut, first.Mods.Count));
+        Assert.DoesNotContain(first.Mods, mod => mod.Adult);
+        Assert.Equal((20, 0), (second.Offset, second.LeftOut));
+        Assert.Equal((0, 20), (included.LeftOut, included.Mods.Count));
+    }
+
+    [Fact]
     public async Task ACategoryAndHowLongSinceUpdatedNarrowTheSearch()
     {
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);

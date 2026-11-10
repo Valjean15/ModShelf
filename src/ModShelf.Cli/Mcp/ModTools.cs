@@ -131,7 +131,7 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
         });
 
     [McpServerTool(Name = "mod_search", Title = "Search a game's mods", ReadOnly = true, Idempotent = true, OpenWorld = true, UseStructuredContent = true)]
-    [Description("Lists a game's mods on its site that match, a page at a time, each with the link mod_show and download take. Mods with adult content are left out unless asked for. A site searches only by what it can, in its own orders: one asked more is refused, saying what it can. Each result's search says what the site can do for the game: its orders, the filters it takes, its largest page, its word for approval, and the game's categories. endorsements counts whatever the site counts as approval.")]
+    [Description("Lists a game's mods on its site that match, a page at a time, each with the link mod_show and download take. Mods with adult content are left out unless asked for; leftOut counts those a page left out once the site answered. A site searches only by what it can, in its own orders: one asked more is refused, saying what it can. Each result's search says what the site can do for the game: its orders, the filters it takes, its largest page, its word for approval, and the game's categories. endorsements counts whatever the site counts as approval.")]
     public Task<SearchResult> SearchAsync(
         [Description("The game, as its site names it: on Nexus Mods by the name in its links, such as stardewvalley; on GameBanana by its number, such as 16951. mod_games finds a site's games and their keys.")] string game,
         [Description("Words to look for in the mods' names; none to list every mod of the game.")] string? words = null,
@@ -206,6 +206,7 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
                 found.TotalCount,
                 found.Offset,
                 found.HasMore,
+                found.LeftOut,
                 [
                     .. found.Mods.Select(mod => new SearchEntry(
                         mod.Mod.Game.Source.Value,
