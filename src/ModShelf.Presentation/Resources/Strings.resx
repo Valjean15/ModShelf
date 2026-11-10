@@ -1002,6 +1002,22 @@
     <value>Link in the browser</value>
     <comment>Links an account by signing in on the site, in the browser, and approving ModShelf.</comment>
   </data>
+  <data name="AccountLinkProfile" xml:space="preserve">
+    <value>Link your profile</value>
+    <comment>Links an account by naming the user's public profile on the site, without a password.</comment>
+  </data>
+  <data name="AccountProfileMessage" xml:space="preserve">
+    <value>Type your member name on {0}, or paste the link to your profile there. ModShelf reads only what anyone can see on it, such as the mods you follow there, and asks for no password.</value>
+    <comment>{0} is the site's name.</comment>
+  </data>
+  <data name="AccountProfileHint" xml:space="preserve">
+    <value>Member name or profile link</value>
+    <comment>Shown in the empty box for the profile.</comment>
+  </data>
+  <data name="AccountProfileRefused" xml:space="preserve">
+    <value>{0} has no such member, or doesn't show their profile. Check the name, then try again.</value>
+    <comment>{0} is the site's name.</comment>
+  </data>
   <data name="AccountLinkEmail" xml:space="preserve">
     <value>Link with an emailed code</value>
     <comment>Links an account with a code the site emails.</comment>

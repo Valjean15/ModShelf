@@ -3,15 +3,21 @@ using ModShelf.Domain.Mods;
 namespace ModShelf.Application.Watchlist;
 
 /// <summary>
-/// The mods the linked accounts follow on their sites, such as Nexus Mods' tracked mods: listed by site, and followed
-/// or no longer followed by link.
+/// The mods the linked accounts follow on their sites, such as Nexus Mods' tracked mods or GameBanana's subscriptions:
+/// listed by site, and, where ModShelf can change them, followed or no longer followed by link.
 /// </summary>
 public interface IWatchlists
 {
     /// <summary>
-    /// The sources with a watchlist, by ID.
+    /// The sources with a watchlist ModShelf can read, by ID.
     /// </summary>
     IReadOnlyList<SourceId> Sources { get; }
+
+    /// <summary>
+    /// Whether ModShelf can follow mods on the source, and stop following them, too; false for a source whose watchlist
+    /// it can only read, or that has none.
+    /// </summary>
+    bool CanChange(SourceId source);
 
     /// <returns>Every mod the account linked to <paramref name="source"/> follows, of every game, in no particular order.</returns>
     /// <exception cref="ArgumentException">The source isn't registered, or has no watchlist.</exception>
@@ -23,7 +29,9 @@ public interface IWatchlists
     /// Follows the mod the link is to, or to one of whose files. Following one already followed changes nothing.
     /// </summary>
     /// <returns>The mod now followed.</returns>
-    /// <exception cref="Downloads.UnsupportedLinkException">No source knows the link, or its site has no watchlist.</exception>
+    /// <exception cref="Downloads.UnsupportedLinkException">
+    /// No source knows the link, or its site has no watchlist ModShelf can change.
+    /// </exception>
     /// <exception cref="ArgumentException">The link is malformed, or is the site's but not to a mod or a file.</exception>
     /// <exception cref="Sources.Abstractions.Accounts.AuthenticationFailedException">No account is linked, or the site refused it.</exception>
     /// <exception cref="HttpRequestException">The site couldn't be reached, or refused; with 404 when there's no such mod.</exception>
@@ -42,7 +50,8 @@ public interface IWatchlists
     /// Follows a mod by reference, such as one a search found. Following one already followed changes nothing.
     /// </summary>
     /// <exception cref="ArgumentException">
-    /// The mod's source isn't registered or has no watchlist, or the source doesn't know the mod's game or ID.
+    /// The mod's source isn't registered or has no watchlist ModShelf can change, or the source doesn't know the mod's game
+    /// or ID.
     /// </exception>
     /// <exception cref="Sources.Abstractions.Accounts.AuthenticationFailedException">No account is linked, or the site refused it.</exception>
     /// <exception cref="HttpRequestException">The site couldn't be reached, or refused; with 404 when there's no such mod.</exception>

@@ -175,6 +175,20 @@ public sealed class ModCommandTrackingTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task ListsTheModsOfASiteItCanOnlyReadAndSaysWhereToChangeThem()
+    {
+        await using InProcessCli cli = new(_site, _browser, sources: [_catalog, new FakeProfileSource()]);
+
+        CliResult listed = await cli.RunAsync(["mod", "tracked", "--source", "fake-profile"], Cancellation);
+
+        Assert.Equal(Done, listed.ExitCode);
+        Assert.Contains("2 subscribed mods on Fake profile site.", listed.Output, StringComparison.Ordinal);
+        Assert.Contains("16951 414644", listed.Output.ReplaceLineEndings("\n").Split('\n').Select(line => string.Join(' ', line.Split(' ', StringSplitOptions.RemoveEmptyEntries))));
+        Assert.Contains("ModShelf only reads them: change them on Fake profile site's website.", listed.Output, StringComparison.Ordinal);
+        Assert.DoesNotContain("mod untrack", listed.Output, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task AsksWhichSiteWhenMoreThanOneCanTrackMods()
     {
         CliResult refused = await _cli.RunAsync(["mod", "tracked"], Cancellation);

@@ -25,6 +25,7 @@ internal static class AccountCommand
     private const string ApiKeyMethod = "api-key";
     private const string BrowserMethod = "browser";
     private const string EmailMethod = "email";
+    private const string ProfileMethod = "profile";
 
     public static Command Create(CliEnvironment environment)
     {
@@ -34,7 +35,7 @@ internal static class AccountCommand
         Argument<string> linkSource = new("source") { Description = "The source's ID, as account list shows it." };
         Option<string?> with = new("--with")
         {
-            Description = $"How to sign in: {ApiKeyMethod}, {BrowserMethod} or {EmailMethod}. By default, the first way the source offers.",
+            Description = $"How to sign in: {ApiKeyMethod}, {BrowserMethod}, {EmailMethod} or {ProfileMethod} (your public profile, read only). By default, the first way the source offers.",
             HelpName = "method",
         };
         Command link = new("link", "Links your account on a source, replacing the one linked before.") { linkSource, with };
@@ -57,6 +58,7 @@ internal static class AccountCommand
         AuthKind.ApiKey => ApiKeyMethod,
         AuthKind.OAuthPkce => BrowserMethod,
         AuthKind.EmailCode => EmailMethod,
+        AuthKind.PublicProfile => ProfileMethod,
         _ => kind.ToString(),
     };
 
@@ -65,6 +67,7 @@ internal static class AccountCommand
         ApiKeyMethod => AuthKind.ApiKey,
         BrowserMethod => AuthKind.OAuthPkce,
         EmailMethod => AuthKind.EmailCode,
+        ProfileMethod => AuthKind.PublicProfile,
         _ => null,
     };
 
@@ -72,6 +75,7 @@ internal static class AccountCommand
     {
         AuthKind.ApiKey => $"{source} refused the API key. Check it, then try again.",
         AuthKind.EmailCode => $"{source} refused the code. Check it, or ask for a new one, then try again.",
+        AuthKind.PublicProfile => $"{source} has no such member, or doesn't show their profile. Check the name, then try again.",
         _ => $"{source} didn't let ModShelf in. Try again, and approve ModShelf in the browser.",
     };
 

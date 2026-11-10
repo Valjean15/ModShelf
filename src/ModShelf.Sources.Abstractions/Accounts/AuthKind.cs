@@ -18,4 +18,10 @@ public enum AuthKind
 
     /// <summary>The site emails the user a code, which the user types in.</summary>
     EmailCode = 3,
+
+    /// <summary>
+    /// The user names their public profile on the site, by its name or its link: nothing secret is asked, and only what
+    /// anyone can see is read, such as the mods it follows. Nothing on the site can be changed with it.
+    /// </summary>
+    PublicProfile = 4,
 }

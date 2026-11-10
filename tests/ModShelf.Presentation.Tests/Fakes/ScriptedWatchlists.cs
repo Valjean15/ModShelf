@@ -17,6 +17,13 @@ internal sealed class ScriptedWatchlists : IWatchlists
     public IReadOnlyList<SourceId> Sources => [.. Tracking];
 
     /// <summary>
+    /// The sites whose tracked mods ModShelf can only read, as GameBanana's subscriptions.
+    /// </summary>
+    public HashSet<SourceId> ReadOnly { get; } = [];
+
+    public bool CanChange(SourceId source) => Tracking.Contains(source) && !ReadOnly.Contains(source);
+
+    /// <summary>
     /// The mods tracked, of every site.
     /// </summary>
     public HashSet<ModRef> Tracked { get; } = [];

@@ -15,6 +15,7 @@ internal sealed class FakeStrategy : IAuthStrategy
     public const string GoodApiKey = "good-key";
     public const string GoodEmailCode = "123456";
     public const string GoodOAuthCode = "c0de";
+    public const string GoodProfile = "jean";
     public const string ApiKeyHeader = "X-Api-Key";
 
     private int _refreshCalls;
@@ -56,6 +57,9 @@ internal sealed class FakeStrategy : IAuthStrategy
         return strategy;
     }
 
+    public static FakeStrategy Profile(TimeProvider timeProvider)
+        => new(AuthKind.PublicProfile, timeProvider) { Refresh = _ => Task.FromResult<AccountCredentials?>(null) };
+
     public static FakeStrategy OAuth(TimeProvider timeProvider)
     {
         FakeStrategy strategy = new(AuthKind.OAuthPkce, timeProvider);
@@ -82,6 +86,7 @@ internal sealed class FakeStrategy : IAuthStrategy
         {
             AuthKind.ApiKey => new AuthChallenge(AuthKind.ApiKey, new Uri("https://example.com/account/api-keys")),
             AuthKind.EmailCode => new AuthChallenge(AuthKind.EmailCode, sentTo: "j***@example.com"),
+            AuthKind.PublicProfile => new AuthChallenge(AuthKind.PublicProfile),
             _ => new AuthChallenge(
                 AuthKind.OAuthPkce,
                 new Uri($"https://auth.example.com/authorize?redirect_uri={Uri.EscapeDataString(start.RedirectUri!.AbsoluteUri)}&state=st4te-0f9e"),
@@ -101,6 +106,7 @@ internal sealed class FakeStrategy : IAuthStrategy
         {
             AuthKind.ApiKey => answer == GoodApiKey,
             AuthKind.EmailCode => answer == GoodEmailCode,
+            AuthKind.PublicProfile => answer == GoodProfile,
             _ => HttpUtility.ParseQueryString(new Uri(answer).Query) is var query
                 && query["state"] == challenge.State["state"]
                 && query["code"] == GoodOAuthCode,

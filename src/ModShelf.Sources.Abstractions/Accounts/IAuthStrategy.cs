@@ -28,14 +28,15 @@ public interface IAuthStrategy
     /// </summary>
     /// <param name="challenge">The challenge <see cref="BeginAsync"/> returned.</param>
     /// <param name="answer">
-    /// The API key, the emailed code, or for <see cref="AuthKind.OAuthPkce"/> the full redirect URI the
-    /// browser came back to.
+    /// The API key, the emailed code, the profile's name or link, or for <see cref="AuthKind.OAuthPkce"/> the full redirect
+    /// URI the browser came back to.
     /// </param>
     /// <exception cref="AuthenticationFailedException">The site refused the answer.</exception>
     Task<AccountCredentials> CompleteAsync(AuthChallenge challenge, string answer, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Adds the credentials to a request to the source's API, such as an <c>Authorization</c> header.
+    /// Adds the credentials to a request to the source's API, such as an <c>Authorization</c> header, or for
+    /// <see cref="AuthKind.PublicProfile"/> the profile's ID where the request names the linked one.
     /// </summary>
     void Authorize(HttpRequestMessage request, AccountCredentials credentials);
 

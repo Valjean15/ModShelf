@@ -90,7 +90,7 @@ public sealed partial class ModPageViewModel : ObservableObject
         HasPage = page.Mod.PageUrl is not null;
         CategoryText = page.Mod.Category ?? string.Empty;
         Changelog = NewestFirst(page.Changelogs, page.Mod.Version);
-        CanTrack = services.Tracked.CanTrack(Mod.Game.Source) && words.CanFollow;
+        CanTrack = services.Tracked.CanChange(Mod.Game.Source) && words.CanFollow;
         string site = services.Sources.SiteName(Mod.Game.Source);
         SiteName = site;
         TrackText = words.Follow is { } follow ? Text.Format(Strings.BrowseFollow, Text.Capitalized(follow), site) : string.Empty;

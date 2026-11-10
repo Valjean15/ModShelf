@@ -2,6 +2,7 @@ using System.Net;
 
 using ModShelf.Application.Accounts;
 using ModShelf.Application.Accounts.Ports;
+using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.Tests.Common;
@@ -154,6 +155,35 @@ public sealed class AccountViewModelTests
         await card.LinkMethods.Single(method => method.Kind == kind).Command.ExecuteAsync(null);
 
         Assert.Equal(note, card.Note);
+    }
+
+    [Fact]
+    public async Task APublicProfileIsAskedForInTheOpenAndARefusalSaysSo()
+    {
+        SourceId banana = new("gamebanana");
+        _harness.Accounts.AddSource(banana, "GameBanana", worksWithoutAccount: true, [AuthKind.PublicProfile]);
+        await _harness.StartAsync();
+        string? asked = null;
+        _harness.Accounts.Link = async (source, kind, prompt, token) =>
+        {
+            asked = await prompt.AskProfileAsync(source, token);
+            throw new AuthenticationFailedException("No such member.");
+        };
+        _harness.Dialogs.Answers.Enqueue("chlorophylls");
+        AccountViewModel card = _harness.Card(banana);
+
+        await card.LinkMethods[0].Command.ExecuteAsync(null);
+
+        Assert.Equal("Link your profile", card.LinkMethods[0].Label);
+        Assert.Equal("chlorophylls", asked);
+        Assert.Equal(
+            new TextQuestion(
+                "Link GameBanana",
+                "Type your member name on GameBanana, or paste the link to your profile there. ModShelf reads only what anyone can see on it, such as the mods you follow there, and asks for no password.",
+                "Member name or profile link",
+                "Link"),
+            Assert.Single(_harness.Dialogs.Questions));
+        Assert.Equal(("GameBanana has no such member, or doesn't show their profile. Check the name, then try again.", true), (card.Note, card.IsNoteAProblem));
     }
 
     [Fact]

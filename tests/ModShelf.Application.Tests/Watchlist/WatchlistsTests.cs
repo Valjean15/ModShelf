@@ -8,6 +8,8 @@ using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Accounts;
+using ModShelf.Sources.Abstractions.Common;
+using ModShelf.Sources.Abstractions.Watchlist;
 
 namespace ModShelf.Application.Tests.Watchlist;
 
@@ -28,6 +30,50 @@ public sealed class WatchlistsTests
         Assert.Equal(site.LinkedMod, followed);
         Assert.Equal([site.LinkedMod], await watchlists.GetWatchedAsync(TestData.Nexus, Cancellation));
         Assert.Equal(["RecognizeAsync", "WatchAsync", "GetWatchedAsync"], site.Asked);
+    }
+
+    [Fact]
+    public async Task ReadsTheListOfASiteWhoseListItCanOnlyRead()
+    {
+        SourceId banana = new("gamebanana");
+        ModRef subscribed = TestData.File(banana, "1").Mod;
+        ReadOnlyWatchlist site = new(banana, [subscribed]);
+        Watchlists watchlists = new(new SourceRegistry([new FakeWatchlistSource(TestData.Nexus), site]), new InMemoryLibraryRepository());
+
+        IReadOnlyList<ModRef> listed = await watchlists.GetWatchedAsync(banana, Cancellation);
+
+        Assert.Equal([TestData.Nexus, banana], watchlists.Sources);
+        Assert.Equal([subscribed], listed);
+        Assert.True(watchlists.CanChange(TestData.Nexus));
+        Assert.False(watchlists.CanChange(banana));
+        Assert.False(watchlists.CanChange(new SourceId("nowhere")));
+    }
+
+    [Fact]
+    public async Task RefusesToChangeTheListOfASiteWhoseListItCanOnlyRead()
+    {
+        SourceId banana = new("gamebanana");
+        ModRef subscribed = TestData.File(banana, "1").Mod;
+        Watchlists watchlists = new(new SourceRegistry([new ReadOnlyWatchlist(banana, [subscribed])]), new InMemoryLibraryRepository());
+
+        ArgumentException refused = await Assert.ThrowsAsync<ArgumentException>(() => watchlists.WatchAsync(subscribed, Cancellation));
+
+        Assert.StartsWith("ModShelf can only read your subscribed mods on GameBanana: change them on its website.", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task RefusesToChangeTheListByALinkToAModOfASiteWhoseListItCanOnlyRead()
+    {
+        SourceId banana = new("gamebanana");
+        ModRef subscribed = TestData.File(banana, "1").Mod;
+        Uri page = new("https://gamebanana.com/mods/1");
+        InMemoryLibraryRepository library = new();
+        library.Add(LibraryMod.Watch(subscribed, "Subscribed mod", null, page, TestData.Now));
+        Watchlists watchlists = new(new SourceRegistry([new ReadOnlyWatchlist(banana, [subscribed])]), library);
+
+        UnsupportedLinkException refused = await Assert.ThrowsAsync<UnsupportedLinkException>(() => watchlists.UnwatchAsync(page, Cancellation));
+
+        Assert.Equal("ModShelf can only read your subscribed mods on GameBanana: change them on its website.", refused.Message);
     }
 
     [Fact]
@@ -203,5 +249,19 @@ public sealed class WatchlistsTests
             new InMemoryLibraryRepository());
 
         Assert.Equal([TestData.Nexus, TestData.ModIo], watchlists.Sources);
+    }
+
+    /// <summary>
+    /// A site whose followed mods ModShelf can only read, as GameBanana's subscriptions.
+    /// </summary>
+    private sealed class ReadOnlyWatchlist(SourceId id, IReadOnlyList<ModRef> followed) : IWatchlistReader
+    {
+        public SourceId Id { get; } = id;
+
+        public string DisplayName => "GameBanana";
+
+        public SiteWords Words { get; } = new() { Followed = "subscribed" };
+
+        public Task<IReadOnlyList<ModRef>> GetWatchedAsync(CancellationToken cancellationToken) => Task.FromResult(followed);
     }
 }

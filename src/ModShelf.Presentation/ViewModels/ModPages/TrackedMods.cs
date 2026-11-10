@@ -21,9 +21,14 @@ internal sealed class TrackedMods
     }
 
     /// <summary>
-    /// Whether the site has a list of tracked mods.
+    /// Whether the site has a list of tracked mods ModShelf can read.
     /// </summary>
     public bool CanTrack(SourceId source) => _watchlists.Sources.Contains(source);
+
+    /// <summary>
+    /// Whether ModShelf can track mods on the site, and stop tracking them, too.
+    /// </summary>
+    public bool CanChange(SourceId source) => _watchlists.CanChange(source);
 
     /// <summary>
     /// Whether the mod is tracked; null while its site's list hasn't been read.

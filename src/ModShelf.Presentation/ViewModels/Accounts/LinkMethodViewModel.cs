@@ -23,6 +23,7 @@ public sealed partial class LinkMethodViewModel : ObservableObject
             AuthKind.ApiKey => Strings.AccountLinkApiKey,
             AuthKind.OAuthPkce => Strings.AccountLinkBrowser,
             AuthKind.EmailCode => Strings.AccountLinkEmail,
+            AuthKind.PublicProfile => Strings.AccountLinkProfile,
             _ => kind.ToString(),
         };
     }

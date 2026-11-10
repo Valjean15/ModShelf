@@ -51,6 +51,25 @@ public sealed partial class AccountCommandTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task LinksAPublicProfileByItsNameInTheOpen()
+    {
+        await using InProcessCli cli = new(_site, _browser, sources: [new FakeProfileSource()]);
+
+        CliResult linked = Log(await cli.RunAsync(["account", "link", "fake-profile"], Cancellation, "jean\n"));
+        CliResult refused = Log(await cli.RunAsync(["account", "link", "fake-profile", "--with", "profile"], Cancellation, "nobody\n"));
+        CliResult listed = Log(await cli.RunAsync(["account", "list"], Cancellation));
+
+        Assert.Equal(Done, linked.ExitCode);
+        Assert.Contains("ModShelf reads only what anyone can see on your profile on fake-profile, and asks for no password.", linked.Output, StringComparison.Ordinal);
+        Assert.Contains("Your member name, or your profile's link: ", linked.Output, StringComparison.Ordinal);
+        Assert.Contains("Linked fake-profile as jean.", linked.Output, StringComparison.Ordinal);
+        Assert.Equal(Failed, refused.ExitCode);
+        Assert.StartsWith("fake-profile has no such member, or doesn't show their profile. Check the name, then try again.", refused.Errors.Trim(), StringComparison.Ordinal);
+        string[] row = Cells(listed.AccountRowFor("fake-profile"));
+        Assert.Equal(("fake-profile", "jean", "profile"), (row[0], row[1], row[^1]));
+    }
+
+    [Fact]
     public async Task ListShowsEachSourceThatCanLinkAnAccount()
     {
         CliResult listed = await RunAsync(["account", "list"]);

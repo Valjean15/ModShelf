@@ -54,6 +54,30 @@ public sealed class AccountLinkingTests
     }
 
     [Fact]
+    public async Task LinksAPublicProfileByItsName()
+    {
+        _harness.Prompt.Profile = $"  {Fakes.FakeStrategy.GoodProfile} ";
+
+        LinkedAccount account = await _harness.LinkAsync(TestData.ModIo, AuthKind.PublicProfile);
+
+        Assert.Equal(["profile"], _harness.Prompt.Asked);
+        Assert.Equal([Fakes.FakeStrategy.GoodProfile], _harness.ModIoProfile.Answers);
+        Assert.Equal((TestData.ModIo, AuthKind.PublicProfile), (account.Source, account.Kind));
+        Assert.Equal("token-for-jean", (await CredentialsAsync(TestData.ModIo))?.AccessToken);
+    }
+
+    [Fact]
+    public async Task ABlankProfileIsRefusedWithoutAskingTheSite()
+    {
+        _harness.Prompt.Profile = "  ";
+
+        ArgumentException refused = await Assert.ThrowsAsync<ArgumentException>(() => _harness.LinkAsync(TestData.ModIo, AuthKind.PublicProfile));
+
+        Assert.StartsWith("No name or profile link was entered.", refused.Message, StringComparison.Ordinal);
+        Assert.Empty(_harness.ModIoProfile.Answers);
+    }
+
+    [Fact]
     public async Task TrimsWhatTheUserPasted()
     {
         _harness.Prompt.ApiKey = $"  {Fakes.FakeStrategy.GoodApiKey}\n";

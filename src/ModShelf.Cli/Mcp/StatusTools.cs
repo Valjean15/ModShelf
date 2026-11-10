@@ -47,6 +47,7 @@ internal sealed class StatusTools(IAccountService accounts, IDiagnostics diagnos
         AuthKind.ApiKey => "api-key",
         AuthKind.OAuthPkce => "browser",
         AuthKind.EmailCode => "email",
+        AuthKind.PublicProfile => "profile",
         _ => kind.ToString(),
     };
 }

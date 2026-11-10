@@ -53,6 +53,11 @@ internal sealed class DialogAuthPrompt : IAuthPrompt
             },
             cancellationToken);
 
+    public Task<string> AskProfileAsync(SourceId source, CancellationToken cancellationToken)
+        => AskAsync(
+            new TextQuestion(Title, Text.Format(Strings.AccountProfileMessage, _siteName), Strings.AccountProfileHint, Strings.AccountLinkConfirm),
+            cancellationToken);
+
     public Task<string> AskEmailCodeAsync(SourceId source, string? sentTo, CancellationToken cancellationToken)
         => AskAsync(
             new TextQuestion(

@@ -74,7 +74,7 @@ internal static partial class ModCommand
                         return problem.ExitCode;
                     }
 
-                    WriteTracked(environment.Output, tracked, site, followed, CliText.Words(sources, source).Unfollow ?? "unfollow");
+                    WriteTracked(environment.Output, tracked, site, followed, watchlists.CanChange(source) ? CliText.Words(sources, source).Unfollow ?? "unfollow" : null);
                     return ExitCodes.Done;
                 },
                 cancellationToken)
@@ -150,8 +150,8 @@ internal static partial class ModCommand
     /// <summary>
     /// By game, then by ID, numbers in numeric order, in the site's words: "12 tracked mods on Nexus Mods."
     /// </summary>
-    /// <param name="unfollow">The site's word for unfollowing a mod, such as "untrack".</param>
-    private static void WriteTracked(TextWriter output, IReadOnlyList<ModRef> tracked, string site, string followed, string unfollow)
+    /// <param name="unfollow">The site's word for unfollowing a mod, such as "untrack"; null when ModShelf can't.</param>
+    private static void WriteTracked(TextWriter output, IReadOnlyList<ModRef> tracked, string site, string followed, string? unfollow)
     {
         if (tracked.Count == 0)
         {
@@ -170,6 +170,6 @@ internal static partial class ModCommand
                 .Select(mod => new[] { mod.Game.Key, mod.Id }),
         ];
         TextTable.Write(output, rows);
-        output.WriteLine($"To {unfollow} one: mod untrack \"<its link>\"");
+        output.WriteLine(unfollow is null ? $"ModShelf only reads them: change them on {site}'s website." : $"To {unfollow} one: mod untrack \"<its link>\"");
     }
 }

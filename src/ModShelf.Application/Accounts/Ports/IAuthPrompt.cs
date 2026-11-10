@@ -23,6 +23,11 @@ public interface IAuthPrompt
     Task<string> AskApiKeyAsync(SourceId source, Uri? keyPage, CancellationToken cancellationToken);
 
     /// <summary>
+    /// For a public profile: asks for the user's name on the site, or the link to their profile there.
+    /// </summary>
+    Task<string> AskProfileAsync(SourceId source, CancellationToken cancellationToken);
+
+    /// <summary>
     /// For an emailed code: asks for the code.
     /// </summary>
     /// <param name="sentTo">Where the code went, as the source reports it.</param>

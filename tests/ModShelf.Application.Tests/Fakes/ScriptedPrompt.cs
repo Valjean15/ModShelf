@@ -16,6 +16,8 @@ internal sealed class ScriptedPrompt : IAuthPrompt
 
     public string EmailCode { get; set; } = FakeStrategy.GoodEmailCode;
 
+    public string Profile { get; set; } = "jean";
+
     public ConcurrentQueue<string> Asked { get; } = new();
 
     public Uri? KeyPage { get; private set; }
@@ -28,6 +30,12 @@ internal sealed class ScriptedPrompt : IAuthPrompt
     {
         Asked.Enqueue("email");
         return Task.FromResult(Email);
+    }
+
+    public Task<string> AskProfileAsync(SourceId source, CancellationToken cancellationToken)
+    {
+        Asked.Enqueue("profile");
+        return Task.FromResult(Profile);
     }
 
     public Task<string> AskApiKeyAsync(SourceId source, Uri? keyPage, CancellationToken cancellationToken)

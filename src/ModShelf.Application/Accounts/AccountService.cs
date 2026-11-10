@@ -218,6 +218,17 @@ internal sealed partial class AccountService : IAccountService, ICredentialProvi
         return await strategy.CompleteAsync(challenge, code, cancellationToken).ConfigureAwait(false);
     }
 
+    private static async Task<AccountCredentials> LinkWithProfileAsync(
+        SourceId source,
+        IAuthStrategy strategy,
+        IAuthPrompt prompt,
+        CancellationToken cancellationToken)
+    {
+        AuthChallenge challenge = await strategy.BeginAsync(new AuthStart(), cancellationToken).ConfigureAwait(false);
+        string profile = Entered(await prompt.AskProfileAsync(source, cancellationToken).ConfigureAwait(false), "No name or profile link was entered.");
+        return await strategy.CompleteAsync(challenge, profile, cancellationToken).ConfigureAwait(false);
+    }
+
     private static string Entered(string answer, string messageWhenBlank)
         => string.IsNullOrWhiteSpace(answer) ? throw new ArgumentException(messageWhenBlank, nameof(answer)) : answer.Trim();
 
@@ -236,6 +247,7 @@ internal sealed partial class AccountService : IAccountService, ICredentialProvi
             AuthKind.ApiKey => await LinkWithApiKeyAsync(source, strategy, prompt, cancellationToken).ConfigureAwait(false),
             AuthKind.EmailCode => await LinkWithEmailedCodeAsync(source, strategy, prompt, cancellationToken).ConfigureAwait(false),
             AuthKind.OAuthPkce => await LinkInBrowserAsync(source, strategy, prompt, cancellationToken).ConfigureAwait(false),
+            AuthKind.PublicProfile => await LinkWithProfileAsync(source, strategy, prompt, cancellationToken).ConfigureAwait(false),
             _ => throw new ArgumentOutOfRangeException(nameof(strategy), strategy.Kind, "Unknown kind of authentication."),
         };
         AccountProfile profile = await linker.GetProfileAsync(credentials, strategy.Kind, cancellationToken).ConfigureAwait(false);

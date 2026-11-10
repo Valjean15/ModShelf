@@ -24,8 +24,9 @@ internal sealed class AccountHarness
         NexusOAuth = FakeStrategy.OAuth(Time);
         NexusApiKey = FakeStrategy.ApiKey(Time);
         ModIoEmail = FakeStrategy.EmailCode(Time);
+        ModIoProfile = FakeStrategy.Profile(Time);
         Nexus = new FakeAccountSource(TestData.Nexus, NexusOAuth, NexusApiKey);
-        ModIo = new FakeAccountSource(TestData.ModIo, ModIoEmail) { WorksWithoutAccount = true };
+        ModIo = new FakeAccountSource(TestData.ModIo, ModIoEmail, ModIoProfile) { WorksWithoutAccount = true };
         Service = Build();
     }
 
@@ -36,6 +37,11 @@ internal sealed class AccountHarness
     public FakeStrategy NexusApiKey { get; }
 
     public FakeStrategy ModIoEmail { get; }
+
+    /// <summary>
+    /// mod.io's second way, here: the user's public profile, by name.
+    /// </summary>
+    public FakeStrategy ModIoProfile { get; }
 
     public FakeAccountSource Nexus { get; }
 

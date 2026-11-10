@@ -10,13 +10,8 @@ namespace ModShelf.Sources.Abstractions.Watchlist;
 /// <see cref="IModSource.Words"/>: <see cref="Common.SiteWords.Follow"/>, <see cref="Common.SiteWords.Unfollow"/> and
 /// <see cref="Common.SiteWords.Followed"/>.
 /// </remarks>
-public interface IWatchlistSync : IModSource
+public interface IWatchlistSync : IWatchlistReader
 {
-    /// <returns>Every mod the account follows, of every game, in no particular order.</returns>
-    /// <exception cref="Accounts.AuthenticationFailedException">No account is linked, or the site refused it.</exception>
-    /// <exception cref="HttpRequestException">The site couldn't be reached, or refused.</exception>
-    Task<IReadOnlyList<ModRef>> GetWatchedAsync(CancellationToken cancellationToken);
-
     /// <summary>
     /// Follows the mod. Following one already followed changes nothing.
     /// </summary>

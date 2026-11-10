@@ -1399,6 +1399,18 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task SaysASiteLinksAProfile()
+    {
+        await using InProcessCli cli = new(_site, _browser, sources: [new FakeProfileSource()]);
+        await using McpSession mcp = await cli.StartMcpAsync(Cancellation);
+
+        AccountsListing accounts = await mcp.CallAsync<AccountsListing>("accounts_status", null, Cancellation);
+
+        AccountEntry profile = Assert.Single(accounts.Accounts, account => account.Source == FakeProfileSource.SourceId.Value);
+        Assert.Equal(["profile"], profile.LinkWith);
+    }
+
+    [Fact]
     public async Task LinksAndTheirKeysAreNeverLogged()
     {
         await using (McpSession mcp = await Cli.StartMcpAsync(Cancellation))

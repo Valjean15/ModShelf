@@ -272,6 +272,12 @@ public abstract class SourceContractTests<TSource>
         {
             Assert.True(words.CanFollow, $"{typeof(TSource).Name} follows mods, so it says what it calls following one.");
         }
+        else if (source is IWatchlistReader)
+        {
+            // Its followed mods are only read, so it names them, and not following one.
+            Assert.Equal((null, null), (words.Follow, words.Unfollow));
+            Assert.False(words.Followed is null, $"{typeof(TSource).Name} lists followed mods, so it says what it calls one.");
+        }
         else
         {
             Assert.Equal((null, null, null), (words.Follow, words.Unfollow, words.Followed));

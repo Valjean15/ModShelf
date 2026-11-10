@@ -54,6 +54,7 @@ public sealed partial class AccountViewModel
                     {
                         AuthKind.ApiKey => Strings.AccountApiKeyRefused,
                         AuthKind.EmailCode => Strings.AccountCodeRefused,
+                        AuthKind.PublicProfile => Strings.AccountProfileRefused,
                         _ => Strings.AccountBrowserRefused,
                     },
                     SiteName),

@@ -36,6 +36,13 @@ internal sealed class TerminalAuthPrompt(CliEnvironment environment) : IAuthProm
         return ReadLineAsync(cancellationToken);
     }
 
+    public Task<string> AskProfileAsync(SourceId source, CancellationToken cancellationToken)
+    {
+        environment.Prompts.WriteLine($"ModShelf reads only what anyone can see on your profile on {source}, and asks for no password.");
+        environment.Prompts.Write("Your member name, or your profile's link: ");
+        return ReadLineAsync(cancellationToken);
+    }
+
     public Task<string> AskEmailCodeAsync(SourceId source, string? sentTo, CancellationToken cancellationToken)
     {
         environment.Prompts.WriteLine(sentTo is null ? $"{source} is emailing you a code." : $"{source} is emailing a code to {sentTo}.");
