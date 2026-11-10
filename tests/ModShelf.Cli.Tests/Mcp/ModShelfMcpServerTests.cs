@@ -196,6 +196,18 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
             StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task AGamesNumberAloneIsntNexusModsToSearch()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        string refused = await mcp.CallFailingAsync("mod_search", Arguments(("game", "16951")), Cancellation);
+
+        Assert.Contains("More than one site can search; choose one with source: ", refused, StringComparison.Ordinal);
+        Assert.Contains("gamebanana", refused, StringComparison.Ordinal);
+        Assert.DoesNotContain("nexus", refused, StringComparison.Ordinal);
+    }
+
     [Theory]
     [InlineData("library.everything", "1", "There's no setting called library.everything.")]
     [InlineData("updates.interval", "soon", "soon")]

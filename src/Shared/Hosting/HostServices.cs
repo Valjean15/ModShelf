@@ -9,6 +9,7 @@ using ModShelf.Platform.Agents;
 using ModShelf.Platform.Links;
 using ModShelf.Platform.Secrets;
 using ModShelf.Sources.DirectUrl;
+using ModShelf.Sources.GameBanana;
 using ModShelf.Sources.Nexus;
 
 namespace ModShelf.Hosting;
@@ -97,6 +98,7 @@ internal static class HostServices
         services.AddAppUninstall();
         services.AddDirectUrlSource();
         services.AddNexusSource(NexusOptionsFrom(configuration));
+        services.AddGameBananaSource();
         return folder;
     }
 

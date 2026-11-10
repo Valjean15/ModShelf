@@ -227,6 +227,23 @@ public abstract class SourceContractTests<TSource>
     }
 
     [Fact]
+    public async Task EachFileOfAModHasALinkToDownloadItBy()
+    {
+        ILinkRecognizer recognizer = Capability<ILinkRecognizer>();
+        IModCatalog catalog = Capability<IModCatalog>();
+        Capability<IDownloadResolver>();
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        RecognizedLink linked = (await recognizer.RecognizeAsync(OwnLinks[0], cancellationToken))!;
+
+        // The app downloads a file it lists by its link: on a mod's page, from the Updates screen, and through the
+        // command line and the MCP server. A site that gives its files no page gives another link, its own, to each,
+        // which its recognizer takes as the file (above).
+        Assert.All(
+            await catalog.GetFilesAsync(linked.File.Mod, cancellationToken),
+            file => Assert.True(file.PageUrl is not null, $"{typeof(TSource).Name} gives the file {file.Reference.Id} no link to download it by."));
+    }
+
+    [Fact]
     public void NamesFollowingInThreeWordsWhenItFollowsModsAndInNoneOtherwise()
     {
         TSource source = CreateSource();

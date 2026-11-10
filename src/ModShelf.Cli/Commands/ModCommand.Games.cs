@@ -39,7 +39,7 @@ internal static partial class ModCommand
         };
         Option<string?> source = new("--source")
         {
-            Description = "The site, such as nexus. Needed only when more than one site lists its games.",
+            Description = "The site, nexus or gamebanana. Needed only when more than one site lists its games.",
             HelpName = "source",
         };
         Option<int> page = new("--page")

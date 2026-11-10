@@ -108,6 +108,19 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task AGamesKeyAloneIsTheOnlySitesWhoseGamesKeysLookLikeIt()
+    {
+        string[] said =
+        [
+            (await RunAsync("set", "games.16951.notify", "true")).Output.Trim(),
+            (await RunAsync("set", "games.fallout4.notify", "true")).Output.Trim(),
+        ];
+
+        Assert.StartsWith("games.gamebanana/16951.notify is now true", said[0], StringComparison.Ordinal);
+        Assert.StartsWith("games.nexus/fallout4.notify is now true", said[1], StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task SetsAGamesOwnSettings()
     {
         string[] said =

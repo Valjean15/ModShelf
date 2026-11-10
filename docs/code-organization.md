@@ -91,7 +91,8 @@ Other projects see a project only through what it makes public, so keep that to 
 | 1500–1599 | Pictures and mod details |
 | 1600–1699 | Infrastructure: the UI state file |
 | 1700–1799 | Deprecated calls: counting them, and their file |
-| 1800 onward | Next free block |
+| 1800–1899 | Sources.GameBanana |
+| 1900 onward | Next free block |
 
 ## 7. Files
 
