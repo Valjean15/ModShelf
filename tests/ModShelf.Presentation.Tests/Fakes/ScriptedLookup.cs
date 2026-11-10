@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 
 using ModShelf.Application.Catalog;
+using ModShelf.Application.Common;
 using ModShelf.Application.Downloads;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Catalog;
@@ -29,6 +30,12 @@ internal sealed class ScriptedLookup : IModLookup
     /// Each site's games.
     /// </summary>
     public Dictionary<SourceId, IReadOnlyList<GameInfo>> Games { get; } = [];
+
+    /// <summary>
+    /// The sites that find their games by name, as GameBanana does: what <see cref="Games"/> has for one is what its
+    /// search finds, matched as the app matches names.
+    /// </summary>
+    public HashSet<SourceId> ByName { get; } = [];
 
     /// <summary>
     /// Each game's mods, in the order the search finds them: those whose names have the words, or all without words.
@@ -120,6 +127,21 @@ internal sealed class ScriptedLookup : IModLookup
         }
 
         return Answer(nameof(GetGamesAsync), () => Games.GetValueOrDefault(source) ?? []);
+    }
+
+    public bool FindsGamesByName(SourceId source) => IsOthers(source) ? Others!.FindsGamesByName(source) : ByName.Contains(source);
+
+    public Task<IReadOnlyList<GameInfo>> FindGamesAsync(SourceId source, NameQuery query, CancellationToken cancellationToken)
+    {
+        _asked.Enqueue($"FindGamesAsync {source} {query.Text}");
+        if (IsOthers(source))
+        {
+            return Others!.FindGamesAsync(source, query, cancellationToken);
+        }
+
+        return Answer(nameof(FindGamesAsync), () => ByName.Contains(source) && query.IsEmpty
+            ? throw new ArgumentException("Give words of the game's name.", nameof(query))
+            : query.Find((Games.GetValueOrDefault(source) ?? []).OrderBy(game => game.Name, StringComparer.OrdinalIgnoreCase), game => game.Name));
     }
 
     public async Task<SearchPage> SearchAsync(GameRef game, SearchQuery query, CancellationToken cancellationToken)

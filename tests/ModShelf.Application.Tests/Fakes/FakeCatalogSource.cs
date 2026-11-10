@@ -42,6 +42,11 @@ internal sealed class FakeCatalogSource(SourceId id) : ILinkRecognizer, IModCata
     public IReadOnlyList<ModChangelog> Changelogs { get; init; } = [new("5.2", ["Fixed the menus."])];
 
     /// <summary>
+    /// The games it lists; null for <see cref="Game"/> alone.
+    /// </summary>
+    public IReadOnlyList<GameInfo>? Games { get; init; }
+
+    /// <summary>
     /// Holds each changelog read until set, as a slow site does; a read whose caller gives up ends then. Null to answer at
     /// once.
     /// </summary>
@@ -61,7 +66,7 @@ internal sealed class FakeCatalogSource(SourceId id) : ILinkRecognizer, IModCata
         => Answer(nameof(RecognizeAsync), () => (RecognizedLink?)new RecognizedLink(LinkedFile, "SkyUI_5_2_SE.7z"));
 
     public Task<IReadOnlyList<GameInfo>> GetGamesAsync(CancellationToken cancellationToken)
-        => Answer(nameof(GetGamesAsync), () => (IReadOnlyList<GameInfo>)[Game]);
+        => Answer(nameof(GetGamesAsync), () => Games ?? [Game]);
 
     public Task<GameInfo> GetGameAsync(GameRef game, CancellationToken cancellationToken)
         => Answer(nameof(GetGameAsync), () => Game);

@@ -349,6 +349,32 @@ public sealed class ModCommandSearchTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task FindsTheGamesOfASiteThatFindsThemByNameAsItMatchesNames()
+    {
+        FakeGameSearchSite names = new();
+        await using InProcessCli cli = new(_site, _browser, sources: [_catalog, names]);
+
+        CliResult found = await cli.RunAsync(["mod", "games", "persona", "5", "--source", "fake-names"], Cancellation);
+
+        string[] lines = found.Output.ReplaceLineEndings("\n").Split('\n');
+        Assert.Equal("2 games on Fake name search match. These are 1 to 2.", lines[0]);
+        Assert.Equal(["7545", "16951"], lines[2..4].Select(line => line.Split(' ')[0]));
+        Assert.Equal(["persona 5"], names.Asked);
+    }
+
+    [Theory]
+    [InlineData(new string[0], "Fake name search has too many games to list them all: give words of the game's name.")]
+    [InlineData(new[] { "p5" }, "Fake name search finds games by a word of 3 letters or more.")]
+    public async Task SaysWhatTheSiteThatFindsGamesByNameNeeds(string[] words, string problem)
+    {
+        await using InProcessCli cli = new(_site, _browser, sources: [_catalog, new FakeGameSearchSite()]);
+
+        CliResult refused = await cli.RunAsync(["mod", "games", .. words, "--source", "fake-names"], Cancellation);
+
+        Assert.Equal((BadInput, problem), (refused.ExitCode, refused.Errors.Trim()));
+    }
+
+    [Fact]
     public async Task AsksWhichSiteWhenMoreThanOneCanSearch()
     {
         CliResult refused = await _cli.RunAsync(["mod", "search", "--game", "game"], Cancellation);

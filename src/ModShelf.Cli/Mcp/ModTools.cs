@@ -229,7 +229,7 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
     [McpServerTool(Name = "mod_games", Title = "Find a site's games", ReadOnly = true, Idempotent = true, OpenWorld = true, UseStructuredContent = true)]
     [Description("Lists a site's games whose names match, those that start with the words first, a page at a time, each with the key mod_search's game takes. Each word must start a word of the name, in any order; case, accents, quotes and other punctuation don't count, and a Roman numeral from II to XXX is its number too: \"stalker 2\" finds S.T.A.L.K.E.R. 2, \"final fantasy 12\" Final Fantasy XII.")]
     public Task<GamesResult> GamesAsync(
-        [Description("Words of the game's name; none to list every game.")] string? words = null,
+        [Description("Words of the game's name; none to list every game, on a site that lists them all. GameBanana finds its games by name only, by a word of 3 letters or more.")] string? words = null,
         [Description("The site: nexus or gamebanana. Needed when more than one site lists its games, as both do: ask each site the game may be on.")] string? source = null,
         [Description("Which page of games, from 1.")] int page = 1,
         [Description("How many games a page lists, from 1 to 100.")] int pageSize = 20,
@@ -247,10 +247,7 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
             }
 
             SourceId site = ChooseSource([.. sources.All<IModCatalog>().Select(catalog => catalog.Id)], source, "list its games");
-            StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
-            IReadOnlyList<GameInfo> found = NameQuery.Parse(words).Find(
-                (await lookup.GetGamesAsync(site, cancellationToken).ConfigureAwait(false)).OrderBy(game => game.Name, byName),
-                game => game.Name);
+            IReadOnlyList<GameInfo> found = await lookup.FindGamesAsync(site, NameQuery.Parse(words), cancellationToken).ConfigureAwait(false);
             int offset = (page - 1) * pageSize;
             GameEntry[] shown =
             [

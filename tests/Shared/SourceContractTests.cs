@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Accounts;
@@ -241,6 +243,22 @@ public abstract class SourceContractTests<TSource>
         Assert.All(
             await catalog.GetFilesAsync(linked.File.Mod, cancellationToken),
             file => Assert.True(file.PageUrl is not null, $"{typeof(TSource).Name} gives the file {file.Reference.Id} no link to download it by."));
+    }
+
+    [Fact]
+    public async Task FindsTheSearchableGameByTheLongestWordOfItsName()
+    {
+        IGameSearch search = Capability<IGameSearch>();
+        IModCatalog catalog = Capability<IModCatalog>();
+        GameRef game = Searchable();
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        string name = (await catalog.GetGameAsync(game, cancellationToken)).Name;
+        string word = Regex.Split(name, @"[^\p{L}\p{N}]+").MaxBy(part => part.Length)!.ToLowerInvariant();
+
+        IReadOnlyList<GameInfo> found = await search.FindGamesAsync(word, cancellationToken);
+
+        Assert.Contains(found, listed => listed.Game == game);
+        Assert.All(found, listed => Assert.Equal(search.Id, listed.Game.Source));
     }
 
     [Fact]

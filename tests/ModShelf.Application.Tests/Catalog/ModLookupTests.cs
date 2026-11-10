@@ -1,6 +1,7 @@
 using System.Net;
 
 using ModShelf.Application.Catalog;
+using ModShelf.Application.Common;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Sources;
 using ModShelf.Application.Tests.Fakes;
@@ -343,6 +344,86 @@ public sealed class ModLookupTests
     }
 
     [Fact]
+    public async Task FindsTheGamesOfASiteThatListsThemInItsWholeList()
+    {
+        FakeCatalogSource site = new(TestData.Nexus) { Games = [Named("Stardew Valley"), Named("Valheim"), Named("Fallout 4"), Named("Valley of Dragons")] };
+        ModLookup lookup = new(new SourceRegistry([site]));
+
+        IReadOnlyList<GameInfo> valley = await lookup.FindGamesAsync(TestData.Nexus, NameQuery.Parse("valley"), TestContext.Current.CancellationToken);
+        IReadOnlyList<GameInfo> every = await lookup.FindGamesAsync(TestData.Nexus, NameQuery.Every, TestContext.Current.CancellationToken);
+
+        Assert.Equal(["Valley of Dragons", "Stardew Valley"], valley.Select(game => game.Name));
+        Assert.Equal(["Fallout 4", "Stardew Valley", "Valheim", "Valley of Dragons"], every.Select(game => game.Name));
+        Assert.Equal(["GetGamesAsync"], site.Asked);
+        Assert.False(lookup.FindsGamesByName(TestData.Nexus));
+    }
+
+    [Fact]
+    public async Task AsksASiteThatFindsItsGamesByNameEachTimeAndMatchesWhatItFindsAsTheAppDoes()
+    {
+        SourceId banana = new("banana");
+        GameRef persona = new(banana, "16951");
+        GameSearchSite site = new(new FakeCatalogSource(banana))
+        {
+            Found =
+            [
+                new GameInfo(persona, "Persona 5 Royal (PC)"),
+                new GameInfo(new GameRef(banana, "7545"), "Persona 5"),
+                new GameInfo(new GameRef(banana, "8502"), "Persona 3 FES"),
+                new GameInfo(persona, "Persona 5 Royal (PC)"),
+                new GameInfo(new GameRef(TestData.Nexus, "persona5"), "Persona 5"),
+            ],
+        };
+        ModLookup lookup = new(new SourceRegistry([site]));
+
+        IReadOnlyList<GameInfo> found = await lookup.FindGamesAsync(banana, NameQuery.Parse("persona 5"), TestContext.Current.CancellationToken);
+        IReadOnlyList<GameInfo> again = await lookup.FindGamesAsync(banana, NameQuery.Parse(" Persona 5 "), TestContext.Current.CancellationToken);
+
+        Assert.True(lookup.FindsGamesByName(banana));
+        Assert.Equal([new GameRef(banana, "7545"), persona], found.Select(game => game.Game));
+        Assert.Equal(found, again);
+        Assert.Equal(["persona 5", "Persona 5"], site.Asked);
+    }
+
+    [Fact]
+    public void ASiteThatFindsGamesByNameButCantDescribeThemDoesntFindThem()
+    {
+        SourceId banana = new("banana");
+        ModLookup lookup = new(new SourceRegistry([new SearchOnlySite(banana)]));
+
+        Assert.False(lookup.FindsGamesByName(banana));
+        Assert.False(lookup.FindsGamesByName(new SourceId("nowhere")));
+    }
+
+    [Fact]
+    public async Task RefusesToListEveryGameOfASiteThatFindsThemByName()
+    {
+        SourceId banana = new("banana");
+        GameSearchSite site = new(new FakeCatalogSource(banana));
+        ModLookup lookup = new(new SourceRegistry([site]));
+
+        ArgumentException refused = await Assert.ThrowsAsync<ArgumentException>(
+            () => lookup.FindGamesAsync(banana, NameQuery.Parse(" .. "), TestContext.Current.CancellationToken));
+
+        Assert.StartsWith("banana has too many games to list them all: give words of the game's name.", refused.Message, StringComparison.Ordinal);
+        Assert.Empty(site.Asked);
+    }
+
+    [Fact]
+    public async Task PassesOnASearchTheSiteCantDo()
+    {
+        SourceId banana = new("banana");
+        ArgumentException tooShort = new("A word of 3 letters or more.");
+        GameSearchSite site = new(new FakeCatalogSource(banana)) { Failure = tooShort };
+        ModLookup lookup = new(new SourceRegistry([site]));
+
+        ArgumentException refused = await Assert.ThrowsAsync<ArgumentException>(
+            () => lookup.FindGamesAsync(banana, NameQuery.Parse("p5"), TestContext.Current.CancellationToken));
+
+        Assert.Same(tooShort, refused);
+    }
+
+    [Fact]
     public async Task RefusesTheGamesOfASourceThatCantDescribeThem()
     {
         ModLookup lookup = new(new SourceRegistry([ScriptedLinkRecognizer.Never(TestData.Nexus)]));
@@ -449,6 +530,63 @@ public sealed class ModLookupTests
         }
 
         public Task<IReadOnlyList<GameInfo>> GetGamesAsync(CancellationToken cancellationToken) => catalog.GetGamesAsync(cancellationToken);
+
+        public Task<GameInfo> GetGameAsync(GameRef game, CancellationToken cancellationToken) => catalog.GetGameAsync(game, cancellationToken);
+
+        public Task<ModInfo> GetModAsync(ModRef modRef, CancellationToken cancellationToken) => catalog.GetModAsync(modRef, cancellationToken);
+
+        public Task<IReadOnlyList<ModFile>> GetFilesAsync(ModRef modRef, CancellationToken cancellationToken) => catalog.GetFilesAsync(modRef, cancellationToken);
+
+        public Task<IReadOnlyList<ModChangelog>> GetChangelogsAsync(ModRef modRef, CancellationToken cancellationToken)
+            => catalog.GetChangelogsAsync(modRef, cancellationToken);
+    }
+
+    private static GameInfo Named(string name) => new(new GameRef(TestData.Nexus, name.Replace(" ", string.Empty, StringComparison.Ordinal).ToLowerInvariant()), name);
+
+    /// <summary>
+    /// A site that finds its games by name, finding <see cref="Found"/> whatever is typed, or failing as told.
+    /// </summary>
+    /// <summary>
+    /// A site with a search of its games by name, and no catalog to describe them.
+    /// </summary>
+    private sealed class SearchOnlySite(SourceId id) : IGameSearch
+    {
+        public SourceId Id => id;
+
+        public string DisplayName => "Search only";
+
+        public SiteWords Words => SiteWords.None;
+
+        public Task<IReadOnlyList<GameInfo>> FindGamesAsync(string words, CancellationToken cancellationToken)
+            => Task.FromResult<IReadOnlyList<GameInfo>>([]);
+    }
+
+    private sealed class GameSearchSite(FakeCatalogSource catalog) : IModCatalog, IGameSearch
+    {
+        private readonly List<string> _asked = [];
+
+        public SourceId Id => catalog.Id;
+
+        public string DisplayName => catalog.DisplayName;
+
+        public SiteWords Words => catalog.Words;
+
+        public IReadOnlyList<GameInfo> Found { get; init; } = [];
+
+        public Exception? Failure { get; init; }
+
+        /// <summary>
+        /// The words searched for, in order.
+        /// </summary>
+        public IReadOnlyList<string> Asked => _asked;
+
+        public Task<IReadOnlyList<GameInfo>> FindGamesAsync(string words, CancellationToken cancellationToken)
+        {
+            _asked.Add(words);
+            return Failure is { } failure ? Task.FromException<IReadOnlyList<GameInfo>>(failure) : Task.FromResult(Found);
+        }
+
+        public Task<IReadOnlyList<GameInfo>> GetGamesAsync(CancellationToken cancellationToken) => throw new InvalidOperationException("Its games are found by name.");
 
         public Task<GameInfo> GetGameAsync(GameRef game, CancellationToken cancellationToken) => catalog.GetGameAsync(game, cancellationToken);
 

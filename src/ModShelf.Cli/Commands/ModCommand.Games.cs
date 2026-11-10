@@ -1,6 +1,4 @@
 using System.CommandLine;
-using System.Globalization;
-
 using Microsoft.Extensions.DependencyInjection;
 
 using ModShelf.Application.Catalog;
@@ -34,7 +32,7 @@ internal static partial class ModCommand
     {
         Argument<string[]> words = new("words")
         {
-            Description = "Words of the game's name, each the start of one of its words, in any order: \"stalker 2\" finds S.T.A.L.K.E.R. 2. Leave them out to list every game.",
+            Description = "Words of the game's name, each the start of one of its words, in any order: \"stalker 2\" finds S.T.A.L.K.E.R. 2. Leave them out to list every game, on a site that lists them all; GameBanana's are found by name.",
             Arity = ArgumentArity.ZeroOrMore,
         };
         Option<string?> source = new("--source")
@@ -103,10 +101,10 @@ internal static partial class ModCommand
                         return ExitCodes.BadInput;
                     }
 
-                    IReadOnlyList<GameInfo> games;
+                    IReadOnlyList<GameInfo> found;
                     try
                     {
-                        games = await services.GetRequiredService<IModLookup>().GetGamesAsync(source, cancellationToken).ConfigureAwait(false);
+                        found = await services.GetRequiredService<IModLookup>().FindGamesAsync(source, query, cancellationToken).ConfigureAwait(false);
                     }
                     catch (Exception exception) when (GamesProblem(exception) is { } problem)
                     {
@@ -115,8 +113,6 @@ internal static partial class ModCommand
                     }
 
                     string site = sources.Find<IModSource>(source)?.DisplayName ?? source.Value;
-                    StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
-                    IReadOnlyList<GameInfo> found = query.Find(games.OrderBy(game => game.Name, byName), game => game.Name);
                     WriteGames(environment.Output, found, query, site, offset, count);
                     return ExitCodes.Done;
                 },

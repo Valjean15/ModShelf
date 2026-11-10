@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 
+using ModShelf.Application.Common;
 using ModShelf.Application.Sources;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Catalog;
@@ -13,7 +14,7 @@ namespace ModShelf.Application.Catalog;
 /// about the mod, all four questions at once, and its <see cref="IModRequirements"/>, when it has one, at the same time.
 /// Searches go to the game's source's <see cref="IModSearch"/>, once checked against its
 /// <see cref="IModSearch.Capabilities"/>. Each source's games, and each mod's changelog asked about by version, are kept
-/// once read.
+/// once read; a source that finds its games by name (<see cref="IGameSearch"/>) is asked each time instead.
 /// </summary>
 internal sealed class ModLookup : IModLookup
 {
@@ -90,6 +91,35 @@ internal sealed class ModLookup : IModLookup
 
         IReadOnlyList<GameInfo> games = await catalog.GetGamesAsync(cancellationToken).ConfigureAwait(false);
         return _games.GetOrAdd(source, games);
+    }
+
+    public bool FindsGamesByName(SourceId source)
+        => source is not null && _sources.Find<IModCatalog>(source) is not null && _sources.Find<IGameSearch>(source) is not null;
+
+    public async Task<IReadOnlyList<GameInfo>> FindGamesAsync(SourceId source, NameQuery query, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(query);
+
+        IModCatalog catalog = _sources.Require<IModCatalog>(source, "can't describe its games", nameof(source));
+        IReadOnlyList<GameInfo> games;
+        if (_sources.Find<IGameSearch>(source) is { } search)
+        {
+            if (query.IsEmpty)
+            {
+                throw new ArgumentException($"{catalog.DisplayName} has too many games to list them all: give words of the game's name.", nameof(query));
+            }
+
+            games = await search.FindGamesAsync(query.Text, cancellationToken).ConfigureAwait(false);
+        }
+        else
+        {
+            games = await GetGamesAsync(source, cancellationToken).ConfigureAwait(false);
+        }
+
+        return query.Find(
+            games.Where(game => game.Game.Source == source).DistinctBy(game => game.Game).OrderBy(game => game.Name, StringComparer.CurrentCultureIgnoreCase),
+            game => game.Name);
     }
 
     public async Task<SearchPage> SearchAsync(GameRef game, SearchQuery query, CancellationToken cancellationToken)

@@ -1275,6 +1275,19 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task FindsTheGamesOfASiteThatFindsThemByName()
+    {
+        _cli = new InProcessCli(_site, _browser, sources: [_handoff, _catalog, new FakeGameSearchSite()]);
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        GamesResult found = await mcp.CallAsync<GamesResult>("mod_games", Arguments(("words", "persona"), ("source", "fake-names")), Cancellation);
+        string every = await mcp.CallFailingAsync("mod_games", Arguments(("source", "fake-names")), Cancellation);
+
+        Assert.Equal(["Persona 3 FES", "Persona 5", "Persona 5 Royal (PC)"], found.Games.Select(game => game.Name));
+        Assert.Contains("Fake name search has too many games to list them all: give words of the game's name.", every, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task ListsASitesGamesAPageAtATimeThoseStartingWithTheWordsFirst()
     {
         _catalog.MoreGames.AddRange([new GameInfo(new GameRef(FakeCatalogSite.SourceId, "gamebox"), "Game Box"), new GameInfo(new GameRef(FakeCatalogSite.SourceId, "zoo"), "Zoo")]);

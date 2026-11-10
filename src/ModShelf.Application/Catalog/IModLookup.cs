@@ -1,3 +1,4 @@
+using ModShelf.Application.Common;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Search;
@@ -6,7 +7,7 @@ namespace ModShelf.Application.Catalog;
 
 /// <summary>
 /// Looks mods up on their sites: one from a link to it or by reference, with its game, files, changelog and requirements;
-/// what changed in one of its versions; a game's mods by search; or the games a site has.
+/// what changed in one of its versions; a game's mods by search; or the games a site has, all or by name.
 /// </summary>
 public interface IModLookup
 {
@@ -61,6 +62,25 @@ public interface IModLookup
     /// <exception cref="Sources.Abstractions.Accounts.AuthenticationFailedException">The site needs a linked account, or refused it.</exception>
     /// <exception cref="HttpRequestException">The site couldn't be reached, or refused.</exception>
     Task<IReadOnlyList<GameInfo>> GetGamesAsync(SourceId source, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Whether the source finds its games by name as they're typed (<see cref="IGameSearch"/>), its whole list taking
+    /// too long to read for a list to pick from; false for a source that lists them all, or isn't registered.
+    /// </summary>
+    bool FindsGamesByName(SourceId source);
+
+    /// <summary>
+    /// The source's games whose names match <paramref name="query"/>, those that start with it first, then by name: from
+    /// the site's own search for a source that finds its games by name, asked each time; from the whole list otherwise,
+    /// as <see cref="GetGamesAsync"/> reads and keeps it. With nothing typed, every game of a source that lists them.
+    /// </summary>
+    /// <exception cref="ArgumentException">
+    /// The source isn't registered, or can't describe its games; or it finds its games by name, and nothing was typed or
+    /// the site can't search by what was, which says so.
+    /// </exception>
+    /// <exception cref="Sources.Abstractions.Accounts.AuthenticationFailedException">The site needs a linked account, or refused it.</exception>
+    /// <exception cref="HttpRequestException">The site couldn't be reached, or refused.</exception>
+    Task<IReadOnlyList<GameInfo>> FindGamesAsync(SourceId source, NameQuery query, CancellationToken cancellationToken);
 
     /// <summary>
     /// One page of a game's mods that match <paramref name="query"/>, from the game's source. Unless the query includes
