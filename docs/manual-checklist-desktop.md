@@ -1,6 +1,6 @@
 # Manual checklist: the desktop app
 
-CI never calls a live mod site, and never clicks through the desktop app, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 15 checks GameBanana, once, with no account of its own. Phase 5 is done when every flow of Phases 1 to 4 works from the app, without the command line. The command line has its own checklist, [manual-checklist.md](manual-checklist.md).
+CI never calls a live mod site, and never clicks through the desktop app, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 15 checks GameBanana, once, without an account and then with a profile linked. Phase 5 is done when every flow of Phases 1 to 4 works from the app, without the command line. The command line has its own checklist, [manual-checklist.md](manual-checklist.md).
 
 The checks download files into a test folder, and keep the library database, settings and credentials apart from your own. One section changes your account: it tracks SMAPI and untracks it again, leaving your tracked mods as they were.
 
@@ -79,9 +79,9 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
 ## 3. Browse
 
 - [ ] **3.1 The games.** Open the Browse screen.
-  The game picker's field says "Find a game"; clicking it opens a list under it saying "Type to find any of the *N* games on Nexus Mods and GameBanana." and which keys do what, once both sites' games are read: the first time in a run, a bar under the field runs while GameBanana's list is read, which can take a minute (write down how long; ADR 0087). With nothing in the library yet, it starts with none chosen: "Choose a game to search its mods."
+  The game picker's field says "Find a game"; clicking it opens a list under it saying "Type to find any of the *N* games on Nexus Mods, or a game on GameBanana by its name." and which keys do what, once Nexus Mods' games are read, in a few seconds: GameBanana's whole list is never read (ADR 0088). With nothing in the library yet, it starts with none chosen: "Choose a game to search its mods."
 - [ ] **3.1a Games by name.** Type each in the game picker: `stalker 2`, `final fantasy 12`, `dragons dogma`, `valley`, `dew`. Then type `star`, press ↓ twice and Enter; open it again, type `sky`, and press Escape.
-  S.T.A.L.K.E.R. 2: Heart of Chornobyl; Final Fantasy XII: The Zodiac Age; Dragon's Dogma 2; for `valley`, the games whose names start with "Valley" first, then Stardew Valley and the others; for `dew`, "No game's name has “dew”." Clearing the field shows the hint again. ↓ moves the highlight, and Enter chooses the third game: it shows as a chip in the field, and its rows load. Escape closes the list, forgetting `sky`, the chip still there. Each game's name has its site after it, as in "Stardew Valley (Nexus Mods)", since GameBanana's games are listed too; a game on both shows twice. For `dew`, a GameBanana game's name may hold it: write down which.
+  S.T.A.L.K.E.R. 2: Heart of Chornobyl; Final Fantasy XII: The Zodiac Age; Dragon's Dogma 2; for `valley`, the games whose names start with "Valley" first, then Stardew Valley and the others; for `dew`, "No game's name has “dew”." Clearing the field shows the hint again. ↓ moves the highlight, and Enter chooses the third game: it shows as a chip in the field, and its rows load. Escape closes the list, forgetting `sky`, the chip still there. Each game's name has its site after it, as in "Stardew Valley (Nexus Mods)", since GameBanana's games are found too, by a word of 3 letters or more, "Finding games on GameBanana…" while it's asked; a game on both shows twice. For `dew`, a GameBanana game's name may hold it: write down which.
 - [ ] **3.2 Search.** Choose Stardew Valley (type to filter the list), type `smapi` in the search box, and **Search**.
   "*N* mods match." SMAPI is near the top, with its downloads, endorsements and last update.
 - [ ] **3.2a The game's rows.** Clear the search box.
@@ -336,14 +336,14 @@ Nexus Mods' **Mod manager download** buttons hand a download over with an `nxm:/
 - [ ] **14.1 Unlink.** On the Accounts screen, **Unlink**.
   "Unlink Nexus Mods?" **Unlink**: "Unlinked. Its stored credentials are deleted." The card says "No account is linked.", and the sidebar **Link an account**. On Windows, `account_nexus.secret` is gone from the test folder's `Secrets` folder.
 - [ ] **14.2 Browse needs it.** Open the Browse screen, and **Try again** if it shows a message.
-  "Nexus Mods needs your account linked, or refused the one linked. …", with **Go to Accounts**, which opens the Accounts screen. GameBanana's games are still in the game picker.
+  "Nexus Mods needs your account linked, or refused the one linked. …", with **Go to Accounts**, which opens the Accounts screen. GameBanana's games are still found in the game picker.
 
 ## 15. GameBanana
 
-GameBanana needs no account. The checks use Persona 5 Royal (PC) and P5R Female Protagonist, and download only its small metadata files, of a few hundred bytes.
+GameBanana needs no account; 15.11 to 15.14 link a member's public profile, read only: yours, or, without a GameBanana account, `chlorophylls`, the mod's author. The checks use Persona 5 Royal (PC) and P5R Female Protagonist, and download only its small metadata files, of a few hundred bytes.
 
-- [ ] **15.1 A GameBanana game.** On the Browse screen, type `persona 5 royal` in the game picker.
-  "Persona 5 Royal (PC) (GameBanana)" among the games, beside Nexus Mods' of that name, each with its site. Choose it.
+- [ ] **15.1 A GameBanana game.** Start the app, open the Browse screen, and click the game picker; then type `p5`, then `persona 5 royal`. Press Ctrl+K and type `persona 5 royal` there too.
+  Nexus Mods' games and the library's show at once, and the hint under the field says "Type to find any of the *N* games on Nexus Mods, or a game on GameBanana by its name." `p5` finds only Nexus Mods' games: GameBanana's need a word of 3 letters. With `persona 5 royal`, "Finding games on GameBanana…" for a moment, then "Persona 5 Royal (PC) (GameBanana)" among the games, beside Nexus Mods' of that name, each with its site. Quick search finds it the same way. Choose it in the picker.
 - [ ] **15.2 The game's rows.** Look at the game's page.
   **Trending**, **Recently added** and **Recently updated**, each with GameBanana's mods, their pictures and likes, as the game's page on the website shows them. A mod GameBanana shows behind a warning, should Trending have one, has its picture blurred and an "Adult content" tag; the other rows leave such mods out.
 - [ ] **15.3 Filters.** Open **Filters**.
@@ -363,6 +363,14 @@ GameBanana needs no account. The checks use Persona 5 Royal (PC) and P5R Female 
   "This GameBanana link names a file but not its mod, so ModShelf can't tell whose it is. Copy the mod's page link instead." Then "This GameBanana link isn't to a mod or its files. Copy a mod's page link."
 - [ ] **15.10 Remove it.** In the mod's **…** menu on the Library screen, **Remove from library**.
   The mod leaves the library, its file staying on disk, and Persona 5 Royal (PC) leaves the Library's games.
+- [ ] **15.11 Link a profile.** On the Accounts screen, GameBanana's card, **Link your profile**; type `nobody-zz-qq` and link; then the member name.
+  The box says ModShelf reads only what anyone can see on the profile, and asks for no password. `nobody-zz-qq`: "GameBanana has no such member, or doesn't show their profile. Check the name, then try again." The name: the card shows the profile's name and picture, and today's date; the bottom of the sidebar shows it too, with "GameBanana".
+- [ ] **15.12 Subscribed mods.** On the Browse screen, choose a GameBanana game the profile subscribes to mods of (for `chlorophylls`, Persona 5 Royal (PC)), and **Subscribed mods**; open one of the mods.
+  "*N* subscribed mods of *game* on GameBanana.", as the profile's subscriptions on the website list that game's mods (works in progress left out), those the library watches tagged "Watched". The mod's page has no button to subscribe or unsubscribe: ModShelf can only read them.
+- [ ] **15.13 Watch all.** Back on the list, **Watch all (*N*)**; then open the Library screen.
+  "Watching *N* more mods for updates in the library." (or "Watching 1 more mod…"), each mod tagged "Watched", and the button reads **Watch all (0)**, greyed. The Library lists them under the game, watched. **Tracked mods** on a Nexus Mods game has the same button.
+- [ ] **15.14 Unlink it.** On the Accounts screen, **Unlink** on GameBanana's card, and confirm; then **Subscribed mods** again in Browse.
+  The card says nothing is linked, and Browse says "GameBanana needs your account linked, or refused the one linked. Link it on the Accounts screen, then try again.", with a button to the Accounts screen. The mods Watch all watched stay in the library.
 
 ## Clean up
 
@@ -517,3 +525,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 15.8 Save to a folder | | – | |
 | 15.9 Links it refuses | | – | |
 | 15.10 Remove it | | – | |
+| 15.11 Link a profile | | – | |
+| 15.12 Subscribed mods | | – | |
+| 15.13 Watch all | | – | |
+| 15.14 Unlink it | | – | |

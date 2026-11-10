@@ -1,6 +1,6 @@
 # Manual checklist
 
-CI never calls a live mod site, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 13 checks GameBanana, once, with no account of its own. Phase 3 is done when they all pass.
+CI never calls a live mod site, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 13 checks GameBanana, once, without an account and then with a profile linked. Phase 3 is done when they all pass.
 
 The checks use the CLI. They download files into a temporary folder, and keep the library database and credentials apart from your own. One section changes your account: it tracks SMAPI and untracks it again, leaving your tracked mods as they were.
 
@@ -64,8 +64,8 @@ A new terminal needs all these lines again, with the same folders. Never paste a
   Only Pathoschild's mods, numbered from 6.
 - [ ] **3.4 No match.** `ms mod search zqxj no such mod zqxj --game stardewvalley`.
   "No mods match." Exit code 0.
-- [ ] **3.4a Games by name.** `ms mod games stalker 2`, then `ms mod games final fantasy 12`, then `ms mod games valley stardew`.
-  S.T.A.L.K.E.R. 2: Heart of Chornobyl, with its key; Final Fantasy XII: The Zodiac Age; Stardew Valley, key `stardewvalley`. Each says how many match, and "To search a game's mods: mod search --game <its key>".
+- [ ] **3.4a Games by name.** `ms mod games stalker 2 --source nexus`, then `ms mod games final fantasy 12 --source nexus`, then `ms mod games valley stardew --source nexus`; then `ms mod games stalker 2`.
+  S.T.A.L.K.E.R. 2: Heart of Chornobyl, with its key; Final Fantasy XII: The Zodiac Age; Stardew Valley, key `stardewvalley`. Each says how many match, and "To search a game's mods: mod search --game <its key>". Without `--source`, "More than one site can list its games; choose one with --source: nexus, gamebanana.", exit code 2.
 - [ ] **3.5 The site's own order, and endorsements.** `ms mod search --game stardewvalley`, then the same with `--sort Endorsements`.
   "*N* mods match, in the site's own order. These are 1 to 20.", the most endorsed at the top, then "…, most endorsements first." with the same mods. The table's columns are ID, Name, Author, Endorsements, Downloads, Updated and Link.
 - [ ] **3.6 A category, and how long since updated.** `ms mod search --game stardewvalley --category "user interface" --updated-within 30`, then `ms mod search --game stardewvalley --category Armour`.
@@ -222,7 +222,7 @@ These checks make the desktop app open Nexus Mods' `nxm://` links, from the comm
 
 ## 13. GameBanana
 
-GameBanana needs no account. The checks use P5R Female Protagonist (mod 440088) of Persona 5 Royal (PC) (game 16951), and download only its small metadata files, of a few hundred bytes:
+GameBanana needs no account; 13.13 to 13.17 link a member's public profile, read only: yours, or, without a GameBanana account, `chlorophylls`, the mod's author. The checks use P5R Female Protagonist (mod 440088) of Persona 5 Royal (PC) (game 16951), and download only its small metadata files, of a few hundred bytes:
 
 ```powershell
 $gb = Join-Path $test 'GameBanana'
@@ -232,8 +232,8 @@ $gb = Join-Path $test 'GameBanana'
   "P5R Female Protagonist", "Game: Persona 5 Royal (PC)", its author, "Likes:" and "Downloads:", and its page. Under "Main files", the mod and its voiceover packs, the newest marked `*`; under "Miscellaneous files", their metadata files of a few hundred bytes. Each file's link is `https://gamebanana.com/mmdl/<file>,Mod,440088`. "1 more file (an old version, archived or in no section) isn't shown". Exit code 0.
 - [ ] **13.2 Old versions and the changelog.** The same with `--all --changelog`.
   An "Old versions" section with the archived version, then the changelog, newest version first, as the mod's Updates tab on the website lists it.
-- [ ] **13.3 Games by name.** `ms mod games persona 5 --source gamebanana`, timing it: `Measure-Command { ms mod games persona 5 --source gamebanana | Out-Host }`.
-  "10 games on GameBanana match.", `16951 Persona 5 Royal (PC)` among them. It reads GameBanana's whole list of games, nearly 100 pages: write down how long it took (a minute is expected the first time; less once GameBanana keeps the pages, for 10 minutes).
+- [ ] **13.3 Games by name.** `ms mod games persona 5 --source gamebanana`, timing it: `Measure-Command { ms mod games persona 5 --source gamebanana | Out-Host }`; then `ms mod games --source gamebanana` and `ms mod games p5 --source gamebanana`.
+  "10 games on GameBanana match.", `16951 Persona 5 Royal (PC)` among them, in a second or so: GameBanana's own search finds them by "persona", never its whole list of games. Then "GameBanana has too many games to list them all: give words of the game's name." and "GameBanana finds games by a word of 3 letters or more.", exit code 2 for each.
 - [ ] **13.4 A game's mods, and a game's key alone.** `ms mod search --game 16951 --page-size 5`.
   "*N* mods match, in the site's own order." The newest mods of the game on the website first. The number alone picks GameBanana, without `--source`, though a Nexus Mods account is linked. The Downloads column is `-`: GameBanana's lists don't say.
 - [ ] **13.5 Words, author and category.** `ms mod search protagonist --game 16951 --page-size 20`, `ms mod search --game 16951 --author chlorophylls`, then `ms mod search --game 16951 --category models --page-size 5`.
@@ -252,6 +252,16 @@ $gb = Join-Path $test 'GameBanana'
   "This GameBanana link names a file but not its mod, so ModShelf can't tell whose it is. Copy the mod's page link instead."; "This GameBanana link isn't to a mod or its files. Copy a mod's page link."; "The site has no such mod or file." Exit code 2 for each.
 - [ ] **13.12 Forget it.** `ms library forget "https://gamebanana.com/mods/440088"`.
   The mod leaves the library; its file stays on disk.
+- [ ] **13.13 Link a profile.** `ms account list`, then `ms account link gamebanana`, and type the member name; then `ms account list` again.
+  `gamebanana  - (optional)` with `profile` under "Link with"; "ModShelf reads only what anyone can see on your profile on gamebanana, and asks for no password.", no password asked, then "Linked gamebanana as *name*." Listed again, the name, no level, and today's date. Exit code 0.
+- [ ] **13.14 By its link, and refusals.** `ms account link gamebanana --with profile`, pasting the profile's link from the website (`https://gamebanana.com/members/<number>`); then again with `nobody-zz-qq`, then with `https://gamebanana.com/mods/440088`.
+  "Linked gamebanana as *name*." Then twice "gamebanana has no such member, or doesn't show their profile. Check the name, then try again. Nothing was linked.", exit code 1, the profile linked first still linked.
+- [ ] **13.15 Subscribed mods.** `ms mod tracked --source gamebanana`.
+  "*N* subscribed mods on GameBanana.", each mod's game and ID, as the profile's subscriptions on the website list its mods (works in progress and the rest left out), then "ModShelf only reads them: change them on GameBanana's website." A profile subscribed to none: "No subscribed mods on GameBanana."
+- [ ] **13.16 Not changed here.** `ms mod track "https://gamebanana.com/mods/440088"`, then `ms mod untrack` with the same link.
+  "ModShelf can only read your subscribed mods on GameBanana: change them on its website.", exit code 2 for each; the website's subscriptions unchanged.
+- [ ] **13.17 Unlink it.** `ms account unlink gamebanana`, then `ms mod tracked --source gamebanana`.
+  "Unlinked gamebanana. Its stored credentials are deleted." Then "GameBanana needs a linked account to list its subscribed mods, or refused the one linked. Link it with account link, then run the same command again.", exit code 1. Everything else on GameBanana works as before.
 
 ## Clean up
 
@@ -338,3 +348,8 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 13.10 Into the library | | – | |
 | 13.11 Refusals | | – | |
 | 13.12 Forget it | | – | |
+| 13.13 Link a profile | | – | |
+| 13.14 By its link, and refusals | | – | |
+| 13.15 Subscribed mods | | – | |
+| 13.16 Not changed here | | – | |
+| 13.17 Unlink it | | – | |

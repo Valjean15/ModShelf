@@ -143,7 +143,7 @@ by side, would offer a mod's "tan" variant as the update of its "pale" one. The 
   a game read every site's games before showing any, so the first time Browse opens in a run, Nexus Mods' games wait
   for GameBanana's too. Left open for the human before 1.0.2 is released: reading each site's games apart, keeping the
   list between runs, or searching GameBanana's games by name (`Util/Game/NameMatch`, one request of 0.3 seconds), which
-  needs a capability of its own.
+  needs a capability of its own. ADR 0088 settles it: each site's games are read apart, and GameBanana's found by name.
 - `mod updates` (and `IUpdateFeed`) isn't offered for GameBanana; `library check` asks for each watched mod's profile,
   4 at a time.
 - A pasted 1-click link without its mod can't be used; the button's links, which name it, can.

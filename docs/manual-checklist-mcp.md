@@ -152,8 +152,9 @@ GameBanana needs no account. Start a new conversation, so the agent reads the se
 
 - [ ] **5.1 Which sites.** Ask the agent where it can find mods for Persona 5 Royal.
   It asks both sites, with `mod_games` and `source` `nexus` and `gamebanana`, and names the site of each game it finds:
-  Persona 5 Royal (PC), `16951`, on GameBanana, and Nexus Mods' game of that name, if it has one. The first `mod_games`
-  of GameBanana in a run reads its whole list of games, which can take a minute.
+  Persona 5 Royal (PC), `16951`, on GameBanana, and Nexus Mods' game of that name, if it has one. GameBanana's are found
+  by its own search, by a word of 3 letters or more, in a second or so; asked without words, `mod_games` says GameBanana
+  has too many games to list them all.
 - [ ] **5.2 A game's key alone.** Ask it to search GameBanana's game 16951 for `protagonist`.
   `mod_search` with `game` `16951`, without `source` or with `gamebanana`; each result's `source` is `gamebanana`, and
   the agent says the mods are GameBanana's, best matches first.
@@ -166,6 +167,10 @@ GameBanana needs no account. Start a new conversation, so the agent reads the se
   downloads that one, 504 bytes; `library_list` then lists it under game `16951` of `gamebanana`.
 - [ ] **5.5 Its updates.** Ask the agent to check the library for updates.
   `library_check` counts the GameBanana mod among those it checked; there's no update for it.
+- [ ] **5.6 A linked profile.** Link a GameBanana profile on the desktop app's Accounts screen, then ask the agent which
+  accounts are linked.
+  `accounts_status` lists GameBanana as linked, with `profile` its way to link one, no level, and `worksWithoutAccount`
+  true; the agent never names the profile.
 
 ## Results
 
@@ -210,3 +215,4 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 5.3 Adult content | | |
 | 5.4 A file of a GameBanana mod | | |
 | 5.5 Its updates | | |
+| 5.6 A linked profile | | |

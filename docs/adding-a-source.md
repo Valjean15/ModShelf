@@ -71,17 +71,23 @@ site has. What ModShelf does without each:
 | `ILinkRecognizer` | Turns a link to the site's mod or file into a file reference. | Nothing of the site can be downloaded by link. |
 | `IDownloadResolver` | Turns a file into a `DownloadTicket`, or `HandoffRequired` when the user must start the download on the site. | Its files can't be downloaded. |
 | `IModCatalog` | The site's games, a game, a mod, its files and its changelogs. | Its files don't go into the library (they're saved to a folder, as plain web links are), and nothing is checked for updates. |
+| `IGameSearch` | The site's games found by name, for a site with too many to list them all at once. | Its whole games list is read, once a run, for Browse, quick search and Add a game to pick from. |
 | `IModSearch` | A game's mods, a page at a time, in the orders and by the filters its `Capabilities` say. | Browse doesn't list the site's games. |
 | `ITrendingMods` | What the site says is trending for a game. | Browse shows no trending row for it. |
 | `IModRequirements` | What a mod needs, as its author listed it. | The mod page lists no requirements. |
 | `IUpdateFeed` | Which of a game's mods changed lately, in one request. | Each watched mod is asked for its files on its own: one request per mod per check. |
-| `IWatchlistSync` | The mods the account follows on the site. | Browse has no followed mods, and the mod page no button to follow. |
+| `IWatchlistReader` | The mods the account follows on the site, to read only. | Browse has no followed mods. |
+| `IWatchlistSync` | The `IWatchlistReader` ModShelf can change too: following and no longer following a mod. | The mod page has no button to follow. |
 | `IAccountLinker` | Linking an account, with one `IAuthStrategy` per way the site allows. | No account is offered. |
 | `IApiQuota` | What's left of the account's allowances, when the site says. | No quota is shown. |
 | `IHandoffScheme` | The link scheme the site hands downloads over with. | ModShelf can't offer to open those links. |
 
 A source needs `ILinkRecognizer`, `IDownloadResolver` and `IModCatalog` for its files to go into the library and be
 checked for updates. The rest are optional.
+
+A source with `IGameSearch` still lists every game in `IModCatalog.GetGamesAsync`, which the contract reads, but the app
+never asks it to: the screens find its games as a name is typed and show each site's games as that site answers, and
+`mod games` and `mod_games` need words for it.
 
 ### Links
 
@@ -144,9 +150,10 @@ sentence starts. Nexus Mods' are:
 | `Approval` | endorsement | "1 endorsement" |
 | `Approvals` | endorsements | "87 endorsements", **Most endorsements**, **Fewest endorsements**, the CLI's Endorsements column |
 
-A site with `IWatchlistSync` gives all three words for following; one without gives none. A site that counts approval
-in `ModInfo.Endorsements` gives both words for it, and one that sorts by `SearchSort.Endorsements` must; a site without
-gives neither, and nothing shows it: no count, no order by it, no CLI column. `SiteWords.None` is a site with neither.
+A site with `IWatchlistSync` gives all three words for following; one with only `IWatchlistReader` gives `Followed`
+alone, as GameBanana's "subscribed"; one with neither gives none. A site that counts approval in `ModInfo.Endorsements`
+gives both words for it, and one that sorts by `SearchSort.Endorsements` must; a site without gives neither, and nothing
+shows it: no count, no order by it, no CLI column. `SiteWords.None` is a site with neither.
 
 ### Search
 
@@ -170,8 +177,13 @@ declared order lists the mods in it, each filter narrows them, and pages are ful
 
 ### Accounts
 
-- Each way of linking is an `IAuthStrategy` of one `AuthKind`: `ApiKey`, `OAuthPkce` or `EmailCode`.
+- Each way of linking is an `IAuthStrategy` of one `AuthKind`: `ApiKey`, `OAuthPkce`, `EmailCode` or `PublicProfile`.
   `WorksWithoutAccount` says whether the site can be used without one.
+- `PublicProfile` is for a site that gives apps no way to sign a member in: the user names their profile, by its name or
+  link, nothing secret is asked, and only what anyone can see is read, such as the mods it follows, with an
+  `IWatchlistReader` and never an `IWatchlistSync`. The credentials are what names the profile, such as GameBanana's
+  member ID, which `Authorize` puts where a request names the linked one (`apiv11/Member/linked/…`). `GetProfileAsync`
+  refuses a profile the site doesn't show.
 - The app keeps credentials in the system's secret store (`ISecretStore`), never in the database, settings or the log.
   The source never stores them.
 - The source asks `IHttpClientFactory` for the client named `SourceHttpClients.NameFor(Id)`: the app adds the linked
