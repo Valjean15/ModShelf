@@ -103,14 +103,22 @@ ModShelf works out updates from a mod's files as the catalog lists them, never f
 - otherwise, a main file's update is the newest **main** file uploaded after it;
 - a mod with files gets the **optional** files uploaded since its last check, as new files.
 
+A site that lists a mod's files side by side, without saying which is the main one or which replaced which, such as
+variants ("pale" and "tan") or add-ons uploaded at different times, says so with `IModCatalog.FilesSideBySide`. Its
+files are never taken for each other's update by date: a library file's update comes only from its chain, and the main
+files uploaded since a check are new files too. GameBanana is one (ADR 0087).
+
 So map the site's categories onto `ModFileCategory` with care:
 
-- Each version's main download is `Main`. **A site that doesn't classify files lists each version's file as `Main`.**
-  `Unknown` is never taken as an update.
+- Each version's main download is `Main`. **A site that doesn't classify files lists each version's file as `Main`,**
+  and says whether they sit side by side (above). `Unknown` is never taken as an update.
 - `Update`, `Optional` and `Miscellaneous` as the site uses them; `OldVersion` and `Archived` for what the site marks
-  as replaced or withdrawn.
+  as replaced or withdrawn. A file that isn't the mod, such as the small release file a mod manager reads, is
+  `Miscellaneous`.
 - `ReplacedBy` only when the site says a file replaced another, and only forward in time: leave out a link to a file
-  uploaded before the one it replaces (Nexus Mods lists some; ADR 0059).
+  uploaded before the one it replaces (Nexus Mods lists some; ADR 0059). A site that keeps a file's older versions
+  apart without naming their successor may link each to the newer file of the same name, its version left out
+  (GameBanana's archived files; ADR 0087).
 - `UploadedAt` as the site says; `SizeInBytes` exact when the site gives it (a size rounded to the kilobyte still
   matches on a rescan); every hash the site publishes.
 - `PageUrl`, when the file has a page, is a link the source's own recognizer takes.
@@ -141,8 +149,11 @@ updated."), and the screens offer only these.
 
 - **Orders:** each `SearchOrder`, a `SearchSort` and its `SearchDirection`, the site has; its own first, which a search
   that names none uses. A sort the site has only one way round is listed only that way.
-- **Filters:** what it narrows by: `Text`, `Author`, `Category`, `UpdatedSince`, `AdultContent`. A site without
-  `AdultContent` marks no mod as adult, so including adult mods changes nothing there.
+- **Filters:** what it narrows by: `Text`, `Author`, `Category`, `UpdatedSince`, `AdultContent`. A site with
+  `AdultContent` leaves adult mods out unless asked. One that marks adult mods (`ModInfo.HasAdultContent`) but can't
+  leave them out says so with `MarksAdultContent`: ModShelf leaves them out itself after each page, unless asked, and
+  the page says how many (`SearchPage.LeftOut`), so the next one follows on. A site with neither marks no mod as adult,
+  so including adult mods changes nothing there.
 - **The largest page,** from 1 to 100. A page holds as many mods as asked, up to it, while more match, so pages
   follow on whole.
 
