@@ -53,6 +53,10 @@ once is kept for good.
 | `ModRef.Id` | A mod of that game | The site's permanent ID, not a slug its author can rename. |
 | `ModFileRef.Id` | A file of that mod | The site's permanent ID. Keep it short: it goes into file names, as `SkyUI (1234).7z`, when two files share a name. |
 
+A site whose game keys have a shape of their own, such as GameBanana's numbers, says so with
+`IModCatalog.CouldBeGameKey`, so a game typed by its key alone, on the command line or by an agent, can be told to be
+that site's: `fallout4` is Nexus Mods', `16951` GameBanana's. A key two sites could both have needs its site.
+
 Games are kept apart per site. The same game on two sites is two games, each with settings of its own and its site's
 name beside it; ModShelf points out that they share a name ("Also on …") and offers to copy one's settings to the other,
 but never merges, links or changes them by itself.

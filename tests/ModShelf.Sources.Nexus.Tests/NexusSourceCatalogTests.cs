@@ -41,6 +41,17 @@ public sealed class NexusSourceCatalogTests : IDisposable
         _api.Dispose();
     }
 
+    [Theory]
+    [InlineData("stardewvalley", true)]
+    [InlineData("StardewValley", true)]
+    [InlineData("fallout4", true)]
+    [InlineData("16951", false)]
+    [InlineData("my game", false)]
+    public void ItsGamesKeysAreTheNamesInItsLinks(string key, bool could)
+    {
+        Assert.Equal(could, Source.CouldBeGameKey(key));
+    }
+
     [Fact]
     public async Task AGameHasItsNameAndPage()
     {

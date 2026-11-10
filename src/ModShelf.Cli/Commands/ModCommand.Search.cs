@@ -84,7 +84,7 @@ internal static partial class ModCommand
         };
         Option<string?> source = new("--source")
         {
-            Description = "The site to search, such as nexus. Needed only when more than one site can search.",
+            Description = "The site to search, such as nexus. Needed only when the game's key could be more than one site's.",
             HelpName = "source",
         };
 
@@ -169,14 +169,18 @@ internal static partial class ModCommand
                 async services =>
                 {
                     IModLookup lookup = services.GetRequiredService<IModLookup>();
+                    ISourceRegistry sources = services.GetRequiredService<ISourceRegistry>();
 
-                    if (ChooseSource(lookup.SearchableSources, sourceText) is not { } source)
+                    // Without a site named, those whose games' keys look like the game's could have it.
+                    IReadOnlyList<SourceId> able = sourceText is null
+                        ? GameSites.ThatCouldHave(gameKey, lookup.SearchableSources, sources)
+                        : lookup.SearchableSources;
+                    if (ChooseSource(able, sourceText) is not { } source)
                     {
-                        await environment.Error.WriteLineAsync(SourceProblem(lookup.SearchableSources, sourceText, "search")).ConfigureAwait(false);
+                        await environment.Error.WriteLineAsync(SourceProblem(able, sourceText, "search")).ConfigureAwait(false);
                         return ExitCodes.BadInput;
                     }
 
-                    ISourceRegistry sources = services.GetRequiredService<ISourceRegistry>();
                     IModSearch? search = sources.Find<IModSearch>(source);
                     SearchQuery query;
                     SearchPage found;

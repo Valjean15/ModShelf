@@ -19,6 +19,13 @@ public sealed partial class NexusSource : IModCatalog
     private static readonly string ModDetailsQuery = ReadQuery("Catalog", "ModDetails.graphql");
 
     /// <summary>
+    /// Nexus Mods names its games by the domain names in its links, such as stardewvalley: letters with digits, never
+    /// digits alone.
+    /// </summary>
+    public bool CouldBeGameKey(string key)
+        => NexusLink.GameFromApi(key) is not null && key.Any(char.IsAsciiLetter);
+
+    /// <summary>
     /// The approved games, from <c>v1/games.json</c>: one request for them all.
     /// </summary>
     /// <returns>

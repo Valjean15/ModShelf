@@ -143,7 +143,7 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
         [Description("Turn the order around, so the least comes first.")] bool ascending = false,
         [Description("Which page of results, from 1.")] int page = 1,
         [Description("How many mods a page lists, from 1 to 100, as many as the site's pages hold at most; 20 unless set, or fewer when the site's pages hold fewer.")] int? pageSize = null,
-        [Description("The site to search, such as nexus; needed only when more than one site can.")] string? source = null,
+        [Description("The site to search, such as nexus; needed only when the game's key could be more than one site's.")] string? source = null,
         CancellationToken cancellationToken = default)
         => McpProblems.GuardAsync(async () =>
         {
@@ -168,7 +168,11 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
                 throw new McpException($"updatedWithin must be from 1 to {SearchArguments.MostDays} days.");
             }
 
-            SourceId site = ChooseSource(lookup.SearchableSources, source, "search");
+            // Without a site named, those whose games' keys look like the game's could have it.
+            SourceId site = ChooseSource(
+                source is null ? GameSites.ThatCouldHave(game, lookup.SearchableSources, sources) : lookup.SearchableSources,
+                source,
+                "search");
             GameRef searched = new(site, game.Trim());
 
             // The site's own order and page size unless asked otherwise; a whole number of pages in, so each page starts

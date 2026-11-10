@@ -39,4 +39,11 @@ public interface IModCatalog : IModSource
     /// main files uploaded since a mod was checked are new files. False unless the source says so.
     /// </summary>
     bool FilesSideBySide => false;
+
+    /// <summary>
+    /// Whether <paramref name="key"/> could be one of the site's games, by its shape alone, as GameBanana names its games
+    /// by number: so a game named by its key alone, such as <c>fallout4</c>, can be told to be one site's. True for any
+    /// key unless the source says otherwise.
+    /// </summary>
+    bool CouldBeGameKey(string key) => true;
 }

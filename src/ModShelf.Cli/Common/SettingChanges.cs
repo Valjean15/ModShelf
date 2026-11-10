@@ -361,7 +361,7 @@ internal static class SettingChanges
     /// <summary>
     /// The game a setting's name gives: its site and its key there, such as nexus/stardewvalley; or its key alone, which
     /// is the game of that key in the library or the settings while only one site's is, or the game of the only site
-    /// that has games.
+    /// whose games' keys look like it, as GameBanana's are numbers.
     /// </summary>
     /// <exception cref="ArgumentException">The name gives no game, or a key more than one site's game has.</exception>
     public static async Task<GameRef> GameNamedAsync(
@@ -391,7 +391,9 @@ internal static class SettingChanges
                 .Select(known => known.Source)
                 .Distinct(),
         ];
-        SourceId[] sites = listed.Length > 0 ? listed : [.. sources.All<IModCatalog>().Select(source => source.Id)];
+        SourceId[] sites = listed.Length > 0
+            ? listed
+            : [.. GameSites.ThatCouldHave(typed, [.. sources.All<IModCatalog>().Select(source => source.Id)], sources)];
         return sites.Length switch
         {
             1 => new GameRef(sites[0], typed),
