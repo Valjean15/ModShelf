@@ -153,6 +153,18 @@ internal sealed class RecordedGameBananaApi : IDisposable
         => _server.Given(Request.Create().UsingGet().WithPath(path)).AtPriority(0).RespondWith(response(Response.Create()));
 
     /// <summary>
+    /// Forgets every answer set up so far, as when GameBanana comes back after it failed.
+    /// </summary>
+    public void Reset() => _server.ResetMappings();
+
+    /// <summary>
+    /// Answers requests to <paramref name="path"/> with <paramref name="parameter"/> set to <paramref name="value"/> as
+    /// the test says, before any recording.
+    /// </summary>
+    public void Answer(string path, string parameter, string value, Func<IResponseBuilder, IResponseBuilder> response)
+        => _server.Given(Request.Create().UsingGet().WithPath(path).WithParam(parameter, value)).AtPriority(0).RespondWith(response(Response.Create()));
+
+    /// <summary>
     /// The source's services, as the hosts register them, calling this GameBanana: <c>AddSourceHttpClients()</c>, with no
     /// account linked, then <c>AddGameBananaSource()</c>. Retries don't wait.
     /// </summary>

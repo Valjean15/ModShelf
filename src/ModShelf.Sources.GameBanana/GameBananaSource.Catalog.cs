@@ -136,10 +136,13 @@ public sealed partial class GameBananaSource : IModCatalog
     /// without.
     /// </summary>
     private static Uri? Picture(GameBananaImage[] images, string type)
-        => images.FirstOrDefault(image => string.Equals(image.Type, type, StringComparison.OrdinalIgnoreCase)) is { Url: { } url }
-            && !url.EndsWith("/_.gif", StringComparison.OrdinalIgnoreCase)
-            ? GameBananaMods.WebLink(url)
-            : null;
+        => Picture(images.FirstOrDefault(image => string.Equals(image.Type, type, StringComparison.OrdinalIgnoreCase))?.Url);
+
+    /// <summary>
+    /// A game's picture; null for none, or the blank one GameBanana gives a game without.
+    /// </summary>
+    private static Uri? Picture(string? url)
+        => url is not null && !url.EndsWith("/_.gif", StringComparison.OrdinalIgnoreCase) ? GameBananaMods.WebLink(url) : null;
 
     private Task<GameBananaPage<GameBananaGame>> GamesPageAsync(int page, CancellationToken cancellationToken)
         => _api.GetAsync<GameBananaPage<GameBananaGame>>(
