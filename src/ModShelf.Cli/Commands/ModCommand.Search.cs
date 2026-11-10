@@ -250,10 +250,22 @@ internal static partial class ModCommand
         _ => null,
     };
 
+    /// <summary>
+    /// Such as ", but 2 with adult content are left out (add --adult to see them)", for the adult mods a site marks but
+    /// can't leave out, which ModShelf left out of the page.
+    /// </summary>
+    private static string LeftOut(SearchPage found)
+        => found.LeftOut switch
+        {
+            0 => string.Empty,
+            1 => ", but 1 with adult content is left out (add --adult to see it)",
+            _ => $", but {CliText.Count(found.LeftOut)} with adult content are left out (add --adult to see them)",
+        };
+
     /// <param name="words">The site's words, for what it counts as approval; without them, there's no column for it.</param>
     private static void WriteResults(TextWriter output, SearchPage found, SearchQuery query, SiteWords words)
     {
-        if (found.Mods.Count == 0)
+        if (found.Mods.Count == 0 && found.LeftOut == 0)
         {
             output.WriteLine(found.TotalCount == 0
                 ? "No mods match."
@@ -262,12 +274,33 @@ internal static partial class ModCommand
         }
 
         int first = found.Offset + 1;
-        int last = found.Offset + found.Mods.Count;
+        int last = found.NextOffset;
         string matches = found.TotalCount == 1 ? "1 mod matches" : $"{CliText.Count(found.TotalCount)} mods match";
-        output.WriteLine(found.Mods.Count == 1 && first == found.TotalCount
+        output.WriteLine(found.Mods.Count == 1 && found.LeftOut == 0 && first == found.TotalCount
             ? $"{matches}{SortedBy(query, words)}."
-            : $"{matches}{SortedBy(query, words)}. These are {CliText.Count(first)} to {CliText.Count(last)}.");
+            : $"{matches}{SortedBy(query, words)}. These are {CliText.Count(first)} to {CliText.Count(last)}{LeftOut(found)}.");
 
+        if (found.Mods.Count > 0)
+        {
+            WriteTable(output, found, words);
+        }
+
+        if (found.HasMore)
+        {
+            output.WriteLine($"More on the next page: add --page {(found.Offset / query.Count) + 2}.");
+        }
+
+        if (found.Mods.Count > 0)
+        {
+            output.WriteLine("To see a mod's files: mod show \"<its link>\"");
+        }
+    }
+
+    /// <summary>
+    /// The page's mods, a row each.
+    /// </summary>
+    private static void WriteTable(TextWriter output, SearchPage found, SiteWords words)
+    {
         string? approvals = words.Approvals;
         string[][] rows =
         [
@@ -284,13 +317,6 @@ internal static partial class ModCommand
             ]),
         ];
         TextTable.Write(output, rows);
-
-        if (found.HasMore)
-        {
-            output.WriteLine($"More on the next page: add --page {(found.Offset / query.Count) + 2}.");
-        }
-
-        output.WriteLine("To see a mod's files: mod show \"<its link>\"");
     }
 
     /// <summary>

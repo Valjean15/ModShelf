@@ -55,6 +55,17 @@ public sealed class BrowseChoicesTests
         Assert.Equal(4, BrowseChoices.For(new SearchCapabilities([best], SearchFilters.UpdatedSince, 20), SiteWords.None).TimeWindows.Count);
     }
 
+    [Theory]
+    [InlineData(SearchFilters.None, false, false)]
+    [InlineData(SearchFilters.None, true, true)]
+    [InlineData(SearchFilters.AdultContent, false, true)]
+    public void IncludingAdultModsWhereTheSiteMarksThem(SearchFilters filters, bool marks, bool offered)
+    {
+        SearchOrder best = new(SearchSort.Relevance, SearchDirection.Descending);
+
+        Assert.Equal(offered, BrowseChoices.For(new SearchCapabilities([best], filters, 20, marks), SiteWords.None).Has(SearchFilters.AdultContent));
+    }
+
     [Fact]
     public void EveryOrderWhenBrowseListsNoneOfTheSites()
     {

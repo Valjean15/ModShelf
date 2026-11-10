@@ -149,6 +149,11 @@ internal sealed partial class FakeCatalogSite : ILinkRecognizer, IModCatalog, IM
         ]);
 
     /// <summary>
+    /// Whether it lists adult mods even when not asked, as a site that marks them but can't leave them out does.
+    /// </summary>
+    private bool LeavesAdultModsIn => Capabilities.MarksAdultContent && !Capabilities.Has(SearchFilters.AdultContent);
+
+    /// <summary>
     /// The last query searched, for checking how the command asked.
     /// </summary>
     public SearchQuery? LastQuery { get; private set; }
@@ -180,7 +185,7 @@ internal sealed partial class FakeCatalogSite : ILinkRecognizer, IModCatalog, IM
                 .Select(SearchableMod)
                 .Where(mod => words.All(word => mod.Name.Split(' ').Contains(word, StringComparer.OrdinalIgnoreCase)))
                 .Where(mod => query.Author is null || string.Equals(mod.Author, query.Author, StringComparison.OrdinalIgnoreCase))
-                .Where(mod => query.IncludeAdultContent || !mod.HasAdultContent),
+                .Where(mod => query.IncludeAdultContent || LeavesAdultModsIn || !mod.HasAdultContent),
         ];
         return Task.FromResult(new SearchPage(matches.Skip(query.Offset).Take(query.Count), matches.Length, query.Offset));
     }

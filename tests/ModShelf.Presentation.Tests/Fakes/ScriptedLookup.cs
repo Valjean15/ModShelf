@@ -64,6 +64,12 @@ internal sealed class ScriptedLookup : IModLookup
     public List<(GameRef Game, SearchQuery Query)> Searches { get; } = [];
 
     /// <summary>
+    /// Whether the adult mods a search finds are left out of its page unless asked for, as the app does for a site that
+    /// marks them but can't leave them out, which the page says.
+    /// </summary>
+    public bool LeavesOutAdultMods { get; set; }
+
+    /// <summary>
     /// What was asked, in order, such as "GetGamesAsync nexus" or "LookUpAsync 12604".
     /// </summary>
     public IReadOnlyList<string> Asked => [.. _asked];
@@ -138,7 +144,9 @@ internal sealed class ScriptedLookup : IModLookup
         [
             .. (Mods.GetValueOrDefault(game) ?? []).Where(mod => query.Text is null || mod.Name.Contains(query.Text, StringComparison.OrdinalIgnoreCase)),
         ];
-        return await Answer(nameof(SearchAsync), () => new SearchPage(mods.Skip(query.Offset).Take(query.Count), mods.Count, query.Offset));
+        ModInfo[] page = [.. mods.Skip(query.Offset).Take(query.Count)];
+        ModInfo[] kept = LeavesOutAdultMods && !query.IncludeAdultContent ? [.. page.Where(mod => !mod.HasAdultContent)] : page;
+        return await Answer(nameof(SearchAsync), () => new SearchPage(kept, mods.Count, query.Offset, page.Length - kept.Length));
     }
 
     private bool IsOthers(SourceId source) => Others?.SearchableSources.Contains(source) == true && !Searchable.Contains(source);

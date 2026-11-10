@@ -80,6 +80,17 @@ public sealed class SearchCapabilitiesTests
         Assert.NotEqual(one, new SearchCapabilities([MostDownloaded, BestMatch], SearchFilters.Text, 50));
         Assert.NotEqual(one, new SearchCapabilities([BestMatch, MostDownloaded], SearchFilters.Author, 50));
         Assert.NotEqual(one, new SearchCapabilities([BestMatch, MostDownloaded], SearchFilters.Text, 20));
+        Assert.NotEqual(one, new SearchCapabilities([BestMatch, MostDownloaded], SearchFilters.Text, 50, marksAdultContent: true));
+    }
+
+    [Theory]
+    [InlineData(SearchFilters.None, false, false)]
+    [InlineData(SearchFilters.None, true, true)]
+    [InlineData(SearchFilters.AdultContent, false, true)]
+    [InlineData(SearchFilters.Text | SearchFilters.AdultContent, true, true)]
+    public void MarksAdultModsWhenItSaysSoOrCanLeaveThemOut(SearchFilters filters, bool marks, bool marked)
+    {
+        Assert.Equal(marked, new SearchCapabilities([BestMatch], filters, 20, marks).MarksAdultContent);
     }
 
     [Fact]

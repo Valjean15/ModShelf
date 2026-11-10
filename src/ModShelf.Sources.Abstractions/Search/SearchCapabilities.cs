@@ -12,9 +12,13 @@ public sealed record SearchCapabilities
     /// <param name="orders">Its orders, the one it uses unless asked otherwise first; repeats are left out.</param>
     /// <param name="filters">What it can narrow its results by.</param>
     /// <param name="maxCount">The most mods a page can hold: from 1 to <see cref="SearchQuery.MaxCount"/>.</param>
+    /// <param name="marksAdultContent">
+    /// Whether it marks adult mods though it can't leave them out, as <see cref="SearchFilters.AdultContent"/> does: then
+    /// ModShelf leaves them out itself unless asked. A site with the filter marks them anyway.
+    /// </param>
     /// <exception cref="ArgumentException">There's no order.</exception>
     /// <exception cref="ArgumentOutOfRangeException">A filter is unknown, or the page size out of range.</exception>
-    public SearchCapabilities(IEnumerable<SearchOrder> orders, SearchFilters filters, int maxCount)
+    public SearchCapabilities(IEnumerable<SearchOrder> orders, SearchFilters filters, int maxCount, bool marksAdultContent = false)
     {
         ArgumentNullException.ThrowIfNull(orders);
         if ((filters & ~Every) != 0)
@@ -33,6 +37,7 @@ public sealed record SearchCapabilities
 
         Filters = filters;
         MaxCount = maxCount;
+        MarksAdultContent = marksAdultContent || Has(SearchFilters.AdultContent);
     }
 
     /// <summary>
@@ -49,6 +54,13 @@ public sealed record SearchCapabilities
     /// The most mods a page can hold. A page holds as many as asked, up to this, while more match.
     /// </summary>
     public int MaxCount { get; }
+
+    /// <summary>
+    /// Whether it marks adult mods (<see cref="Catalog.ModInfo.HasAdultContent"/>): always when it can leave them out
+    /// (<see cref="SearchFilters.AdultContent"/>); otherwise ModShelf leaves them out itself, after each page, unless
+    /// asked. A site that doesn't marks none.
+    /// </summary>
+    public bool MarksAdultContent { get; }
 
     /// <summary>
     /// Whether it lists mods in that order.
@@ -69,7 +81,11 @@ public sealed record SearchCapabilities
     /// Whether both say the same, the orders compared one by one rather than as lists.
     /// </summary>
     public bool Equals(SearchCapabilities? other)
-        => other is not null && Filters == other.Filters && MaxCount == other.MaxCount && Orders.SequenceEqual(other.Orders);
+        => other is not null
+            && Filters == other.Filters
+            && MaxCount == other.MaxCount
+            && MarksAdultContent == other.MarksAdultContent
+            && Orders.SequenceEqual(other.Orders);
 
-    public override int GetHashCode() => HashCode.Combine(Filters, MaxCount, Orders.Count);
+    public override int GetHashCode() => HashCode.Combine(Filters, MaxCount, MarksAdultContent, Orders.Count);
 }

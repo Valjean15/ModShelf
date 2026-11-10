@@ -89,6 +89,9 @@ internal static class BrowseChoices
             sorts.FirstOrDefault(choice => choice.Sort == own.Sort && choice.Direction == own.Direction) ?? sorts[0],
             capabilities.Has(SearchFilters.UpdatedSince) ? TimeWindows : [TimeWindows[0]],
             sizes.Length > 0 ? sizes : [new PageSizeChoice(capabilities.MaxCount, Text.Format(Strings.BrowsePerPage, capabilities.MaxCount))],
-            capabilities.Filters);
+
+            // Including adult mods is offered for a site that marks them, whether it leaves them out itself or
+            // ModShelf does.
+            capabilities.MarksAdultContent ? capabilities.Filters | SearchFilters.AdultContent : capabilities.Filters);
     }
 }

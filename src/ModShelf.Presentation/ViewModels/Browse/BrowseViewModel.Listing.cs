@@ -236,7 +236,7 @@ public sealed partial class BrowseViewModel
             Results.Add(Row(mod, problem: null, fact));
         }
 
-        _nextOffset = page.Offset + page.Mods.Count;
+        _nextOffset = page.NextOffset;
         HasMore = page.HasMore;
         ResultsText = Counts.Of(page.TotalCount, Strings.BrowseNoMatches, Strings.BrowseOneMatch, Strings.BrowseMatches);
     }

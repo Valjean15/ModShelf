@@ -194,6 +194,26 @@ public sealed class BrowseViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task ThePageAfterOneWithModsLeftOutFollowsOnPastThem()
+    {
+        _harness.Lookup.LeavesOutAdultMods = true;
+        List<ModInfo> mods = _harness.Searchable(BrowseHarness.Skyrim, 45);
+        foreach (int adult in new[] { 4, 19, 33 })
+        {
+            mods[adult] = new ModInfo(mods[adult].Mod, mods[adult].Name, hasAdultContent: true);
+        }
+
+        await ChooseAsync(BrowseHarness.Skyrim, -1);
+        await Screen.LoadMoreCommand.ExecuteAsync(null);
+        await Screen.LoadMoreCommand.ExecuteAsync(null);
+
+        Assert.Equal([0, 20, 40], _harness.Lookup.Searches.Select(search => search.Query.Offset));
+        Assert.Equal(Enumerable.Range(1, 45).Where(id => id is not (5 or 20 or 34)).Select(id => $"Mod {id}"), _harness.Names());
+        Assert.False(Screen.HasMore);
+        Assert.Equal("45 mods match.", Screen.ResultsText);
+    }
+
+    [Fact]
     public async Task ModsListedAlreadyArentListedAgain()
     {
         List<ModInfo> mods = await ChooseAsync(BrowseHarness.Skyrim, 30);

@@ -171,6 +171,43 @@ public sealed class ModLookupTests
     }
 
     [Fact]
+    public async Task LeavesOutTheAdultModsASiteMarksButCantLeaveOut()
+    {
+        FakeCatalogSource site = AdultSite(marks: true, filters: false);
+
+        SearchPage page = await SearchAdultSiteAsync(site, includeAdult: false);
+
+        Assert.Equal(["Plain 1", "Plain 2"], page.Mods.Select(mod => mod.Name));
+        Assert.Equal((20, 2, 24, true), (page.Offset, page.LeftOut, page.NextOffset, page.HasMore));
+        Assert.Equal(30, page.TotalCount);
+        Assert.False(site.LastSearch?.Query.IncludeAdultContent);
+    }
+
+    [Fact]
+    public async Task CountsTheModsASiteLeftOutItselfWithTheAdultOnes()
+    {
+        FakeCatalogSource site = AdultSite(marks: true, filters: false);
+        site.Found = new SearchPage(site.Found!.Mods, site.Found.TotalCount, site.Found.Offset, leftOut: 3);
+
+        SearchPage page = await SearchAdultSiteAsync(site, includeAdult: false);
+
+        Assert.Equal((5, 27), (page.LeftOut, page.NextOffset));
+    }
+
+    [Theory]
+    [InlineData(true, false, true)]
+    [InlineData(true, true, false)]
+    [InlineData(false, false, false)]
+    public async Task KeepsTheAdultModsWhenAskedOrWhenTheSiteChoseItself(bool marks, bool filters, bool includeAdult)
+    {
+        FakeCatalogSource site = AdultSite(marks, filters);
+
+        SearchPage page = await SearchAdultSiteAsync(site, includeAdult);
+
+        Assert.Same(site.Found, page);
+    }
+
+    [Fact]
     public async Task RefusesToSearchWithASourceThatCant()
     {
         ModLookup lookup = new(new SourceRegistry([ScriptedLinkRecognizer.Never(TestData.Nexus)]));
@@ -347,6 +384,37 @@ public sealed class ModLookupTests
         await Assert.ThrowsAsync<ArgumentException>(() => lookup.LookUpAsync(
             new Uri("skyrimspecialedition/mods/12604", UriKind.Relative), TestContext.Current.CancellationToken));
     }
+
+    /// <summary>
+    /// A site whose search finds a page of four mods, 21 to 24 of 30, two with adult content; it marks them, or can leave
+    /// them out itself, as told.
+    /// </summary>
+    private static FakeCatalogSource AdultSite(bool marks, bool filters)
+    {
+        FakeCatalogSource site = new(TestData.Nexus)
+        {
+            Capabilities = new(
+                [new SearchOrder(SearchSort.Relevance, SearchDirection.Descending)],
+                filters ? SearchFilters.AdultContent : SearchFilters.None,
+                SearchQuery.MaxCount,
+                marks),
+        };
+        GameRef game = site.LinkedFile.Mod.Game;
+        site.Found = new SearchPage(
+            [
+                new ModInfo(new ModRef(game, "1"), "Plain 1"),
+                new ModInfo(new ModRef(game, "2"), "Adult 1", hasAdultContent: true),
+                new ModInfo(new ModRef(game, "3"), "Plain 2"),
+                new ModInfo(new ModRef(game, "4"), "Adult 2", hasAdultContent: true),
+            ],
+            30,
+            20);
+        return site;
+    }
+
+    private static Task<SearchPage> SearchAdultSiteAsync(FakeCatalogSource site, bool includeAdult)
+        => new ModLookup(new SourceRegistry([site])).SearchAsync(
+            site.LinkedFile.Mod.Game, new SearchQuery(offset: 20, count: 4, includeAdultContent: includeAdult), TestContext.Current.CancellationToken);
 
     private static Task<ModPage> LookUpAsync(params IModSource[] sources)
         => new ModLookup(new SourceRegistry(sources)).LookUpAsync(Link, TestContext.Current.CancellationToken);

@@ -338,7 +338,11 @@ public abstract class SourceContractTests<TSource>
             Assert.All(found, mod => Assert.True(mod.UpdatedAt is not { } at || at >= since));
         }
 
-        Assert.All(every, mod => Assert.False(mod.HasAdultContent, "Adult mods are left out unless asked for."));
+        // A site that marks adult mods but can't leave them out lists them; ModShelf leaves them out.
+        if (can.Has(SearchFilters.AdultContent))
+        {
+            Assert.All(every, mod => Assert.False(mod.HasAdultContent, "Adult mods are left out unless asked for."));
+        }
     }
 
     [Fact]
@@ -346,7 +350,7 @@ public abstract class SourceContractTests<TSource>
     {
         IModSearch search = Capability<IModSearch>();
         GameRef game = Searchable();
-        Assert.SkipWhen(search.Capabilities.Has(SearchFilters.AdultContent), $"{typeof(TSource).Name} has adult content.");
+        Assert.SkipWhen(search.Capabilities.MarksAdultContent, $"{typeof(TSource).Name} marks adult content.");
 
         SearchPage page = await search.SearchAsync(
             game, new SearchQuery(count: search.Capabilities.MaxCount, includeAdultContent: true), TestContext.Current.CancellationToken);

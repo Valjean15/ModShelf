@@ -122,6 +122,28 @@ public sealed class ModCommandSearchTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task SaysHowManyAdultModsItLeftOutOfAPageWhenTheSiteCouldnt()
+    {
+        _catalog.Capabilities = new(
+            Enum.GetValues<SearchSort>().SelectMany(SearchOrder.BothWays),
+            SearchFilters.Text | SearchFilters.Author | SearchFilters.Category | SearchFilters.UpdatedSince,
+            SearchQuery.MaxCount,
+            marksAdultContent: true);
+
+        CliResult found = await SearchAsync();
+
+        Assert.Contains(
+            "45 mods match, in the site's own order. These are 1 to 20, but 1 with adult content is left out (add --adult to see it).",
+            found.Output,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain("Example Mod 3 ", found.Output, StringComparison.Ordinal);
+        Assert.Contains(ModLink("120").AbsoluteUri, found.Output, StringComparison.Ordinal);
+        Assert.DoesNotContain(ModLink("121").AbsoluteUri, found.Output, StringComparison.Ordinal);
+        Assert.Contains("More on the next page: add --page 2.", found.Output, StringComparison.Ordinal);
+        Assert.False(_catalog.LastQuery!.IncludeAdultContent);
+    }
+
+    [Fact]
     public async Task AdultContentOnlyWhenAsked()
     {
         CliResult found = await SearchAsync("3", "--adult");

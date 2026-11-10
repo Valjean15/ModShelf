@@ -92,14 +92,28 @@ internal sealed class ModLookup : IModLookup
         return _games.GetOrAdd(source, games);
     }
 
-    public Task<SearchPage> SearchAsync(GameRef game, SearchQuery query, CancellationToken cancellationToken)
+    public async Task<SearchPage> SearchAsync(GameRef game, SearchQuery query, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(game);
         ArgumentNullException.ThrowIfNull(query);
 
         IModSearch search = _sources.Require<IModSearch>(game.Source, "can't search", nameof(game));
         SearchChecks.Ensure(search.Capabilities, query, search.DisplayName);
-        return search.SearchAsync(game, query, cancellationToken);
+        SearchPage page = await search.SearchAsync(game, query, cancellationToken).ConfigureAwait(false);
+        return query.IncludeAdultContent || search.Capabilities.Has(SearchFilters.AdultContent) || !search.Capabilities.MarksAdultContent
+            ? page
+            : WithoutAdultMods(page);
+    }
+
+    /// <summary>
+    /// The page without the adult mods its site marks but couldn't leave out, which it says it left out.
+    /// </summary>
+    private static SearchPage WithoutAdultMods(SearchPage page)
+    {
+        ModInfo[] kept = [.. page.Mods.Where(mod => !mod.HasAdultContent)];
+        return kept.Length == page.Mods.Count
+            ? page
+            : new SearchPage(kept, page.TotalCount, page.Offset, page.LeftOut + page.Mods.Count - kept.Length);
     }
 
     /// <summary>

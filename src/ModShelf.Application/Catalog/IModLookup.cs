@@ -63,7 +63,9 @@ public interface IModLookup
     Task<IReadOnlyList<GameInfo>> GetGamesAsync(SourceId source, CancellationToken cancellationToken);
 
     /// <summary>
-    /// One page of a game's mods that match <paramref name="query"/>, from the game's source.
+    /// One page of a game's mods that match <paramref name="query"/>, from the game's source. Unless the query includes
+    /// adult content, the adult mods a site marks but can't leave out itself are left out here, and the page says how
+    /// many (<see cref="SearchPage.LeftOut"/>).
     /// </summary>
     /// <exception cref="ArgumentException">
     /// The game's source isn't registered or can't search, or can't search as <paramref name="query"/> asks, which says

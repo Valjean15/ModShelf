@@ -9,11 +9,16 @@ public sealed record SearchPage
 {
     /// <param name="totalCount">How many mods match in all, as the site counts them.</param>
     /// <param name="offset">How many results come before this page.</param>
-    public SearchPage(IEnumerable<ModInfo> mods, int totalCount, int offset)
+    /// <param name="leftOut">
+    /// How many of the page's results were left out of <paramref name="mods"/>: the adult mods a site marks but can't
+    /// leave out itself (<see cref="SearchCapabilities.MarksAdultContent"/>).
+    /// </param>
+    public SearchPage(IEnumerable<ModInfo> mods, int totalCount, int offset, int leftOut = 0)
     {
         ArgumentNullException.ThrowIfNull(mods);
         ArgumentOutOfRangeException.ThrowIfNegative(totalCount);
         ArgumentOutOfRangeException.ThrowIfNegative(offset);
+        ArgumentOutOfRangeException.ThrowIfNegative(leftOut);
 
         Mods = [.. mods];
         if (Mods.Any(mod => mod is null))
@@ -23,6 +28,7 @@ public sealed record SearchPage
 
         TotalCount = totalCount;
         Offset = offset;
+        LeftOut = leftOut;
     }
 
     /// <summary>
@@ -35,7 +41,18 @@ public sealed record SearchPage
     public int Offset { get; }
 
     /// <summary>
+    /// How many of the page's results were left out of <see cref="Mods"/>, as adult mods are when the site can't leave
+    /// them out itself; they still count in <see cref="TotalCount"/>.
+    /// </summary>
+    public int LeftOut { get; }
+
+    /// <summary>
+    /// The offset of the page after this one: past the mods on it and those left out.
+    /// </summary>
+    public int NextOffset => Offset + Mods.Count + LeftOut;
+
+    /// <summary>
     /// Whether more mods match after this page.
     /// </summary>
-    public bool HasMore => Offset + Mods.Count < TotalCount;
+    public bool HasMore => NextOffset < TotalCount;
 }

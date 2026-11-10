@@ -87,10 +87,15 @@ internal sealed class FakeCatalogSource(SourceId id) : ILinkRecognizer, IModCata
     /// </summary>
     public (GameRef Game, SearchQuery Query)? LastSearch { get; private set; }
 
+    /// <summary>
+    /// The page every search finds; <see cref="Mod"/> alone when null.
+    /// </summary>
+    public SearchPage? Found { get; set; }
+
     public Task<SearchPage> SearchAsync(GameRef game, SearchQuery query, CancellationToken cancellationToken)
     {
         LastSearch = (game, query);
-        return Answer(nameof(SearchAsync), () => new SearchPage([Mod], 1, query.Offset));
+        return Answer(nameof(SearchAsync), () => Found ?? new SearchPage([Mod], 1, query.Offset));
     }
 
     private Task<T> Answer<T>(string method, Func<T> answer)
