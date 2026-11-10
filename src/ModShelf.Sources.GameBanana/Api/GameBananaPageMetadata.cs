@@ -14,6 +14,12 @@ internal sealed record GameBananaPageMetadata
     public int RecordCount { get; init; }
 
     /// <summary>
+    /// How many a page holds, at most.
+    /// </summary>
+    [JsonPropertyName("_nPerpage")]
+    public int PerPage { get; init; }
+
+    /// <summary>
     /// Whether this page is the last.
     /// </summary>
     [JsonPropertyName("_bIsComplete")]

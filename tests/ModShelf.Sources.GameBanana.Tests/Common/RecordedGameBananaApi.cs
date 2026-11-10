@@ -166,14 +166,23 @@ internal sealed class RecordedGameBananaApi : IDisposable
 
     /// <summary>
     /// The source's services, as the hosts register them, calling this GameBanana: <c>AddSourceHttpClients()</c>, with no
-    /// account linked, then <c>AddGameBananaSource()</c>. Retries don't wait.
+    /// account linked or with the member <paramref name="linkedMember"/>, then <c>AddGameBananaSource()</c>. Retries don't
+    /// wait.
     /// </summary>
-    public ServiceProvider BuildServices(Func<GameBananaOptions, GameBananaOptions>? configure = null, int retries = 3)
+    public ServiceProvider BuildServices(Func<GameBananaOptions, GameBananaOptions>? configure = null, int retries = 3, string? linkedMember = null)
     {
         GameBananaOptions options = new() { BaseAddress = BaseAddress };
         ServiceCollection services = new();
         services.AddLogging(logging => logging.SetMinimumLevel(LogLevel.Trace).AddProvider(Logs));
-        services.AddSingleton<ICredentialProvider, NoLinkedAccount>();
+        if (linkedMember is null)
+        {
+            services.AddSingleton<ICredentialProvider, NoLinkedAccount>();
+        }
+        else
+        {
+            services.AddSingleton<ICredentialProvider>(provider => new LinkedProfile(provider, linkedMember));
+        }
+
         services.AddSourceHttpClients(new SourceHttpOptions
         {
             MaxRetryAttempts = retries,

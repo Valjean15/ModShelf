@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Common;
+using ModShelf.Sources.GameBanana.Accounts;
 using ModShelf.Sources.GameBanana.Api;
 using ModShelf.Sources.GameBanana.Links;
 using ModShelf.Sources.GameBanana.Resources;
@@ -12,7 +13,8 @@ using ModShelf.Sources.GameBanana.Resources;
 namespace ModShelf.Sources.GameBanana;
 
 /// <summary>
-/// GameBanana (<c>gamebanana.com</c>), through <c>apiv11</c>, the JSON API its own pages use, which needs no account.
+/// GameBanana (<c>gamebanana.com</c>), through <c>apiv11</c>, the JSON API its own pages use, which needs no account:
+/// a member is linked by their public profile only, for what anyone can see of it.
 /// Games and mods are named by GameBanana's IDs. Every request goes through the client the app sets up for the source.
 /// </summary>
 public sealed partial class GameBananaSource
@@ -35,6 +37,7 @@ public sealed partial class GameBananaSource
 
         _api = api;
         _logger = logger;
+        Strategies = [new GameBananaProfileStrategy(MemberIdAsync)];
     }
 
     public SourceId Id => GameBananaId;
@@ -42,10 +45,11 @@ public sealed partial class GameBananaSource
     public string DisplayName => Strings.DisplayName;
 
     /// <summary>
-    /// GameBanana counts likes. Following a mod there needs an account, which ModShelf doesn't link.
+    /// GameBanana counts likes, and its members subscribe to mods, which ModShelf reads but can't change.
     /// </summary>
     public SiteWords Words { get; } = new()
     {
+        Followed = Strings.WordFollowed,
         Approval = Strings.WordApproval,
         Approvals = Strings.WordApprovals,
     };

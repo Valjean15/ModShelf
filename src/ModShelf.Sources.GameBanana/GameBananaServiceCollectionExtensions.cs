@@ -23,7 +23,8 @@ public static class GameBananaServiceCollectionExtensions
         (typeof(GameBananaSource).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "0.0.0").Split('+')[0];
 
     /// <summary>
-    /// Adds <see cref="GameBananaSource"/> as an <see cref="IModSource"/>. It needs no account. Its API client names the
+    /// Adds <see cref="GameBananaSource"/> as an <see cref="IModSource"/>. It needs no account, and links a member's public
+    /// profile, read-only, for their subscriptions. Its API client names the
     /// app and its version on every request, and sends a few at a time at most. Calling this again changes nothing.
     /// </summary>
     /// <remarks>

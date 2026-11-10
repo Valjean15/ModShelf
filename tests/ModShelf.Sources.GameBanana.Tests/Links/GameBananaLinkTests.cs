@@ -73,6 +73,23 @@ public sealed class GameBananaLinkTests
         Assert.Equal(isId, GameBananaLink.IsId(text));
     }
 
+    [Theory]
+    [InlineData("chlorophylls", false, null)]
+    [InlineData("some:name", false, null)]
+    [InlineData("gamebanana.com", false, null)]
+    [InlineData("gamebanana.com/members/1740038", true, "1740038")]
+    [InlineData("  www.gamebanana.com/members/1740038  ", true, "1740038")]
+    [InlineData("HTTPS://GAMEBANANA.COM/MEMBERS/1740038", true, "1740038")]
+    [InlineData("https://gamebanana.com/members/1740038?tab=subscriptions", true, "1740038")]
+    [InlineData("https://gamebanana.com/members", true, null)]
+    [InlineData("https://gamebanana.com/members/-1", true, null)]
+    [InlineData("https://gamebanana.com.example/members/1740038", true, null)]
+    [InlineData("https://example.com/gamebanana.com/members/1740038", true, null)]
+    public void ReadsTheMemberOfAProfileLink(string text, bool isLink, string? member)
+    {
+        Assert.Equal((isLink, member), (GameBananaLink.TryReadMember(text, out string? read), read));
+    }
+
     [Fact]
     public void AModsPageIsOnGameBanana()
     {

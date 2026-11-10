@@ -59,6 +59,36 @@ internal sealed record GameBananaLink(string ModId, string? FileId)
     }
 
     /// <summary>
+    /// Whether <paramref name="text"/> is a web link, written with its scheme or as GameBanana's host and a path, and if so
+    /// the member whose profile it's to, as in <c>https://gamebanana.com/members/1740038</c>.
+    /// </summary>
+    /// <param name="memberId">The member's ID; null when the link is to anything else, or anywhere else.</param>
+    /// <returns>False for text that isn't a link, such as a member's name.</returns>
+    public static bool TryReadMember(string text, out string? memberId)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+
+        memberId = null;
+        string written = text.Trim();
+        if (written.StartsWith($"{Host}/", StringComparison.OrdinalIgnoreCase) || written.StartsWith($"www.{Host}/", StringComparison.OrdinalIgnoreCase))
+        {
+            written = $"https://{written}";
+        }
+
+        if (!Uri.TryCreate(written, UriKind.Absolute, out Uri? link) || (link.Scheme != Uri.UriSchemeHttps && link.Scheme != Uri.UriSchemeHttp))
+        {
+            return false;
+        }
+
+        if (IsGameBanana(link.Host) && link.AbsolutePath.Trim('/').ToLowerInvariant().Split('/') is ["members", var member, ..] && IsId(member))
+        {
+            memberId = member;
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// Whether <paramref name="text"/> is an ID as GameBanana gives them: a number.
     /// </summary>
     public static bool IsId(string? text)

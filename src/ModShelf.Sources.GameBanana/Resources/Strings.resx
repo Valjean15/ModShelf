@@ -61,6 +61,10 @@
   <data name="DisplayName" xml:space="preserve">
     <value>GameBanana</value>
   </data>
+  <data name="WordFollowed" xml:space="preserve">
+    <value>subscribed</value>
+    <comment>A mod a GameBanana member subscribes to, as in "subscribed mods". Lowercase.</comment>
+  </data>
   <data name="WordApproval" xml:space="preserve">
     <value>like</value>
     <comment>One of what GameBanana counts as approval of a mod, as in "1 like". Lowercase.</comment>
