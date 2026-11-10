@@ -31,4 +31,12 @@ public interface IModCatalog : IModSource
 
     /// <returns>The changes listed for each version, in the order the site gives them; empty when there are none.</returns>
     Task<IReadOnlyList<ModChangelog>> GetChangelogsAsync(ModRef modRef, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Whether the site lists a mod's files side by side, without saying which is the main one or which replaced which,
+    /// such as variants or add-ons uploaded at different times. ModShelf then never takes one for another's update by
+    /// when they were uploaded: a file's update comes only from its chain (<see cref="ModFile.ReplacedBy"/>), and the
+    /// main files uploaded since a mod was checked are new files. False unless the source says so.
+    /// </summary>
+    bool FilesSideBySide => false;
 }

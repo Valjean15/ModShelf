@@ -1741,6 +1741,10 @@
     <value>New optional file</value>
     <comment>On an optional file uploaded since the mod was last checked.</comment>
   </data>
+  <data name="ModPageNewFile" xml:space="preserve">
+    <value>New file</value>
+    <comment>On a file uploaded since the mod was last checked that replaces none of the library's, where the site lists a mod's files side by side.</comment>
+  </data>
   <data name="ModPageUpdate" xml:space="preserve">
     <value>Update</value>
     <comment>On a file on the site that an update check found.</comment>

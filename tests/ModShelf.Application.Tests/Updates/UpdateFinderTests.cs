@@ -353,6 +353,47 @@ public sealed class UpdateFinderTests
     }
 
     [Fact]
+    public void SideBySideAMainFileNothingReplacedHasNoUpdate()
+    {
+        Assert.Empty(Find(WithFiles("60"), sideBySide: true));
+    }
+
+    [Fact]
+    public void SideBySideTheMainFilesUploadedSinceTheLastCheckAreNewFiles()
+    {
+        IReadOnlyList<LibraryUpdate> updates = Find(WithFiles("60"), since: Now.AddDays(-6), sideBySide: true);
+
+        Assert.Equal(["61", "71"], updates.Select(update => update.File.Id).Order());
+        Assert.All(updates, update => Assert.Null(update.Replaces));
+    }
+
+    [Fact]
+    public void SideBySideAFilesUpdateIsTheNewestOfItsChainThoughNew()
+    {
+        IReadOnlyList<LibraryUpdate> updates = Find(WithFiles("50"), since: Now.AddDays(-12), sideBySide: true);
+
+        Assert.Equal(
+            [("52", "50"), ("61", null), ("71", null)],
+            updates.Select(update => (update.File.Id, update.Replaces?.Id)).OrderBy(update => update.Item1));
+    }
+
+    [Fact]
+    public void SideBySideKeepsTheNewFilesEarlierChecksFoundWhileTheyStayNew()
+    {
+        LibraryMod mod = WithFiles("60").WithUpdates([Earlier("61"), Earlier("99")]);
+
+        Assert.Equal(["61"], Find(mod, sideBySide: true).Select(update => update.File.Id));
+    }
+
+    [Fact]
+    public void SideBySideAWatchedModGetsTheMainFilesSinceItsLastCheck()
+    {
+        IReadOnlyList<LibraryUpdate> updates = Find(Watched(), since: Now.AddDays(-12), sideBySide: true);
+
+        Assert.Equal(["61", "52"], updates.Select(update => update.File.Id));
+    }
+
+    [Fact]
     public void ListsTheNewestFirst()
     {
         IReadOnlyList<LibraryUpdate> updates = Find(WithFiles("50", "60"));
@@ -360,8 +401,9 @@ public sealed class UpdateFinderTests
         Assert.Equal(["61", "52"], updates.Select(update => update.File.Id));
     }
 
-    private static IReadOnlyList<LibraryUpdate> Find(LibraryMod mod, IReadOnlyList<ModFile>? site = null, DateTimeOffset? since = null)
-        => UpdateFinder.Find(mod, site ?? Site, since ?? Now.AddDays(-1), Now);
+    private static IReadOnlyList<LibraryUpdate> Find(
+        LibraryMod mod, IReadOnlyList<ModFile>? site = null, DateTimeOffset? since = null, bool sideBySide = false)
+        => UpdateFinder.Find(mod, site ?? Site, since ?? Now.AddDays(-1), Now, sideBySide);
 
     private static ModFileRef Ref(string id) => new(SkyUi, id);
 

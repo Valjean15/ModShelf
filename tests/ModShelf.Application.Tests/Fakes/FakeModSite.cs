@@ -36,6 +36,11 @@ internal sealed class FakeModSite : ILinkRecognizer, IModCatalog, IHandoffScheme
     public string Scheme => "fakemods";
 
     /// <summary>
+    /// Whether it lists a mod's files side by side, as GameBanana does.
+    /// </summary>
+    public bool FilesSideBySide { get; set; }
+
+    /// <summary>
     /// What the next answer of each kind throws instead, keyed by the method's name.
     /// </summary>
     public ConcurrentDictionary<string, Exception> Failures { get; } = new();

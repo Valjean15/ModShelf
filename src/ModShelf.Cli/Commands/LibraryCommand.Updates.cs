@@ -167,8 +167,7 @@ internal static partial class LibraryCommand
                         update.Name,
                         update.VersionLabel ?? "-",
                         CliText.Time(update.UploadedAt),
-                        mod?.Files.FirstOrDefault(file => file.File == update.Replaces)?.FileName
-                            ?? (update.Replaces is null && update.Category == ModFileCategory.Optional ? "(new optional file)" : "-"),
+                        mod?.Files.FirstOrDefault(file => file.File == update.Replaces)?.FileName ?? NewFile(update, mod),
                         update.PageUrl?.AbsoluteUri ?? "-",
                     };
                 }),
@@ -221,6 +220,26 @@ internal static partial class LibraryCommand
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// "(new optional file)"; or "(new file)" for a main file that replaces none of a mod with files, as a site whose files
+    /// sit side by side offers one; otherwise "-", as for a mod that's only watched or has only archived versions, whose
+    /// new main files are its updates.
+    /// </summary>
+    private static string NewFile(LibraryUpdate update, LibraryMod? mod)
+        => update.Replaces is not null ? "-"
+            : update.Category == ModFileCategory.Optional ? "(new optional file)"
+            : mod?.Files.Any(file => !IsArchived(file.RelativePath)) == true ? "(new file)"
+            : "-";
+
+    /// <summary>
+    /// Whether a library path is in an <c>_archive</c> folder, where old versions go.
+    /// </summary>
+    private static bool IsArchived(string relativePath)
+    {
+        string[] parts = relativePath.Split(LibraryPaths.Separator);
+        return parts.Length > 1 && string.Equals(parts[^2], "_archive", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

@@ -506,7 +506,7 @@ public sealed partial class ModPageViewModel : ObservableObject
             return Text.Format(Strings.ModPageUpdateFor, yours.VersionLabel ?? yours.Name);
         }
 
-        return update.Replaces is null && update.Category == ModFileCategory.Optional ? Strings.ModPageNewOptionalFile : Strings.ModPageUpdate;
+        return NewFiles.Note(update, inLibrary) ?? Strings.ModPageUpdate;
     }
 
     private static string SectionTitle(ModFileCategory category) => category switch

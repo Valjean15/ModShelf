@@ -27,6 +27,11 @@ namespace ModShelf.Application.Updates;
 /// the newest of their chain, and no library file's update. Each replaces nothing, and is kept while it stays new and the
 /// site lists it. Once downloaded, it's a library file like any, whose chain is followed.
 /// </item>
+/// <item>
+/// A site that lists a mod's files side by side (<see cref="Sources.Abstractions.Catalog.IModCatalog.FilesSideBySide"/>)
+/// says nothing of which replaced which but by its chains: its main files are new files too, as optional ones are, and a
+/// main file in no chain has no update.
+/// </item>
 /// </list>
 /// </remarks>
 internal static class UpdateFinder
@@ -38,8 +43,10 @@ internal static class UpdateFinder
     /// files, and for a mod with files, its new optional files.
     /// </param>
     /// <param name="foundAt">When this check started.</param>
+    /// <param name="sideBySide">Whether the site lists the mod's files side by side.</param>
     /// <returns>The mod's updates, the newest first.</returns>
-    public static IReadOnlyList<LibraryUpdate> Find(LibraryMod mod, IReadOnlyList<ModFile> siteFiles, DateTimeOffset since, DateTimeOffset foundAt)
+    public static IReadOnlyList<LibraryUpdate> Find(
+        LibraryMod mod, IReadOnlyList<ModFile> siteFiles, DateTimeOffset since, DateTimeOffset foundAt, bool sideBySide = false)
     {
         ArgumentNullException.ThrowIfNull(mod);
         ArgumentNullException.ThrowIfNull(siteFiles);
@@ -82,20 +89,21 @@ internal static class UpdateFinder
         }
         else
         {
-            // One that's a library file's update, the newest of its chain, is found below as that instead.
-            bool IsNewOptional(ModFile file)
-                => file.Category == ModFileCategory.Optional
+            // One that's a library file's update, the newest of its chain, is found below as that instead. A site whose
+            // files sit side by side has its main files new too.
+            bool IsNew(ModFile file)
+                => (file.Category == ModFileCategory.Optional || (sideBySide && file.Category == ModFileCategory.Main))
                     && !have.Contains(file.Reference)
                     && !(Replacements.Next(file, listed) is { } next && listed.ContainsKey(next));
 
-            foreach (ModFile file in siteFiles.Where(file => file.UploadedAt > since && IsNewOptional(file)))
+            foreach (ModFile file in siteFiles.Where(file => file.UploadedAt > since && IsNew(file)))
             {
                 Add(file, null);
             }
 
             foreach (LibraryUpdate earlier in mod.Updates.Where(update => update.Replaces is null))
             {
-                if (listed.TryGetValue(earlier.File, out ModFile? file) && IsNewOptional(file))
+                if (listed.TryGetValue(earlier.File, out ModFile? file) && IsNew(file))
                 {
                     Add(file, null);
                 }
@@ -112,7 +120,8 @@ internal static class UpdateFinder
                     Add(update, newestHad);
                 }
             }
-            else if (file.Category == ModFileCategory.Main
+            else if (!sideBySide
+                && file.Category == ModFileCategory.Main
                 && !chained.Contains(file.File)
                 && siteFiles
                     .Where(other => other.Category == ModFileCategory.Main

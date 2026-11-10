@@ -455,6 +455,22 @@ public sealed class UpdateCheckerTests : IDisposable
     }
 
     [Fact]
+    public async Task ASiteWhoseFilesSitSideBySideHasNoUpdateByDateOnlyNewFiles()
+    {
+        // Mod 3's 30, then 34 beside it before the last check, and 35 since.
+        await CheckedAtAsync(TestData.Now.AddHours(-2));
+        _site.FilesSideBySide = true;
+        _site.AddFile("3", "34", "34.7z", "Variant", uploadedAt: TestData.Now.AddDays(-1));
+        _site.AddFile("3", "35", "35.7z", "Another variant", uploadedAt: TestData.Now.AddHours(-1));
+
+        await CheckAsync(_site);
+
+        LibraryUpdate found = Assert.Single(Mod("3").Updates);
+        Assert.Equal(("35", (ModFileRef?)null), (found.File.Id, found.Replaces));
+        Assert.Equal(("11", "10"), (Assert.Single(Mod("1").Updates).File.Id, Assert.Single(Mod("1").Updates).Replaces?.Id));
+    }
+
+    [Fact]
     public async Task AModWithFilesGetsItsNewOptionalFilesAndFollowsOneOnceDownloaded()
     {
         // As Bestiary: an optional file uploaded since the last check; the one uploaded before it isn't news.

@@ -514,7 +514,7 @@ public sealed partial class LibraryModViewModel : ObservableObject
         {
             string text = update.Replaces is not null
                 ? Text.Format(Strings.ModStatusUpdateTo, update.VersionLabel ?? update.Name)
-                : update.Category == ModFileCategory.Optional ? Strings.ModPageNewOptionalFile : Strings.ModPageUpdate;
+                : NewFiles.Note(update, _mod) ?? Strings.ModPageUpdate;
             statuses.Add(new ModStatus(text, ModStatusKind.Update));
         }
         else if (offered.Count > 1)

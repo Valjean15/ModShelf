@@ -127,6 +127,42 @@ public sealed class LibraryUpdatesCommandTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task MarksANewFileOfASiteWhoseFilesSitSideBySide()
+    {
+        await RunAsync("download", HandoffLink("1").AbsoluteUri);
+        ModRef mod = new(new GameRef(FakeHandoffSource.SourceId, "game"), "mod");
+        LibraryUpdate beside = new(
+            new ModFileRef(mod, "8"), "Variant", "variant.zip", "1.0", ModFileCategory.Main, DateTimeOffset.UnixEpoch.AddDays(5), null, DateTimeOffset.UnixEpoch.AddDays(10), FileLink("8"));
+        await _cli.InAppAsync(
+            services => services.GetRequiredService<ILibraryRepository>().UpdateAsync(
+                mod, stored => stored!.WithUpdates([beside, Update(mod, "3", days: 3)]), Cancellation),
+            Cancellation);
+
+        string[] lines = Lines(await RunAsync("library", "updates"));
+
+        Assert.Equal(["(new", "file)", FileLink("8").AbsoluteUri], Words(lines[2])[^3..]);
+        Assert.Equal([FileNameOf("1"), FileLink("3").AbsoluteUri], Words(lines[3])[^2..]);
+    }
+
+    [Fact]
+    public async Task ANewMainFileOfAModWithOnlyArchivedVersionsIsNoNewFile()
+    {
+        ModRef mod = new(new GameRef(FakeHandoffSource.SourceId, "game"), "mod");
+        LibraryFile archived = new(
+            new ModFileRef(mod, "1"), "File 1", "1.1", ModFileCategory.Main, DateTimeOffset.UnixEpoch.AddDays(1), "handoff/game/mod/_archive/old.zip", 10, DateTimeOffset.UnixEpoch.AddDays(2));
+        LibraryUpdate newer = new(
+            new ModFileRef(mod, "8"), "Newer", "newer.zip", "2.0", ModFileCategory.Main, DateTimeOffset.UnixEpoch.AddDays(5), null, DateTimeOffset.UnixEpoch.AddDays(10), FileLink("8"));
+        await _cli.InAppAsync(
+            services => services.GetRequiredService<ILibraryRepository>().UpdateAsync(
+                mod, _ => LibraryMod.Watch(mod, "Archived Mod", null, null, DateTimeOffset.UnixEpoch).WithFile(archived).WithUpdates([newer]), Cancellation),
+            Cancellation);
+
+        string[] lines = Lines(await RunAsync("library", "updates"));
+
+        Assert.Equal(["-", FileLink("8").AbsoluteUri], Words(lines[2])[^2..]);
+    }
+
+    [Fact]
     public async Task DownloadingTheUpdateTakesItOff()
     {
         await RunAsync("download", HandoffLink("1").AbsoluteUri);

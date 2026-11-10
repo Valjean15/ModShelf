@@ -242,7 +242,7 @@ public sealed class LibraryByGameTests : IDisposable
         Assert.Equal(
             [
                 "Address Library: New optional file (Update), 1 file missing (Problem)",
-                "Main: Update (Update)",
+                "Main: New file (Update)",
                 "Many: 2 updates (Update), 1 file missing (Problem)",
                 "SkyUI: Update to 5.2 (Update)",
                 "Unwatched: Not watched (Note)",

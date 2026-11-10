@@ -236,7 +236,7 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
                     mod.Mod,
                     stored => stored is { IsWatched: true }
                         ? stored.Checked(check.StartedAt).WithUpdates(
-                            UpdateFinder.Find(stored, files, LastChecked(stored, check.StartedAt) - Margin, check.StartedAt))
+                            UpdateFinder.Find(stored, files, LastChecked(stored, check.StartedAt) - Margin, check.StartedAt, catalog.FilesSideBySide))
                         : stored,
                     cancellationToken)
                 .ConfigureAwait(false);
