@@ -1,4 +1,5 @@
 using ModShelf.Domain.Mods;
+using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.ViewModels.Games;
 using ModShelf.Presentation.ViewModels.Settings;
 using ModShelf.Sources.Abstractions.Catalog;
@@ -123,6 +124,39 @@ public sealed class SettingsAddGameTests
 
         Assert.Single(_harness.Dialogs.AddingGames);
         Assert.Equal(listed, Screen.Games.Count);
+    }
+
+    [Fact]
+    public async Task FindsTheGamesOfASiteThatFindsThemByNameButThoseListed()
+    {
+        SourceId banana = new("gamebanana");
+        GameInfo royal = new(new GameRef(banana, "16951"), "Persona 5 Royal (PC)");
+        GameInfo persona = new(new GameRef(banana, "7545"), "Persona 5");
+        ScriptedCatalog catalog = new(banana, "GameBanana");
+        catalog.GameNames[royal.Game.Key] = royal.Name;
+        SettingsHarness harness = new(byName: catalog);
+        harness.Lookup.Games[TestData.Nexus] = [Skyrim, Stardew];
+        harness.Lookup.ByName.Add(banana);
+        harness.Lookup.Games[banana] = [royal, persona];
+        harness.Library.Add(TestData.LibraryMod(new ModRef(royal.Game, "440088"), "P5R Female Protagonist"));
+        await harness.StartAsync();
+        harness.Screen.OnShown();
+        await harness.Screen.GamesWork;
+        AddGameViewModel? seen = null;
+        harness.Dialogs.InAddGame = async adding =>
+        {
+            await adding.Reading;
+            seen = adding;
+            adding.Picker.Query = "persona";
+            await adding.Picker.Finding;
+            return false;
+        };
+
+        await harness.Screen.AddGameCommand.ExecuteAsync(null);
+
+        AddGameViewModel adding = Assert.IsType<AddGameViewModel>(seen);
+        Assert.Equal(["Persona 5"], adding.Picker.Entries.Select(entry => entry.Name));
+        Assert.Equal(["GetGamesAsync nexus", "FindGamesAsync gamebanana persona"], harness.Lookup.Asked);
     }
 
     private static async Task<bool> PickAsync(AddGameViewModel adding, string typed)

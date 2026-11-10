@@ -3115,6 +3115,18 @@
     <value>Type to find any of the {0:N0} games on {1}.</value>
     <comment>The game picker while nothing's typed: {0} is how many games, {1} the sites.</comment>
   </data>
+  <data name="GamePickerTypeToFindOrByName" xml:space="preserve">
+    <value>Type to find any of the {0:N0} games on {1}, or a game on {2} by its name.</value>
+    <comment>The game picker while nothing's typed, when some sites find their games by name: {0} is how many games the others list, {1} those sites, {2} the sites that find them by name, such as GameBanana.</comment>
+  </data>
+  <data name="GamePickerTypeToFindByName" xml:space="preserve">
+    <value>Type to find a game on {0} by its name.</value>
+    <comment>The game picker while nothing's typed, when every site finds its games by name: {0} is the sites, such as GameBanana.</comment>
+  </data>
+  <data name="GamesFindingByName" xml:space="preserve">
+    <value>Finding games on {0}…</value>
+    <comment>The game picker and quick search while sites that find their games by name are asked: {0} is the sites, such as GameBanana.</comment>
+  </data>
   <data name="GamePickerNothingFound" xml:space="preserve">
     <value>No game's name has “{0}”.</value>
     <comment>The game picker when no game matches: {0} is what was typed.</comment>

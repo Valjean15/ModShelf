@@ -2,6 +2,7 @@ using ModShelf.Application.Diagnostics;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.ViewModels.Settings;
+using ModShelf.Sources.Abstractions;
 using ModShelf.Testing;
 
 namespace ModShelf.Presentation.Tests.ViewModels.Settings;
@@ -14,7 +15,8 @@ internal sealed class SettingsHarness
 {
     /// <param name="releases">ModShelf's releases, as the test sets them up; by default, an installed ModShelf.</param>
     /// <param name="example">The example site, beside Nexus Mods.</param>
-    public SettingsHarness(bool protectedByOs = true, ScriptedAppReleases? releases = null, ExampleSite? example = null)
+    /// <param name="byName">A site, beside Nexus Mods, that finds its games by name.</param>
+    public SettingsHarness(bool protectedByOs = true, ScriptedAppReleases? releases = null, ExampleSite? example = null, ScriptedCatalog? byName = null)
     {
         Releases = releases ?? new ScriptedAppReleases();
         Mover = new ScriptedLibraryMover(Settings);
@@ -35,7 +37,7 @@ internal sealed class SettingsHarness
             Themes,
             Tray,
             Dialogs,
-            example is null ? new FakeSourceRegistry(Catalog) : new FakeSourceRegistry(Catalog, example),
+            new FakeSourceRegistry([Catalog, .. example is null ? [] : new IModSource[] { example }, .. byName is null ? [] : new IModSource[] { byName }]),
             Lookup,
             Hidden,
             GameSettings,

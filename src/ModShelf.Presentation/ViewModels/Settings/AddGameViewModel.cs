@@ -15,7 +15,8 @@ namespace ModShelf.Presentation.ViewModels.Settings;
 
 /// <summary>
 /// Settings' Add a game…: the game picker over the sites' games not listed yet, a game chosen added at once; or a game's
-/// key typed, such as skyrimspecialedition, for a game the sites can't list, as without an account.
+/// key typed, such as skyrimspecialedition, for a game the sites can't list, as without an account. A site that finds its
+/// games by name is asked as the name is typed.
 /// </summary>
 public sealed partial class AddGameViewModel : ObservableObject
 {
@@ -23,6 +24,7 @@ public sealed partial class AddGameViewModel : ObservableObject
     private readonly ISourceRegistry _sources;
     private readonly HashSet<GameRef> _listed;
     private readonly ILogger _logger;
+    private readonly GamesByName _byName;
 
     /// <param name="listed">The games listed already, which aren't offered.</param>
     internal AddGameViewModel(IModLookup lookup, ISourceRegistry sources, ModPictures pictures, IEnumerable<GameRef> listed, ILogger logger)
@@ -36,7 +38,8 @@ public sealed partial class AddGameViewModel : ObservableObject
         _sources = sources;
         _listed = [.. listed];
         _logger = logger;
-        Picker = new GamePickerViewModel(pictures, sources, Choose, typed: Type);
+        _byName = new GamesByName(lookup, sources.All<IModCatalog>().Select(catalog => catalog.Id), logger, _listed.Contains);
+        Picker = new GamePickerViewModel(pictures, sources, Choose, typed: Type, byName: _byName);
     }
 
     /// <summary>
@@ -75,7 +78,8 @@ public sealed partial class AddGameViewModel : ObservableObject
     internal Task Reading { get; private set; } = Task.CompletedTask;
 
     /// <summary>
-    /// Starts reading the games of every site that can list them, but those listed already, for the picker.
+    /// Starts reading the games of every site that lists them, but those listed already, for the picker; those of a site
+    /// that finds them by name are found as the name is typed.
     /// </summary>
     internal void StartReading(CancellationToken cancellationToken) => Reading = ReadAsync(cancellationToken);
 
@@ -86,7 +90,7 @@ public sealed partial class AddGameViewModel : ObservableObject
         List<string> problems = [];
         try
         {
-            foreach (IModCatalog catalog in _sources.All<IModCatalog>())
+            foreach (IModCatalog catalog in _sources.All<IModCatalog>().Where(catalog => !_byName.Finds(catalog.Id)))
             {
                 try
                 {

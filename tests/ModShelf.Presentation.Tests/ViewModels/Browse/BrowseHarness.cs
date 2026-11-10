@@ -27,19 +27,42 @@ internal sealed class BrowseHarness : IDisposable
 
     public static readonly GameInfo Fallout = new(new GameRef(TestData.Nexus, "fallout4"), "Fallout 4");
 
+    /// <summary>
+    /// A site that finds its games by name, as GameBanana does.
+    /// </summary>
+    public static readonly SourceId Banana = new("gamebanana");
+
+    public static readonly GameInfo Royal = new(new GameRef(Banana, "16951"), "Persona 5 Royal (PC)");
+
+    public static readonly GameInfo Persona = new(new GameRef(Banana, "7545"), "Persona 5");
+
+    public static readonly GameInfo Zelda = new(new GameRef(Banana, "5866"), "The Legend of Zelda");
+
     private readonly CancellationTokenSource _stopping = new();
     private bool _disposed;
 
     /// <param name="trending">Whether Nexus Mods lists its games' trending mods.</param>
     /// <param name="example">The example site, beside Nexus Mods, asked as the app asks it.</param>
     /// <param name="nexusSearch">What Nexus Mods' search can do; every order and filter unless said.</param>
-    public BrowseHarness(bool trending = true, ExampleSite? example = null, SearchCapabilities? nexusSearch = null)
+    /// <param name="banana">Whether <see cref="Banana"/>, which finds its games by name, is a site too.</param>
+    public BrowseHarness(bool trending = true, ExampleSite? example = null, SearchCapabilities? nexusSearch = null, bool banana = false)
     {
         FakeSourceRegistry others = example is null ? new FakeSourceRegistry() : new FakeSourceRegistry(example);
         Lookup = new ScriptedLookup { Others = example is null ? null : AppLookup.Over(others) };
         Time.SetLocalTimeZone(TimeZoneInfo.Utc);
         Lookup.Searchable.Add(TestData.Nexus);
         Lookup.Games[TestData.Nexus] = [Stardew, Skyrim, Fallout];
+        if (banana)
+        {
+            Lookup.Searchable.Add(Banana);
+            Lookup.ByName.Add(Banana);
+            Lookup.Games[Banana] = [Royal, Persona, Zelda];
+            foreach (GameInfo game in Lookup.Games[Banana])
+            {
+                BananaCatalog.GameNames[game.Game.Key] = game.Name;
+            }
+        }
+
         Watchlists.Tracking.Add(TestData.Nexus);
         Screens = new ScreenOpener(Navigation);
         Undo = new UndoBarViewModel(Library, UiThread, Time, UndoLogger);
@@ -57,6 +80,7 @@ internal sealed class BrowseHarness : IDisposable
                 .. trending ? [Catalog, Trending] : new IModSource[] { Catalog },
                 .. nexusSearch is null ? [] : new IModSource[] { new CapabilitiesOnlySearch(TestData.Nexus, nexusSearch) },
                 .. others.All<IModSource>(),
+                .. banana ? new IModSource[] { BananaCatalog } : [],
             ]),
             Browser,
             Folders,
@@ -106,6 +130,11 @@ internal sealed class BrowseHarness : IDisposable
     public ScriptedFolders Folders { get; } = new();
 
     public ScriptedCatalog Catalog { get; } = new(TestData.Nexus, "Nexus Mods");
+
+    /// <summary>
+    /// <see cref="Banana"/>'s catalog, which names its games.
+    /// </summary>
+    public ScriptedCatalog BananaCatalog { get; } = new(Banana, "GameBanana");
 
     public ScriptedTrending Trending { get; } = new(TestData.Nexus, "Nexus Mods");
 

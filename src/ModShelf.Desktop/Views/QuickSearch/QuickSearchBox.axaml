@@ -48,6 +48,13 @@
                            Text="{Binding NothingFound}"
                            IsVisible="{Binding NothingFound, Converter={x:Static ObjectConverters.IsNotNull}}" />
 
+                <TextBlock DockPanel.Dock="Bottom"
+                           Classes="note"
+                           Margin="20,4,20,16"
+                           TextWrapping="Wrap"
+                           Text="{Binding FindingText}"
+                           IsVisible="{Binding FindingText, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
                 <ScrollViewer x:Name="Scroller" HorizontalScrollBarVisibility="Disabled">
                     <ItemsControl x:Name="EntriesList"
                                   Margin="8,4,8,8"

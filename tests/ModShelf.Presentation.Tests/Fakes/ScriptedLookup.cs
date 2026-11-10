@@ -66,6 +66,16 @@ internal sealed class ScriptedLookup : IModLookup
     public ConcurrentQueue<TaskCompletionSource> HeldSearches { get; } = new();
 
     /// <summary>
+    /// Holds the next finds of games by name, each until its source is set.
+    /// </summary>
+    public ConcurrentQueue<TaskCompletionSource> HeldFinds { get; } = new();
+
+    /// <summary>
+    /// Holds the reading of a site's games until its source is set.
+    /// </summary>
+    public ConcurrentDictionary<SourceId, TaskCompletionSource> HeldGames { get; } = new();
+
+    /// <summary>
     /// The searches asked for, in order.
     /// </summary>
     public List<(GameRef Game, SearchQuery Query)> Searches { get; } = [];
@@ -118,28 +128,38 @@ internal sealed class ScriptedLookup : IModLookup
         return Answer(nameof(GetChangesAsync), () => (IReadOnlyList<string>?)(Changes.GetValueOrDefault((modRef, version)) ?? []));
     }
 
-    public Task<IReadOnlyList<GameInfo>> GetGamesAsync(SourceId source, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<GameInfo>> GetGamesAsync(SourceId source, CancellationToken cancellationToken)
     {
         _asked.Enqueue($"GetGamesAsync {source}");
         if (IsOthers(source))
         {
-            return Others!.GetGamesAsync(source, cancellationToken);
+            return await Others!.GetGamesAsync(source, cancellationToken);
         }
 
-        return Answer(nameof(GetGamesAsync), () => Games.GetValueOrDefault(source) ?? []);
+        if (HeldGames.TryGetValue(source, out TaskCompletionSource? hold))
+        {
+            await hold.Task;
+        }
+
+        return await Answer(nameof(GetGamesAsync), () => Games.GetValueOrDefault(source) ?? []);
     }
 
     public bool FindsGamesByName(SourceId source) => IsOthers(source) ? Others!.FindsGamesByName(source) : ByName.Contains(source);
 
-    public Task<IReadOnlyList<GameInfo>> FindGamesAsync(SourceId source, NameQuery query, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<GameInfo>> FindGamesAsync(SourceId source, NameQuery query, CancellationToken cancellationToken)
     {
         _asked.Enqueue($"FindGamesAsync {source} {query.Text}");
         if (IsOthers(source))
         {
-            return Others!.FindGamesAsync(source, query, cancellationToken);
+            return await Others!.FindGamesAsync(source, query, cancellationToken);
         }
 
-        return Answer(nameof(FindGamesAsync), () => ByName.Contains(source) && query.IsEmpty
+        if (HeldFinds.TryDequeue(out TaskCompletionSource? hold))
+        {
+            await hold.Task;
+        }
+
+        return await Answer(nameof(FindGamesAsync), () => ByName.Contains(source) && query.IsEmpty
             ? throw new ArgumentException("Give words of the game's name.", nameof(query))
             : query.Find((Games.GetValueOrDefault(source) ?? []).OrderBy(game => game.Name, StringComparer.OrdinalIgnoreCase), game => game.Name));
     }

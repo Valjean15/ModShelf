@@ -23,7 +23,17 @@ internal sealed class QuickSearchHarness
 
     public static readonly Uri SkyrimCover = new("https://images.nexusmods.com/images/games/v2/1704/skyrim-hero.jpg");
 
-    public QuickSearchHarness(NavigationService? navigation = null)
+    /// <summary>
+    /// A site that finds its games by name, as GameBanana does.
+    /// </summary>
+    public static readonly SourceId Banana = new("gamebanana");
+
+    public static readonly GameRef Royal = new(Banana, "16951");
+
+    public static readonly GameRef Persona = new(Banana, "7545");
+
+    /// <param name="banana">Whether <see cref="Banana"/> is a site too.</param>
+    public QuickSearchHarness(NavigationService? navigation = null, bool banana = false)
     {
         Navigation = navigation ?? new NavigationService();
         Screens = new ScreenOpener(Navigation);
@@ -34,12 +44,21 @@ internal sealed class QuickSearchHarness
             new GameInfo(Stardew, "Stardew Valley"),
             new GameInfo(Fallout, "Fallout 4"),
         ];
+        ScriptedCatalog bananaCatalog = new(Banana, "GameBanana");
+        if (banana)
+        {
+            Lookup.Searchable.Add(Banana);
+            Lookup.ByName.Add(Banana);
+            Lookup.Games[Banana] = [new GameInfo(Royal, "Persona 5 Royal (PC)"), new GameInfo(Persona, "Persona 5")];
+            bananaCatalog.GameNames[Royal.Key] = "Persona 5 Royal (PC)";
+        }
+
         Settings.Listed.Add(new SettingsSearchEntry(SettingsCategory.Library, "Library", "Where files go", "Where files go Downloads are saved in the library's folder"));
         Settings.Listed.Add(new SettingsSearchEntry(SettingsCategory.General, "General", "Theme", "Theme Light Dark System"));
         Search = new QuickSearchViewModel(
             Library,
             Lookup,
-            new FakeSourceRegistry(new ScriptedCatalog(TestData.Nexus, "Nexus Mods")),
+            new FakeSourceRegistry(new ScriptedCatalog(TestData.Nexus, "Nexus Mods"), bananaCatalog),
             Hidden,
             Settings,
             Screens,

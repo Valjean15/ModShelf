@@ -58,6 +58,10 @@ public sealed partial class QuickSearchViewModel : ObservableObject
     private readonly ModPictures _pictures;
     private readonly ILogger<QuickSearchViewModel> _logger;
     private readonly Dictionary<GameRef, GameInfo> _named = [];
+    private readonly GamesByName _byName;
+
+    // Which asking of the sites that find games by name is the latest: an answer to an earlier one is dropped.
+    private int _asked;
     private readonly Dictionary<GameRef, GamePictureViewModel> _covers = [];
     private IReadOnlyList<LibraryMod> _mods = [];
     private IReadOnlyList<string> _recent = [];
@@ -99,6 +103,7 @@ public sealed partial class QuickSearchViewModel : ObservableObject
         _uiState = uiState;
         _pictures = pictures;
         _logger = logger;
+        _byName = new GamesByName(lookup, lookup.SearchableSources, logger, hiddenGames.IsHidden);
     }
 
     /// <summary>
@@ -137,10 +142,21 @@ public sealed partial class QuickSearchViewModel : ObservableObject
     public partial QuickSearchEntryViewModel? Highlighted { get; private set; }
 
     /// <summary>
-    /// Such as "Nothing has “zzz”."; null while something does, or nothing's typed.
+    /// Such as "Nothing has “zzz”."; null while something does, nothing's typed, or games are being found by name.
     /// </summary>
     [ObservableProperty]
     public partial string? NothingFound { get; private set; }
+
+    /// <summary>
+    /// Such as "Finding games on GameBanana…", while the sites that find their games by name are asked; null otherwise.
+    /// </summary>
+    [ObservableProperty]
+    public partial string? FindingText { get; private set; }
+
+    /// <summary>
+    /// The asking of the sites that find their games by name for what's typed, for tests to wait on.
+    /// </summary>
+    internal Task Finding { get; private set; } = Task.CompletedTask;
 
     /// <summary>
     /// Reading the library and the sites' games as the box opens, for tests to wait on.
@@ -182,7 +198,11 @@ public sealed partial class QuickSearchViewModel : ObservableObject
     [RelayCommand]
     private void Choose() => Highlighted?.OpenCommand.Execute(null);
 
-    partial void OnQueryChanged(string value) => Arrange();
+    partial void OnQueryChanged(string value)
+    {
+        Find(value);
+        Arrange();
+    }
 
     partial void OnIsOpenChanged(bool value)
     {
@@ -218,7 +238,10 @@ public sealed partial class QuickSearchViewModel : ObservableObject
         {
             try
             {
-                foreach (GameInfo game in await _lookup.GetGamesAsync(source, CancellationToken.None))
+                IEnumerable<GameInfo> games = _byName.Finds(source)
+                    ? await LibraryGamesAsync(source)
+                    : await _lookup.GetGamesAsync(source, CancellationToken.None);
+                foreach (GameInfo game in games)
                 {
                     _named[game.Game] = game;
                 }
@@ -259,7 +282,54 @@ public sealed partial class QuickSearchViewModel : ObservableObject
         string? highlighted = Highlighted is { } shown ? KeyOf(shown) : null;
         Entries.SyncWith(listed);
         Highlight(listed.FirstOrDefault(entry => KeyOf(entry) == highlighted) ?? listed.FirstOrDefault());
-        NothingFound = !query.IsEmpty && listed.Count == 0 ? Text.Format(Strings.QuickSearchNothingFound, query.Text) : null;
+        NothingFound = !query.IsEmpty && listed.Count == 0 && FindingText is null ? Text.Format(Strings.QuickSearchNothingFound, query.Text) : null;
+    }
+
+    /// <summary>
+    /// The library's games of a site that finds its games by name, as it names them, but those named already; the
+    /// others are found as their names are typed.
+    /// </summary>
+    private async Task<IReadOnlyList<GameInfo>> LibraryGamesAsync(SourceId source)
+    {
+        GameRef[] games = [.. _mods.Select(mod => mod.Mod.Game).Where(game => game.Source == source && !_named.ContainsKey(game)).Distinct()];
+        GameInfo?[] named = await Task.WhenAll(games.Select(game => GameNames.ReadAsync(_sources, game, _logger, CancellationToken.None)));
+        return [.. named.OfType<GameInfo>()];
+    }
+
+    /// <summary>
+    /// Asks the sites that find their games by name for what's typed, in place of what was asked before, whose answer is
+    /// then dropped; the games found stay named.
+    /// </summary>
+    private void Find(string typed)
+    {
+        int asked = ++_asked;
+        if (_byName.Sites.Count == 0 || NameQuery.Parse(typed).IsEmpty)
+        {
+            FindingText = null;
+            Finding = Task.CompletedTask;
+            return;
+        }
+
+        FindingText = Text.Format(Strings.GamesFindingByName, Text.List(_byName.Sites.Select(_sources.SiteName)));
+        Finding = FindAsync(typed, asked);
+    }
+
+    private async Task FindAsync(string typed, int asked)
+    {
+        IReadOnlyList<GameInfo> found = await _byName.FindAsync(typed, CancellationToken.None);
+        if (asked != _asked)
+        {
+            // More was typed, and is being found.
+            return;
+        }
+
+        foreach (GameInfo game in found)
+        {
+            _named.TryAdd(game.Game, game);
+        }
+
+        FindingText = null;
+        Arrange();
     }
 
     /// <summary>

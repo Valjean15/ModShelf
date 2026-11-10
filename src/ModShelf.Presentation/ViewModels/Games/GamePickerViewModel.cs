@@ -18,6 +18,8 @@ namespace ModShelf.Presentation.ViewModels.Games;
 /// The game picker: a field with the chosen game as a chip, and under it, while it's open, the games in the library, the
 /// one with the most mods first, then the sites' other games whose names have what's typed (<see cref="NameQuery"/>),
 /// and the recent searches while nothing is. The arrow keys move from game to game, Enter chooses, and Escape closes it.
+/// A site that finds its games by name (<see cref="GamesByName"/>) is asked as the name is typed, each answer taking the
+/// last one's place; the games it found stay known, so one chosen keeps its name and cover.
 /// </summary>
 public sealed partial class GamePickerViewModel : ObservableObject
 {
@@ -31,8 +33,13 @@ public sealed partial class GamePickerViewModel : ObservableObject
     private readonly Action<GameRef> _chosen;
     private readonly Action<string>? _searchAgain;
     private readonly Action<string>? _typed;
+    private readonly GamesByName? _byName;
     private readonly Dictionary<GameRef, GamePickerEntryViewModel> _entries = [];
+    private readonly Dictionary<GameRef, GameInfo> _found = [];
     private IReadOnlyList<GameInfo> _games = [];
+
+    // Which asking of the sites that find games by name is the latest: an answer to an earlier one is dropped.
+    private int _asked;
     private IReadOnlyDictionary<GameRef, int> _library = new Dictionary<GameRef, int>();
     private string _sites = string.Empty;
     private GameRef? _current;
@@ -40,8 +47,14 @@ public sealed partial class GamePickerViewModel : ObservableObject
     /// <param name="chosen">What choosing a game does.</param>
     /// <param name="searchAgain">Searches a recent search again; null for a picker without recent searches.</param>
     /// <param name="typed">What Enter does with the text typed when no game is listed to choose; null for nothing.</param>
+    /// <param name="byName">The sites that find their games by name, asked as it's typed; null for none.</param>
     internal GamePickerViewModel(
-        ModPictures pictures, ISourceRegistry sources, Action<GameRef> chosen, Action<string>? searchAgain = null, Action<string>? typed = null)
+        ModPictures pictures,
+        ISourceRegistry sources,
+        Action<GameRef> chosen,
+        Action<string>? searchAgain = null,
+        Action<string>? typed = null,
+        GamesByName? byName = null)
     {
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(sources);
@@ -52,6 +65,7 @@ public sealed partial class GamePickerViewModel : ObservableObject
         _chosen = chosen;
         _searchAgain = searchAgain;
         _typed = typed;
+        _byName = byName is { Sites.Count: > 0 } ? byName : null;
     }
 
     /// <summary>
@@ -115,9 +129,26 @@ public sealed partial class GamePickerViewModel : ObservableObject
     public partial string? MoreText { get; private set; }
 
     /// <summary>
-    /// How many games the picker can find, those of the library or not.
+    /// Such as "Finding games on GameBanana…", while the sites that find their games by name are asked; null otherwise.
+    /// </summary>
+    [ObservableProperty]
+    public partial string? FindingText { get; private set; }
+
+    /// <summary>
+    /// How many games the picker can find, those of the library or not, but those found by name.
     /// </summary>
     internal int GameCount => _games.Count;
+
+    /// <summary>
+    /// The asking of the sites that find their games by name for what's typed, for tests to wait on.
+    /// </summary>
+    internal Task Finding { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
+    /// What the picker knows of a game: listed, or found by name; null for one it doesn't.
+    /// </summary>
+    internal GameInfo? Known(GameRef game)
+        => _games.FirstOrDefault(listed => listed.Game == game) ?? _found.GetValueOrDefault(game);
 
     /// <summary>
     /// Offers <paramref name="games"/>: those the sites list that can be chosen. Their sites show when they're of two
@@ -129,16 +160,10 @@ public sealed partial class GamePickerViewModel : ObservableObject
 
         StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
         _games = [.. games.OrderBy(game => game.Name, byName)];
-        string[] sites = [.. _games.Select(game => game.Game.Source).Distinct().Select(_sources.SiteName).Order(byName)];
-        _sites = sites.Length switch
-        {
-            0 => string.Empty,
-            1 => sites[0],
-            _ => Text.Format(Strings.ListAnd, string.Join(", ", sites[..^1]), sites[^1]),
-        };
+        _sites = SiteNames(_games.Select(game => game.Game.Source).Concat(_byName?.Sites ?? []));
         foreach (GamePickerEntryViewModel entry in _entries.Values)
         {
-            entry.ShowSite = sites.Length > 1;
+            entry.ShowSite = ShowsSites;
         }
 
         ShowPicked(_current);
@@ -194,7 +219,7 @@ public sealed partial class GamePickerViewModel : ObservableObject
     /// Opens the list, as focusing the field does: once there are games or recent searches to show.
     /// </summary>
     [RelayCommand]
-    private void Open() => IsOpen = IsOpen || _games.Count > 0 || Recent.Count > 0;
+    private void Open() => IsOpen = IsOpen || _games.Count > 0 || Recent.Count > 0 || _byName is not null;
 
     /// <summary>
     /// Closes the list, forgetting what was typed; the game chosen stays.
@@ -241,6 +266,7 @@ public sealed partial class GamePickerViewModel : ObservableObject
             IsOpen = true;
         }
 
+        Find(value);
         Arrange();
     }
 
@@ -310,7 +336,13 @@ public sealed partial class GamePickerViewModel : ObservableObject
                 .OrderByDescending(game => _library[game.Game])
                 .ThenBy(game => game.Name, byName),
         ];
-        IReadOnlyList<GameInfo> found = query.IsEmpty ? [] : query.Find(_games.Where(game => !_library.ContainsKey(game.Game)), game => game.Name);
+        IReadOnlyList<GameInfo> found = query.IsEmpty
+            ? []
+            : query.Find(
+                _games.Concat(_found.Values.Where(game => !_games.Any(listed => listed.Game == game.Game)))
+                    .Where(game => !_library.ContainsKey(game.Game))
+                    .OrderBy(game => game.Name, byName),
+                game => game.Name);
         List<GamePickerEntryViewModel> listed = [];
         foreach (GameInfo game in yours)
         {
@@ -335,13 +367,80 @@ public sealed partial class GamePickerViewModel : ObservableObject
         Entries.SyncWith(listed);
         Highlight(Highlighted is { } highlighted && listed.Contains(highlighted) ? highlighted : listed.FirstOrDefault());
         HasRecent = query.IsEmpty && Recent.Count > 0;
-        Hint = query.IsEmpty && _games.Count > 0 ? Text.Format(Strings.GamePickerTypeToFind, _games.Count, _sites) : null;
-        NothingFound = !query.IsEmpty && listed.Count == 0 && _games.Count > 0 ? Text.Format(Strings.GamePickerNothingFound, query.Text) : null;
+        Hint = query.IsEmpty ? HintText() : null;
+        NothingFound = !query.IsEmpty && listed.Count == 0 && FindingText is null && (_games.Count > 0 || _byName is not null)
+            ? Text.Format(Strings.GamePickerNothingFound, query.Text)
+            : null;
         MoreText = found.Count > MostOthers ? Text.Format(Strings.GamePickerMore, found.Count - MostOthers) : null;
     }
 
     /// <summary>
-    /// The game's entry, made once; null for a game the sites don't list.
+    /// Whether the games are of two sites or more, so each says its site.
+    /// </summary>
+    private bool ShowsSites => _games.Select(listed => listed.Game.Source).Concat(_byName?.Sites ?? []).Distinct().Skip(1).Any();
+
+    /// <summary>
+    /// Such as "Type to find any of the 3,412 games on Nexus Mods.", or, with sites that find their games by name, "…, or a
+    /// game on GameBanana by its name."; null when there's nothing to find.
+    /// </summary>
+    private string? HintText()
+    {
+        GameInfo[] listed = [.. _games.Where(game => _byName?.Finds(game.Game.Source) != true)];
+        string listing = SiteNames(listed.Select(game => game.Game.Source));
+        string byName = SiteNames(_byName?.Sites ?? []);
+        return (listed.Length, _byName is not null) switch
+        {
+            (0, false) => null,
+            (_, false) => Text.Format(Strings.GamePickerTypeToFind, listed.Length, listing),
+            (0, true) => Text.Format(Strings.GamePickerTypeToFindByName, byName),
+            _ => Text.Format(Strings.GamePickerTypeToFindOrByName, listed.Length, listing, byName),
+        };
+    }
+
+    /// <summary>
+    /// The sites' names, in order, as "Nexus Mods and GameBanana".
+    /// </summary>
+    private string SiteNames(IEnumerable<SourceId> sources)
+        => Text.List(sources.Distinct().Select(_sources.SiteName).Order(StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true)));
+
+    /// <summary>
+    /// Asks the sites that find their games by name for what's typed, in place of what was asked before, whose answer is
+    /// then dropped; the games found stay known.
+    /// </summary>
+    private void Find(string typed)
+    {
+        int asked = ++_asked;
+        if (_byName is not { } byName || NameQuery.Parse(typed).IsEmpty)
+        {
+            FindingText = null;
+            Finding = Task.CompletedTask;
+            return;
+        }
+
+        FindingText = Text.Format(Strings.GamesFindingByName, SiteNames(byName.Sites));
+        Finding = FindAsync(byName, typed, asked);
+    }
+
+    private async Task FindAsync(GamesByName byName, string typed, int asked)
+    {
+        IReadOnlyList<GameInfo> found = await byName.FindAsync(typed, CancellationToken.None);
+        if (asked != _asked)
+        {
+            // More was typed, and is being found.
+            return;
+        }
+
+        foreach (GameInfo game in found)
+        {
+            _found[game.Game] = game;
+        }
+
+        FindingText = null;
+        Arrange();
+    }
+
+    /// <summary>
+    /// The game's entry, made once; null for a game the sites don't list, and none found by name.
     /// </summary>
     private GamePickerEntryViewModel? EntryFor(GameRef game)
     {
@@ -350,14 +449,14 @@ public sealed partial class GamePickerViewModel : ObservableObject
             return entry;
         }
 
-        if (_games.FirstOrDefault(listed => listed.Game == game) is not { } info)
+        if (Known(game) is not { } info)
         {
             return null;
         }
 
         entry = new GamePickerEntryViewModel(game, info.Name, _sources.SiteName(game.Source), _pictures, Pick)
         {
-            ShowSite = _games.Select(listed => listed.Game.Source).Distinct().Skip(1).Any(),
+            ShowSite = ShowsSites,
         };
         entry.Cover.Place(info.CoverUrl, CancellationToken.None);
         _entries.Add(game, entry);

@@ -38,6 +38,7 @@
             <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding Hint}" IsVisible="{Binding Hint, Converter={x:Static ObjectConverters.IsNotNull}}" />
             <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding NothingFound}" IsVisible="{Binding NothingFound, Converter={x:Static ObjectConverters.IsNotNull}}" />
             <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding MoreText}" IsVisible="{Binding MoreText, Converter={x:Static ObjectConverters.IsNotNull}}" />
+            <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding FindingText}" IsVisible="{Binding FindingText, Converter={x:Static ObjectConverters.IsNotNull}}" />
         </StackPanel>
 
         <ScrollViewer MaxHeight="380" HorizontalScrollBarVisibility="Disabled">

@@ -76,6 +76,10 @@ public sealed partial class BrowseViewModel : ScreenViewModel
 
     // Every game the sites listed, the hidden ones too, as the game picker and the tests know them.
     private List<(GameChoice Choice, GameInfo Info)> _allGames = [];
+
+    // The games of the sites that find theirs by name that are offered: the library's, and those chosen once found.
+    private readonly List<(GameChoice Choice, GameInfo Info)> _foundGames = [];
+    private readonly GamesByName _byName;
     private bool _picturesShown;
 
     // While the screen changes a choice itself, such as the category when the game changes, that's no search.
@@ -129,7 +133,8 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         _logger = logger;
         screens.BrowseGameOpening += OnGameOpening;
         Filters = new BrowseFiltersViewModel(this);
-        Picker = new GamePickerViewModel(pictures, sources, ChooseGame, SearchAgainFor);
+        _byName = new GamesByName(lookup, lookup.SearchableSources, logger, hiddenGames.IsHidden);
+        Picker = new GamePickerViewModel(pictures, sources, ChooseGame, SearchAgainFor, byName: _byName);
         _services = new ModPageServices(
             library,
             libraryDownloads,
@@ -521,5 +526,11 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     /// Tells the game picker how many mods the library has of each game.
     /// </summary>
     private void ShowLibraryGames()
-        => Picker.ShowLibrary(_inLibrary.Keys.GroupBy(mod => mod.Game).ToDictionary(game => game.Key, game => game.Count()));
+    {
+        Picker.ShowLibrary(_inLibrary.Keys.GroupBy(mod => mod.Game).ToDictionary(game => game.Key, game => game.Count()));
+        if (_gamesRead)
+        {
+            GamesWork = OfferLibraryGamesByNameAsync();
+        }
+    }
 }
