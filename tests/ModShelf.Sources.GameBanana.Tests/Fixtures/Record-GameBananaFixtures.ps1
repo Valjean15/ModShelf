@@ -12,7 +12,8 @@
     anyway.
 
     It records, for one game and one of its mods:
-    - the games list, a page at a time, and the games whose names match the game's;
+    - the games list, a page at a time: the first two, the last, and the one that holds the game; and the games whose
+      names match the game's;
     - the game, its mod categories, its trending mods, and a game that doesn't exist (see below);
     - the game's mods, 50 a page, in each order a search can ask for, and narrowed by a category and by an author (the
       first mod of the newest page's, as the source's contract tests pick them), with the member search that finds the
@@ -23,7 +24,7 @@
     - a mod of the game with content ratings, when it has one;
     - where the download links of the mod's newest file lead (asked with HEAD, so no file is downloaded).
 
-    A run that completes replaces the earlier recordings; one that stops leaves them as they were. It makes about 60
+    A run that completes replaces the earlier recordings; one that stops leaves them as they were. It makes about 70
     requests, one at a time with a pause between them, and stops if
     GameBanana asks it to slow down.
 
@@ -168,6 +169,52 @@ function Invoke-Banana {
 function Invoke-Api([string] $Path, [System.Collections.Specialized.OrderedDictionary] $Parameters) {
     $query = if ($Parameters) { Join-Query $Parameters } else { '' }
     return Invoke-Banana "apiv11/$Path" $query
+}
+
+# A page of the games list, 50 games in alphabetical order, as the source asks for one.
+function Invoke-GamesPage([int] $Page) {
+    return Invoke-Api 'Game/Index' ([ordered]@{ '_nPage' = $Page; '_nPerpage' = $PageSize; '_sSort' = 'Generic_Alphabetically' })
+}
+
+# The page of the games list that holds the game, and its answer: found by halving, as the list is in alphabetical
+# order, then among the pages around that one, then one by one, should GameBanana order names unlike this script.
+function Find-GamePage([string] $Name, [int] $Last) {
+    $asked = @{}
+    function Get-Page([int] $Page) {
+        if (-not $asked.ContainsKey($Page)) {
+            $asked[$Page] = Invoke-GamesPage $Page
+        }
+
+        return $asked[$Page]
+    }
+
+    $low = 1
+    $high = $Last
+    while ($low -lt $high) {
+        $middle = [int][Math]::Floor(($low + $high + 1) / 2)
+        $first = @((Read-Answer (Get-Page $middle) 'the games list')['_aRecords']) | Select-Object -First 1
+        if ($first -and [string]::Compare((Get-Text $first['_sName']), $Name, [StringComparison]::OrdinalIgnoreCase) -le 0) {
+            $low = $middle
+        }
+        else {
+            $high = $middle - 1
+        }
+    }
+
+    $nearby = foreach ($step in 1..3) { $low - $step; $low + $step }
+    foreach ($page in @($low) + $nearby + (1..$Last)) {
+        if ($page -lt 1 -or $page -gt $Last) {
+            continue
+        }
+
+        $answer = Get-Page $page
+        $holds = @((Read-Answer $answer 'the games list')['_aRecords']) | Where-Object { (Get-Text $_['_idRow']) -eq [string]$Game }
+        if ($holds) {
+            return [pscustomobject]@{ Page = $page; Answer = $answer }
+        }
+    }
+
+    return $null
 }
 
 # A page of the game's mods, as the source asks for one.
@@ -395,16 +442,24 @@ try {
     Write-Host "Recording $gameName ($Game) and its mod $(Get-Text $modBody['_sName']) ($ModId) into $Recorded"
 
     # The games list, a page at a time, and the games named like this one.
-    $games = Invoke-Api 'Game/Index' ([ordered]@{ '_nPage' = 1; '_nPerpage' = $PageSize; '_sSort' = 'Generic_Alphabetically' })
+    $games = Invoke-GamesPage 1
     $gameCount = [int](Get-Text (Read-Answer $games 'the games list')['_aMetadata']['_nRecordCount'])
     $lastPage = [Math]::Max(1, [int][Math]::Ceiling($gameCount / $PageSize))
     Save-Fixture 'games-1' $games
     if ($lastPage -ge 2) {
-        Save-Fixture 'games-2' (Invoke-Api 'Game/Index' ([ordered]@{ '_nPage' = 2; '_nPerpage' = $PageSize; '_sSort' = 'Generic_Alphabetically' }))
+        Save-Fixture 'games-2' (Invoke-GamesPage 2)
     }
 
     if ($lastPage -ge 3) {
-        Save-Fixture 'games-last' (Invoke-Api 'Game/Index' ([ordered]@{ '_nPage' = $lastPage; '_nPerpage' = $PageSize; '_sSort' = 'Generic_Alphabetically' }))
+        Save-Fixture 'games-last' (Invoke-GamesPage $lastPage)
+    }
+
+    $holding = Find-GamePage $gameName $lastPage
+    if (-not $holding) {
+        Write-Host "  No page of the games list holds $gameName, so none was recorded for it."
+    }
+    elseif ($holding.Page -notin 1, 2, $lastPage) {
+        Save-Fixture 'games-with-game' $holding.Answer
     }
 
     Save-Fixture 'games-name-match' (Invoke-Api 'Util/Game/NameMatch' ([ordered]@{ '_sName' = $gameName }))
