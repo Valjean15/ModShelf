@@ -223,6 +223,7 @@
                                VerticalAlignment="Center"
                                Text="{Binding OrderText}"
                                IsVisible="{Binding OrderText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    <Button Content="{Binding WatchAllText}" Command="{Binding WatchAllCommand}" IsVisible="{Binding IsShowingTracked}" />
                     <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding HasSelection}">
                         <TextBlock Classes="note" VerticalAlignment="Center" Text="{Binding SelectionText}" />
                         <Button Classes="accent" Content="{Binding DownloadSelectedText}" Command="{Binding DownloadSelectedCommand}" />

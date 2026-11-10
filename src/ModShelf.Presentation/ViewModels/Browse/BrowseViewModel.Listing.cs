@@ -112,6 +112,7 @@ public sealed partial class BrowseViewModel
                     int count => Text.Format(Strings.BrowseFollowed, count, followed, game.Name, site),
                 };
                 HasMore = false;
+                ShowWatchAll();
                 await ShowTrackedPageAsync(source, token);
             });
         return Listing;

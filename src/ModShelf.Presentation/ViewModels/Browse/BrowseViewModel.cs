@@ -513,6 +513,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     {
         _inLibrary.Apply(change);
         ShowLibraryGames();
+        ShowWatchAll();
         foreach (BrowseModViewModel row in Results.Concat(Rows.SelectMany(listed => listed.Mods)).Where(row => row.Mod == change.Mod))
         {
             row.ShowLibrary(change.After);

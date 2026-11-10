@@ -2248,6 +2248,22 @@
     <value>Update selected ({0:N0})</value>
     <comment>Downloads the updates of the mods selected in a game. {0} counts the updates.</comment>
   </data>
+  <data name="BrowseWatchAll" xml:space="preserve">
+    <value>Watch all ({0:N0})</value>
+    <comment>Watches in the library, for updates, every mod of the game the account follows on its site that isn't watched yet. {0} counts them.</comment>
+  </data>
+  <data name="BrowseWatchedAllOne" xml:space="preserve">
+    <value>Watching 1 more mod for updates in the library.</value>
+    <comment>What Watch all did, when it watched one mod.</comment>
+  </data>
+  <data name="BrowseWatchedAll" xml:space="preserve">
+    <value>Watching {0:N0} more mods for updates in the library.</value>
+    <comment>What Watch all did: {0} is how many mods it watched.</comment>
+  </data>
+  <data name="BrowseWatchAllFailed" xml:space="preserve">
+    <value>{0:N0} couldn't be watched: {1}</value>
+    <comment>After what Watch all did, the mods it couldn't watch: {0} is how many, {1} why the first couldn't.</comment>
+  </data>
   <data name="BrowseDownloadSelected" xml:space="preserve">
     <value>Download selected ({0:N0})</value>
     <comment>Downloads the newest main file of each mod selected. {0} counts the mods.</comment>
