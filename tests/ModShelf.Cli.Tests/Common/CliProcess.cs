@@ -27,7 +27,8 @@ internal sealed class CliProcess : IDisposable
 
     public bool HasExited => _process.HasExited;
 
-    public static CliProcess Start(string databasePath, IEnumerable<string> arguments)
+    /// <param name="environment">More environment variables for the CLI, such as a log level of its configuration.</param>
+    public static CliProcess Start(string databasePath, IEnumerable<string> arguments, IReadOnlyDictionary<string, string>? environment = null)
     {
         ProcessStartInfo start = new(DotnetHost())
         {
@@ -45,6 +46,11 @@ internal sealed class CliProcess : IDisposable
         }
 
         start.Environment["ModShelf__DatabasePath"] = databasePath;
+        foreach ((string name, string value) in environment ?? new Dictionary<string, string>())
+        {
+            start.Environment[name] = value;
+        }
+
         return new CliProcess(Process.Start(start) ?? throw new InvalidOperationException("The CLI didn't start."));
     }
 
