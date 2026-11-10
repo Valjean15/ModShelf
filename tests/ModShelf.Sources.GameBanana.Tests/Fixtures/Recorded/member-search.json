@@ -1,0 +1,54 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/apiv11/Util/Search/Results",
+    "query": "_sModelName=Member&_sSearchString=chlorophylls"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "body": {
+      "_aMetadata": {
+        "_nRecordCount": 1,
+        "_nPerpage": 15,
+        "_bIsComplete": true
+      },
+      "_aRecords": [
+        {
+          "_idRow": 1740038,
+          "_sModelName": "Member",
+          "_sSingularTitle": "Member",
+          "_sIconClasses": "SubmissionType Member",
+          "_sName": "chlorophylls",
+          "_sProfileUrl": "https://gamebanana.com/members/1740038",
+          "_tsDateAdded": 1594848084,
+          "_tsDateModified": 1682881421,
+          "_bHasFiles": false,
+          "_aPreviewMedia": {
+            "_aImages": [
+              {
+                "_sType": "avatar",
+                "_sUrl": "https://images.gamebanana.com/img/av/60b16b9cd22b0.png"
+              }
+            ]
+          },
+          "_aSubmitter": {
+            "_idRow": 1740038,
+            "_sName": "chlorophylls",
+            "_bIsOnline": false,
+            "_bHasRipe": false,
+            "_sProfileUrl": "https://gamebanana.com/members/1740038",
+            "_sAvatarUrl": "https://images.gamebanana.com/img/av/60b16b9cd22b0.png",
+            "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/610a34e9e24a9.png"
+          },
+          "_sInitialVisibility": "show",
+          "_bHasContentRatings": false,
+          "_nPostCount": 7,
+          "_bIsOwnedByAccessor": false
+        }
+      ]
+    }
+  }
+}

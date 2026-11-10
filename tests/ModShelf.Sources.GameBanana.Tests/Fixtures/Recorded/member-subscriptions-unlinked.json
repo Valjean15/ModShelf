@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/apiv11/Member/linked/Subscriptions",
+    "query": "_nPage=1"
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "body": {
+      "_sErrorCode": "NO_SUCH_ROUTE",
+      "_sErrorMessage": "Invalid request path or request method"
+    }
+  }
+}

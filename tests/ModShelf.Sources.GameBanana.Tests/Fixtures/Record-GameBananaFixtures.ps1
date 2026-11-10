@@ -12,8 +12,9 @@
     anyway.
 
     It records, for one game and one of its mods:
-    - the games list, a page at a time: the first two, the last, and the one that holds the game; and the games whose
-      names match the game's;
+    - the games list, a page at a time: the first two, the last, and the one that holds the game; the games whose
+      names match the game's; and those whose names have its longest word, 50 a page, as the source finds games by
+      name;
     - the game, its mod categories, its trending mods, and a game that doesn't exist (see below);
     - the game's mods, 50 a page, in each order a search can ask for, and narrowed by a category and by an author (the
       first mod of the newest page's, as the source's contract tests pick them), with the member search that finds the
@@ -22,9 +23,12 @@
     - the mod's profile, its download page, its updates, its game alone (what a link to the mod doesn't say), and a mod
       that doesn't exist, both ways (see below);
     - a mod of the game with content ratings, when it has one;
+    - the mod's author as a member, as linking their profile reads it: the member search that finds them by name, their
+      profile, their subscriptions, a member that doesn't exist, and subscriptions asked for without a member's ID (as
+      when no profile is linked);
     - where the download links of the mod's newest file lead (asked with HEAD, so no file is downloaded).
 
-    A run that completes replaces the earlier recordings; one that stops leaves them as they were. It makes about 70
+    A run that completes replaces the earlier recordings; one that stops leaves them as they were. It makes about 80
     requests, one at a time with a pause between them, and stops if
     GameBanana asks it to slow down.
 
@@ -34,7 +38,8 @@
 
     Long lists that the source never reads in full are cut short, so the files stay small: a mod's pictures to the
     first 2, the mod managers' game lists to 3, a member's medals to 2, and a file's analysis warnings to 3 a kind. A
-    member's whereabouts on the site (_sLocation) are left empty.
+    member's buddies, donation links and profile modules are left out, and their whereabouts on the site (_sLocation,
+    _sSavedLastLocation) left empty.
 
 .PARAMETER Game
     The game's ID on GameBanana, as in gamebanana.com/games/<id>. Persona 5 Royal (PC) by default: over 900 mods, most
@@ -108,7 +113,10 @@ $SearchOrders = @('best_match', 'popularity', 'date', 'udate')
 $AdultRatings = @('st', 'sc', 'nu', 'pn', 'sa')
 
 # How many of each long list are kept.
-$Kept = @{ '_aImages' = 2; '_aGameRowIds' = 3; '_aNormalMedals' = 2; '_aRareMedals' = 2; '_aLegendaryMedals' = 2 }
+$Kept = @{
+    '_aImages' = 2; '_aGameRowIds' = 3; '_aNormalMedals' = 2; '_aRareMedals' = 2; '_aLegendaryMedals' = 2
+    '_aBuddies' = 0; '_aDonationMethods' = 0; '_aProfileModules' = 0
+}
 $WarningsKept = 3
 
 $UserAgent = 'ModShelf-fixtures/1.0'
@@ -267,8 +275,10 @@ function Limit-Array($Array, [int] $Count) {
 # Cuts the long lists the source never reads in full, wherever they are, and empties members' whereabouts.
 function Limit-Long($Node, [string] $Name) {
     if ($Node -is [System.Text.Json.Nodes.JsonObject]) {
-        if ($null -ne $Node['_sLocation']) {
-            $Node['_sLocation'] = [System.Text.Json.Nodes.JsonValue]::Create('')
+        foreach ($whereabouts in '_sLocation', '_sSavedLastLocation') {
+            if ($null -ne $Node[$whereabouts]) {
+                $Node[$whereabouts] = [System.Text.Json.Nodes.JsonValue]::Create('')
+            }
         }
 
         foreach ($property in $Node) {
@@ -464,6 +474,16 @@ try {
 
     Save-Fixture 'games-name-match' (Invoke-Api 'Util/Game/NameMatch' ([ordered]@{ '_sName' = $gameName }))
 
+    # The games whose names have the game's longest word, lowercase, as the source asks when that's typed.
+    $longest = @($gameName.ToLowerInvariant() -split '[^\p{L}\p{N}]+' | Where-Object { $_.Length -ge 3 } | Sort-Object Length -Descending -Stable) |
+        Select-Object -First 1
+    if ($longest) {
+        Save-Fixture 'games-find' (Invoke-Api 'Util/Game/NameMatch' ([ordered]@{ '_sName' = $longest; '_nPerpage' = $PageSize; '_nPage' = 1 }))
+    }
+    else {
+        Write-Host "  $gameName has no word of 3 letters or more, so no search of games by name was recorded."
+    }
+
     # The game.
     Save-Fixture 'game' $gameAnswer
     $categories = Invoke-Api 'Mod/Categories' ([ordered]@{ '_idGameRow' = $Game; '_sSort' = 'a_to_z'; '_bShowEmpty' = 'true' })
@@ -555,6 +575,22 @@ try {
     else {
         Write-Host "  The game has no mods rated for adults, so none was recorded."
     }
+
+    # The mod's author as a member: found by name, their profile and their subscriptions, as linking their profile reads
+    # them; one that doesn't exist; and subscriptions asked for without a member's ID, as when no profile is linked.
+    $submitter = $modBody['_aSubmitter']
+    if ($submitter) {
+        $memberId = Get-Text $submitter['_idRow']
+        Save-Fixture 'member-search' (Invoke-Api 'Util/Search/Results' ([ordered]@{ '_sModelName' = 'Member'; '_sSearchString' = (Get-Text $submitter['_sName']) }))
+        Save-Fixture 'member' (Invoke-Api "Member/$memberId/ProfilePage")
+        Save-Fixture 'member-subscriptions' (Invoke-Api "Member/$memberId/Subscriptions" ([ordered]@{ '_nPage' = 1 }))
+    }
+    else {
+        Write-Host "  Mod $ModId names no author, so no member was recorded."
+    }
+
+    Save-Missing 'member-not-found' "Member/$MissingId/ProfilePage"
+    Save-Fixture 'member-subscriptions-unlinked' (Invoke-Api 'Member/linked/Subscriptions' ([ordered]@{ '_nPage' = 1 }))
 
     # Where the download links of the mod's newest file lead.
     $files = @($modBody['_aFiles']) | Where-Object { $null -ne $_ }

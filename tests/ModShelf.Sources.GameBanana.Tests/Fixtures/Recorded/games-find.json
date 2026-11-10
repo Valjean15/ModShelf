@@ -1,0 +1,281 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/apiv11/Util/Game/NameMatch",
+    "query": "_sName=persona&_nPerpage=50&_nPage=1"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "body": {
+      "_aMetadata": {
+        "_nRecordCount": 37,
+        "_nPerpage": 50,
+        "_bIsComplete": true
+      },
+      "_aRecords": [
+        {
+          "_idRow": 16951,
+          "_sName": "Persona 5 Royal (PC)",
+          "_sProfileUrl": "https://gamebanana.com/games/16951",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/6351756090c49.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+        },
+        {
+          "_idRow": 18557,
+          "_sName": "Persona 3 Reload",
+          "_sProfileUrl": "https://gamebanana.com/games/18557",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/65ccd8b78e6bd.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/6486070a3c38a.png"
+        },
+        {
+          "_idRow": 8263,
+          "_sName": "Persona 4 Golden PC (32 Bit)",
+          "_sProfileUrl": "https://gamebanana.com/games/8263",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/5eecd14461911.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/5ee5c43a18ce1.png"
+        },
+        {
+          "_idRow": 8502,
+          "_sName": "Persona 3 FES",
+          "_sProfileUrl": "https://gamebanana.com/games/8502",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/64e3ad7fb0386.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/609eb54673751.png"
+        },
+        {
+          "_idRow": 8675,
+          "_sName": "Sonic Robo Blast 2 Persona",
+          "_sProfileUrl": "https://gamebanana.com/games/8675",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/61184f654c23f.png",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/611839917c03b.png"
+        },
+        {
+          "_idRow": 17755,
+          "_sName": "Persona 4 Golden PC (64 Bit)",
+          "_sProfileUrl": "https://gamebanana.com/games/17755",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/63dacd354be6c.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/65c51158adfad.png"
+        },
+        {
+          "_idRow": 7545,
+          "_sName": "Persona 5",
+          "_sProfileUrl": "https://gamebanana.com/games/7545",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/5d79ba0ec8f45.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/609df92984e1d.png"
+        },
+        {
+          "_idRow": 16613,
+          "_sName": "Persona 3 Portable (PC)",
+          "_sProfileUrl": "https://gamebanana.com/games/16613",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/63e83fc5ed51e.png",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/62a65ffa55bfd.png"
+        },
+        {
+          "_idRow": 8583,
+          "_sName": "Persona 3 Portable (PSP)",
+          "_sProfileUrl": "https://gamebanana.com/games/8583",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/60c610f59b27a.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/60d0941603272.png"
+        },
+        {
+          "_idRow": 9099,
+          "_sName": "Persona 5 Strikers",
+          "_sProfileUrl": "https://gamebanana.com/games/9099",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/6066218a94e2d.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/609d8a6b02fc2.png"
+        },
+        {
+          "_idRow": 17354,
+          "_sName": "Persona 5 Royal (Switch)",
+          "_sProfileUrl": "https://gamebanana.com/games/17354",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/6356b6f26ff52.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/634d01143f6c0.png"
+        },
+        {
+          "_idRow": 12961,
+          "_sName": "Shin Megami Tensei: Persona (PSP)",
+          "_sProfileUrl": "https://gamebanana.com/games/12961",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/62b9cdbca541f.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/633c0d61d9969.png"
+        },
+        {
+          "_idRow": 16053,
+          "_sName": "Persona 4 Arena Ultimax",
+          "_sProfileUrl": "https://gamebanana.com/games/16053",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/625deb106a924.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/623536802566c.png"
+        },
+        {
+          "_idRow": 8464,
+          "_sName": "Persona 5 Royal",
+          "_sProfileUrl": "https://gamebanana.com/games/8464",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/5f5ad3e7c53fb.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/609d79875526e.png"
+        },
+        {
+          "_idRow": 20149,
+          "_sName": "Persona 5: The Phantom X",
+          "_sProfileUrl": "https://gamebanana.com/games/20149",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/685da6d6b51a2.png",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/685f240925f25.png"
+        },
+        {
+          "_idRow": 9561,
+          "_sName": "Persona Q2",
+          "_sProfileUrl": "https://gamebanana.com/games/9561",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/64d648f8289ef.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/6056fd28ac217.png"
+        },
+        {
+          "_idRow": 8761,
+          "_sName": "Persona 4 (PS2)",
+          "_sProfileUrl": "https://gamebanana.com/games/8761",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/654f0a96081a8.png",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/6378108b30dae.png"
+        },
+        {
+          "_idRow": 8615,
+          "_sName": "Persona 5: Dancing in Starlight",
+          "_sProfileUrl": "https://gamebanana.com/games/8615",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/614f9f2e7f9d7.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/5faa53512792d.png"
+        },
+        {
+          "_idRow": 15703,
+          "_sName": "Persona 4 Golden (Vita)",
+          "_sProfileUrl": "https://gamebanana.com/games/15703",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/63020f8e0ab17.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/61ff496005faa.png"
+        },
+        {
+          "_idRow": 18918,
+          "_sName": "Persona 5 Tactica (PC)",
+          "_sProfileUrl": "https://gamebanana.com/games/18918",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/655cb24abf2bb.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/655cb5aa140ba.png"
+        },
+        {
+          "_idRow": 12877,
+          "_sName": "Shin Megami Tensei: Persona 2: Innocent Sin (PSP)",
+          "_sProfileUrl": "https://gamebanana.com/games/12877",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/6113f61ad82c1.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/60ffb6365118c.png"
+        },
+        {
+          "_idRow": 17434,
+          "_sName": "Persona 3 Portable (Switch)",
+          "_sProfileUrl": "https://gamebanana.com/games/17434",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/_.gif",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+        },
+        {
+          "_idRow": 15592,
+          "_sName": "Megami Ibunroku Persona",
+          "_sProfileUrl": "https://gamebanana.com/games/15592",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/6306ea78d1e74.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/61ede85fd7ca0.png"
+        },
+        {
+          "_idRow": 16093,
+          "_sName": "Persona 4: Dancing All Night",
+          "_sProfileUrl": "https://gamebanana.com/games/16093",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/685dd3a3d5d09.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/685dd3a12d7a4.png"
+        },
+        {
+          "_idRow": 14377,
+          "_sName": "Persona Q: Shadow of the Labyrinth",
+          "_sProfileUrl": "https://gamebanana.com/games/14377",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/6186c7867532b.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/616a2da776999.png"
+        },
+        {
+          "_idRow": 8747,
+          "_sName": "Persona 3: Dancing in Moonlight",
+          "_sProfileUrl": "https://gamebanana.com/games/8747",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/5fe6811a550ae.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/5fdaedda57041.png"
+        },
+        {
+          "_idRow": 15590,
+          "_sName": "Persona 2 Eternal Punishment (PSP)",
+          "_sProfileUrl": "https://gamebanana.com/games/15590",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/63328dc1293c0.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/61edd86019b37.png"
+        },
+        {
+          "_idRow": 18610,
+          "_sName": "Persona 5 Tactica (Switch)",
+          "_sProfileUrl": "https://gamebanana.com/games/18610",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/6560cc9b38d17.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+        },
+        {
+          "_idRow": 17433,
+          "_sName": "Persona 4 Golden (Switch)",
+          "_sProfileUrl": "https://gamebanana.com/games/17433",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/_.gif",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+        },
+        {
+          "_idRow": 14130,
+          "_sName": "Persona (PSX)",
+          "_sProfileUrl": "https://gamebanana.com/games/14130",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/63052dce0d8f1.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/6154ccb4be35d.png"
+        },
+        {
+          "_idRow": 19025,
+          "_sName": "Megami Ibunroku Persona: Ikū no Tō Hen",
+          "_sProfileUrl": "https://gamebanana.com/games/19025",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/_.gif",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/64ee7bce6ad8e.png"
+        },
+        {
+          "_idRow": 15605,
+          "_sName": "Persona 2 Eternal Punishment (PSX)",
+          "_sProfileUrl": "https://gamebanana.com/games/15605",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/6306ed8e6164e.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/61ef7f8aeb98e.png"
+        },
+        {
+          "_idRow": 25884,
+          "_sName": "Persona: Anomalous Tower Chronicle",
+          "_sProfileUrl": "https://gamebanana.com/games/25884",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/_.gif",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/6aafb9f33cfbe.png"
+        },
+        {
+          "_idRow": 25803,
+          "_sName": "Persona 3 (PS2)",
+          "_sProfileUrl": "https://gamebanana.com/games/25803",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/_.gif",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/6aa2ee7f4b188.png"
+        },
+        {
+          "_idRow": 22747,
+          "_sName": "Persona 4 Revival [PC]",
+          "_sProfileUrl": "https://gamebanana.com/games/22747",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/_.gif",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/_.gif"
+        },
+        {
+          "_idRow": 19426,
+          "_sName": "Persona 5 Tactica",
+          "_sProfileUrl": "https://gamebanana.com/games/19426",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/_.gif",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/655713c7ded11.png"
+        },
+        {
+          "_idRow": 15606,
+          "_sName": "Persona 2: Innocent Sin (PSX)",
+          "_sProfileUrl": "https://gamebanana.com/games/15606",
+          "_sBannerUrl": "https://images.gamebanana.com/img/banners/games/6306ecdb3d163.jpg",
+          "_sIconUrl": "https://images.gamebanana.com/img/ico/games/61ef812fcf088.png"
+        }
+      ]
+    }
+  }
+}

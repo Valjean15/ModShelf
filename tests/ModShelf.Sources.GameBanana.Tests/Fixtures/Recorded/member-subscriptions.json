@@ -1,0 +1,434 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/apiv11/Member/1740038/Subscriptions",
+    "query": "_nPage=1"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    "body": {
+      "_aMetadata": {
+        "_nRecordCount": 5,
+        "_nPerpage": 15,
+        "_bIsComplete": true
+      },
+      "_aRecords": [
+        {
+          "_idRow": 2792060,
+          "_aSubscription": {
+            "_idRow": 432481,
+            "_sModelName": "Mod",
+            "_sSingularTitle": "Mod",
+            "_sIconClasses": "SubmissionType Mod",
+            "_sName": "P5R: Custom Bonus Tweaks",
+            "_sProfileUrl": "https://gamebanana.com/mods/432481",
+            "_tsDateAdded": 1678946415,
+            "_tsDateModified": 1765760901,
+            "_bHasFiles": true,
+            "_aTags": [
+              "Yes: Suffering"
+            ],
+            "_aPreviewMedia": {
+              "_aImages": [
+                {
+                  "_sType": "screenshot",
+                  "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                  "_sFile": "6412ad1e07659.jpg",
+                  "_sFile220": "220-90_6412ad1e07659.jpg",
+                  "_hFile220": 124,
+                  "_wFile220": 220,
+                  "_sFile530": "530-90_6412ad1e07659.jpg",
+                  "_hFile530": 298,
+                  "_wFile530": 530,
+                  "_sFile100": "100-90_6412ad1e07659.jpg",
+                  "_hFile100": 56,
+                  "_wFile100": 100,
+                  "_sFile800": "800-90_6412ad1e07659.jpg",
+                  "_hFile800": 450,
+                  "_wFile800": 800
+                },
+                {
+                  "_sType": "screenshot",
+                  "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                  "_sFile": "6412ad1bafa59.jpg",
+                  "_sFile100": "100-90_6412ad1bafa59.jpg",
+                  "_hFile100": 56,
+                  "_wFile100": 100
+                }
+              ]
+            },
+            "_aSubmitter": {
+              "_idRow": 1694106,
+              "_sName": "DeathChaos",
+              "_bIsOnline": false,
+              "_bHasRipe": false,
+              "_sProfileUrl": "https://gamebanana.com/members/1694106",
+              "_sAvatarUrl": "https://images.gamebanana.com/img/av/5fe54e42aa8f8.png",
+              "_aClearanceLevels": [
+                "P5 Manager"
+              ],
+              "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/5fe54de9c02c8.png"
+            },
+            "_aGame": {
+              "_idRow": 16951,
+              "_sName": "Persona 5 Royal (PC)",
+              "_sProfileUrl": "https://gamebanana.com/games/16951",
+              "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+            },
+            "_aRootCategory": {
+              "_sName": "QOL",
+              "_sProfileUrl": "https://gamebanana.com/mods/cats/19711",
+              "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/63a8d81a64138.png"
+            },
+            "_sVersion": "2.6.9",
+            "_tsDateUpdated": 1754057689,
+            "_bIsObsolete": false,
+            "_sInitialVisibility": "show",
+            "_bHasContentRatings": false,
+            "_nLikeCount": 325,
+            "_nPostCount": 689,
+            "_bWasFeatured": true,
+            "_nViewCount": 484680,
+            "_bIsOwnedByAccessor": false
+          },
+          "_tsDateAdded": 1678946415
+        },
+        {
+          "_idRow": 2681611,
+          "_aSubscription": {
+            "_idRow": 495507,
+            "_sModelName": "Mod",
+            "_sSingularTitle": "Mod",
+            "_sIconClasses": "SubmissionType Mod",
+            "_sName": "Ryo Framework",
+            "_sProfileUrl": "https://gamebanana.com/mods/495507",
+            "_tsDateAdded": 1707820305,
+            "_tsDateModified": 1730666533,
+            "_bHasFiles": true,
+            "_aTags": [],
+            "_aPreviewMedia": {
+              "_aImages": [
+                {
+                  "_sType": "screenshot",
+                  "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                  "_sFile": "65dcee3a13cce.jpg",
+                  "_sFile220": "220-90_65dcee3a13cce.jpg",
+                  "_hFile220": 110,
+                  "_wFile220": 220,
+                  "_sFile530": "530-90_65dcee3a13cce.jpg",
+                  "_hFile530": 265,
+                  "_wFile530": 530,
+                  "_sFile100": "100-90_65dcee3a13cce.jpg",
+                  "_hFile100": 50,
+                  "_wFile100": 100
+                },
+                {
+                  "_sType": "screenshot",
+                  "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                  "_sFile": "65cb38885f67c.jpg",
+                  "_sFile100": "100-90_65cb38885f67c.jpg",
+                  "_hFile100": 50,
+                  "_wFile100": 100
+                }
+              ]
+            },
+            "_aSubmitter": {
+              "_idRow": 2986979,
+              "_sName": "RyoTune",
+              "_bIsOnline": false,
+              "_bHasRipe": false,
+              "_sProfileUrl": "https://gamebanana.com/members/2986979",
+              "_sAvatarUrl": "https://images.gamebanana.com/img/av/68df8ebda43a4.png",
+              "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/68047b525349f.png"
+            },
+            "_aGame": {
+              "_idRow": 18557,
+              "_sName": "Persona 3 Reload",
+              "_sProfileUrl": "https://gamebanana.com/games/18557",
+              "_sIconUrl": "https://images.gamebanana.com/img/ico/games/6486070a3c38a.png"
+            },
+            "_aRootCategory": {
+              "_sName": "Other/Misc",
+              "_sProfileUrl": "https://gamebanana.com/mods/cats/23550",
+              "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/65dde74314af2.png"
+            },
+            "_sVersion": "2.5.8",
+            "_tsDateUpdated": 1730666874,
+            "_bIsObsolete": false,
+            "_sInitialVisibility": "show",
+            "_bHasContentRatings": false,
+            "_nLikeCount": 54,
+            "_nPostCount": 63,
+            "_bWasFeatured": true,
+            "_nViewCount": 107303,
+            "_bIsOwnedByAccessor": false
+          },
+          "_tsDateAdded": 1707820305
+        },
+        {
+          "_idRow": 2500408,
+          "_aSubscription": {
+            "_idRow": 482718,
+            "_sModelName": "Mod",
+            "_sSingularTitle": "Mod",
+            "_sIconClasses": "SubmissionType Mod",
+            "_sName": "Unhardcoded Romances",
+            "_sProfileUrl": "https://gamebanana.com/mods/482718",
+            "_tsDateAdded": 1701835783,
+            "_tsDateModified": 1733146562,
+            "_bHasFiles": true,
+            "_aTags": [],
+            "_aPreviewMedia": {
+              "_aImages": [
+                {
+                  "_sType": "screenshot",
+                  "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                  "_sFile": "656fef836d2f3.jpg",
+                  "_sFile220": "220-90_656fef836d2f3.jpg",
+                  "_hFile220": 124,
+                  "_wFile220": 220,
+                  "_sFile530": "530-90_656fef836d2f3.jpg",
+                  "_hFile530": 298,
+                  "_wFile530": 530,
+                  "_sFile100": "100-90_656fef836d2f3.jpg",
+                  "_hFile100": 56,
+                  "_wFile100": 100
+                },
+                {
+                  "_sType": "screenshot",
+                  "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                  "_sFile": "656fef8295b38.jpg",
+                  "_sFile100": "100-90_656fef8295b38.jpg",
+                  "_hFile100": 56,
+                  "_wFile100": 100
+                }
+              ]
+            },
+            "_aSubmitter": {
+              "_idRow": 2429356,
+              "_sName": "CornflakesCTD",
+              "_bIsOnline": false,
+              "_bHasRipe": false,
+              "_sProfileUrl": "https://gamebanana.com/members/2429356",
+              "_sAvatarUrl": "https://images.gamebanana.com/img/av/655d7978bde11.png",
+              "_sHdAvatarUrl": "https://images.gamebanana.com/img/av/655d797cf0e5a.png"
+            },
+            "_aGame": {
+              "_idRow": 16951,
+              "_sName": "Persona 5 Royal (PC)",
+              "_sProfileUrl": "https://gamebanana.com/games/16951",
+              "_sIconUrl": "https://images.gamebanana.com/img/ico/games/63a8d2a8d7a82.png"
+            },
+            "_aRootCategory": {
+              "_sName": "Other/Misc",
+              "_sProfileUrl": "https://gamebanana.com/mods/cats/18444",
+              "_sIconUrl": ""
+            },
+            "_sVersion": "1.1.2",
+            "_tsDateUpdated": 1733146639,
+            "_bIsObsolete": false,
+            "_sInitialVisibility": "show",
+            "_bHasContentRatings": false,
+            "_nLikeCount": 78,
+            "_nPostCount": 45,
+            "_bWasFeatured": true,
+            "_nViewCount": 156033,
+            "_bIsOwnedByAccessor": false
+          },
+          "_tsDateAdded": 1701835783
+        },
+        {
+          "_idRow": 783821,
+          "_aSubscription": {
+            "_idRow": 59270,
+            "_sModelName": "Wip",
+            "_sSingularTitle": "WiP",
+            "_sIconClasses": "SubmissionType Wip",
+            "_sName": "The Royal Project -WIP-",
+            "_sProfileUrl": "https://gamebanana.com/wips/59270",
+            "_tsDateAdded": 1629099132,
+            "_tsDateModified": 1660709225,
+            "_bHasFiles": true,
+            "_aTags": [
+              "Genre: 3D Art & Rendering",
+              "Genre: Coding/Scripting"
+            ],
+            "_aPreviewMedia": {
+              "_aImages": [
+                {
+                  "_sType": "screenshot",
+                  "_sBaseUrl": "https://images.gamebanana.com/img/ss/wips",
+                  "_sFile": "6277a6de4b3c5.jpg",
+                  "_sFile220": "220-90_6277a6de4b3c5.jpg",
+                  "_sFile530": "530-90_6277a6de4b3c5.jpg",
+                  "_sFile100": "100-90_6277a6de4b3c5.jpg",
+                  "_hFile220": 123,
+                  "_wFile220": 220,
+                  "_hFile530": 298,
+                  "_wFile530": 530,
+                  "_hFile100": 56,
+                  "_wFile100": 100
+                },
+                {
+                  "_sType": "screenshot",
+                  "_sBaseUrl": "https://images.gamebanana.com/img/ss/wips",
+                  "_sFile": "611a13f679f20.jpg",
+                  "_sFile100": "100-90_611a13f679f20.jpg",
+                  "_hFile100": 56,
+                  "_wFile100": 100
+                }
+              ]
+            },
+            "_aSubmitter": {
+              "_idRow": 1847256,
+              "_sName": "SecreC.",
+              "_bIsOnline": false,
+              "_bHasRipe": false,
+              "_sProfileUrl": "https://gamebanana.com/members/1847256",
+              "_sAvatarUrl": "https://images.gamebanana.com/img/av/60a6157eeb30d.png"
+            },
+            "_aGame": {
+              "_idRow": 7545,
+              "_sName": "Persona 5",
+              "_sProfileUrl": "https://gamebanana.com/games/7545",
+              "_sIconUrl": "https://images.gamebanana.com/img/ico/games/609df92984e1d.png"
+            },
+            "_aRootCategory": {
+              "_sName": "Other/Misc",
+              "_sProfileUrl": "https://gamebanana.com/wips/cats/835",
+              "_sIconUrl": ""
+            },
+            "_akDevelopmentState": "comp",
+            "_sDevelopmentState": "Completed",
+            "_iCompletionPercentage": 100,
+            "_aFinishedWork": {
+              "_aFinishedWorksOnGameBanana": [
+                {
+                  "_sName": "The Royal Project",
+                  "_sModelName": "Mod",
+                  "_sProfileUrl": "https://gamebanana.com/mods/396208",
+                  "_aPreviewMedia": {
+                    "_aImages": [
+                      {
+                        "_sType": "screenshot",
+                        "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                        "_sFile": "658b9434e8703.jpg",
+                        "_sFile220": "220-90_658b9434e8703.jpg",
+                        "_hFile220": 124,
+                        "_wFile220": 220,
+                        "_sFile530": "530-90_658b9434e8703.jpg",
+                        "_hFile530": 298,
+                        "_wFile530": 530,
+                        "_sFile100": "100-90_658b9434e8703.jpg",
+                        "_hFile100": 56,
+                        "_wFile100": 100,
+                        "_sFile800": "800-90_658b9434e8703.jpg",
+                        "_hFile800": 450,
+                        "_wFile800": 800
+                      },
+                      {
+                        "_sType": "screenshot",
+                        "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                        "_sFile": "62f9f7407b3bc.jpg",
+                        "_sFile100": "100-90_62f9f7407b3bc.jpg",
+                        "_hFile100": 56,
+                        "_wFile100": 100
+                      }
+                    ]
+                  },
+                  "_tsDateAdded": 1660708815,
+                  "_sInitialVisibility": "show"
+                }
+              ],
+              "_aRemoteFinishedWorkUrls": []
+            },
+            "_tsDateUpdated": 1660561930,
+            "_sInitialVisibility": "show",
+            "_bHasContentRatings": false,
+            "_nLikeCount": 43,
+            "_nPostCount": 23,
+            "_bWasFeatured": false,
+            "_nViewCount": 89529,
+            "_bIsOwnedByAccessor": false
+          },
+          "_tsDateAdded": 1629099132
+        },
+        {
+          "_idRow": 285387,
+          "_aSubscription": {
+            "_idRow": 168235,
+            "_sModelName": "Mod",
+            "_sSingularTitle": "Mod",
+            "_sIconClasses": "SubmissionType Mod",
+            "_sName": "Linkle Mod",
+            "_sProfileUrl": "https://gamebanana.com/mods/168235",
+            "_tsDateAdded": 1526968963,
+            "_tsDateModified": 1636903597,
+            "_bHasFiles": true,
+            "_aTags": [
+              "Model: Custom",
+              "Texture: Custom"
+            ],
+            "_aPreviewMedia": {
+              "_aImages": [
+                {
+                  "_sType": "screenshot",
+                  "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                  "_sFile": "5b03ae09c75ab.jpg",
+                  "_sFile530": "530-90_5b03ae09c75ab.jpg",
+                  "_sFile220": "220-90_5b03ae09c75ab.jpg",
+                  "_sFile100": "100-90_5b03ae09c75ab.jpg",
+                  "_sFile800": "800-90_5b03ae09c75ab.jpg"
+                },
+                {
+                  "_sType": "screenshot",
+                  "_sBaseUrl": "https://images.gamebanana.com/img/ss/mods",
+                  "_sFile": "5d88ad9dbecfb.webp",
+                  "_sFile100": "100-90_5d88ad9dbecfb.webp"
+                }
+              ]
+            },
+            "_aSubmitter": {
+              "_idRow": 1624901,
+              "_sName": "lynard killer",
+              "_bIsOnline": false,
+              "_bHasRipe": false,
+              "_sProfileUrl": "https://gamebanana.com/members/1624901",
+              "_sAvatarUrl": "https://images.gamebanana.com/img/av/5a9c24a2536c8.jpg"
+            },
+            "_aGame": {
+              "_idRow": 5866,
+              "_sName": "The Legend of Zelda: Breath of the Wild (WiiU)",
+              "_sProfileUrl": "https://gamebanana.com/games/5866",
+              "_sIconUrl": "https://images.gamebanana.com/img/ico/games/591f162eaaccd.gif"
+            },
+            "_aRootCategory": {
+              "_sName": "Skins",
+              "_sProfileUrl": "https://gamebanana.com/mods/cats/7315",
+              "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/60947e343fb25.png"
+            },
+            "_aSubCategory": {
+              "_sName": "Linkle",
+              "_sProfileUrl": "https://gamebanana.com/mods/cats/7337",
+              "_sIconUrl": "https://images.gamebanana.com/img/ico/ModCategory/5d27857e2e39b.png"
+            },
+            "_sVersion": "",
+            "_tsDateUpdated": 1576678205,
+            "_bIsObsolete": false,
+            "_sInitialVisibility": "show",
+            "_bHasContentRatings": false,
+            "_nLikeCount": 481,
+            "_nPostCount": 523,
+            "_bWasFeatured": true,
+            "_nViewCount": 2721212,
+            "_bIsOwnedByAccessor": false
+          },
+          "_tsDateAdded": 1526968963
+        }
+      ]
+    }
+  }
+}
