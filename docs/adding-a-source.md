@@ -125,7 +125,10 @@ So map the site's categories onto `ModFileCategory` with care:
   (GameBanana's archived files; ADR 0087).
 - `UploadedAt` as the site says; `SizeInBytes` exact when the site gives it (a size rounded to the kilobyte still
   matches on a rescan); every hash the site publishes.
-- `PageUrl`, when the file has a page, is a link the source's own recognizer takes.
+- `PageUrl` is a link the source's own recognizer takes as the file: its page, or, for a site that gives files no
+  page, another link of its own to the file (GameBanana's 1-click links). Every file of a source that downloads needs
+  one, since the app downloads a file it lists by it: on a mod's page, from the Updates screen, and through the
+  command line and the MCP server. The contract checks it.
 
 ### The site's words
 

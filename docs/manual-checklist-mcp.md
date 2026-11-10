@@ -146,6 +146,27 @@ Settings › **Agents** in the desktop app. Agents are off until you turn them o
 - [ ] **4.1 With the app.** Update the desktop app to a newer release, then restart the agent's app.
   `%LOCALAPPDATA%\ModShelf.App\current\ModShelf.Cli.exe --version` is the new version, and the server starts as in 1.1.
 
+## 5. GameBanana
+
+GameBanana needs no account. Start a new conversation, so the agent reads the server's instructions afresh.
+
+- [ ] **5.1 Which sites.** Ask the agent where it can find mods for Persona 5 Royal.
+  It asks both sites, with `mod_games` and `source` `nexus` and `gamebanana`, and names the site of each game it finds:
+  Persona 5 Royal (PC), `16951`, on GameBanana, and Nexus Mods' game of that name, if it has one. The first `mod_games`
+  of GameBanana in a run reads its whole list of games, which can take a minute.
+- [ ] **5.2 A game's key alone.** Ask it to search GameBanana's game 16951 for `protagonist`.
+  `mod_search` with `game` `16951`, without `source` or with `gamebanana`; each result's `source` is `gamebanana`, and
+  the agent says the mods are GameBanana's, best matches first.
+- [ ] **5.3 Adult content.** Ask for the game's most liked mods, 50 of them.
+  When GameBanana's first 50 hold mods it shows behind a warning, `leftOut` counts them, the page lists that many fewer,
+  and the agent says so, offering to include them.
+- [ ] **5.4 A file of a GameBanana mod.** Ask it to download the "Japanese voiceover pack update metadata" file of
+  `https://gamebanana.com/mods/440088` into the library.
+  It reads the mod with `mod_show`, whose files each have a `https://gamebanana.com/mmdl/<file>,Mod,440088` link, and
+  downloads that one, 504 bytes; `library_list` then lists it under game `16951` of `gamebanana`.
+- [ ] **5.5 Its updates.** Ask the agent to check the library for updates.
+  `library_check` counts the GameBanana mod among those it checked; there's no update for it.
+
 ## Results
 
 Copy this table into the release's notes or issue, and mark each check ✅, ❌ or – (not run). For a ❌, add what you
@@ -184,3 +205,8 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 3.4 Forgetting a mod | | |
 | 3.5 Rescanning | | |
 | 4.1 With the app | | |
+| 5.1 Which sites | | |
+| 5.2 A game's key alone | | |
+| 5.3 Adult content | | |
+| 5.4 A file of a GameBanana mod | | |
+| 5.5 Its updates | | |

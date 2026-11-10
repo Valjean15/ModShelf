@@ -1,6 +1,6 @@
 # Manual checklist
 
-CI never calls a live mod site, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Phase 3 is done when they all pass.
+CI never calls a live mod site, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 13 checks GameBanana, once, with no account of its own. Phase 3 is done when they all pass.
 
 The checks use the CLI. They download files into a temporary folder, and keep the library database and credentials apart from your own. One section changes your account: it tracks SMAPI and untracks it again, leaving your tracked mods as they were.
 
@@ -28,7 +28,7 @@ $cli = Resolve-Path src/ModShelf.Cli/bin/Debug/net10.0/ModShelf.Cli.dll
 function ms { dotnet $cli @args }
 ```
 
-Run sections 1 to 12 with the Premium account first. Then run them again with the free account, skipping the checks marked **Premium only**. Each account downloads into a folder of its own, so the second run doesn't find the first one's files:
+Run sections 1 to 12 with the Premium account first. Then run them again with the free account, skipping the checks marked **Premium only**. Run section 13 once, in the Premium run, before section 12. Each account downloads into a folder of its own, so the second run doesn't find the first one's files:
 
 ```powershell
 $downloads = Join-Path $test 'Premium'   # 'Free' for the free account
@@ -220,6 +220,39 @@ These checks make the desktop app open Nexus Mods' `nxm://` links, from the comm
 - [ ] **12.4 Search without an account.** `ms mod search smapi --game stardewvalley`.
   Write down what happens: Nexus Mods doesn't say whether its search needs an account. Either results or "The site needs a linked account to search…" is fine.
 
+## 13. GameBanana
+
+GameBanana needs no account. The checks use P5R Female Protagonist (mod 440088) of Persona 5 Royal (PC) (game 16951), and download only its small metadata files, of a few hundred bytes:
+
+```powershell
+$gb = Join-Path $test 'GameBanana'
+```
+
+- [ ] **13.1 A mod's page.** `ms mod show "https://gamebanana.com/mods/440088"`.
+  "P5R Female Protagonist", "Game: Persona 5 Royal (PC)", its author, "Likes:" and "Downloads:", and its page. Under "Main files", the mod and its voiceover packs, the newest marked `*`; under "Miscellaneous files", their metadata files of a few hundred bytes. Each file's link is `https://gamebanana.com/mmdl/<file>,Mod,440088`. "1 more file (an old version, archived or in no section) isn't shown". Exit code 0.
+- [ ] **13.2 Old versions and the changelog.** The same with `--all --changelog`.
+  An "Old versions" section with the archived version, then the changelog, newest version first, as the mod's Updates tab on the website lists it.
+- [ ] **13.3 Games by name.** `ms mod games persona 5 --source gamebanana`, timing it: `Measure-Command { ms mod games persona 5 --source gamebanana | Out-Host }`.
+  "10 games on GameBanana match.", `16951 Persona 5 Royal (PC)` among them. It reads GameBanana's whole list of games, nearly 100 pages: write down how long it took (a minute is expected the first time; less once GameBanana keeps the pages, for 10 minutes).
+- [ ] **13.4 A game's mods, and a game's key alone.** `ms mod search --game 16951 --page-size 5`.
+  "*N* mods match, in the site's own order." The newest mods of the game on the website first. The number alone picks GameBanana, without `--source`, though a Nexus Mods account is linked. The Downloads column is `-`: GameBanana's lists don't say.
+- [ ] **13.5 Words, author and category.** `ms mod search protagonist --game 16951 --page-size 20`, `ms mod search --game 16951 --author chlorophylls`, then `ms mod search --game 16951 --category models --page-size 5`.
+  "best matches first", as the website's search for the words in the game; then the author's mods, P5R Female Protagonist among them; then only Models mods.
+- [ ] **13.6 Adult content.** `ms mod search --game 16951 --sort Endorsements --page-size 50`, then the same with `--adult`.
+  "most likes first". When the first 50 hold mods the website shows behind a warning, the first says "…, but *N* with adult content are left out (add --adult to see them)." and lists 50 less *N*; with `--adult`, 50, those included.
+- [ ] **13.7 What GameBanana can't search.** `ms mod search --game 16951 --updated-within 7`, then `ms mod search protagonist --game 16951 --sort Name`.
+  "GameBanana can't search by when mods were updated. It can search by words, by author and by category." Then "GameBanana sorts a search by words by best match, popularity, newest or recently updated only." Exit code 2 for each.
+- [ ] **13.8 Download a file by its link.** `ms download "https://gamebanana.com/mmdl/1662079,Mod,440088" --to $gb`.
+  "Checking the file", "Done", and `p5rpcfemaleprotagonist-jpnvoreleasemetadata.json`, 504 bytes, in the folder. Exit code 0.
+- [ ] **13.9 A 1-click link behind a mod manager's scheme.** `ms download "jasm-plus:https://gamebanana.com/mmdl/1662077,Mod,440088" --to $gb`.
+  The same, with `p5rpcfemaleprotagonist-engvoreleasemetadata.json`, 500 bytes.
+- [ ] **13.10 Into the library, and its updates.** `ms download "https://gamebanana.com/mmdl/1722099,Mod,440088"`, then `ms library list --files`, `ms library check` and `ms library updates`.
+  "Added to the library."; the file under `gamebanana/16951/P5R Female Protagonist (440088)` in the library's folder, its mod watched; the check counts the GameBanana mod among those it checked, and `library updates` lists no update of it.
+- [ ] **13.11 Refusals.** `ms download "https://gamebanana.com/mmdl/1662079" --to $gb`, `ms mod show "https://gamebanana.com/games/16951"`, then `ms mod show "https://gamebanana.com/mods/999999999"`.
+  "This GameBanana link names a file but not its mod, so ModShelf can't tell whose it is. Copy the mod's page link instead."; "This GameBanana link isn't to a mod or its files. Copy a mod's page link."; "The site has no such mod or file." Exit code 2 for each.
+- [ ] **13.12 Forget it.** `ms library forget "https://gamebanana.com/mods/440088"`.
+  The mod leaves the library; its file stays on disk.
+
 ## Clean up
 
 After both accounts:
@@ -293,3 +326,15 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 12.2 Listed as not linked | | | |
 | 12.3 Needs an account | | | |
 | 12.4 Search without an account | | | |
+| 13.1 GameBanana mod's page | | – | |
+| 13.2 Old versions and changelog | | – | |
+| 13.3 Games by name (time: …) | | – | |
+| 13.4 A game's mods, key alone | | – | |
+| 13.5 Words, author, category | | – | |
+| 13.6 Adult content | | – | |
+| 13.7 What it can't search | | – | |
+| 13.8 Download by its link | | – | |
+| 13.9 Link behind a scheme | | – | |
+| 13.10 Into the library | | – | |
+| 13.11 Refusals | | – | |
+| 13.12 Forget it | | – | |

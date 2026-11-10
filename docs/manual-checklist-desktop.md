@@ -1,6 +1,6 @@
 # Manual checklist: the desktop app
 
-CI never calls a live mod site, and never clicks through the desktop app, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Phase 5 is done when every flow of Phases 1 to 4 works from the app, without the command line. The command line has its own checklist, [manual-checklist.md](manual-checklist.md).
+CI never calls a live mod site, and never clicks through the desktop app, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 15 checks GameBanana, once, with no account of its own. Phase 5 is done when every flow of Phases 1 to 4 works from the app, without the command line. The command line has its own checklist, [manual-checklist.md](manual-checklist.md).
 
 The checks download files into a test folder, and keep the library database, settings and credentials apart from your own. One section changes your account: it tracks SMAPI and untracks it again, leaving your tracked mods as they were.
 
@@ -30,7 +30,7 @@ function app { Start-Process dotnet -ArgumentList "`"$app`"" }
 
 The quotes around the path matter: `Start-Process` passes it on as it is, so a path with a space, such as `D:\Repository backups\ModShelf`, would reach `dotnet` as two arguments, and its window would close at once.
 
-Run sections 1 to 14 with the Premium account first, then again with the free account, skipping the checks marked **Premium only** and running those marked **free only**. Before the second run, close the app (the tray menu's **Quit ModShelf**), and delete the test folder, so the free account starts afresh:
+Run sections 1 to 14 with the Premium account first, then again with the free account, skipping the checks marked **Premium only** and running those marked **free only**. Run section 15 once, in the Premium run, before section 14. Before the second run, close the app (the tray menu's **Quit ModShelf**), and delete the test folder, so the free account starts afresh:
 
 ```powershell
 Remove-Item -Recurse -Force $test
@@ -79,9 +79,9 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
 ## 3. Browse
 
 - [ ] **3.1 The games.** Open the Browse screen.
-  The game picker's field says "Find a game"; clicking it opens a list under it saying "Type to find any of the *N* games on Nexus Mods." and which keys do what. With nothing in the library yet, it starts with none chosen: "Choose a game to search its mods."
+  The game picker's field says "Find a game"; clicking it opens a list under it saying "Type to find any of the *N* games on Nexus Mods and GameBanana." and which keys do what, once both sites' games are read: the first time in a run, a bar under the field runs while GameBanana's list is read, which can take a minute (write down how long; ADR 0087). With nothing in the library yet, it starts with none chosen: "Choose a game to search its mods."
 - [ ] **3.1a Games by name.** Type each in the game picker: `stalker 2`, `final fantasy 12`, `dragons dogma`, `valley`, `dew`. Then type `star`, press ↓ twice and Enter; open it again, type `sky`, and press Escape.
-  S.T.A.L.K.E.R. 2: Heart of Chornobyl; Final Fantasy XII: The Zodiac Age; Dragon's Dogma 2; for `valley`, the games whose names start with "Valley" first, then Stardew Valley and the others; for `dew`, "No game's name has “dew”." Clearing the field shows the hint again. ↓ moves the highlight, and Enter chooses the third game: it shows as a chip in the field, and its rows load. Escape closes the list, forgetting `sky`, the chip still there.
+  S.T.A.L.K.E.R. 2: Heart of Chornobyl; Final Fantasy XII: The Zodiac Age; Dragon's Dogma 2; for `valley`, the games whose names start with "Valley" first, then Stardew Valley and the others; for `dew`, "No game's name has “dew”." Clearing the field shows the hint again. ↓ moves the highlight, and Enter chooses the third game: it shows as a chip in the field, and its rows load. Escape closes the list, forgetting `sky`, the chip still there. Each game's name has its site after it, as in "Stardew Valley (Nexus Mods)", since GameBanana's games are listed too; a game on both shows twice. For `dew`, a GameBanana game's name may hold it: write down which.
 - [ ] **3.2 Search.** Choose Stardew Valley (type to filter the list), type `smapi` in the search box, and **Search**.
   "*N* mods match." SMAPI is near the top, with its downloads, endorsements and last update.
 - [ ] **3.2a The game's rows.** Clear the search box.
@@ -336,7 +336,33 @@ Nexus Mods' **Mod manager download** buttons hand a download over with an `nxm:/
 - [ ] **14.1 Unlink.** On the Accounts screen, **Unlink**.
   "Unlink Nexus Mods?" **Unlink**: "Unlinked. Its stored credentials are deleted." The card says "No account is linked.", and the sidebar **Link an account**. On Windows, `account_nexus.secret` is gone from the test folder's `Secrets` folder.
 - [ ] **14.2 Browse needs it.** Open the Browse screen, and **Try again** if it shows a message.
-  "Nexus Mods needs your account linked, or refused the one linked. …", with **Go to Accounts**, which opens the Accounts screen.
+  "Nexus Mods needs your account linked, or refused the one linked. …", with **Go to Accounts**, which opens the Accounts screen. GameBanana's games are still in the game picker.
+
+## 15. GameBanana
+
+GameBanana needs no account. The checks use Persona 5 Royal (PC) and P5R Female Protagonist, and download only its small metadata files, of a few hundred bytes.
+
+- [ ] **15.1 A GameBanana game.** On the Browse screen, type `persona 5 royal` in the game picker.
+  "Persona 5 Royal (PC) (GameBanana)" among the games, beside Nexus Mods' of that name, each with its site. Choose it.
+- [ ] **15.2 The game's rows.** Look at the game's page.
+  **Trending**, **Recently added** and **Recently updated**, each with GameBanana's mods, their pictures and likes, as the game's page on the website shows them. A mod GameBanana shows behind a warning, should Trending have one, has its picture blurred and an "Adult content" tag; the other rows leave such mods out.
+- [ ] **15.3 Filters.** Open **Filters**.
+  The order box offers **Best match**, **Newest**, **Oldest**, **Recently updated**, **Most likes**, **Most downloaded**, **Name, A to Z** and **Name, Z to A**; no "Updated within"; the game's categories (Models, Textures, QOL…); an author box; **Include adult content**; and 20 or 50 per page. Apply **Most likes** and **50** per page, then **Load more**.
+  50 mods, then more. When GameBanana's first 50 hold mods it shows behind a warning, the first page lists fewer than 50, and **Load more** goes on after them without repeating any. Ticking **Include adult content** lists them, their pictures blurred.
+- [ ] **15.4 Words, author and category.** Search `protagonist`, then clear it and type `chlorophylls` in the author box, then clear that and choose **Models** in the category box.
+  Mods matching the words, "Best match" the order; then the author's mods, P5R Female Protagonist among them; then Models mods only. Words with an author or a category at once are refused, saying GameBanana can't search by words and by author or category at once.
+- [ ] **15.5 A mod's page.** Paste `https://gamebanana.com/mods/440088` into the search box, and **Search**.
+  P5R Female Protagonist: its picture, "by chlorophylls", its version, likes, downloads and last update, its summary, and **Open on GameBanana**. "Files on GameBanana": the mod and its voiceover packs under "Main", their metadata files under "Miscellaneous", each with **Download** and **Save to a folder…**; **Show 1 more file** lists the archived version under "Old versions". "Changelog" shows its latest versions, newest first.
+- [ ] **15.6 Download a file.** **Download** on "Japanese voiceover pack update metadata".
+  It goes into the library in a moment: the file says "In the library", and the Library screen shows Persona 5 Royal (PC) with GameBanana's banner and "1 mod". With Nexus Mods' mods in the library too, each game shows its site in a chip, and the Library has a **Site** box (ADR 0069): choosing GameBanana shows Persona 5 Royal (PC) alone.
+- [ ] **15.7 Its folder and its updates.** In the mod's **…** menu on the Library screen, **Open folder**; then **Check now** on the Updates screen.
+  The folder is `Library\gamebanana\16951\P5R Female Protagonist (440088)`, holding the file. The check counts the mod, and finds no update for it.
+- [ ] **15.8 Save to a folder.** On the mod's page, **Save to a folder…** on "English voiceover pack update metadata", and pick the test folder.
+  The file, 500 bytes, in the test folder, and the Downloads screen lists it done.
+- [ ] **15.9 Links it refuses.** Paste each into the Downloads screen's box, and **Download**: `https://gamebanana.com/mmdl/1662079` and `https://gamebanana.com/games/16951`.
+  "This GameBanana link names a file but not its mod, so ModShelf can't tell whose it is. Copy the mod's page link instead." Then "This GameBanana link isn't to a mod or its files. Copy a mod's page link."
+- [ ] **15.10 Remove it.** In the mod's **…** menu on the Library screen, **Remove from library**.
+  The mod leaves the library, its file staying on disk, and Persona 5 Royal (PC) leaves the Library's games.
 
 ## Clean up
 
@@ -481,3 +507,13 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 13.2 What each run is | | | |
 | 14.1 Unlink | | | |
 | 14.2 Browse needs it | | | |
+| 15.1 A GameBanana game | | – | |
+| 15.2 The game's rows | | – | |
+| 15.3 Filters | | – | |
+| 15.4 Words, author, category | | – | |
+| 15.5 A mod's page | | – | |
+| 15.6 Download a file | | – | |
+| 15.7 Its folder and updates | | – | |
+| 15.8 Save to a folder | | – | |
+| 15.9 Links it refuses | | – | |
+| 15.10 Remove it | | – | |
