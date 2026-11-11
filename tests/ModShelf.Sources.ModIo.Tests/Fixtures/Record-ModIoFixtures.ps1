@@ -27,15 +27,16 @@
       the games open to third parties, 100 a page, by name and by a word of the game's name;
     - one open game with many mods: the game, its mods 50 a page in each order a search can ask for, two pages deep for
       the newest and the latest updated, and narrowed by words, author, tag, update date and explicit content;
-    - one of its mods with several files: the mod, the mod found by the name in its link, its files, its live file, what
-      it depends on, and where its live file's download link leads (asked for one byte, so nothing is downloaded);
+    - one of its mods with several files: the mod, the mod found by the name in its link, its files and its live file,
+      as any platform's and as Windows' (X-Modio-Platform), what it depends on, and where its live file's download link
+      leads (asked for one byte, so nothing is downloaded);
     - the game's file events since 28 days ago, its latest events, and its oldest, to see how far back they reach;
     - your subscriptions, with the token and with the key;
     - a game closed to third parties, a game, mod and file that don't exist, and a token and a key mod.io refuses.
 
-    A run that completes replaces the earlier recordings; one that stops leaves them as they were. It makes about 90
-    requests, one at a time, a little over a second apart (mod.io allows a key 60 a minute), and stops if mod.io asks
-    it to slow down.
+    A run that completes replaces the earlier recordings; one that stops leaves them as they were, and puts what it had
+    recorded in Recorded-partial, which isn't to be committed. It makes about 90 requests, one at a time, a little over
+    a second apart (mod.io allows a key 60 a minute), and stops if mod.io asks it to slow down.
 
     Long text the source never reads (descriptions, metadata) is left out, and lists the source reads only the start of
     (pictures) are cut to 2.
@@ -198,7 +199,8 @@ function Invoke-ModIo {
         [int] $ForGame = $script:Game,
         [uri] $Absolute,
         [string] $Token = $script:Token,
-        [string] $Key = $script:Key
+        [string] $Key = $script:Key,
+        [string] $Platform
     )
 
     Start-Sleep -Milliseconds $PauseMilliseconds
@@ -223,6 +225,10 @@ function Invoke-ModIo {
     $request.Headers.Add('Accept', 'application/json')
     if ($Auth -eq 'token') {
         $request.Headers.Authorization = [System.Net.Http.Headers.AuthenticationHeaderValue]::new('Bearer', $Token)
+    }
+
+    if ($Platform) {
+        $request.Headers.Add('X-Modio-Platform', $Platform)
     }
 
     if ($Absolute) {
@@ -259,6 +265,7 @@ function Invoke-ModIo {
             Method  = 'GET'
             Server  = if ($Absolute) { 'download' } else { $Server }
             Auth    = $Auth
+            Platform = $Platform
             Path    = $recordedPath
             Query   = $query
             Status  = [int]$response.StatusCode
@@ -448,6 +455,9 @@ function Save-Fixture([string] $Name, $Exchange) {
     $path = [regex]::Replace((Hide-DownloadHash $Exchange.Path), "(?<=/)$([regex]::Escape($script:Me.UserId))(?=/|$)", $Stand.UserId)
     $request['path'] = [System.Text.Json.Nodes.JsonValue]::Create($path)
     $request['query'] = [System.Text.Json.Nodes.JsonValue]::Create($Exchange.Query)
+    if ($Exchange.Platform) {
+        $request['platform'] = [System.Text.Json.Nodes.JsonValue]::Create($Exchange.Platform)
+    }
 
     $response = [System.Text.Json.Nodes.JsonObject]::new()
     $response['status'] = [System.Text.Json.Nodes.JsonValue]::Create($Exchange.Status)
@@ -730,15 +740,34 @@ try {
     Save-Fixture 'mod' $modAnswer
     Save-Fixture 'mod-by-name-id' (Invoke-ModIo $GameHost "games/$Game/mods" ([ordered]@{ 'name_id' = (Get-Text $modBody['name_id']) }))
     Save-Fixture 'mod-files' (Invoke-ModIo $GameHost "games/$Game/mods/$ModId/files" ([ordered]@{ '_sort' = '-date_added'; '_limit' = 100 }))
+    Save-Fixture 'mod-files-windows' (Invoke-ModIo $GameHost "games/$Game/mods/$ModId/files" ([ordered]@{ '_sort' = '-date_added'; '_limit' = 100 }) -Platform windows)
     $liveFile = $modBody['modfile']
     if ($liveFile -is [System.Text.Json.Nodes.JsonObject]) {
+        # The live file, as any platform's and as Windows', and its download link from whichever gives one.
         $liveId = Get-Text $liveFile['id']
-        $fileAnswer = Invoke-ModIo $GameHost "games/$Game/mods/$ModId/files/$liveId"
-        Save-Fixture 'mod-file' $fileAnswer
-        $binary = Get-Text (Read-Answer $fileAnswer "file $liveId")['download']['binary_url']
+        $binary = $null
+        foreach ($asked in @(@{ Name = 'mod-file'; Platform = $null }, @{ Name = 'mod-file-windows'; Platform = 'windows' })) {
+            $fileAnswer = Invoke-ModIo $GameHost "games/$Game/mods/$ModId/files/$liveId" -Platform $asked.Platform
+            Save-Fixture $asked.Name $fileAnswer
+            $fileBody = ConvertTo-Node $fileAnswer.Text
+
+            # Assigned, not the value of an if: PowerShell would take a JSON object for a list of its properties.
+            $download = $null
+            if ($fileAnswer.Status -eq 200 -and $fileBody -is [System.Text.Json.Nodes.JsonObject]) {
+                $download = $fileBody['download']
+            }
+
+            if (-not $binary -and $download -is [System.Text.Json.Nodes.JsonObject]) {
+                $binary = Get-Text $download['binary_url']
+            }
+        }
+
         if ($binary) {
             Save-Fixture 'download-token' (Invoke-ModIo -Absolute ([uri]$binary) -Auth token)
             Save-Fixture 'download-none' (Invoke-ModIo -Absolute ([uri]$binary) -Auth none)
+        }
+        else {
+            Write-Host "  mod.io gave $modName's live file without a download link, so no download was recorded."
         }
     }
     else {
@@ -780,6 +809,20 @@ try {
     Get-ChildItem -Path $Recorded -Filter '*.json' -File | Remove-Item
     Get-ChildItem -Path $OutFolder -Filter '*.json' -File | Move-Item -Destination $Recorded
     Write-Host "Done: $Saved files. Revoke the token on mod.io's API Access page, review the files, then tell Claude they are there."
+}
+catch {
+    # What was recorded before it stopped, each file checked as any, for Claude to see why.
+    if ($Saved -gt 0 -and (Test-Path -LiteralPath $OutFolder)) {
+        $partial = Join-Path $PSScriptRoot 'Recorded-partial'
+        if (Test-Path -LiteralPath $partial) {
+            Remove-Item -LiteralPath $partial -Recurse -Force
+        }
+
+        Copy-Item -LiteralPath $OutFolder -Destination $partial -Recurse
+        Write-Host "It stopped after $Saved files, which are in $partial (not to commit). Tell Claude what it said."
+    }
+
+    throw
 }
 finally {
     $Http.Dispose()
