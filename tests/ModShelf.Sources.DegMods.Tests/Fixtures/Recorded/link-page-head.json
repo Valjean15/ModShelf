@@ -1,0 +1,12 @@
+{
+  "request": {
+    "method": "HEAD",
+    "url": "https://www.mediafire.com/file/hdufpfmnt93zfq9/Halo_%2526_Doom_Music_Replace_Combat_Music.zip"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "text/html; charset=UTF-8"
+    }
+  }
+}

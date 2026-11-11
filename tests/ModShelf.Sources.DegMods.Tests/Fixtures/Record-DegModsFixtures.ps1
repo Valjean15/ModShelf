@@ -29,7 +29,9 @@
       Mods' (428), and the other's answer to HEAD and to the file's first kilobyte;
     - a file of the second mod that only DEG Mods' server has: its 428, and each other server's 404;
     - a catbox.moe file's HEAD and first kilobyte, and one catbox.moe no longer has; where an archive.org link leads
-      (HEAD).
+      (HEAD);
+    - what a link elsewhere gives, as the source asks it (HEAD): one to the file itself, given to -FileLink, and one to a
+      page that leads to it, given to -PageLink.
 
     A file's first kilobyte is asked with a Range header, and a redirect followed, each answer saved.
 
@@ -42,7 +44,7 @@
 
     Each event's ID is checked to be the SHA-256 of its content, as NIP-01 says, before it's written.
 
-    A run that completes replaces the earlier recordings; one that stops leaves them as they were. It makes about 60
+    A run that completes replaces the earlier recordings; one that stops leaves them as they were. It makes about 62
     requests, one at a time with a pause between them.
 
 .PARAMETER Mods
@@ -54,6 +56,14 @@
 .PARAMETER Author
     An author whose mods are paged through, a few at a time: one with more than a few mods, all ordinary ones. By
     default the author of Starfield's music replacers (nine mods, one an old event moved to the new kind).
+
+.PARAMETER FileLink
+    A link to a mod's file on a host that gives the file itself there, though it isn't a Blossom server or a host the
+    source knows. By default, Fallout: New Vegas' Standalone Driveable Cars v7.11, on RPGHQ's file host.
+
+.PARAMETER PageLink
+    A link to a mod's file that leads to a page. By default, a MediaFire link of the -Author's mods: Halo & Doom Music
+    Replace Combat Music.
 
 .EXAMPLE
     ./Record-DegModsFixtures.ps1
@@ -88,6 +98,9 @@ param(
 
     [ValidatePattern('^[0-9a-f]{64}$')]
     [string] $Author = 'b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a',
+
+    [uri] $FileLink = 'https://f.rpghq.org/14Y3yg8yWsCn.7z?n=FixedFrontierStandaloneCarsPack_FOMOD-v7.11.7z',
+    [uri] $PageLink = 'https://www.mediafire.com/file/hdufpfmnt93zfq9/Halo_%2526_Doom_Music_Replace_Combat_Music.zip',
 
     # Only for testing this script against local fakes of DEG Mods.
     [uri[]] $Relays = @('wss://brs.degmods.com', 'wss://relay.degmods.com'),
@@ -644,6 +657,10 @@ try {
     if ($archive) {
         Save-File 'archive-head' (Invoke-File $archive.Url -Head)
     }
+
+    # Links elsewhere: one gives the file, the other a page.
+    Save-File 'link-file-head' (Invoke-File $FileLink -Head)
+    Save-File 'link-page-head' (Invoke-File $PageLink -Head)
 
     New-Item -ItemType Directory -Force -Path $Recorded | Out-Null
     Get-ChildItem -Path $Recorded -Filter '*.json' -File | Remove-Item

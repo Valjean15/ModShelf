@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "HEAD",
+    "url": "https://f.rpghq.org/14Y3yg8yWsCn.7z?n=FixedFrontierStandaloneCarsPack_FOMOD-v7.11.7z"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "ETag": "919d4fc9de49b999ed17259cbce085f971710a834_z961cf4a2b794952c86930616_f1089f3443d000693_d20250512_m010702_c005_v0501003_t0047_u01747012022666",
+      "Accept-Ranges": "bytes",
+      "Content-Type": "application/x-7z-compressed",
+      "Content-Length": "492821667",
+      "Last-Modified": "Wed, 11 Nov 2026 19:01:35 GMT",
+      "Content-Disposition": "filename=FixedFrontierStandaloneCarsPack_FOMOD-v7.11.7z"
+    }
+  }
+}
