@@ -409,6 +409,8 @@ DEG Mods needs no account. The checks use the links of the command line's checkl
   No card for DEG Mods: it needs no account.
 - [ ] **17.2 A DEG Mods game.** On the Browse screen, type `vegas` in the game picker, and choose "Fallout: New Vegas (DEG Mods)".
   DEG Mods' games come from its mods, beside the other sites', after a few seconds the first time. No **Trending** row; **Recently added** and **Recently updated**, with DEG Mods' pictures, those of older mods on DEG Mods' own servers too (Smook's Police Gear Pack's among them), no approval and no downloads; the log has no "couldn't be downloaded" for a picture from `bs.degmods.com`; a mod DEG Mods marks NSFW is left out unless **Include adult content** is ticked.
+- [ ] **17.2a Covers.** In the game picker's list, look at Fallout: New Vegas (DEG Mods) and Street Fighter 6 (DEG Mods); after 17.5, at the Library's games.
+  Each has its cover, the game's wide picture from DEG Mods' games database (Steam's for most games), a few seconds after the first listing of a run; the log has "DEG Mods' games database has covers for *N* of its *M* games" once a run. A game the database lacks shows its initial.
 - [ ] **17.3 Filters.** Open **Filters**.
   The order box offers **Newest**, **Oldest**, **Recently updated**, **Name, A to Z** and **Name, Z to A**; no category; author and "Updated within" are offered. An author is their `npub1…`, as the mods' cards name them.
 - [ ] **17.4 A mod's page.** Paste the Better Newspapers link into the search box, and **Search**.
@@ -599,6 +601,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 16.10 Unlink it | | – | |
 | 17.1 No card | | – | |
 | 17.2 A DEG Mods game | | – | |
+| 17.2a Covers | | – | |
 | 17.3 Filters | | – | |
 | 17.4 A mod's page | | – | |
 | 17.5 Download it | | – | |
