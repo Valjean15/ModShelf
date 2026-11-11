@@ -37,6 +37,12 @@ public sealed partial class BrowseViewModel
     partial void OnSelectedSiteChanged(SiteChoice value)
     {
         Picker.ShowSite(value.Source);
+        if (Game is null || IsGamesProblem)
+        {
+            // Only the problems of the sites whose games are offered.
+            ShowGamesProblem();
+        }
+
         if (_showingSite)
         {
             return;
@@ -59,7 +65,9 @@ public sealed partial class BrowseViewModel
     /// <summary>
     /// Whether <paramref name="game"/> is of the site chosen, or every site is.
     /// </summary>
-    private bool OfSiteChosen(GameRef game) => SelectedSite.Source is not { } site || game.Source == site;
+    private bool OfSiteChosen(GameRef game) => OfSiteChosen(game.Source);
+
+    private bool OfSiteChosen(SourceId source) => SelectedSite.Source is not { } site || source == site;
 
     /// <summary>
     /// Shows <paramref name="choice"/> in the site box without choosing a game or remembering it, as when it's put back

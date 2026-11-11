@@ -1,6 +1,7 @@
 using ModShelf.Application.State;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.ViewModels.Browse;
+using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Testing;
 
 namespace ModShelf.Presentation.Tests.ViewModels.Browse;
@@ -148,6 +149,39 @@ public sealed class BrowseSiteBoxTests : IDisposable
         Assert.Equal(shown, Screen.SelectedSite.Name);
         Assert.Equal(shown == "Nexus Mods" ? BrowseHarness.Skyrim.Game : BrowseHarness.Royal.Game, Screen.Game?.Game);
         Assert.Equal(remembered, _harness.UiState.State.BrowseSite);
+    }
+
+    [Fact]
+    public async Task ASitesGamesThatCantBeReadAreSaidOnlyWhileItsGamesAreOffered()
+    {
+        _harness.Lookup.Refusals["GetGamesAsync"] = new AuthenticationFailedException("No account is linked.");
+        await _harness.StartAsync();
+        await _harness.ShowAsync();
+        (string?, bool) all = (Screen.Problem, Screen.IsGamesProblem);
+
+        Screen.SelectedSite = Site("GameBanana");
+        (string?, bool) banana = (Screen.Problem, Screen.IsGamesProblem);
+        Screen.SelectedSite = Site("Nexus Mods");
+
+        Assert.Equal((true, true), (all.Item1 is not null, all.Item2));
+        Assert.Equal((null, false), banana);
+        Assert.Equal((all.Item1, true, true), (Screen.Problem, Screen.IsGamesProblem, Screen.NeedsAccount));
+    }
+
+    [Fact]
+    public async Task ASitesGamesReadAgainAreNoLongerSaidToHaveFailed()
+    {
+        _harness.Lookup.Refusals["GetGamesAsync"] = new AuthenticationFailedException("No account is linked.");
+        await _harness.StartAsync();
+        await _harness.ShowAsync();
+        bool failed = Screen.IsGamesProblem;
+
+        await Screen.ReadGamesCommand.ExecuteAsync(null);
+        Screen.SelectedSite = Site("GameBanana");
+        Screen.SelectedSite = Site("All sites");
+
+        Assert.True(failed);
+        Assert.Equal((null, false), (Screen.Problem, Screen.IsGamesProblem));
     }
 
     [Fact]

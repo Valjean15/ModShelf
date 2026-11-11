@@ -31,6 +31,12 @@ public sealed partial class BrowseViewModel
     private GameRef? _asked;
 
     /// <summary>
+    /// The sites whose games couldn't be read, with why, in the order they failed: said while the site box offers their
+    /// games.
+    /// </summary>
+    private readonly Dictionary<SourceId, (string Problem, bool NeedsAccount)> _gamesProblems = [];
+
+    /// <summary>
     /// The last reading of the chosen game's own settings, for tests to wait on.
     /// </summary>
     internal Task DefaultsWork { get; private set; } = Task.CompletedTask;
@@ -110,6 +116,7 @@ public sealed partial class BrowseViewModel
 
         IsReadingGames = true;
         GamesFailed = false;
+        _gamesProblems.Clear();
         Tell(null, needsAccount: false);
         List<(GameChoice Choice, GameInfo Info)> games = [];
         try
@@ -192,15 +199,37 @@ public sealed partial class BrowseViewModel
         catch (Exception exception) when (Describe(exception, site, Strings.BrowseGamesFailed) is { } problem)
         {
             GamesFailed = true;
-            Tell(problem, exception is AuthenticationFailedException, games: true);
+            TellGamesProblem(source, problem, exception is AuthenticationFailedException);
             return null;
         }
         catch (Exception exception)
         {
             LogGamesFailed(_logger, exception, source.Value);
             GamesFailed = true;
-            Tell(Strings.SomethingWentWrong, needsAccount: false, games: true);
+            TellGamesProblem(source, Strings.SomethingWentWrong, needsAccount: false);
             return null;
+        }
+    }
+
+    private void TellGamesProblem(SourceId source, string problem, bool needsAccount)
+    {
+        _gamesProblems[source] = (problem, needsAccount);
+        ShowGamesProblem();
+    }
+
+    /// <summary>
+    /// Says why a site's games couldn't be read: the first such site whose games the site box offers; nothing when none
+    /// is.
+    /// </summary>
+    private void ShowGamesProblem()
+    {
+        if (_gamesProblems.FirstOrDefault(failed => OfSiteChosen(failed.Key)) is { Key: not null } shown)
+        {
+            Tell(shown.Value.Problem, shown.Value.NeedsAccount, games: true);
+        }
+        else if (IsGamesProblem)
+        {
+            Tell(null, needsAccount: false);
         }
     }
 

@@ -23,6 +23,8 @@ a site filter in Browse, and chose **a site box beside the game box**: **All sit
   staying until another is, its chip saying its site. Browse starts on the site's favourite game the same way.
 - **The site follows the game.** A game of another site chosen elsewhere, as quick search opens it (quick search keeps
   every site's games), moves the box to that site.
+- **A site's games that couldn't be read** are said only while the box offers that site's games: with DEG Mods chosen,
+  Nexus Mods' "needs your account linked" doesn't show; with all sites, the first site that failed is said, as before.
 - **Remembered** between runs as state, not a setting: `UiState.BrowseSite`, the site's source ID, `browseSite` in
   `ui-state.json`; a site ModShelf no longer has is passed over, for all sites. Restoring it isn't remembered again.
   One that can't be remembered is logged (970).
@@ -39,5 +41,5 @@ a site filter in Browse, and chose **a site box beside the game box**: **All sit
 
 - Presentation: the box's sites; a site narrowing the picker, its names and hint, and the site not asked; all sites back;
   the favourite game chosen with a site, or the picker opened; quick search moving the box; remembered, restored, a site
-  no longer there, and one that can't be remembered.
+  no longer there, and one that can't be remembered; a site's games that couldn't be read said only while it's offered.
 - Application: `UiState.BrowseSite` trimmed, and compared. Infrastructure: `browseSite` read and written.
