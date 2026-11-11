@@ -211,6 +211,48 @@ public sealed class DegModsSourceCatalogTests : IDisposable
         Assert.Equal(could, Source().CouldBeGameKey(key));
     }
 
+    [Fact]
+    public async Task ShowsAPictureOnDegModsOldServerFromAnotherByItsSha256()
+    {
+        ModRef policeGear = new(FalloutNewVegas, $"{RecordedDegMods.FalloutAuthor}:{RecordedDegMods.PoliceGear}");
+
+        ModInfo mod = await Source().GetModAsync(policeGear, TestContext.Current.CancellationToken);
+
+        // Its event names https://bs.degmods.com/1cf575c9….png, which DEG Mods' old server gives only to its site.
+        Assert.Equal("https://blossom.primal.net/1cf575c9001aa4b035e16e1039322e45464caddf176dff89915d347134fb544d.png", mod.PictureUrl?.AbsoluteUri);
+    }
+
+    [Theory]
+    [InlineData("https://bs.degmods.com/{0}.png", "https://blossom.primal.net/{0}.png")]
+    [InlineData("https://brs.degmods.com/{0}", "https://blossom.primal.net/{0}")]
+    [InlineData("https://BS.degmods.com/{0}.JPG", "https://blossom.primal.net/{0}.JPG")]
+    [InlineData("https://image.nostr.build/{0}.png", "https://image.nostr.build/{0}.png")]
+    [InlineData("https://bs.degmods.com/pictures/{0}.png", "https://bs.degmods.com/pictures/{0}.png")]
+    [InlineData("http://localhost:3000/{0}.png", null)]
+    public async Task ShowsAPictureOnDegModsOwnServerFromTheFirstFileServerAndNoneOnThisComputer(string picture, string? shown)
+    {
+        const string Sha256 = "4e6ec40ee934696a7de4a03e2a043380a68e1b2bfd1ec9134886d0745b86e4ea";
+        TestAuthor author = new(4);
+        _degMods.Brs.Add(author.Mod("x", "A mod", "Game", 100, [], ["image", Format(picture, Sha256)]));
+
+        ModInfo mod = await Source().GetModAsync(new ModRef(new GameRef(DegMods, "game"), $"{author.PublicKey}:x"), TestContext.Current.CancellationToken);
+
+        Assert.Equal(shown is null ? null : Format(shown, Sha256), mod.PictureUrl?.OriginalString);
+        Assert.Equal(mod.PictureUrl, mod.ThumbnailUrl);
+    }
+
+    [Fact]
+    public async Task ShowsNoPictureOnDegModsOwnServerWhenEveryFileServerIsItsOwn()
+    {
+        TestAuthor author = new(4);
+        _degMods.Brs.Add(author.Mod("x", "A mod", "Game", 100, [], ["image", "https://bs.degmods.com/4e6ec40ee934696a7de4a03e2a043380a68e1b2bfd1ec9134886d0745b86e4ea.png"]));
+        using ServiceProvider services = _degMods.BuildServices(options => options with { FileServers = [new Uri("https://brs.degmods.com/")] });
+
+        ModInfo mod = await Source(services).GetModAsync(new ModRef(new GameRef(DegMods, "game"), $"{author.PublicKey}:x"), TestContext.Current.CancellationToken);
+
+        Assert.Null(mod.PictureUrl);
+    }
+
     public void Dispose()
     {
         _services.Dispose();
@@ -220,4 +262,6 @@ public sealed class DegModsSourceCatalogTests : IDisposable
     private DegModsSource Source() => Source(_services);
 
     private static DegModsSource Source(ServiceProvider services) => services.GetServices<IModSource>().OfType<DegModsSource>().Single();
+
+    private static string Format(string format, string sha256) => string.Format(System.Globalization.CultureInfo.InvariantCulture, format, sha256);
 }

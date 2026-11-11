@@ -3,6 +3,7 @@ using System.Net;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.DegMods.Catalog;
+using ModShelf.Sources.DegMods.Downloads;
 using ModShelf.Sources.DegMods.Links;
 
 namespace ModShelf.Sources.DegMods;
@@ -94,10 +95,31 @@ public sealed partial class DegModsSource : IModCatalog
             Nip19.Npub(mod.Author),
             mod.Downloads.Count > 0 ? mod.Downloads[0].Version : null,
             ModPage(mod),
-            mod.Picture,
+            PictureOf(mod),
             mod.UpdatedAt,
             isAvailable: true,
             mod.IsAdult,
-            thumbnailUrl: mod.Picture,
+            thumbnailUrl: PictureOf(mod),
             publishedAt: mod.PublishedAt);
+
+    /// <summary>
+    /// The mod's picture: one on DEG Mods' own servers, which give files only to its site, from the first file server
+    /// by its SHA-256 instead, as DEG Mods' site asks its file servers too; none on this computer or its network.
+    /// </summary>
+    private Uri? PictureOf(DegMod mod)
+    {
+        if (mod.Picture is not { } picture || FileHosts.IsOnThisNetwork(picture))
+        {
+            return null;
+        }
+
+        if (!IsGated(picture) || FileHosts.BlossomHash(picture) is not { } sha256)
+        {
+            return picture;
+        }
+
+        return _options.FileServers.FirstOrDefault(server => !IsGated(server)) is { } fileServer
+            ? new Uri(fileServer, sha256 + Path.GetExtension(picture.AbsolutePath))
+            : null;
+    }
 }
