@@ -399,12 +399,12 @@ mod.io answers nothing without a credential. On [your API Access page](https://m
 
 ## 17. DEG Mods
 
-DEG Mods needs no account. The checks use the links of the command line's checklist, section 15: Better Newspapers for New Vegas Bounties II (`$newspapers`), Nipton Rebuilt Remade (`$nipton`), and the test post DEG Mods' admin blocked (`$blocked`).
+DEG Mods needs no account. The checks use the links of the command line's checklist, section 15: Better Newspapers for New Vegas Bounties II (`$newspapers`), Nipton Rebuilt Remade (`$nipton`), Standalone Driveable Cars v7.11 (`$cars`), and the test post DEG Mods' admin blocked (`$blocked`).
 
 - [ ] **17.1 No card.** Open the Accounts screen.
   No card for DEG Mods: it needs no account.
 - [ ] **17.2 A DEG Mods game.** On the Browse screen, type `vegas` in the game picker, and choose "Fallout: New Vegas (DEG Mods)".
-  DEG Mods' games come from its mods, beside the other sites', after a few seconds the first time. No **Trending** row; **Recently added** and **Recently updated**, with DEG Mods' pictures, no approval and no downloads; a mod DEG Mods marks NSFW is left out unless **Include adult content** is ticked.
+  DEG Mods' games come from its mods, beside the other sites', after a few seconds the first time. No **Trending** row; **Recently added** and **Recently updated**, with DEG Mods' pictures, those of older mods on DEG Mods' own servers too (Smook's Police Gear Pack's among them), no approval and no downloads; the log has no "couldn't be downloaded" for a picture from `bs.degmods.com`; a mod DEG Mods marks NSFW is left out unless **Include adult content** is ticked.
 - [ ] **17.3 Filters.** Open **Filters**.
   The order box offers **Newest**, **Oldest**, **Recently updated**, **Name, A to Z** and **Name, Z to A**; no category; author and "Updated within" are offered. An author is their `npub1…`, as the mods' cards name them.
 - [ ] **17.4 A mod's page.** Paste the Better Newspapers link into the search box, and **Search**.
@@ -413,6 +413,8 @@ DEG Mods needs no account. The checks use the links of the command line's checkl
   It goes into the library from `blossom.primal.net`, its SHA-256 checked: "In the library", and the Library shows Fallout: New Vegas with "1 mod", in `Library\degmods\fallout_ new vegas\Better Newspapers for New Vegas Bounties II (…)`.
 - [ ] **17.6 Only on DEG Mods' server.** Paste the Nipton Rebuilt Remade link into the Downloads screen's box, and **Download**.
   The download waits for you, with **Open on DEG Mods**, which opens the mod's page, where DEG Mods shows its ad and downloads the file. Cancel the download once you have it.
+- [ ] **17.6a A file elsewhere.** Paste the Standalone Driveable Cars link into the Downloads screen's box, and **Download**.
+  No browser opens: the download runs in ModShelf, from `f.rpghq.org`, 470 MB. Cancel it once it's under way.
 - [ ] **17.7 Moderation.** Paste the blocked test post's link into the Downloads screen's box, and **Download**.
   "DEG Mods' moderation hides this mod, so ModShelf doesn't download it."
 - [ ] **17.8 Remove it.** On the Library screen, remove Better Newspapers, and delete its file.
@@ -591,5 +593,6 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 17.4 A mod's page | | – | |
 | 17.5 Download it | | – | |
 | 17.6 Only on DEG Mods' server | | – | |
+| 17.6a A file elsewhere | | – | |
 | 17.7 Moderation | | – | |
 | 17.8 Remove it | | – | |

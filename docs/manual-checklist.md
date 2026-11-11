@@ -308,7 +308,7 @@ $mio = Join-Path $test 'modio'
 
 ## 15. DEG Mods
 
-DEG Mods needs no account: its mods are Nostr events on its relays, and its files are on Blossom servers, named by their SHA-256. The checks use Fallout: New Vegas' Better Newspapers for New Vegas Bounties II (three files, the first on DEG Mods' own server and another too), Nipton Rebuilt Remade (files only DEG Mods' own server has, and two on the Internet Archive), Starfield's VGB Fed and Hydration Duration Increase (an older listing, on catbox.moe), Halo & Doom OSTs (on MediaFire), Street Fighter 6's Reject Wifi (two versions), and a test post DEG Mods' admin blocked.
+DEG Mods needs no account: its mods are Nostr events on its relays, and its files are on Blossom servers, named by their SHA-256. The checks use Fallout: New Vegas' Better Newspapers for New Vegas Bounties II (three files, the first on DEG Mods' own server and another too), Nipton Rebuilt Remade (files only DEG Mods' own server has, and two on the Internet Archive), Starfield's VGB Fed and Hydration Duration Increase (an older listing, on catbox.moe), Halo & Doom OSTs (on MediaFire), Standalone Driveable Cars v7.11 (on RPGHQ's file host, 470 MB), Street Fighter 6's Reject Wifi (two versions), and a test post DEG Mods' admin blocked.
 
 ```powershell
 $deg = Join-Path $test 'degmods'
@@ -316,6 +316,7 @@ $newspapers = 'https://degmods.com/mod/naddr1qqjrwcmrv5enqv3395mr2vf5956rwe3h94s
 $nipton = 'https://degmods.com/mod/naddr1qqjrgefs89snzdes95urxwfn956rxd3c943r2wtr95mxxdf5v33rswfs8q6nwq3qzm3rm4rd3aqnk65e8l642kzp6xkhdh67g4rk4k5ytyl4a4xpuxcsxpqqqpu6vepxnzn'
 $fed = 'https://degmods.com/mod/naddr1qqjrgwfexvcrgve3943rwd3j956xgdnz943ryvnz95mrgwpcvcungef4vsexyq3qrwfel2zca4mw3khvfuclr3jng0qta9r8em94p3eat08jc84aceusxpqqqpmvyhypnhp'
 $halo = 'https://degmods.com/mod/naddr1qqjrwwfsxc6nzdrp956rxvrp956rgdm995ukyctp95erxwpex9snjd3kv4skgq3qkgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qxpqqqpu6vwksxva'
+$cars = 'https://degmods.com/mod/naddr1qqjrqvrzvfjrvd3j95urzv3n956rvdp4943rjef395mn2cnyxsmkxvecxueryq3q3jtme6yr2qz849ms9elnz9cgfv5k2pya05snshshtm2h2ky8jreqxpqqqpmvytwz4hk'
 $wifi = 'https://degmods.com/mod/naddr1qqjrzep48qmrse3j95uxvcfn956xyvec943rzve495mrgwp5xd3nqdekvcukyq3qcdcjuqkz9490hfjph29zl8d8ynq7fnm8aktuf9j7ka3dvquz96usxpqqqpu6v760q43'
 $blocked = 'https://degmods.com/mod/naddr1qqjrqvmyx4jrwef3956nxvec956rswry943xywrr94jxzv34x9jnvvnrv5erwq3qqqqugpv34nt2fek9yncm8trhkt5rnyqzkwxfwd96vy93mxz6utpqxpqqqpu6vc3j5th'
 ```
@@ -337,7 +338,9 @@ $blocked = 'https://degmods.com/mod/naddr1qqjrqvmyx4jrwef3956nxvec956rswry943xyw
 - [ ] **15.8 catbox.moe and the Internet Archive.** `ms download $fed --to $deg`; then `ms mod show $nipton --all`, copy the third file's link, and `ms download "<that link>" --to $deg`.
   `wa4qcn.7z` from catbox.moe; then `NRR1.3.7z` from archive.org, through its redirect. Exit code 0 for each.
 - [ ] **15.9 A page.** `ms download $halo --to $deg`.
-  MediaFire's page opens in the browser, as in 15.7.
+  MediaFire's page opens in the browser, as in 15.7, after ModShelf asked it what it gives: the log says the file is on a page at `www.mediafire.com`.
+- [ ] **15.9a A file elsewhere.** `ms download $cars --to $deg`; once it's under way, Ctrl+C.
+  No browser opens: ModShelf downloads `14Y3yg8yWsCn.7z` from `f.rpghq.org` itself, 470 MB, with its progress. Ctrl+C stops it; delete the partial file.
 - [ ] **15.10 Into the library, and an update.** `ms download "$wifi#file=89bc8f13f7654384"`, then `ms library check` and `ms library updates`.
   "Added to the library."; the file under `degmods/street fighter 6/Reject Wifi (…)`. The check finds no update: version 4.0 is an optional file, not this one's update.
 - [ ] **15.11 Updates.** `ms mod updates --game "fallout: new vegas" --source degmods --since 28d`.
@@ -465,6 +468,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 15.7 Only on DEG Mods' server | | – | |
 | 15.8 catbox.moe and the Internet Archive | | – | |
 | 15.9 A page | | – | |
+| 15.9a A file elsewhere | | – | |
 | 15.10 Into the library, and an update | | – | |
 | 15.11 Updates | | – | |
 | 15.12 Moderation | | – | |

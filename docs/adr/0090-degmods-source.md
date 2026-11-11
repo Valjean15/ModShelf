@@ -92,6 +92,10 @@ and UX tweaks 1.0.5.
 - **A mod:** its title, summary, author (`npub1…`, as DEG Mods names authors without a profile), its first file's
   version, its page (`degmods.com/mod/<naddr>`, of the kind it was read from), its picture as its thumbnail too, its
   times, and adult when its author or the admin said so. A mod under another game than asked is a 404.
+- **Its picture**, when it's on DEG Mods' own servers (`GatedHosts`), is the first other file server's, by the SHA-256
+  its link names, as DEG Mods' site asks its file servers too: those servers give files, pictures among them, only to
+  its site (`bs.degmods.com` refuses the connection; `brs.degmods.com` answers `428`), and `blossom.primal.net` had
+  156 of the 158 asked. A picture on this computer or its network (`localhost:3000`, as a few authors left) is none.
 - **Files:** the first one listed is `Main`, the others `Optional`, each made when the event was, with its SHA-256 when
   given, and **ModShelf's link** to it, the mod's page with `#file=<id>`, which opens the mod's page in a browser.
   `FilesSideBySide` is false: a mod's one file uploaded again is its update, as on Nexus Mods, and an optional file new
@@ -114,7 +118,13 @@ and UX tweaks 1.0.5.
     its ad and downloads it (2002);
   - catbox.moe, the Internet Archive's `/download/` links and GitHub's release downloads and raw files are the file
     itself: the ticket is the link;
-  - anything else, such as MediaFire, Google Drive or Mega, is a page, which `HandoffRequired` opens (2003).
+  - **another host's link is asked what it gives** (`HEAD`, following at most five redirects by hand, since the source's
+    client refuses them): an answer of `2xx` with a type other than HTML's is the file, and the ticket is the link,
+    such as RPGHQ's file host (`f.rpghq.org`, 12 of DEG Mods' links), Arweave or qu.ax; a web page, such as MediaFire's,
+    Google Drive's or Mega's, any other answer, or none, is a page, which `HandoffRequired` opens (2003, 2006);
+  - a link to this computer or its network (`localhost`, a name without a dot, `.local`, a loopback, private,
+    link-local or shared address, as a few authors' links name) is never asked, nor a redirect to one: it opens in the
+    browser as it is (2005). A name that leads to such an address isn't caught.
 - A file's link is never logged, only its host.
 
 ### Search and updates
@@ -135,6 +145,9 @@ and UX tweaks 1.0.5.
   account's does, though nothing hands it back: the user downloads it there, then cancels it in ModShelf, or rescans
   the library once the file is in the mod's folder. About half the files on DEG Mods' own servers are on another too.
   MediaFire, Drive and Mega are always so.
+- **Resolving a file elsewhere costs a `HEAD` or a few**, and a host that answers `HEAD` otherwise than `GET` is taken by
+  what `HEAD` says. A link that gives its file is saved under the name in its link (`14Y3yg8yWsCn.7z` for RPGHQ's,
+  whose real name is in its query and its `Content-Disposition`).
 - **The first Browse of a run reads every mod**, about 3 MB from two relays, a few seconds; then five minutes from
   memory.
 - A mod whose author replaces its main file offers the new one as its update; one whose author replaces an optional
@@ -151,7 +164,9 @@ and UX tweaks 1.0.5.
   answers about eleven chosen mods (Fallout: New Vegas, Street Fighter 6, Mafia, Starfield; two test posts the admin
   moderates), the admin's lists, an author's mods in pages of three, and since a time; DEG Mods' gate's `428` (its
   challenges written as REDACTED, since they hold the client's address), a mirror's `HEAD`, its first kilobyte through
-  a redirect, every mirror's `404`, catbox.moe's file and a missing one, and archive.org's redirect. No other mod of the
+  a redirect, every mirror's `404`, catbox.moe's file and a missing one, archive.org's redirect, and what two links
+  elsewhere answer `HEAD` (RPGHQ's file host with the file, MediaFire with its page; added after the first tries, on
+  2026-11-11, with the script's own functions). No other mod of the
   catalog, and nothing its moderation hides, is in the repo: the script stops on one. Mods that are hidden, blocked,
   adult or deleted, and the made-up game the contract searches (60 mods, six adult), are made in the tests, signed with
   test keys.
@@ -159,8 +174,9 @@ and UX tweaks 1.0.5.
   says, with each relay's refusals; the source's requests for files go to the recorded answers whatever their host.
 - The contract (`SourceContractTests<T>`), and the source's own tests: events read and checked, signatures and IDs,
   NIP-19 against values worked out apart, links, files, moderation, the index's keeping and reading afresh, paging,
-  refusals, timeouts, a relay down, searches in each order and filter, downloads from each kind of host, the feed and its
-  reach, registration.
+  refusals, timeouts, a relay down, searches in each order and filter, downloads from each kind of host, links
+  elsewhere asked and their redirects followed, links on this computer's network left alone, pictures moved off DEG
+  Mods' servers, the feed and its reach, registration.
 - 124 deliberate bugs, 98 caught on the first pass. Eight the compiler refused; redefined, all were caught, one after a
   test of a relay that sends another author's mod though the filter names one. One changed nothing: a signature of no
   characters, which the check for 128 already refuses. Three led to simpler code, and their new forms were caught: a
@@ -170,3 +186,8 @@ and UX tweaks 1.0.5.
   address under another prefix, an address with two `d` tags or a short kind, a game's page named by an address, file
   servers' links, mods ordered by when they were published against when they changed, DEG Mods' own server among the
   file servers, a change earlier in the second asked, and both apps registering every site.
+- **After the first tries (2026-11-11):** links elsewhere asked, and pictures moved off DEG Mods' servers. 43 deliberate
+  bugs, 37 caught on the first pass; three the compiler refused, caught once redefined. Two changed nothing, and the
+  code they changed is gone: `localhost` checked apart though a name without a dot is already this network's, and
+  brackets trimmed from an IPv6 address that has none by then. One led to a test of a file's answer carrying a
+  `Location`, which isn't followed.
