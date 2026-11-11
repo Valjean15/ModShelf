@@ -3,6 +3,7 @@
              xmlns:vm="using:ModShelf.Presentation.ViewModels.Library"
              xmlns:app="using:ModShelf.Application.Library"
              xmlns:res="using:ModShelf.Presentation.Resources"
+             xmlns:cards="using:ModShelf.Presentation.ViewModels"
              xmlns:views="using:ModShelf.Desktop.Views"
              xmlns:pictures="using:ModShelf.Desktop.Views.Pictures"
              xmlns:modPages="using:ModShelf.Desktop.Views.ModPages"
@@ -104,48 +105,57 @@
                 <TextBlock Classes="note empty" Text="{Binding NothingMatchesText}" IsVisible="{Binding NothingMatches}" />
 
                 <!-- As cards: each game's cover, then its name and numbers, as many side by side as fit. -->
-                <ScrollViewer IsVisible="{Binding Previews.IsCards}">
-                    <ItemsControl ItemsSource="{Binding Games}" Margin="0,0,16,8" VerticalAlignment="Top">
+                <ScrollViewer IsVisible="{Binding Previews.IsCards}" views:CardColumns.For="{Binding GameCards}">
+                    <ItemsControl ItemsSource="{Binding GameCards.Rows}" Margin="0,0,16,0" VerticalAlignment="Top">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <UniformGrid ColumnSpacing="16"
-                                             RowSpacing="16"
-                                             Columns="{Binding $parent[ScrollViewer].Bounds.Width, Converter={x:Static views:CardColumnsConverter.Instance}}" />
+                                <VirtualizingStackPanel CacheLength="1" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="vm:LibraryGameViewModel">
-                                <Button Classes="modCard" Command="{Binding OpenCommand}" AutomationProperties.Name="{Binding OpenText}">
-                                    <DockPanel>
-                                        <pictures:SixteenByNine DockPanel.Dock="Top">
-                                            <Border Classes="cover" Background="{Binding CoverHue, Converter={x:Static views:CoverBrushConverter.Instance}}">
-                                                <Panel>
-                                                    <TextBlock FontSize="44" Text="{Binding Initial}" IsVisible="{Binding !Cover.HasFile}" />
-                                                    <pictures:ModImage File="{Binding Cover.File}"
-                                                                       DecodeWidth="1280"
-                                                                       Stretch="UniformToFill"
-                                                                       RenderOptions.BitmapInterpolationMode="HighQuality" />
-                                                </Panel>
-                                            </Border>
-                                        </pictures:SixteenByNine>
-                                        <StackPanel Margin="14,10,14,14" Spacing="4">
-                                            <TextBlock FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
-                                            <Border Classes="site" IsVisible="{Binding ShowSite}"><TextBlock Text="{Binding SiteName}" /></Border>
-                                            <TextBlock Classes="note" FontSize="12.5" TextTrimming="CharacterEllipsis" Text="{Binding AlsoOnText}" IsVisible="{Binding HasAlsoOn}" />
-                                            <WrapPanel ItemSpacing="12">
-                                                <TextBlock Classes="note" Text="{Binding ModsText}" />
-                                                <TextBlock Classes="note" Text="{Binding SizeText}" />
-                                            </WrapPanel>
-                                            <WrapPanel ItemSpacing="8" LineSpacing="4">
-                                                <Border Classes="tag accent" IsVisible="{Binding HasUpdates}">
-                                                    <TextBlock Text="{Binding UpdatesText}" />
-                                                </Border>
-                                                <TextBlock Classes="note" VerticalAlignment="Center" Text="{Binding UpdatesText}" IsVisible="{Binding !HasUpdates}" />
-                                                <TextBlock Classes="note" VerticalAlignment="Center" Text="{Binding ArchivedText}" IsVisible="{Binding HasArchived}" />
-                                            </WrapPanel>
-                                        </StackPanel>
-                                    </DockPanel>
-                                </Button>
+                            <DataTemplate x:DataType="cards:CardRow">
+                                <ItemsControl ItemsSource="{Binding Cards}" Margin="0,0,0,16">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid ColumnSpacing="16" Rows="1" Columns="{Binding Columns}" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:LibraryGameViewModel">
+                                            <Button Classes="modCard" Command="{Binding OpenCommand}" AutomationProperties.Name="{Binding OpenText}">
+                                                <DockPanel>
+                                                    <pictures:SixteenByNine DockPanel.Dock="Top">
+                                                        <Border Classes="cover" Background="{Binding CoverHue, Converter={x:Static views:CoverBrushConverter.Instance}}">
+                                                            <Panel>
+                                                                <TextBlock FontSize="44" Text="{Binding Initial}" IsVisible="{Binding !Cover.HasFile}" />
+                                                                <pictures:ModImage File="{Binding Cover.File}"
+                                                                                   DecodeWidth="1280"
+                                                                                   Stretch="UniformToFill"
+                                                                                   RenderOptions.BitmapInterpolationMode="HighQuality" />
+                                                            </Panel>
+                                                        </Border>
+                                                    </pictures:SixteenByNine>
+                                                    <StackPanel Margin="14,10,14,14" Spacing="4">
+                                                        <TextBlock FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
+                                                        <Border Classes="site" IsVisible="{Binding ShowSite}"><TextBlock Text="{Binding SiteName}" /></Border>
+                                                        <TextBlock Classes="note" FontSize="12.5" TextTrimming="CharacterEllipsis" Text="{Binding AlsoOnText}" IsVisible="{Binding HasAlsoOn}" />
+                                                        <WrapPanel ItemSpacing="12">
+                                                            <TextBlock Classes="note" Text="{Binding ModsText}" />
+                                                            <TextBlock Classes="note" Text="{Binding SizeText}" />
+                                                        </WrapPanel>
+                                                        <WrapPanel ItemSpacing="8" LineSpacing="4">
+                                                            <Border Classes="tag accent" IsVisible="{Binding HasUpdates}">
+                                                                <TextBlock Text="{Binding UpdatesText}" />
+                                                            </Border>
+                                                            <TextBlock Classes="note" VerticalAlignment="Center" Text="{Binding UpdatesText}" IsVisible="{Binding !HasUpdates}" />
+                                                            <TextBlock Classes="note" VerticalAlignment="Center" Text="{Binding ArchivedText}" IsVisible="{Binding HasArchived}" />
+                                                        </WrapPanel>
+                                                    </StackPanel>
+                                                </DockPanel>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -570,81 +580,90 @@
                 </Border>
 
                 <!-- As cards: each mod's picture, then its name, numbers and what to know of it. -->
-                <ScrollViewer IsVisible="{Binding Previews.IsCards}">
-                    <ItemsControl ItemsSource="{Binding GameMods}" Margin="0,0,16,8" VerticalAlignment="Top">
+                <ScrollViewer IsVisible="{Binding Previews.IsCards}" views:CardColumns.For="{Binding ModCards}">
+                    <ItemsControl ItemsSource="{Binding ModCards.Rows}" Margin="0,0,16,0" VerticalAlignment="Top">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <UniformGrid ColumnSpacing="16"
-                                             RowSpacing="16"
-                                             Columns="{Binding $parent[ScrollViewer].Bounds.Width, Converter={x:Static views:CardColumnsConverter.Instance}}" />
+                                <VirtualizingStackPanel CacheLength="1" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="vm:LibraryModViewModel">
-                                <Border Classes="modCard">
-                                    <DockPanel>
-                                        <Panel DockPanel.Dock="Top">
-                                            <pictures:ModCardPicture DataContext="{Binding Picture}" />
-                                            <Border Classes="onPicture box">
-                                                <CheckBox Classes="select"
-                                                          IsChecked="{Binding IsSelected}"
-                                                          AutomationProperties.Name="{Binding SelectText}" />
-                                            </Border>
-                                        </Panel>
-                                        <StackPanel Margin="14,10,6,14" Spacing="4">
-                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
-                                                <Button Classes="name" VerticalAlignment="Center" Command="{Binding OpenCommand}">
-                                                    <TextBlock FontSize="15" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
-                                                </Button>
-                                                <Button Grid.Column="1"
-                                                        Classes="more"
-                                                        VerticalAlignment="Top"
-                                                        ToolTip.Tip="{x:Static res:Strings.MoreActions}"
-                                                        AutomationProperties.Name="{x:Static res:Strings.MoreActions}">
-                                                    <PathIcon Width="18" Height="18" Data="{StaticResource MoreIcon}" />
-                                                    <Button.Flyout>
-                                                        <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                                            <MenuItem Header="{x:Static res:Strings.LibraryOpenMod}" Command="{Binding OpenCommand}" />
-                                                            <MenuItem Header="{x:Static res:Strings.LibraryOpenOnSite}" Command="{Binding OpenPageCommand}" />
-                                                            <MenuItem Header="{x:Static res:Strings.LibraryOpenFolder}" Command="{Binding OpenFolderCommand}" />
-                                                            <MenuItem Header="{x:Static res:Strings.ModWatch}" Command="{Binding WatchCommand}" IsVisible="{Binding !IsWatched}" />
-                                                            <MenuItem Header="{x:Static res:Strings.ModUnwatch}" Command="{Binding UnwatchCommand}" IsVisible="{Binding IsWatched}" />
-                                                            <MenuItem Header="{x:Static res:Strings.ModPin}" Command="{Binding PinCommand}" IsVisible="{Binding !IsPinned}" />
-                                                            <MenuItem Header="{x:Static res:Strings.ModUnpin}" Command="{Binding UnpinCommand}" IsVisible="{Binding IsPinned}" />
-                                                            <MenuItem Header="{Binding EditNoteText}" Command="{Binding EditNoteCommand}" />
-                                                            <MenuItem Header="{x:Static res:Strings.ModOfferSkipped}" Command="{Binding OfferSkippedCommand}" IsVisible="{Binding HasSkipped}" />
-                                                            <MenuItem Header="{x:Static res:Strings.LibraryRescan}" Command="{Binding RescanCommand}" />
-                                                            <Separator />
-                                                            <MenuItem Header="{x:Static res:Strings.LibraryRemoveMod}" Command="{Binding RemoveCommand}" />
-                                                        </MenuFlyout>
-                                                    </Button.Flyout>
-                                                </Button>
-                                            </Grid>
-                                            <TextBlock Classes="note" Text="{Binding AuthorText}" IsVisible="{Binding AuthorText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                                            <WrapPanel ItemSpacing="12">
-                                                <TextBlock Classes="note" Text="{Binding VersionText}" IsVisible="{Binding HasFiles}" />
-                                                <TextBlock Classes="note" Text="{Binding FilesText}" />
-                                                <TextBlock Classes="note" Text="{Binding SizeText}" IsVisible="{Binding HasFiles}" />
-                                            </WrapPanel>
-                                            <ItemsControl Margin="0,2,0,0" ItemsSource="{Binding Statuses}">
-                                                <ItemsControl.ItemsPanel>
-                                                    <ItemsPanelTemplate>
-                                                        <WrapPanel ItemSpacing="4" LineSpacing="4" />
-                                                    </ItemsPanelTemplate>
-                                                </ItemsControl.ItemsPanel>
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate x:DataType="vm:ModStatus">
-                                                        <Border Classes="tag"
-                                                                Classes.accent="{Binding Kind, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:ModStatusKind.Update}}"
-                                                                Classes.warn="{Binding Kind, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:ModStatusKind.Problem}}">
-                                                            <TextBlock Text="{Binding Text}" />
+                            <DataTemplate x:DataType="cards:CardRow">
+                                <ItemsControl ItemsSource="{Binding Cards}" Margin="0,0,0,16">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid ColumnSpacing="16" Rows="1" Columns="{Binding Columns}" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:LibraryModViewModel">
+                                            <Border Classes="modCard">
+                                                <DockPanel>
+                                                    <Panel DockPanel.Dock="Top">
+                                                        <pictures:ModCardPicture DataContext="{Binding Picture}" />
+                                                        <Border Classes="onPicture box">
+                                                            <CheckBox Classes="select"
+                                                                      IsChecked="{Binding IsSelected}"
+                                                                      AutomationProperties.Name="{Binding SelectText}" />
                                                         </Border>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                        </StackPanel>
-                                    </DockPanel>
-                                </Border>
+                                                    </Panel>
+                                                    <StackPanel Margin="14,10,6,14" Spacing="4">
+                                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                                                            <Button Classes="name" VerticalAlignment="Center" Command="{Binding OpenCommand}">
+                                                                <TextBlock FontSize="15" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
+                                                            </Button>
+                                                            <Button Grid.Column="1"
+                                                                    Classes="more"
+                                                                    VerticalAlignment="Top"
+                                                                    ToolTip.Tip="{x:Static res:Strings.MoreActions}"
+                                                                    AutomationProperties.Name="{x:Static res:Strings.MoreActions}">
+                                                                <PathIcon Width="18" Height="18" Data="{StaticResource MoreIcon}" />
+                                                                <Button.Flyout>
+                                                                    <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                                                        <MenuItem Header="{x:Static res:Strings.LibraryOpenMod}" Command="{Binding OpenCommand}" />
+                                                                        <MenuItem Header="{x:Static res:Strings.LibraryOpenOnSite}" Command="{Binding OpenPageCommand}" />
+                                                                        <MenuItem Header="{x:Static res:Strings.LibraryOpenFolder}" Command="{Binding OpenFolderCommand}" />
+                                                                        <MenuItem Header="{x:Static res:Strings.ModWatch}" Command="{Binding WatchCommand}" IsVisible="{Binding !IsWatched}" />
+                                                                        <MenuItem Header="{x:Static res:Strings.ModUnwatch}" Command="{Binding UnwatchCommand}" IsVisible="{Binding IsWatched}" />
+                                                                        <MenuItem Header="{x:Static res:Strings.ModPin}" Command="{Binding PinCommand}" IsVisible="{Binding !IsPinned}" />
+                                                                        <MenuItem Header="{x:Static res:Strings.ModUnpin}" Command="{Binding UnpinCommand}" IsVisible="{Binding IsPinned}" />
+                                                                        <MenuItem Header="{Binding EditNoteText}" Command="{Binding EditNoteCommand}" />
+                                                                        <MenuItem Header="{x:Static res:Strings.ModOfferSkipped}" Command="{Binding OfferSkippedCommand}" IsVisible="{Binding HasSkipped}" />
+                                                                        <MenuItem Header="{x:Static res:Strings.LibraryRescan}" Command="{Binding RescanCommand}" />
+                                                                        <Separator />
+                                                                        <MenuItem Header="{x:Static res:Strings.LibraryRemoveMod}" Command="{Binding RemoveCommand}" />
+                                                                    </MenuFlyout>
+                                                                </Button.Flyout>
+                                                            </Button>
+                                                        </Grid>
+                                                        <TextBlock Classes="note" Text="{Binding AuthorText}" IsVisible="{Binding AuthorText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                                        <WrapPanel ItemSpacing="12">
+                                                            <TextBlock Classes="note" Text="{Binding VersionText}" IsVisible="{Binding HasFiles}" />
+                                                            <TextBlock Classes="note" Text="{Binding FilesText}" />
+                                                            <TextBlock Classes="note" Text="{Binding SizeText}" IsVisible="{Binding HasFiles}" />
+                                                        </WrapPanel>
+                                                        <ItemsControl Margin="0,2,0,0" ItemsSource="{Binding Statuses}">
+                                                            <ItemsControl.ItemsPanel>
+                                                                <ItemsPanelTemplate>
+                                                                    <WrapPanel ItemSpacing="4" LineSpacing="4" />
+                                                                </ItemsPanelTemplate>
+                                                            </ItemsControl.ItemsPanel>
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate x:DataType="vm:ModStatus">
+                                                                    <Border Classes="tag"
+                                                                            Classes.accent="{Binding Kind, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:ModStatusKind.Update}}"
+                                                                            Classes.warn="{Binding Kind, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:ModStatusKind.Problem}}">
+                                                                        <TextBlock Text="{Binding Text}" />
+                                                                    </Border>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+                                                    </StackPanel>
+                                                </DockPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>

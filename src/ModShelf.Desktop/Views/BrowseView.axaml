@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:ModShelf.Presentation.ViewModels.Browse"
              xmlns:res="using:ModShelf.Presentation.Resources"
+             xmlns:cards="using:ModShelf.Presentation.ViewModels"
              xmlns:views="using:ModShelf.Desktop.Views"
              xmlns:games="using:ModShelf.Desktop.Views.Games"
              xmlns:pictures="using:ModShelf.Desktop.Views.Pictures"
@@ -316,64 +317,73 @@
                     </Border>
 
                     <!-- As cards, as many side by side as fit. Clicking one opens it. -->
-                    <ScrollViewer Margin="0,8,0,0" IsVisible="{Binding Previews.IsCards}">
-                        <ItemsControl ItemsSource="{Binding Results}" Margin="0,0,16,8">
+                    <ScrollViewer Margin="0,8,0,0" IsVisible="{Binding Previews.IsCards}" views:CardColumns.For="{Binding ResultCards}">
+                        <ItemsControl ItemsSource="{Binding ResultCards.Rows}" Margin="0,0,16,0">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <UniformGrid ColumnSpacing="16"
-                                                 RowSpacing="16"
-                                                 Columns="{Binding $parent[ScrollViewer].Bounds.Width, Converter={x:Static views:CardColumnsConverter.Instance}}" />
+                                    <VirtualizingStackPanel CacheLength="1" />
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="vm:BrowseModViewModel">
-                                    <Button Classes="modCard" Command="{Binding OpenCommand}">
-                                        <DockPanel>
-                                            <Panel DockPanel.Dock="Top">
-                                                <pictures:ModCardPicture DataContext="{Binding Picture}" />
-                                                <Border Classes="onPicture box" IsVisible="{Binding CanSelect}">
-                                                    <CheckBox Classes="select"
-                                                              IsChecked="{Binding IsSelected}"
-                                                              AutomationProperties.Name="{Binding SelectText}" />
-                                                </Border>
-                                            </Panel>
-                                            <StackPanel Margin="14,10,14,14" Spacing="4">
-                                                <TextBlock FontSize="15"
-                                                           FontWeight="SemiBold"
-                                                           TextWrapping="Wrap"
-                                                           MaxLines="2"
-                                                           TextTrimming="CharacterEllipsis"
-                                                           Text="{Binding Name}" />
-                                                <TextBlock Classes="note" Text="{Binding AuthorText}" IsVisible="{Binding AuthorText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                                                <TextBlock Classes="note"
-                                                           TextWrapping="Wrap"
-                                                           MaxLines="2"
-                                                           TextTrimming="CharacterEllipsis"
-                                                           Text="{Binding Summary}"
-                                                           IsVisible="{Binding Summary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                                                <TextBlock Classes="note" Text="{Binding FactText}" IsVisible="{Binding FactText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                                                <WrapPanel ItemSpacing="12">
-                                                    <TextBlock Classes="note" Text="{Binding EndorsementsText}" />
-                                                    <TextBlock Classes="note" Text="{Binding DownloadsText}" />
-                                                </WrapPanel>
-                                                <WrapPanel ItemSpacing="6" LineSpacing="6" Margin="0,2,0,0">
-                                                    <Border Classes="tag good" IsVisible="{Binding IsDownloaded}">
-                                                        <TextBlock Text="{x:Static res:Strings.BrowseDownloadedTag}" />
-                                                    </Border>
-                                                    <Border Classes="tag" IsVisible="{Binding IsWatched}">
-                                                        <TextBlock Text="{x:Static res:Strings.BrowseWatchedTag}" />
-                                                    </Border>
-                                                    <Border Classes="tag" IsVisible="{Binding IsHidden}">
-                                                        <TextBlock Text="{x:Static res:Strings.BrowseHiddenTag}" />
-                                                    </Border>
-                                                </WrapPanel>
-                                                <TextBlock Classes="problem"
-                                                           TextWrapping="Wrap"
-                                                           Text="{Binding Problem}"
-                                                           IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}" />
-                                            </StackPanel>
-                                        </DockPanel>
-                                    </Button>
+                                <DataTemplate x:DataType="cards:CardRow">
+                                    <ItemsControl ItemsSource="{Binding Cards}" Margin="0,0,0,16">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <UniformGrid ColumnSpacing="16" Rows="1" Columns="{Binding Columns}" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:BrowseModViewModel">
+                                                <Button Classes="modCard" Command="{Binding OpenCommand}">
+                                                    <DockPanel>
+                                                        <Panel DockPanel.Dock="Top">
+                                                            <pictures:ModCardPicture DataContext="{Binding Picture}" />
+                                                            <Border Classes="onPicture box" IsVisible="{Binding CanSelect}">
+                                                                <CheckBox Classes="select"
+                                                                          IsChecked="{Binding IsSelected}"
+                                                                          AutomationProperties.Name="{Binding SelectText}" />
+                                                            </Border>
+                                                        </Panel>
+                                                        <StackPanel Margin="14,10,14,14" Spacing="4">
+                                                            <TextBlock FontSize="15"
+                                                                       FontWeight="SemiBold"
+                                                                       TextWrapping="Wrap"
+                                                                       MaxLines="2"
+                                                                       TextTrimming="CharacterEllipsis"
+                                                                       Text="{Binding Name}" />
+                                                            <TextBlock Classes="note" Text="{Binding AuthorText}" IsVisible="{Binding AuthorText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                                            <TextBlock Classes="note"
+                                                                       TextWrapping="Wrap"
+                                                                       MaxLines="2"
+                                                                       TextTrimming="CharacterEllipsis"
+                                                                       Text="{Binding Summary}"
+                                                                       IsVisible="{Binding Summary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                                            <TextBlock Classes="note" Text="{Binding FactText}" IsVisible="{Binding FactText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                                            <WrapPanel ItemSpacing="12">
+                                                                <TextBlock Classes="note" Text="{Binding EndorsementsText}" />
+                                                                <TextBlock Classes="note" Text="{Binding DownloadsText}" />
+                                                            </WrapPanel>
+                                                            <WrapPanel ItemSpacing="6" LineSpacing="6" Margin="0,2,0,0">
+                                                                <Border Classes="tag good" IsVisible="{Binding IsDownloaded}">
+                                                                    <TextBlock Text="{x:Static res:Strings.BrowseDownloadedTag}" />
+                                                                </Border>
+                                                                <Border Classes="tag" IsVisible="{Binding IsWatched}">
+                                                                    <TextBlock Text="{x:Static res:Strings.BrowseWatchedTag}" />
+                                                                </Border>
+                                                                <Border Classes="tag" IsVisible="{Binding IsHidden}">
+                                                                    <TextBlock Text="{x:Static res:Strings.BrowseHiddenTag}" />
+                                                                </Border>
+                                                            </WrapPanel>
+                                                            <TextBlock Classes="problem"
+                                                                       TextWrapping="Wrap"
+                                                                       Text="{Binding Problem}"
+                                                                       IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                                        </StackPanel>
+                                                    </DockPanel>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
