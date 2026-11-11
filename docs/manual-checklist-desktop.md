@@ -45,7 +45,7 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
 - [ ] **1.2 Closing the setup.** Close the setup with its window's close button, **Quit ModShelf** from the tray menu, and `app` again.
   The setup is back, at "Step 1 of 3".
 - [ ] **1.3 Its pages.** **Choose another folder…**, and pick a new, empty folder named `Library` in the test folder (`$test`). Then **Next**, and **Next** again, and **Back**.
-  The folder shown is the one picked, with "The library is in … now." under it. Step 2, "Link your account", has the Nexus Mods card as on the Accounts screen; don't link the account here, section 2 does. Step 3, "Links from websites", says which app opens `nxm://` links, with **Open them with ModShelf**; don't take them here, section 12 does. **Back** returns to step 2.
+  The folder shown is the one picked, with "The library is in … now." under it. Step 2, "Link your account", has the Nexus Mods card, with what Settings › Accounts shows of it; don't link the account here, section 2 does. Step 3, "Links from websites", says which app opens `nxm://` links, with **Open them with ModShelf**; don't take them here, section 12 does. **Back** returns to step 2.
 - [ ] **1.4 Done.** With the Premium account, **Next**, then **Finish**. With the free account, **Skip setup** instead, on any step.
   The setup closes. The Settings screen shows the `Library` folder from 1.3, with **Use the default folder** enabled. `settings.json` in the test folder holds `"setup": { "done": true }`. **Quit ModShelf** from the tray menu and `app` again: the main window opens without the setup.
 - [ ] **1.5 The tray icon.** Look in the notification area (on Windows, it may be under the arrow that shows hidden icons).
@@ -61,20 +61,24 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
 
 ## 2. Link the account
 
-- [ ] **2.1 The card.** Open the Accounts screen.
-  A card for Nexus Mods: "Nexus Mods needs a linked account." and "No account is linked.", with **Link with an API key**. On Windows and macOS, no warning about a keyring. At the bottom of the sidebar, **Link an account**, "To download mods", which opens Accounts from any screen.
+- [ ] **2.1 The row.** Click **Settings** at the bottom of the sidebar.
+  The sidebar lists Library, Updates, Browse and Downloads, with **Settings** at its bottom, raised while shown; no account block. Settings opens on **Accounts**, its first category: under "Needs an account", a row for Nexus Mods saying "Not linked", with **Link…** and **Details**; under "No account needed", DEG Mods and Direct link, each saying what ModShelf does there with no account. **Link…** opens the row: "Nexus Mods needs a linked account." with **Link with an API key**; **Less** closes it. On Windows and macOS, no warning about a keyring.
 - [ ] **2.2 A wrong key is refused.** **Link with an API key**, type `not-a-real-key`, and **Link**.
-  The dialog hides what you type. Then, on the card: "Nexus Mods refused the API key. Check it, then try again."
+  The dialog hides what you type. Then, in the row: "Nexus Mods refused the API key. Check it, then try again."
 - [ ] **2.3 The API key page.** **Link with an API key**, then **Open the API key page**.
-  Your API keys page opens in the browser. **Cancel** closes the dialog, and the card says nothing new.
+  Your API keys page opens in the browser. **Cancel** closes the dialog, and the row says nothing new.
 - [ ] **2.4 The key links the account.** **Link with an API key**, paste the key, and **Link**.
-  "Linked as *your name*." The card shows your picture from Nexus Mods (your initial on a colour until it's read), your name, "Premium" (or "Free") in a tag, and "Linked on *today*". The bottom of the sidebar shows the same picture, your name and "Premium · Nexus Mods" (or "Free · Nexus Mods") in place of **Link an account**; clicking it from another screen opens Accounts. With the sidebar's names hidden (the button at its top), the picture shows alone, its tooltip naming you, your level and Nexus Mods. With the network off, closing and starting the app shows the picture saved. Under "API requests left, as Nexus Mods last said:", a line per day and per hour, such as "Per day: 19,999 of 20,000 left, until …". **Check** and **Unlink** appear.
+  "Linked as *your name*." The row shows your picture from Nexus Mods (your initial on a colour until it's read), "Premium" (or "Free") in a tag beside Nexus Mods, and under it your name and what's left of the requests that run out soonest, such as "Kestrel · 498 of 500 requests left this hour", with **Check**. **Details** shows "Linked on *today*", under "API requests left, as Nexus Mods last said:" a line per day and per hour, such as "Per day: 19,999 of 20,000 left, until …", and **Unlink**. With the sidebar's names hidden (the button at its top), Settings shows its icon alone. With the network off, closing and starting the app shows the picture saved.
 - [ ] **2.5 Check.** **Check**.
   "Checked at *now*." The requests left went down by one or two.
-- [ ] **2.5a Requests running low.** In Settings › Updates, set "Warn about a site's requests for the hour or the day" to **When below 30% are left**, then use the app until fewer than 30% of the hour's requests are left (or set it to a share above what Accounts shows left), and wait half a minute. Click the strip's ×. Then, on the Updates screen with fewer requests left than the watched mods, **Check now**. Set the warning back to **When below 10% are left (the default)**.
+- [ ] **2.5a Requests running low.** In Settings › Updates, set "Warn about a site's requests for the hour or the day" to **When below 30% are left**, then use the app until fewer than 30% of the hour's requests are left (or set it to a share above what Settings › Accounts shows left), and wait half a minute. Click the strip's ×. Then, on the Updates screen with fewer requests left than the watched mods, **Check now**. Set the warning back to **When below 10% are left (the default)**.
   A strip at the top of the window says "Nexus Mods has *N* of its *M* requests left this hour. They renew at *time*." (or "today", for the day's); × hides it until they renew. **Check now** asks first, "Requests may run out", saying about how many requests the check may take, how many are left and when they renew; **Cancel** checks nothing, **Go on** checks. `settings show` in a terminal says `quota.warnBelow` 30, then 10 (default).
-- [ ] **2.6 Linked from the command line.** With the app open on another screen, run `dotnet run --project src/ModShelf.Cli -- account unlink nexus`, then open Accounts; link it again from the command line (`account link nexus`), and open Accounts again. Link it in the app afterwards if you unlinked it there.
-  Opening Accounts shows the account gone, and the sidebar **Link an account**; then linked again, in both, without restarting the app.
+- [ ] **2.6 Linked from the command line.** With the app open on another screen, run `dotnet run --project src/ModShelf.Cli -- account unlink nexus`, then open Settings › Accounts; link it again from the command line (`account link nexus`), and open it again. Link it in the app afterwards if you unlinked it there.
+  Settings › Accounts shows the account gone; then linked again, without restarting the app.
+- [ ] **2.7 What needs attention.** With the key revoked on Nexus Mods' API keys page (or a key of a free account that's no longer valid), **Check**; then link the key again. Separately, unlink the account, download a file of SMAPI from Browse so it fails for want of an account, and look at the sidebar.
+  After the refused check, the row says "Nexus Mods refused the account: link it again." in its problem colour, and **Settings** at the bottom of the sidebar has a badge of 1, its tooltip "Settings: 1 to look at"; linking again clears both. With the download failed for want of an account, the row says "Downloads wait for an account", and the badge counts it until the download is retried or cleared. A newer ModShelf to install counts too (section 10.11).
+- [ ] **2.8 The ways in.** From Browse's "Go to Accounts", Downloads' failed download, quick search's "Accounts", and the address `modshelf://accounts`.
+  Each opens Settings on **Accounts**.
 
 ## 3. Browse
 
@@ -232,8 +236,8 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
 
 ## 10. Settings
 
-- [ ] **10.0 Categories and search.** Open the Settings screen, then each category in its list.
-  It opens on **General**: the theme, closing the window, the previews, and pictures and mod details. **Library**: the library folder, your browser's downloads, the folder pattern, old versions and **Rescan the library**. **Updates**, **Links**, **Agents** (AI agents, connecting them and their address; [manual-checklist-mcp.md](manual-checklist-mcp.md) section 0 checks them), **Games** (each game's own settings, the library's games each with its banner from Nexus Mods) and **About** show theirs. Type `folder` in **Search settings**: the library folder, your browser's downloads, the folder pattern, old versions (the _archive folder), the rescan, the games' patterns and About (the log folder), under "Settings that match “folder”", and General, Updates and Links fade in the list. `zzz`: "No setting matches “zzz”." Type `stardew`: **Games** shows Stardew Valley alone, its page open. Escape, or choosing a category, ends the search. **Rescan the library** says what it found, as on the Library screen. Make the window narrow: the categories move above the settings, side by side.
+- [ ] **10.0 Categories and search.** Open Settings, then each category in its list.
+  It opens on **Accounts** (section 2). **General**: the theme, closing the window, the previews, and pictures and mod details. **Library**: the library folder, your browser's downloads, the folder pattern, old versions and **Rescan the library**. **Updates**, **Links**, **Agents** (AI agents, connecting them and their address; [manual-checklist-mcp.md](manual-checklist-mcp.md) section 0 checks them), **Games** (each game's own settings, the library's games each with its banner from Nexus Mods) and **About** show theirs. Type `folder` in **Search settings**: the library folder, your browser's downloads, the folder pattern, old versions (the _archive folder), the rescan, the games' patterns and About (the log folder), under "Settings that match “folder”", and Accounts, General, Updates and Links fade in the list; `api key` finds the accounts. `zzz`: "No setting matches “zzz”." Type `stardew`: **Games** shows Stardew Valley alone, its page open. Escape, or choosing a category, ends the search. **Rescan the library** says what it found, as on the Library screen. Make the window narrow: the categories move above the settings, side by side.
 - [ ] **10.1 Folder patterns.** In **Library**, under "Folder pattern", change every game's pattern to `{source}/{game}/{modid}/{file}`.
   The example under it changes as you type. `{mod}/{file}x` says what's wrong, and **Save** is disabled. With the right pattern, **Save**: a mod the library doesn't have yet then downloads to `nexus\<game>\<mod's ID>\…`. Mods in the library keep their folders, and files downloaded already stay where they are.
 - [ ] **10.1a Each screen's previews.** In **General**, under "Previews", choose **Cards** for the Library, **Rows** for Browse and **Thumbnails** for Updates and Downloads, then look at each screen. Choose **Cards** in Browse's view switch, and come back. Then set them back: **Thumbnails**, **Cards**, **Rows**, **Rows**.
@@ -337,10 +341,10 @@ Nexus Mods' **Mod manager download** buttons hand a download over with an `nxm:/
 
 ## 14. Unlink the account
 
-- [ ] **14.1 Unlink.** On the Accounts screen, **Unlink**.
-  "Unlink Nexus Mods?" **Unlink**: "Unlinked. Its stored credentials are deleted." The card says "No account is linked.", and the sidebar **Link an account**. On Windows, `account_nexus.secret` is gone from the test folder's `Secrets` folder.
+- [ ] **14.1 Unlink.** In Settings › Accounts, Nexus Mods' **Details**, then **Unlink**.
+  "Unlink Nexus Mods?" **Unlink**: "Unlinked. Its stored credentials are deleted." The row says "Not linked". On Windows, `account_nexus.secret` is gone from the test folder's `Secrets` folder.
 - [ ] **14.2 Browse needs it.** Open the Browse screen, and **Try again** if it shows a message.
-  "Nexus Mods needs your account linked, or refused the one linked. …", with **Go to Accounts**, which opens the Accounts screen. GameBanana's games are still found in the game picker.
+  "Nexus Mods needs your account linked, or refused the one linked. …", with **Go to Accounts**, which opens Settings › Accounts. GameBanana's games are still found in the game picker.
 
 ## 15. GameBanana
 
@@ -367,21 +371,21 @@ GameBanana needs no account; 15.11 to 15.14 link a member's public profile, read
   "This GameBanana link names a file but not its mod, so ModShelf can't tell whose it is. Copy the mod's page link instead." Then "This GameBanana link isn't to a mod or its files. Copy a mod's page link."
 - [ ] **15.10 Remove it.** In the mod's **…** menu on the Library screen, **Remove from library**.
   The mod leaves the library, its file staying on disk, and Persona 5 Royal (PC) leaves the Library's games.
-- [ ] **15.11 Link a profile.** On the Accounts screen, GameBanana's card, **Link your profile**; type `nobody-zz-qq` and link; then the member name.
+- [ ] **15.11 Link a profile.** In Settings › Accounts, under "Optional", GameBanana's **Link…**, then **Link your profile**; type `nobody-zz-qq` and link; then the member name.
   The box says ModShelf reads only what anyone can see on the profile, and asks for no password. `nobody-zz-qq`: "GameBanana has no such member, or doesn't show their profile. Check the name, then try again." The name: the card shows the profile's name and picture, and today's date; the bottom of the sidebar shows it too, with "GameBanana".
 - [ ] **15.12 Subscribed mods.** On the Browse screen, choose a GameBanana game the profile subscribes to mods of (for `chlorophylls`, Persona 5 Royal (PC)), and **Subscribed mods**; open one of the mods.
   "*N* subscribed mods of *game* on GameBanana.", as the profile's subscriptions on the website list that game's mods (works in progress left out), those the library watches tagged "Watched". The mod's page has no button to subscribe or unsubscribe: ModShelf can only read them.
 - [ ] **15.13 Watch all.** Back on the list, **Watch all (*N*)**; then open the Library screen.
   "Watching *N* more mods for updates in the library." (or "Watching 1 more mod…"), each mod tagged "Watched", and the button reads **Watch all (0)**, greyed. The Library lists them under the game, watched. **Tracked mods** on a Nexus Mods game has the same button.
-- [ ] **15.14 Unlink it.** On the Accounts screen, **Unlink** on GameBanana's card, and confirm; then **Subscribed mods** again in Browse.
-  The card says nothing is linked, and Browse says "GameBanana needs your account linked, or refused the one linked. Link it on the Accounts screen, then try again.", with a button to the Accounts screen. The mods Watch all watched stay in the library.
+- [ ] **15.14 Unlink it.** In Settings › Accounts, **Unlink** in GameBanana's **Details**, and confirm; then **Subscribed mods** again in Browse.
+  The row says "Not linked", and Browse says "GameBanana needs your account linked, or refused the one linked. Link it in Settings › Accounts, then try again.", with a button to it. The mods Watch all watched stay in the library.
 
 ## 16. mod.io
 
 mod.io answers nothing without a credential. On [your API Access page](https://mod.io/me/access), copy your **API key**, make a personal **access token** with the `read` scope, and subscribe to Better Inventory UI (`https://mod.io/g/baldursgate3/m/better-inventory-ui1`); revoke the token once the checks are done. The checks use Baldur's Gate 3 and Better Inventory UI, whose live file is about 460 KB.
 
-- [ ] **16.1 The card.** Open the Accounts screen.
-  A card for mod.io saying it needs a linked account, with **Link with an API key**. **Open the API key page** in its dialog opens your API Access page.
+- [ ] **16.1 The row.** Open Settings › Accounts.
+  A row for mod.io under "Needs an account"; **Link…** opens it, saying it needs a linked account, with **Link with an API key**. **Open the API key page** in its dialog opens your API Access page.
 - [ ] **16.2 Link the API key.** **Link with an API key**, paste `not-a-real-key`, and **Link**; then paste the API key, and **Link**.
   "mod.io refused the API key. Check it, then try again." Then the card shows "API key", "Without subscriptions" in a tag, and "Linked on *today*", with no picture but the initial.
 - [ ] **16.3 A mod.io game.** On the Browse screen, type `baldur` in the game picker, and choose "Baldur's Gate 3 (mod.io)".
@@ -393,20 +397,20 @@ mod.io answers nothing without a credential. On [your API Access page](https://m
 - [ ] **16.6 Download it.** **Download** on the live file; then the Library screen.
   It goes into the library: "In the library", and the Library shows Baldur's Gate 3 with mod.io's logo and "1 mod", in `Library\modio\6715\Better Inventory UI (4228735)`.
 - [ ] **16.7 Subscriptions need a token.** Back in Browse, **Subscribed mods**.
-  "mod.io couldn't list your subscribed mods: mod.io lists them for an access token only: link one in place of your API key." The Accounts card still shows the key linked, not waiting to be linked again.
-- [ ] **16.8 Link a token.** On the Accounts screen, **Link with an API key** on mod.io's card, paste the token, and **Link**; then **Subscribed mods** in Browse, and **Watch all**.
+  "mod.io couldn't list your subscribed mods: mod.io lists them for an access token only: link one in place of your API key." Settings › Accounts still shows the key linked, not waiting to be linked again.
+- [ ] **16.8 Link a token.** In Settings › Accounts, mod.io's **Details**, then **Link with an API key**, paste the token, and **Link**; then **Subscribed mods** in Browse, and **Watch all**.
   The card shows your name and picture, and "Access token". "1 subscribed mod of Baldur's Gate 3 on mod.io.", Better Inventory UI, tagged "Watched" since 16.6; its page has no button to subscribe or unsubscribe. **Watch all (0)**, greyed.
 - [ ] **16.9 Links it refuses.** Paste `https://mod.io/g/baldursgate3` into the Downloads screen's box, and **Download**.
   "That mod.io link isn't to a mod: copy the link of a mod's page."
-- [ ] **16.10 Unlink it.** On the Accounts screen, **Unlink** on mod.io's card, and confirm; then search Baldur's Gate 3 in Browse.
-  The card says nothing is linked, and Browse says "mod.io needs your account linked, or refused the one linked. Link it on the Accounts screen, then try again.", with a button to the Accounts screen. Better Inventory UI stays in the library. Revoke the token on mod.io.
+- [ ] **16.10 Unlink it.** In Settings › Accounts, **Unlink** in mod.io's **Details**, and confirm; then search Baldur's Gate 3 in Browse.
+  The row says "Not linked", and Browse says "mod.io needs your account linked, or refused the one linked. Link it in Settings › Accounts, then try again.", with a button to it. Better Inventory UI stays in the library. Revoke the token on mod.io.
 
 ## 17. DEG Mods
 
 DEG Mods needs no account. The checks use the links of the command line's checklist, section 15: Better Newspapers for New Vegas Bounties II (`$newspapers`), Nipton Rebuilt Remade (`$nipton`), Standalone Driveable Cars v7.11 (`$cars`), and the test post DEG Mods' admin blocked (`$blocked`).
 
-- [ ] **17.1 No card.** Open the Accounts screen.
-  No card for DEG Mods: it needs no account.
+- [ ] **17.1 No account needed.** Open Settings › Accounts.
+  DEG Mods under "No account needed": "ModShelf searches its mods, downloads its files and checks them for updates, with no account."
 - [ ] **17.2 A DEG Mods game.** On the Browse screen, type `vegas` in the game picker, and choose "Fallout: New Vegas (DEG Mods)".
   DEG Mods' games come from its mods, beside the other sites', after a few seconds the first time. No **Trending** row; **Recently added** and **Recently updated**, with DEG Mods' pictures, those of older mods on DEG Mods' own servers too (Smook's Police Gear Pack's among them), no approval and no downloads; the log has no "couldn't be downloaded" for a picture from `bs.degmods.com`; a mod DEG Mods marks NSFW is left out unless **Include adult content** is ticked.
 - [ ] **17.2a Covers.** In the game picker's list, look at Fallout: New Vegas (DEG Mods) and Street Fighter 6 (DEG Mods); after 17.5, at the Library's games.
@@ -462,13 +466,15 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 1.7 The window comes back as it was | | | |
 | 1.8 A narrow window | | | |
 | 1.9 The database writes ahead | | | |
-| 2.1 Card | | | |
+| 2.1 The row | | | |
 | 2.2 Wrong key refused | | | |
 | 2.3 API key page | | | |
 | 2.4 Key links the account | | | |
 | 2.5 Check | | | |
 | 2.5a Requests running low | | | |
 | 2.6 Linked from the command line | | | |
+| 2.7 What needs attention | | | |
+| 2.8 The ways in | | | |
 | 3.1 Games | | | |
 | 3.1a Games by name | | | |
 | 3.1b The site box | | | |
@@ -589,7 +595,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 15.12 Subscribed mods | | – | |
 | 15.13 Watch all | | – | |
 | 15.14 Unlink it | | – | |
-| 16.1 The card | | – | |
+| 16.1 The row | | – | |
 | 16.2 Link the API key | | – | |
 | 16.3 A mod.io game | | – | |
 | 16.4 Filters | | – | |
@@ -599,7 +605,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 16.8 Link a token | | – | |
 | 16.9 Links it refuses | | – | |
 | 16.10 Unlink it | | – | |
-| 17.1 No card | | – | |
+| 17.1 No account needed | | – | |
 | 17.2 A DEG Mods game | | – | |
 | 17.2a Covers | | – | |
 | 17.3 Filters | | – | |
