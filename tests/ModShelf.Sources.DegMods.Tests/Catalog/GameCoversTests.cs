@@ -203,6 +203,22 @@ public sealed class GameCoversTests : IDisposable
         Assert.Equal("https://cdn.example/fnv/newer.jpg", Cover(games, "fallout: new vegas"));
     }
 
+    [Fact]
+    public async Task AHostThatShowsNoCoversReadsNoDatabase()
+    {
+        using RecordedDegMods degMods = new();
+        using ServiceProvider services = degMods.BuildServices(options => options with { Admin = _admin.PublicKey, ReadsGameCovers = false });
+        string steam = Csv("Fallout: New Vegas,https://cdn.example/fnv/library_hero.jpg,");
+        degMods.Main.Add(_admin.Sign(Moderation.ListKind, 1_000, [["d", GameCovers.DatabaseList], ["csv", Sha256(steam)]]));
+        degMods.Serve(new Uri($"https://blossom.primal.net/{Sha256(steam)}"), Encoding.UTF8.GetBytes(steam));
+
+        IReadOnlyList<GameInfo> games = await ((DegModsSource)services.GetServices<IModSource>().Single()).GetGamesAsync(Cancellation);
+
+        Assert.All(games, game => Assert.Null(game.CoverUrl));
+        Assert.Empty(degMods.Asked);
+        Assert.DoesNotContain(degMods.Main.Filters, filter => filter.ToJsonString().Contains(GameCovers.DatabaseList, StringComparison.Ordinal));
+    }
+
     [Theory]
     [InlineData("http://localhost:3000/hero.jpg", "https://cdn.example/fnv/box.jpg")]
     [InlineData("ftp://cdn.example/hero.jpg", "https://cdn.example/fnv/box.jpg")]

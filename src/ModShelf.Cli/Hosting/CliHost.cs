@@ -67,7 +67,8 @@ internal static class CliHost
         builder.Services.AddProcessStartLog(RunningCommand.Description);
 
         // The desktop app, when it runs this library's queue, carries out the queue requests of a host that doesn't.
-        string folder = builder.Services.AddModShelf(builder.Configuration, LogFilePrefix);
+        // It shows no games' covers, so it reads none: DEG Mods' take a 28 MB download (ADR 0093).
+        string folder = builder.Services.AddModShelf(builder.Configuration, LogFilePrefix, showsCovers: false);
         builder.Services.AddQueueOwner(folder);
         if (runDownloads)
         {

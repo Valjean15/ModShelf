@@ -54,14 +54,20 @@ internal sealed partial class GameCovers : IDisposable
 
     /// <summary>
     /// The covers of the games <paramref name="keys"/> gives, by their keys: each game's wide picture, or else its box art;
-    /// none for a game the database doesn't have. The first time, the database is read while the keys are; when it can't
-    /// be, there are none, and it's read again the next time.
+    /// none for a game the database doesn't have, and none at all for a host that shows none
+    /// (<see cref="DegModsOptions.ReadsGameCovers"/>). The first time, the database is read while the keys are; when it
+    /// can't be, there are none, and it's read again the next time.
     /// </summary>
     /// <param name="keys">The keys of the games, as <see cref="ModEvents.GameKey"/> makes them, once they're known.</param>
     /// <exception cref="HttpRequestException">Reading the keys did.</exception>
     public async Task<IReadOnlyDictionary<string, Uri>> ReadAsync(Task<IReadOnlySet<string>> keys, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(keys);
+
+        if (!_options.ReadsGameCovers)
+        {
+            return None;
+        }
 
         if (_covers is { } kept)
         {

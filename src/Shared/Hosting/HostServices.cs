@@ -72,8 +72,10 @@ internal static class HostServices
     /// Registers ModShelf's files, where the configuration says, and every service both hosts have.
     /// </summary>
     /// <param name="app">What the host's log files' names start with, such as <c>cli</c>.</param>
+    /// <param name="showsCovers">Whether the host shows games' covers, as the desktop app does; the command line doesn't, so
+    /// it reads none that take a download of their own, as DEG Mods' do.</param>
     /// <returns>The library database's folder, where the settings and the log files are too.</returns>
-    public static string AddModShelf(this IServiceCollection services, IConfiguration configuration, string app)
+    public static string AddModShelf(this IServiceCollection services, IConfiguration configuration, string app, bool showsCovers = true)
     {
         string? databasePath = configuration[DatabasePathKey];
         string folder = services.AddLibraryFiles(string.IsNullOrWhiteSpace(databasePath) ? null : Path.GetFullPath(databasePath), app);
@@ -102,7 +104,7 @@ internal static class HostServices
         services.AddNexusSource(NexusOptionsFrom(configuration));
         services.AddGameBananaSource();
         services.AddModIoSource();
-        services.AddDegModsSource();
+        services.AddDegModsSource(new DegModsOptions { ReadsGameCovers = showsCovers });
         return folder;
     }
 

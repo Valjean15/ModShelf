@@ -31,6 +31,9 @@ What it is, read 2026-11-11 (the site's `index-CX1jqn5A.js`, the admin's relay, 
   relays are, and only the rows of the games DEG Mods shows mods of are kept, for the run. A run that can't read the
   event has no covers, and reads it again the next time; once read, a game that gains its first mod later in the run
   has none until the next run.
+- **Only where covers show** (`DegModsOptions.ReadsGameCovers`): the desktop app reads the database; the command line
+  and its MCP server, which show no covers, don't (`AddModShelf(…, showsCovers: false)`), so `mod games` costs no
+  28 MB download.
 - **A game's cover** is its wide picture, or else its box art, when it's a web address not on this computer's network;
   a game without one shows its initial, as before. No icon.
 - Logs 2030 to 2034, in DEG Mods' block: how many games have covers, and why the database or a file couldn't be read.
@@ -49,4 +52,5 @@ What it is, read 2026-11-11 (the site's `index-CX1jqn5A.js`, the admin's relay, 
   are 28 MB): covers by wide picture or box art, a later file winning, a name in quotes and in another case; read once
   a run, from the first server giving the file whole, past a file with another hash and a server that can't be reached;
   a redirect followed; no database, then one; a file no server gives; only the admin's newest event; pictures not on
-  the web, or on this computer's network, passed over; CSV fields with commas and quotes.
+  the web, or on this computer's network, passed over; CSV fields with commas and quotes; a host that shows no covers
+  reading no database.

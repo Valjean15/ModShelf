@@ -75,4 +75,10 @@ public sealed record DegModsOptions
     /// How long every mod read at once is kept, for Browse and its searches, before it's read again.
     /// </summary>
     public TimeSpan KeepModsFor { get; init; } = TimeSpan.FromMinutes(5);
+
+    /// <summary>
+    /// Whether its games' covers are read from DEG Mods' games database, about 28 MB once a run (ADR 0093): for a host that
+    /// shows them, as the desktop app; the command line shows none.
+    /// </summary>
+    public bool ReadsGameCovers { get; init; } = true;
 }
