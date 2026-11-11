@@ -1,6 +1,6 @@
 # Manual checklist
 
-CI never calls a live mod site, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 13 checks GameBanana, once, without an account and then with a profile linked; section 14 checks mod.io, once, with an API key and then with an access token. Phase 3 is done when they all pass.
+CI never calls a live mod site, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 13 checks GameBanana, once, without an account and then with a profile linked; section 14 checks mod.io, once, with an API key and then with an access token; section 15 checks DEG Mods, once, without an account. Phase 3 is done when they all pass.
 
 The checks use the CLI. They download files into a temporary folder, and keep the library database and credentials apart from your own. One section changes your account: it tracks SMAPI and untracks it again, leaving your tracked mods as they were.
 
@@ -306,6 +306,49 @@ $mio = Join-Path $test 'modio'
 - [ ] **14.17 Unlink it.** `ms account unlink modio`, then `ms mod search --game 6715 --source modio`.
   "Unlinked modio. Its stored credentials are deleted." Then the search says the site needs a linked account, exit code 1. Revoke the token on mod.io.
 
+## 15. DEG Mods
+
+DEG Mods needs no account: its mods are Nostr events on its relays, and its files are on Blossom servers, named by their SHA-256. The checks use Fallout: New Vegas' Better Newspapers for New Vegas Bounties II (three files, the first on DEG Mods' own server and another too), Nipton Rebuilt Remade (files only DEG Mods' own server has, and two on the Internet Archive), Starfield's VGB Fed and Hydration Duration Increase (an older listing, on catbox.moe), Halo & Doom OSTs (on MediaFire), Street Fighter 6's Reject Wifi (two versions), and a test post DEG Mods' admin blocked.
+
+```powershell
+$deg = Join-Path $test 'degmods'
+$newspapers = 'https://degmods.com/mod/naddr1qqjrwcmrv5enqv3395mr2vf5956rwe3h94snqdf594snywryvvcnyd3evenrgq3qzm3rm4rd3aqnk65e8l642kzp6xkhdh67g4rk4k5ytyl4a4xpuxcsxpqqqpu6vwmyaq6'
+$nipton = 'https://degmods.com/mod/naddr1qqjrgefs89snzdes95urxwfn956rxd3c943r2wtr95mxxdf5v33rswfs8q6nwq3qzm3rm4rd3aqnk65e8l642kzp6xkhdh67g4rk4k5ytyl4a4xpuxcsxpqqqpu6vepxnzn'
+$fed = 'https://degmods.com/mod/naddr1qqjrgwfexvcrgve3943rwd3j956xgdnz943ryvnz95mrgwpcvcungef4vsexyq3qrwfel2zca4mw3khvfuclr3jng0qta9r8em94p3eat08jc84aceusxpqqqpmvyhypnhp'
+$halo = 'https://degmods.com/mod/naddr1qqjrwwfsxc6nzdrp956rxvrp956rgdm995ukyctp95erxwpex9snjd3kv4skgq3qkgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qxpqqqpu6vwksxva'
+$wifi = 'https://degmods.com/mod/naddr1qqjrzep48qmrse3j95uxvcfn956xyvec943rzve495mrgwp5xd3nqdekvcukyq3qcdcjuqkz9490hfjph29zl8d8ynq7fnm8aktuf9j7ka3dvquz96usxpqqqpu6v760q43'
+$blocked = 'https://degmods.com/mod/naddr1qqjrqvmyx4jrwef3956nxvec956rswry943xywrr94jxzv34x9jnvvnrv5erwq3qqqqugpv34nt2fek9yncm8trhkt5rnyqzkwxfwd96vy93mxz6utpqxpqqqpu6vc3j5th'
+```
+
+- [ ] **15.1 Games.** `ms mod games vegas --source degmods`, then `ms mod games --source degmods --page-size 100`.
+  "Fallout: New Vegas" with the key `fallout: new vegas`; then about 250 games, those DEG Mods' mods are of, read in a few seconds. `account list` has no DEG Mods row: it needs no account.
+- [ ] **15.2 A mod's page.** `ms mod show $newspapers`.
+  "Better Newspapers for New Vegas Bounties II", "Game: Fallout: New Vegas", by its author's `npub1…`, and its page. Under "Main files", the first file, version 1.0, marked `*`; under "Optional files", the LE version and the alternative texture. Each link is the mod's page with `#file=` and 16 hexadecimal digits.
+- [ ] **15.3 A game named alone.** `ms mod search --game "fallout: new vegas" --page-size 5`, then `ms mod search --game starfield --page-size 5`, then `ms mod search --game "degmods/starfield" --page-size 5`.
+  The first searches DEG Mods, the newest first, as the game's page on DEG Mods lists them; the second Nexus Mods, a name being Nexus Mods'; the third DEG Mods' Starfield, the music replacers among the newest.
+- [ ] **15.4 Words, author, time and order.** `ms mod search newspapers --game "fallout: new vegas"`, `ms mod search --game starfield --source degmods --author npub1kgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qj5fkyk`, `ms mod search --game "fallout: new vegas" --updated-within 30 --sort Updated`, then `ms mod search --game "fallout: new vegas" --sort Name --ascending --page-size 5`.
+  Better Newspapers; the author's eight music replacers; the mods changed in the last month, the latest first; the first five by name. `--sort Downloads` and `--category Armor` are refused, saying what DEG Mods can.
+- [ ] **15.5 Adult content.** `ms mod search --game starfield --source degmods --page-size 50`, then the same with `--adult`.
+  The second lists the mods the first left out, those DEG Mods marks NSFW; the first says how many it left out, or lists them all when none is.
+- [ ] **15.6 From another file server.** `ms download $newspapers --to $deg`.
+  "Checking the file", "Done", and `Better Newspapers for New Vegas Bounties II-96533-1-0-1771837702.zip`, from `blossom.primal.net`, as the log says, its SHA-256 checked. Exit code 0. Nothing asked of `brs.degmods.com`.
+- [ ] **15.7 Only on DEG Mods' server.** `ms download $nipton --to $deg`.
+  The mod's page opens in the browser, shown with it, and the command waits for a link: DEG Mods' page shows its ad, then downloads the file. Press Ctrl+C: the download waits, exit code 3. The log says only DEG Mods' own server has the file. Cancel it in the desktop app or leave it.
+- [ ] **15.8 catbox.moe and the Internet Archive.** `ms download $fed --to $deg`; then `ms mod show $nipton --all`, copy the third file's link, and `ms download "<that link>" --to $deg`.
+  `wa4qcn.7z` from catbox.moe; then `NRR1.3.7z` from archive.org, through its redirect. Exit code 0 for each.
+- [ ] **15.9 A page.** `ms download $halo --to $deg`.
+  MediaFire's page opens in the browser, as in 15.7.
+- [ ] **15.10 Into the library, and an update.** `ms download "$wifi#file=89bc8f13f7654384"`, then `ms library check` and `ms library updates`.
+  "Added to the library."; the file under `degmods/street fighter 6/Reject Wifi (…)`. The check finds no update: version 4.0 is an optional file, not this one's update.
+- [ ] **15.11 Updates.** `ms mod updates --game "fallout: new vegas" --source degmods --since 28d`.
+  The mods changed in the last 28 days, in one request to each relay; `--since 60d` is refused, as for Nexus Mods.
+- [ ] **15.12 Moderation.** `ms mod show $blocked`.
+  "DEG Mods' moderation hides this mod, so ModShelf doesn't download it.", exit code 2. The log says a hidden mod was asked for, without saying which.
+- [ ] **15.13 Refusals.** `ms mod show "https://degmods.com/game/Starfield"`, `ms mod show "https://degmods.com/mod/not-an-address"`, then `ms mod show "$newspapers#file=0123456789abcdef"`.
+  "This DEG Mods link isn't to a mod. Copy the link of the mod's page."; the same; then "The DEG Mods mod no longer lists that file. Copy the link of the mod's page." Exit code 2 for each.
+- [ ] **15.14 A relay down.** With the network cut, `ms mod games --source degmods`.
+  It says DEG Mods' relay couldn't be reached, after 30 seconds at most, exit code 1.
+
 ## Clean up
 
 After both accounts:
@@ -413,3 +456,17 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 14.15 Refusals | | – | |
 | 14.16 Nothing secret in the logs | | – | |
 | 14.17 Unlink it | | – | |
+| 15.1 Games | | – | |
+| 15.2 A mod's page | | – | |
+| 15.3 A game named alone | | – | |
+| 15.4 Words, author, time and order | | – | |
+| 15.5 Adult content | | – | |
+| 15.6 From another file server | | – | |
+| 15.7 Only on DEG Mods' server | | – | |
+| 15.8 catbox.moe and the Internet Archive | | – | |
+| 15.9 A page | | – | |
+| 15.10 Into the library, and an update | | – | |
+| 15.11 Updates | | – | |
+| 15.12 Moderation | | – | |
+| 15.13 Refusals | | – | |
+| 15.14 A relay down | | – | |

@@ -191,6 +191,23 @@ conversation.
   `accounts_status` lists mod.io as linked, with `api-key` its way to link one, "Access token" its level, and
   `worksWithoutAccount` false; the agent never sees the token.
 
+## 7. DEG Mods
+
+DEG Mods needs no account. Start a new conversation.
+
+- [ ] **7.1 Which sites.** Ask the agent where it can find mods for Fallout: New Vegas.
+  It asks the sites with `mod_games`, `degmods` among them, and names the site of each game it finds: Fallout: New Vegas,
+  `fallout: new vegas`, on DEG Mods, beside Nexus Mods' game of that name.
+- [ ] **7.2 A game's name.** Ask it to search DEG Mods' Fallout: New Vegas for `newspapers`.
+  `mod_search` with `game` `fallout: new vegas` (and `source` `degmods`, or without, since a name with a space is DEG
+  Mods'); Better Newspapers for New Vegas Bounties II, its `source` `degmods`, its author an `npub1…`.
+- [ ] **7.3 A file of a DEG Mods mod.** Ask it to download Better Newspapers into the library.
+  It reads the mod with `mod_show`, whose files' links are the mod's page with `#file=…`, and downloads the main one;
+  `library_list` lists it under game `fallout: new vegas` of `degmods`.
+- [ ] **7.4 One only DEG Mods' server has.** Ask it to download Nipton Rebuilt Remade (the command line's checklist,
+  `$nipton`).
+  `download` says it waits for the user to start it on DEG Mods' page; the agent says so, and gives the page.
+
 ## Results
 
 Copy this table into the release's notes or issue, and mark each check ✅, ❌ or – (not run). For a ❌, add what you
@@ -239,3 +256,7 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 6.2 A game's key alone | | |
 | 6.3 A file of a mod.io mod | | |
 | 6.4 The account | | |
+| 7.1 Which sites | | |
+| 7.2 A game's name | | |
+| 7.3 A file of a DEG Mods mod | | |
+| 7.4 One only DEG Mods' server has | | |

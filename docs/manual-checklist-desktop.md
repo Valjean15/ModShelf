@@ -1,6 +1,6 @@
 # Manual checklist: the desktop app
 
-CI never calls a live mod site, and never clicks through the desktop app, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 15 checks GameBanana, once, without an account and then with a profile linked; section 16 checks mod.io, once, with an API key and then with an access token. Phase 5 is done when every flow of Phases 1 to 4 works from the app, without the command line. The command line has its own checklist, [manual-checklist.md](manual-checklist.md).
+CI never calls a live mod site, and never clicks through the desktop app, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 15 checks GameBanana, once, without an account and then with a profile linked; section 16 checks mod.io, once, with an API key and then with an access token; section 17 checks DEG Mods, once, without an account. Phase 5 is done when every flow of Phases 1 to 4 works from the app, without the command line. The command line has its own checklist, [manual-checklist.md](manual-checklist.md).
 
 The checks download files into a test folder, and keep the library database, settings and credentials apart from your own. One section changes your account: it tracks SMAPI and untracks it again, leaving your tracked mods as they were.
 
@@ -397,6 +397,27 @@ mod.io answers nothing without a credential. On [your API Access page](https://m
 - [ ] **16.10 Unlink it.** On the Accounts screen, **Unlink** on mod.io's card, and confirm; then search Baldur's Gate 3 in Browse.
   The card says nothing is linked, and Browse says "mod.io needs your account linked, or refused the one linked. Link it on the Accounts screen, then try again.", with a button to the Accounts screen. Better Inventory UI stays in the library. Revoke the token on mod.io.
 
+## 17. DEG Mods
+
+DEG Mods needs no account. The checks use the links of the command line's checklist, section 15: Better Newspapers for New Vegas Bounties II (`$newspapers`), Nipton Rebuilt Remade (`$nipton`), and the test post DEG Mods' admin blocked (`$blocked`).
+
+- [ ] **17.1 No card.** Open the Accounts screen.
+  No card for DEG Mods: it needs no account.
+- [ ] **17.2 A DEG Mods game.** On the Browse screen, type `vegas` in the game picker, and choose "Fallout: New Vegas (DEG Mods)".
+  DEG Mods' games come from its mods, beside the other sites', after a few seconds the first time. No **Trending** row; **Recently added** and **Recently updated**, with DEG Mods' pictures, no approval and no downloads; a mod DEG Mods marks NSFW is left out unless **Include adult content** is ticked.
+- [ ] **17.3 Filters.** Open **Filters**.
+  The order box offers **Newest**, **Oldest**, **Recently updated**, **Name, A to Z** and **Name, Z to A**; no category; author and "Updated within" are offered. An author is their `npub1…`, as the mods' cards name them.
+- [ ] **17.4 A mod's page.** Paste the Better Newspapers link into the search box, and **Search**.
+  Its picture, "by npub1…", version 1.0, last update, and **Open on DEG Mods**. "Files on DEG Mods": the first under "Main", the LE version and the alternative texture under "Optional".
+- [ ] **17.5 Download it.** **Download** on the main file; then the Library screen.
+  It goes into the library from `blossom.primal.net`, its SHA-256 checked: "In the library", and the Library shows Fallout: New Vegas with "1 mod", in `Library\degmods\fallout_ new vegas\Better Newspapers for New Vegas Bounties II (…)`.
+- [ ] **17.6 Only on DEG Mods' server.** Paste the Nipton Rebuilt Remade link into the Downloads screen's box, and **Download**.
+  The download waits for you, with **Open on DEG Mods**, which opens the mod's page, where DEG Mods shows its ad and downloads the file. Cancel the download once you have it.
+- [ ] **17.7 Moderation.** Paste the blocked test post's link into the Downloads screen's box, and **Download**.
+  "DEG Mods' moderation hides this mod, so ModShelf doesn't download it."
+- [ ] **17.8 Remove it.** On the Library screen, remove Better Newspapers, and delete its file.
+  The game leaves the Library.
+
 ## Clean up
 
 If a run stopped before 12.7, give the links back on the Settings screen first: their registration starts ModShelf on the test folder. After both accounts, quit the app from the tray menu, then:
@@ -564,3 +585,11 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 16.8 Link a token | | – | |
 | 16.9 Links it refuses | | – | |
 | 16.10 Unlink it | | – | |
+| 17.1 No card | | – | |
+| 17.2 A DEG Mods game | | – | |
+| 17.3 Filters | | – | |
+| 17.4 A mod's page | | – | |
+| 17.5 Download it | | – | |
+| 17.6 Only on DEG Mods' server | | – | |
+| 17.7 Moderation | | – | |
+| 17.8 Remove it | | – | |

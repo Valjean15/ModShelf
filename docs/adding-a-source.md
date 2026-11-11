@@ -12,7 +12,8 @@ action that makes a game do so.
 
 Before writing code, find out and write down, for the ADR:
 
-- **The official API**, and its documentation. ModShelf uses official APIs only and never reads a site's web pages.
+- **The official API**, and its documentation, or the open protocol the site's own pages read, such as DEG Mods' Nostr
+  relays (ADR 0090). ModShelf uses official APIs only and never reads a site's web pages.
 - **The terms:** whether an app must register, ask for approval or show attribution; what it may keep, and for how long.
 - **The limits:** requests per minute, hour or day, per user or per app, and the headers that say what's left.
 - **Accounts:** whether reading, searching or downloading needs one, and how a user links it: a personal API key, a
@@ -101,9 +102,11 @@ never asks it to: the screens find its games as a name is typed and show each si
 
 - A `DownloadTicket` is short-lived and can be signed: never store, cache or log it, or the link inside it.
 - Give the file's hash in the ticket when the site publishes one, in any algorithm `FileHash` takes.
-- `HandoffRequired` names the page where the user starts the download. A handoff link can carry a key: it's kept in
-  memory only and never logged. A source with `IHandoffScheme` makes ModShelf able to register that scheme with the
-  system, which other mod managers may claim too: that's raised and asked about first.
+- `HandoffRequired` names the page where the user starts the download. A file only a browser can get, such as one on a
+  page that leads to it (MediaFire) or one a site gives only to its own pages after an ad, is `HandoffRequired` with that
+  page too: nothing hands it back, so the download waits there until cancelled (DEG Mods, ADR 0090). A handoff link can
+  carry a key: it's kept in memory only and never logged. A source with `IHandoffScheme` makes ModShelf able to register
+  that scheme with the system, which other mod managers may claim too: that's raised and asked about first.
 
 ### Files, and how updates are found
 
@@ -171,6 +174,9 @@ updated."), and the screens offer only these.
 - **The largest page,** from 1 to 100. A page holds as many mods as asked, up to it, while more match, so pages
   follow on whole.
 
+A site whose own moderation hides mods by default, such as DEG Mods' blocked mods and hidden tags, has them hidden in
+ModShelf too, listed nowhere and their links refused; mods sexualizing minors are always left out (ADR 0090).
+
 The source may still refuse what it can't do with `ArgumentException`; it's never sent. The contract checks that each
 declared order lists the mods in it, each filter narrows them, and pages are full, against a game the test names
 (`SearchableGame`).
@@ -214,6 +220,11 @@ app's name and version (Nexus Mods: `Application-Name` and `Application-Version`
 before the site's rate limit, from its headers. Those sit inside the retries, so they see every attempt, and inside
 each attempt's time limit, so one that waits long, such as for a minute's limit, waits before the client is called
 instead, as mod.io's `ModIoPacer` does (ADR 0089). `AddNexusSource()` shows it all.
+
+A site read over another protocol, such as Nostr's relays over WebSockets, opens it through a client of its own from the
+factory (`IHttpMessageHandlerFactory.CreateHandler`), with a retry for a connection that fails for a passing reason, and
+its own time limits: the source's named client reads each answer whole within an attempt's time, which a WebSocket's
+never is. Its HTTP requests, such as for files, still go through the named client (ADR 0090).
 
 - `IApiQuota` shows what's left of the limit, when the site says.
 - Errors, as `SourceContractTests<T>` and the interfaces' remarks expect: `ArgumentException` for another source's game,
