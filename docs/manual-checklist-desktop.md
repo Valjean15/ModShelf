@@ -115,6 +115,8 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
   - `https://example.com/file.zip`: "No site ModShelf knows has mods at that link."
 - [ ] **3.8 Previews.** **Back to the list**, search `smapi` again, and look at the results with each of **Cards**, **Thumbnails** and **Rows** in the view switch beside **Filters**.
   Each view's icon names it in a tooltip. **Cards**, the default: each mod is a card with its picture across the top, as many side by side as fit; clicking one opens it. **Thumbnails**: the list, with each mod's thumbnail beside it. **Rows**: the list without pictures. A mod without a picture shows a faint picture sign. The choice stays after closing and starting the app.
+- [ ] **3.8a Many cards.** With **Cards**, choose GameBanana's Friday Night Funkin' and **Search**, then **Load more** nine times (200 mods). Scroll to the end and back; narrow the window, then widen it; click the search box and press Tab until a card has the focus, then keep pressing Tab. Then, in the Library with its previews on **Cards** (Settings › General › Previews), open the game with the most mods, scroll halfway, and change **Sort**.
+  Each **Load more** adds its cards at once, and the screen scrolls without stopping, every card drawn when it comes into view. Each row holds as many cards as fit, counted again as the window narrows or widens; the last row's cards are as wide as the others. Tab goes from card to card (each card, then its box), the list scrolling to show each. In the Library, the game's mods show at once, and sorting them again redraws the cards shown at once.
 - [ ] **3.9 Adult pictures.** Choose Skyrim Special Edition, tick **Include adult content** in **Filters** and **Apply**, and search `outfit`.
   A chip says "Adult content included". The adult mods' pictures are blurred, and their cards say "Adult · blurred". No sharp adult picture shows, even for a moment.
 - [ ] **3.10 Select mods.** Choose Stardew Valley, search `smapi`, and tick the boxes of two mods (at the top left of each card; with **Rows**, beside each name).
@@ -491,6 +493,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 3.6 Link in the search box | | | |
 | 3.7 Links it refuses | | | |
 | 3.8 Previews | | | |
+| 3.8a Many cards | | | |
 | 3.9 Adult pictures | | | |
 | 3.10 Select mods | | | |
 | 4.1 From a mod's page | | – | |
