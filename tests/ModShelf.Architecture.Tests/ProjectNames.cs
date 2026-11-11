@@ -16,6 +16,7 @@ internal static class ProjectNames
     public const string Presentation = "ModShelf.Presentation";
     public const string SourcesNexus = "ModShelf.Sources.Nexus";
     public const string SourcesGameBanana = "ModShelf.Sources.GameBanana";
+    public const string SourcesModIo = "ModShelf.Sources.ModIo";
     public const string SourcesDirectUrl = "ModShelf.Sources.DirectUrl";
     public const string Desktop = "ModShelf.Desktop";
     public const string Cli = "ModShelf.Cli";

@@ -33,7 +33,7 @@ internal static partial class ModCommand
         };
         Option<string> game = new("--game")
         {
-            Description = "The game, as its site names it: stardewvalley on Nexus Mods, a number such as 16951 on GameBanana.",
+            Description = "The game, as its site names it: stardewvalley on Nexus Mods, a number such as 16951 on GameBanana or 6715 on mod.io.",
             HelpName = "game",
             Required = true,
         };
@@ -84,7 +84,7 @@ internal static partial class ModCommand
         };
         Option<string?> source = new("--source")
         {
-            Description = "The site to search, nexus or gamebanana. Needed only when the game's key could be more than one site's.",
+            Description = "The site to search: nexus, gamebanana or modio. Needed only when the game's key could be more than one site's.",
             HelpName = "source",
         };
 

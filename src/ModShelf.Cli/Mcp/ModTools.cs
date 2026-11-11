@@ -56,7 +56,7 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
     [McpServerTool(Name = "mod_show", Title = "Show a mod", ReadOnly = true, Idempotent = true, OpenWorld = true, UseStructuredContent = true)]
     [Description("Shows a mod as its site describes it, with its files, each with the link to download it, the newer file that replaces it by the site's word, where the library has it, if it does, and whether it's an update skipped; and whether the library has the mod pinned, and its note. Old versions, archived files and files in no section are left out unless allFiles is set, but for the one the link points to. The library's files that the site no longer lists, such as a pulled file, are in libraryOnly; newerInLibrary says when one of them is newer than everything the site lists.")]
     public Task<ModDetails> ShowAsync(
-        [Description("A link to the mod or one of its files, such as its page on Nexus Mods or GameBanana.")] string link,
+        [Description("A link to the mod or one of its files, such as its page on Nexus Mods, GameBanana or mod.io.")] string link,
         [Description("Also list old versions, archived files and files in no section.")] bool allFiles = false,
         [Description("Also give the mod's changelog.")] bool changelog = false,
         CancellationToken cancellationToken = default)
@@ -133,7 +133,7 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
     [McpServerTool(Name = "mod_search", Title = "Search a game's mods", ReadOnly = true, Idempotent = true, OpenWorld = true, UseStructuredContent = true)]
     [Description("Lists a game's mods on its site that match, a page at a time, each with the link mod_show and download take. Mods with adult content are left out unless asked for; leftOut counts those a page left out once the site answered. A site searches only by what it can, in its own orders: one asked more is refused, saying what it can. Each result's search says what the site can do for the game: its orders, the filters it takes, its largest page, its word for approval, and the game's categories. endorsements counts whatever the site counts as approval.")]
     public Task<SearchResult> SearchAsync(
-        [Description("The game, as its site names it: on Nexus Mods by the name in its links, such as stardewvalley; on GameBanana by its number, such as 16951. mod_games finds a site's games and their keys.")] string game,
+        [Description("The game, as its site names it: on Nexus Mods by the name in its links, such as stardewvalley; on GameBanana and mod.io by its number, such as 16951 or 6715. mod_games finds a site's games and their keys.")] string game,
         [Description("Words to look for in the mods' names; none to list every mod of the game.")] string? words = null,
         [Description("Only mods by this author, where the site can search by author.")] string? author = null,
         [Description("Only mods in this category of the game, by its name in any case, where the site can search by category; a result's search.categories lists them. One the game doesn't have is refused, naming those it has.")] string? category = null,
@@ -143,7 +143,7 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
         [Description("Turn the order around, so the least comes first.")] bool ascending = false,
         [Description("Which page of results, from 1.")] int page = 1,
         [Description("How many mods a page lists, from 1 to 100, as many as the site's pages hold at most; 20 unless set, or fewer when the site's pages hold fewer.")] int? pageSize = null,
-        [Description("The site to search: nexus or gamebanana. Needed only when the game's key could be more than one site's; each result says its site as source.")] string? source = null,
+        [Description("The site to search: nexus, gamebanana or modio. Needed only when the game's key could be more than one site's; each result says its site as source.")] string? source = null,
         CancellationToken cancellationToken = default)
         => McpProblems.GuardAsync(async () =>
         {
@@ -230,7 +230,7 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
     [Description("Lists a site's games whose names match, those that start with the words first, a page at a time, each with the key mod_search's game takes. Each word must start a word of the name, in any order; case, accents, quotes and other punctuation don't count, and a Roman numeral from II to XXX is its number too: \"stalker 2\" finds S.T.A.L.K.E.R. 2, \"final fantasy 12\" Final Fantasy XII.")]
     public Task<GamesResult> GamesAsync(
         [Description("Words of the game's name; none to list every game, on a site that lists them all. GameBanana finds its games by name only, by a word of 3 letters or more.")] string? words = null,
-        [Description("The site: nexus or gamebanana. Needed when more than one site lists its games, as both do: ask each site the game may be on.")] string? source = null,
+        [Description("The site: nexus, gamebanana or modio. Needed when more than one site lists its games, as several do: ask each site the game may be on.")] string? source = null,
         [Description("Which page of games, from 1.")] int page = 1,
         [Description("How many games a page lists, from 1 to 100.")] int pageSize = 20,
         CancellationToken cancellationToken = default)

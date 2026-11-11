@@ -110,14 +110,17 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     [Fact]
     public async Task AGamesKeyAloneIsTheOnlySitesWhoseGamesKeysLookLikeIt()
     {
-        string[] said =
-        [
-            (await RunAsync("set", "games.16951.notify", "true")).Output.Trim(),
-            (await RunAsync("set", "games.fallout4.notify", "true")).Output.Trim(),
-        ];
+        CliResult name = await RunAsync("set", "games.fallout4.notify", "true");
+        CliResult number = await RunAsync("set", "games.16951.notify", "true");
+        CliResult named = await RunAsync("set", "games.gamebanana/16951.notify", "true");
 
-        Assert.StartsWith("games.gamebanana/16951.notify is now true", said[0], StringComparison.Ordinal);
-        Assert.StartsWith("games.nexus/fallout4.notify is now true", said[1], StringComparison.Ordinal);
+        Assert.StartsWith("games.nexus/fallout4.notify is now true", name.Output.Trim(), StringComparison.Ordinal);
+
+        // GameBanana's games and mod.io's are both numbers.
+        Assert.Equal(
+            (BadInput, "More than one site may have a game called 16951: name its site too, as gamebanana/16951 or modio/16951."),
+            (number.ExitCode, number.Errors.Trim()));
+        Assert.StartsWith("games.gamebanana/16951.notify is now true", named.Output.Trim(), StringComparison.Ordinal);
     }
 
     [Fact]

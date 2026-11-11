@@ -250,7 +250,7 @@ public sealed class ExampleSiteTests : IAsyncDisposable
         CliResult unclear = await RunAsync("mod", "search", "golden", "--game", "16951");
 
         Assert.Equal(BadInput, unclear.ExitCode);
-        Assert.Equal("More than one site can search; choose one with --source: gamebanana, example.", unclear.Errors.Trim());
+        Assert.Equal("More than one site can search; choose one with --source: gamebanana, modio, example.", unclear.Errors.Trim());
     }
 
     [Fact]

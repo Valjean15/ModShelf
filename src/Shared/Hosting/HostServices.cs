@@ -10,6 +10,7 @@ using ModShelf.Platform.Links;
 using ModShelf.Platform.Secrets;
 using ModShelf.Sources.DirectUrl;
 using ModShelf.Sources.GameBanana;
+using ModShelf.Sources.ModIo;
 using ModShelf.Sources.Nexus;
 
 namespace ModShelf.Hosting;
@@ -99,6 +100,7 @@ internal static class HostServices
         services.AddDirectUrlSource();
         services.AddNexusSource(NexusOptionsFrom(configuration));
         services.AddGameBananaSource();
+        services.AddModIoSource();
         return folder;
     }
 
