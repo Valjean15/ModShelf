@@ -1,6 +1,7 @@
 using ModShelf.Application.Diagnostics;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.Tests.Fakes;
+using ModShelf.Presentation.Tests.ViewModels.Accounts;
 using ModShelf.Presentation.ViewModels.Settings;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Testing;
@@ -43,6 +44,7 @@ internal sealed class SettingsHarness
             Hidden,
             GameSettings,
             Screens,
+            Navigation,
             Sites,
             UiThread,
             PicturesCard,
@@ -52,8 +54,14 @@ internal sealed class SettingsHarness
             Agents,
             About,
             AppUpdate,
+            Accounts.Screen,
             Logger);
     }
+
+    /// <summary>
+    /// Settings › Accounts, over the accounts' own fakes.
+    /// </summary>
+    public AccountsHarness Accounts { get; } = new();
 
     public InMemorySettingsService Settings { get; } = new();
 

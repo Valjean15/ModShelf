@@ -1,0 +1,103 @@
+<!-- A site's row in Settings › Accounts: the site, its account or that none is linked, and its main button; it opens for
+     the rest, as the first-run setup's card shows it (ADR 0094). -->
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sys="using:System"
+             xmlns:vm="using:ModShelf.Presentation.ViewModels.Accounts"
+             xmlns:res="using:ModShelf.Presentation.Resources"
+             xmlns:views="using:ModShelf.Desktop.Views"
+             xmlns:pictures="using:ModShelf.Desktop.Views.Pictures"
+             x:Class="ModShelf.Desktop.Views.AccountRow"
+             x:DataType="vm:AccountViewModel">
+
+    <Border Classes="card accountRow">
+        <StackPanel Spacing="10">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                <!-- The account's picture, or its initial on its colour; an empty ring while none is linked. -->
+                <Panel VerticalAlignment="Center">
+                    <Border Classes="avatar"
+                            Width="36"
+                            Height="36"
+                            CornerRadius="18"
+                            Background="{Binding Hue, Converter={x:Static views:CoverBrushConverter.Instance}}"
+                            IsVisible="{Binding IsLinked}">
+                        <Panel>
+                            <TextBlock FontSize="15" Text="{Binding Initial}" IsVisible="{Binding !Picture.HasFile}" />
+                            <pictures:ModImage File="{Binding Picture.File}"
+                                               DecodeWidth="108"
+                                               Stretch="UniformToFill"
+                                               RenderOptions.BitmapInterpolationMode="HighQuality" />
+                        </Panel>
+                    </Border>
+                    <Border Classes="avatar link" Width="36" Height="36" CornerRadius="18" IsVisible="{Binding !IsLinked}" />
+                </Panel>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock FontWeight="SemiBold" VerticalAlignment="Center" Text="{Binding SiteName}" />
+                        <Border Classes="tag accent" IsVisible="{Binding Tier, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                            <TextBlock Text="{Binding Tier}" />
+                        </Border>
+                    </StackPanel>
+                    <TextBlock Classes="note" TextTrimming="CharacterEllipsis" Text="{Binding SummaryText}" />
+                    <TextBlock Classes="note problem" TextWrapping="Wrap" Text="{Binding AttentionText}" IsVisible="{Binding NeedsAttention}" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <Button Classes="accent" Content="{x:Static res:Strings.AccountRowLink}" Command="{Binding ExpandCommand}" IsVisible="{Binding ShowsLink}" />
+                    <Button Content="{x:Static res:Strings.AccountCheck}" Command="{Binding CheckCommand}" IsVisible="{Binding IsLinked}" />
+                    <Button Classes="quiet" Content="{Binding DetailsText}" Command="{Binding ToggleDetailsCommand}" />
+                </StackPanel>
+            </Grid>
+
+            <!-- The rest: what the site needs, when it was linked, the requests left, linking, unlinking. -->
+            <StackPanel Spacing="10" IsVisible="{Binding IsExpanded}">
+                <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding AboutText}" />
+                <TextBlock Classes="note" Text="{Binding LinkedText}" IsVisible="{Binding IsLinked}" />
+                <StackPanel Spacing="2" IsVisible="{Binding HasQuota}">
+                    <TextBlock Classes="note" Text="{Binding QuotaHeading}" />
+                    <ItemsControl ItemsSource="{Binding Quota}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="sys:String">
+                                <TextBlock TextWrapping="Wrap" Text="{Binding}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+                <WrapPanel ItemSpacing="8" LineSpacing="8">
+                    <ItemsControl ItemsSource="{Binding LinkMethods}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="8" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:LinkMethodViewModel">
+                                <Button Classes.accent="{Binding IsMain}" Content="{Binding Label}" Command="{Binding Command}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Classes="quiet" Content="{x:Static res:Strings.AccountUnlink}" Command="{Binding UnlinkCommand}" IsVisible="{Binding IsLinked}" />
+                </WrapPanel>
+            </StackPanel>
+
+            <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" />
+
+            <!-- While linking waits for the user to approve ModShelf in the browser. -->
+            <StackPanel Spacing="8" IsVisible="{Binding IsWaitingForBrowser}">
+                <TextBlock TextWrapping="Wrap" Text="{Binding BrowserNote}" />
+                <SelectableTextBlock TextWrapping="Wrap"
+                                     Text="{Binding BrowserPageText}"
+                                     IsVisible="{Binding BrowserPageText, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Content="{x:Static res:Strings.AccountOpenPageAgain}" Command="{Binding OpenBrowserPageAgainCommand}" />
+                    <Button Classes="quiet" Content="{x:Static res:Strings.AccountStopLinking}" Command="{Binding StopLinkingCommand}" />
+                </StackPanel>
+            </StackPanel>
+
+            <TextBlock Classes="note message"
+                       Classes.problem="{Binding IsNoteAProblem}"
+                       Text="{Binding Note}" />
+        </StackPanel>
+    </Border>
+</UserControl>

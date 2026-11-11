@@ -2,6 +2,7 @@ using Microsoft.Extensions.Time.Testing;
 
 using ModShelf.Application.Downloads;
 using ModShelf.Presentation.Tests.Fakes;
+using ModShelf.Presentation.ViewModels.Accounts;
 using ModShelf.Presentation.ViewModels.Downloads;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Testing;
@@ -31,6 +32,7 @@ internal sealed class DownloadsHarness : IDisposable
             Dialogs,
             new FakeSourceRegistry([new ScriptedCatalog(TestData.Nexus, "Nexus Mods"), .. others]),
             Sites,
+            Wanting,
             Pictures.Pictures,
             UiThread,
             Time,
@@ -42,6 +44,11 @@ internal sealed class DownloadsHarness : IDisposable
     public TestPictures Pictures { get; } = new();
 
     public ScriptedSitesInUse Sites { get; } = new();
+
+    /// <summary>
+    /// The sites whose downloads failed for want of an account, as the screen says.
+    /// </summary>
+    public SitesWantingAccounts Wanting { get; } = new();
 
     public ScriptedLibraryDownloads Library { get; } = new();
 

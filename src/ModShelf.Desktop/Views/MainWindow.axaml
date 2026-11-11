@@ -3,7 +3,6 @@
         xmlns:vm="using:ModShelf.Presentation.ViewModels"
         xmlns:res="using:ModShelf.Presentation.Resources"
         xmlns:views="using:ModShelf.Desktop.Views"
-        xmlns:accounts="using:ModShelf.Presentation.ViewModels.Accounts"
         xmlns:pictures="using:ModShelf.Desktop.Views.Pictures"
         xmlns:quick="using:ModShelf.Desktop.Views.QuickSearch"
         xmlns:undo="using:ModShelf.Presentation.ViewModels.Undo"
@@ -68,63 +67,29 @@
                             </Grid>
                         </Button>
 
-                        <!-- The accounts at the bottom: each one's picture, name, and level and site, opening Accounts; Link an
-                             account while none is linked. Collapsed, the pictures alone, each named in its tooltip. -->
-                        <Border DockPanel.Dock="Bottom"
-                                Classes="accountMenu"
-                                Classes.collapsed="{Binding !IsSidebarOpen}"
-                                Margin="6,8,6,10">
-                            <StackPanel DataContext="{Binding Accounts}" x:DataType="accounts:AccountMenuViewModel">
-                                <ItemsControl ItemsSource="{Binding Entries}" IsVisible="{Binding HasAccounts}" AutomationProperties.Name="{x:Static res:Strings.AccountsTitle}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="accounts:AccountMenuEntryViewModel">
-                                            <Button Classes="accountRow"
-                                                    Command="{Binding $parent[ItemsControl].((accounts:AccountMenuViewModel)DataContext).OpenAccountsCommand, FallbackValue={x:Null}}"
-                                                    ToolTip.Tip="{Binding Tip}"
-                                                    AutomationProperties.Name="{Binding Tip}">
-                                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
-                                                    <Border Classes="avatar"
-                                                            Width="32"
-                                                            Height="32"
-                                                            CornerRadius="16"
-                                                            Background="{Binding Hue, Converter={x:Static views:CoverBrushConverter.Instance}}">
-                                                        <Panel>
-                                                            <TextBlock FontSize="14" Text="{Binding Initial}" IsVisible="{Binding !Picture.HasFile}" />
-                                                            <pictures:ModImage File="{Binding Picture.File}"
-                                                                               DecodeWidth="96"
-                                                                               Stretch="UniformToFill"
-                                                                               RenderOptions.BitmapInterpolationMode="HighQuality" />
-                                                        </Panel>
-                                                    </Border>
-                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                        <TextBlock FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
-                                                        <TextBlock Classes="note" FontSize="12.5" TextTrimming="CharacterEllipsis" Text="{Binding Level}" />
-                                                    </StackPanel>
-                                                </Grid>
-                                            </Button>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                                <Button Classes="accountRow"
-                                        Command="{Binding OpenAccountsCommand}"
-                                        IsVisible="{Binding OffersLinking}"
-                                        ToolTip.Tip="{x:Static res:Strings.AccountMenuLink}">
-                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
-                                        <Border Classes="avatar link" Width="32" Height="32" CornerRadius="16">
-                                            <PathIcon Width="14" Height="14" Data="{StaticResource PlusIcon}" />
-                                        </Border>
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                            <TextBlock FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Text="{x:Static res:Strings.AccountMenuLink}" />
-                                            <TextBlock Classes="note" FontSize="12.5" TextTrimming="CharacterEllipsis" Text="{x:Static res:Strings.AccountMenuLinkNote}" />
-                                        </StackPanel>
-                                    </Grid>
-                                </Button>
+                        <!-- Settings at the bottom: its icon and name; collapsed, its icon. Its badge counts what to look at there: a
+                             newer ModShelf, and accounts that need attention, which are inside it (ADR 0094). -->
+                        <Button DockPanel.Dock="Bottom"
+                                Classes="sidebarSettings"
+                                Classes.selected="{Binding IsSettingsShown}"
+                                Margin="6,8,6,10"
+                                Command="{Binding OpenSettingsCommand}"
+                                ToolTip.Tip="{Binding SettingsTip}"
+                                AutomationProperties.Name="{Binding SettingsTip}">
+                            <StackPanel Orientation="Horizontal" Spacing="16">
+                                <Panel>
+                                    <PathIcon Data="{StaticResource SettingsIcon}" />
+                                    <Border Classes="badge" IsVisible="{Binding HasSettingsBadge}">
+                                        <TextBlock Text="{Binding SettingsBadge}" />
+                                    </Border>
+                                </Panel>
+                                <TextBlock Text="{x:Static res:Strings.SettingsTitle}" VerticalAlignment="Center" />
                             </StackPanel>
-                        </Border>
+                        </Button>
 
                         <ListBox Classes="sidebar"
-                                 ItemsSource="{Binding Screens}"
-                                 SelectedItem="{Binding CurrentScreen}">
+                                 ItemsSource="{Binding SidebarScreens}"
+                                 SelectedItem="{Binding SidebarScreen}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate x:DataType="vm:ScreenViewModel">
                                     <StackPanel Orientation="Horizontal" Spacing="16">

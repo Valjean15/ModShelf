@@ -16,6 +16,7 @@ using ModShelf.Domain.Downloads;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
+using ModShelf.Presentation.ViewModels.Accounts;
 using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Downloads;
@@ -33,6 +34,7 @@ namespace ModShelf.Presentation.ViewModels.Downloads;
 public sealed partial class DownloadsViewModel : ScreenViewModel
 {
     private readonly IDownloadService _downloads;
+    private readonly SitesWantingAccounts _wantingAccounts;
     private readonly ILibraryDownloads _library;
     private readonly IOpenedLinks _opened;
     private readonly FolderDownloads _folders;
@@ -59,6 +61,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         IDialogService dialogs,
         ISourceRegistry sources,
         ISitesInUse sitesInUse,
+        SitesWantingAccounts wantingAccounts,
         ModPictures pictures,
         IUiThread uiThread,
         TimeProvider timeProvider,
@@ -73,12 +76,14 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(dialogs);
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(sitesInUse);
+        ArgumentNullException.ThrowIfNull(wantingAccounts);
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(logger);
 
         _downloads = downloads;
         _sitesInUse = sitesInUse;
+        _wantingAccounts = wantingAccounts;
         _library = library;
         _opened = opened;
         _settings = settings;
@@ -552,6 +557,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
     private void Count()
     {
         Badge = Jobs.Count(job => job.IsAwaitingHandoff || job.IsFailed);
+        _wantingAccounts.Show(Jobs.Where(job => job.WantsAccount).Select(job => job.Mod.Game.Source));
         HasJobs = Jobs.Count > 0;
         HasFinished = Jobs.Any(job => job.IsFinished);
         foreach (DownloadTabViewModel tab in Tabs)

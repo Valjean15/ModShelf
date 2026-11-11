@@ -143,6 +143,11 @@
                                    Text="{Binding NothingMatches}"
                                    IsVisible="{Binding NothingMatches, Converter={x:Static ObjectConverters.IsNotNull}}" />
 
+                        <!-- The sites' accounts: the first category (ADR 0094). -->
+                        <Panel IsVisible="{Binding AccountsSection.IsShown}">
+                            <views:AccountsView DataContext="{Binding Accounts}" />
+                        </Panel>
+
                         <Border Classes="card" IsVisible="{Binding ThemeSection.IsShown}">
                             <StackPanel Spacing="8">
                                 <TextBlock Classes="subheading" Text="{x:Static res:Strings.SettingsAppearanceHeading}" />

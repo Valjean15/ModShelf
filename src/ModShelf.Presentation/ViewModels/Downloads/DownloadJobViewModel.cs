@@ -79,6 +79,11 @@ public sealed partial class DownloadJobViewModel : ObservableObject
     /// </summary>
     internal ModRef Mod => _job.File.Mod;
 
+    /// <summary>
+    /// Whether it failed for want of an account on its site.
+    /// </summary>
+    internal bool WantsAccount => _job.FailureReason == DownloadFailureReason.AccountNeeded;
+
     public string FileName => _job.FileName;
 
     /// <summary>

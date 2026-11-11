@@ -5,6 +5,7 @@ namespace ModShelf.Presentation.ViewModels.Settings;
 /// </summary>
 public enum SettingsCategory
 {
+    Accounts,
     General,
     Library,
     Updates,

@@ -16,6 +16,7 @@ using ModShelf.Domain.Updates;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
+using ModShelf.Presentation.ViewModels.Accounts;
 using ModShelf.Presentation.ViewModels.Pictures;
 
 namespace ModShelf.Presentation.ViewModels.Settings;
@@ -85,6 +86,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
         IHiddenGames hiddenGames,
         IGameSettingsOpener gameSettings,
         IScreenOpener screens,
+        INavigationService navigation,
         ISitesInUse sitesInUse,
         IUiThread uiThread,
         PicturesViewModel pictures,
@@ -94,6 +96,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
         AgentsViewModel agents,
         AboutViewModel about,
         AppUpdateViewModel appUpdate,
+        AccountsViewModel accounts,
         ILogger<SettingsViewModel> logger)
     {
         ArgumentNullException.ThrowIfNull(settings);
@@ -109,6 +112,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
         ArgumentNullException.ThrowIfNull(hiddenGames);
         ArgumentNullException.ThrowIfNull(gameSettings);
         ArgumentNullException.ThrowIfNull(screens);
+        ArgumentNullException.ThrowIfNull(navigation);
         ArgumentNullException.ThrowIfNull(sitesInUse);
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(pictures);
@@ -118,6 +122,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
         ArgumentNullException.ThrowIfNull(agents);
         ArgumentNullException.ThrowIfNull(about);
         ArgumentNullException.ThrowIfNull(appUpdate);
+        ArgumentNullException.ThrowIfNull(accounts);
         ArgumentNullException.ThrowIfNull(logger);
 
         _settings = settings;
@@ -147,6 +152,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
         Agents = agents;
         About = about;
         AppUpdate = appUpdate;
+        Accounts = accounts;
         appUpdate.PropertyChanged += (_, changed) =>
         {
             if (changed.PropertyName == nameof(AppUpdateViewModel.WantsUser))
@@ -162,7 +168,20 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
         SelectedCategory = Categories[0];
         gameSettings.Opening += OnGameSettingsOpening;
         screens.SettingsOpening += OnSettingsOpening;
+        navigation.Navigated += (_, screen) =>
+        {
+            // Accounts is a category of Settings (ADR 0094).
+            if (screen == Screen.Accounts)
+            {
+                _uiThread.Post(() => OnSettingsOpening(this, SettingsCategory.Accounts));
+            }
+        };
     }
+
+    /// <summary>
+    /// The sites' accounts: Settings' first category.
+    /// </summary>
+    public AccountsViewModel Accounts { get; }
 
     public override Screen Screen => Screen.Settings;
 

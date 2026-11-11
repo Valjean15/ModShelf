@@ -2,17 +2,18 @@ using Microsoft.Extensions.Time.Testing;
 
 using ModShelf.Application.Accounts;
 using ModShelf.Domain.Mods;
-using ModShelf.Presentation.Services;
 using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.ViewModels.Accounts;
+using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Testing;
 
 namespace ModShelf.Presentation.Tests.ViewModels.Accounts;
 
 /// <summary>
-/// The Accounts screen over fakes, with two sites: Nexus Mods, which needs an account and links one with an API key or in
-/// the browser, and mod.io, which works without one and links one with an emailed code.
+/// Settings › Accounts over fakes, with two sites that link accounts: Nexus Mods, which needs an account and links one
+/// with an API key or in the browser, and mod.io, which works without one and links one with an emailed code; and two
+/// that need none: DEG Mods, which searches, downloads and lists updates, and web links, which download.
 /// </summary>
 internal sealed class AccountsHarness
 {
@@ -21,15 +22,30 @@ internal sealed class AccountsHarness
 
     public static readonly SourceId ModIo = new("mod-io");
 
+    public static readonly SourceId DegMods = new("degmods");
+
+    public static readonly SourceId WebLinks = new("direct");
+
     public static readonly Uri KeyPage = new("https://next.nexusmods.com/settings/api-keys");
 
     public static readonly Uri ApprovalPage = new("https://users.nexusmods.com/oauth/authorize?client_id=modshelf&state=abc");
 
-    public AccountsHarness(bool protectedByOs = true)
+    /// <param name="openSites">Whether DEG Mods and web links, which need no account, are sites too.</param>
+    /// <param name="sites">The sites registered, in place of DEG Mods and web links.</param>
+    public AccountsHarness(bool protectedByOs = true, bool openSites = true, IReadOnlyList<IModSource>? sites = null)
     {
         Time.SetLocalTimeZone(TimeZoneInfo.Utc);
-        Menu = new AccountMenuViewModel(Pictures.Pictures, Navigation);
-        Screen = new AccountsViewModel(Accounts, new FixedSecretStore(protectedByOs), Browser, Dialogs, UiThread, Time, Pictures.Pictures, Menu, Logger);
+        Screen = new AccountsViewModel(
+            Accounts,
+            new FixedSecretStore(protectedByOs),
+            Browser,
+            Dialogs,
+            UiThread,
+            Time,
+            Pictures.Pictures,
+            new FakeSourceRegistry([.. sites ?? (openSites ? [new OpenSite(DegMods, "DEG Mods"), new PageSite(WebLinks, "Web links")] : [])]),
+            Wanting,
+            Logger);
     }
 
     public ScriptedAccounts Accounts { get; } = new();
@@ -46,12 +62,10 @@ internal sealed class AccountsHarness
 
     public TestPictures Pictures { get; } = new();
 
-    public NavigationService Navigation { get; } = new();
-
     /// <summary>
-    /// The accounts at the bottom of the menu, which the screen's cards tell.
+    /// The sites whose downloads failed for want of an account, as the Downloads screen says.
     /// </summary>
-    public AccountMenuViewModel Menu { get; }
+    public SitesWantingAccounts Wanting { get; } = new();
 
     public AccountsViewModel Screen { get; }
 

@@ -910,32 +910,37 @@
         <Setter Property="BorderBrush" Value="Transparent" />
     </Style>
 
-    <!-- The accounts at the bottom of the sidebar: in a quiet box, each a row with its round picture; collapsed, the
-         pictures alone, without the box. -->
-    <Style Selector="Border.accountMenu">
-        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="10" />
-        <Setter Property="Background" Value="{DynamicResource ShelfSurfaceBrush}" />
-    </Style>
-
-    <Style Selector="Border.accountMenu.collapsed">
-        <Setter Property="BorderBrush" Value="Transparent" />
-        <Setter Property="Background" Value="Transparent" />
-    </Style>
-
-    <Style Selector="Button.accountRow">
+    <!-- Settings at the bottom of the sidebar: as a screen in its list, raised while shown. -->
+    <Style Selector="Button.sidebarSettings">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="Transparent" />
-        <Setter Property="Padding" Value="5" />
+        <Setter Property="Padding" Value="12,10" />
         <Setter Property="CornerRadius" Value="8" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfMutedBrush}" />
+        <Setter Property="FontWeight" Value="Medium" />
     </Style>
 
-    <Style Selector="Button.accountRow:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Style Selector="Button.sidebarSettings:pointerover /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource ShelfSidebarHoverBrush}" />
         <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfTextBrush}" />
+    </Style>
+
+    <Style Selector="Button.sidebarSettings.selected /template/ ContentPresenter#PART_ContentPresenter, Button.sidebarSettings.selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfSidebarSelectedBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfTextBrush}" />
+    </Style>
+
+    <Style Selector="Button.sidebarSettings.selected">
+        <Setter Property="Foreground" Value="{DynamicResource ShelfTextBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <!-- A site's row in Settings › Accounts: a compact card. -->
+    <Style Selector="Border.card.accountRow">
+        <Setter Property="Padding" Value="14,12" />
     </Style>
 
     <Style Selector="Border.avatar">

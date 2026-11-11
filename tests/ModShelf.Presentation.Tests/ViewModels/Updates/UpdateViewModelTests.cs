@@ -115,7 +115,7 @@ public sealed class UpdateViewModelTests : IDisposable
         await row.DownloadCommand.ExecuteAsync(null);
 
         Assert.Equal(
-            ("The site needs a linked account to look that link up, or refused the one linked. Link it on the Accounts screen, then try again.", true),
+            ("The site needs a linked account to look that link up, or refused the one linked. Link it in Settings › Accounts, then try again.", true),
             (row.Note, row.IsNoteAProblem));
         Assert.Empty(_harness.Logger.Entries);
     }
@@ -217,7 +217,7 @@ public sealed class UpdateViewModelTests : IDisposable
         await _harness.ShowAsync();
 
         Assert.Equal(
-            "The site needs a linked account to give the changelog, or refused the one linked. Link it on the Accounts screen.",
+            "The site needs a linked account to give the changelog, or refused the one linked. Link it in Settings › Accounts.",
             refused);
         Assert.Equal("The site couldn't give the changelog: Service unavailable.", row.ChangesNote);
         Assert.Equal(2, _harness.ChangelogsAsked.Count);

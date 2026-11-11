@@ -41,7 +41,7 @@ public sealed class SiteProblemsTests
     [Fact]
     public void ARefusedAccountSaysToLinkIt()
         => Assert.Equal(
-            "Nexus Mods needs your account linked, or refused the one linked. Link it on the Accounts screen, then try again.",
+            "Nexus Mods needs your account linked, or refused the one linked. Link it in Settings › Accounts, then try again.",
             SiteProblems.Describe(new AuthenticationFailedException("Refused."), "Nexus Mods", Failed));
 
     [Fact]

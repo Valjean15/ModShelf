@@ -78,6 +78,11 @@ public sealed partial class SettingsViewModel
     /// </summary>
     public override void OnShown()
     {
+        if (SelectedCategory?.Category == SettingsCategory.Accounts)
+        {
+            Accounts.OnShown();
+        }
+
         GamesWork = ReadGamesAsync();
         ShownWork = ShowStoredAsync();
         SitesWork = ShowSitesAsync();

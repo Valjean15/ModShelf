@@ -26,7 +26,11 @@ public sealed class PresentationServiceCollectionExtensionsTests
         Assert.Equal(typeof(SitesInUse), Assert.Single(services, descriptor => descriptor.ServiceType == typeof(ISitesInUse)).ImplementationType);
         Assert.Equal(
             [typeof(LibraryViewModel), typeof(UpdatesViewModel), typeof(BrowseViewModel), typeof(DownloadsViewModel), typeof(AccountsViewModel), typeof(SettingsViewModel)],
-            services.Where(descriptor => descriptor.ServiceType == typeof(ScreenViewModel)).Select(descriptor => descriptor.ImplementationType));
+            services.Where(descriptor => descriptor.ServiceType == typeof(ScreenViewModel)).Select(descriptor => descriptor.ImplementationType ?? descriptor.ImplementationFactory?.Method.ReturnType));
+
+        // The one Settings › Accounts shows too (ADR 0094).
+        Assert.Single(services, descriptor => descriptor.ServiceType == typeof(AccountsViewModel));
+        Assert.Single(services, descriptor => descriptor.ServiceType == typeof(SitesWantingAccounts));
         Assert.Single(services, descriptor => descriptor.ServiceType == typeof(MainWindowViewModel));
         Assert.Single(services, descriptor => descriptor.ServiceType == typeof(TrayViewModel));
         Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));

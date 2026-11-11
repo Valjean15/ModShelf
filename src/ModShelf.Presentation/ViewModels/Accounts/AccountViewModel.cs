@@ -24,6 +24,8 @@ public sealed partial class AccountViewModel : ObservableObject
 {
     private readonly AccountServices _services;
     private CancellationTokenSource? _linking;
+    private bool _wanted;
+    private bool _refused;
     private Uri? _browserPage;
 
     internal AccountViewModel(SourceAccountStatus status, AccountServices services)
@@ -34,6 +36,7 @@ public sealed partial class AccountViewModel : ObservableObject
         _services = services;
         Source = status.Source;
         SiteName = status.DisplayName;
+        WorksWithoutAccount = status.WorksWithoutAccount;
         AboutText = Text.Format(status.WorksWithoutAccount ? Strings.AccountOptional : Strings.AccountNeeded, SiteName);
         QuotaHeading = Text.Format(Strings.AccountQuotaHeading, SiteName);
         LinkMethods =
@@ -58,6 +61,55 @@ public sealed partial class AccountViewModel : ObservableObject
     public string AboutText { get; }
 
     /// <summary>
+    /// Whether ModShelf uses the site without an account too, as GameBanana; otherwise it needs one, as Nexus Mods.
+    /// </summary>
+    public bool WorksWithoutAccount { get; }
+
+    /// <summary>
+    /// Whether its row in Settings › Accounts shows the rest: the ways to link, checking, unlinking and the requests left.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DetailsText), nameof(ShowsLink))]
+    public partial bool IsExpanded { get; set; }
+
+    /// <summary>
+    /// "Details", or "Less" while the row shows them.
+    /// </summary>
+    public string DetailsText => IsExpanded ? Strings.AccountRowLess : Strings.AccountRowDetails;
+
+    /// <summary>
+    /// Whether the row offers Link…: without an account, until it's open.
+    /// </summary>
+    public bool ShowsLink => !IsLinked && !IsExpanded;
+
+    /// <summary>
+    /// Under the site's name: the account's name, with what's left of its requests; or that none is linked.
+    /// </summary>
+    public string SummaryText => !IsLinked ? Strings.AccountRowNotLinked
+        : RequestsText is { } requests ? Text.Format(Strings.AccountRowSummary, AccountName, requests)
+        : AccountName;
+
+    /// <summary>
+    /// Such as "19,998 of 20,000 requests left today", the allowance with least left, as the site last said; null while it
+    /// hasn't, or without an account.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SummaryText))]
+    public partial string? RequestsText { get; private set; }
+
+    /// <summary>
+    /// Why the account needs attention, such as that downloads wait for one; null when it doesn't.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(NeedsAttention))]
+    public partial string? AttentionText { get; private set; }
+
+    /// <summary>
+    /// Whether Settings' badge counts it: downloads of the site failed for want of an account, or the site refused it.
+    /// </summary>
+    public bool NeedsAttention => AttentionText is not null;
+
+    /// <summary>
     /// Each way the site offers to link an account, the one it offers first first. Linking replaces the account linked
     /// before.
     /// </summary>
@@ -66,13 +118,14 @@ public sealed partial class AccountViewModel : ObservableObject
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(CheckCommand))]
     [NotifyCanExecuteChangedFor(nameof(UnlinkCommand))]
+    [NotifyPropertyChangedFor(nameof(ShowsLink), nameof(SummaryText))]
     public partial bool IsLinked { get; private set; }
 
     /// <summary>
     /// The account's name on the site; empty without an account.
     /// </summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Initial), nameof(Hue))]
+    [NotifyPropertyChangedFor(nameof(Initial), nameof(Hue), nameof(SummaryText))]
     public partial string AccountName { get; private set; } = string.Empty;
 
     /// <summary>
@@ -164,6 +217,15 @@ public sealed partial class AccountViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Says whether downloads of the site failed for want of an account (ADR 0094).
+    /// </summary>
+    internal void ShowWanted(bool wanted)
+    {
+        _wanted = wanted;
+        ShowAttention();
+    }
+
+    /// <summary>
     /// Such as "Per day", for how long an allowance lasts.
     /// </summary>
     private static string PeriodName(TimeSpan period)
@@ -178,6 +240,24 @@ public sealed partial class AccountViewModel : ObservableObject
         => exception is InvalidOperationException or IOException or UnauthorizedAccessException or CryptographicException;
 
     private bool CanAct() => !IsBusy;
+
+    /// <summary>
+    /// Opens the row for the ways to link an account.
+    /// </summary>
+    [RelayCommand]
+    private void Expand() => IsExpanded = true;
+
+    /// <summary>
+    /// Opens or closes the row's details.
+    /// </summary>
+    [RelayCommand]
+    private void ToggleDetails() => IsExpanded = !IsExpanded;
+
+    private void ShowAttention()
+        => AttentionText = _refused ? Text.Format(Strings.AccountRowRefused, SiteName)
+            : _wanted && IsLinked ? Text.Format(Strings.AccountRowWantedLinked, SiteName)
+            : _wanted ? Strings.AccountRowWanted
+            : null;
 
     private bool CanCheckOrUnlink() => IsLinked && !IsBusy;
 
@@ -202,6 +282,7 @@ public sealed partial class AccountViewModel : ObservableObject
                 try
                 {
                     LinkedAccount account = await _services.Accounts.CheckAsync(Source, cancellationToken);
+                    _refused = false;
                     await ShowLatestAsync(account);
                     Say(Text.Format(Strings.AccountChecked, Dates.Time(_services.TimeProvider.GetUtcNow(), _services.TimeProvider)), false);
                 }
@@ -214,7 +295,7 @@ public sealed partial class AccountViewModel : ObservableObject
             },
             exception => exception switch
             {
-                AuthenticationFailedException => Text.Format(Strings.AccountCheckRefused, SiteName),
+                AuthenticationFailedException => Refused(),
                 _ when DescribeSiteProblem(exception) is { } problem => problem,
                 _ when IsFailureWithReason(exception) => exception.Message,
                 _ => null,
@@ -256,6 +337,16 @@ public sealed partial class AccountViewModel : ObservableObject
         IsBusy = false;
     }
 
+    /// <summary>
+    /// Notes that the site refused the account, which Settings' badge then counts, and says so.
+    /// </summary>
+    private string Refused()
+    {
+        _refused = true;
+        ShowAttention();
+        return Text.Format(Strings.AccountCheckRefused, SiteName);
+    }
+
     private void Begin()
     {
         IsBusy = true;
@@ -294,7 +385,12 @@ public sealed partial class AccountViewModel : ObservableObject
         AccountName = account?.Profile.DisplayName ?? string.Empty;
         Tier = account?.Profile.Tier;
         Picture.Place(account?.Profile.AvatarUrl, CancellationToken.None);
-        _services.Menu.Show(Source, SiteName, account);
+        if (account is null)
+        {
+            _refused = false;
+        }
+
+        ShowAttention();
         LinkedText = account is null
             ? Strings.AccountNotLinked
             : Text.Format(Strings.AccountLinkedOn, Dates.Day(account.LinkedAt, _services.TimeProvider));
@@ -311,6 +407,15 @@ public sealed partial class AccountViewModel : ObservableObject
         }
 
         HasQuota = Quota.Count > 0;
+        RequestsText = (account is null ? [] : quota?.Allowances ?? [])
+            .OrderBy(allowance => allowance.Limit > 0 ? (double)allowance.Remaining / allowance.Limit : 1)
+            .Select(allowance => Text.Format(
+                allowance.Period == TimeSpan.FromDays(1) ? Strings.AccountRowRequestsToday
+                    : allowance.Period == TimeSpan.FromHours(1) ? Strings.AccountRowRequestsThisHour
+                    : Strings.AccountRowRequests,
+                allowance.Remaining,
+                allowance.Limit))
+            .FirstOrDefault();
     }
 
     /// <summary>

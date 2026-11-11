@@ -1,3 +1,5 @@
+<!-- The sites' accounts, in Settings › Accounts (ADR 0094): those that need one, those that work without one, and the
+     sites that need none, each group under its heading. -->
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:ModShelf.Presentation.ViewModels.Accounts"
@@ -6,41 +8,69 @@
              x:Class="ModShelf.Desktop.Views.AccountsView"
              x:DataType="vm:AccountsViewModel">
 
-    <DockPanel>
-        <TextBlock DockPanel.Dock="Top" Classes="heading" Text="{Binding Title}" />
-
+    <StackPanel Spacing="12">
         <!-- Linux without a keyring: the credentials are in a file other programs running as the user can read. -->
-        <Border DockPanel.Dock="Top" Classes="strip" Margin="0,0,0,12" IsVisible="{Binding IsStoreUnprotected}">
-            <TextBlock Text="{x:Static res:Strings.CredentialsNotProtected}" />
+        <Border Classes="strip" IsVisible="{Binding IsStoreUnprotected}">
+            <TextBlock TextWrapping="Wrap" Text="{x:Static res:Strings.CredentialsNotProtected}" />
         </Border>
 
-        <ProgressBar DockPanel.Dock="Top" IsIndeterminate="True" IsVisible="{Binding IsLoading}" />
+        <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsLoading}" />
 
-        <TextBlock DockPanel.Dock="Top"
-                   Classes="note message"
+        <TextBlock Classes="note message"
                    Classes.problem="{Binding IsEmptyTextAProblem}"
                    Text="{Binding EmptyText}" />
 
-        <ScrollViewer>
-            <!-- As wide as the screen allows, up to a comfortable width. -->
-            <Grid VerticalAlignment="Top">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="100*" MaxWidth="760" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <ItemsControl ItemsSource="{Binding Sources}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Spacing="12" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="vm:AccountViewModel">
-                            <views:AccountCard />
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </Grid>
-        </ScrollViewer>
-    </DockPanel>
+        <StackPanel Spacing="8" IsVisible="{Binding HasNeedOne}">
+            <TextBlock Classes="subheading" Text="{x:Static res:Strings.AccountsNeedOne}" />
+            <ItemsControl ItemsSource="{Binding NeedOne}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:AccountViewModel">
+                        <views:AccountRow />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+
+        <StackPanel Spacing="8" IsVisible="{Binding HasOptional}">
+            <TextBlock Classes="subheading" Text="{x:Static res:Strings.AccountsOptional}" />
+            <ItemsControl ItemsSource="{Binding Optional}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:AccountViewModel">
+                        <views:AccountRow />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+
+        <StackPanel Spacing="8" IsVisible="{Binding HasNoneNeeded}">
+            <TextBlock Classes="subheading" Text="{x:Static res:Strings.AccountsNoneNeeded}" />
+            <ItemsControl ItemsSource="{Binding NoneNeeded}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:SiteWithoutAccountViewModel">
+                        <Border Classes="card accountRow">
+                            <StackPanel Spacing="2">
+                                <TextBlock FontWeight="SemiBold" Text="{Binding SiteName}" />
+                                <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding AboutText}" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </StackPanel>
 </UserControl>

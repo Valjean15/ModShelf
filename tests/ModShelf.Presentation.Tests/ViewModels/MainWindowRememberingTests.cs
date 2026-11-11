@@ -30,7 +30,6 @@ public sealed class MainWindowRememberingTests : IDisposable
             _navigation,
             _uiThread,
             TestScreen.OneOfEach(),
-            new AccountMenuViewModel(new TestPictures().Pictures, _navigation),
             new QuickSearchHarness(_navigation).Search,
             new UndoBarViewModel(new InMemoryModLibrary(), _uiThread, TimeProvider.System, new RecordingLogger<UndoBarViewModel>()),
             new QuotaWarningViewModel(new FakeSourceRegistry(), new InMemorySettingsService(), _uiThread, TimeProvider.System, new RecordingLogger<QuotaWarningViewModel>()),

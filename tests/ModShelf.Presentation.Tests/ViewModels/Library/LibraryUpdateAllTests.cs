@@ -110,7 +110,7 @@ public sealed class LibraryUpdateAllTests : IDisposable
 
         Assert.Equal(3, _harness.LibraryDownloads.Added.Count);
         Assert.Equal(
-            ("Queued 1 update. It shows on the Downloads screen. 2 updates couldn't be queued. The first: The site needs a linked account to look that link up, or refused the one linked. Link it on the Accounts screen, then try again.", true),
+            ("Queued 1 update. It shows on the Downloads screen. 2 updates couldn't be queued. The first: The site needs a linked account to look that link up, or refused the one linked. Link it in Settings › Accounts, then try again.", true),
             (skyrim.UpdateNote, skyrim.IsUpdateNoteAProblem));
         Assert.StartsWith(
             "Error: Queuing a file of mod 1 of skyrimspecialedition for the library failed System.InvalidOperationException",

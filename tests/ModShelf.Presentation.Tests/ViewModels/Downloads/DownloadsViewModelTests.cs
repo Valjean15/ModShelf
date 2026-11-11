@@ -3,6 +3,7 @@ using System.Net;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Library;
 using ModShelf.Domain.Downloads;
+using ModShelf.Domain.Mods;
 using ModShelf.Presentation.ViewModels.Downloads;
 using ModShelf.Sources.Abstractions.Accounts;
 
@@ -24,7 +25,7 @@ public sealed class DownloadsViewModelTests : IDisposable
         { new ArgumentException("The link is to a collection, not a mod or a file.", "link"), "The link is to a collection, not a mod or a file." },
         {
             new AuthenticationFailedException(),
-            "The site needs a linked account to look that link up, or refused the one linked. Link it on the Accounts screen, then try again."
+            "The site needs a linked account to look that link up, or refused the one linked. Link it in Settings › Accounts, then try again."
         },
         { new HttpRequestException("Not found.", null, HttpStatusCode.NotFound), "The site has no such mod or file." },
         { new HttpRequestException("Gone.", null, HttpStatusCode.Gone), "The site has no such mod or file." },
@@ -122,6 +123,23 @@ public sealed class DownloadsViewModelTests : IDisposable
         _harness.Downloads.Publish(TestData.Job("new.7z", createdAt: TestData.Now.AddSeconds(1)));
 
         Assert.Equal(["new.7z", "old.7z"], Screen.Jobs.Select(job => job.FileName));
+    }
+
+    [Fact]
+    public async Task SaysWhichSitesDownloadsFailedForWantOfAnAccount()
+    {
+        DownloadJobSnapshot wanting = TestData.Job("wanting.7z", DownloadJobStatus.Failed) with { FailureReason = DownloadFailureReason.AccountNeeded };
+        DownloadJobSnapshot other = TestData.Job("other.7z", DownloadJobStatus.Failed) with { FailureReason = DownloadFailureReason.Network };
+        int changes = 0;
+        _harness.Wanting.Changed += (_, _) => changes++;
+        await _harness.StartWithAsync(wanting, other);
+        IReadOnlySet<SourceId> before = _harness.Wanting.Sites;
+
+        _harness.Downloads.Publish(wanting with { Status = DownloadJobStatus.Queued, FailureReason = null });
+
+        Assert.Equal([TestData.Nexus], before);
+        Assert.Empty(_harness.Wanting.Sites);
+        Assert.Equal(2, changes);
     }
 
     [Fact]

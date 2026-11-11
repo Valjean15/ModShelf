@@ -4,9 +4,9 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.State;
+using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
-using ModShelf.Presentation.ViewModels.Accounts;
 using ModShelf.Presentation.ViewModels.Quota;
 using ModShelf.Presentation.ViewModels.QuickSearch;
 using ModShelf.Presentation.ViewModels.Undo;
@@ -45,7 +45,6 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         INavigationService navigation,
         IUiThread uiThread,
         IEnumerable<ScreenViewModel> screens,
-        AccountMenuViewModel accounts,
         QuickSearchViewModel quickSearch,
         UndoBarViewModel undo,
         QuotaWarningViewModel quota,
@@ -55,7 +54,6 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         ArgumentNullException.ThrowIfNull(navigation);
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(screens);
-        ArgumentNullException.ThrowIfNull(accounts);
         ArgumentNullException.ThrowIfNull(quickSearch);
         ArgumentNullException.ThrowIfNull(undo);
         ArgumentNullException.ThrowIfNull(quota);
@@ -66,7 +64,6 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         _uiThread = uiThread;
         _uiState = uiState;
         _logger = logger;
-        Accounts = accounts;
         QuickSearch = quickSearch;
         Undo = undo;
         Quota = quota;
@@ -75,6 +72,12 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         {
             throw new ArgumentException("The main window needs one of each screen.", nameof(screens));
         }
+
+        SidebarScreens = [.. Screens.Where(screen => screen.Screen is not (Screen.Accounts or Screen.Settings))];
+        SettingsScreen = Screens[(int)Screen.Settings];
+        SettingsScreen.PropertyChanged += OnSettingsBadgeChanged;
+        Screens[(int)Screen.Accounts].PropertyChanged += OnSettingsBadgeChanged;
+        ShowSettingsBadge();
 
         // The first screen isn't one the user chose, so it isn't remembered.
         _restoring = true;
@@ -91,9 +94,54 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
     public IReadOnlyList<ScreenViewModel> Screens { get; }
 
     /// <summary>
-    /// The accounts at the bottom of the sidebar, each opening Accounts.
+    /// The screens the sidebar lists: Library, Updates, Browse and Downloads. Settings is at its bottom, and Accounts
+    /// inside Settings (ADR 0094).
     /// </summary>
-    public AccountMenuViewModel Accounts { get; }
+    public IReadOnlyList<ScreenViewModel> SidebarScreens { get; }
+
+    /// <summary>
+    /// Settings, at the bottom of the sidebar.
+    /// </summary>
+    public ScreenViewModel SettingsScreen { get; }
+
+    /// <summary>
+    /// The sidebar's screen shown; null while Settings is, which the sidebar then selects none for. Setting it, as
+    /// selecting it in the sidebar does, goes to it; clearing it keeps the screen shown.
+    /// </summary>
+    public ScreenViewModel? SidebarScreen
+    {
+        get => SidebarScreens.Contains(CurrentScreen) ? CurrentScreen : null;
+        set
+        {
+            if (value is not null && !ReferenceEquals(value, CurrentScreen))
+            {
+                CurrentScreen = value;
+            }
+            else
+            {
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Whether Settings, or Accounts inside it, is shown.
+    /// </summary>
+    public bool IsSettingsShown => CurrentScreen.Screen == Screen.Settings;
+
+    /// <summary>
+    /// What Settings' button counts: a newer ModShelf to install, and the accounts that need attention.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSettingsBadge), nameof(SettingsTip))]
+    public partial int SettingsBadge { get; private set; }
+
+    public bool HasSettingsBadge => SettingsBadge > 0;
+
+    /// <summary>
+    /// "Settings", or such as "Settings: 2 to look at" while its badge counts something.
+    /// </summary>
+    public string SettingsTip => HasSettingsBadge ? Text.Format(Strings.SettingsAttentionTip, SettingsBadge) : Strings.SettingsTitle;
 
     /// <summary>
     /// Quick search, over any screen: Ctrl+K, or the field at the top of the sidebar.
@@ -114,6 +162,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
     /// The screen shown. Setting it, as selecting it in the sidebar does, goes to it.
     /// </summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SidebarScreen), nameof(IsSettingsShown))]
     public partial ScreenViewModel CurrentScreen { get; set; }
 
     /// <summary>
@@ -233,6 +282,9 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void Navigate(Screen screen) => _navigation.NavigateTo(screen);
 
+    [RelayCommand]
+    private void OpenSettings() => _navigation.NavigateTo(Screen.Settings);
+
     private async Task RunAsync(ScreenViewModel screen)
     {
         try
@@ -263,7 +315,11 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
             return;
         }
 
-        _navigation.NavigateTo(value.Screen);
+        if (_navigation.Current != Screen.Accounts || value.Screen != Screen.Settings)
+        {
+            _navigation.NavigateTo(value.Screen);
+        }
+
         if (!ReferenceEquals(value, _shown))
         {
             _shown = value;
@@ -271,6 +327,16 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
             Remember(state => state with { Screen = value.Screen.ToString() });
         }
     }
+
+    private void OnSettingsBadgeChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs changed)
+    {
+        if (changed.PropertyName == nameof(ScreenViewModel.Badge))
+        {
+            _uiThread.Post(ShowSettingsBadge);
+        }
+    }
+
+    private void ShowSettingsBadge() => SettingsBadge = SettingsScreen.Badge + Screens[(int)Screen.Accounts].Badge;
 
     /// <summary>
     /// Remembers what <paramref name="change"/> makes of the state, after what was remembered before; not while the state
@@ -300,7 +366,10 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
 
     private void OnNavigated(object? sender, Screen screen) => _uiThread.Post(() => CurrentScreen = ScreenFor(_navigation.Current));
 
-    private ScreenViewModel ScreenFor(Screen screen) => Screens[(int)screen];
+    /// <summary>
+    /// The screen that shows <paramref name="screen"/>: Settings for Accounts, which is inside it.
+    /// </summary>
+    private ScreenViewModel ScreenFor(Screen screen) => Screens[(int)(screen == Screen.Accounts ? Screen.Settings : screen)];
 
     // An absolute link, but not to a file: an argument like C:\Mods or /home/jean/mods reads as a file:// link.
     private static Uri? LinkIn(string argument)

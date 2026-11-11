@@ -221,6 +221,27 @@ public sealed class SettingsViewModelTests
     }
 
     [Fact]
+    public async Task AccountsOpenOnTheirCategoryWhichListsThemAgainEachTimeItsShown()
+    {
+        await _harness.StartAsync();
+        await _harness.Accounts.StartAsync();
+        Screen.SelectedCategory = Screen.Categories[1];
+        int listedBefore = _harness.Accounts.Accounts.Calls.Count(call => call == "list");
+
+        _harness.Navigation.NavigateTo(Presentation.Services.Screen.Accounts);
+        await _harness.Accounts.Screen.Refreshing;
+        Screen.SelectedCategory = Screen.Categories[2];
+        Screen.SelectedCategory = Screen.Categories[0];
+        await _harness.Accounts.Screen.Refreshing;
+        Screen.OnShown();
+        await _harness.Accounts.Screen.Refreshing;
+
+        Assert.Equal(SettingsCategory.Accounts, Screen.SelectedCategory?.Category);
+        Assert.Same(_harness.Accounts.Screen, Screen.Accounts);
+        Assert.Equal(listedBefore + 3, _harness.Accounts.Accounts.Calls.Count(call => call == "list"));
+    }
+
+    [Fact]
     public async Task ShowsTheBrowsersDownloadsFolderAsStored()
     {
         string folder = Path.Combine(Path.GetTempPath(), "Browser downloads");

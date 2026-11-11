@@ -152,7 +152,7 @@ public sealed class ModPageViewModelTests : IDisposable
 
         await file.DownloadCommand.ExecuteAsync(null);
 
-        Assert.Equal("The site needs a linked account to look that link up, or refused the one linked. Link it on the Accounts screen, then try again.", file.Note);
+        Assert.Equal("The site needs a linked account to look that link up, or refused the one linked. Link it in Settings › Accounts, then try again.", file.Note);
         Assert.True(file.IsNoteAProblem);
     }
 
@@ -281,7 +281,7 @@ public sealed class ModPageViewModelTests : IDisposable
 
         await mod.ToggleTrackCommand.ExecuteAsync(null);
 
-        Assert.Equal("Nexus Mods needs your account linked, or refused the one linked. Link it on the Accounts screen, then try again.", mod.Note);
+        Assert.Equal("Nexus Mods needs your account linked, or refused the one linked. Link it in Settings › Accounts, then try again.", mod.Note);
         Assert.Equal((true, false), (mod.IsNoteAProblem, mod.IsTracked));
     }
 

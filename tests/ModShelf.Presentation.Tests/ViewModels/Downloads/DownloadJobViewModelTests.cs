@@ -38,12 +38,12 @@ public sealed class DownloadJobViewModelTests : IDisposable
         { DownloadFailureReason.HashMismatch, "Failed: the file doesn't match the expected hash, so it was deleted." },
         {
             DownloadFailureReason.AccountNeeded,
-            "Failed: the site needs a linked account, or refused the one linked. Link it on the Accounts screen, then retry."
+            "Failed: the site needs a linked account, or refused the one linked. Link it in Settings › Accounts, then retry."
         },
         { DownloadFailureReason.Unexpected, "Failed unexpectedly. The log has the details." },
         {
             DownloadFailureReason.RateLimited,
-            "Failed: the site's rate limit for this account is used up. Retry once it resets; the Accounts screen says when."
+            "Failed: the site's rate limit for this account is used up. Retry once it resets; Settings › Accounts says when."
         },
     };
 
@@ -529,7 +529,7 @@ public sealed class DownloadJobViewModelTests : IDisposable
             [
                 (
                     "That link didn't work",
-                    "The site needs a linked account to look that link up, or refused the one linked. Link it on the Accounts screen, then try again."
+                    "The site needs a linked account to look that link up, or refused the one linked. Link it in Settings › Accounts, then try again."
                 ),
             ],
             _harness.Dialogs.Messages);

@@ -14,7 +14,7 @@ public sealed class SettingsCategoriesTests
     private SettingsViewModel Screen => _harness.Screen;
 
     [Fact]
-    public void ShowsGeneralFirstThenEachCategorysSettingsAlone()
+    public void ShowsAccountsFirstThenEachCategorysSettingsAlone()
     {
         Dictionary<string, string[]> shown = [];
 
@@ -24,9 +24,10 @@ public sealed class SettingsCategoriesTests
             shown[category.Name] = Shown();
         }
 
-        Assert.Equal(["General", "Library", "Updates", "Links", "Agents", "Games", "About"], Screen.Categories.Select(category => category.ToString()));
+        Assert.Equal(["Accounts", "General", "Library", "Updates", "Links", "Agents", "Games", "About"], Screen.Categories.Select(category => category.ToString()));
+        Assert.Equal(["Accounts"], shown["Accounts"]);
         Assert.Equal(["Theme", "Window", "Pictures"], shown["General"]);
-        Assert.Equal(["LibraryFolder", "FolderPattern", "OldVersions", "Rescan"], shown["Library"]);
+        Assert.Equal(["LibraryFolder", "BrowserFolder", "FolderPattern", "OldVersions", "Rescan"], shown["Library"]);
         Assert.Equal(["Updates", "Quota"], shown["Updates"]);
         Assert.Equal(["Links"], shown["Links"]);
         Assert.Equal(["Agents"], shown["Agents"]);
@@ -36,25 +37,25 @@ public sealed class SettingsCategoriesTests
     }
 
     [Fact]
-    public void StartsOnGeneral()
+    public void StartsOnAccounts()
     {
-        Assert.Equal(SettingsCategory.General, Screen.SelectedCategory?.Category);
-        Assert.Equal(["Theme", "Window", "Pictures"], Shown());
+        Assert.Equal(SettingsCategory.Accounts, Screen.SelectedCategory?.Category);
+        Assert.Equal(["Accounts"], Shown());
         Assert.Equal((false, string.Empty, (string?)null), (Screen.IsSearching, Screen.SearchHeading, Screen.NothingMatches));
     }
 
     [Fact]
     public void ASearchShowsWhatMatchesFromEveryCategory()
     {
-        Screen.SelectedCategory = Screen.Categories[5];
+        Screen.SelectedCategory = Screen.Categories[6];
 
         Screen.SearchText = "  FOLDER ";
 
         Assert.True(Screen.IsSearching);
         Assert.Equal("Settings that match “FOLDER”", Screen.SearchHeading);
         // The archive folder, the mods' folders, the log folder.
-        Assert.Equal(["LibraryFolder", "FolderPattern", "OldVersions", "Rescan", "Games", "About"], Shown());
-        Assert.Equal([false, true, false, false, false, true, true], Screen.Categories.Select(category => category.HasMatches));
+        Assert.Equal(["LibraryFolder", "BrowserFolder", "FolderPattern", "OldVersions", "Rescan", "Games", "About"], Shown());
+        Assert.Equal([false, false, true, false, false, false, true, true], Screen.Categories.Select(category => category.HasMatches));
         Assert.Null(Screen.NothingMatches);
     }
 
@@ -65,6 +66,17 @@ public sealed class SettingsCategoriesTests
 
         // Every game's notices, and a game's own.
         Assert.Equal(["Updates", "Games"], Shown());
+    }
+
+    [Fact]
+    public void ASearchFindsTheAccounts()
+    {
+        Screen.SelectedCategory = Screen.Categories[1];
+
+        Screen.SearchText = "api key";
+
+        Assert.Equal(["Accounts"], Shown());
+        Assert.True(Screen.Categories[0].HasMatches);
     }
 
     [Fact]
@@ -88,13 +100,13 @@ public sealed class SettingsCategoriesTests
     [Fact]
     public void ClearingTheSearchShowsTheCategoryChosenAgain()
     {
-        Screen.SelectedCategory = Screen.Categories[1];
+        Screen.SelectedCategory = Screen.Categories[2];
         Screen.SearchText = "theme";
 
         Screen.ClearSearchCommand.Execute(null);
 
         Assert.Equal((string.Empty, false), (Screen.SearchText, Screen.IsSearching));
-        Assert.Equal(["LibraryFolder", "FolderPattern", "OldVersions", "Rescan"], Shown());
+        Assert.Equal(["LibraryFolder", "BrowserFolder", "FolderPattern", "OldVersions", "Rescan"], Shown());
         Assert.All(Screen.Categories, category => Assert.True(category.HasMatches));
     }
 
@@ -106,7 +118,7 @@ public sealed class SettingsCategoriesTests
         Screen.ClearSearchCommand.Execute(null);
 
         Assert.Equal((string.Empty, (string?)null), (Screen.SearchHeading, Screen.NothingMatches));
-        Assert.Equal(["Theme", "Window", "Pictures"], Shown());
+        Assert.Equal(["Accounts"], Shown());
     }
 
     [Fact]
@@ -114,7 +126,7 @@ public sealed class SettingsCategoriesTests
     {
         Screen.SearchText = "theme";
 
-        Screen.SelectedCategory = Screen.Categories[2];
+        Screen.SelectedCategory = Screen.Categories[3];
 
         Assert.Equal(string.Empty, Screen.SearchText);
         Assert.Equal(["Updates", "Quota"], Shown());
@@ -123,7 +135,7 @@ public sealed class SettingsCategoriesTests
     [Fact]
     public void BlankSearchesSearchNothing()
     {
-        Screen.SelectedCategory = Screen.Categories[6];
+        Screen.SelectedCategory = Screen.Categories[7];
 
         Screen.SearchText = " \t ";
 
@@ -163,10 +175,12 @@ public sealed class SettingsCategoriesTests
     private string[] Shown()
         => [.. new (string Name, SettingsSectionViewModel Section)[]
         {
+            ("Accounts", Screen.AccountsSection),
             ("Theme", Screen.ThemeSection),
             ("Window", Screen.WindowSection),
             ("Pictures", Screen.PicturesSection),
             ("LibraryFolder", Screen.LibraryFolderSection),
+            ("BrowserFolder", Screen.BrowserFolderSection),
             ("FolderPattern", Screen.FolderPatternSection),
             ("OldVersions", Screen.OldVersionsSection),
             ("Rescan", Screen.RescanSection),

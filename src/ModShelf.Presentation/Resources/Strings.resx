@@ -78,21 +78,89 @@
     <value>Downloads</value>
     <comment>The screen of the download queue.</comment>
   </data>
-  <data name="AccountMenuLevel" xml:space="preserve">
+  <data name="SettingsCategoryAccounts" xml:space="preserve">
+    <value>Accounts</value>
+    <comment>Settings' first category: the sites' accounts.</comment>
+  </data>
+  <data name="AccountsNeedOne" xml:space="preserve">
+    <value>Needs an account</value>
+    <comment>Settings › Accounts: the heading of the sites that need an account, such as Nexus Mods.</comment>
+  </data>
+  <data name="AccountsOptional" xml:space="preserve">
+    <value>Optional</value>
+    <comment>Settings › Accounts: the heading of the sites that work without an account too, such as GameBanana.</comment>
+  </data>
+  <data name="AccountsNoneNeeded" xml:space="preserve">
+    <value>No account needed</value>
+    <comment>Settings › Accounts: the heading of the sites ModShelf uses with no account, such as DEG Mods.</comment>
+  </data>
+  <data name="AccountsSearchWords" xml:space="preserve">
+    <value>Account link API key token profile sign in log in</value>
+    <comment>Words Settings' search finds the accounts by, besides their headings.</comment>
+  </data>
+  <data name="AccountRowWanted" xml:space="preserve">
+    <value>Downloads wait for an account</value>
+    <comment>An account's row while downloads of its site failed for want of one, and none is linked.</comment>
+  </data>
+  <data name="AccountRowWantedLinked" xml:space="preserve">
+    <value>Downloads failed for want of an account on {0}: check it, or link it again.</value>
+    <comment>An account's row while downloads of its site failed for want of an account, though one is linked. {0}: the site.</comment>
+  </data>
+  <data name="AccountRowRefused" xml:space="preserve">
+    <value>{0} refused the account: link it again.</value>
+    <comment>An account's row once its site refused it when checked. {0}: the site.</comment>
+  </data>
+  <data name="AccountRowRequestsToday" xml:space="preserve">
+    <value>{0:N0} of {1:N0} requests left today</value>
+    <comment>An account's row: what's left of the site's API requests, by day.</comment>
+  </data>
+  <data name="AccountRowRequestsThisHour" xml:space="preserve">
+    <value>{0:N0} of {1:N0} requests left this hour</value>
+    <comment>An account's row: what's left of the site's API requests, by hour.</comment>
+  </data>
+  <data name="AccountRowRequests" xml:space="preserve">
+    <value>{0:N0} of {1:N0} requests left</value>
+    <comment>An account's row: what's left of the site's API requests, for another period.</comment>
+  </data>
+  <data name="AccountRowLink" xml:space="preserve">
+    <value>Link…</value>
+    <comment>An account's row without an account: opens the row for the ways to link one.</comment>
+  </data>
+  <data name="AccountWithout" xml:space="preserve">
+    <value>ModShelf {0}, with no account.</value>
+    <comment>A site ModShelf uses with no account, such as DEG Mods. {0}: what it does there, such as "searches its mods, downloads its files and checks them for updates".</comment>
+  </data>
+  <data name="AccountWithoutSearches" xml:space="preserve">
+    <value>searches its mods</value>
+    <comment>Part of what ModShelf does on a site with no account.</comment>
+  </data>
+  <data name="AccountWithoutDownloads" xml:space="preserve">
+    <value>downloads its files</value>
+    <comment>Part of what ModShelf does on a site with no account.</comment>
+  </data>
+  <data name="AccountWithoutChecks" xml:space="preserve">
+    <value>checks them for updates</value>
+    <comment>Part of what ModShelf does on a site with no account.</comment>
+  </data>
+  <data name="SettingsAttentionTip" xml:space="preserve">
+    <value>Settings: {0:N0} to look at</value>
+    <comment>The tooltip of the sidebar's Settings button while its badge counts something: a newer ModShelf, or accounts that need attention.</comment>
+  </data>
+  <data name="AccountRowNotLinked" xml:space="preserve">
+    <value>Not linked</value>
+    <comment>An account's row while no account is linked on its site.</comment>
+  </data>
+  <data name="AccountRowSummary" xml:space="preserve">
     <value>{0} · {1}</value>
-    <comment>An account's level and site, under its name at the bottom of the menu, such as "Premium · Nexus Mods". {0}: the level; {1}: the site.</comment>
+    <comment>An account's row, under the site's name: the account's name and what's left of its requests. {0}: the account's name; {1}: such as "19,998 of 20,000 requests left today".</comment>
   </data>
-  <data name="AccountMenuTip" xml:space="preserve">
-    <value>{0} · {1}</value>
-    <comment>The tooltip of an account at the bottom of the menu, such as "Kestrel · Premium · Nexus Mods". {0}: the account's name; {1}: its level and site, or its site.</comment>
+  <data name="AccountRowDetails" xml:space="preserve">
+    <value>Details</value>
+    <comment>Opens an account's row for linking, checking and unlinking.</comment>
   </data>
-  <data name="AccountMenuLink" xml:space="preserve">
-    <value>Link an account</value>
-    <comment>At the bottom of the menu while no account is linked; it opens Accounts.</comment>
-  </data>
-  <data name="AccountMenuLinkNote" xml:space="preserve">
-    <value>To download mods</value>
-    <comment>Under "Link an account" at the bottom of the menu.</comment>
+  <data name="AccountRowLess" xml:space="preserve">
+    <value>Less</value>
+    <comment>Closes an account's row's details.</comment>
   </data>
   <data name="AccountsTitle" xml:space="preserve">
     <value>Accounts</value>
@@ -195,7 +263,7 @@
     <comment>Example file name in the empty box.</comment>
   </data>
   <data name="LinkNeedsAccount" xml:space="preserve">
-    <value>The site needs a linked account to look that link up, or refused the one linked. Link it on the Accounts screen, then try again.</value>
+    <value>The site needs a linked account to look that link up, or refused the one linked. Link it in Settings › Accounts, then try again.</value>
     <comment>When a mod site refused the account while looking a link up.</comment>
   </data>
   <data name="LinkNotFound" xml:space="preserve">
@@ -259,11 +327,11 @@
     <comment>A failed download's status.</comment>
   </data>
   <data name="JobFailedAccountNeeded" xml:space="preserve">
-    <value>Failed: the site needs a linked account, or refused the one linked. Link it on the Accounts screen, then retry.</value>
+    <value>Failed: the site needs a linked account, or refused the one linked. Link it in Settings › Accounts, then retry.</value>
     <comment>A failed download's status.</comment>
   </data>
   <data name="JobFailedRateLimited" xml:space="preserve">
-    <value>Failed: the site's rate limit for this account is used up. Retry once it resets; the Accounts screen says when.</value>
+    <value>Failed: the site's rate limit for this account is used up. Retry once it resets; Settings › Accounts says when.</value>
     <comment>A failed download's status.</comment>
   </data>
   <data name="JobFailedUnexpected" xml:space="preserve">
@@ -675,7 +743,7 @@
     <comment>{0} is the site's name.</comment>
   </data>
   <data name="ChangelogNeedsAccount" xml:space="preserve">
-    <value>The site needs a linked account to give the changelog, or refused the one linked. Link it on the Accounts screen.</value>
+    <value>The site needs a linked account to give the changelog, or refused the one linked. Link it in Settings › Accounts.</value>
     <comment>When the site refused the account.</comment>
   </data>
   <data name="ChangelogFailed" xml:space="preserve">
@@ -771,7 +839,7 @@
     <comment>When no source can search.</comment>
   </data>
   <data name="SiteNeedsAccount" xml:space="preserve">
-    <value>{0} needs your account linked, or refused the one linked. Link it on the Accounts screen, then try again.</value>
+    <value>{0} needs your account linked, or refused the one linked. Link it in Settings › Accounts, then try again.</value>
     <comment>{0} is the site's name.</comment>
   </data>
   <data name="BrowseGamesFailed" xml:space="preserve">
@@ -1583,7 +1651,7 @@
     <comment>Heading of the setup's second page.</comment>
   </data>
   <data name="FirstRunAccountText" xml:space="preserve">
-    <value>Browsing, downloading and checking for updates on a mod site need your account there. Link it now, or later on the Accounts screen.</value>
+    <value>Browsing, downloading and checking for updates on a mod site need your account there. Link it now, or later in Settings › Accounts.</value>
     <comment>Under the second page's heading.</comment>
   </data>
   <data name="FirstRunLinksHeading" xml:space="preserve">

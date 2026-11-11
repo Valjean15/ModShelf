@@ -35,6 +35,7 @@ public sealed partial class AccountViewModel
                     }
                 }));
             LinkedAccount account = await _services.Accounts.LinkAsync(Source, kind, prompt, linking.Token);
+            _refused = false;
             await ShowLatestAsync(account);
             Say(Text.Format(Strings.AccountLinked, account.Profile.DisplayName), false);
         }

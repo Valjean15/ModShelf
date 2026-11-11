@@ -103,7 +103,7 @@ public sealed class BrowseSelectionTests : IDisposable
         await Screen.DownloadSelectedCommand.ExecuteAsync(null);
 
         Assert.Equal(
-            ("1 was in the library already. 2 files couldn't be queued. The first: The site needs a linked account to look that link up, or refused the one linked. Link it on the Accounts screen, then try again.", true),
+            ("1 was in the library already. 2 files couldn't be queued. The first: The site needs a linked account to look that link up, or refused the one linked. Link it in Settings › Accounts, then try again.", true),
             (Screen.SelectionNote, Screen.IsSelectionNoteAProblem));
         Assert.StartsWith(
             "Error: Queuing a file of mod 2 of skyrimspecialedition for the library failed System.InvalidOperationException",

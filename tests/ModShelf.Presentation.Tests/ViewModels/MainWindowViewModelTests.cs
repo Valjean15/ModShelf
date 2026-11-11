@@ -54,9 +54,9 @@ public sealed class MainWindowViewModelTests : IDisposable
     [Fact]
     public void SelectingAScreenGoesToIt()
     {
-        _window.CurrentScreen = _window.Screens[(int)Screen.Accounts];
+        _window.CurrentScreen = _window.Screens[(int)Screen.Downloads];
 
-        Assert.Equal(Screen.Accounts, _navigation.Current);
+        Assert.Equal(Screen.Downloads, _navigation.Current);
     }
 
     [Fact]
@@ -72,7 +72,7 @@ public sealed class MainWindowViewModelTests : IDisposable
 
         Assert.Equal(Screen.Library, beforeTheUiThreadRan);
         Assert.Equal(Screen.Updates, _window.CurrentScreen.Screen);
-        Assert.Equal([nameof(MainWindowViewModel.CurrentScreen)], changed);
+        Assert.Equal([nameof(MainWindowViewModel.CurrentScreen), nameof(MainWindowViewModel.SidebarScreen), nameof(MainWindowViewModel.IsSettingsShown)], changed);
     }
 
     [Fact]
@@ -252,11 +252,77 @@ public sealed class MainWindowViewModelTests : IDisposable
     }
 
     [Fact]
-    public void TheAccountsAtTheBottomOpenAccounts()
+    public void TheSidebarListsTheScreensButSettingsAndAccountsWhichSettingsHolds()
     {
-        _window.Accounts.OpenAccountsCommand.Execute(null);
+        Assert.Equal(["Library", "Updates", "Browse", "Downloads"], _window.SidebarScreens.Select(screen => screen.Title));
+        Assert.Equal(Screen.Settings, _window.SettingsScreen.Screen);
+        Assert.Same(_window.Screens[(int)Screen.Library], _window.SidebarScreen);
+        Assert.False(_window.IsSettingsShown);
+    }
 
-        Assert.Equal((Screen.Accounts, Screen.Accounts), (_navigation.Current, _window.CurrentScreen.Screen));
+    [Fact]
+    public void SettingsAtTheBottomOpensSettingsAndTheSidebarSelectsNone()
+    {
+        List<string?> changed = [];
+        _window.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+
+        _window.OpenSettingsCommand.Execute(null);
+
+        Assert.Equal((Screen.Settings, Screen.Settings), (_navigation.Current, _window.CurrentScreen.Screen));
+        Assert.Null(_window.SidebarScreen);
+        Assert.True(_window.IsSettingsShown);
+        Assert.Contains(nameof(MainWindowViewModel.SidebarScreen), changed);
+        Assert.Contains(nameof(MainWindowViewModel.IsSettingsShown), changed);
+
+        _window.SidebarScreen = null;
+        Assert.Equal(Screen.Settings, _window.CurrentScreen.Screen);
+
+        _window.SidebarScreen = _window.SidebarScreens[2];
+        Assert.Equal((Screen.Browse, Screen.Browse), (_navigation.Current, _window.CurrentScreen.Screen));
+        Assert.False(_window.IsSettingsShown);
+    }
+
+    [Fact]
+    public void TheSidebarLosingItsSelectionSelectsTheScreenShownAgain()
+    {
+        List<string?> changed = [];
+        _window.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+
+        _window.SidebarScreen = null;
+
+        Assert.Equal((Screen.Library, Screen.Library), (_navigation.Current, _window.CurrentScreen.Screen));
+        Assert.Same(_window.Screens[(int)Screen.Library], _window.SidebarScreen);
+        Assert.Equal([nameof(MainWindowViewModel.SidebarScreen)], changed);
+    }
+
+    [Fact]
+    public void AccountsShowInSettingsKeepingItsScreenForTheWayIn()
+    {
+        TestScreen settings = (TestScreen)_window.Screens[(int)Screen.Settings];
+
+        _window.NavigateCommand.Execute(Screen.Accounts);
+
+        Assert.Equal((Screen.Accounts, Screen.Settings), (_navigation.Current, _window.CurrentScreen.Screen));
+        Assert.True(_window.IsSettingsShown);
+        Assert.Null(_window.SidebarScreen);
+        Assert.Equal(1, settings.Shows);
+    }
+
+    [Fact]
+    public void SettingsBadgeCountsSettingsAndAccounts()
+    {
+        TestScreen settings = (TestScreen)_window.Screens[(int)Screen.Settings];
+        TestScreen accounts = (TestScreen)_window.Screens[(int)Screen.Accounts];
+        bool before = _window.HasSettingsBadge;
+        string tipBefore = _window.SettingsTip;
+
+        settings.Count(1);
+        accounts.Count(2);
+
+        Assert.False(before);
+        Assert.Equal("Settings", tipBefore);
+        Assert.Equal((3, true), (_window.SettingsBadge, _window.HasSettingsBadge));
+        Assert.Equal("Settings: 3 to look at", _window.SettingsTip);
     }
 
     [Fact]
@@ -275,7 +341,6 @@ public sealed class MainWindowViewModelTests : IDisposable
             _navigation,
             _uiThread,
             screens,
-            new AccountMenuViewModel(new TestPictures().Pictures, _navigation),
             new QuickSearchHarness(_navigation).Search,
             new UndoBarViewModel(new InMemoryModLibrary(), _uiThread, TimeProvider.System, new RecordingLogger<UndoBarViewModel>()),
             new QuotaWarningViewModel(new FakeSourceRegistry(), new InMemorySettingsService(), _uiThread, TimeProvider.System, new RecordingLogger<QuotaWarningViewModel>()),

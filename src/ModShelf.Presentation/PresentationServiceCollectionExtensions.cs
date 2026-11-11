@@ -38,7 +38,8 @@ public static class PresentationServiceCollectionExtensions
         services.TryAddSingleton<IGameSettingsOpener, GameSettingsOpener>();
         services.TryAddSingleton<IScreenOpener, ScreenOpener>();
         services.TryAddSingleton<ModPictures>();
-        services.TryAddSingleton<AccountMenuViewModel>();
+        services.TryAddSingleton<SitesWantingAccounts>();
+        services.TryAddSingleton<AccountsViewModel>();
         services.TryAddSingleton<UndoBarViewModel>();
         services.TryAddSingleton<QuotaWarningViewModel>();
         services.TryAddSingleton<ISitesInUse, SitesInUse>();
@@ -48,7 +49,7 @@ public static class PresentationServiceCollectionExtensions
             ServiceDescriptor.Singleton<ScreenViewModel, UpdatesViewModel>(),
             ServiceDescriptor.Singleton<ScreenViewModel, BrowseViewModel>(),
             ServiceDescriptor.Singleton<ScreenViewModel, DownloadsViewModel>(),
-            ServiceDescriptor.Singleton<ScreenViewModel, AccountsViewModel>(),
+            ServiceDescriptor.Singleton<ScreenViewModel, AccountsViewModel>(provider => provider.GetRequiredService<AccountsViewModel>()),
             ServiceDescriptor.Singleton<ScreenViewModel, SettingsViewModel>(),
         ]);
         services.TryAddSingleton<ISettingsIndex>(provider => provider.GetServices<ScreenViewModel>().OfType<SettingsViewModel>().Single());

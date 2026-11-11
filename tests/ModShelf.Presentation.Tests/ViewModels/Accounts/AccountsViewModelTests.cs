@@ -93,12 +93,24 @@ public sealed class AccountsViewModelTests
     [Fact]
     public async Task SaysWhenNoSiteSupportsAccounts()
     {
+        AccountsHarness harness = new(openSites: false);
+
+        await harness.Screen.StartAsync(TestContext.Current.CancellationToken);
+
+        Assert.Empty(harness.Screen.Sources);
+        Assert.Equal(Strings.AccountsNone, harness.Screen.EmptyText);
+        Assert.False(harness.Screen.IsEmptyTextAProblem);
+        Assert.False(harness.Screen.IsLoading);
+    }
+
+    [Fact]
+    public async Task WithOnlySitesThatNeedNoAccountItListsThemAndSaysNothingElse()
+    {
         await _harness.Screen.StartAsync(TestContext.Current.CancellationToken);
 
         Assert.Empty(_harness.Screen.Sources);
-        Assert.Equal(Strings.AccountsNone, _harness.Screen.EmptyText);
-        Assert.False(_harness.Screen.IsEmptyTextAProblem);
-        Assert.False(_harness.Screen.IsLoading);
+        Assert.Null(_harness.Screen.EmptyText);
+        Assert.Equal((false, false, true), (_harness.Screen.HasNeedOne, _harness.Screen.HasOptional, _harness.Screen.HasNoneNeeded));
     }
 
     [Fact]

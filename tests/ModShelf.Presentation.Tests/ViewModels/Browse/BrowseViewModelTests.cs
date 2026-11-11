@@ -262,7 +262,7 @@ public sealed class BrowseViewModelTests : IDisposable
         Screen.GoToAccountsCommand.Execute(null);
 
         Assert.Equal(
-            "Nexus Mods needs your account linked, or refused the one linked. Link it on the Accounts screen, then try again.",
+            "Nexus Mods needs your account linked, or refused the one linked. Link it in Settings › Accounts, then try again.",
             Screen.Problem);
         Assert.True(Screen.NeedsAccount);
         Assert.Equal(Presentation.Services.Screen.Accounts, _harness.Navigation.Current);
@@ -458,7 +458,7 @@ public sealed class BrowseViewModelTests : IDisposable
 
     [Theory]
     [InlineData("https://example.com/somewhere", "No site ModShelf knows has mods at that link.")]
-    [InlineData("https://www.nexusmods.com/skyrimspecialedition/mods/12604", "The site needs a linked account to look that link up, or refused the one linked. Link it on the Accounts screen, then try again.")]
+    [InlineData("https://www.nexusmods.com/skyrimspecialedition/mods/12604", "The site needs a linked account to look that link up, or refused the one linked. Link it in Settings › Accounts, then try again.")]
     public async Task ALinkThatCantBeOpenedSaysWhy(string link, string problem)
     {
         await _harness.StartAsync();

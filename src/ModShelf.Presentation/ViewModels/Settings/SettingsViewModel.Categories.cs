@@ -15,10 +15,11 @@ namespace ModShelf.Presentation.ViewModels.Settings;
 public sealed partial class SettingsViewModel
 {
     /// <summary>
-    /// General, Library, Updates, Links, Agents, Games and About.
+    /// Accounts, General, Library, Updates, Links, Agents, Games and About.
     /// </summary>
     public IReadOnlyList<SettingsCategoryViewModel> Categories { get; } =
     [
+        new(SettingsCategory.Accounts, Strings.SettingsCategoryAccounts),
         new(SettingsCategory.General, Strings.SettingsCategoryGeneral),
         new(SettingsCategory.Library, Strings.SettingsCategoryLibrary),
         new(SettingsCategory.Updates, Strings.SettingsCategoryUpdates),
@@ -29,7 +30,7 @@ public sealed partial class SettingsViewModel
     ];
 
     /// <summary>
-    /// The category shown, while no search is under way; General at first.
+    /// The category shown, while no search is under way; Accounts at first.
     /// </summary>
     [ObservableProperty]
     public partial SettingsCategoryViewModel? SelectedCategory { get; set; }
@@ -58,6 +59,19 @@ public sealed partial class SettingsViewModel
     /// </summary>
     [ObservableProperty]
     public partial string? NothingMatches { get; private set; }
+
+    /// <summary>
+    /// The sites' accounts: Accounts.
+    /// </summary>
+    public SettingsSectionViewModel AccountsSection { get; } = new(
+        SettingsCategory.Accounts,
+        Strings.AccountsTitle,
+        Strings.AccountsNeedOne,
+        Strings.AccountsOptional,
+        Strings.AccountsNoneNeeded,
+        Strings.AccountCheck,
+        Strings.AccountUnlink,
+        Strings.AccountsSearchWords);
 
     /// <summary>
     /// The theme: General.
@@ -241,6 +255,7 @@ public sealed partial class SettingsViewModel
 
     private IEnumerable<SettingsSectionViewModel> Sections =>
     [
+        AccountsSection,
         ThemeSection,
         WindowSection,
         PreviewsSection,
@@ -270,6 +285,11 @@ public sealed partial class SettingsViewModel
         else
         {
             ShowSections();
+        }
+
+        if (value?.Category == SettingsCategory.Accounts)
+        {
+            Accounts.OnShown();
         }
     }
 
