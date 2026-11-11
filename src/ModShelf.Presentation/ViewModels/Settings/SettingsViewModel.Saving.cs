@@ -121,6 +121,7 @@ public sealed partial class SettingsViewModel
 
             LibraryRoot = settings.LibraryRoot ?? _settings.DefaultLibraryRoot;
             IsDefaultRoot = FilePaths.Same(LibraryRoot, _settings.DefaultLibraryRoot);
+            BrowserFolder.Show(settings);
 
             Folders.Show(settings.LibraryFolders ?? FolderPattern.Default, LibraryRoot);
             ShowGames();

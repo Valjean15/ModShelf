@@ -123,6 +123,15 @@ public sealed partial class SettingsViewModel
         Strings.SettingsUseDefaultFolder);
 
     /// <summary>
+    /// Where the browser saves downloads, which ModShelf takes waiting downloads' files from: Library.
+    /// </summary>
+    public SettingsSectionViewModel BrowserFolderSection { get; } = new(
+        SettingsCategory.Library,
+        Strings.SettingsBrowserFolderHeading,
+        Strings.SettingsBrowserFolderNote,
+        Strings.SettingsUseSystemsDownloads);
+
+    /// <summary>
     /// The folder pattern of every game without its own: Library.
     /// </summary>
     public SettingsSectionViewModel FolderPatternSection { get; } = new(
@@ -237,6 +246,7 @@ public sealed partial class SettingsViewModel
         PreviewsSection,
         PicturesSection,
         LibraryFolderSection,
+        BrowserFolderSection,
         FolderPatternSection,
         OldVersionsSection,
         RescanSection,

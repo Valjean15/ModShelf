@@ -269,6 +269,20 @@
                             </StackPanel>
                         </Border>
 
+                        <Border Classes="card" IsVisible="{Binding BrowserFolderSection.IsShown}">
+                            <StackPanel Spacing="8" DataContext="{Binding BrowserFolder}" x:DataType="vm:BrowserFolderViewModel">
+                                <TextBlock Classes="subheading" Text="{x:Static res:Strings.SettingsBrowserFolderHeading}" />
+                                <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.SettingsBrowserFolderNote}" />
+                                <SelectableTextBlock FontFamily="{DynamicResource ShelfMonoFont}" FontSize="13" TextWrapping="Wrap" Text="{Binding Folder}" />
+                                <TextBlock Classes="note" Text="{x:Static res:Strings.SettingsBrowserFolderIsSystems}" IsVisible="{Binding IsSystems}" />
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button Content="{x:Static res:Strings.SettingsChooseFolder}" Command="{Binding ChooseCommand}" />
+                                    <Button Classes="quiet" Content="{x:Static res:Strings.SettingsUseSystemsDownloads}" Command="{Binding UseSystemsCommand}" />
+                                </StackPanel>
+                                <TextBlock Classes="note message problem" Text="{Binding Problem}" IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                            </StackPanel>
+                        </Border>
+
                         <Border Classes="card" IsVisible="{Binding FolderPatternSection.IsShown}">
                             <StackPanel Spacing="8" Grid.IsSharedSizeScope="True">
                                 <TextBlock Classes="subheading" Text="{x:Static res:Strings.SettingsFolderPatternHeading}" />

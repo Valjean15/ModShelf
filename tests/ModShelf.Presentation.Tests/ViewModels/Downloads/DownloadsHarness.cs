@@ -26,6 +26,7 @@ internal sealed class DownloadsHarness : IDisposable
             Links,
             Opened,
             Settings,
+            Folders,
             Browser,
             Dialogs,
             new FakeSourceRegistry([new ScriptedCatalog(TestData.Nexus, "Nexus Mods"), .. others]),
@@ -49,6 +50,8 @@ internal sealed class DownloadsHarness : IDisposable
     public ScriptedOpenedLinks Opened { get; } = new();
 
     public FakeSettingsService Settings { get; } = new();
+
+    public FixedUserFolders Folders { get; } = new();
 
     public ScriptedBrowser Browser { get; } = new();
 

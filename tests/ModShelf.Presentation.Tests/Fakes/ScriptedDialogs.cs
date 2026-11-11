@@ -30,6 +30,16 @@ internal sealed class ScriptedDialogs : IDialogService
 
     public Queue<string?> Folders { get; } = new();
 
+    /// <summary>
+    /// The file the user picks each time in turn; null cancels.
+    /// </summary>
+    public Queue<string?> Files { get; } = new();
+
+    /// <summary>
+    /// The file pickers shown: each one's title and the folder it starts in.
+    /// </summary>
+    public List<(string Title, string? Folder)> FilePickers { get; } = [];
+
     public Task ShowMessageAsync(string title, string message, CancellationToken cancellationToken)
     {
         Messages.Add((title, message));
@@ -58,6 +68,12 @@ internal sealed class ScriptedDialogs : IDialogService
     {
         FolderPickers.Add(title);
         return Task.FromResult(Folders.TryDequeue(out string? folder) ? folder : null);
+    }
+
+    public Task<string?> PickFileAsync(string title, string? folder, CancellationToken cancellationToken)
+    {
+        FilePickers.Add((title, folder));
+        return Task.FromResult(Files.TryDequeue(out string? file) ? file : null);
     }
 
     /// <summary>

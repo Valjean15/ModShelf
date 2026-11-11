@@ -91,6 +91,28 @@ internal sealed class AvaloniaDialogService : IDialogService
         });
     }
 
+    public Task<string?> PickFileAsync(string title, string? folder, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(title);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            // The system's file picker needs a window to belong to.
+            if (AppWindows.Top is not { } owner)
+            {
+                return null;
+            }
+
+            IStorageFolder? start = folder is not null && Directory.Exists(folder)
+                ? await owner.StorageProvider.TryGetFolderFromPathAsync(folder)
+                : null;
+            IReadOnlyList<IStorageFile> files = await owner.StorageProvider.OpenFilePickerAsync(
+                new FilePickerOpenOptions { Title = title, AllowMultiple = false, SuggestedStartLocation = start });
+            return files.Count > 0 ? files[0].TryGetLocalPath() : null;
+        });
+    }
+
     public Task<bool> AddGameAsync(AddGameViewModel adding, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(adding);

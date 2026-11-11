@@ -32,7 +32,11 @@ public sealed partial class DownloadJobViewModel : ObservableObject
     private readonly List<(DateTimeOffset At, long Bytes)> _samples = [];
     private DownloadJobSnapshot _job;
 
-    internal DownloadJobViewModel(DownloadJobSnapshot job, string siteName, DownloadJobServices services, ModPictures pictures)
+    /// <param name="handsOverLinks">
+    /// Whether the site's page hands a link over, such as Nexus Mods' <c>nxm://</c> links, for a download waiting on it;
+    /// otherwise the browser downloads the file, which the user hands over instead.
+    /// </param>
+    internal DownloadJobViewModel(DownloadJobSnapshot job, string siteName, bool handsOverLinks, DownloadJobServices services, ModPictures pictures)
     {
         ArgumentNullException.ThrowIfNull(job);
         ArgumentException.ThrowIfNullOrWhiteSpace(siteName);
@@ -43,7 +47,8 @@ public sealed partial class DownloadJobViewModel : ObservableObject
         _services = services;
         Picture = new ModPictureViewModel(pictures);
         SiteName = siteName;
-        OpenPageLabel = Text.Format(Strings.JobOpenPage, siteName);
+        HandsOverLinks = handsOverLinks;
+        OpenPageLabel = handsOverLinks ? Text.Format(Strings.JobOpenPage, siteName) : Strings.JobOpenDownloadPage;
         Show(job);
     }
 
@@ -58,6 +63,7 @@ public sealed partial class DownloadJobViewModel : ObservableObject
         Cancel,
         OpenPage,
         PasteLink,
+        ChooseFile,
     }
 
     public DownloadJobId Id => _job.Id;
@@ -103,6 +109,13 @@ public sealed partial class DownloadJobViewModel : ObservableObject
 
     public string OpenPageLabel { get; }
 
+    /// <summary>
+    /// Whether the site's page hands a link over for a download waiting on it, which the user pastes when ModShelf doesn't
+    /// get it; otherwise the browser downloads the file, which ModShelf takes from the browser's downloads folder, or the
+    /// user chooses.
+    /// </summary>
+    public bool HandsOverLinks { get; }
+
     [ObservableProperty]
     public partial DownloadJobStatus Status { get; private set; }
 
@@ -122,10 +135,12 @@ public sealed partial class DownloadJobViewModel : ObservableObject
     public partial bool IsFinished { get; private set; }
 
     /// <summary>
-    /// Whether the download waits for the user to start it on its site, and to paste the link the site hands over.
+    /// Whether the download waits for the user on its site's page: to start it there, and paste the link the site hands
+    /// over, or to download the file there, and hand it over.
     /// </summary>
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PasteLinkCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ChooseFileCommand))]
     public partial bool IsAwaitingHandoff { get; private set; }
 
     /// <summary>
@@ -284,7 +299,7 @@ public sealed partial class DownloadJobViewModel : ObservableObject
     {
         DownloadJobStatus.Queued => Strings.JobQueued,
         DownloadJobStatus.Resolving => Strings.JobResolving,
-        DownloadJobStatus.AwaitingHandoff => Text.Format(Strings.JobAwaitingHandoff, SiteName),
+        DownloadJobStatus.AwaitingHandoff => HandsOverLinks ? Text.Format(Strings.JobAwaitingHandoff, SiteName) : Strings.JobAwaitingBrowserFile,
         DownloadJobStatus.Downloading => Strings.JobDownloading,
         DownloadJobStatus.Verifying => Strings.JobVerifying,
         DownloadJobStatus.Completed => Strings.JobCompleted,
@@ -381,7 +396,7 @@ public sealed partial class DownloadJobViewModel : ObservableObject
     /// Asks for the link the site handed over once the user started the download there, and hands it to the queue, which
     /// goes on with the download. A link to another file is refused, as is anything that isn't a link.
     /// </summary>
-    [RelayCommand(CanExecute = nameof(IsAwaitingHandoff))]
+    [RelayCommand(CanExecute = nameof(CanPasteLink))]
     private Task PasteLinkAsync(CancellationToken cancellationToken)
         => RunAsync(
             JobAction.PasteLink,
@@ -400,6 +415,50 @@ public sealed partial class DownloadJobViewModel : ObservableObject
                 if (await HandOffAsync(text.Trim(), cancellationToken) is { } problem)
                 {
                     await _services.Dialogs.ShowMessageAsync(Strings.PasteLinkProblemTitle, problem, cancellationToken);
+                }
+            },
+            cancellationToken);
+
+    private bool CanPasteLink() => IsAwaitingHandoff && HandsOverLinks;
+
+    /// <summary>
+    /// Asks for the file the user's browser downloaded from the page, starting in the browser's downloads folder, and
+    /// hands it to the queue, which checks it against the site's hash and moves it into the library. Why a file wasn't
+    /// taken is said.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(IsAwaitingHandoff))]
+    private Task ChooseFileAsync(CancellationToken cancellationToken)
+        => RunAsync(
+            JobAction.ChooseFile,
+            async () =>
+            {
+                string? folder = await _services.BrowserFolderAsync(cancellationToken);
+                if (await _services.Dialogs.PickFileAsync(Text.Format(Strings.ChooseFileTitle, FileName), folder, cancellationToken) is not { } path)
+                {
+                    return;
+                }
+
+                TakeFileOutcome? outcome;
+                try
+                {
+                    outcome = await _services.Downloads.TakeFileAsync(Id, path, cancellationToken);
+                }
+                catch (Exception exception) when (exception is InvalidOperationException or KeyNotFoundException)
+                {
+                    // It stopped waiting meanwhile.
+                    outcome = null;
+                }
+
+                string? problem = outcome switch
+                {
+                    TakeFileOutcome.HashMismatch => Text.Format(Strings.TakeFileHashMismatch, FileName, SiteName),
+                    TakeFileOutcome.NotFound => Strings.TakeFileNotFound,
+                    TakeFileOutcome.StorageError => Strings.TakeFileStorageError,
+                    _ => null,
+                };
+                if (problem is not null)
+                {
+                    await _services.Dialogs.ShowMessageAsync(Strings.TakeFileProblemTitle, problem, cancellationToken);
                 }
             },
             cancellationToken);

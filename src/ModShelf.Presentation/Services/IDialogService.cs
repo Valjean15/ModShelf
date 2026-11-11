@@ -40,6 +40,12 @@ public interface IDialogService
     Task<string?> PickFolderAsync(string title, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Asks the user to pick a file, starting in <paramref name="folder"/> when it's there.
+    /// </summary>
+    /// <returns>The file's full path; null when they cancelled, or picked a place that isn't a file on this computer.</returns>
+    Task<string?> PickFileAsync(string title, string? folder, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Asks the user to find a game to add, by its name or its key, as Settings' Add a game… does, until they choose one,
     /// type a key and add it (<see cref="AddGameViewModel.AddRequested"/>), or close the dialog.
     /// </summary>

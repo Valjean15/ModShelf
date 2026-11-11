@@ -54,6 +54,7 @@ public static class PresentationServiceCollectionExtensions
         services.TryAddSingleton<ISettingsIndex>(provider => provider.GetServices<ScreenViewModel>().OfType<SettingsViewModel>().Single());
         services.TryAddSingleton<QuickSearchViewModel>();
         services.TryAddSingleton<PicturesViewModel>();
+        services.TryAddSingleton<BrowserFolderViewModel>();
         services.TryAddSingleton<LinksViewModel>();
         services.TryAddSingleton<AgentsViewModel>();
         services.TryAddSingleton<FirstRunViewModel>();

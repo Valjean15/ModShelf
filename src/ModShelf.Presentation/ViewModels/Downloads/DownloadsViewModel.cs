@@ -10,6 +10,7 @@ using ModShelf.Application.Downloads;
 using ModShelf.Application.Library;
 using ModShelf.Application.Links;
 using ModShelf.Application.Settings;
+using ModShelf.Application.Settings.Ports;
 using ModShelf.Application.Sources;
 using ModShelf.Domain.Downloads;
 using ModShelf.Presentation.Common;
@@ -17,6 +18,7 @@ using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Downloads;
 
 namespace ModShelf.Presentation.ViewModels.Downloads;
 
@@ -35,6 +37,8 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
     private readonly IOpenedLinks _opened;
     private readonly FolderDownloads _folders;
     private readonly ISourceRegistry _sources;
+    private readonly ISettingsService _settings;
+    private readonly IUserFolders _userFolders;
     private readonly ISitesInUse _sitesInUse;
     private readonly ModPictures _pictures;
     private readonly IUiThread _uiThread;
@@ -50,6 +54,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         ILinkDownloads links,
         IOpenedLinks opened,
         ISettingsService settings,
+        IUserFolders folders,
         IBrowserLauncher browser,
         IDialogService dialogs,
         ISourceRegistry sources,
@@ -63,6 +68,8 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(library);
         ArgumentNullException.ThrowIfNull(links);
         ArgumentNullException.ThrowIfNull(opened);
+        ArgumentNullException.ThrowIfNull(settings);
+        ArgumentNullException.ThrowIfNull(folders);
         ArgumentNullException.ThrowIfNull(dialogs);
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(sitesInUse);
@@ -74,12 +81,14 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         _sitesInUse = sitesInUse;
         _library = library;
         _opened = opened;
+        _settings = settings;
+        _userFolders = folders;
         _folders = new FolderDownloads(links, dialogs);
         _sources = sources;
         _pictures = pictures;
         _uiThread = uiThread;
         _logger = logger;
-        _jobServices = new DownloadJobServices(downloads, links, browser, dialogs, timeProvider, logger);
+        _jobServices = new DownloadJobServices(downloads, links, browser, dialogs, timeProvider, BrowserFolderAsync, logger);
         Tabs =
         [
             new(DownloadTab.All, Strings.DownloadsTabAll),
@@ -488,7 +497,8 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
     private void Add(DownloadJobSnapshot job)
     {
         bool fromSite = _sources.Find<IModCatalog>(job.File.Mod.Game.Source) is not null;
-        DownloadJobViewModel added = new(job, _sources.SiteName(job.File.Mod.Game.Source), _jobServices, _pictures)
+        bool handsOverLinks = _sources.Find<IDownloadResolver>(job.File.Mod.Game.Source)?.HandsOverLinks ?? true;
+        DownloadJobViewModel added = new(job, _sources.SiteName(job.File.Mod.Game.Source), handsOverLinks, _jobServices, _pictures)
         {
             FromSite = fromSite,
             ShowSite = ShowSites && fromSite,
@@ -556,18 +566,39 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         DownloadJobViewModel[] waiting = [.. Jobs.Where(job => job.IsAwaitingHandoff)];
         string[] sites = [.. waiting.Select(job => job.SiteName).Distinct(StringComparer.Ordinal)];
         HasWaiting = waiting.Length > 0;
-        WaitingText = sites switch
+        WaitingText = (sites, waiting.All(job => job.HandsOverLinks), waiting.Any(job => job.HandsOverLinks)) switch
         {
-            [] => string.Empty,
-            [{ } site] => waiting.Length == 1
+            ([], _, _) => string.Empty,
+            (_, false, true) => Text.Format(Strings.DownloadsWaitingMixed, waiting.Length),
+            ([{ } site], true, _) => waiting.Length == 1
                 ? Text.Format(Strings.DownloadsWaitingOne, site)
                 : Text.Format(Strings.DownloadsWaiting, waiting.Length, site),
-            _ => Text.Format(Strings.DownloadsWaitingOnSites, waiting.Length),
+            ([{ } site], false, _) => waiting.Length == 1
+                ? Text.Format(Strings.DownloadsWaitingFileOne, site)
+                : Text.Format(Strings.DownloadsWaitingFile, waiting.Length, site),
+            (_, true, _) => Text.Format(Strings.DownloadsWaitingOnSites, waiting.Length),
+            _ => Text.Format(Strings.DownloadsWaitingFileOnSites, waiting.Length),
         };
         CanOpenNextPage = waiting.Any(job => job.CanOpenPage);
     }
 
     private static bool Shows(DownloadTab tab, DownloadJobViewModel job) => tab == DownloadTab.All || job.Tab == tab;
+
+    /// <summary>
+    /// The folder the browser saves downloads to: as set, or the system's Downloads folder; null when the settings can't
+    /// be read.
+    /// </summary>
+    private async Task<string?> BrowserFolderAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            return (await _settings.GetAsync(cancellationToken)).BrowserDownloadsFolder ?? _userFolders.Downloads;
+        }
+        catch (Exception exception) when (exception is IOException or InvalidDataException or UnauthorizedAccessException)
+        {
+            return null;
+        }
+    }
 
     /// <summary>
     /// Such as "2 downloading at 4.10 MB/s, 1 queued · 2 waiting for you · 1 failed": what's under way, then what waits for

@@ -139,7 +139,8 @@
                                                 Margin="0,6,0,0"
                                                 IsVisible="{Binding IsAwaitingHandoff}">
                                         <Button Classes="accent" Content="{Binding OpenPageLabel}" Command="{Binding OpenPageCommand}" />
-                                        <Button Content="{x:Static res:Strings.JobPasteLink}" Command="{Binding PasteLinkCommand}" />
+                                        <Button Content="{x:Static res:Strings.JobPasteLink}" Command="{Binding PasteLinkCommand}" IsVisible="{Binding HandsOverLinks}" />
+                                        <Button Content="{x:Static res:Strings.JobChooseFile}" Command="{Binding ChooseFileCommand}" />
                                     </StackPanel>
 
                                     <!-- Only what the download allows now shows. -->

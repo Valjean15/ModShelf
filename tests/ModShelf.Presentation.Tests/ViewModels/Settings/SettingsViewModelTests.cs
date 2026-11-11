@@ -221,6 +221,18 @@ public sealed class SettingsViewModelTests
     }
 
     [Fact]
+    public async Task ShowsTheBrowsersDownloadsFolderAsStored()
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "Browser downloads");
+        _harness.Settings.Stored = new AppSettings { BrowserDownloadsFolder = folder };
+
+        await _harness.StartAsync();
+
+        Assert.Equal((folder, false), (Screen.BrowserFolder.Folder, Screen.BrowserFolder.IsSystems));
+        Assert.Equal(SettingsCategory.Library, Screen.BrowserFolderSection.Category);
+    }
+
+    [Fact]
     public async Task OffersWhenToWarnThatRequestsRunLowAndSavesIt()
     {
         _harness.Settings.Stored = new AppSettings { QuotaWarnBelow = 15 };

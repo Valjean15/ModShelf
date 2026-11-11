@@ -3635,4 +3635,72 @@
     <value>Quit Claude Desktop completely, from its menu or the tray, and start it again: ModShelf's tools are then in its chats. Turn on Allow agents to use ModShelf too, or their calls are refused.</value>
     <comment>After adding while agents are off.</comment>
   </data>
+  <data name="JobAwaitingBrowserFile" xml:space="preserve">
+    <value>Waiting for you: download it from its page, and ModShelf takes the file from your downloads folder</value>
+    <comment>Status of a download whose site hands nothing over, such as a file on MediaFire: the browser downloads the file.</comment>
+  </data>
+  <data name="JobOpenDownloadPage" xml:space="preserve">
+    <value>Open the page</value>
+    <comment>Button on a download waiting for its file to be downloaded in the browser: opens the page it's on.</comment>
+  </data>
+  <data name="JobChooseFile" xml:space="preserve">
+    <value>Choose the file…</value>
+    <comment>Button on a download waiting for the user: hands it the file the browser downloaded.</comment>
+  </data>
+  <data name="ChooseFileTitle" xml:space="preserve">
+    <value>Choose the file you downloaded: {0}</value>
+    <comment>Title of the file picker for a waiting download. {0} is the file's name, such as SkyUI_5_2_SE.7z.</comment>
+  </data>
+  <data name="TakeFileProblemTitle" xml:space="preserve">
+    <value>That file wasn't taken</value>
+    <comment>Title of the message when a file handed to a waiting download wasn't taken.</comment>
+  </data>
+  <data name="TakeFileHashMismatch" xml:space="preserve">
+    <value>That file isn't {0}: its checksum isn't the one {1} gives. It's left where it was, and the download still waits for you.</value>
+    <comment>{0} is the file's name; {1} the site, such as DEG Mods.</comment>
+  </data>
+  <data name="TakeFileNotFound" xml:space="preserve">
+    <value>That file isn't there any more. The download still waits for you.</value>
+    <comment>When the file picked for a waiting download was moved or deleted meanwhile.</comment>
+  </data>
+  <data name="TakeFileStorageError" xml:space="preserve">
+    <value>ModShelf couldn't move that file into the library, such as because another program has it open. It's left where it was, and the log has the details.</value>
+    <comment>When the file picked for a waiting download couldn't be read or moved.</comment>
+  </data>
+  <data name="DownloadsWaitingFileOne" xml:space="preserve">
+    <value>1 file waits for you on {0}. Download it from its page there, and ModShelf takes it from your downloads folder.</value>
+    <comment>Above the downloads, with Open the next page, when the site hands nothing over. {0} is the site, such as DEG Mods.</comment>
+  </data>
+  <data name="DownloadsWaitingFile" xml:space="preserve">
+    <value>{0:N0} files wait for you on {1}. Download each from its page there, and ModShelf takes them from your downloads folder.</value>
+    <comment>As DownloadsWaitingFileOne, for more. {0} counts them; {1} is the site.</comment>
+  </data>
+  <data name="DownloadsWaitingFileOnSites" xml:space="preserve">
+    <value>{0:N0} files wait for you on their sites. Download each from its page there, and ModShelf takes them from your downloads folder.</value>
+    <comment>As DownloadsWaitingFile, when they're on several sites.</comment>
+  </data>
+  <data name="DownloadsWaitingMixed" xml:space="preserve">
+    <value>{0:N0} files wait for you on their sites. Start or download each from its page there: ModShelf goes on with the link a site hands over, or takes the file from your downloads folder.</value>
+    <comment>When some waiting downloads' sites hand a link over and others don't.</comment>
+  </data>
+  <data name="SettingsBrowserFolderHeading" xml:space="preserve">
+    <value>Your browser's downloads</value>
+    <comment>Settings › Library: the folder the browser saves downloads to.</comment>
+  </data>
+  <data name="SettingsBrowserFolderNote" xml:space="preserve">
+    <value>When a download waits for you on a site's page, ModShelf takes the file your browser saves here, and moves it into the library.</value>
+    <comment>Settings › Library, under Your browser's downloads.</comment>
+  </data>
+  <data name="SettingsBrowserFolderIsSystems" xml:space="preserve">
+    <value>Your system's Downloads folder.</value>
+    <comment>Settings › Library: below the browser's downloads folder, when it's the system's.</comment>
+  </data>
+  <data name="SettingsBrowserFolderPick" xml:space="preserve">
+    <value>Choose your browser's downloads folder</value>
+    <comment>Title of the folder picker for the browser's downloads folder.</comment>
+  </data>
+  <data name="SettingsUseSystemsDownloads" xml:space="preserve">
+    <value>Use the system's Downloads folder</value>
+    <comment>Settings › Library: sets the browser's downloads folder back to the system's.</comment>
+  </data>
 </root>

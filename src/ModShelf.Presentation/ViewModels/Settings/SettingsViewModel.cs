@@ -88,6 +88,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
         ISitesInUse sitesInUse,
         IUiThread uiThread,
         PicturesViewModel pictures,
+        BrowserFolderViewModel browserFolder,
         ModPictures covers,
         LinksViewModel links,
         AgentsViewModel agents,
@@ -111,6 +112,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
         ArgumentNullException.ThrowIfNull(sitesInUse);
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(pictures);
+        ArgumentNullException.ThrowIfNull(browserFolder);
         ArgumentNullException.ThrowIfNull(covers);
         ArgumentNullException.ThrowIfNull(links);
         ArgumentNullException.ThrowIfNull(agents);
@@ -133,6 +135,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
         _covers = covers;
         _logger = logger;
         Pictures = pictures;
+        BrowserFolder = browserFolder;
         ScreenPreviews =
         [
             new(PreviewScreen.Library, Strings.LibraryTitle, Strings.SettingsPreviewsLibraryNote, ChoosePreviews),
@@ -170,6 +173,11 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
     /// pictures show.
     /// </summary>
     public PicturesViewModel Pictures { get; }
+
+    /// <summary>
+    /// The folder the browser saves downloads to, where the file of a download waiting on a site's page is taken from.
+    /// </summary>
+    public BrowserFolderViewModel BrowserFolder { get; }
 
     /// <summary>
     /// How each screen shows mods: the Library, Browse, Updates and Downloads.

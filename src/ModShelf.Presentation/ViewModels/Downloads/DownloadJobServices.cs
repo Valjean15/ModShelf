@@ -15,6 +15,7 @@ internal sealed class DownloadJobServices(
     IBrowserLauncher browser,
     IDialogService dialogs,
     TimeProvider timeProvider,
+    Func<CancellationToken, Task<string?>> browserFolder,
     ILogger logger)
 {
     public IDownloadService Downloads { get; } = downloads ?? throw new ArgumentNullException(nameof(downloads));
@@ -28,4 +29,10 @@ internal sealed class DownloadJobServices(
     public TimeProvider TimeProvider { get; } = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
 
     public ILogger Logger { get; } = logger ?? throw new ArgumentNullException(nameof(logger));
+
+    /// <summary>
+    /// The folder the browser saves downloads to, where choosing a waiting download's file starts; null when it can't be
+    /// read.
+    /// </summary>
+    public Func<CancellationToken, Task<string?>> BrowserFolderAsync { get; } = browserFolder ?? throw new ArgumentNullException(nameof(browserFolder));
 }

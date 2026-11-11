@@ -26,6 +26,7 @@ internal sealed class SettingsHarness
         AppUpdate = new AppUpdateViewModel(Releases, Exit, UiThread, AppUpdateLogger);
         Pictures = new TestPictures(Settings);
         PicturesCard = new PicturesViewModel(Settings, Pictures.Pictures, PicturesLogger);
+        BrowserFolder = new BrowserFolderViewModel(Settings, Folders, Dialogs, BrowserFolderLogger);
         GameSettings = new GameSettingsOpener(Navigation);
         Screens = new ScreenOpener(Navigation);
         Screen = new SettingsViewModel(
@@ -45,6 +46,7 @@ internal sealed class SettingsHarness
             Sites,
             UiThread,
             PicturesCard,
+            BrowserFolder,
             Pictures.Pictures,
             Links,
             Agents,
@@ -58,6 +60,12 @@ internal sealed class SettingsHarness
     public TestPictures Pictures { get; }
 
     public RecordingLogger<PicturesViewModel> PicturesLogger { get; } = new();
+
+    public FixedUserFolders Folders { get; } = new();
+
+    public BrowserFolderViewModel BrowserFolder { get; }
+
+    public RecordingLogger<BrowserFolderViewModel> BrowserFolderLogger { get; } = new();
 
     public PicturesViewModel PicturesCard { get; }
 
