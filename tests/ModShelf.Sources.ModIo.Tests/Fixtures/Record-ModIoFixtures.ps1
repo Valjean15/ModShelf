@@ -27,9 +27,10 @@
       the games open to third parties, 100 a page, by name and by a word of the game's name;
     - one open game with many mods: the game, its mods 50 a page in each order a search can ask for, two pages deep for
       the newest and the latest updated, and narrowed by words, author, tag, update date and explicit content;
-    - one of its mods with several files: the mod, the mod found by the name in its link, its files and its live file,
-      as any platform's and as Windows' (X-Modio-Platform), what it depends on, and where its live file's download link
-      leads (asked for one byte, so nothing is downloaded);
+    - one of its mods with several files: the mod, the mod found by the name in its link, its files and its live file
+      (from the mod, or from its Windows files when the game has files per platform), as any platform's and as
+      Windows' (X-Modio-Platform), what it depends on, and where its live file's download link leads (asked for one
+      byte, so nothing is downloaded);
     - the game's file events since 28 days ago, its latest events, and its oldest, to see how far back they reach;
     - your subscriptions, with the token and with the key;
     - a game closed to third parties, a game, mod and file that don't exist, and a token and a key mod.io refuses.
@@ -377,8 +378,10 @@ function Hide-User($Node) {
                 }
             }
 
-            if ($Node.ContainsKey('display_name_portal')) {
-                $Node['display_name_portal'] = $null
+            foreach ($personal in 'display_name_portal', 'country') {
+                if ($Node.ContainsKey($personal)) {
+                    $Node[$personal] = $null
+                }
             }
 
             if ($Node['avatar'] -is [System.Text.Json.Nodes.JsonObject]) {
@@ -738,13 +741,26 @@ try {
     $modName = Get-Text $modBody['name']
     Write-Host "  The mod: $modName ($ModId)."
     Save-Fixture 'mod' $modAnswer
+    Save-Fixture 'mod-windows' (Invoke-ModIo $GameHost "games/$Game/mods/$ModId" -Platform windows)
     Save-Fixture 'mod-by-name-id' (Invoke-ModIo $GameHost "games/$Game/mods" ([ordered]@{ 'name_id' = (Get-Text $modBody['name_id']) }))
     Save-Fixture 'mod-files' (Invoke-ModIo $GameHost "games/$Game/mods/$ModId/files" ([ordered]@{ '_sort' = '-date_added'; '_limit' = 100 }))
     Save-Fixture 'mod-files-windows' (Invoke-ModIo $GameHost "games/$Game/mods/$ModId/files" ([ordered]@{ '_sort' = '-date_added'; '_limit' = 100 }) -Platform windows)
-    $liveFile = $modBody['modfile']
-    if ($liveFile -is [System.Text.Json.Nodes.JsonObject]) {
-        # The live file, as any platform's and as Windows', and its download link from whichever gives one.
-        $liveId = Get-Text $liveFile['id']
+    # The live file: the mod's modfile, which a game with files per platform leaves empty, or Windows' live file.
+    $liveId = $null
+    if ($modBody['modfile'] -is [System.Text.Json.Nodes.JsonObject] -and $null -ne $modBody['modfile']['id']) {
+        $liveId = Get-Text $modBody['modfile']['id']
+    }
+
+    if (-not $liveId -and $modBody['platforms'] -is [System.Text.Json.Nodes.JsonArray]) {
+        foreach ($platform in $modBody['platforms']) {
+            if ($platform -is [System.Text.Json.Nodes.JsonObject] -and (Get-Text $platform['platform']) -eq 'windows') {
+                $liveId = Get-Text $platform['modfile_live']
+            }
+        }
+    }
+
+    if ($liveId) {
+        # As any platform's and as Windows', and its download link from whichever gives one.
         $binary = $null
         foreach ($asked in @(@{ Name = 'mod-file'; Platform = $null }, @{ Name = 'mod-file-windows'; Platform = 'windows' })) {
             $fileAnswer = Invoke-ModIo $GameHost "games/$Game/mods/$ModId/files/$liveId" -Platform $asked.Platform
