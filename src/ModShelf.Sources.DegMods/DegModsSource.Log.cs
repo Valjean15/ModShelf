@@ -21,4 +21,10 @@ public sealed partial class DegModsSource
 
     [LoggerMessage(EventId = 2004, Level = LogLevel.Debug, Message = "The file server {Host} couldn't be asked for a DEG Mods file")]
     private static partial void LogServerFailed(ILogger logger, Exception exception, string host);
+
+    [LoggerMessage(EventId = 2005, Level = LogLevel.Information, Message = "A DEG Mods file's link names {Host}, on this computer or its network: ModShelf doesn't ask it, and it opens in the browser")]
+    private static partial void LogOnThisNetwork(ILogger logger, string host);
+
+    [LoggerMessage(EventId = 2006, Level = LogLevel.Debug, Message = "{Host} couldn't be asked what a DEG Mods file's link gives")]
+    private static partial void LogLinkFailed(ILogger logger, Exception exception, string host);
 }

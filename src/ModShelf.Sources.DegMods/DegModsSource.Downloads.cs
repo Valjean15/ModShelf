@@ -13,10 +13,16 @@ namespace ModShelf.Sources.DegMods;
 /// The <see cref="IDownloadResolver"/> half: where to download a file from, read afresh from the mod's newest event
 /// every time. A file named by its SHA-256 is asked of the file servers, the one its link names first, unless that's DEG
 /// Mods' own; DEG Mods' own gives files only to a browser that showed its ad, so a file only it has opens the mod's page
-/// (ADR 0090). A file on a page, such as MediaFire's, opens that page.
+/// (ADR 0090). Another host's link is asked what it gives: the file is downloaded from it, and a page, such as
+/// MediaFire's, opens.
 /// </summary>
 public sealed partial class DegModsSource : IDownloadResolver
 {
+    /// <summary>
+    /// The most redirects followed asking a link what it gives.
+    /// </summary>
+    private const int MaxRedirects = 5;
+
     /// <param name="file">One of this source's files.</param>
     /// <param name="handoff">Ignored: DEG Mods hands no downloads over.</param>
     /// <returns>
@@ -44,7 +50,7 @@ public sealed partial class DegModsSource : IDownloadResolver
         FileHash? hash = sha256 is null ? null : new FileHash(FileHashAlgorithm.Sha256, sha256);
         if (FileHosts.BlossomHash(download.Url) is null)
         {
-            if (FileHosts.IsDirect(download.Url))
+            if (FileHosts.IsDirect(download.Url) || await GivesFileAsync(download.Url, cancellationToken).ConfigureAwait(false))
             {
                 return new DownloadTicket(download.Url, expectedHash: hash);
             }
@@ -88,6 +94,48 @@ public sealed partial class DegModsSource : IDownloadResolver
                 yield return new Uri(server, sha256);
             }
         }
+    }
+
+    /// <summary>
+    /// Whether a link on another host gives the file itself rather than a page: it answers HEAD with something other
+    /// than a web page, there or where it sends ModShelf, at most five times. A link to this computer or its network is
+    /// never asked, nor one that doesn't answer: a browser opens it.
+    /// </summary>
+    private async Task<bool> GivesFileAsync(Uri link, CancellationToken cancellationToken)
+    {
+        HttpClient client = _clients.CreateClient(SourceHttpClients.NameFor(DegModsId));
+        Uri address = link;
+        for (int sent = 0; sent <= MaxRedirects; sent++)
+        {
+            if (FileHosts.IsOnThisNetwork(address))
+            {
+                LogOnThisNetwork(_logger, address.Host);
+                return false;
+            }
+
+            using HttpRequestMessage request = new(HttpMethod.Head, address);
+            try
+            {
+                using HttpResponseMessage response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+                if ((int)response.StatusCode is < 300 or >= 400 || response.Headers.Location is not { } location)
+                {
+                    return FileHosts.IsFile(response);
+                }
+
+                address = new Uri(address, location);
+                if (address.Scheme != Uri.UriSchemeHttps && address.Scheme != Uri.UriSchemeHttp)
+                {
+                    return false;
+                }
+            }
+            catch (HttpRequestException exception)
+            {
+                LogLinkFailed(_logger, exception, address.Host);
+                return false;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>

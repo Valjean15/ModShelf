@@ -149,6 +149,11 @@ internal sealed class RecordedDegMods : IDisposable
     public RecordingLoggerProvider Logs { get; } = new();
 
     /// <summary>
+    /// The hosts the source's client can't reach, as a name no server has: a request to one fails before it's sent.
+    /// </summary>
+    public ISet<string> Unreachable { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
     /// Every request the file servers got, oldest first.
     /// </summary>
     public IReadOnlyList<ILogEntry> Requests => [.. _server.LogEntries.Where(entry => entry.RequestMessage?.Path?.StartsWith("/relay", StringComparison.Ordinal) == false)];
@@ -223,7 +228,7 @@ internal sealed class RecordedDegMods : IDisposable
             AttemptTimeout = TimeSpan.FromSeconds(10),
         });
         services.AddDegModsSource(configure?.Invoke(options) ?? options);
-        services.AddHttpClient(SourceHttpClients.NameFor(DegModsSource.DegModsId)).AddHttpMessageHandler(() => new ToRecorded(new Uri(_server.Url!)));
+        services.AddHttpClient(SourceHttpClients.NameFor(DegModsSource.DegModsId)).AddHttpMessageHandler(() => new ToRecorded(new Uri(_server.Url!), Unreachable));
         return services.BuildServiceProvider();
     }
 
@@ -232,10 +237,30 @@ internal sealed class RecordedDegMods : IDisposable
     /// <paramref name="status"/>, before any recording.
     /// </summary>
     public void Answer(string method, Uri url, int status)
-        => _server
+        => Answer(method, url, status, new Dictionary<string, string>());
+
+    /// <summary>
+    /// From now on, the server at <paramref name="url"/>'s host answers <paramref name="method"/> for its path with
+    /// <paramref name="status"/> and <paramref name="headers"/>, before any recording.
+    /// </summary>
+    public void Answer(string method, Uri url, int status, IReadOnlyDictionary<string, string> headers)
+    {
+        IResponseBuilder response = Response.Create().WithStatusCode(status);
+        foreach ((string name, string value) in headers)
+        {
+            response = response.WithHeader(name, value);
+        }
+
+        _server
             .Given(Request.Create().UsingMethod(method).WithPath($"/{url.Host}{url.AbsolutePath}"))
             .AtPriority(0)
-            .RespondWith(Response.Create().WithStatusCode(status));
+            .RespondWith(response);
+    }
+
+    /// <summary>
+    /// The status each request to the file servers was answered with, oldest first.
+    /// </summary>
+    public IReadOnlyList<int> Answered => [.. Requests.Select(entry => Convert.ToInt32(entry.ResponseMessage!.StatusCode, System.Globalization.CultureInfo.InvariantCulture))];
 
     /// <summary>
     /// The paths the file servers were asked for, as <c>&lt;host&gt;&lt;path&gt;</c>, oldest first.
@@ -285,7 +310,8 @@ internal sealed class RecordedDegMods : IDisposable
     }
 
     /// <summary>
-    /// A file server's recorded answer, at <c>/&lt;host&gt;&lt;path&gt;</c>, for the method it was asked with.
+    /// A file server's recorded answer, at <c>/&lt;host&gt;&lt;path&gt;</c>, for the method it was asked with: the
+    /// path as WireMock.Net reads a request's, unescaped twice, once by its web server and once by itself.
     /// </summary>
     private void ServeFile(string name)
     {
@@ -293,7 +319,7 @@ internal sealed class RecordedDegMods : IDisposable
         Uri url = new(recording["request"]!["url"]!.GetValue<string>());
         JsonNode response = recording["response"]!;
         _server
-            .Given(Request.Create().UsingMethod(recording["request"]!["method"]!.GetValue<string>()).WithPath($"/{url.Host}{url.AbsolutePath}"))
+            .Given(Request.Create().UsingMethod(recording["request"]!["method"]!.GetValue<string>()).WithPath($"/{url.Host}{Uri.UnescapeDataString(Uri.UnescapeDataString(url.AbsolutePath))}"))
             .RespondWith(Response.Create().WithCallback(_ => Answer(response)));
     }
 
@@ -322,12 +348,17 @@ internal sealed class RecordedDegMods : IDisposable
     /// Sends every request of the source's client here, as <c>/&lt;host&gt;&lt;path&gt;</c>, so a file server's link
     /// reaches its recording.
     /// </summary>
-    private sealed class ToRecorded(Uri server) : DelegatingHandler
+    private sealed class ToRecorded(Uri server, ISet<string> unreachable) : DelegatingHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             // A retry sends the request again, already sent here.
             Uri asked = request.RequestUri!;
+            if (unreachable.Contains(asked.Host))
+            {
+                throw new HttpRequestException(HttpRequestError.NameResolutionError, $"No such host is known. ({asked.Host}:{asked.Port})");
+            }
+
             if (asked.Authority != server.Authority)
             {
                 request.RequestUri = new Uri(server, $"/{asked.Host}{asked.PathAndQuery}");

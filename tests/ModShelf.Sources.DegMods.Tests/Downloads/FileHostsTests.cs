@@ -16,6 +16,56 @@ public sealed class FileHostsTests
     }
 
     [Theory]
+    [InlineData("http://localhost:3000/mod.zip")]
+    [InlineData("http://LOCALHOST/mod.zip")]
+    [InlineData("http://files.localhost/mod.zip")]
+    [InlineData("http://printer.local/mod.zip")]
+    [InlineData("http://nas/mod.zip")]
+    [InlineData("http://nas./mod.zip")]
+    [InlineData("http://0.0.0.0/mod.zip")]
+    [InlineData("http://10.1.2.3/mod.zip")]
+    [InlineData("http://127.0.0.1/mod.zip")]
+    [InlineData("http://169.254.169.254/latest")]
+    [InlineData("http://172.16.0.1/mod.zip")]
+    [InlineData("http://172.31.255.255/mod.zip")]
+    [InlineData("http://192.168.1.10/mod.zip")]
+    [InlineData("http://100.64.0.1/mod.zip")]
+    [InlineData("http://100.127.255.255/mod.zip")]
+    [InlineData("http://[::1]/mod.zip")]
+    [InlineData("http://[::]/mod.zip")]
+    [InlineData("http://[fe80::1]/mod.zip")]
+    [InlineData("http://[fec0::1]/mod.zip")]
+    [InlineData("http://[fd12:3456::1]/mod.zip")]
+    [InlineData("http://[::ffff:192.168.0.1]/mod.zip")]
+    public void ALinkToThisComputerOrItsNetworkIsOnIt(string link)
+    {
+        Assert.True(FileHosts.IsOnThisNetwork(new Uri(link)));
+    }
+
+    [Theory]
+    [InlineData("https://f.rpghq.org/14Y3yg8yWsCn.7z")]
+    [InlineData("https://localhost.example.com/mod.zip")]
+    [InlineData("http://1.1.1.1/mod.zip")]
+    [InlineData("http://11.0.0.1/mod.zip")]
+    [InlineData("http://126.255.255.255/mod.zip")]
+    [InlineData("http://128.0.0.1/mod.zip")]
+    [InlineData("http://169.253.0.1/mod.zip")]
+    [InlineData("http://169.255.0.1/mod.zip")]
+    [InlineData("http://172.15.255.255/mod.zip")]
+    [InlineData("http://172.32.0.1/mod.zip")]
+    [InlineData("http://192.167.1.1/mod.zip")]
+    [InlineData("http://192.169.1.1/mod.zip")]
+    [InlineData("http://100.63.255.255/mod.zip")]
+    [InlineData("http://100.128.0.1/mod.zip")]
+    [InlineData("http://99.64.0.1/mod.zip")]
+    [InlineData("http://[2606:4700:4700::1111]/mod.zip")]
+    [InlineData("http://[::ffff:8.8.8.8]/mod.zip")]
+    public void ALinkElsewhereIsntOnIt(string link)
+    {
+        Assert.False(FileHosts.IsOnThisNetwork(new Uri(link)));
+    }
+
+    [Theory]
     [InlineData("https://example.com/files/" + Sha256 + ".zip")]
     [InlineData("https://example.com/" + Sha256 + "/file.zip")]
     [InlineData("https://example.com/550a7a5da7893d23.zip")]
