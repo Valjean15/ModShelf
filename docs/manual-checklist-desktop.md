@@ -82,6 +82,8 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
   The game picker's field says "Find a game"; clicking it opens a list under it saying "Type to find any of the *N* games on Nexus Mods, or a game on GameBanana by its name." and which keys do what, once Nexus Mods' games are read, in a few seconds: GameBanana's whole list is never read (ADR 0088). With nothing in the library yet, it starts with none chosen: "Choose a game to search its mods."
 - [ ] **3.1a Games by name.** Type each in the game picker: `stalker 2`, `final fantasy 12`, `dragons dogma`, `valley`, `dew`. Then type `star`, press ↓ twice and Enter; open it again, type `sky`, and press Escape.
   S.T.A.L.K.E.R. 2: Heart of Chornobyl; Final Fantasy XII: The Zodiac Age; Dragon's Dogma 2; for `valley`, the games whose names start with "Valley" first, then Stardew Valley and the others; for `dew`, "No game's name has “dew”." Clearing the field shows the hint again. ↓ moves the highlight, and Enter chooses the third game: it shows as a chip in the field, and its rows load. Escape closes the list, forgetting `sky`, the chip still there. Each game's name has its site after it, as in "Stardew Valley (Nexus Mods)", since GameBanana's games are found too, by a word of 3 letters or more, "Finding games on GameBanana…" while it's asked; a game on both shows twice. For `dew`, a GameBanana game's name may hold it: write down which.
+- [ ] **3.1b The site box.** Open the box left of the game picker, choose **Nexus Mods**, and type `persona` in the game picker; choose **GameBanana**, and type `persona` again; choose **All sites**. Then choose **GameBanana** again, quit the app (**Quit ModShelf**), start it, and open Browse.
+  The box lists **All sites**, DEG Mods, GameBanana, mod.io and Nexus Mods. With Nexus Mods, the picker lists only Nexus Mods' games, without "(Nexus Mods)" after their names, and its hint names Nexus Mods alone; nothing is asked of GameBanana. With GameBanana, its Persona games, found by name; the game chosen before, of Nexus Mods, gives way to the GameBanana game the library has the most mods of, or, with none, the picker opens for one. **All sites** brings every site's games back, each with its site. After the restart the box says GameBanana, and Browse starts on a GameBanana game. Quick search (Ctrl+K) opening a Nexus Mods game puts the box on Nexus Mods.
 - [ ] **3.2 Search.** Choose Stardew Valley (type to filter the list), type `smapi` in the search box, and **Search**.
   "*N* mods match." SMAPI is near the top, with its downloads, endorsements and last update.
 - [ ] **3.2a The game's rows.** Clear the search box.
@@ -467,6 +469,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 2.6 Linked from the command line | | | |
 | 3.1 Games | | | |
 | 3.1a Games by name | | | |
+| 3.1b The site box | | | |
 | 3.2 Search | | | |
 | 3.2a The game's rows | | | |
 | 3.3 Order and pages | | | |
