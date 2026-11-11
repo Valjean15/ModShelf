@@ -140,7 +140,7 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
 ## 5. Download through the website (free only)
 
 - [ ] **5.1 It waits for you.** On SMAPI's page in Browse, **Download** on its main file. Open the Downloads screen.
-  The download says "Waiting for you: start the download on Nexus Mods, then paste the link it hands over", with **Open on Nexus Mods** and **Paste link…**. Above the list, "1 file waits for you on Nexus Mods. …" with **Open the next page**; the line under the heading says "1 waiting for you", and the "Waiting for you" tab counts 1. The Downloads screen's badge counts 1.
+  The download says "Waiting for you: start the download on Nexus Mods, then paste the link it hands over", with **Open on Nexus Mods**, **Paste link…** and **Choose the file…**. Above the list, "1 file waits for you on Nexus Mods. …" with **Open the next page**; the line under the heading says "1 waiting for you", and the "Waiting for you" tab counts 1. The Downloads screen's badge counts 1.
 - [ ] **5.2 The page.** **Open on Nexus Mods**, then **Open the next page**.
   Each opens the file's page on the Files tab.
 - [ ] **5.3 Not a link.** **Paste link…**, type `hello`, and **Continue**.
@@ -153,6 +153,8 @@ A new terminal needs the setup lines again. Never paste an API key or an `nxm://
   The waiting download goes on, and ends "Done".
 - [ ] **5.7 The file's page isn't the link handed over.** Start another old version of SMAPI's download from its page in Browse. On the Downloads screen, **Open on Nexus Mods**, copy the page's address from the browser's address bar, then **Paste link…**, paste it, and **Continue**.
   "That's a link to *the file's name*, but not the one Nexus Mods hands over. Start the download on its page, then paste the link its download button holds." **Cancel** the download.
+- [ ] **5.8 The file from the browser.** Start another old version of SMAPI's download from its page in Browse. On the website, download it with **Manual download** on the "Slow download" page, into the browser's usual Downloads folder.
+  A few seconds after the browser finishes, the download ends "Done", without a link pasted: the file has left the Downloads folder for SMAPI's folder in the library. The log has "The browser saved *the file's name*, for download job …: Taken", and no path.
 
 ## 6. Save to a folder
 
@@ -229,7 +231,7 @@ An update needs a mod whose newest file the library doesn't have. Content Patche
 ## 10. Settings
 
 - [ ] **10.0 Categories and search.** Open the Settings screen, then each category in its list.
-  It opens on **General**: the theme, closing the window, the previews, and pictures and mod details. **Library**: the library folder, the folder pattern, old versions and **Rescan the library**. **Updates**, **Links**, **Agents** (AI agents, connecting them and their address; [manual-checklist-mcp.md](manual-checklist-mcp.md) section 0 checks them), **Games** (each game's own settings, the library's games each with its banner from Nexus Mods) and **About** show theirs. Type `folder` in **Search settings**: the library folder, the folder pattern, old versions (the _archive folder), the rescan, the games' patterns and About (the log folder), under "Settings that match “folder”", and General, Updates and Links fade in the list. `zzz`: "No setting matches “zzz”." Type `stardew`: **Games** shows Stardew Valley alone, its page open. Escape, or choosing a category, ends the search. **Rescan the library** says what it found, as on the Library screen. Make the window narrow: the categories move above the settings, side by side.
+  It opens on **General**: the theme, closing the window, the previews, and pictures and mod details. **Library**: the library folder, your browser's downloads, the folder pattern, old versions and **Rescan the library**. **Updates**, **Links**, **Agents** (AI agents, connecting them and their address; [manual-checklist-mcp.md](manual-checklist-mcp.md) section 0 checks them), **Games** (each game's own settings, the library's games each with its banner from Nexus Mods) and **About** show theirs. Type `folder` in **Search settings**: the library folder, your browser's downloads, the folder pattern, old versions (the _archive folder), the rescan, the games' patterns and About (the log folder), under "Settings that match “folder”", and General, Updates and Links fade in the list. `zzz`: "No setting matches “zzz”." Type `stardew`: **Games** shows Stardew Valley alone, its page open. Escape, or choosing a category, ends the search. **Rescan the library** says what it found, as on the Library screen. Make the window narrow: the categories move above the settings, side by side.
 - [ ] **10.1 Folder patterns.** In **Library**, under "Folder pattern", change every game's pattern to `{source}/{game}/{modid}/{file}`.
   The example under it changes as you type. `{mod}/{file}x` says what's wrong, and **Save** is disabled. With the right pattern, **Save**: a mod the library doesn't have yet then downloads to `nexus\<game>\<mod's ID>\…`. Mods in the library keep their folders, and files downloaded already stay where they are.
 - [ ] **10.1a Each screen's previews.** In **General**, under "Previews", choose **Cards** for the Library, **Rows** for Browse and **Thumbnails** for Updates and Downloads, then look at each screen. Choose **Cards** in Browse's view switch, and come back. Then set them back: **Thumbnails**, **Cards**, **Rows**, **Rows**.
@@ -412,7 +414,11 @@ DEG Mods needs no account. The checks use the links of the command line's checkl
 - [ ] **17.5 Download it.** **Download** on the main file; then the Library screen.
   It goes into the library from `blossom.primal.net`, its SHA-256 checked: "In the library", and the Library shows Fallout: New Vegas with "1 mod", in `Library\degmods\fallout_ new vegas\Better Newspapers for New Vegas Bounties II (…)`.
 - [ ] **17.6 Only on DEG Mods' server.** Paste the Nipton Rebuilt Remade link into the Downloads screen's box, and **Download**.
-  The download waits for you, with **Open on DEG Mods**, which opens the mod's page, where DEG Mods shows its ad and downloads the file. Cancel the download once you have it.
+  The download says "Waiting for you: download it from its page, and ModShelf takes the file from your downloads folder", with **Open the page** and **Choose the file…**, and no **Paste link…**; above the list, "1 file waits for you on DEG Mods. Download it from its page there, and ModShelf takes it from your downloads folder." **Choose the file…** opens in your Downloads folder: pick another file, such as Better Newspapers' from the library. "That file wasn't taken": "That file isn't NRR1.3.7.zip: its checksum isn't the one DEG Mods gives. It's left where it was, and the download still waits for you." The file is where it was, and the download still waits.
+- [ ] **17.6b From the browser.** **Open the page**: it opens the mod's page, where DEG Mods shows its ad; download the file there, into the browser's usual Downloads folder.
+  A few seconds after the browser finishes, the download ends "Done", its SHA-256 checked: the file has left the Downloads folder for Nipton Rebuilt Remade's folder in the library.
+- [ ] **17.6c Choose the file.** In Settings › Library › "Your browser's downloads", **Choose another folder…** and pick the test folder. On Nipton Rebuilt Remade's page in Browse, **Download** on "Nipton Rebuilt Remade (Christmas Add-On)"; on the Downloads screen, **Open the page**, and download it there into your Downloads folder. Then **Choose the file…**, and pick it in your Downloads folder.
+  The card shows the test folder, the settings file holds `"downloads": { "browserFolder": "…" }`, and "Your system's Downloads folder." is gone. The download keeps waiting once the browser has the file, since ModShelf watches the test folder; **Choose the file…** opens there. Picked, the file moves into the library, and the download ends "Done". **Use the system's Downloads folder** puts the card back, and `"downloads"` leaves the settings file.
 - [ ] **17.6a A file elsewhere.** Paste the Standalone Driveable Cars link into the Downloads screen's box, and **Download**.
   No browser opens: the download runs in ModShelf, from `f.rpghq.org`, 470 MB. Cancel it once it's under way.
 - [ ] **17.7 Moderation.** Paste the blocked test post's link into the Downloads screen's box, and **Download**.
@@ -493,6 +499,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 5.5 Another file's link | – | | |
 | 5.6 The link in the box | – | | |
 | 5.7 The file's page | – | | |
+| 5.8 The file from the browser | – | | |
 | 6.1 A folder of your own | | | |
 | 6.2 Again | | | |
 | 7.1 Pause | | | |
@@ -593,6 +600,8 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 17.4 A mod's page | | – | |
 | 17.5 Download it | | – | |
 | 17.6 Only on DEG Mods' server | | – | |
+| 17.6b From the browser | | – | |
+| 17.6c Choose the file | | – | |
 | 17.6a A file elsewhere | | – | |
 | 17.7 Moderation | | – | |
 | 17.8 Remove it | | – | |

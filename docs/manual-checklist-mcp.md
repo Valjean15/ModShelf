@@ -51,7 +51,7 @@ Settings › **Agents** in the desktop app. Agents are off until you turn them o
 ## 1. The server
 
 - [ ] **1.1 Tools.** Start the agent's app, and ask it which ModShelf tools it has.
-  25 tools, from `library_list` to `diagnostics`. Claude Desktop's settings show the server as running. After ModShelf
+  26 tools, from `library_list` to `diagnostics`. Claude Desktop's settings show the server as running. After ModShelf
   is updated, quit Claude Desktop completely, start it again and begin a new conversation: an older list of the tools
   makes calls such as `download` with `link` fail with "download doesn't take these arguments: it needs links. …".
 - [ ] **1.2 Reading.** Ask for the library, the updates and the settings; then for the mods with files missing from disk.
@@ -206,7 +206,14 @@ DEG Mods needs no account. Start a new conversation.
   `library_list` lists it under game `fallout: new vegas` of `degmods`.
 - [ ] **7.4 One only DEG Mods' server has.** Ask it to download Nipton Rebuilt Remade (the command line's checklist,
   `$nipton`).
-  `download` says it waits for the user to start it on DEG Mods' page; the agent says so, and gives the page.
+  `download` says the file is on a page only the browser downloads it from, and gives the page; the agent says so,
+  without Nexus Mods' words about a mod manager download.
+- [ ] **7.5 The file from the browser.** On that page, download the file, saving it into the test folder rather than the
+  Downloads folder (the browser's "Save as"). Ask the agent to hand the waiting download Better Newspapers' file from the
+  library with `downloads_take`, then the saved file by its name alone, then by its full path.
+  The first: the agent says it isn't the download's, its checksum not the one the site gives, and the file is still in
+  the library; the name alone: "Give the file's full path."; the full path: "Taken: the file is in the library.",
+  `library_list` lists Nipton Rebuilt Remade, and the file has left the test folder.
 
 ## Results
 
@@ -260,3 +267,4 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 7.2 A game's name | | |
 | 7.3 A file of a DEG Mods mod | | |
 | 7.4 One only DEG Mods' server has | | |
+| 7.5 The file from the browser | | |

@@ -83,7 +83,7 @@ A new terminal needs all these lines again, with the same folders. Never paste a
 ## 5. Download through the website (free only)
 
 - [ ] **5.1 The page opens.** `ms download "https://www.nexusmods.com/stardewvalley/mods/2400" --to $downloads`.
-  "The site wants this download started on its website." The file's page opens in your browser, on the Files tab, and its address is printed too. Then "Link: " waits.
+  "The site wants this download started on its website." The file's page opens in your browser, on the Files tab, and its address is printed too, with "If your browser downloads the file instead, ModShelf takes it from *your Downloads folder*, or type its path here." Then "Link: " waits.
 - [ ] **5.2 A line that isn't a link.** Type `hello` and press Enter.
   "That isn't a link. Paste the link the site handed over, or press Ctrl+C to stop."
 - [ ] **5.3 Ctrl+C leaves it waiting.** Press Ctrl+C.
@@ -98,6 +98,10 @@ A new terminal needs all these lines again, with the same folders. Never paste a
   "That link is to another file, *its name*. Paste the link for *the first file*, or press Ctrl+C to stop." Press Ctrl+C.
 - [ ] **5.8 The file's page isn't the link handed over.** Run 5.1 with another new folder, `--to (Join-Path $downloads page)`. At "Link: ", paste the file's page address printed above it, and press Enter.
   "That's a link to *the file's name*, but not the one the site hands over: start the download on the page above, then paste the link its download button holds, or press Ctrl+C to stop." Press Ctrl+C.
+- [ ] **5.8a A file the browser downloads.** Run 5.1 with another new folder, `--to (Join-Path $downloads manual)`. On the page, click **Manual download**, then **Slow download**: the browser downloads the file into its Downloads folder.
+  A few seconds after the browser finishes, without anything typed: "Saved …" in the `manual` folder, exit code 0. The file has left the Downloads folder.
+- [ ] **5.8b A path typed.** Run 5.1 with another new folder, `--to (Join-Path $downloads typed)`. At "Link: ", type the full path of the file saved in 5.8a with `x` added before its ending, in quotes, and press Enter; then its right path, in quotes.
+  "There's no file there. Type the path of the file your browser downloaded, or press Ctrl+C to stop." Then "Saved …" in the `typed` folder, exit code 0, and the file has left `manual`.
 - [ ] **5.9 Prompts with the output in a file.** `ms download "https://www.nexusmods.com/stardewvalley/mods/2400" --to (Join-Path $downloads page) > (Join-Path $test output.txt)`.
   The page's address and "Link: " still show in the terminal. Press Ctrl+C; `output.txt` holds no "Link: ".
 
@@ -128,6 +132,8 @@ Use a file of a few hundred MB, so there's time to stop it: for example a textur
   The first says "games.nexus/stardewvalley.previews is now cards: on nexus/stardewvalley's page in the desktop app's Library, and in Browse while it's chosen, its mods show as cards, with large pictures." The second says "'big' isn't off, thumbnails or cards." with exit code 2. `settings show` lists `games.nexus/stardewvalley.previews cards`, and `settings.json` holds `"previews": "cards"` under `"nexus/stardewvalley"`. The reset says the game's mods show as `previews.library` and `previews.browse` say.
 - [ ] **7.5b A game's own folder.** With SMAPI's file downloaded (4 or 5): `ms settings set games.stardewvalley.root "$test\Stardew"`, then `ms library move-game stardewvalley "$test\Stardew"`, then the same with `--yes`, `ms library list --files` and `ms settings show`. Then `ms download "https://www.nexusmods.com/stardewvalley/mods/2400"` once more, and last `ms library move-game stardewvalley --yes`.
   The set is refused (exit code 1): "nexus/stardewvalley has files in …. Moving the game's files changes its folder and takes them along. To move them there: library move-game stardewvalley "…\Stardew"". Without `--yes`, it says how many files move, how much room they take, from where to where, and that both folders are on one drive; "Nothing moved yet. To move them: add --yes." and nothing moves. With `--yes`: "Moved 1 file from … to …\Stardew." and the file is under `…\Stardew\nexus\stardewvalley\SMAPI (2400)\`. `library list --files` shows it there, `settings show` lists `games.nexus/stardewvalley.root`, and the download says the file is in the library already, at its new path. Moving back puts the file in the library's folder, removes the emptied `Stardew` folder, and `settings show` no longer lists the root.
+- [ ] **7.5c The browser's folder.** `ms settings show`, `ms settings set downloads.browserFolder "$test\Browser"`, `ms settings set downloads.browserFolder Browser`, then `ms settings reset downloads.browserFolder`.
+  `show` lists `downloads.browserFolder` as your Downloads folder, "(default)". The first set: "downloads.browserFolder is now …\Browser: a download waiting on a site's page takes the file your browser saves there."; `settings.json` has `"downloads": { "browserFolder": "…" }`. The relative one is refused: "'Browser' isn't a full path, such as …". The reset says it's back to the system's Downloads folder, and `"downloads"` leaves `settings.json`.
 - [ ] **7.6 Settings from before 1.0.0.** Before upgrading, note a game's own setting in `settings.json`, such as `"stardewvalley": { "notify": false }` under `"games"`. After upgrading, `ms settings show`.
   It lists `games.nexus/stardewvalley.notify false`. After any `ms settings set`, `settings.json` names the game `"nexus/stardewvalley"`, and keeps anything else it held.
 
@@ -334,11 +340,11 @@ $blocked = 'https://degmods.com/mod/naddr1qqjrqvmyx4jrwef3956nxvec956rswry943xyw
 - [ ] **15.6 From another file server.** `ms download $newspapers --to $deg`.
   "Checking the file", "Done", and `Better Newspapers for New Vegas Bounties II-96533-1-0-1771837702.zip`, from `blossom.primal.net`, as the log says, its SHA-256 checked. Exit code 0. Nothing asked of `brs.degmods.com`.
 - [ ] **15.7 Only on DEG Mods' server.** `ms download $nipton --to $deg`.
-  The mod's page opens in the browser, shown with it, and the command waits for a link: DEG Mods' page shows its ad, then downloads the file. Press Ctrl+C: the download waits, exit code 3. The log says only DEG Mods' own server has the file. Cancel it in the desktop app or leave it.
+  "The file is on a page, which only your browser downloads it from." The mod's page opens in the browser, shown with it, with "Download the file there. ModShelf takes it from *your Downloads folder* once your browser has saved it, or type its path here and press Enter.", and "Path: " waits. The log says only DEG Mods' own server has the file. At "Path: ", type the full path of Better Newspapers' file from 15.6: "That file isn't NRR1.3.7.zip: its checksum isn't the one the site gives. It's left where it was. Type the path of the file your browser downloaded, or press Ctrl+C to stop." The file is still in `$deg`. Then, on the page, where DEG Mods shows its ad, download the file: a few seconds after the browser finishes, "Saved …" in `$deg`, exit code 0, and the file has left the Downloads folder.
 - [ ] **15.8 catbox.moe and the Internet Archive.** `ms download $fed --to $deg`; then `ms mod show $nipton --all`, copy the third file's link, and `ms download "<that link>" --to $deg`.
   `wa4qcn.7z` from catbox.moe; then `NRR1.3.7z` from archive.org, through its redirect. Exit code 0 for each.
 - [ ] **15.9 A page.** `ms download $halo --to $deg`.
-  MediaFire's page opens in the browser, as in 15.7, after ModShelf asked it what it gives: the log says the file is on a page at `www.mediafire.com`.
+  MediaFire's page opens in the browser, as in 15.7, after ModShelf asked it what it gives: the log says the file is on a page at `www.mediafire.com`. "Path: " waits; press Ctrl+C, and cancel the download in the desktop app or leave it.
 - [ ] **15.9a A file elsewhere.** `ms download $cars --to $deg`; once it's under way, Ctrl+C.
   No browser opens: ModShelf downloads `14Y3yg8yWsCn.7z` from `f.rpghq.org` itself, 470 MB, with its progress. Ctrl+C stops it; delete the partial file.
 - [ ] **15.10 Into the library, and an update.** `ms download "$wifi#file=89bc8f13f7654384"`, then `ms library check` and `ms library updates`.
@@ -393,6 +399,8 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 5.6 The link alone | – | | |
 | 5.7 Link to another file | – | | |
 | 5.8 The file's page at Link: | – | | |
+| 5.8a A file the browser downloads | – | | |
+| 5.8b A path typed | – | | |
 | 5.9 Prompts with the output in a file | – | | |
 | 6.1 Ctrl+C keeps the part | | | |
 | 6.2 Continues where it stopped | | | |
