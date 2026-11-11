@@ -29,6 +29,11 @@
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.11.0" />
   </ItemGroup>
 
+  <!-- Nostr events' signatures (secp256k1 Schnorr, BIP-340), which DEG Mods' mods and moderation are: ADR 0090. -->
+  <ItemGroup Label="Signatures">
+    <PackageVersion Include="NBitcoin.Secp256k1" Version="4.0.4" />
+  </ItemGroup>
+
   <ItemGroup Label="Data">
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.13" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.13" />

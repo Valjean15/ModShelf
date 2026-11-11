@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Strings.resx holds the English text; other cultures come from satellite assemblies (CA1824). -->
+    <NeutralLanguage>en</NeutralLanguage>
+  </PropertyGroup>
+
+  <!--
+    The relays' WebSockets and the file servers' requests: IHttpClientFactory, logging, and AddDegModsSource() for the
+    hosts, from the package that brings them, as in ModShelf.Sources.Nexus. The file servers' client's name comes from
+    Sources.Abstractions, so the app adds the retries and the time limits to its requests.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
+  </ItemGroup>
+
+  <!-- Each Nostr event's signature, secp256k1 Schnorr (BIP-340), checked before it's believed: ADR 0090. -->
+  <ItemGroup>
+    <PackageReference Include="NBitcoin.Secp256k1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ModShelf.Sources.Abstractions\ModShelf.Sources.Abstractions.csproj" />
+  </ItemGroup>
+
+  <!-- The Strings class is generated from Strings.resx at build time, as in ModShelf.Sources.Nexus. -->
+  <PropertyGroup>
+    <CoreCompileDependsOn>PrepareResources;$(CoreCompileDependsOn)</CoreCompileDependsOn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Strings.resx">
+      <Generator>MSBuild:Compile</Generator>
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedNamespace>ModShelf.Sources.DegMods.Resources</StronglyTypedNamespace>
+      <StronglyTypedClassName>Strings</StronglyTypedClassName>
+      <StronglyTypedFileName>$(IntermediateOutputPath)Strings.Designer.cs</StronglyTypedFileName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

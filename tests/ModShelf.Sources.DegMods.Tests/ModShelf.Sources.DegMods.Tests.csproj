@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ModShelf.Sources.DegMods\ModShelf.Sources.DegMods.csproj" />
+  </ItemGroup>
+
+  <!-- The source's file servers' client set up as the hosts set it up: the app's retries, time limits and refusal of redirects. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ModShelf.Infrastructure\ModShelf.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <!--
+    Serves the recorded relays and file servers, so the tests never call DEG Mods, on a clock the tests set; and signs the
+    events the tests make, as their authors would.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    <PackageReference Include="NBitcoin.Secp256k1" />
+    <PackageReference Include="WireMock.Net" />
+  </ItemGroup>
+
+  <!-- The checks every source shares, and the helpers several test projects use. -->
+  <ItemGroup>
+    <Compile Include="..\Shared\RecordingLoggerProvider.cs" Link="Shared\RecordingLoggerProvider.cs" />
+    <Compile Include="..\Shared\SourceContractTests.cs" Link="Shared\SourceContractTests.cs" />
+  </ItemGroup>
+
+  <!-- The recordings Fixtures/Record-DegModsFixtures.ps1 makes. -->
+  <ItemGroup>
+    <None Include="Fixtures\Recorded\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
