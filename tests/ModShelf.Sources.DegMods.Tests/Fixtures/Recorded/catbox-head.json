@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "HEAD",
+    "url": "https://files.catbox.moe/wa4qcn.7z"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/x-7z-compressed",
+      "Content-Length": "0"
+    }
+  }
+}

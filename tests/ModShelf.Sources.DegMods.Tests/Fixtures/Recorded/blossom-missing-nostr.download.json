@@ -1,0 +1,12 @@
+{
+  "request": {
+    "method": "HEAD",
+    "url": "https://nostr.download/8890132ecb96efb82f9b9ed56a6e41a3c6acb7b5a238192473cd2271d5effa26"
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "Content-Length": "0"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "https://files.catbox.moe/bw0aw3.zip",
+    "range": "bytes=0-1023"
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "Content-Type": "text/html; charset=UTF-8"
+    },
+    "body": "<html>\n\n<head>\n<link rel=\"stylesheet\" href=\"/official/images/style.css\">\n<meta charset=\"UTF-8\">\n<meta name=\"robots\" content=\"noindex\">\n<meta name=\"author\" content=\"Lolcats\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=0.4\">\n<title>Catbox</title>\n</head>\n\n<img src=\"/official/images/404.png\" style=\"margin: auto; display: block;\">\n\n<div class=\"notetiny\">\n<a class=\"linkbutton\" href=\"https://catbox.moe/\">Click me to go home</a>\n</div>\n\n<script>\n(function (d) {\nwindow.rum = {key: 'z2ave2fv'};\nvar script = d.createElement('script');\nscript.src = 'https://cdn.perfops.net/rom3/rom3.min.js';\nscript.type = 'text/javascript';\nscript.defer = true;\nscript.async = true;\nd.getElementsByTagName('head')[0].appendChild(script);\n})(document);\n</script>\n\n</body>\n\n</html>\n"
+  }
+}

@@ -1,0 +1,1809 @@
+{
+  "relay": "wss://relay.degmods.com/",
+  "info": {
+    "description": "This is a strfry instance.",
+    "name": "strfry default",
+    "software": "git+https://github.com/hoytech/strfry.git",
+    "supported_nips": [
+      1,
+      2,
+      4,
+      9,
+      11,
+      12,
+      16,
+      20,
+      22,
+      28,
+      33,
+      40
+    ],
+    "version": "v236-c0dec7c"
+  },
+  "exchanges": [
+    {
+      "name": "mod 16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1:7cce3021-6514-47f7-a054-a28dc1269ff4",
+      "request": [
+        "REQ",
+        "s1",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1"
+          ],
+          "#d": [
+            "7cce3021-6514-47f7-a054-a28dc1269ff4"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EOSE",
+          "s1"
+        ]
+      ]
+    },
+    {
+      "name": "mod 16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1:4e09a170-8393-4368-b59c-6c54db890857",
+      "request": [
+        "REQ",
+        "s2",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1"
+          ],
+          "#d": [
+            "4e09a170-8393-4368-b59c-6c54db890857"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s2",
+          {
+            "content": "[My](https://next.nexusmods.com/profile/smokeytstevenston?gameId=130 \"My\") remake of Jokerine's classic Fallout: New Vegas mod of the same name.\n\n[Original Mod Link](https://www.nexusmods.com/newvegas/mods/86010 \"Original Mod Link\")\n\nREQUIREMENTS:\nFallout: New Vegas and all DLCs\n\nSpeedyB64's [Speedy Resources Pack](https://www.nexusmods.com/newvegas/mods/39551 \"Speedy Resources Pack\")\n\nhman101's [Claim the Mojave mod](https://www.nexusmods.com/newvegas/mods/75196 \"Claim the Mojave mod\")\n\nmadnuttah's [Marijuana Plant mod](https://www.nexusmods.com/newvegas/mods/38264 \"Marijuana Plant mod\")\n\nStewieAI's [Restored Book Menus mod](https://www.nexusmods.com/newvegas/mods/67278 \"Restored Book Menus mod\")",
+            "created_at": 1745738912,
+            "id": "674b97a2c7ac883cf06a2e8cc619a10e13c370762295c702d1a593ac30f50284",
+            "kind": 30402,
+            "pubkey": "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1",
+            "sig": "af580dd0dfbaee1eb49be61ea4938dba00214658e65befefaed4ed8fc223532d3a6902ab2892184dc6af2abcbb4053df7aa8549f9daf126752d0348ca914bfcf",
+            "tags": [
+              [
+                "d",
+                "4e09a170-8393-4368-b59c-6c54db890857"
+              ],
+              [
+                "a",
+                "30402:16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1:4e09a170-8393-4368-b59c-6c54db890857"
+              ],
+              [
+                "r",
+                "degmods.com"
+              ],
+              [
+                "t",
+                "GameMod"
+              ],
+              [
+                "published_at",
+                "1745736230"
+              ],
+              [
+                "game",
+                "Fallout: New Vegas"
+              ],
+              [
+                "title",
+                "Nipton Rebuilt Remade: Version 1.3"
+              ],
+              [
+                "featuredImageUrl",
+                "https://cdn.nostrcheck.me/16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1/b0e6fcf14e249e7162ae35dcb40c5f8675830bd778e2da7b33a9cc0c894596f4.webp"
+              ],
+              [
+                "summary",
+                "My remake of Jokerine's classic Fallout: New Vegas mod of the same name."
+              ],
+              [
+                "nsfw",
+                "false"
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshotsUrls",
+                "https://cdn.nostrcheck.me/16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1/b0e6fcf14e249e7162ae35dcb40c5f8675830bd778e2da7b33a9cc0c894596f4.webp"
+              ],
+              [
+                "tags",
+                "Fallout",
+                " New Vegas",
+                " Town",
+                " Overhaul",
+                " Humor",
+                " Nipton",
+                ""
+              ],
+              [
+                "downloadUrls",
+                "{\"title\":\"Nipton Rebuilt Remade\",\"url\":\"https://archive.org/download/NiptonRebuiltRemade/NRR1.3.7z\",\"hash\":\"\",\"signatureKey\":\"\",\"malwareScanLink\":\"https://www.virustotal.com/gui/file/87e6e8d62802164e40abb7807b86c468edbf1c779804d46037719d1bacc7e099\",\"modVersion\":\"1.3\",\"customNote\":\"\",\"mediaUrl\":\"\"}",
+                "{\"url\":\"https://archive.org/download/NiptonRebuiltRemade/NiptonRebuiltChristmasPatch.7z\",\"hash\":\"\",\"signatureKey\":\"\",\"malwareScanLink\":\"https://www.virustotal.com/gui/file/088ae0760decb708d66e9487ade093b4882a7e34beb09923a99e0154930449c8\",\"modVersion\":\"HoHoHo\",\"customNote\":\"\",\"title\":\"Nipton Rebuilt Remade (Christmas Add-On)\"}"
+              ],
+              [
+                "otherAssets",
+                "true"
+              ],
+              [
+                "uploadPermission",
+                "true"
+              ],
+              [
+                "modPermission",
+                "true"
+              ],
+              [
+                "convPermission",
+                "true"
+              ],
+              [
+                "assetUsePermission",
+                "true"
+              ],
+              [
+                "assetUseComPermission",
+                "true"
+              ],
+              [
+                "publisherNotes",
+                ""
+              ],
+              [
+                "extraCredits",
+                ""
+              ],
+              [
+                "L",
+                "com.degmods:quality of life"
+              ],
+              [
+                "L",
+                "com.degmods:gameplay"
+              ],
+              [
+                "L",
+                "com.degmods:total conversions"
+              ],
+              [
+                "l",
+                "com.degmods:quality of life"
+              ],
+              [
+                "l",
+                "com.degmods:gameplay"
+              ],
+              [
+                "l",
+                "com.degmods:total conversions"
+              ]
+            ]
+          }
+        ],
+        [
+          "EOSE",
+          "s2"
+        ]
+      ]
+    },
+    {
+      "name": "mod 16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1:7162b89c-da8a-4889-b4df-db905d8ecf03",
+      "request": [
+        "REQ",
+        "s3",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1"
+          ],
+          "#d": [
+            "7162b89c-da8a-4889-b4df-db905d8ecf03"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s3",
+          {
+            "content": "# Smook's Police Gear Pack\n\n::youtube{#_BxDXNCSjBQ}\n\n# What is it?\n\nThis mod adds a bunch of police uniforms and armor to the game. Specifically 4 different versions in 3 different types:\n\n* Las Vegas Police Department\n* Sheriff\n* Freelance Police\n* New Vegas Milk Company\n\n# Where to get them?\n\nThere's an industrial grade shipment of each inside of a respawning crate in the Nevada Highway Patrol Station\n\n# Credits:\n\n[mrconvict](https://next.nexusmods.com/profile/mrconvict?gameId=130 \"mrconvict\") for the Uniform mesh and Sheriff Uniform textures.\n\n[nofear88](https://next.nexusmods.com/profile/nofear88?gameId=130 \"nofear88\") for the LVPD Uniform textures.\n\n[Testudini](https://next.nexusmods.com/profile/Testudini?gameId=130 \"Testudini\") for the NVMC Milkman textures.\n\n[eric3844](https://next.nexusmods.com/profile/eric3844?gameId=130 \"eric3844\") for the Shoulder Harness mesh.\n\nMe for the Freelance Police textures and various texture and mesh edits.",
+            "created_at": 1788739823,
+            "id": "fdd543e8940164aee500d7c1842de2351a4d5c344709e94c4ddaeb1d6246e43b",
+            "kind": 30402,
+            "pubkey": "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1",
+            "sig": "78751ba7ef18ee12428cd42a107cdc18e1211b0d9dbc9cb3631fb2e3f68da4b98a789d92eddb9eca4efbb5fee23d96d417b6b9c050f411a0eb2f4f37cd1a1c91",
+            "tags": [
+              [
+                "d",
+                "7162b89c-da8a-4889-b4df-db905d8ecf03"
+              ],
+              [
+                "a",
+                "30402:16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1:7162b89c-da8a-4889-b4df-db905d8ecf03"
+              ],
+              [
+                "r",
+                "degmods.com"
+              ],
+              [
+                "t",
+                "GameMod"
+              ],
+              [
+                "published_at",
+                "1758084486"
+              ],
+              [
+                "game",
+                "Fallout: New Vegas"
+              ],
+              [
+                "title",
+                "Smook's Police Gear Pack"
+              ],
+              [
+                "featuredImageUrl",
+                "https://bs.degmods.com/1cf575c9001aa4b035e16e1039322e45464caddf176dff89915d347134fb544d.png"
+              ],
+              [
+                "summary",
+                "Adds a bunch of police uniforms and armor to the game."
+              ],
+              [
+                "nsfw",
+                "false"
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshotsUrls",
+                "https://bs.degmods.com/1cf575c9001aa4b035e16e1039322e45464caddf176dff89915d347134fb544d.png",
+                "https://bs.degmods.com/3a6eabd248b0ac4f8825d78f22f6a14139e952ef9dbab16b1e643a9591a928f5.png",
+                "https://bs.degmods.com/3a38da62ecda8058b5578a9d3d52c8cd478b2828954ed41c4f5aeb8170b16da3.png",
+                "https://bs.degmods.com/81e9b015dbc11fbd2cd26b516e40d2aee8c18207f8ac8c720dded1d1d9b21ad9.png",
+                "https://bs.degmods.com/23a703a5f80b278cb874167547ea29e0b95617cb041fc4df573819591e673899.png",
+                "https://bs.degmods.com/5ff4a10f74063001810e73ac2ab77cba7cf07729410dd0e8b8df08c36149ec2a.png",
+                "https://bs.degmods.com/0a789b411b6c7e2920324aa29b503a141d20948258d96cef9b5a99afe19a8fc0.png",
+                "https://bs.degmods.com/3184502dab8b2181b5421ec0d79994616db13378191f512cc04645058ef33788.png",
+                "https://bs.degmods.com/ef9549e6f762aa731ece5a3133128bfc01b1ec5bab48646cb5621ff0daa3efff.png",
+                "https://bs.degmods.com/4672949ef698580f2f02ada7546822db54cfb8375cb668e89a4a86c52b144785.png",
+                "https://bs.degmods.com/8391f3abaf5f2121d5b9f01003ae7ffcc217264d71410e98caeaffbdcdf2565f.png",
+                "https://bs.degmods.com/c05e84172f3fb5cd1375285fa80aa7ec35e7ecf7158479828aff8ee6d8a2a8ac.png",
+                "https://bs.degmods.com/83a008af4bc03fa2ce52d5a8a5261df468a0d0d01c1b948be5928e3fa2d74a6a.png",
+                "https://bs.degmods.com/098adfd620b9433c47a88cd0ff8438bed72949064104a57dd0f2dac79ff3eb21.png",
+                "https://bs.degmods.com/67be1f3566a36185e5068cc953ba0fdffb319d010fc3fec2fe8d363f829e681c.png",
+                "https://bs.degmods.com/59d34eb62ce2e364d153ef1977719e9aa38617a41b09bf218a88b8bd9edca3f6.png",
+                "https://bs.degmods.com/f0868051630586a1fc27e4e565bbc4b57c60be4fddb828d0606dabf8b443c3e2.png",
+                "https://bs.degmods.com/81810caa6bc7da42215a503b47efcb502dbdd8b5f50a3eb0cacdb5f02139c0f0.png",
+                "https://bs.degmods.com/9f52615b92e1b28c864946257f2cf0f53a9c7ae535282f2eecd4243c902c18d7.png",
+                "https://bs.degmods.com/6d4a1bfce9f37f9160965e1d3f15f9d47d9037329938bc61c92cc76098d7dd84.png",
+                "https://bs.degmods.com/9487c1234c4e976c30dde67907a6e99ff237c0de1452ed6709578328ac4ab350.png",
+                "https://bs.degmods.com/9ae7a3c7831b68c2918e098818ca830d0e2c51c1772af1d93e553c6b2bad6b8b.png",
+                "https://bs.degmods.com/0628c4c9376872aa0475f35c58b5dfd288593058e0e098766047155c9619ce90.png",
+                "https://bs.degmods.com/2f17336b30a605c8d459f310c4c7de904270f9d1124ed2c205b462fcdbd7a292.png",
+                "https://bs.degmods.com/a868500b9d0a808adcb204faff1a67dec6da754b62c0aa17d492f485f6019076.png",
+                "https://bs.degmods.com/3bfc951c321f917b140e82c3eb27fe91af93a3a6bc70888f546de58c0cfa3db9.png",
+                "https://bs.degmods.com/874c7fd2efcc36c3d813bc0104a4d6e20e9b7f22edd3d86fabb188592b7b7371.png",
+                "https://bs.degmods.com/69d7c50845fc5a8784b2649eebf4e84cdfe812c8513a2882b4b1bd32739425e6.png",
+                "https://bs.degmods.com/24258621183bb32ace01d897eb4233a237d2b19a125aafe4a7b65da4e64484b3.png",
+                "https://bs.degmods.com/854600c50ef6a75c4128b95d9437ae7b162dd55aa1a655ea69b1e1491121af03.png",
+                "https://bs.degmods.com/19b90f691dfef42d0014b0b7c71ae3d0cf2f127a95e2b1a88ec172a6a7ced678.png",
+                "https://bs.degmods.com/b47fc84d57b002995beda3dff18041764318a4579e7c0ca276bb4afae005fc21.png",
+                "https://bs.degmods.com/35c7462468b7e3c996a520a056afad3d37e7c5ae77fabd1011fbdce703a8bdca.png",
+                "https://bs.degmods.com/ecbce375a45ac13bce065e3a4146fd4a29e4c1c42417b1fae1f57d2df4b0852e.png",
+                "https://bs.degmods.com/822546dc3fc0e486b087b2662e8f4292336e9a155116b425797bb60f3ebc9e56.png",
+                "https://bs.degmods.com/5de6807ef989e9225d7ce8a13b7c20da453dc078891016203c38eba6c65cb817.png",
+                "https://bs.degmods.com/449a7d444affc77200ab715ab29f6ada84c3b26c0ecc9eb3f8ee42680f428a27.png",
+                "https://bs.degmods.com/ad514eee432b5f808ea1bbaca99e189de0c4f5e1f0bce656cbccf50efeee5f84.png"
+              ],
+              [
+                "tags",
+                "Fallout",
+                " Fallout New Vegas",
+                " Fallout: New Vegas",
+                " FNV",
+                " Uniform",
+                " Armor",
+                " Police",
+                " Sheriff",
+                " Milkman",
+                ""
+              ],
+              [
+                "downloadUrls",
+                "{\"url\":\"https://bs.degmods.com/57e4fb2c82c6f67c82f5bec568e912d418a25d0c2abc2485c5415f0757ec57f2.zip\",\"hash\":\"57e4fb2c82c6f67c82f5bec568e912d418a25d0c2abc2485c5415f0757ec57f2\",\"malwareScanLink\":\"https://bs.degmods.com/scan/57e4fb2c82c6f67c82f5bec568e912d418a25d0c2abc2485c5415f0757ec57f2\",\"modVersion\":\"1.1\",\"customNote\":\"Fixed a missing texture.\",\"automaticHash\":\"57e4fb2c82c6f67c82f5bec568e912d418a25d0c2abc2485c5415f0757ec57f2\",\"automaticScanLink\":\"https://bs.degmods.com/scan/57e4fb2c82c6f67c82f5bec568e912d418a25d0c2abc2485c5415f0757ec57f2\",\"title\":\"Main File\"}",
+                "{\"url\":\"https://files.catbox.moe/bw0aw3.zip\",\"hash\":\"57e4fb2c82c6f67c82f5bec568e912d418a25d0c2abc2485c5415f0757ec57f2\",\"malwareScanLink\":\"https://bs.degmods.com/scan/57e4fb2c82c6f67c82f5bec568e912d418a25d0c2abc2485c5415f0757ec57f2\",\"modVersion\":\"1.1\",\"customNote\":\"Fixed a missing texture.\",\"automaticHash\":\"\",\"automaticScanLink\":\"\",\"title\":\"Main File (Backup Link)\"}"
+              ],
+              [
+                "otherAssets",
+                "true"
+              ],
+              [
+                "uploadPermission",
+                "true"
+              ],
+              [
+                "modPermission",
+                "true"
+              ],
+              [
+                "convPermission",
+                "true"
+              ],
+              [
+                "assetUsePermission",
+                "true"
+              ],
+              [
+                "assetUseComPermission",
+                "false"
+              ],
+              [
+                "publisherNotes",
+                ""
+              ],
+              [
+                "extraCredits",
+                ""
+              ],
+              [
+                "L",
+                "com.degmods:clothing"
+              ],
+              [
+                "l",
+                "com.degmods:clothing"
+              ],
+              [
+                "legacy",
+                "yes"
+              ]
+            ]
+          }
+        ],
+        [
+          "EOSE",
+          "s3"
+        ]
+      ]
+    },
+    {
+      "name": "mod 16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1:cae0605a-cf81-47df-8cfc-c06eb6c458dd",
+      "request": [
+        "REQ",
+        "s4",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1"
+          ],
+          "#d": [
+            "cae0605a-cf81-47df-8cfc-c06eb6c458dd"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s4",
+          {
+            "content": "> ![](https://i.postimg.cc/RFTJzXBG/President-John-Henry-Sneeden-Avatar.png \"Approved by Enclave President John Henry Sneeden himself!\")\n>\n> ***Approved by Enclave President John Henry Sneeden himself!***\n\n# **The hell is this?**\n\nThis mod Adds an Enclave General's uniform and hat to the game. Pretty much exactly what it says on the can.\n\n# **Where to get em?**\n\nThey can be found inside a locker in the Remnants Bunker. They can also be spawned into the game with the following console commands (Replace XX with the mod's current load order number, you know the drill.)\n\n| player.additem XX000BF8 1     | **Enclave General Outfit** |\n| ----------------------------- | -------------------------- |\n| **player.additem XX000BF9 1** | **Enclave General Cap**    |\n\nPipe can be downloaded right [here.](https://degmods.com/mod/naddr1qvzqqqrkcgpzq9hz8h2xmr6p8d4fj0l424vyr5ddwm04u328dtdggkfltm2vrcd3qy2hwumn8ghj7un9d3shjtnyv9kh2uewd9hj7qgcwaehxw309aex2mrp0yhxget8d4hkguewvdhk6tcqdvenqdpsxgarzdn9xgekgep5xejrse35xyekydnp8yunxenxx56n2dfcxsckgvtpvsmnverxx4jngdf5xumxzerp8q6r2wfnvc6k2ep5vvck2vtzxyarxe3hx3jrxctr956kycmy956r2wp495urjefe956nvd3jx9sngenyvyenvj3tzp6/ \"here.\")\n\n# **Credits:**\n\n[**eric3844**](https://next.nexusmods.com/profile/eric3844 \"eric3844\") for the armband mesh.\n\n[**Andragorn**](https://next.nexusmods.com/profile/Deleted432558User \"Andragorn\") for the medal cord mesh.\n\n**Me** for the hat textures as well as the coat mesh and texture edits.",
+            "created_at": 1754443824,
+            "id": "5b1a0953206b5d135e281a50cf37506063a9a8433fb20924dbfeff2158013830",
+            "kind": 30402,
+            "pubkey": "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1",
+            "sig": "42f51c0bd0ffb5c3b74cf871e51cbd772abb1cf73d897c79d98cdb41b10b6ff7c05c65cbf1094f33ceba643740be0f78239be5054fdd473a3382df38f1af0c81",
+            "tags": [
+              [
+                "d",
+                "cae0605a-cf81-47df-8cfc-c06eb6c458dd"
+              ],
+              [
+                "a",
+                "30402:16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1:cae0605a-cf81-47df-8cfc-c06eb6c458dd"
+              ],
+              [
+                "r",
+                "degmods.com"
+              ],
+              [
+                "t",
+                "GameMod"
+              ],
+              [
+                "published_at",
+                "1753111314"
+              ],
+              [
+                "game",
+                "Fallout: New Vegas"
+              ],
+              [
+                "title",
+                "Enclave General Outfit"
+              ],
+              [
+                "featuredImageUrl",
+                "https://image.nostr.build/07e782deb841548ab1d45c3880c63f5046a5fff1b73499f13f2bab850bc016b4.png"
+              ],
+              [
+                "summary",
+                "Adds an Enclave General's uniform and hat to the game."
+              ],
+              [
+                "nsfw",
+                "false"
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshotsUrls",
+                "https://image.nostr.build/07e782deb841548ab1d45c3880c63f5046a5fff1b73499f13f2bab850bc016b4.png",
+                "https://image.nostr.build/c4edebbe7080c2b0baee12597bb7c6edaa4d6d41cd244130ededc145f2edae4a.png",
+                "https://image.nostr.build/0640e595cfc2e23c0ca92cd0988211bbbfd58551346eb2dfb5db9b78d1446ad9.png"
+              ],
+              [
+                "tags",
+                "Fallout",
+                " New Vegas",
+                " Fallout New Vegas",
+                " FNV",
+                " Armor",
+                " Clothes",
+                " Uniform",
+                " Enclave",
+                " Sneedclave",
+                ""
+              ],
+              [
+                "downloadUrls",
+                "{\"title\":\" Main File\",\"url\":\"https://files.catbox.moe/0ydpe6.7z\",\"hash\":\"\",\"malwareScanLink\":\"https://www.virustotal.com/gui/file/fd634b65109c6071e79763c71777f5d931e98e3644358d7b6d198f8b0c2fae3b?nocache=1\",\"modVersion\":\"1.0\",\"customNote\":\"\",\"mediaUrl\":\"\"}"
+              ],
+              [
+                "otherAssets",
+                "true"
+              ],
+              [
+                "uploadPermission",
+                "true"
+              ],
+              [
+                "modPermission",
+                "true"
+              ],
+              [
+                "convPermission",
+                "true"
+              ],
+              [
+                "assetUsePermission",
+                "true"
+              ],
+              [
+                "assetUseComPermission",
+                "false"
+              ],
+              [
+                "publisherNotes",
+                ""
+              ],
+              [
+                "extraCredits",
+                ""
+              ],
+              [
+                "L",
+                "com.degmods:clothing"
+              ],
+              [
+                "l",
+                "com.degmods:clothing"
+              ]
+            ]
+          }
+        ],
+        [
+          "EOSE",
+          "s4"
+        ]
+      ]
+    },
+    {
+      "name": "mod 16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1:3f74d3ac-5bcd-4585-89e9-56621a4fda36",
+      "request": [
+        "REQ",
+        "s5",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1"
+          ],
+          "#d": [
+            "3f74d3ac-5bcd-4585-89e9-56621a4fda36"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s5",
+          {
+            "content": "::youtube{#mTNYwHxfqcQ}\n\n# **What ya got there?**\n\nThis mod adds equipable 1950s J.R. \"Bob\" Dobbs style tobacco pipes to the game, complete with working smoke effects. Comes in 3 versions A tobacco pipe, a marijuana pipe, and a frop pipe. All of them are identical gameplay wise since they are just cosmetic items. (I might add object effects to them later on idk.)\n\n# **Where to get em?**\n\nAll 3 can be found sitting on a shelf in Doc Mitchell's house. Alternatively if you want to spawn em yourself in the console, the codes to do so can be found here:\n\n| **player.additem XX000ADD 1** | Tobacco Pipe       |\n| ----------------------------- | ------------------ |\n| **player.additem XX000ADE 1** | **Marijuana Pipe** |\n| **player.additem XX000ADF 1** | **Frop Pipe**      |\n\n# **Credits:**\n\n[**Jokerine**](https://next.nexusmods.com/profile/Jokerine?gameId=130 \"Jokerine\")**/Dinky** for creating the Tobacco pipe mesh and textures\n\n**Me** for editing said meshes and textures & creating this mod.",
+            "created_at": 1754443531,
+            "id": "b2fae8179d89396e66a53974b4a4c7b28b2dfccefc4e48d1fbd07624b1370d09",
+            "kind": 30402,
+            "pubkey": "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1",
+            "sig": "aa98d83296530f6d712caf11f197c1bac92b9001ebd2769e8bd118603b2874eeb31e9edbd80538b66938f068ddf6463ed94d51b6c00990e9c5f71ad6a1c816ab",
+            "tags": [
+              [
+                "d",
+                "3f74d3ac-5bcd-4585-89e9-56621a4fda36"
+              ],
+              [
+                "a",
+                "30402:16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1:3f74d3ac-5bcd-4585-89e9-56621a4fda36"
+              ],
+              [
+                "r",
+                "degmods.com"
+              ],
+              [
+                "t",
+                "GameMod"
+              ],
+              [
+                "published_at",
+                "1753408684"
+              ],
+              [
+                "game",
+                "Fallout: New Vegas"
+              ],
+              [
+                "title",
+                "Smook's Equipable Pipes"
+              ],
+              [
+                "featuredImageUrl",
+                "https://image.nostr.build/883b59a5bfeb8607101715ec047ee02adaa0abc1840603c551325958040c1404.png"
+              ],
+              [
+                "summary",
+                "Adds equipable tobacco pipes to the game for your smoking pleasure."
+              ],
+              [
+                "nsfw",
+                "false"
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshotsUrls",
+                "https://image.nostr.build/883b59a5bfeb8607101715ec047ee02adaa0abc1840603c551325958040c1404.png",
+                "https://image.nostr.build/ffe6a6293e8d56925648ab57c6e88553d8e74b9ffc72fe1ff404af40953b1e55.png",
+                "https://image.nostr.build/2be865837e33e5f7641f52215087ed4260ba4da51f12955cdfa2df1052c3b7ba.png",
+                "https://image.nostr.build/0e97dc91523dffec61231ceb0ccfbe4de688b9607052a33918edd22eb517b695.png",
+                "https://image.nostr.build/4643985c12eca81faa77531ad6b864ff21eaafa91b5adbbc6f08c0b89aee0175.png"
+              ],
+              [
+                "tags",
+                "Fallout",
+                " New Vegas",
+                " Fallout New Vegas",
+                " Fallout: New Vegas",
+                " FNV",
+                " Cosmetics",
+                " Accessories",
+                " Pipe",
+                " Smoking",
+                " Tobacco",
+                " Marijuana",
+                " Frop",
+                ""
+              ],
+              [
+                "downloadUrls",
+                "{\"title\":\"Main File\",\"url\":\"https://files.catbox.moe/id991e.7z\",\"hash\":\"\",\"malwareScanLink\":\"https://www.virustotal.com/gui/file/f56414a9c9e306e98e00e3bd434e454ab76a71fc8928e931f6253938eca7a48c?nocache=1\",\"modVersion\":\"1.0\",\"customNote\":\"\",\"mediaUrl\":\"\"}"
+              ],
+              [
+                "otherAssets",
+                "true"
+              ],
+              [
+                "uploadPermission",
+                "true"
+              ],
+              [
+                "modPermission",
+                "true"
+              ],
+              [
+                "convPermission",
+                "true"
+              ],
+              [
+                "assetUsePermission",
+                "true"
+              ],
+              [
+                "assetUseComPermission",
+                "false"
+              ],
+              [
+                "publisherNotes",
+                ""
+              ],
+              [
+                "extraCredits",
+                ""
+              ],
+              [
+                "L",
+                "com.degmods:clothing"
+              ],
+              [
+                "l",
+                "com.degmods:clothing"
+              ]
+            ]
+          }
+        ],
+        [
+          "EOSE",
+          "s5"
+        ]
+      ]
+    },
+    {
+      "name": "mod c3712e02c22d4afba641ba8a2f9da724c1e4cf67ed97c4965eb762d603822eb9:1d5868f2-8fa3-4b38-b135-64843c076f9b",
+      "request": [
+        "REQ",
+        "s6",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "c3712e02c22d4afba641ba8a2f9da724c1e4cf67ed97c4965eb762d603822eb9"
+          ],
+          "#d": [
+            "1d5868f2-8fa3-4b38-b135-64843c076f9b"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EOSE",
+          "s6"
+        ]
+      ]
+    },
+    {
+      "name": "mod a15550047ac16022e0b11381cbe0ad5dd22e2d0555bb50827aee57e3c379b71a:1ff99bb8-1543-491e-9e7a-dfbfc57c7b8b",
+      "request": [
+        "REQ",
+        "s7",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "a15550047ac16022e0b11381cbe0ad5dd22e2d0555bb50827aee57e3c379b71a"
+          ],
+          "#d": [
+            "1ff99bb8-1543-491e-9e7a-dfbfc57c7b8b"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s7",
+          {
+            "content": "This mod removes all the voice lines from the game. Mod was made and tested in English 1.0 version but with the new update should work on any language version. This mod was not tested with the Lucas Bertone mission. If you have issues with this mod, you can contact me on discord or twitter @PlusProMichal.\n\n**Changelogs:**\n\nThe final version is here! Version 2.2 is another hotfix for 2.0 that mutes 1 sound file from Chapter 19 and adds an optional folder with the credits song without the lyrics (used AI to make that one so thats why its optional).\n\nI made a new hotfix update 2.1 that fixes a crash when entering the villa in Visiting Rich People.\n\nNew update 2.0 is here: it fixes softlock in Better Get Used To It, mutes people in The Priest and also should mute every voice line in any language version of the game.&#x20;\n\n**How to install**:\n\ngo into the mafia folder and just put the sounds folder in and replace everything.\n\nShowcase of this mod: [https://www.youtube.com/watch?v\\=8Rd-rTq\\_jic](https://www.youtube.com/watch?v=8Rd-rTq_jic)",
+            "created_at": 1776429189,
+            "id": "34bb2bbef4fdd5f9457c1bd97c3541f45dc1b056b9efe06a7babef1e9f171741",
+            "kind": 30402,
+            "pubkey": "a15550047ac16022e0b11381cbe0ad5dd22e2d0555bb50827aee57e3c379b71a",
+            "sig": "137dcbd3c49242160e2840ca477e399378f51a48a6b09ecffa75e81b8d4fa33e1ab5058dd933b50fe6534ad30b33297eaefed9ecbbfdf756697a4450845a411c",
+            "tags": [
+              [
+                "d",
+                "1ff99bb8-1543-491e-9e7a-dfbfc57c7b8b"
+              ],
+              [
+                "a",
+                "30402:a15550047ac16022e0b11381cbe0ad5dd22e2d0555bb50827aee57e3c379b71a:1ff99bb8-1543-491e-9e7a-dfbfc57c7b8b"
+              ],
+              [
+                "r",
+                "degmods.com"
+              ],
+              [
+                "t",
+                "GameMod"
+              ],
+              [
+                "published_at",
+                "1768087102"
+              ],
+              [
+                "game",
+                "Mafia"
+              ],
+              [
+                "title",
+                "No Talking"
+              ],
+              [
+                "featuredImageUrl",
+                "https://bs.degmods.com/4d3ba8343d5bc3b1d533487e2157a0d4b11a0e2eccfa82abd688c863d6143551.png"
+              ],
+              [
+                "summary",
+                "removes all the voice lines from the game"
+              ],
+              [
+                "nsfw",
+                "false"
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshotsUrls",
+                "https://bs.degmods.com/4d3ba8343d5bc3b1d533487e2157a0d4b11a0e2eccfa82abd688c863d6143551.png"
+              ],
+              [
+                "tags",
+                "No Talking",
+                " Voice Lines"
+              ],
+              [
+                "downloadUrls",
+                "{\"title\":\"No Talking 2.2 Final\",\"url\":\"https://bs.degmods.com/1d01960a4a9964c7ab5a32c643acdb3031760eb12ce8f4ad6d5f93714e41a0df.zip\",\"hash\":\"1d01960a4a9964c7ab5a32c643acdb3031760eb12ce8f4ad6d5f93714e41a0df\",\"malwareScanLink\":\"https://bs.degmods.com/scan/1d01960a4a9964c7ab5a32c643acdb3031760eb12ce8f4ad6d5f93714e41a0df\",\"modVersion\":\"2.2\",\"customNote\":\"\",\"mediaUrl\":\"\",\"automaticHash\":\"1d01960a4a9964c7ab5a32c643acdb3031760eb12ce8f4ad6d5f93714e41a0df\",\"automaticScanLink\":\"https://bs.degmods.com/scan/1d01960a4a9964c7ab5a32c643acdb3031760eb12ce8f4ad6d5f93714e41a0df\"}",
+                "{\"url\":\"https://bs.degmods.com/3b38921892d3d9200b07600da2ce04f4ed305469d81d02710ac3a60ffe948793.zip\",\"hash\":\"3b38921892d3d9200b07600da2ce04f4ed305469d81d02710ac3a60ffe948793\",\"malwareScanLink\":\"https://bs.degmods.com/scan/3b38921892d3d9200b07600da2ce04f4ed305469d81d02710ac3a60ffe948793\",\"modVersion\":\"1.0\",\"customNote\":\"\",\"automaticHash\":\"3b38921892d3d9200b07600da2ce04f4ed305469d81d02710ac3a60ffe948793\",\"automaticScanLink\":\"https://bs.degmods.com/scan/3b38921892d3d9200b07600da2ce04f4ed305469d81d02710ac3a60ffe948793\",\"title\":\"No Talking 1.0\"}",
+                "{\"url\":\"https://bs.degmods.com/59a52281b53a8abb3fa64603a3508f70828fbd0a5b4d9c792e0fcca975ce6d01.zip\",\"hash\":\"59a52281b53a8abb3fa64603a3508f70828fbd0a5b4d9c792e0fcca975ce6d01\",\"malwareScanLink\":\"https://bs.degmods.com/scan/59a52281b53a8abb3fa64603a3508f70828fbd0a5b4d9c792e0fcca975ce6d01\",\"modVersion\":\"2.0\",\"customNote\":\"\",\"automaticHash\":\"59a52281b53a8abb3fa64603a3508f70828fbd0a5b4d9c792e0fcca975ce6d01\",\"automaticScanLink\":\"https://bs.degmods.com/scan/59a52281b53a8abb3fa64603a3508f70828fbd0a5b4d9c792e0fcca975ce6d01\",\"title\":\"No Talking 2.0\"}",
+                "{\"url\":\"https://bs.degmods.com/02dabbd86822140a4713e5fe38543a6354344722015bbe4cc24e27f417596a1d.zip\",\"hash\":\"02dabbd86822140a4713e5fe38543a6354344722015bbe4cc24e27f417596a1d\",\"malwareScanLink\":\"https://bs.degmods.com/scan/02dabbd86822140a4713e5fe38543a6354344722015bbe4cc24e27f417596a1d\",\"modVersion\":\"2.1\",\"customNote\":\"\",\"automaticHash\":\"02dabbd86822140a4713e5fe38543a6354344722015bbe4cc24e27f417596a1d\",\"automaticScanLink\":\"https://bs.degmods.com/scan/02dabbd86822140a4713e5fe38543a6354344722015bbe4cc24e27f417596a1d\",\"title\":\"No Talking 2.1\"}"
+              ],
+              [
+                "otherAssets",
+                "true"
+              ],
+              [
+                "uploadPermission",
+                "true"
+              ],
+              [
+                "modPermission",
+                "true"
+              ],
+              [
+                "convPermission",
+                "true"
+              ],
+              [
+                "assetUsePermission",
+                "true"
+              ],
+              [
+                "assetUseComPermission",
+                "false"
+              ],
+              [
+                "publisherNotes",
+                ""
+              ],
+              [
+                "extraCredits",
+                ""
+              ],
+              [
+                "L",
+                "com.degmods:audio:voice"
+              ],
+              [
+                "l",
+                "com.degmods:audio"
+              ],
+              [
+                "l",
+                "com.degmods:voice"
+              ]
+            ]
+          }
+        ],
+        [
+          "EOSE",
+          "s7"
+        ]
+      ]
+    },
+    {
+      "name": "mod 1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679:49930431-b762-4d6b-b22b-6488f94e5d2b",
+      "request": [
+        "REQ",
+        "s8",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679"
+          ],
+          "#d": [
+            "49930431-b762-4d6b-b22b-6488f94e5d2b"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s8",
+          {
+            "content": "Hungry?\u00A0 Thirsty?\n\nThis mod increases the duration of Fed and Hydration.\n\nThat's it, no other changes to the buff.\n\nFed duration increased to 4 hours.\nHydration duration increased to 2 hours.\n\nHydration question:\u00A0 Why only 2 hours?\nHydration Answer:\u00A0 Because it makes sense to me you would get thirsty faster than hungry.\n\nNote:\u00A0&#x20;\n\nMod is not retroactive.\u00A0 If you already had the buff before installing you will need to eat and drink again to see the new duration.\n\nIssues:\n\nThis mod does not alter the Food/Drink items to show the new duration, it will still shows 30 minutes on the items. I am not going to fix this as this mod still does what I want it to do and the food showing the un modded duration has no detrimental effect, the timer in your buffs shows correctly.\u00A0 If it bugs you, feel free to make a patch that fixes it.\n\nQ:\u00A0 Why increase durations at all?\n\nA:\u00A0 Because I am an old dude and forget to eat/drink all the time.\u00A0 Even with the increase I still forget, but at least when I do remember it lasts longer and I don't have to carry as much food that adds weight.",
+            "created_at": 1745925124,
+            "id": "e2a67edd67521b7fd94f994d3579e8368ab5c4fd324e53f2ab3d9add42135ac5",
+            "kind": 30402,
+            "pubkey": "1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679",
+            "sig": "42c9150e0f8d87485ed123c59d94f28565704a9a2ee81b7d96e98576ae6723582b49a0d06db17e6461bc22204ce5c5406727c22f7ab0ccc0c9473af6d1c6bb00",
+            "tags": [
+              [
+                "d",
+                "49930431-b762-4d6b-b22b-6488f94e5d2b"
+              ],
+              [
+                "a",
+                "30402:1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679:49930431-b762-4d6b-b22b-6488f94e5d2b"
+              ],
+              [
+                "r",
+                "degmods.com"
+              ],
+              [
+                "t",
+                "GameMod"
+              ],
+              [
+                "published_at",
+                "1745923884"
+              ],
+              [
+                "game",
+                "Starfield"
+              ],
+              [
+                "title",
+                "VGB Fed and Hydration Duration Increase"
+              ],
+              [
+                "featuredImageUrl",
+                "https://cdn.nostrcheck.me/1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679/1d34ecaad846df8814896251c30bf200b597a2f03a494dc2e257eb5e8819d7da.webp"
+              ],
+              [
+                "summary",
+                "Increases Fed and Hydration buffs by 4/2 hours."
+              ],
+              [
+                "nsfw",
+                "false"
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshotsUrls",
+                "https://cdn.nostrcheck.me/1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679/1d34ecaad846df8814896251c30bf200b597a2f03a494dc2e257eb5e8819d7da.webp"
+              ],
+              [
+                "tags",
+                "Bethesda",
+                " Starfield",
+                " Buff Duration"
+              ],
+              [
+                "downloadUrls",
+                "{\"title\":\"\",\"url\":\"https://files.catbox.moe/wa4qcn.7z\",\"hash\":\"\",\"signatureKey\":\"\",\"malwareScanLink\":\"https://www.virustotal.com/gui/file/418bbcf947a5133d6efc3defdc6fcff0f8a306c58f45082db38e7e6984cf79ad\",\"modVersion\":\"1.0\",\"customNote\":\"\",\"mediaUrl\":\"\"}"
+              ],
+              [
+                "otherAssets",
+                "true"
+              ],
+              [
+                "uploadPermission",
+                "false"
+              ],
+              [
+                "modPermission",
+                "true"
+              ],
+              [
+                "convPermission",
+                "false"
+              ],
+              [
+                "assetUsePermission",
+                "false"
+              ],
+              [
+                "assetUseComPermission",
+                "false"
+              ],
+              [
+                "publisherNotes",
+                "If you want to make a more complicated system using mine as a base, feel free, just be sure to give the proper credit :)"
+              ],
+              [
+                "extraCredits",
+                ""
+              ],
+              [
+                "L",
+                "com.degmods:gameplay"
+              ],
+              [
+                "L",
+                "com.degmods:quality of life"
+              ],
+              [
+                "l",
+                "com.degmods:gameplay"
+              ],
+              [
+                "l",
+                "com.degmods:quality of life"
+              ]
+            ]
+          }
+        ],
+        [
+          "EOSE",
+          "s8"
+        ]
+      ]
+    },
+    {
+      "name": "mod 1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679:9ad17069-382d-42f0-9b0b-97ce92649d25",
+      "request": [
+        "REQ",
+        "s9",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679"
+          ],
+          "#d": [
+            "9ad17069-382d-42f0-9b0b-97ce92649d25"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s9",
+          {
+            "content": "Need a rest?\n\nThis mod increases the duration of Well Rested and Emotional Security so you don't have to try to rest every 24 minutes.\u00A0\u00A0\n\nThat's it.\u00A0 There are no other changes or additions.\n\nWell Rested duration increase to 2 hours\nEmotional Security duration increase to 4 hours.\n\nCompatibility:\u00A0\n\nAfter switching to .esm I had to make a patch.\u00A0 With patch verified compatible with Immersive Love Perk by\u00A0[InquisitorOverhaulsReturn](https://www.nexusmods.com/starfield/users/132105373)\u00A0located here\u00A0[https://www.nexusmods.com/starfield/mods/8837](https://www.nexusmods.com/starfield/mods/8837)\n\nI altered the duration, nothing else so it MAY be compatible with others that add bonuses if they don't alter duration.\n\nOther than keeping up with Starfield version updates if necessary, I will not be adding anything else to this mod.",
+            "created_at": 1745924721,
+            "id": "9f18830fc0d365d65fc16f76c71131b390ddf62c99b0ad85852157269f2f4cbd",
+            "kind": 30402,
+            "pubkey": "1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679",
+            "sig": "0e72ad7b31e05c98fd07702deb71eb8a9228f264945d66e712cc0d44ac9a55ecdc0521b858869c57c0a11c6e1a29ce98f9b0b1b59a38f2212ebbc8011fd1df87",
+            "tags": [
+              [
+                "d",
+                "9ad17069-382d-42f0-9b0b-97ce92649d25"
+              ],
+              [
+                "a",
+                "30402:1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679:9ad17069-382d-42f0-9b0b-97ce92649d25"
+              ],
+              [
+                "r",
+                "degmods.com"
+              ],
+              [
+                "t",
+                "GameMod"
+              ],
+              [
+                "published_at",
+                "1745924644"
+              ],
+              [
+                "game",
+                "Starfield"
+              ],
+              [
+                "title",
+                "VGB Well Rested and Emotional Security Duration Increase"
+              ],
+              [
+                "featuredImageUrl",
+                "https://cdn.nostrcheck.me/1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679/87776138dd9a42bd4c9076ea229dd45dbc86a415971ca23dc8bda3fec141b290.webp"
+              ],
+              [
+                "summary",
+                "Increases duration of Well Rested and Emotional Security to 2/4 hours."
+              ],
+              [
+                "nsfw",
+                "false"
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshotsUrls",
+                "https://cdn.nostrcheck.me/1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679/87776138dd9a42bd4c9076ea229dd45dbc86a415971ca23dc8bda3fec141b290.webp"
+              ],
+              [
+                "tags",
+                "Bethesda",
+                " Starfield",
+                " Buff Duration"
+              ],
+              [
+                "downloadUrls",
+                "{\"title\":\"Main File\",\"url\":\"https://files.catbox.moe/wa4qcn.7z\",\"hash\":\"\",\"signatureKey\":\"\",\"malwareScanLink\":\"https://www.virustotal.com/gui/file/418bbcf947a5133d6efc3defdc6fcff0f8a306c58f45082db38e7e6984cf79ad\",\"modVersion\":\"1.0\",\"customNote\":\"\",\"mediaUrl\":\"\"}",
+                "{\"url\":\"https://files.catbox.moe/mxojqb.7z\",\"hash\":\"\",\"signatureKey\":\"\",\"malwareScanLink\":\"https://www.virustotal.com/gui/file/b44ca98a9b424e950d0dfcb414a6c62c6d0b43a83b88faa0d1e0aafb1d404b39\",\"modVersion\":\"1.0\",\"customNote\":\"\",\"title\":\"Immersive Love Patch\"}"
+              ],
+              [
+                "otherAssets",
+                "true"
+              ],
+              [
+                "uploadPermission",
+                "false"
+              ],
+              [
+                "modPermission",
+                "false"
+              ],
+              [
+                "convPermission",
+                "false"
+              ],
+              [
+                "assetUsePermission",
+                "false"
+              ],
+              [
+                "assetUseComPermission",
+                "false"
+              ],
+              [
+                "publisherNotes",
+                ""
+              ],
+              [
+                "extraCredits",
+                ""
+              ],
+              [
+                "L",
+                "com.degmods:gameplay"
+              ],
+              [
+                "L",
+                "com.degmods:quality of life"
+              ],
+              [
+                "l",
+                "com.degmods:gameplay"
+              ],
+              [
+                "l",
+                "com.degmods:quality of life"
+              ]
+            ]
+          }
+        ],
+        [
+          "EOSE",
+          "s9"
+        ]
+      ]
+    },
+    {
+      "name": "mod 0001c40591acd6a4e6c524f1b3ac77b2e8399002b38c9734ba610b1d985ae2c2:03d5d7e1-5338-488d-bb8c-da251e62ce27",
+      "request": [
+        "REQ",
+        "s10",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "0001c40591acd6a4e6c524f1b3ac77b2e8399002b38c9734ba610b1d985ae2c2"
+          ],
+          "#d": [
+            "03d5d7e1-5338-488d-bb8c-da251e62ce27"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s10",
+          {
+            "content": "aeraery43 5\naeraery43 5aeraery43 5\n\naeraery43 5",
+            "created_at": 1781870250,
+            "id": "0000e276f4cb967ec7931fd276352682ed39710e6f655cb5c8daa05130bad4ba",
+            "kind": 31142,
+            "pubkey": "0001c40591acd6a4e6c524f1b3ac77b2e8399002b38c9734ba610b1d985ae2c2",
+            "sig": "c8248a2d742d48ff8ff733f0507040a04ca4018593298f544f0c9505329e43ea5ffb803148744d6604a39d70fcdd88d9d33b315e0f898f8a25f716657bef2da2",
+            "tags": [
+              [
+                "d",
+                "03d5d7e1-5338-488d-bb8c-da251e62ce27"
+              ],
+              [
+                "published_at",
+                "1781870250"
+              ],
+              [
+                "g",
+                "Pirates, Vikings, & Knights II"
+              ],
+              [
+                "title",
+                "aeraery43 5"
+              ],
+              [
+                "image",
+                "https://r2a.primal.net/uploads2/e/b7/2c/eb72c9f8bda79f1d7e509d32868c5684c8bba70cc59b5ed7cea2e1d6ea5f5ccd.png"
+              ],
+              [
+                "summary",
+                "asdasd\n\nasd\n"
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshots",
+                "https://r2a.primal.net/uploads2/e/b7/2c/eb72c9f8bda79f1d7e509d32868c5684c8bba70cc59b5ed7cea2e1d6ea5f5ccd.png",
+                "https://r2a.primal.net/uploads2/e/b7/2c/eb72c9f8bda79f1d7e509d32868c5684c8bba70cc59b5ed7cea2e1d6ea5f5ccd.png",
+                "https://r2a.primal.net/uploads2/e/b7/2c/eb72c9f8bda79f1d7e509d32868c5684c8bba70cc59b5ed7cea2e1d6ea5f5ccd.png"
+              ],
+              [
+                "t",
+                "asdasd"
+              ],
+              [
+                "t",
+                "asd"
+              ],
+              [
+                "t",
+                "dd"
+              ],
+              [
+                "t",
+                "g"
+              ],
+              [
+                "downloads",
+                "file:https://r2a.primal.net/uploads2/e/b7/2c/eb72c9f8bda79f1d7e509d32868c5684c8bba70cc59b5ed7cea2e1d6ea5f5ccd.png"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "nonce",
+                "24539",
+                "15"
+              ]
+            ]
+          }
+        ],
+        [
+          "EOSE",
+          "s10"
+        ]
+      ]
+    },
+    {
+      "name": "mod 0001c40591acd6a4e6c524f1b3ac77b2e8399002b38c9734ba610b1d985ae2c2:b0c9ee94-f19d-4b2c-b8de-10e51cd93e4d",
+      "request": [
+        "REQ",
+        "s11",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "0001c40591acd6a4e6c524f1b3ac77b2e8399002b38c9734ba610b1d985ae2c2"
+          ],
+          "#d": [
+            "b0c9ee94-f19d-4b2c-b8de-10e51cd93e4d"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s11",
+          {
+            "content": "123\n\nasd\nasd\nas\nd\n\n\nasd\nasd\nasd\nas\nd\n\n\nasd\nasd\nasd\nas\nd\n\n\nasd\nasd\nasd\nas\nd\n\n\nasd\nasd\nasd\nas\nd\n\n\nasd\nasd\nasd\nas\nd\n\n\nasd\nasd\nasd\nas\nd\n\n\nasd\nasd\nasd\nas\nd\n\n\nasd\nasd\nasd\nas\nd\n\n\nasd\nasd\nasd\nas\nd\n\n\nasd\nasd\nasd\nas\nd\n\n\nasd\nasd\nasd\nas\nd\n\n\nasd\nasd\nasd\nas\nd\n\n\nasd\n",
+            "created_at": 1782250685,
+            "id": "000163d22e2e171a4716402e6f6de45ca7c8baf16c3c0ff5a3f4391ee76380ae",
+            "kind": 31142,
+            "pubkey": "0001c40591acd6a4e6c524f1b3ac77b2e8399002b38c9734ba610b1d985ae2c2",
+            "sig": "360d9679d8438872bca6b85b114d96976c70020a559c3d66d0a1a2bd024fceac16450764b3956730d8aa96f9a22e6ee1457fffbc064c40ab3e1b4a94af63123c",
+            "tags": [
+              [
+                "d",
+                "b0c9ee94-f19d-4b2c-b8de-10e51cd93e4d"
+              ],
+              [
+                "published_at",
+                "1782250666"
+              ],
+              [
+                "g",
+                "test"
+              ],
+              [
+                "title",
+                "tessst"
+              ],
+              [
+                "image",
+                "https://blossom.primal.net/7c76a364ea7508712be74d86e29d131eda988e0834b2399e7cba3e6a156ad885.jpg"
+              ],
+              [
+                "summary",
+                "asf a"
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "emulation",
+                "true",
+                "Nintendo GameCube"
+              ],
+              [
+                "m",
+                "naddr1qvzqqqre5cpzqqqpcszertxk5nnv2f83kwk80vhg8xgq9vuvju6t5cgtrkv94ckzqqjrqvmyx4jrwef3956nxvec956rswry943xywrr94jxzv34x9jnvvnrv5erwmutygs"
+              ],
+              [
+                "dependencies",
+                "wahwah",
+                "naddr1qvzqqqre5cpzqqqpcszertxk5nnv2f83kwk80vhg8xgq9vuvju6t5cgtrkv94ckzqqjrqvmyx4jrwef3956nxvec956rswry943xywrr94jxzv34x9jnvvnrv5erwmutygs"
+              ],
+              [
+                "dependencies",
+                "gahgah",
+                "https://google.com"
+              ],
+              [
+                "dependencies",
+                "zagzag",
+                "chocoboko"
+              ],
+              [
+                "video",
+                "https://www.youtube.com/watch?v=gW3vVIFRVhw"
+              ],
+              [
+                "screenshots",
+                "https://blossom.primal.net/7c76a364ea7508712be74d86e29d131eda988e0834b2399e7cba3e6a156ad885.jpg",
+                "https://blossom.primal.net/39976c9dfa09736cd3c658544aa8eddb3711ddc127139e7c97692c0d7ef079e0.jpg"
+              ],
+              [
+                "t",
+                "fa"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://brs.degmods.com/1d5a536cccc92a0c953d4f3769a2bdc653cc02c4a18c8e54c1407234af9ff8c8.zip\",\"hash\":\"1d5a536cccc92a0c953d4f3769a2bdc653cc02c4a18c8e54c1407234af9ff8c8\",\"filename\":\"asd123(1).zip\"}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "notes",
+                "asda sdasd\nasd\na\nsd\n\nasd"
+              ],
+              [
+                "credits",
+                "asdas\nda\nd\na\na\nsd\n\n\nasd"
+              ],
+              [
+                "c",
+                "[\"banana\"]"
+              ],
+              [
+                "h",
+                "[\"banana\"]"
+              ],
+              [
+                "f",
+                "banana"
+              ],
+              [
+                "c",
+                "[\"go\"]"
+              ],
+              [
+                "h",
+                "[\"go\"]"
+              ],
+              [
+                "f",
+                "go"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "nonce",
+                "42819",
+                "15"
+              ]
+            ]
+          }
+        ],
+        [
+          "EOSE",
+          "s11"
+        ]
+      ]
+    },
+    {
+      "name": "a mod that does not exist",
+      "request": [
+        "REQ",
+        "s12",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1"
+          ],
+          "#d": [
+            "00000000-0000-0000-0000-000000000000"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EOSE",
+          "s12"
+        ]
+      ]
+    },
+    {
+      "name": "blocked mods and hidden tags",
+      "request": [
+        "REQ",
+        "s13",
+        {
+          "kinds": [
+            30078
+          ],
+          "authors": [
+            "f4bf1fb5ba8be839f70c7331733e309f780822b311f63e01f9dc8abbb428f8d5"
+          ],
+          "#d": [
+            "moderation-excluded-tags",
+            "blocked-mods"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s13",
+          {
+            "content": "",
+            "created_at": 1783522131,
+            "id": "0000670ebbf23a3e71ecbf54761351f8ef303841a59b35ba478a47911e1b61a1",
+            "kind": 30078,
+            "pubkey": "f4bf1fb5ba8be839f70c7331733e309f780822b311f63e01f9dc8abbb428f8d5",
+            "sig": "ab0953445bb8e599fa2a2b4eb4c8b016914ae089f8597bcab39625c936dfbe3910faf719eae86eea83fe7459328352b5e80457c2b4d7abdd3a2670f7b54640a6",
+            "tags": [
+              [
+                "d",
+                "blocked-mods"
+              ],
+              [
+                "a",
+                "31142:0001c40591acd6a4e6c524f1b3ac77b2e8399002b38c9734ba610b1d985ae2c2:03d5d7e1-5338-488d-bb8c-da251e62ce27",
+                "block"
+              ],
+              [
+                "nonce",
+                "30835",
+                "15"
+              ]
+            ]
+          }
+        ],
+        [
+          "EVENT",
+          "s13",
+          {
+            "content": "",
+            "created_at": 1782045491,
+            "id": "00000185568ed609126c8ed093c592d76ec033dae97e7eaf2f343c2d36d73314",
+            "kind": 30078,
+            "pubkey": "f4bf1fb5ba8be839f70c7331733e309f780822b311f63e01f9dc8abbb428f8d5",
+            "sig": "49cc0b8db9cbd618c851303b3baa424dcdf0f16361b4bf90b2c15ea246abf6eb461d1d3ca5611fd7163b2b20d164b4bfd1eec204e6bca88729ef0cabd06b2b10",
+            "tags": [
+              [
+                "d",
+                "moderation-excluded-tags"
+              ],
+              [
+                "t",
+                "politics"
+              ],
+              [
+                "t",
+                "religion"
+              ],
+              [
+                "t",
+                "loli"
+              ],
+              [
+                "t",
+                "shota"
+              ],
+              [
+                "t",
+                "gore"
+              ],
+              [
+                "nonce",
+                "66904",
+                "15"
+              ]
+            ]
+          }
+        ],
+        [
+          "EOSE",
+          "s13"
+        ]
+      ]
+    },
+    {
+      "name": "blocked authors",
+      "request": [
+        "REQ",
+        "s14",
+        {
+          "kinds": [
+            10000
+          ],
+          "authors": [
+            "f4bf1fb5ba8be839f70c7331733e309f780822b311f63e01f9dc8abbb428f8d5"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s14",
+          {
+            "content": "uaCgWPDhB4/3xIauMU2H4w==?iv=OcgjzkihDQXhg36qquEyCg==",
+            "created_at": 1790452343,
+            "id": "30d9ca5b03b7fff48c6a4c24c5019ac8107f98e5b8016441305f0af0a8a2c08f",
+            "kind": 10000,
+            "pubkey": "f4bf1fb5ba8be839f70c7331733e309f780822b311f63e01f9dc8abbb428f8d5",
+            "sig": "01c9c221bcea5f6f8b5c741edb38d9ecadc154b780f8f886f13e396d230548aadbfd6fd8b4666a61091fc8ca17a68de393769fe898a8d2d6d3543ea83ab6f574",
+            "tags": [
+              [
+                "p",
+                "5a6aebb3f7680df52220022635164633db737ad45f58e3d194d4d86d2da78aed"
+              ],
+              [
+                "p",
+                "24e308412d06cbeee5341d56554a3224fde9dd7d542db60d90f01c78cd3f52f7"
+              ]
+            ]
+          }
+        ],
+        [
+          "EOSE",
+          "s14"
+        ]
+      ]
+    },
+    {
+      "name": "moderation tags",
+      "request": [
+        "REQ",
+        "s15",
+        {
+          "kinds": [
+            30985
+          ],
+          "authors": [
+            "f4bf1fb5ba8be839f70c7331733e309f780822b311f63e01f9dc8abbb428f8d5"
+          ],
+          "#L": [
+            "moderation"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s15",
+          {
+            "content": "",
+            "created_at": 1784650810,
+            "id": "0001ddda90089543d6ca6fb14f59e221ffbfd588741a7e51a0280469f2f6b92a",
+            "kind": 30985,
+            "pubkey": "f4bf1fb5ba8be839f70c7331733e309f780822b311f63e01f9dc8abbb428f8d5",
+            "sig": "61be8ee58e7441ab2d0992508743b138702e9a8fd14d99f573eb0d1f1a440c677c0fc9f20fa06717fce76c21964bad8c73821d6eb1ff5c24d2b85e63f9b2620e",
+            "tags": [
+              [
+                "d",
+                "31142:0001c40591acd6a4e6c524f1b3ac77b2e8399002b38c9734ba610b1d985ae2c2:b0c9ee94-f19d-4b2c-b8de-10e51cd93e4d"
+              ],
+              [
+                "a",
+                "31142:0001c40591acd6a4e6c524f1b3ac77b2e8399002b38c9734ba610b1d985ae2c2:b0c9ee94-f19d-4b2c-b8de-10e51cd93e4d"
+              ],
+              [
+                "L",
+                "moderation"
+              ],
+              [
+                "k",
+                "31142"
+              ],
+              [
+                "nonce",
+                "2581",
+                "15"
+              ]
+            ]
+          }
+        ],
+        [
+          "EOSE",
+          "s15"
+        ]
+      ]
+    },
+    {
+      "name": "the author's mods, page 1",
+      "request": [
+        "REQ",
+        "s16",
+        {
+          "kinds": [
+            31142
+          ],
+          "authors": [
+            "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a"
+          ],
+          "limit": 3
+        }
+      ],
+      "messages": [
+        [
+          "EOSE",
+          "s16"
+        ]
+      ]
+    },
+    {
+      "name": "the author's old mods",
+      "request": [
+        "REQ",
+        "s17",
+        {
+          "kinds": [
+            30402
+          ],
+          "authors": [
+            "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a"
+          ],
+          "#t": [
+            "GameMod"
+          ],
+          "until": 1785542399,
+          "limit": 500
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s17",
+          {
+            "content": "**Description**\nThe six songs are as follows:\n1\\. MEAL ARMSTRONG\n2\\. OSAMA BIN SHREDDING\n3\\. WHAT'S HER ONLYSTREETS\n4\\. ELASTIGGA\n5\\. TONS N ROSES\n6\\. METHALLICA\n\n**Installation instructions**\nManual method:\n1\\. Download the mod manually\n2\\. Extract the archive file\n3\\. Put the Data folder in \\common\\Starfield\\Data\n\nThe Vortex method is very straightforward; no instructions are necessary.\n\n**Requirements**\nNone\n\n**Shout outs**\nMany thanks to [Neurolepticer](https://www.nexusmods.com/profile/Neurolepticer) for their [Wwise Soundbank List](https://www.nexusmods.com/starfield/mods/1801). I couldn't have figured out the numbers otherwise.",
+            "created_at": 1785279635,
+            "id": "ceabd1b4863f8a669cb5533d89c89c198fe94b55d6d3b33c22970c7211b5ff02",
+            "kind": 30402,
+            "pubkey": "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a",
+            "sig": "1c41c8240e6f0fe2c994b073dbf84b2fdba0200a55a2082459a43f54b9dcf89d534f22cbad7d8e3237f09c428d16a0dfb45221801a30eed8143c085af03797eb",
+            "tags": [
+              [
+                "d",
+                "c0026d44-026f-4fd7-86dd-2c0cfe1dbda6"
+              ],
+              [
+                "a",
+                "30402:b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a:c0026d44-026f-4fd7-86dd-2c0cfe1dbda6"
+              ],
+              [
+                "r",
+                "degmods.com"
+              ],
+              [
+                "t",
+                "GameMod"
+              ],
+              [
+                "published_at",
+                "1780594797"
+              ],
+              [
+                "game",
+                "Starfield"
+              ],
+              [
+                "title",
+                "Chat Music - Astral Lounge Music Replacer"
+              ],
+              [
+                "featuredImageUrl",
+                "https://staticdelivery.nexusmods.com/mods/4187/images/17357/17357-1780522690-1666782675.jpg"
+              ],
+              [
+                "summary",
+                "Replaces the six BorealUS songs with six iconic songs by Chat Music."
+              ],
+              [
+                "nsfw",
+                "false"
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshotsUrls",
+                "https://bs.degmods.com/2400e6992aebf8bbaed6fe750ad94c0ff9fbbab6e73a1b98fb672ece2a8e221c.jpg"
+              ],
+              [
+                "tags",
+                "music",
+                " audio",
+                " ai-generated",
+                " pop music",
+                " rock music",
+                " starfield"
+              ],
+              [
+                "downloadUrls",
+                "{\"title\":\"\",\"url\":\"https://files.catbox.moe/glt7kh.zip\",\"hash\":\"\",\"malwareScanLink\":\"\",\"modVersion\":\"\",\"customNote\":\"\",\"mediaUrl\":\"\",\"automaticHash\":\"\",\"automaticScanLink\":\"\"}"
+              ],
+              [
+                "otherAssets",
+                "true"
+              ],
+              [
+                "uploadPermission",
+                "true"
+              ],
+              [
+                "modPermission",
+                "true"
+              ],
+              [
+                "convPermission",
+                "true"
+              ],
+              [
+                "assetUsePermission",
+                "true"
+              ],
+              [
+                "assetUseComPermission",
+                "false"
+              ],
+              [
+                "publisherNotes",
+                ""
+              ],
+              [
+                "extraCredits",
+                ""
+              ],
+              [
+                "L",
+                "com.degmods:audio:music"
+              ],
+              [
+                "l",
+                "com.degmods:audio"
+              ],
+              [
+                "l",
+                "com.degmods:music"
+              ],
+              [
+                "legacy",
+                "yes"
+              ]
+            ]
+          }
+        ],
+        [
+          "EOSE",
+          "s17"
+        ]
+      ]
+    }
+  ]
+}

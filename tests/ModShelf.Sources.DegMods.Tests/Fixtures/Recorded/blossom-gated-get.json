@@ -1,0 +1,18 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "https://brs.degmods.com/550a7a5da7893d23b7e9e5562b1c69b6576476f72f6ef3a9afde9cb27837f08a.zip",
+    "range": "bytes=0-1023"
+  },
+  "response": {
+    "status": 428,
+    "headers": {
+      "X-Blossom-Gate-Ad": "v=1; ref=30078:3eaa732e52f03881facde2efddd8e8b6b4347b46a0661ee04b9492e5c23c5326:manual-blossom-ads; min=1000; c=REDACTED",
+      "X-Blossom-Gate-Pow": "v=1; d=17; c=REDACTED",
+      "X-Reason": "gate requirements not satisfied",
+      "Content-Length": "32",
+      "Content-Type": "text/plain; charset=utf-8"
+    },
+    "body": "gate requirements not satisfied\n"
+  }
+}

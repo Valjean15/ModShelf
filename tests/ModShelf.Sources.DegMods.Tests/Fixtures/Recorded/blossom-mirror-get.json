@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "https://blossom.primal.net/550a7a5da7893d23b7e9e5562b1c69b6576476f72f6ef3a9afde9cb27837f08a",
+    "range": "bytes=0-1023"
+  },
+  "response": {
+    "status": 302,
+    "headers": {
+      "Location": "https://r2a.primal.net/uploads2/5/50/a7/550a7a5da7893d23b7e9e5562b1c69b6576476f72f6ef3a9afde9cb27837f08a.bin",
+      "Content-Type": "application/zip",
+      "Content-Length": "0"
+    },
+    "body": ""
+  }
+}

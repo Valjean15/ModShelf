@@ -1,0 +1,18 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "https://files.catbox.moe/wa4qcn.7z",
+    "range": "bytes=0-1023"
+  },
+  "response": {
+    "status": 206,
+    "headers": {
+      "ETag": "\"6810ae6e-2c3\"",
+      "Content-Type": "application/x-7z-compressed",
+      "Content-Length": "707",
+      "Last-Modified": "Tue, 29 Apr 2025 10:48:14 GMT",
+      "Content-Range": "bytes 0-706/707"
+    },
+    "bodyBase64": "N3q8ryccAATJXdL9gAIAAAAAAAAjAAAAAAAAAJlNs1fgCn8B410AKhFGqoAlZQdiSg6qdJ36kbiyqZ/zBfDv35v0dOaWPt5fENceikoyS3aoaaWKH0iyOIqXu6cEG53KJ+APSqBPQIiIKN8VPt5UyLQqxxkKsVzqje/mJlPgLBJqdByJnNymSmGPsfs16C1cNEDURgFgREDebKxkX3B/yxR7LD3gLdEOzMMg4CJlbbekb2tKC4ovqqWmk0I0kP3Q5+lAtle2C5G96zqZG7oMse4rqokr/5eKm8b0qhH5AG+Un4lbpwyVYOK0A9L0RKwEE9F+IPnmTK95YZQGklVHOQV8e9rUO0VR022eeqcuzuG/OMzhKdxtoR+e9JTohyL7YRn06iY29TjVHsouCVMmd9aW6ZwD8nFmARUR6z3O4RP26WYrRfzN3qwC/yUeZ7+HrioftPiiKduYya14nopcLhzipDdKbMUS8Pxkj1gZapCuJFaOqb/o09pUOdqvaq8RHQdoWgLyK0xPdBDCAXlN5H6UcWHTIdqrHRdq7d3YOAhEHmrVdMkI8nQ8qRKqRJMmPENqWXSj++JxqCJWOZFC0Tn6ptz31F+N6Kyo57WEem3dLVENUIeBqnjzkHQA5dXb+ZMgpo9KH//d+wyCaQhTdKJhQlJA0BviINSoqVWs11VUGzcecWRViVRAAAAAgTMHrg/VPQbwhyVHVwXTHKNYIm4BZJWfLwSQhLvBHKYRu2TVenpdDnWUzWV2hq+Qym9DTbUBlR0W6+pkRLyscH7quUS75rzcqKPx2VzBYnhAgy7WRxWWL0WB49Z7i4o/XqDBMoMnVvPh5RftA2xfgoLsdZJEazSplbVZqZ2D33UiFzxlen7EqGrr6VqLzZZ1jQAAFwaB6wEJgJUABwsBAAEjAwEBBV0AEAAADIDaCgHELflrAAA="
+  }
+}

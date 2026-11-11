@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "HEAD",
+    "url": "https://blossom.primal.net/550a7a5da7893d23b7e9e5562b1c69b6576476f72f6ef3a9afde9cb27837f08a"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/zip",
+      "Content-Length": "1124599"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "request": {
+    "method": "HEAD",
+    "url": "https://archive.org/download/NiptonRebuiltRemade/NRR1.3.7z"
+  },
+  "response": {
+    "status": 302,
+    "headers": {
+      "Accept-Ranges": "bytes",
+      "Location": "https://dn710607.ca.archive.org/0/items/NiptonRebuiltRemade/NRR1.3.7z",
+      "Content-Type": "text/html; charset=UTF-8"
+    }
+  }
+}

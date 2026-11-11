@@ -1,0 +1,4322 @@
+{
+  "relay": "wss://brs.degmods.com/",
+  "info": {
+    "name": "",
+    "description": "",
+    "pubkey": "",
+    "contact": "",
+    "supported_nips": [
+      1,
+      11,
+      40,
+      42,
+      70,
+      86,
+      9,
+      45
+    ],
+    "software": "https://github.com/fiatjaf/khatru",
+    "version": "n/a",
+    "icon": "",
+    "banner": ""
+  },
+  "exchanges": [
+    {
+      "name": "mod 16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1:7cce3021-6514-47f7-a054-a28dc1269ff4",
+      "request": [
+        "REQ",
+        "s1",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1"
+          ],
+          "#d": [
+            "7cce3021-6514-47f7-a054-a28dc1269ff4"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s1",
+          {
+            "kind": 31142,
+            "id": "0000c49741409c33c41296805bbf8f19d12b90af81c6c31c734e0e47bcf166b2",
+            "pubkey": "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1",
+            "created_at": 1788744816,
+            "tags": [
+              [
+                "d",
+                "7cce3021-6514-47f7-a054-a28dc1269ff4"
+              ],
+              [
+                "published_at",
+                "1788744812"
+              ],
+              [
+                "g",
+                "Fallout: New Vegas"
+              ],
+              [
+                "title",
+                "Better Newspapers for New Vegas Bounties II"
+              ],
+              [
+                "image",
+                "https://blossom.primal.net/3d1e43e062c53642909aadee7a961345246ac9bfcdfecc06f42c34faa455e88f.png"
+              ],
+              [
+                "summary",
+                "Improves the Coyote Courier newspapers with custom designed ones utilizing the Book Menu Restored mod."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "elsewhere",
+                "https://www.nexusmods.com/newvegas/mods/96533"
+              ],
+              [
+                "screenshots",
+                "https://blossom.primal.net/3d1e43e062c53642909aadee7a961345246ac9bfcdfecc06f42c34faa455e88f.png",
+                "https://blossom.primal.net/ee3d4c2fc02d011d0a1bbae085d9377cf8a815b8f9132a6b2c650ba604e97e5c.png",
+                "https://npub1zm3rm4rd3aqnk65e8l642kzp6xkhdh67g4rk4k5ytyl4a4xpuxcsk4xvf4.blossom.band/4a61006b7787d6fefa0755e88b7e862d05b35563e696c77d2b8b56fc783ca0c8.png",
+                "https://blossom.primal.net/0038876225083f0590600533fbecac7fc1cebecefa49290876aad46dfd312a0e.png"
+              ],
+              [
+                "t",
+                "fallout"
+              ],
+              [
+                "t",
+                "fallout new vegas"
+              ],
+              [
+                "t",
+                "fallout: new vegas"
+              ],
+              [
+                "t",
+                "fnv"
+              ],
+              [
+                "t",
+                "newspapers"
+              ],
+              [
+                "t",
+                "books"
+              ],
+              [
+                "t",
+                "clutter"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://brs.degmods.com/550a7a5da7893d23b7e9e5562b1c69b6576476f72f6ef3a9afde9cb27837f08a.zip\",\"title\":\"  Better Newspapers for New Vegas Bounties II\",\"hash\":\"550a7a5da7893d23b7e9e5562b1c69b6576476f72f6ef3a9afde9cb27837f08a\",\"filename\":\"Better Newspapers for New Vegas Bounties II-96533-1-0-1771837702.zip\",\"version\":\"1.0\",\"note\":\"Main Version\",\"scans\":[{\"label\":\"VirusTotal\",\"url\":\"https://www.virustotal.com/gui/file/550a7a5da7893d23b7e9e5562b1c69b6576476f72f6ef3a9afde9cb27837f08a\"},{\"label\":\"Hybrid Analysis\",\"url\":\"https://www.hybrid-analysis.com/sample/550a7a5da7893d23b7e9e5562b1c69b6576476f72f6ef3a9afde9cb27837f08a\"}]}"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://brs.degmods.com/0398b9b1c68c1169592f73adaa8525a139fb3ba7b616f212fcbe3101c293b867.zip\",\"title\":\"  Better Newspapers for New Vegas Bounties II (LE version ESP)\",\"hash\":\"0398b9b1c68c1169592f73adaa8525a139fb3ba7b616f212fcbe3101c293b867\",\"filename\":\"Better Newspapers for New Vegas Bounties II LE-96533-1-0-1773123565.zip\",\"version\":\"1.0LE\",\"note\":\"An alternative ESP for those who use New Vegas Bounties II LE by RoyBatterian (REQUIRES MAIN FILE ASSETS!)\",\"scans\":[{\"label\":\"Hybrid Analysis\",\"url\":\"https://www.hybrid-analysis.com/sample/0398b9b1c68c1169592f73adaa8525a139fb3ba7b616f212fcbe3101c293b867\"},{\"label\":\"VirusTotal\",\"url\":\"https://www.virustotal.com/gui/file/0398b9b1c68c1169592f73adaa8525a139fb3ba7b616f212fcbe3101c293b867\"}]}"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://blossom.primal.net/8739c76e681f900923b900c9df0ef75cf421d39cabb54650c4b9ad19b6a76d85.zip\",\"title\":\"Alt Newspaper Texture\",\"hash\":\"8739c76e681f900923b900c9df0ef75cf421d39cabb54650c4b9ad19b6a76d85\",\"filename\":\"Alt Newspaper Texture.zip\",\"version\":\"1.0ALTTEX\",\"note\":\"An alternate texture to give the newspaper a more wrinkly appearance. (REQUIRES MAIN MOD ASSETS!)\",\"scans\":[{\"label\":\"VirusTotal\",\"url\":\"https://www.virustotal.com/gui/file/8739c76e681f900923b900c9df0ef75cf421d39cabb54650c4b9ad19b6a76d85\"},{\"label\":\"Hybrid Analysis\",\"url\":\"https://www.hybrid-analysis.com/sample/8739c76e681f900923b900c9df0ef75cf421d39cabb54650c4b9ad19b6a76d85\"}]}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:true"
+              ],
+              [
+                "credits",
+                "lStewieAl Weijiesen\uFEFF & Xilandro\uFEFF for making the Book Menu Restored\uFEFF mod.\nJokerine\uFEFF for making the newspaper Mesh and Icon.\nSomeguy2000 for making the New Vegas Bounties series.\nbubaknh for making the LE edition.\nMe for making the Newspaper Textures and Menu. "
+              ],
+              [
+                "c",
+                "[\"items\",\"accessories\"]"
+              ],
+              [
+                "h",
+                "[\"items\"]"
+              ],
+              [
+                "h",
+                "[\"items\",\"accessories\"]"
+              ],
+              [
+                "f",
+                "items"
+              ],
+              [
+                "f",
+                "accessories"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "816025"
+              ],
+              [
+                "nonce",
+                "29605",
+                "15"
+              ]
+            ],
+            "content": "# Better Newspapers for New Vegas Bounties II\uFEFF\n\n### Whats it do?\nThis mod remakes the Coyote Courier newspapers from New Vegas Bounties II to use scroll based ones made by myself while screwing around with the Book Menu Restored mod. It also marks said newspapers as player owned items so the short stick saloon bartender won't bitch at you for picking up a newspaper.\n\n### Requirements:\n[The Someguy Series\uFEFF](https://www.nexusmods.com/newvegas/mods/48925)\n[New Vegas Bounties II](https://www.nexusmods.com/newvegas/mods/41184)\n[New Vegas Bounties II LE\uFEFF](https://www.nexusmods.com/newvegas/mods/95101) (only if using LE version)\n[Book Menu Restored](https://www.nexusmods.com/newvegas/mods/67278)\n\n### Installation Instructions:\nDump everything in your Fallout New Vegas data folder.\n\n### Credits:\n[lStewieAl](https://www.nexusmods.com/newvegas/users/2232669) [Weijiesen](https://www.nexusmods.com/newvegas/users/1026866) & [Xilandro](https://www.nexusmods.com/newvegas/users/1417653)\uFEFF for making the [Book Menu Restored](https://www.nexusmods.com/newvegas/mods/67278)\uFEFF mod.\n[Jokerine\uFEFF](https://www.nexusmods.com/newvegas/users/2543917) for making the newspaper Mesh and Icon.\n[Someguy2000](https://www.nexusmods.com/newvegas/users/2159825) for making the New Vegas Bounties series.\n[bubaknh](https://next.nexusmods.com/profile/bubaknh) for making the LE edition.\n[Me](https://www.nexusmods.com/newvegas/users/2848649) for making the Newspaper Textures and Menu.",
+            "sig": "d608d52afb0700ef46d8ac81b395592b143aef78849dffa9e7e479a96f90001bd58b412840e9d6dcb8ad0c6428c89e30c55c49f99bac39ec0641f562170052fb"
+          }
+        ],
+        [
+          "EOSE",
+          "s1"
+        ]
+      ]
+    },
+    {
+      "name": "mod 16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1:4e09a170-8393-4368-b59c-6c54db890857",
+      "request": [
+        "REQ",
+        "s2",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1"
+          ],
+          "#d": [
+            "4e09a170-8393-4368-b59c-6c54db890857"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s2",
+          {
+            "kind": 31142,
+            "id": "0001c3fec8d1b43469260054dfcc206bb878e3444a8aa887ca10b9830941388c",
+            "pubkey": "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1",
+            "created_at": 1745738914,
+            "tags": [
+              [
+                "d",
+                "4e09a170-8393-4368-b59c-6c54db890857"
+              ],
+              [
+                "published_at",
+                "1745736230"
+              ],
+              [
+                "g",
+                "Fallout: New Vegas"
+              ],
+              [
+                "title",
+                "Nipton Rebuilt Remade: Version 1.3"
+              ],
+              [
+                "image",
+                "https://cdn.nostrcheck.me/16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1/b0e6fcf14e249e7162ae35dcb40c5f8675830bd778e2da7b33a9cc0c894596f4.webp"
+              ],
+              [
+                "summary",
+                "My remake of Jokerine's classic Fallout: New Vegas mod of the same name."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshots",
+                "https://cdn.nostrcheck.me/16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1/b0e6fcf14e249e7162ae35dcb40c5f8675830bd778e2da7b33a9cc0c894596f4.webp"
+              ],
+              [
+                "t",
+                "fallout"
+              ],
+              [
+                "t",
+                "new vegas"
+              ],
+              [
+                "t",
+                "town"
+              ],
+              [
+                "t",
+                "overhaul"
+              ],
+              [
+                "t",
+                "humor"
+              ],
+              [
+                "t",
+                "nipton"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://brs.degmods.com/8890132ecb96efb82f9b9ed56a6e41a3c6acb7b5a238192473cd2271d5effa26.zip\",\"title\":\"Nipton Rebuilt Remade\",\"hash\":\"8890132ecb96efb82f9b9ed56a6e41a3c6acb7b5a238192473cd2271d5effa26\",\"filename\":\"NRR1.3.7.zip\",\"version\":\"1.3\",\"scans\":[{\"label\":\"Malware scan\",\"url\":\"https://www.virustotal.com/gui/file/87e6e8d62802164e40abb7807b86c468edbf1c779804d46037719d1bacc7e099\"}]}"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://brs.degmods.com/8bcef68fa9682d917574532c9c358dd9d8ae9253c043ea0a6a25759a4464ea74.zip\",\"title\":\"Nipton Rebuilt Remade (Christmas Add-On)\",\"hash\":\"8bcef68fa9682d917574532c9c358dd9d8ae9253c043ea0a6a25759a4464ea74\",\"filename\":\"NiptonRebuiltChristmasPatch.zip\",\"version\":\"HoHoHo\",\"scans\":[{\"label\":\"Hybrid Analysis\",\"url\":\"https://www.hybrid-analysis.com/sample/8bcef68fa9682d917574532c9c358dd9d8ae9253c043ea0a6a25759a4464ea74\"},{\"label\":\"VirusTotal\",\"url\":\"https://www.virustotal.com/gui/file/8bcef68fa9682d917574532c9c358dd9d8ae9253c043ea0a6a25759a4464ea74\"},{\"label\":\"Malware scan\",\"url\":\"https://www.virustotal.com/gui/file/088ae0760decb708d66e9487ade093b4882a7e34beb09923a99e0154930449c8\"}]}"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://archive.org/download/NiptonRebuiltRemade/NRR1.3.7z\",\"title\":\"Nipton Rebuilt Remade\",\"version\":\"1.3\",\"note\":\"Backup Link\"}"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://archive.org/download/NiptonRebuiltRemade/NiptonRebuiltChristmasPatch.7z\",\"title\":\"Nipton Rebuilt Remade (Christmas Add-On)\",\"version\":\"HoHoHo\",\"note\":\"Backup Link\"}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:true"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "8ce1fb"
+              ],
+              [
+                "nonce",
+                "141857",
+                "15"
+              ]
+            ],
+            "content": "[My](https://next.nexusmods.com/profile/smokeytstevenston?gameId=130 \"My\") remake of Jokerine's classic Fallout: New Vegas mod of the same name.\n\n[Original Mod Link](https://www.nexusmods.com/newvegas/mods/86010 \"Original Mod Link\")\n\nREQUIREMENTS:\nFallout: New Vegas and all DLCs\n\nSpeedyB64's [Speedy Resources Pack](https://www.nexusmods.com/newvegas/mods/39551 \"Speedy Resources Pack\")\n\nhman101's [Claim the Mojave mod](https://www.nexusmods.com/newvegas/mods/75196 \"Claim the Mojave mod\")\n\nmadnuttah's [Marijuana Plant mod](https://www.nexusmods.com/newvegas/mods/38264 \"Marijuana Plant mod\")\n\nStewieAI's [Restored Book Menus mod](https://www.nexusmods.com/newvegas/mods/67278 \"Restored Book Menus mod\")",
+            "sig": "3e664404a6946c8ff8c8e9aea3e7f8b932fca027480b055e8255b3ed77a5579145b2394be32c4c31fb04d1eafc429b03fb30aa4e212cdd8dc2ec2c1802b270ba"
+          }
+        ],
+        [
+          "EVENT",
+          "s2",
+          {
+            "kind": 30402,
+            "id": "674b97a2c7ac883cf06a2e8cc619a10e13c370762295c702d1a593ac30f50284",
+            "pubkey": "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1",
+            "created_at": 1745738912,
+            "tags": [
+              [
+                "d",
+                "4e09a170-8393-4368-b59c-6c54db890857"
+              ],
+              [
+                "a",
+                "30402:16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1:4e09a170-8393-4368-b59c-6c54db890857"
+              ],
+              [
+                "r",
+                "degmods.com"
+              ],
+              [
+                "t",
+                "GameMod"
+              ],
+              [
+                "published_at",
+                "1745736230"
+              ],
+              [
+                "game",
+                "Fallout: New Vegas"
+              ],
+              [
+                "title",
+                "Nipton Rebuilt Remade: Version 1.3"
+              ],
+              [
+                "featuredImageUrl",
+                "https://cdn.nostrcheck.me/16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1/b0e6fcf14e249e7162ae35dcb40c5f8675830bd778e2da7b33a9cc0c894596f4.webp"
+              ],
+              [
+                "summary",
+                "My remake of Jokerine's classic Fallout: New Vegas mod of the same name."
+              ],
+              [
+                "nsfw",
+                "false"
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshotsUrls",
+                "https://cdn.nostrcheck.me/16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1/b0e6fcf14e249e7162ae35dcb40c5f8675830bd778e2da7b33a9cc0c894596f4.webp"
+              ],
+              [
+                "tags",
+                "Fallout",
+                " New Vegas",
+                " Town",
+                " Overhaul",
+                " Humor",
+                " Nipton",
+                ""
+              ],
+              [
+                "downloadUrls",
+                "{\"title\":\"Nipton Rebuilt Remade\",\"url\":\"https://archive.org/download/NiptonRebuiltRemade/NRR1.3.7z\",\"hash\":\"\",\"signatureKey\":\"\",\"malwareScanLink\":\"https://www.virustotal.com/gui/file/87e6e8d62802164e40abb7807b86c468edbf1c779804d46037719d1bacc7e099\",\"modVersion\":\"1.3\",\"customNote\":\"\",\"mediaUrl\":\"\"}",
+                "{\"url\":\"https://archive.org/download/NiptonRebuiltRemade/NiptonRebuiltChristmasPatch.7z\",\"hash\":\"\",\"signatureKey\":\"\",\"malwareScanLink\":\"https://www.virustotal.com/gui/file/088ae0760decb708d66e9487ade093b4882a7e34beb09923a99e0154930449c8\",\"modVersion\":\"HoHoHo\",\"customNote\":\"\",\"title\":\"Nipton Rebuilt Remade (Christmas Add-On)\"}"
+              ],
+              [
+                "otherAssets",
+                "true"
+              ],
+              [
+                "uploadPermission",
+                "true"
+              ],
+              [
+                "modPermission",
+                "true"
+              ],
+              [
+                "convPermission",
+                "true"
+              ],
+              [
+                "assetUsePermission",
+                "true"
+              ],
+              [
+                "assetUseComPermission",
+                "true"
+              ],
+              [
+                "publisherNotes",
+                ""
+              ],
+              [
+                "extraCredits",
+                ""
+              ],
+              [
+                "L",
+                "com.degmods:quality of life"
+              ],
+              [
+                "L",
+                "com.degmods:gameplay"
+              ],
+              [
+                "L",
+                "com.degmods:total conversions"
+              ],
+              [
+                "l",
+                "com.degmods:quality of life"
+              ],
+              [
+                "l",
+                "com.degmods:gameplay"
+              ],
+              [
+                "l",
+                "com.degmods:total conversions"
+              ]
+            ],
+            "content": "[My](https://next.nexusmods.com/profile/smokeytstevenston?gameId=130 \"My\") remake of Jokerine's classic Fallout: New Vegas mod of the same name.\n\n[Original Mod Link](https://www.nexusmods.com/newvegas/mods/86010 \"Original Mod Link\")\n\nREQUIREMENTS:\nFallout: New Vegas and all DLCs\n\nSpeedyB64's [Speedy Resources Pack](https://www.nexusmods.com/newvegas/mods/39551 \"Speedy Resources Pack\")\n\nhman101's [Claim the Mojave mod](https://www.nexusmods.com/newvegas/mods/75196 \"Claim the Mojave mod\")\n\nmadnuttah's [Marijuana Plant mod](https://www.nexusmods.com/newvegas/mods/38264 \"Marijuana Plant mod\")\n\nStewieAI's [Restored Book Menus mod](https://www.nexusmods.com/newvegas/mods/67278 \"Restored Book Menus mod\")",
+            "sig": "af580dd0dfbaee1eb49be61ea4938dba00214658e65befefaed4ed8fc223532d3a6902ab2892184dc6af2abcbb4053df7aa8549f9daf126752d0348ca914bfcf"
+          }
+        ],
+        [
+          "EOSE",
+          "s2"
+        ]
+      ]
+    },
+    {
+      "name": "mod 16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1:7162b89c-da8a-4889-b4df-db905d8ecf03",
+      "request": [
+        "REQ",
+        "s3",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1"
+          ],
+          "#d": [
+            "7162b89c-da8a-4889-b4df-db905d8ecf03"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s3",
+          {
+            "kind": 31142,
+            "id": "00018283ecda332568fcb9eb9fd12a709a8cfaa76c5be2651293cbfa3f60b5ba",
+            "pubkey": "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1",
+            "created_at": 1758092212,
+            "tags": [
+              [
+                "d",
+                "7162b89c-da8a-4889-b4df-db905d8ecf03"
+              ],
+              [
+                "published_at",
+                "1758084486"
+              ],
+              [
+                "g",
+                "Fallout: New Vegas"
+              ],
+              [
+                "title",
+                "Smook's Police Gear Pack"
+              ],
+              [
+                "image",
+                "https://bs.degmods.com/1cf575c9001aa4b035e16e1039322e45464caddf176dff89915d347134fb544d.png"
+              ],
+              [
+                "summary",
+                "Adds a bunch of police uniforms and armor to the game."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshots",
+                "https://bs.degmods.com/1cf575c9001aa4b035e16e1039322e45464caddf176dff89915d347134fb544d.png",
+                "https://bs.degmods.com/3a6eabd248b0ac4f8825d78f22f6a14139e952ef9dbab16b1e643a9591a928f5.png",
+                "https://bs.degmods.com/3a38da62ecda8058b5578a9d3d52c8cd478b2828954ed41c4f5aeb8170b16da3.png",
+                "https://bs.degmods.com/81e9b015dbc11fbd2cd26b516e40d2aee8c18207f8ac8c720dded1d1d9b21ad9.png",
+                "https://bs.degmods.com/23a703a5f80b278cb874167547ea29e0b95617cb041fc4df573819591e673899.png",
+                "https://bs.degmods.com/5ff4a10f74063001810e73ac2ab77cba7cf07729410dd0e8b8df08c36149ec2a.png",
+                "https://bs.degmods.com/0a789b411b6c7e2920324aa29b503a141d20948258d96cef9b5a99afe19a8fc0.png",
+                "https://bs.degmods.com/3184502dab8b2181b5421ec0d79994616db13378191f512cc04645058ef33788.png",
+                "https://bs.degmods.com/ef9549e6f762aa731ece5a3133128bfc01b1ec5bab48646cb5621ff0daa3efff.png",
+                "https://bs.degmods.com/4672949ef698580f2f02ada7546822db54cfb8375cb668e89a4a86c52b144785.png",
+                "https://bs.degmods.com/8391f3abaf5f2121d5b9f01003ae7ffcc217264d71410e98caeaffbdcdf2565f.png",
+                "https://bs.degmods.com/c05e84172f3fb5cd1375285fa80aa7ec35e7ecf7158479828aff8ee6d8a2a8ac.png",
+                "https://bs.degmods.com/83a008af4bc03fa2ce52d5a8a5261df468a0d0d01c1b948be5928e3fa2d74a6a.png",
+                "https://bs.degmods.com/098adfd620b9433c47a88cd0ff8438bed72949064104a57dd0f2dac79ff3eb21.png",
+                "https://bs.degmods.com/67be1f3566a36185e5068cc953ba0fdffb319d010fc3fec2fe8d363f829e681c.png",
+                "https://bs.degmods.com/59d34eb62ce2e364d153ef1977719e9aa38617a41b09bf218a88b8bd9edca3f6.png",
+                "https://bs.degmods.com/f0868051630586a1fc27e4e565bbc4b57c60be4fddb828d0606dabf8b443c3e2.png",
+                "https://bs.degmods.com/81810caa6bc7da42215a503b47efcb502dbdd8b5f50a3eb0cacdb5f02139c0f0.png",
+                "https://bs.degmods.com/9f52615b92e1b28c864946257f2cf0f53a9c7ae535282f2eecd4243c902c18d7.png",
+                "https://bs.degmods.com/6d4a1bfce9f37f9160965e1d3f15f9d47d9037329938bc61c92cc76098d7dd84.png",
+                "https://bs.degmods.com/9487c1234c4e976c30dde67907a6e99ff237c0de1452ed6709578328ac4ab350.png",
+                "https://bs.degmods.com/9ae7a3c7831b68c2918e098818ca830d0e2c51c1772af1d93e553c6b2bad6b8b.png",
+                "https://bs.degmods.com/0628c4c9376872aa0475f35c58b5dfd288593058e0e098766047155c9619ce90.png",
+                "https://bs.degmods.com/2f17336b30a605c8d459f310c4c7de904270f9d1124ed2c205b462fcdbd7a292.png",
+                "https://bs.degmods.com/a868500b9d0a808adcb204faff1a67dec6da754b62c0aa17d492f485f6019076.png",
+                "https://bs.degmods.com/3bfc951c321f917b140e82c3eb27fe91af93a3a6bc70888f546de58c0cfa3db9.png",
+                "https://bs.degmods.com/874c7fd2efcc36c3d813bc0104a4d6e20e9b7f22edd3d86fabb188592b7b7371.png",
+                "https://bs.degmods.com/69d7c50845fc5a8784b2649eebf4e84cdfe812c8513a2882b4b1bd32739425e6.png",
+                "https://bs.degmods.com/24258621183bb32ace01d897eb4233a237d2b19a125aafe4a7b65da4e64484b3.png",
+                "https://bs.degmods.com/854600c50ef6a75c4128b95d9437ae7b162dd55aa1a655ea69b1e1491121af03.png",
+                "https://bs.degmods.com/19b90f691dfef42d0014b0b7c71ae3d0cf2f127a95e2b1a88ec172a6a7ced678.png",
+                "https://bs.degmods.com/b47fc84d57b002995beda3dff18041764318a4579e7c0ca276bb4afae005fc21.png",
+                "https://bs.degmods.com/35c7462468b7e3c996a520a056afad3d37e7c5ae77fabd1011fbdce703a8bdca.png",
+                "https://bs.degmods.com/ecbce375a45ac13bce065e3a4146fd4a29e4c1c42417b1fae1f57d2df4b0852e.png",
+                "https://bs.degmods.com/822546dc3fc0e486b087b2662e8f4292336e9a155116b425797bb60f3ebc9e56.png",
+                "https://bs.degmods.com/5de6807ef989e9225d7ce8a13b7c20da453dc078891016203c38eba6c65cb817.png",
+                "https://bs.degmods.com/449a7d444affc77200ab715ab29f6ada84c3b26c0ecc9eb3f8ee42680f428a27.png",
+                "https://bs.degmods.com/ad514eee432b5f808ea1bbaca99e189de0c4f5e1f0bce656cbccf50efeee5f84.png"
+              ],
+              [
+                "t",
+                "fallout"
+              ],
+              [
+                "t",
+                "fallout new vegas"
+              ],
+              [
+                "t",
+                "fallout: new vegas"
+              ],
+              [
+                "t",
+                "fnv"
+              ],
+              [
+                "t",
+                "uniform"
+              ],
+              [
+                "t",
+                "armor"
+              ],
+              [
+                "t",
+                "police"
+              ],
+              [
+                "t",
+                "sheriff"
+              ],
+              [
+                "t",
+                "milkman"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://bs.degmods.com/57e4fb2c82c6f67c82f5bec568e912d418a25d0c2abc2485c5415f0757ec57f2.zip\",\"title\":\"Main File\",\"hash\":\"57e4fb2c82c6f67c82f5bec568e912d418a25d0c2abc2485c5415f0757ec57f2\",\"version\":\"1.1\",\"note\":\"Fixed a missing texture.\",\"scans\":[{\"label\":\"Malware scan\",\"url\":\"https://bs.degmods.com/scan/57e4fb2c82c6f67c82f5bec568e912d418a25d0c2abc2485c5415f0757ec57f2\"}]}"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://files.catbox.moe/bw0aw3.zip\",\"title\":\"Main File (Backup Link)\",\"hash\":\"57e4fb2c82c6f67c82f5bec568e912d418a25d0c2abc2485c5415f0757ec57f2\",\"version\":\"1.1\",\"note\":\"Fixed a missing texture.\",\"scans\":[{\"label\":\"Malware scan\",\"url\":\"https://bs.degmods.com/scan/57e4fb2c82c6f67c82f5bec568e912d418a25d0c2abc2485c5415f0757ec57f2\"}]}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "e77c37"
+              ],
+              [
+                "nonce",
+                "2373",
+                "15"
+              ]
+            ],
+            "content": "# Smook's Police Gear Pack\n\n::youtube{#_BxDXNCSjBQ}\n\n# What is it?\n\nThis mod adds a bunch of police uniforms and armor to the game. Specifically 4 different versions in 3 different types:\n\n* Las Vegas Police Department\n* Sheriff\n* Freelance Police\n* New Vegas Milk Company\n\n# Where to get them?\n\nThere's an industrial grade shipment of each inside of a respawning crate in the Nevada Highway Patrol Station\n\n# Credits:\n\n[mrconvict](https://next.nexusmods.com/profile/mrconvict?gameId=130 \"mrconvict\") for the Uniform mesh and Sheriff Uniform textures.\n\n[nofear88](https://next.nexusmods.com/profile/nofear88?gameId=130 \"nofear88\") for the LVPD Uniform textures.\n\n[Testudini](https://next.nexusmods.com/profile/Testudini?gameId=130 \"Testudini\") for the NVMC Milkman textures.\n\n[eric3844](https://next.nexusmods.com/profile/eric3844?gameId=130 \"eric3844\") for the Shoulder Harness mesh.\n\nMe for the Freelance Police textures and various texture and mesh edits.",
+            "sig": "62d5f0f838b41548ff73f955e443a58a4b8b49e3b7754a5d3ff6d8d664c5ae03e2982072bfde0d83075c0effffdd4ac71a07a3cb38696ad2fed16cea61d89e69"
+          }
+        ],
+        [
+          "EVENT",
+          "s3",
+          {
+            "kind": 30402,
+            "id": "69ccd665a3f84bef43d9758a98c55ba301ddec80bda90cffc797dbc0098a4f14",
+            "pubkey": "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1",
+            "created_at": 1758092212,
+            "tags": [
+              [
+                "d",
+                "7162b89c-da8a-4889-b4df-db905d8ecf03"
+              ],
+              [
+                "a",
+                "30402:16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1:7162b89c-da8a-4889-b4df-db905d8ecf03"
+              ],
+              [
+                "r",
+                "degmods.com"
+              ],
+              [
+                "t",
+                "GameMod"
+              ],
+              [
+                "published_at",
+                "1758084486"
+              ],
+              [
+                "game",
+                "Fallout: New Vegas"
+              ],
+              [
+                "title",
+                "Smook's Police Gear Pack"
+              ],
+              [
+                "featuredImageUrl",
+                "https://bs.degmods.com/1cf575c9001aa4b035e16e1039322e45464caddf176dff89915d347134fb544d.png"
+              ],
+              [
+                "summary",
+                "Adds a bunch of police uniforms and armor to the game."
+              ],
+              [
+                "nsfw",
+                "false"
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshotsUrls",
+                "https://bs.degmods.com/1cf575c9001aa4b035e16e1039322e45464caddf176dff89915d347134fb544d.png",
+                "https://bs.degmods.com/3a6eabd248b0ac4f8825d78f22f6a14139e952ef9dbab16b1e643a9591a928f5.png",
+                "https://bs.degmods.com/3a38da62ecda8058b5578a9d3d52c8cd478b2828954ed41c4f5aeb8170b16da3.png",
+                "https://bs.degmods.com/81e9b015dbc11fbd2cd26b516e40d2aee8c18207f8ac8c720dded1d1d9b21ad9.png",
+                "https://bs.degmods.com/23a703a5f80b278cb874167547ea29e0b95617cb041fc4df573819591e673899.png",
+                "https://bs.degmods.com/5ff4a10f74063001810e73ac2ab77cba7cf07729410dd0e8b8df08c36149ec2a.png",
+                "https://bs.degmods.com/0a789b411b6c7e2920324aa29b503a141d20948258d96cef9b5a99afe19a8fc0.png",
+                "https://bs.degmods.com/3184502dab8b2181b5421ec0d79994616db13378191f512cc04645058ef33788.png",
+                "https://bs.degmods.com/ef9549e6f762aa731ece5a3133128bfc01b1ec5bab48646cb5621ff0daa3efff.png",
+                "https://bs.degmods.com/4672949ef698580f2f02ada7546822db54cfb8375cb668e89a4a86c52b144785.png",
+                "https://bs.degmods.com/8391f3abaf5f2121d5b9f01003ae7ffcc217264d71410e98caeaffbdcdf2565f.png",
+                "https://bs.degmods.com/c05e84172f3fb5cd1375285fa80aa7ec35e7ecf7158479828aff8ee6d8a2a8ac.png",
+                "https://bs.degmods.com/83a008af4bc03fa2ce52d5a8a5261df468a0d0d01c1b948be5928e3fa2d74a6a.png",
+                "https://bs.degmods.com/098adfd620b9433c47a88cd0ff8438bed72949064104a57dd0f2dac79ff3eb21.png",
+                "https://bs.degmods.com/67be1f3566a36185e5068cc953ba0fdffb319d010fc3fec2fe8d363f829e681c.png",
+                "https://bs.degmods.com/59d34eb62ce2e364d153ef1977719e9aa38617a41b09bf218a88b8bd9edca3f6.png",
+                "https://bs.degmods.com/f0868051630586a1fc27e4e565bbc4b57c60be4fddb828d0606dabf8b443c3e2.png",
+                "https://bs.degmods.com/81810caa6bc7da42215a503b47efcb502dbdd8b5f50a3eb0cacdb5f02139c0f0.png",
+                "https://bs.degmods.com/9f52615b92e1b28c864946257f2cf0f53a9c7ae535282f2eecd4243c902c18d7.png",
+                "https://bs.degmods.com/6d4a1bfce9f37f9160965e1d3f15f9d47d9037329938bc61c92cc76098d7dd84.png",
+                "https://bs.degmods.com/9487c1234c4e976c30dde67907a6e99ff237c0de1452ed6709578328ac4ab350.png",
+                "https://bs.degmods.com/9ae7a3c7831b68c2918e098818ca830d0e2c51c1772af1d93e553c6b2bad6b8b.png",
+                "https://bs.degmods.com/0628c4c9376872aa0475f35c58b5dfd288593058e0e098766047155c9619ce90.png",
+                "https://bs.degmods.com/2f17336b30a605c8d459f310c4c7de904270f9d1124ed2c205b462fcdbd7a292.png",
+                "https://bs.degmods.com/a868500b9d0a808adcb204faff1a67dec6da754b62c0aa17d492f485f6019076.png",
+                "https://bs.degmods.com/3bfc951c321f917b140e82c3eb27fe91af93a3a6bc70888f546de58c0cfa3db9.png",
+                "https://bs.degmods.com/874c7fd2efcc36c3d813bc0104a4d6e20e9b7f22edd3d86fabb188592b7b7371.png",
+                "https://bs.degmods.com/69d7c50845fc5a8784b2649eebf4e84cdfe812c8513a2882b4b1bd32739425e6.png",
+                "https://bs.degmods.com/24258621183bb32ace01d897eb4233a237d2b19a125aafe4a7b65da4e64484b3.png",
+                "https://bs.degmods.com/854600c50ef6a75c4128b95d9437ae7b162dd55aa1a655ea69b1e1491121af03.png",
+                "https://bs.degmods.com/19b90f691dfef42d0014b0b7c71ae3d0cf2f127a95e2b1a88ec172a6a7ced678.png",
+                "https://bs.degmods.com/b47fc84d57b002995beda3dff18041764318a4579e7c0ca276bb4afae005fc21.png",
+                "https://bs.degmods.com/35c7462468b7e3c996a520a056afad3d37e7c5ae77fabd1011fbdce703a8bdca.png",
+                "https://bs.degmods.com/ecbce375a45ac13bce065e3a4146fd4a29e4c1c42417b1fae1f57d2df4b0852e.png",
+                "https://bs.degmods.com/822546dc3fc0e486b087b2662e8f4292336e9a155116b425797bb60f3ebc9e56.png",
+                "https://bs.degmods.com/5de6807ef989e9225d7ce8a13b7c20da453dc078891016203c38eba6c65cb817.png",
+                "https://bs.degmods.com/449a7d444affc77200ab715ab29f6ada84c3b26c0ecc9eb3f8ee42680f428a27.png",
+                "https://bs.degmods.com/ad514eee432b5f808ea1bbaca99e189de0c4f5e1f0bce656cbccf50efeee5f84.png"
+              ],
+              [
+                "tags",
+                "Fallout",
+                " Fallout New Vegas",
+                " Fallout: New Vegas",
+                " FNV",
+                " Uniform",
+                " Armor",
+                " Police",
+                " Sheriff",
+                " Milkman",
+                ""
+              ],
+              [
+                "downloadUrls",
+                "{\"url\":\"https://bs.degmods.com/57e4fb2c82c6f67c82f5bec568e912d418a25d0c2abc2485c5415f0757ec57f2.zip\",\"hash\":\"57e4fb2c82c6f67c82f5bec568e912d418a25d0c2abc2485c5415f0757ec57f2\",\"malwareScanLink\":\"https://bs.degmods.com/scan/57e4fb2c82c6f67c82f5bec568e912d418a25d0c2abc2485c5415f0757ec57f2\",\"modVersion\":\"1.1\",\"customNote\":\"Fixed a missing texture.\",\"automaticHash\":\"57e4fb2c82c6f67c82f5bec568e912d418a25d0c2abc2485c5415f0757ec57f2\",\"automaticScanLink\":\"https://bs.degmods.com/scan/57e4fb2c82c6f67c82f5bec568e912d418a25d0c2abc2485c5415f0757ec57f2\",\"title\":\"Main File\"}",
+                "{\"url\":\"https://files.catbox.moe/bw0aw3.zip\",\"hash\":\"57e4fb2c82c6f67c82f5bec568e912d418a25d0c2abc2485c5415f0757ec57f2\",\"malwareScanLink\":\"https://bs.degmods.com/scan/57e4fb2c82c6f67c82f5bec568e912d418a25d0c2abc2485c5415f0757ec57f2\",\"modVersion\":\"1.1\",\"customNote\":\"Fixed a missing texture.\",\"automaticHash\":\"\",\"automaticScanLink\":\"\",\"title\":\"Main File (Backup Link)\"}"
+              ],
+              [
+                "otherAssets",
+                "true"
+              ],
+              [
+                "uploadPermission",
+                "true"
+              ],
+              [
+                "modPermission",
+                "true"
+              ],
+              [
+                "convPermission",
+                "true"
+              ],
+              [
+                "assetUsePermission",
+                "true"
+              ],
+              [
+                "assetUseComPermission",
+                "false"
+              ],
+              [
+                "publisherNotes",
+                ""
+              ],
+              [
+                "extraCredits",
+                ""
+              ],
+              [
+                "L",
+                "com.degmods:clothing"
+              ],
+              [
+                "l",
+                "com.degmods:clothing"
+              ]
+            ],
+            "content": "# Smook's Police Gear Pack\n\n::youtube{#_BxDXNCSjBQ}\n\n# What is it?\n\nThis mod adds a bunch of police uniforms and armor to the game. Specifically 4 different versions in 3 different types:\n\n* Las Vegas Police Department\n* Sheriff\n* Freelance Police\n* New Vegas Milk Company\n\n# Where to get them?\n\nThere's an industrial grade shipment of each inside of a respawning crate in the Nevada Highway Patrol Station\n\n# Credits:\n\n[mrconvict](https://next.nexusmods.com/profile/mrconvict?gameId=130 \"mrconvict\") for the Uniform mesh and Sheriff Uniform textures.\n\n[nofear88](https://next.nexusmods.com/profile/nofear88?gameId=130 \"nofear88\") for the LVPD Uniform textures.\n\n[Testudini](https://next.nexusmods.com/profile/Testudini?gameId=130 \"Testudini\") for the NVMC Milkman textures.\n\n[eric3844](https://next.nexusmods.com/profile/eric3844?gameId=130 \"eric3844\") for the Shoulder Harness mesh.\n\nMe for the Freelance Police textures and various texture and mesh edits.",
+            "sig": "dfe547ae6268bea602339ddd61fd8d3b34d9187a6bbd27b72a97e535f069e076c4b4453353f8078c7b034f23e169571ab3a54fbe2f4538f895b3b26257ce6b79"
+          }
+        ],
+        [
+          "EOSE",
+          "s3"
+        ]
+      ]
+    },
+    {
+      "name": "mod 16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1:cae0605a-cf81-47df-8cfc-c06eb6c458dd",
+      "request": [
+        "REQ",
+        "s4",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1"
+          ],
+          "#d": [
+            "cae0605a-cf81-47df-8cfc-c06eb6c458dd"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s4",
+          {
+            "kind": 31142,
+            "id": "00011d0eee7e7ef346d9d4728835bed5cd52ad6a3f11db1ba21b155b65171b4a",
+            "pubkey": "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1",
+            "created_at": 1754443827,
+            "tags": [
+              [
+                "d",
+                "cae0605a-cf81-47df-8cfc-c06eb6c458dd"
+              ],
+              [
+                "published_at",
+                "1753111314"
+              ],
+              [
+                "g",
+                "Fallout: New Vegas"
+              ],
+              [
+                "title",
+                "Enclave General Outfit"
+              ],
+              [
+                "image",
+                "https://image.nostr.build/07e782deb841548ab1d45c3880c63f5046a5fff1b73499f13f2bab850bc016b4.png"
+              ],
+              [
+                "summary",
+                "Adds an Enclave General's uniform and hat to the game."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshots",
+                "https://image.nostr.build/07e782deb841548ab1d45c3880c63f5046a5fff1b73499f13f2bab850bc016b4.png",
+                "https://image.nostr.build/c4edebbe7080c2b0baee12597bb7c6edaa4d6d41cd244130ededc145f2edae4a.png",
+                "https://image.nostr.build/0640e595cfc2e23c0ca92cd0988211bbbfd58551346eb2dfb5db9b78d1446ad9.png"
+              ],
+              [
+                "t",
+                "fallout"
+              ],
+              [
+                "t",
+                "new vegas"
+              ],
+              [
+                "t",
+                "fallout new vegas"
+              ],
+              [
+                "t",
+                "fnv"
+              ],
+              [
+                "t",
+                "armor"
+              ],
+              [
+                "t",
+                "clothes"
+              ],
+              [
+                "t",
+                "uniform"
+              ],
+              [
+                "t",
+                "enclave"
+              ],
+              [
+                "t",
+                "sneedclave"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://brs.degmods.com/32d65f1388736b000cfc35c708210aa556513dc2107dd5fea9b75dd243d44c64.zip\",\"title\":\" Main File\",\"hash\":\"32d65f1388736b000cfc35c708210aa556513dc2107dd5fea9b75dd243d44c64\",\"filename\":\"SmooksEnclaveGeneral.zip\",\"version\":\"1.0\",\"note\":\"Added a new link since catbox is a shitty site.\",\"scans\":[{\"label\":\"VirusTotal\",\"url\":\"https://www.virustotal.com/gui/file/32d65f1388736b000cfc35c708210aa556513dc2107dd5fea9b75dd243d44c64\"},{\"label\":\"Hybrid Analysis\",\"url\":\"https://www.hybrid-analysis.com/sample/32d65f1388736b000cfc35c708210aa556513dc2107dd5fea9b75dd243d44c64\"},{\"label\":\"Malware scan\",\"url\":\"https://www.virustotal.com/gui/file/fd634b65109c6071e79763c71777f5d931e98e3644358d7b6d198f8b0c2fae3b?nocache=1\"}]}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:true"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "6f3e24"
+              ],
+              [
+                "nonce",
+                "11605",
+                "15"
+              ]
+            ],
+            "content": "> ![](https://i.postimg.cc/RFTJzXBG/President-John-Henry-Sneeden-Avatar.png \"Approved by Enclave President John Henry Sneeden himself!\")\n>\n> ***Approved by Enclave President John Henry Sneeden himself!***\n\n# **The hell is this?**\n\nThis mod Adds an Enclave General's uniform and hat to the game. Pretty much exactly what it says on the can.\n\n# **Where to get em?**\n\nThey can be found inside a locker in the Remnants Bunker. They can also be spawned into the game with the following console commands (Replace XX with the mod's current load order number, you know the drill.)\n\n| player.additem XX000BF8 1     | **Enclave General Outfit** |\n| ----------------------------- | -------------------------- |\n| **player.additem XX000BF9 1** | **Enclave General Cap**    |\n\nPipe can be downloaded right [here.](https://degmods.com/mod/naddr1qvzqqqre5cpzq9hz8h2xmr6p8d4fj0l424vyr5ddwm04u328dtdggkfltm2vrcd3qqjrxe3hx3jrxctr956kycmy956r2wp495urjefe956nvd3jx9sngenyvyenvsqzrwp)\n\n# **Credits:**\n\n[**eric3844**](https://next.nexusmods.com/profile/eric3844 \"eric3844\") for the armband mesh.\n\n[**Andragorn**](https://next.nexusmods.com/profile/Deleted432558User \"Andragorn\") for the medal cord mesh.\n\n**Me** for the hat textures as well as the coat mesh and texture edits.",
+            "sig": "2016c1dff6870333a851ff908b7d151fc503be0dd2d43fcebdbc4bc7a08a0de3e2fe6859e1d698292b571fac149c2c8ebb0f150113228f5dfe3991480ec94674"
+          }
+        ],
+        [
+          "EVENT",
+          "s4",
+          {
+            "kind": 30402,
+            "id": "5b1a0953206b5d135e281a50cf37506063a9a8433fb20924dbfeff2158013830",
+            "pubkey": "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1",
+            "created_at": 1754443824,
+            "tags": [
+              [
+                "d",
+                "cae0605a-cf81-47df-8cfc-c06eb6c458dd"
+              ],
+              [
+                "a",
+                "30402:16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1:cae0605a-cf81-47df-8cfc-c06eb6c458dd"
+              ],
+              [
+                "r",
+                "degmods.com"
+              ],
+              [
+                "t",
+                "GameMod"
+              ],
+              [
+                "published_at",
+                "1753111314"
+              ],
+              [
+                "game",
+                "Fallout: New Vegas"
+              ],
+              [
+                "title",
+                "Enclave General Outfit"
+              ],
+              [
+                "featuredImageUrl",
+                "https://image.nostr.build/07e782deb841548ab1d45c3880c63f5046a5fff1b73499f13f2bab850bc016b4.png"
+              ],
+              [
+                "summary",
+                "Adds an Enclave General's uniform and hat to the game."
+              ],
+              [
+                "nsfw",
+                "false"
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshotsUrls",
+                "https://image.nostr.build/07e782deb841548ab1d45c3880c63f5046a5fff1b73499f13f2bab850bc016b4.png",
+                "https://image.nostr.build/c4edebbe7080c2b0baee12597bb7c6edaa4d6d41cd244130ededc145f2edae4a.png",
+                "https://image.nostr.build/0640e595cfc2e23c0ca92cd0988211bbbfd58551346eb2dfb5db9b78d1446ad9.png"
+              ],
+              [
+                "tags",
+                "Fallout",
+                " New Vegas",
+                " Fallout New Vegas",
+                " FNV",
+                " Armor",
+                " Clothes",
+                " Uniform",
+                " Enclave",
+                " Sneedclave",
+                ""
+              ],
+              [
+                "downloadUrls",
+                "{\"title\":\" Main File\",\"url\":\"https://files.catbox.moe/0ydpe6.7z\",\"hash\":\"\",\"malwareScanLink\":\"https://www.virustotal.com/gui/file/fd634b65109c6071e79763c71777f5d931e98e3644358d7b6d198f8b0c2fae3b?nocache=1\",\"modVersion\":\"1.0\",\"customNote\":\"\",\"mediaUrl\":\"\"}"
+              ],
+              [
+                "otherAssets",
+                "true"
+              ],
+              [
+                "uploadPermission",
+                "true"
+              ],
+              [
+                "modPermission",
+                "true"
+              ],
+              [
+                "convPermission",
+                "true"
+              ],
+              [
+                "assetUsePermission",
+                "true"
+              ],
+              [
+                "assetUseComPermission",
+                "false"
+              ],
+              [
+                "publisherNotes",
+                ""
+              ],
+              [
+                "extraCredits",
+                ""
+              ],
+              [
+                "L",
+                "com.degmods:clothing"
+              ],
+              [
+                "l",
+                "com.degmods:clothing"
+              ]
+            ],
+            "content": "> ![](https://i.postimg.cc/RFTJzXBG/President-John-Henry-Sneeden-Avatar.png \"Approved by Enclave President John Henry Sneeden himself!\")\n>\n> ***Approved by Enclave President John Henry Sneeden himself!***\n\n# **The hell is this?**\n\nThis mod Adds an Enclave General's uniform and hat to the game. Pretty much exactly what it says on the can.\n\n# **Where to get em?**\n\nThey can be found inside a locker in the Remnants Bunker. They can also be spawned into the game with the following console commands (Replace XX with the mod's current load order number, you know the drill.)\n\n| player.additem XX000BF8 1     | **Enclave General Outfit** |\n| ----------------------------- | -------------------------- |\n| **player.additem XX000BF9 1** | **Enclave General Cap**    |\n\nPipe can be downloaded right [here.](https://degmods.com/mod/naddr1qvzqqqrkcgpzq9hz8h2xmr6p8d4fj0l424vyr5ddwm04u328dtdggkfltm2vrcd3qy2hwumn8ghj7un9d3shjtnyv9kh2uewd9hj7qgcwaehxw309aex2mrp0yhxget8d4hkguewvdhk6tcqdvenqdpsxgarzdn9xgekgep5xejrse35xyekydnp8yunxenxx56n2dfcxsckgvtpvsmnverxx4jngdf5xumxzerp8q6r2wfnvc6k2ep5vvck2vtzxyarxe3hx3jrxctr956kycmy956r2wp495urjefe956nvd3jx9sngenyvyenvj3tzp6/ \"here.\")\n\n# **Credits:**\n\n[**eric3844**](https://next.nexusmods.com/profile/eric3844 \"eric3844\") for the armband mesh.\n\n[**Andragorn**](https://next.nexusmods.com/profile/Deleted432558User \"Andragorn\") for the medal cord mesh.\n\n**Me** for the hat textures as well as the coat mesh and texture edits.",
+            "sig": "42f51c0bd0ffb5c3b74cf871e51cbd772abb1cf73d897c79d98cdb41b10b6ff7c05c65cbf1094f33ceba643740be0f78239be5054fdd473a3382df38f1af0c81"
+          }
+        ],
+        [
+          "EOSE",
+          "s4"
+        ]
+      ]
+    },
+    {
+      "name": "mod 16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1:3f74d3ac-5bcd-4585-89e9-56621a4fda36",
+      "request": [
+        "REQ",
+        "s5",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1"
+          ],
+          "#d": [
+            "3f74d3ac-5bcd-4585-89e9-56621a4fda36"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s5",
+          {
+            "kind": 31142,
+            "id": "0001fff8517f5957dd6ef82bc34bcb044d78885bd190912bf2b44b61c1dfcbb6",
+            "pubkey": "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1",
+            "created_at": 1754443536,
+            "tags": [
+              [
+                "d",
+                "3f74d3ac-5bcd-4585-89e9-56621a4fda36"
+              ],
+              [
+                "published_at",
+                "1753408684"
+              ],
+              [
+                "g",
+                "Fallout: New Vegas"
+              ],
+              [
+                "title",
+                "Smook's Equipable Pipes"
+              ],
+              [
+                "image",
+                "https://image.nostr.build/883b59a5bfeb8607101715ec047ee02adaa0abc1840603c551325958040c1404.png"
+              ],
+              [
+                "summary",
+                "Adds equipable tobacco pipes to the game for your smoking pleasure."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshots",
+                "https://image.nostr.build/883b59a5bfeb8607101715ec047ee02adaa0abc1840603c551325958040c1404.png",
+                "https://image.nostr.build/ffe6a6293e8d56925648ab57c6e88553d8e74b9ffc72fe1ff404af40953b1e55.png",
+                "https://image.nostr.build/2be865837e33e5f7641f52215087ed4260ba4da51f12955cdfa2df1052c3b7ba.png",
+                "https://image.nostr.build/0e97dc91523dffec61231ceb0ccfbe4de688b9607052a33918edd22eb517b695.png",
+                "https://image.nostr.build/4643985c12eca81faa77531ad6b864ff21eaafa91b5adbbc6f08c0b89aee0175.png"
+              ],
+              [
+                "t",
+                "fallout"
+              ],
+              [
+                "t",
+                "new vegas"
+              ],
+              [
+                "t",
+                "fallout new vegas"
+              ],
+              [
+                "t",
+                "fallout: new vegas"
+              ],
+              [
+                "t",
+                "fnv"
+              ],
+              [
+                "t",
+                "cosmetics"
+              ],
+              [
+                "t",
+                "accessories"
+              ],
+              [
+                "t",
+                "pipe"
+              ],
+              [
+                "t",
+                "smoking"
+              ],
+              [
+                "t",
+                "tobacco"
+              ],
+              [
+                "t",
+                "marijuana"
+              ],
+              [
+                "t",
+                "frop"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://brs.degmods.com/fe50a9988aed71f97a2896b5ec267972046f1571cd101866b58b93e7b0544bd2.zip\",\"title\":\"Main File\",\"hash\":\"fe50a9988aed71f97a2896b5ec267972046f1571cd101866b58b93e7b0544bd2\",\"filename\":\"SmooksEquipablePipes.zip\",\"version\":\"1.0\",\"note\":\"Added new link since catbox is a shitty site.\",\"scans\":[{\"label\":\"VirusTotal\",\"url\":\"https://www.virustotal.com/gui/file/fe50a9988aed71f97a2896b5ec267972046f1571cd101866b58b93e7b0544bd2\"},{\"label\":\"Hybrid Analysis\",\"url\":\"https://www.hybrid-analysis.com/sample/fe50a9988aed71f97a2896b5ec267972046f1571cd101866b58b93e7b0544bd2\"},{\"label\":\"Malware scan\",\"url\":\"https://www.virustotal.com/gui/file/f56414a9c9e306e98e00e3bd434e454ab76a71fc8928e931f6253938eca7a48c?nocache=1\"}]}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:true"
+              ],
+              [
+                "c",
+                "[\"items\",\"accessories\"]"
+              ],
+              [
+                "h",
+                "[\"items\"]"
+              ],
+              [
+                "h",
+                "[\"items\",\"accessories\"]"
+              ],
+              [
+                "f",
+                "items"
+              ],
+              [
+                "f",
+                "accessories"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "a22e1b"
+              ],
+              [
+                "nonce",
+                "24865",
+                "15"
+              ]
+            ],
+            "content": "<iframe width=\"807\" height=\"605\" src=\"https://www.youtube.com/embed/mTNYwHxfqcQ\" title=\"Ren and Stimpy - &quot;Smokin&#39;&quot;\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen></iframe>\n\n# **What ya got there?**\n\nThis mod adds equipable 1950s J.R. \"Bob\" Dobbs style tobacco pipes to the game, complete with working smoke effects. Comes in 3 versions A tobacco pipe, a marijuana pipe, and a frop pipe. All of them are identical gameplay wise since they are just cosmetic items. (I might add object effects to them later on idk.)\n\n# **Where to get em?**\n\nAll 3 can be found sitting on a shelf in Doc Mitchell's house. Alternatively if you want to spawn em yourself in the console, the codes to do so can be found here:\n\n| **player.additem XX000ADD 1** | Tobacco Pipe       |\n| ----------------------------- | ------------------ |\n| **player.additem XX000ADE 1** | **Marijuana Pipe** |\n| **player.additem XX000ADF 1** | **Frop Pipe**      |\n\n# **Credits:**\n\n[**Jokerine**](https://next.nexusmods.com/profile/Jokerine?gameId=130 \"Jokerine\")**/Dinky** for creating the Tobacco pipe mesh and textures\n\n**Me** for editing said meshes and textures & creating this mod.",
+            "sig": "a4300d848e848a582ba3db8bd546c9ad8d3158a4003ceeb822beeec3ce9f77a199ead563a1a9ef4a4caa55c04702b491dcc37fc7326141bb8e7f7b7e7f94ffd9"
+          }
+        ],
+        [
+          "EVENT",
+          "s5",
+          {
+            "kind": 30402,
+            "id": "b2fae8179d89396e66a53974b4a4c7b28b2dfccefc4e48d1fbd07624b1370d09",
+            "pubkey": "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1",
+            "created_at": 1754443531,
+            "tags": [
+              [
+                "d",
+                "3f74d3ac-5bcd-4585-89e9-56621a4fda36"
+              ],
+              [
+                "a",
+                "30402:16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1:3f74d3ac-5bcd-4585-89e9-56621a4fda36"
+              ],
+              [
+                "r",
+                "degmods.com"
+              ],
+              [
+                "t",
+                "GameMod"
+              ],
+              [
+                "published_at",
+                "1753408684"
+              ],
+              [
+                "game",
+                "Fallout: New Vegas"
+              ],
+              [
+                "title",
+                "Smook's Equipable Pipes"
+              ],
+              [
+                "featuredImageUrl",
+                "https://image.nostr.build/883b59a5bfeb8607101715ec047ee02adaa0abc1840603c551325958040c1404.png"
+              ],
+              [
+                "summary",
+                "Adds equipable tobacco pipes to the game for your smoking pleasure."
+              ],
+              [
+                "nsfw",
+                "false"
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshotsUrls",
+                "https://image.nostr.build/883b59a5bfeb8607101715ec047ee02adaa0abc1840603c551325958040c1404.png",
+                "https://image.nostr.build/ffe6a6293e8d56925648ab57c6e88553d8e74b9ffc72fe1ff404af40953b1e55.png",
+                "https://image.nostr.build/2be865837e33e5f7641f52215087ed4260ba4da51f12955cdfa2df1052c3b7ba.png",
+                "https://image.nostr.build/0e97dc91523dffec61231ceb0ccfbe4de688b9607052a33918edd22eb517b695.png",
+                "https://image.nostr.build/4643985c12eca81faa77531ad6b864ff21eaafa91b5adbbc6f08c0b89aee0175.png"
+              ],
+              [
+                "tags",
+                "Fallout",
+                " New Vegas",
+                " Fallout New Vegas",
+                " Fallout: New Vegas",
+                " FNV",
+                " Cosmetics",
+                " Accessories",
+                " Pipe",
+                " Smoking",
+                " Tobacco",
+                " Marijuana",
+                " Frop",
+                ""
+              ],
+              [
+                "downloadUrls",
+                "{\"title\":\"Main File\",\"url\":\"https://files.catbox.moe/id991e.7z\",\"hash\":\"\",\"malwareScanLink\":\"https://www.virustotal.com/gui/file/f56414a9c9e306e98e00e3bd434e454ab76a71fc8928e931f6253938eca7a48c?nocache=1\",\"modVersion\":\"1.0\",\"customNote\":\"\",\"mediaUrl\":\"\"}"
+              ],
+              [
+                "otherAssets",
+                "true"
+              ],
+              [
+                "uploadPermission",
+                "true"
+              ],
+              [
+                "modPermission",
+                "true"
+              ],
+              [
+                "convPermission",
+                "true"
+              ],
+              [
+                "assetUsePermission",
+                "true"
+              ],
+              [
+                "assetUseComPermission",
+                "false"
+              ],
+              [
+                "publisherNotes",
+                ""
+              ],
+              [
+                "extraCredits",
+                ""
+              ],
+              [
+                "L",
+                "com.degmods:clothing"
+              ],
+              [
+                "l",
+                "com.degmods:clothing"
+              ]
+            ],
+            "content": "::youtube{#mTNYwHxfqcQ}\n\n# **What ya got there?**\n\nThis mod adds equipable 1950s J.R. \"Bob\" Dobbs style tobacco pipes to the game, complete with working smoke effects. Comes in 3 versions A tobacco pipe, a marijuana pipe, and a frop pipe. All of them are identical gameplay wise since they are just cosmetic items. (I might add object effects to them later on idk.)\n\n# **Where to get em?**\n\nAll 3 can be found sitting on a shelf in Doc Mitchell's house. Alternatively if you want to spawn em yourself in the console, the codes to do so can be found here:\n\n| **player.additem XX000ADD 1** | Tobacco Pipe       |\n| ----------------------------- | ------------------ |\n| **player.additem XX000ADE 1** | **Marijuana Pipe** |\n| **player.additem XX000ADF 1** | **Frop Pipe**      |\n\n# **Credits:**\n\n[**Jokerine**](https://next.nexusmods.com/profile/Jokerine?gameId=130 \"Jokerine\")**/Dinky** for creating the Tobacco pipe mesh and textures\n\n**Me** for editing said meshes and textures & creating this mod.",
+            "sig": "aa98d83296530f6d712caf11f197c1bac92b9001ebd2769e8bd118603b2874eeb31e9edbd80538b66938f068ddf6463ed94d51b6c00990e9c5f71ad6a1c816ab"
+          }
+        ],
+        [
+          "EOSE",
+          "s5"
+        ]
+      ]
+    },
+    {
+      "name": "mod c3712e02c22d4afba641ba8a2f9da724c1e4cf67ed97c4965eb762d603822eb9:1d5868f2-8fa3-4b38-b135-64843c076f9b",
+      "request": [
+        "REQ",
+        "s6",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "c3712e02c22d4afba641ba8a2f9da724c1e4cf67ed97c4965eb762d603822eb9"
+          ],
+          "#d": [
+            "1d5868f2-8fa3-4b38-b135-64843c076f9b"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s6",
+          {
+            "kind": 31142,
+            "id": "00002e9a81bf25f7722de1b5ca9b0083f352f2d17c03f78cb034de6cdec2b51f",
+            "pubkey": "c3712e02c22d4afba641ba8a2f9da724c1e4cf67ed97c4965eb762d603822eb9",
+            "created_at": 1786820820,
+            "tags": [
+              [
+                "d",
+                "1d5868f2-8fa3-4b38-b135-64843c076f9b"
+              ],
+              [
+                "published_at",
+                "1786820819"
+              ],
+              [
+                "g",
+                "Street Fighter 6"
+              ],
+              [
+                "title",
+                "Reject Wifi"
+              ],
+              [
+                "image",
+                "https://blossom.primal.net/c31262b856ef627e27fc4cd3d1f5cf91734c22517477f519dffa8372669bc6e8.jpg"
+              ],
+              [
+                "summary",
+                "Automatically declines WiFi connections"
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "dependencies",
+                "REFramework",
+                "https://github.com/praydog/REFramework"
+              ],
+              [
+                "screenshots",
+                "https://blossom.primal.net/c0fb4bb7ea258287323e716a67b5136726f3b3d0a83b0d10552bec22c96323d8.png"
+              ],
+              [
+                "t",
+                "ui"
+              ],
+              [
+                "t",
+                "quality of life"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://brs.degmods.com/89bc8f13f765438417ed8aaae2c3318ca4ad0e49b66dbd6a1d2e3aadd1aef545.zip\",\"title\":\"RejectWifi (original)\",\"hash\":\"89bc8f13f765438417ed8aaae2c3318ca4ad0e49b66dbd6a1d2e3aadd1aef545\",\"filename\":\"reframework.zip\",\"version\":\"3.1\",\"note\":\"The older original version without the random decline delay option.\",\"scans\":[{\"label\":\"VirusTotal\",\"url\":\"https://www.virustotal.com/gui/file/89bc8f13f765438417ed8aaae2c3318ca4ad0e49b66dbd6a1d2e3aadd1aef545\"}]}"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://brs.degmods.com/8fd6e5a7d1b79081691346cd5200f57d40506ad32b703c1c902f14e1c63833bb.zip\",\"title\":\"RejectWifi\",\"hash\":\"8fd6e5a7d1b79081691346cd5200f57d40506ad32b703c1c902f14e1c63833bb\",\"filename\":\"reframework.zip\",\"version\":\"4.0\",\"note\":\"Newer version with the random decline delay option and more robust checks\",\"scans\":[{\"label\":\"VirusTotal\",\"url\":\"https://www.virustotal.com/gui/file/8fd6e5a7d1b79081691346cd5200f57d40506ad32b703c1c902f14e1c63833bb\"}]}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "credits",
+                "based on the original RejectWifi mod"
+              ],
+              [
+                "c",
+                "[\"interface\"]"
+              ],
+              [
+                "h",
+                "[\"interface\"]"
+              ],
+              [
+                "f",
+                "interface"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "00ee16"
+              ],
+              [
+                "nonce",
+                "26376",
+                "15"
+              ]
+            ],
+            "content": "**Description**\nA small Street Fighter 6 plugin that automatically declines Wi-Fi opponents during matchmaking.\nThe plugin reads the connection type reported by the game and tries to reject a Wi-Fi match before the confirmation screen. \n\n**Installation instructions**\n1. Install REFramework for Street Fighter 6.\n2. Download and extract RejectWifi.\n3. Copy `RejectWifi.dll` into:\n   `Street Fighter 6/reframework/plugins`\n4. Start the game.\n\nSettings can be changed at runtime from the `RejectWifi` section of the REFramework UI, open with Insert key [INS]\n\nTo uninstall the mod, delete `RejectWifi.dll` from `reframework/plugins`.\n\n**Main features**\n- Automatically and silently declines opponents reported by the game as using Wi-Fi.\n\nOptional features:\n- log declined Wi-Fi matches\n- open the matchmaking settings window after a connection error\n- independently enable for Ranked, Casual and Avatar matchmaking\n- optional randomized delay before declining a match - you need to turn on \"Confirm opponent\" for this\n\n**Requirements**\nREFramework",
+            "sig": "a84a4b90020fc3cacfff8fbeda5bc2ed513ecfe0e5d0ba776ec719381e2811bf8f4dfd701948cb597e723ac2396b96a866fd2d546970d498ed03f69691675e1d"
+          }
+        ],
+        [
+          "EOSE",
+          "s6"
+        ]
+      ]
+    },
+    {
+      "name": "mod a15550047ac16022e0b11381cbe0ad5dd22e2d0555bb50827aee57e3c379b71a:1ff99bb8-1543-491e-9e7a-dfbfc57c7b8b",
+      "request": [
+        "REQ",
+        "s7",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "a15550047ac16022e0b11381cbe0ad5dd22e2d0555bb50827aee57e3c379b71a"
+          ],
+          "#d": [
+            "1ff99bb8-1543-491e-9e7a-dfbfc57c7b8b"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s7",
+          {
+            "kind": 31142,
+            "id": "0000695c10d5d214ec946d0f48318ed3c79ddac10c1871ed729168d9989ab4bf",
+            "pubkey": "a15550047ac16022e0b11381cbe0ad5dd22e2d0555bb50827aee57e3c379b71a",
+            "created_at": 1776429189,
+            "tags": [
+              [
+                "d",
+                "1ff99bb8-1543-491e-9e7a-dfbfc57c7b8b"
+              ],
+              [
+                "published_at",
+                "1768087102"
+              ],
+              [
+                "g",
+                "Mafia"
+              ],
+              [
+                "title",
+                "No Talking"
+              ],
+              [
+                "image",
+                "https://bs.degmods.com/4d3ba8343d5bc3b1d533487e2157a0d4b11a0e2eccfa82abd688c863d6143551.png"
+              ],
+              [
+                "summary",
+                "removes all the voice lines from the game"
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshots",
+                "https://bs.degmods.com/4d3ba8343d5bc3b1d533487e2157a0d4b11a0e2eccfa82abd688c863d6143551.png"
+              ],
+              [
+                "t",
+                "no talking"
+              ],
+              [
+                "t",
+                "voice lines"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://bs.degmods.com/1d01960a4a9964c7ab5a32c643acdb3031760eb12ce8f4ad6d5f93714e41a0df.zip\",\"title\":\"No Talking 2.2 Final\",\"hash\":\"1d01960a4a9964c7ab5a32c643acdb3031760eb12ce8f4ad6d5f93714e41a0df\",\"version\":\"2.2\",\"scans\":[{\"label\":\"Malware scan\",\"url\":\"https://bs.degmods.com/scan/1d01960a4a9964c7ab5a32c643acdb3031760eb12ce8f4ad6d5f93714e41a0df\"}]}"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://bs.degmods.com/3b38921892d3d9200b07600da2ce04f4ed305469d81d02710ac3a60ffe948793.zip\",\"title\":\"No Talking 1.0\",\"hash\":\"3b38921892d3d9200b07600da2ce04f4ed305469d81d02710ac3a60ffe948793\",\"version\":\"1.0\",\"scans\":[{\"label\":\"Malware scan\",\"url\":\"https://bs.degmods.com/scan/3b38921892d3d9200b07600da2ce04f4ed305469d81d02710ac3a60ffe948793\"}]}"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://bs.degmods.com/59a52281b53a8abb3fa64603a3508f70828fbd0a5b4d9c792e0fcca975ce6d01.zip\",\"title\":\"No Talking 2.0\",\"hash\":\"59a52281b53a8abb3fa64603a3508f70828fbd0a5b4d9c792e0fcca975ce6d01\",\"version\":\"2.0\",\"scans\":[{\"label\":\"Malware scan\",\"url\":\"https://bs.degmods.com/scan/59a52281b53a8abb3fa64603a3508f70828fbd0a5b4d9c792e0fcca975ce6d01\"}]}"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://bs.degmods.com/02dabbd86822140a4713e5fe38543a6354344722015bbe4cc24e27f417596a1d.zip\",\"title\":\"No Talking 2.1\",\"hash\":\"02dabbd86822140a4713e5fe38543a6354344722015bbe4cc24e27f417596a1d\",\"version\":\"2.1\",\"scans\":[{\"label\":\"Malware scan\",\"url\":\"https://bs.degmods.com/scan/02dabbd86822140a4713e5fe38543a6354344722015bbe4cc24e27f417596a1d\"}]}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "f3aaa5"
+              ],
+              [
+                "nonce",
+                "55703",
+                "15"
+              ]
+            ],
+            "content": "This mod removes all the voice lines from the game. Mod was made and tested in English 1.0 version but with the new update should work on any language version. This mod was not tested with the Lucas Bertone mission. If you have issues with this mod, you can contact me on discord or twitter @PlusProMichal.\n\n**Changelogs:**\n\nThe final version is here! Version 2.2 is another hotfix for 2.0 that mutes 1 sound file from Chapter 19 and adds an optional folder with the credits song without the lyrics (used AI to make that one so thats why its optional).\n\nI made a new hotfix update 2.1 that fixes a crash when entering the villa in Visiting Rich People.\n\nNew update 2.0 is here: it fixes softlock in Better Get Used To It, mutes people in The Priest and also should mute every voice line in any language version of the game.&#x20;\n\n**How to install**:\n\ngo into the mafia folder and just put the sounds folder in and replace everything.\n\nShowcase of this mod: [https://www.youtube.com/watch?v\\=8Rd-rTq\\_jic](https://www.youtube.com/watch?v=8Rd-rTq_jic)",
+            "sig": "d8e6200cd63e8b359ec293e063fe957f72ae333b3f7bb6f4bfd7d871e25d3f063522e45c3b4e3bae6ed8c60d7ddf72355a52692e4c99b44d4223ed54117d8a7c"
+          }
+        ],
+        [
+          "EVENT",
+          "s7",
+          {
+            "kind": 30402,
+            "id": "34bb2bbef4fdd5f9457c1bd97c3541f45dc1b056b9efe06a7babef1e9f171741",
+            "pubkey": "a15550047ac16022e0b11381cbe0ad5dd22e2d0555bb50827aee57e3c379b71a",
+            "created_at": 1776429189,
+            "tags": [
+              [
+                "d",
+                "1ff99bb8-1543-491e-9e7a-dfbfc57c7b8b"
+              ],
+              [
+                "a",
+                "30402:a15550047ac16022e0b11381cbe0ad5dd22e2d0555bb50827aee57e3c379b71a:1ff99bb8-1543-491e-9e7a-dfbfc57c7b8b"
+              ],
+              [
+                "r",
+                "degmods.com"
+              ],
+              [
+                "t",
+                "GameMod"
+              ],
+              [
+                "published_at",
+                "1768087102"
+              ],
+              [
+                "game",
+                "Mafia"
+              ],
+              [
+                "title",
+                "No Talking"
+              ],
+              [
+                "featuredImageUrl",
+                "https://bs.degmods.com/4d3ba8343d5bc3b1d533487e2157a0d4b11a0e2eccfa82abd688c863d6143551.png"
+              ],
+              [
+                "summary",
+                "removes all the voice lines from the game"
+              ],
+              [
+                "nsfw",
+                "false"
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshotsUrls",
+                "https://bs.degmods.com/4d3ba8343d5bc3b1d533487e2157a0d4b11a0e2eccfa82abd688c863d6143551.png"
+              ],
+              [
+                "tags",
+                "No Talking",
+                " Voice Lines"
+              ],
+              [
+                "downloadUrls",
+                "{\"title\":\"No Talking 2.2 Final\",\"url\":\"https://bs.degmods.com/1d01960a4a9964c7ab5a32c643acdb3031760eb12ce8f4ad6d5f93714e41a0df.zip\",\"hash\":\"1d01960a4a9964c7ab5a32c643acdb3031760eb12ce8f4ad6d5f93714e41a0df\",\"malwareScanLink\":\"https://bs.degmods.com/scan/1d01960a4a9964c7ab5a32c643acdb3031760eb12ce8f4ad6d5f93714e41a0df\",\"modVersion\":\"2.2\",\"customNote\":\"\",\"mediaUrl\":\"\",\"automaticHash\":\"1d01960a4a9964c7ab5a32c643acdb3031760eb12ce8f4ad6d5f93714e41a0df\",\"automaticScanLink\":\"https://bs.degmods.com/scan/1d01960a4a9964c7ab5a32c643acdb3031760eb12ce8f4ad6d5f93714e41a0df\"}",
+                "{\"url\":\"https://bs.degmods.com/3b38921892d3d9200b07600da2ce04f4ed305469d81d02710ac3a60ffe948793.zip\",\"hash\":\"3b38921892d3d9200b07600da2ce04f4ed305469d81d02710ac3a60ffe948793\",\"malwareScanLink\":\"https://bs.degmods.com/scan/3b38921892d3d9200b07600da2ce04f4ed305469d81d02710ac3a60ffe948793\",\"modVersion\":\"1.0\",\"customNote\":\"\",\"automaticHash\":\"3b38921892d3d9200b07600da2ce04f4ed305469d81d02710ac3a60ffe948793\",\"automaticScanLink\":\"https://bs.degmods.com/scan/3b38921892d3d9200b07600da2ce04f4ed305469d81d02710ac3a60ffe948793\",\"title\":\"No Talking 1.0\"}",
+                "{\"url\":\"https://bs.degmods.com/59a52281b53a8abb3fa64603a3508f70828fbd0a5b4d9c792e0fcca975ce6d01.zip\",\"hash\":\"59a52281b53a8abb3fa64603a3508f70828fbd0a5b4d9c792e0fcca975ce6d01\",\"malwareScanLink\":\"https://bs.degmods.com/scan/59a52281b53a8abb3fa64603a3508f70828fbd0a5b4d9c792e0fcca975ce6d01\",\"modVersion\":\"2.0\",\"customNote\":\"\",\"automaticHash\":\"59a52281b53a8abb3fa64603a3508f70828fbd0a5b4d9c792e0fcca975ce6d01\",\"automaticScanLink\":\"https://bs.degmods.com/scan/59a52281b53a8abb3fa64603a3508f70828fbd0a5b4d9c792e0fcca975ce6d01\",\"title\":\"No Talking 2.0\"}",
+                "{\"url\":\"https://bs.degmods.com/02dabbd86822140a4713e5fe38543a6354344722015bbe4cc24e27f417596a1d.zip\",\"hash\":\"02dabbd86822140a4713e5fe38543a6354344722015bbe4cc24e27f417596a1d\",\"malwareScanLink\":\"https://bs.degmods.com/scan/02dabbd86822140a4713e5fe38543a6354344722015bbe4cc24e27f417596a1d\",\"modVersion\":\"2.1\",\"customNote\":\"\",\"automaticHash\":\"02dabbd86822140a4713e5fe38543a6354344722015bbe4cc24e27f417596a1d\",\"automaticScanLink\":\"https://bs.degmods.com/scan/02dabbd86822140a4713e5fe38543a6354344722015bbe4cc24e27f417596a1d\",\"title\":\"No Talking 2.1\"}"
+              ],
+              [
+                "otherAssets",
+                "true"
+              ],
+              [
+                "uploadPermission",
+                "true"
+              ],
+              [
+                "modPermission",
+                "true"
+              ],
+              [
+                "convPermission",
+                "true"
+              ],
+              [
+                "assetUsePermission",
+                "true"
+              ],
+              [
+                "assetUseComPermission",
+                "false"
+              ],
+              [
+                "publisherNotes",
+                ""
+              ],
+              [
+                "extraCredits",
+                ""
+              ],
+              [
+                "L",
+                "com.degmods:audio:voice"
+              ],
+              [
+                "l",
+                "com.degmods:audio"
+              ],
+              [
+                "l",
+                "com.degmods:voice"
+              ]
+            ],
+            "content": "This mod removes all the voice lines from the game. Mod was made and tested in English 1.0 version but with the new update should work on any language version. This mod was not tested with the Lucas Bertone mission. If you have issues with this mod, you can contact me on discord or twitter @PlusProMichal.\n\n**Changelogs:**\n\nThe final version is here! Version 2.2 is another hotfix for 2.0 that mutes 1 sound file from Chapter 19 and adds an optional folder with the credits song without the lyrics (used AI to make that one so thats why its optional).\n\nI made a new hotfix update 2.1 that fixes a crash when entering the villa in Visiting Rich People.\n\nNew update 2.0 is here: it fixes softlock in Better Get Used To It, mutes people in The Priest and also should mute every voice line in any language version of the game.&#x20;\n\n**How to install**:\n\ngo into the mafia folder and just put the sounds folder in and replace everything.\n\nShowcase of this mod: [https://www.youtube.com/watch?v\\=8Rd-rTq\\_jic](https://www.youtube.com/watch?v=8Rd-rTq_jic)",
+            "sig": "137dcbd3c49242160e2840ca477e399378f51a48a6b09ecffa75e81b8d4fa33e1ab5058dd933b50fe6534ad30b33297eaefed9ecbbfdf756697a4450845a411c"
+          }
+        ],
+        [
+          "EOSE",
+          "s7"
+        ]
+      ]
+    },
+    {
+      "name": "mod 1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679:49930431-b762-4d6b-b22b-6488f94e5d2b",
+      "request": [
+        "REQ",
+        "s8",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679"
+          ],
+          "#d": [
+            "49930431-b762-4d6b-b22b-6488f94e5d2b"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s8",
+          {
+            "kind": 30402,
+            "id": "e2a67edd67521b7fd94f994d3579e8368ab5c4fd324e53f2ab3d9add42135ac5",
+            "pubkey": "1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679",
+            "created_at": 1745925124,
+            "tags": [
+              [
+                "d",
+                "49930431-b762-4d6b-b22b-6488f94e5d2b"
+              ],
+              [
+                "a",
+                "30402:1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679:49930431-b762-4d6b-b22b-6488f94e5d2b"
+              ],
+              [
+                "r",
+                "degmods.com"
+              ],
+              [
+                "t",
+                "GameMod"
+              ],
+              [
+                "published_at",
+                "1745923884"
+              ],
+              [
+                "game",
+                "Starfield"
+              ],
+              [
+                "title",
+                "VGB Fed and Hydration Duration Increase"
+              ],
+              [
+                "featuredImageUrl",
+                "https://cdn.nostrcheck.me/1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679/1d34ecaad846df8814896251c30bf200b597a2f03a494dc2e257eb5e8819d7da.webp"
+              ],
+              [
+                "summary",
+                "Increases Fed and Hydration buffs by 4/2 hours."
+              ],
+              [
+                "nsfw",
+                "false"
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshotsUrls",
+                "https://cdn.nostrcheck.me/1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679/1d34ecaad846df8814896251c30bf200b597a2f03a494dc2e257eb5e8819d7da.webp"
+              ],
+              [
+                "tags",
+                "Bethesda",
+                " Starfield",
+                " Buff Duration"
+              ],
+              [
+                "downloadUrls",
+                "{\"title\":\"\",\"url\":\"https://files.catbox.moe/wa4qcn.7z\",\"hash\":\"\",\"signatureKey\":\"\",\"malwareScanLink\":\"https://www.virustotal.com/gui/file/418bbcf947a5133d6efc3defdc6fcff0f8a306c58f45082db38e7e6984cf79ad\",\"modVersion\":\"1.0\",\"customNote\":\"\",\"mediaUrl\":\"\"}"
+              ],
+              [
+                "otherAssets",
+                "true"
+              ],
+              [
+                "uploadPermission",
+                "false"
+              ],
+              [
+                "modPermission",
+                "true"
+              ],
+              [
+                "convPermission",
+                "false"
+              ],
+              [
+                "assetUsePermission",
+                "false"
+              ],
+              [
+                "assetUseComPermission",
+                "false"
+              ],
+              [
+                "publisherNotes",
+                "If you want to make a more complicated system using mine as a base, feel free, just be sure to give the proper credit :)"
+              ],
+              [
+                "extraCredits",
+                ""
+              ],
+              [
+                "L",
+                "com.degmods:gameplay"
+              ],
+              [
+                "L",
+                "com.degmods:quality of life"
+              ],
+              [
+                "l",
+                "com.degmods:gameplay"
+              ],
+              [
+                "l",
+                "com.degmods:quality of life"
+              ]
+            ],
+            "content": "Hungry?\u00A0 Thirsty?\n\nThis mod increases the duration of Fed and Hydration.\n\nThat's it, no other changes to the buff.\n\nFed duration increased to 4 hours.\nHydration duration increased to 2 hours.\n\nHydration question:\u00A0 Why only 2 hours?\nHydration Answer:\u00A0 Because it makes sense to me you would get thirsty faster than hungry.\n\nNote:\u00A0&#x20;\n\nMod is not retroactive.\u00A0 If you already had the buff before installing you will need to eat and drink again to see the new duration.\n\nIssues:\n\nThis mod does not alter the Food/Drink items to show the new duration, it will still shows 30 minutes on the items. I am not going to fix this as this mod still does what I want it to do and the food showing the un modded duration has no detrimental effect, the timer in your buffs shows correctly.\u00A0 If it bugs you, feel free to make a patch that fixes it.\n\nQ:\u00A0 Why increase durations at all?\n\nA:\u00A0 Because I am an old dude and forget to eat/drink all the time.\u00A0 Even with the increase I still forget, but at least when I do remember it lasts longer and I don't have to carry as much food that adds weight.",
+            "sig": "42c9150e0f8d87485ed123c59d94f28565704a9a2ee81b7d96e98576ae6723582b49a0d06db17e6461bc22204ce5c5406727c22f7ab0ccc0c9473af6d1c6bb00"
+          }
+        ],
+        [
+          "EOSE",
+          "s8"
+        ]
+      ]
+    },
+    {
+      "name": "mod 1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679:9ad17069-382d-42f0-9b0b-97ce92649d25",
+      "request": [
+        "REQ",
+        "s9",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679"
+          ],
+          "#d": [
+            "9ad17069-382d-42f0-9b0b-97ce92649d25"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s9",
+          {
+            "kind": 30402,
+            "id": "9f18830fc0d365d65fc16f76c71131b390ddf62c99b0ad85852157269f2f4cbd",
+            "pubkey": "1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679",
+            "created_at": 1745924721,
+            "tags": [
+              [
+                "d",
+                "9ad17069-382d-42f0-9b0b-97ce92649d25"
+              ],
+              [
+                "a",
+                "30402:1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679:9ad17069-382d-42f0-9b0b-97ce92649d25"
+              ],
+              [
+                "r",
+                "degmods.com"
+              ],
+              [
+                "t",
+                "GameMod"
+              ],
+              [
+                "published_at",
+                "1745924644"
+              ],
+              [
+                "game",
+                "Starfield"
+              ],
+              [
+                "title",
+                "VGB Well Rested and Emotional Security Duration Increase"
+              ],
+              [
+                "featuredImageUrl",
+                "https://cdn.nostrcheck.me/1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679/87776138dd9a42bd4c9076ea229dd45dbc86a415971ca23dc8bda3fec141b290.webp"
+              ],
+              [
+                "summary",
+                "Increases duration of Well Rested and Emotional Security to 2/4 hours."
+              ],
+              [
+                "nsfw",
+                "false"
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshotsUrls",
+                "https://cdn.nostrcheck.me/1b939fa858ed76e8daec4f31f1c65343c0be9467cecb50c73d5bcf2c1ebdc679/87776138dd9a42bd4c9076ea229dd45dbc86a415971ca23dc8bda3fec141b290.webp"
+              ],
+              [
+                "tags",
+                "Bethesda",
+                " Starfield",
+                " Buff Duration"
+              ],
+              [
+                "downloadUrls",
+                "{\"title\":\"Main File\",\"url\":\"https://files.catbox.moe/wa4qcn.7z\",\"hash\":\"\",\"signatureKey\":\"\",\"malwareScanLink\":\"https://www.virustotal.com/gui/file/418bbcf947a5133d6efc3defdc6fcff0f8a306c58f45082db38e7e6984cf79ad\",\"modVersion\":\"1.0\",\"customNote\":\"\",\"mediaUrl\":\"\"}",
+                "{\"url\":\"https://files.catbox.moe/mxojqb.7z\",\"hash\":\"\",\"signatureKey\":\"\",\"malwareScanLink\":\"https://www.virustotal.com/gui/file/b44ca98a9b424e950d0dfcb414a6c62c6d0b43a83b88faa0d1e0aafb1d404b39\",\"modVersion\":\"1.0\",\"customNote\":\"\",\"title\":\"Immersive Love Patch\"}"
+              ],
+              [
+                "otherAssets",
+                "true"
+              ],
+              [
+                "uploadPermission",
+                "false"
+              ],
+              [
+                "modPermission",
+                "false"
+              ],
+              [
+                "convPermission",
+                "false"
+              ],
+              [
+                "assetUsePermission",
+                "false"
+              ],
+              [
+                "assetUseComPermission",
+                "false"
+              ],
+              [
+                "publisherNotes",
+                ""
+              ],
+              [
+                "extraCredits",
+                ""
+              ],
+              [
+                "L",
+                "com.degmods:gameplay"
+              ],
+              [
+                "L",
+                "com.degmods:quality of life"
+              ],
+              [
+                "l",
+                "com.degmods:gameplay"
+              ],
+              [
+                "l",
+                "com.degmods:quality of life"
+              ]
+            ],
+            "content": "Need a rest?\n\nThis mod increases the duration of Well Rested and Emotional Security so you don't have to try to rest every 24 minutes.\u00A0\u00A0\n\nThat's it.\u00A0 There are no other changes or additions.\n\nWell Rested duration increase to 2 hours\nEmotional Security duration increase to 4 hours.\n\nCompatibility:\u00A0\n\nAfter switching to .esm I had to make a patch.\u00A0 With patch verified compatible with Immersive Love Perk by\u00A0[InquisitorOverhaulsReturn](https://www.nexusmods.com/starfield/users/132105373)\u00A0located here\u00A0[https://www.nexusmods.com/starfield/mods/8837](https://www.nexusmods.com/starfield/mods/8837)\n\nI altered the duration, nothing else so it MAY be compatible with others that add bonuses if they don't alter duration.\n\nOther than keeping up with Starfield version updates if necessary, I will not be adding anything else to this mod.",
+            "sig": "0e72ad7b31e05c98fd07702deb71eb8a9228f264945d66e712cc0d44ac9a55ecdc0521b858869c57c0a11c6e1a29ce98f9b0b1b59a38f2212ebbc8011fd1df87"
+          }
+        ],
+        [
+          "EOSE",
+          "s9"
+        ]
+      ]
+    },
+    {
+      "name": "mod 0001c40591acd6a4e6c524f1b3ac77b2e8399002b38c9734ba610b1d985ae2c2:03d5d7e1-5338-488d-bb8c-da251e62ce27",
+      "request": [
+        "REQ",
+        "s10",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "0001c40591acd6a4e6c524f1b3ac77b2e8399002b38c9734ba610b1d985ae2c2"
+          ],
+          "#d": [
+            "03d5d7e1-5338-488d-bb8c-da251e62ce27"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EOSE",
+          "s10"
+        ]
+      ]
+    },
+    {
+      "name": "mod 0001c40591acd6a4e6c524f1b3ac77b2e8399002b38c9734ba610b1d985ae2c2:b0c9ee94-f19d-4b2c-b8de-10e51cd93e4d",
+      "request": [
+        "REQ",
+        "s11",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "0001c40591acd6a4e6c524f1b3ac77b2e8399002b38c9734ba610b1d985ae2c2"
+          ],
+          "#d": [
+            "b0c9ee94-f19d-4b2c-b8de-10e51cd93e4d"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EOSE",
+          "s11"
+        ]
+      ]
+    },
+    {
+      "name": "a mod that does not exist",
+      "request": [
+        "REQ",
+        "s12",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "16e23dd46d8f413b6a993ff5555841d1ad76df5e45476ada84593f5ed4c1e1b1"
+          ],
+          "#d": [
+            "00000000-0000-0000-0000-000000000000"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EOSE",
+          "s12"
+        ]
+      ]
+    },
+    {
+      "name": "blocked mods and hidden tags",
+      "request": [
+        "REQ",
+        "s13",
+        {
+          "kinds": [
+            30078
+          ],
+          "authors": [
+            "f4bf1fb5ba8be839f70c7331733e309f780822b311f63e01f9dc8abbb428f8d5"
+          ],
+          "#d": [
+            "moderation-excluded-tags",
+            "blocked-mods"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EOSE",
+          "s13"
+        ]
+      ]
+    },
+    {
+      "name": "blocked authors",
+      "request": [
+        "REQ",
+        "s14",
+        {
+          "kinds": [
+            10000
+          ],
+          "authors": [
+            "f4bf1fb5ba8be839f70c7331733e309f780822b311f63e01f9dc8abbb428f8d5"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "CLOSED",
+          "s14",
+          "blocked: this relay only serves mod, mod-jam, and moderation-tag events"
+        ]
+      ]
+    },
+    {
+      "name": "moderation tags",
+      "request": [
+        "REQ",
+        "s15",
+        {
+          "kinds": [
+            30985
+          ],
+          "authors": [
+            "f4bf1fb5ba8be839f70c7331733e309f780822b311f63e01f9dc8abbb428f8d5"
+          ],
+          "#L": [
+            "moderation"
+          ]
+        }
+      ],
+      "messages": [
+        [
+          "EOSE",
+          "s15"
+        ]
+      ]
+    },
+    {
+      "name": "the author's mods, page 1",
+      "request": [
+        "REQ",
+        "s16",
+        {
+          "kinds": [
+            31142
+          ],
+          "authors": [
+            "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a"
+          ],
+          "limit": 3
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s16",
+          {
+            "kind": 31142,
+            "id": "000046c58ce4e38b06f0858a3a132c0cedee64f0f80569abf04d7e348c92fa4d",
+            "pubkey": "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a",
+            "created_at": 1785288090,
+            "tags": [
+              [
+                "d",
+                "7c67587d-1e7c-4c65-b270-636f03bcf4b5"
+              ],
+              [
+                "published_at",
+                "1785288087"
+              ],
+              [
+                "g",
+                "Starfield"
+              ],
+              [
+                "title",
+                "Euphoria - Euphorika Music Replacer"
+              ],
+              [
+                "image",
+                "https://blossom.primal.net/8afa6d3f8135648f8918701ff8778f2d8b4ebe5357cbcbf5676776c6e245fd4d.jpg"
+              ],
+              [
+                "summary",
+                "Replaces all Euphorika bar music with Euphoria by Kendrick Lamar."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "video",
+                "https://youtu.be/NPqDIwWMtxg?si=QxlNnGbarSb10nI2&t=50"
+              ],
+              [
+                "screenshots",
+                "https://blossom.primal.net/8afa6d3f8135648f8918701ff8778f2d8b4ebe5357cbcbf5676776c6e245fd4d.jpg"
+              ],
+              [
+                "t",
+                "audio"
+              ],
+              [
+                "t",
+                "music"
+              ],
+              [
+                "t",
+                "kendrick lamar"
+              ],
+              [
+                "t",
+                "rap music"
+              ],
+              [
+                "t",
+                "drake"
+              ],
+              [
+                "t",
+                "hip-hop"
+              ],
+              [
+                "t",
+                "diss track"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://brs.degmods.com/b62d2c10523a6a7adb6816eadde616a4d8a744e91124301717dd208eef0b4885.zip\",\"hash\":\"b62d2c10523a6a7adb6816eadde616a4d8a744e91124301717dd208eef0b4885\",\"filename\":\"Euphoria Replaces Euphorika Music.zip\"}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "c",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "h",
+                "[\"audio\"]"
+              ],
+              [
+                "h",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "f",
+                "audio"
+              ],
+              [
+                "f",
+                "music"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "afe5d8"
+              ],
+              [
+                "nonce",
+                "12762",
+                "15"
+              ]
+            ],
+            "content": "### Description\nReplaces all Euphorika bar music with Euphoria by Kendrick Lamar.\n\n### Installation instructions\nMake sure your StarfieldCustom.ini contains the following lines before you install any mods for this game.\n\n`[Archive]`\n`bInvalidateOlderFiles=1`\n`sResourceDataDirsFinal=`\n\n## Manual method:\n1. Download the mod manually\n2. Extract the archive file\n3. Put the Data folder in \\common\\Starfield\\Data\n\nThe Vortex method is very straightforward; no instructions are necessary.\n\n### Requirements\nNone\n\n### Shout Outs\nMany thanks to [Neurolepticer](https://www.nexusmods.com/profile/Neurolepticer/mods?gameId=4187) for their [Wwise Soundbank List](https://www.nexusmods.com/starfield/mods/1801). I couldn't have figured out the numbers otherwise.",
+            "sig": "9011aa179cf394542379c6d1478a025cbf576728417005649b2bf5b7ba02dfddf305b575335ac7f7befe160f522635ffdcb2acf36ce97c0275cc4c36bce7c18e"
+          }
+        ],
+        [
+          "EVENT",
+          "s16",
+          {
+            "kind": 31142,
+            "id": "000011f8867f2fb6f27e444fd97507706dcc11af78beedf66a42ea2648624301",
+            "pubkey": "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a",
+            "created_at": 1785287010,
+            "tags": [
+              [
+                "d",
+                "4c41c4e6-0b14-43dc-84f8-49580373d62c"
+              ],
+              [
+                "published_at",
+                "1785287007"
+              ],
+              [
+                "g",
+                "Starfield"
+              ],
+              [
+                "title",
+                "Disturbia - Madame Sauvage's Place Music Replacer"
+              ],
+              [
+                "image",
+                "https://npub1kgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qj5fkyk.blossom.band/c35a406a743aafd785fadcfc07ae303e42d283e20eda10205495b6562f906702.jpg"
+              ],
+              [
+                "summary",
+                "Replaces all Madame Sauvage bar music with Disturbia by Rihanna."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "video",
+                "https://youtu.be/E1mU6h4Xdxc?si=lWtpB7NBLzLNhqWU&t=22"
+              ],
+              [
+                "screenshots",
+                "https://npub1kgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qj5fkyk.blossom.band/c35a406a743aafd785fadcfc07ae303e42d283e20eda10205495b6562f906702.jpg"
+              ],
+              [
+                "t",
+                "audio"
+              ],
+              [
+                "t",
+                "music"
+              ],
+              [
+                "t",
+                "disturbia"
+              ],
+              [
+                "t",
+                "rihanna"
+              ],
+              [
+                "t",
+                "pop music"
+              ],
+              [
+                "t",
+                "mainstream music"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://brs.degmods.com/8ff3a3f48399cadf17119537e6419b34ab4ec29848f3f3bac31515d48902fb65.zip\",\"hash\":\"8ff3a3f48399cadf17119537e6419b34ab4ec29848f3f3bac31515d48902fb65\",\"filename\":\"Disturbia Replaces Madame Sauvage Music.zip\"}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "c",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "h",
+                "[\"audio\"]"
+              ],
+              [
+                "h",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "f",
+                "audio"
+              ],
+              [
+                "f",
+                "music"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "65b51f"
+              ],
+              [
+                "nonce",
+                "6634",
+                "15"
+              ]
+            ],
+            "content": "### Description\nReplaces all Madame Sauvage bar music with Disturbia by Rihanna.\n\n### Installation instructions\nMake sure your StarfieldCustom.ini contains the following lines before you install any mods for this game.\n\n`[Archive]`\n`bInvalidateOlderFiles=1`\n`sResourceDataDirsFinal=`\n\n## Manual method:\n1. Download the mod manually\n2. Extract the archive file\n3. Put the Data folder in \\common\\Starfield\\Data\n\nThe Vortex method is very straightforward; no instructions are necessary.\n\n### Requirements\nNone\n\n### Shout Outs\nMany thanks to [Neurolepticer](https://www.nexusmods.com/profile/Neurolepticer/mods?gameId=4187) for their [Wwise Soundbank List](https://www.nexusmods.com/starfield/mods/1801). I couldn't have figured out the numbers otherwise.",
+            "sig": "5fb9ee5610160d7567e3d44621fb4e3c4153317f242a3b46dae12277095a26dd9b25b27484fca609fc36a86059530354c95bd8b2905376cadd1df01a7ec22806"
+          }
+        ],
+        [
+          "EVENT",
+          "s16",
+          {
+            "kind": 31142,
+            "id": "000155bfd2756c799f41afed1bc11a0d6bd06f1b7f37337f53ed2fa20e17eeb7",
+            "pubkey": "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a",
+            "created_at": 1785286502,
+            "tags": [
+              [
+                "d",
+                "7906514a-430a-447e-9baa-23891a966ead"
+              ],
+              [
+                "published_at",
+                "1785286499"
+              ],
+              [
+                "g",
+                "Starfield"
+              ],
+              [
+                "title",
+                "Halo & Doom OSTs - Combat Music Replacers"
+              ],
+              [
+                "image",
+                "https://blossom.primal.net/cac2d9493e528a60f60edc70973e1b7bcbb288ddc14845563c73ced5f0314d5b.jpg"
+              ],
+              [
+                "summary",
+                "Replaces all standard combat music with songs from the Halo and Doom series."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshots",
+                "https://npub1kgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qj5fkyk.blossom.band/a1d6b6d3865a4f69d17691759a314402c98acb27a0c7c82512c4179268bd79fd.jpg"
+              ],
+              [
+                "t",
+                "audio"
+              ],
+              [
+                "t",
+                "music"
+              ],
+              [
+                "t",
+                "halo"
+              ],
+              [
+                "t",
+                "doom"
+              ],
+              [
+                "t",
+                "ost"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://www.mediafire.com/file/hdufpfmnt93zfq9/Halo_%2526_Doom_Music_Replace_Combat_Music.zip\"}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "c",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "h",
+                "[\"audio\"]"
+              ],
+              [
+                "h",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "f",
+                "audio"
+              ],
+              [
+                "f",
+                "music"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "5db3ac"
+              ],
+              [
+                "nonce",
+                "131645",
+                "15"
+              ]
+            ],
+            "content": "### Description\nThe four songs are as follows:\n1. [Rock Anthem for Saving The World](https://www.youtube.com/watch?v=zptzXFVU1eg)\n2. [The Only Thing They Fear Is You](https://www.youtube.com/watch?v=kpnW68Q8ltc)\n3. [One Final Effort](https://www.youtube.com/watch?v=HIDR5ZBQBfo)\n4. [Super Gore Nest Beta](https://www.youtube.com/watch?v=Is7W5m_ug7E)\n\n### Installation instructions\nMake sure your StarfieldCustom.ini contains the following lines before you install any mods for this game.\n\n`[Archive]`\n`bInvalidateOlderFiles=1`\n`sResourceDataDirsFinal=`\n\n## Manual method:\n1. Download the mod manually\n2. Extract the archive file\n3. Put the Data folder in \\common\\Starfield\\Data\n\nThe Vortex method is very straightforward; no instructions are necessary.\n\n### Requirements\nNone\n\n### Shout Outs\nMany thanks to [Neurolepticer](https://www.nexusmods.com/profile/Neurolepticer/mods?gameId=4187) for their [Wwise Soundbank List](https://www.nexusmods.com/starfield/mods/1801). I couldn't have figured out the numbers otherwise.",
+            "sig": "0adb100c969429add6324a2383a3a3dc80ed2352cde9e1f2c12b00ae14abb55fb702d809f58df99cda21da57eba0dccb2a2ea3dd6b279bb113e4ada9eda519b1"
+          }
+        ],
+        [
+          "EOSE",
+          "s16"
+        ]
+      ]
+    },
+    {
+      "name": "the author's mods, page 2",
+      "request": [
+        "REQ",
+        "s17",
+        {
+          "kinds": [
+            31142
+          ],
+          "authors": [
+            "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a"
+          ],
+          "until": 1785286502,
+          "limit": 3
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s17",
+          {
+            "kind": 31142,
+            "id": "000155bfd2756c799f41afed1bc11a0d6bd06f1b7f37337f53ed2fa20e17eeb7",
+            "pubkey": "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a",
+            "created_at": 1785286502,
+            "tags": [
+              [
+                "d",
+                "7906514a-430a-447e-9baa-23891a966ead"
+              ],
+              [
+                "published_at",
+                "1785286499"
+              ],
+              [
+                "g",
+                "Starfield"
+              ],
+              [
+                "title",
+                "Halo & Doom OSTs - Combat Music Replacers"
+              ],
+              [
+                "image",
+                "https://blossom.primal.net/cac2d9493e528a60f60edc70973e1b7bcbb288ddc14845563c73ced5f0314d5b.jpg"
+              ],
+              [
+                "summary",
+                "Replaces all standard combat music with songs from the Halo and Doom series."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshots",
+                "https://npub1kgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qj5fkyk.blossom.band/a1d6b6d3865a4f69d17691759a314402c98acb27a0c7c82512c4179268bd79fd.jpg"
+              ],
+              [
+                "t",
+                "audio"
+              ],
+              [
+                "t",
+                "music"
+              ],
+              [
+                "t",
+                "halo"
+              ],
+              [
+                "t",
+                "doom"
+              ],
+              [
+                "t",
+                "ost"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://www.mediafire.com/file/hdufpfmnt93zfq9/Halo_%2526_Doom_Music_Replace_Combat_Music.zip\"}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "c",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "h",
+                "[\"audio\"]"
+              ],
+              [
+                "h",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "f",
+                "audio"
+              ],
+              [
+                "f",
+                "music"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "5db3ac"
+              ],
+              [
+                "nonce",
+                "131645",
+                "15"
+              ]
+            ],
+            "content": "### Description\nThe four songs are as follows:\n1. [Rock Anthem for Saving The World](https://www.youtube.com/watch?v=zptzXFVU1eg)\n2. [The Only Thing They Fear Is You](https://www.youtube.com/watch?v=kpnW68Q8ltc)\n3. [One Final Effort](https://www.youtube.com/watch?v=HIDR5ZBQBfo)\n4. [Super Gore Nest Beta](https://www.youtube.com/watch?v=Is7W5m_ug7E)\n\n### Installation instructions\nMake sure your StarfieldCustom.ini contains the following lines before you install any mods for this game.\n\n`[Archive]`\n`bInvalidateOlderFiles=1`\n`sResourceDataDirsFinal=`\n\n## Manual method:\n1. Download the mod manually\n2. Extract the archive file\n3. Put the Data folder in \\common\\Starfield\\Data\n\nThe Vortex method is very straightforward; no instructions are necessary.\n\n### Requirements\nNone\n\n### Shout Outs\nMany thanks to [Neurolepticer](https://www.nexusmods.com/profile/Neurolepticer/mods?gameId=4187) for their [Wwise Soundbank List](https://www.nexusmods.com/starfield/mods/1801). I couldn't have figured out the numbers otherwise.",
+            "sig": "0adb100c969429add6324a2383a3a3dc80ed2352cde9e1f2c12b00ae14abb55fb702d809f58df99cda21da57eba0dccb2a2ea3dd6b279bb113e4ada9eda519b1"
+          }
+        ],
+        [
+          "EVENT",
+          "s17",
+          {
+            "kind": 31142,
+            "id": "0000dce6ba705503266cb45995a9b46dbf049846840c358dffcedb4e0dd3db32",
+            "pubkey": "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a",
+            "created_at": 1785285171,
+            "tags": [
+              [
+                "d",
+                "87934fc6-a13c-476f-9bbd-ab7f66d4ef74"
+              ],
+              [
+                "published_at",
+                "1785285169"
+              ],
+              [
+                "g",
+                "Starfield"
+              ],
+              [
+                "title",
+                "Pirate Themed Music - The Last Nova Music Replacers"
+              ],
+              [
+                "image",
+                "https://blossom.primal.net/407363bcd143a8fa33547cebaaac962ee6783ba67ffa446d75b160358df0ea21.jpg"
+              ],
+              [
+                "summary",
+                "Replaces all the music in The Last Nova with several pirate themed songs."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshots",
+                "https://blossom.primal.net/407363bcd143a8fa33547cebaaac962ee6783ba67ffa446d75b160358df0ea21.jpg"
+              ],
+              [
+                "t",
+                "music"
+              ],
+              [
+                "t",
+                "audio"
+              ],
+              [
+                "t",
+                "crimson fleet"
+              ],
+              [
+                "t",
+                "pirates"
+              ],
+              [
+                "t",
+                "one piece"
+              ],
+              [
+                "t",
+                "pirates of the caribbean"
+              ],
+              [
+                "t",
+                "lazytown"
+              ],
+              [
+                "t",
+                "irish rovers"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://brs.degmods.com/5cc5a3b7d9e3f503b217168644c3d3842c90ea1d255a9f7900ac6200a9a27b25.zip\",\"hash\":\"5cc5a3b7d9e3f503b217168644c3d3842c90ea1d255a9f7900ac6200a9a27b25\",\"filename\":\"Pirate Songs Replace The Last Nova Music.zip\"}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "c",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "h",
+                "[\"audio\"]"
+              ],
+              [
+                "h",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "f",
+                "audio"
+              ],
+              [
+                "f",
+                "music"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "e0217d"
+              ],
+              [
+                "nonce",
+                "34369",
+                "15"
+              ]
+            ],
+            "content": "### Description\nThe four songs are as follows:\n1. [Pirates of the Caribbean Main Theme](https://youtu.be/rdB13lFexNk?si=OSY5ppDedP76nHOS&t=5)\n2. [We Are! The First Opening from One Piece](https://www.youtube.com/watch?v=92n9mXFwbF8)\n3. [You Are A Pirate from Lazytown](https://www.youtube.com/watch?v=i8ju_10NkGY)\n4. [The Drunken Sailor Sea Shanty](https://youtu.be/HILxaamOFBE?si=giO9ow3NLgiK94oi&t=27)\n\n### Installation instructions\nMake sure your StarfieldCustom.ini contains the following lines before you install any mods for this game.\n\n`[Archive]`\n`bInvalidateOlderFiles=1`\n`sResourceDataDirsFinal=`\n\n## Manual method:\n1. Download the mod manually\n2. Extract the archive file\n3. Put the Data folder in \\common\\Starfield\\Data\n\nThe Vortex method is very straightforward; no instructions are necessary.\n\n### Requirements\nNone\n\n### Shout Outs\nMany thanks to [Neurolepticer](https://www.nexusmods.com/profile/Neurolepticer/mods?gameId=4187) for their [Wwise Soundbank List](https://www.nexusmods.com/starfield/mods/1801). I couldn't have figured out the numbers otherwise.",
+            "sig": "eb1ab7103b1c64391220a220d9d83e95dc916195fb50195b7d1ad6a8061335b9aeca5acafec82f476f2648d72a486baf57b2406b8e9f405d7ee0ea9abd83a823"
+          }
+        ],
+        [
+          "EVENT",
+          "s17",
+          {
+            "kind": 31142,
+            "id": "0001d312d6e909e6b62d79e1078ee1a8b80ef46a7c3c8ddcceeb7fe47da9b3e1",
+            "pubkey": "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a",
+            "created_at": 1785284477,
+            "tags": [
+              [
+                "d",
+                "630f4cef-11b4-4075-9170-6bd5caf265e8"
+              ],
+              [
+                "published_at",
+                "1785284475"
+              ],
+              [
+                "g",
+                "Starfield"
+              ],
+              [
+                "title",
+                "Reggae Fusion - Jake's Bar Music Replacers"
+              ],
+              [
+                "image",
+                "https://npub1kgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qj5fkyk.blossom.band/e35dd1d2b52b63eedfb55a1ddf68ba38d53a8f43234ba2ddc86edd3c8db4f910.jpg"
+              ],
+              [
+                "summary",
+                "Replaces all Jake's Bar music with three reggae fusion songs that were popular during the mid-to-late 2000s."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshots",
+                "https://npub1kgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qj5fkyk.blossom.band/e35dd1d2b52b63eedfb55a1ddf68ba38d53a8f43234ba2ddc86edd3c8db4f910.jpg"
+              ],
+              [
+                "t",
+                "music"
+              ],
+              [
+                "t",
+                "audio"
+              ],
+              [
+                "t",
+                "pop music"
+              ],
+              [
+                "t",
+                "reggae music"
+              ],
+              [
+                "t",
+                "2000s music"
+              ],
+              [
+                "t",
+                "nostalgia"
+              ],
+              [
+                "t",
+                "reggae fusion"
+              ],
+              [
+                "t",
+                "throwback"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://brs.degmods.com/3e841039d2fdde5f28d1ec3d88e5cc93709d92bed7d49165140bc0268353efd4.zip\",\"hash\":\"3e841039d2fdde5f28d1ec3d88e5cc93709d92bed7d49165140bc0268353efd4\",\"filename\":\"Reggae Pop Songs Replace Jake's Bar Music.zip\"}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "c",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "h",
+                "[\"audio\"]"
+              ],
+              [
+                "h",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "f",
+                "audio"
+              ],
+              [
+                "f",
+                "music"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "babcc2"
+              ],
+              [
+                "nonce",
+                "100820",
+                "15"
+              ]
+            ],
+            "content": "### Description\nThe three songs are as follows:\n1. [Fire Burning by Sean Kingston](https://youtu.be/YkyhvCdJ_vM?si=A-YxQbgKfG91PbUw&t=5)\n2. [It Wasn't Me by Shaggy feat. Rik Rok](https://youtu.be/2g5Hz17C4is?si=3N_c09Sfb6fnR-nm&t=3)\n3. [Temperature by Sean Paul](https://youtu.be/dW2MmuA1nI4?si=Mwx_g4gdiqw1uCo9&t=1)\n\n### Installation instructions\nMake sure your StarfieldCustom.ini contains the following lines before you install any mods for this game.\n\n`[Archive]`\n`bInvalidateOlderFiles=1`\n`sResourceDataDirsFinal=`\n\n## Manual method:\n1. Download the mod manually\n2. Extract the archive file\n3. Put the Data folder in \\common\\Starfield\\Data\n\nThe Vortex method is very straightforward; no instructions are necessary.\n\n### Requirements\nNone\n\n### Shout Outs\nMany thanks to [Neurolepticer](https://www.nexusmods.com/profile/Neurolepticer/mods?gameId=4187) for their [Wwise Soundbank List](https://www.nexusmods.com/starfield/mods/1801). I couldn't have figured out the numbers otherwise.",
+            "sig": "54c3c1be6fba643445492c35eb0cd9ecaae6baefe61d90cb2980d152c8953aff9862a3b87e8d51ba97dcac364af357e5335444b0cdac3df77473964105505136"
+          }
+        ],
+        [
+          "EOSE",
+          "s17"
+        ]
+      ]
+    },
+    {
+      "name": "the author's mods, page 3",
+      "request": [
+        "REQ",
+        "s18",
+        {
+          "kinds": [
+            31142
+          ],
+          "authors": [
+            "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a"
+          ],
+          "until": 1785284477,
+          "limit": 3
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s18",
+          {
+            "kind": 31142,
+            "id": "0001d312d6e909e6b62d79e1078ee1a8b80ef46a7c3c8ddcceeb7fe47da9b3e1",
+            "pubkey": "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a",
+            "created_at": 1785284477,
+            "tags": [
+              [
+                "d",
+                "630f4cef-11b4-4075-9170-6bd5caf265e8"
+              ],
+              [
+                "published_at",
+                "1785284475"
+              ],
+              [
+                "g",
+                "Starfield"
+              ],
+              [
+                "title",
+                "Reggae Fusion - Jake's Bar Music Replacers"
+              ],
+              [
+                "image",
+                "https://npub1kgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qj5fkyk.blossom.band/e35dd1d2b52b63eedfb55a1ddf68ba38d53a8f43234ba2ddc86edd3c8db4f910.jpg"
+              ],
+              [
+                "summary",
+                "Replaces all Jake's Bar music with three reggae fusion songs that were popular during the mid-to-late 2000s."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshots",
+                "https://npub1kgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qj5fkyk.blossom.band/e35dd1d2b52b63eedfb55a1ddf68ba38d53a8f43234ba2ddc86edd3c8db4f910.jpg"
+              ],
+              [
+                "t",
+                "music"
+              ],
+              [
+                "t",
+                "audio"
+              ],
+              [
+                "t",
+                "pop music"
+              ],
+              [
+                "t",
+                "reggae music"
+              ],
+              [
+                "t",
+                "2000s music"
+              ],
+              [
+                "t",
+                "nostalgia"
+              ],
+              [
+                "t",
+                "reggae fusion"
+              ],
+              [
+                "t",
+                "throwback"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://brs.degmods.com/3e841039d2fdde5f28d1ec3d88e5cc93709d92bed7d49165140bc0268353efd4.zip\",\"hash\":\"3e841039d2fdde5f28d1ec3d88e5cc93709d92bed7d49165140bc0268353efd4\",\"filename\":\"Reggae Pop Songs Replace Jake's Bar Music.zip\"}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "c",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "h",
+                "[\"audio\"]"
+              ],
+              [
+                "h",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "f",
+                "audio"
+              ],
+              [
+                "f",
+                "music"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "babcc2"
+              ],
+              [
+                "nonce",
+                "100820",
+                "15"
+              ]
+            ],
+            "content": "### Description\nThe three songs are as follows:\n1. [Fire Burning by Sean Kingston](https://youtu.be/YkyhvCdJ_vM?si=A-YxQbgKfG91PbUw&t=5)\n2. [It Wasn't Me by Shaggy feat. Rik Rok](https://youtu.be/2g5Hz17C4is?si=3N_c09Sfb6fnR-nm&t=3)\n3. [Temperature by Sean Paul](https://youtu.be/dW2MmuA1nI4?si=Mwx_g4gdiqw1uCo9&t=1)\n\n### Installation instructions\nMake sure your StarfieldCustom.ini contains the following lines before you install any mods for this game.\n\n`[Archive]`\n`bInvalidateOlderFiles=1`\n`sResourceDataDirsFinal=`\n\n## Manual method:\n1. Download the mod manually\n2. Extract the archive file\n3. Put the Data folder in \\common\\Starfield\\Data\n\nThe Vortex method is very straightforward; no instructions are necessary.\n\n### Requirements\nNone\n\n### Shout Outs\nMany thanks to [Neurolepticer](https://www.nexusmods.com/profile/Neurolepticer/mods?gameId=4187) for their [Wwise Soundbank List](https://www.nexusmods.com/starfield/mods/1801). I couldn't have figured out the numbers otherwise.",
+            "sig": "54c3c1be6fba643445492c35eb0cd9ecaae6baefe61d90cb2980d152c8953aff9862a3b87e8d51ba97dcac364af357e5335444b0cdac3df77473964105505136"
+          }
+        ],
+        [
+          "EVENT",
+          "s18",
+          {
+            "kind": 31142,
+            "id": "0001f03bb3ce9503968b458e10830a52b01590661efcb414a17eb181a9e36ea8",
+            "pubkey": "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a",
+            "created_at": 1785282875,
+            "tags": [
+              [
+                "d",
+                "dcb86daa-ea1f-475e-ba9c-45ed489d5328"
+              ],
+              [
+                "published_at",
+                "1785282873"
+              ],
+              [
+                "g",
+                "Starfield"
+              ],
+              [
+                "title",
+                "Espresso - Terrabrew Music Replacer"
+              ],
+              [
+                "image",
+                "https://npub1kgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qj5fkyk.blossom.band/b7d9ba62d0a7e71bb67c88ce95d01faf8d4c63b3ad6b29339482512e8feee630.jpg"
+              ],
+              [
+                "summary",
+                "Replaces all Terrabrew cafe music with Espresso by Sabrina Carpenter."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "video",
+                "https://youtu.be/eVli-tstM5E?si=mBeB0B43azXwZEZU&t=14"
+              ],
+              [
+                "screenshots",
+                "https://npub1kgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qj5fkyk.blossom.band/b7d9ba62d0a7e71bb67c88ce95d01faf8d4c63b3ad6b29339482512e8feee630.jpg"
+              ],
+              [
+                "t",
+                "music"
+              ],
+              [
+                "t",
+                "audio"
+              ],
+              [
+                "t",
+                "sabrina carpenter"
+              ],
+              [
+                "t",
+                "pop music"
+              ],
+              [
+                "t",
+                "mainstream music"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://brs.degmods.com/34c481a7a4fe123ea15713a7d907b158f6c06cd1cce003f0fc3a154b8cfbabb4.zip\",\"hash\":\"34c481a7a4fe123ea15713a7d907b158f6c06cd1cce003f0fc3a154b8cfbabb4\",\"filename\":\"Espresso Replaces Terrabrew Music Mod.zip\"}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "credits",
+                "Sabrina Carpenter - Original Song"
+              ],
+              [
+                "c",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "h",
+                "[\"audio\"]"
+              ],
+              [
+                "h",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "f",
+                "audio"
+              ],
+              [
+                "f",
+                "music"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "f1678a"
+              ],
+              [
+                "nonce",
+                "24176",
+                "15"
+              ]
+            ],
+            "content": "### Description\nReplaces all Terrabrew cafe music with Espresso by Sabrina Carpenter.\n\n### Installation instructions\nMake sure your StarfieldCustom.ini contains the following lines before you install any mods for this game.\n\n`[Archive]`\n`bInvalidateOlderFiles=1`\n`sResourceDataDirsFinal=`\n\n## Manual method:\n1. Download the mod manually\n2. Extract the archive file\n3. Put the Data folder in \\common\\Starfield\\Data\n\nThe Vortex method is very straightforward; no instructions are necessary.\n\n### Requirements\nNone\n\n### Shout Outs\nMany thanks to [Neurolepticer](https://www.nexusmods.com/profile/Neurolepticer/mods?gameId=4187) for their [Wwise Soundbank List](https://www.nexusmods.com/starfield/mods/1801). I couldn't have figured out the numbers otherwise.",
+            "sig": "f3b158ee165445014a9a1179755f23f68a129c482449ed91b2c93d322155e43626ed12e5eb105002273f15c6175b29385dd67310a4d68dc189316c5b14ae017b"
+          }
+        ],
+        [
+          "EVENT",
+          "s18",
+          {
+            "kind": 31142,
+            "id": "0001461bc3ef5ce85d44bc72e3b86cbac0f8b3dfdcb136ba3149ca3877b87e27",
+            "pubkey": "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a",
+            "created_at": 1785280394,
+            "tags": [
+              [
+                "d",
+                "5536c318-003d-436c-828c-799f91d89512"
+              ],
+              [
+                "published_at",
+                "1785280389"
+              ],
+              [
+                "g",
+                "Starfield"
+              ],
+              [
+                "title",
+                "One Winged Angel - Starborn Combat Music Replacer"
+              ],
+              [
+                "image",
+                "https://npub1kgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qj5fkyk.blossom.band/3b1c6e6fcc8e9ba02073d7aaa240558a2e6c262c2c10d9b2cecaa0b8907460d1.jpg"
+              ],
+              [
+                "summary",
+                "Replaces the Starborn Combat theme with Sephiroth's theme from Final Fantasy 7."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "elsewhere",
+                "https://schaken-mods.com/file/one-winged-angel-starborn-combat-music-replacer"
+              ],
+              [
+                "video",
+                "https://www.youtube.com/watch?v=8_x1lKdVfy4"
+              ],
+              [
+                "screenshots",
+                "https://npub1kgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qj5fkyk.blossom.band/2a62d1bfbd09481a03cc0f7b9f519b3550752d712163b681751930f0f2136de1.jpg"
+              ],
+              [
+                "t",
+                "music"
+              ],
+              [
+                "t",
+                "final fantasy"
+              ],
+              [
+                "t",
+                "starfield"
+              ],
+              [
+                "t",
+                "starborn"
+              ],
+              [
+                "t",
+                "boss music"
+              ],
+              [
+                "t",
+                "audio"
+              ],
+              [
+                "t",
+                "sound"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://brs.degmods.com/551506e5803e989679d3f251f4826a6b26b0aaa016a880358a853313bf9246ef.zip\",\"hash\":\"551506e5803e989679d3f251f4826a6b26b0aaa016a880358a853313bf9246ef\",\"filename\":\"One-Winged Angel Starborn Combat Music.zip\"}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "credits",
+                "FoxSynth - Original Mix of One Winged Angel"
+              ],
+              [
+                "c",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "h",
+                "[\"audio\"]"
+              ],
+              [
+                "h",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "f",
+                "audio"
+              ],
+              [
+                "f",
+                "music"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "fae383"
+              ],
+              [
+                "nonce",
+                "90223",
+                "15"
+              ]
+            ],
+            "content": "### Description\nReplaces the Starborn Combat theme with [this version](https://www.youtube.com/watch?v=8_x1lKdVfy4) of Sephiroth's theme from Final Fantasy 7.\n\n### Installation instructions\nMake sure your StarfieldCustom.ini contains the following lines before you install any mods for this game.\n\n`[Archive]`\n`bInvalidateOlderFiles=1`\n`sResourceDataDirsFinal=`\n\nManual method:\n1. Download the mod manually\n2. Extract the archive file\n3. Put the Data folder in \\common\\Starfield\\Data\n\nThe Vortex method is very straightforward; no instructions are necessary.\n\n### Requirements\nNone\n\n### Shout Outs\nMany thanks to [Neurolepticer](https://www.nexusmods.com/profile/Neurolepticer/mods?gameId=4187) for their [Wwise Soundbank List](https://www.nexusmods.com/starfield/mods/1801). I couldn't have figured out the numbers otherwise.",
+            "sig": "a6e3df45b72233a8cb4b6f5e4c3d22e20380d8a24319c58e861375baf9b14e9005dd2e406c37ac98b8826fad25b83978157c243db2e93ae1e0afe11cfb95cd08"
+          }
+        ],
+        [
+          "EOSE",
+          "s18"
+        ]
+      ]
+    },
+    {
+      "name": "the author's mods, page 4",
+      "request": [
+        "REQ",
+        "s19",
+        {
+          "kinds": [
+            31142
+          ],
+          "authors": [
+            "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a"
+          ],
+          "until": 1785280394,
+          "limit": 3
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s19",
+          {
+            "kind": 31142,
+            "id": "0001461bc3ef5ce85d44bc72e3b86cbac0f8b3dfdcb136ba3149ca3877b87e27",
+            "pubkey": "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a",
+            "created_at": 1785280394,
+            "tags": [
+              [
+                "d",
+                "5536c318-003d-436c-828c-799f91d89512"
+              ],
+              [
+                "published_at",
+                "1785280389"
+              ],
+              [
+                "g",
+                "Starfield"
+              ],
+              [
+                "title",
+                "One Winged Angel - Starborn Combat Music Replacer"
+              ],
+              [
+                "image",
+                "https://npub1kgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qj5fkyk.blossom.band/3b1c6e6fcc8e9ba02073d7aaa240558a2e6c262c2c10d9b2cecaa0b8907460d1.jpg"
+              ],
+              [
+                "summary",
+                "Replaces the Starborn Combat theme with Sephiroth's theme from Final Fantasy 7."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "elsewhere",
+                "https://schaken-mods.com/file/one-winged-angel-starborn-combat-music-replacer"
+              ],
+              [
+                "video",
+                "https://www.youtube.com/watch?v=8_x1lKdVfy4"
+              ],
+              [
+                "screenshots",
+                "https://npub1kgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qj5fkyk.blossom.band/2a62d1bfbd09481a03cc0f7b9f519b3550752d712163b681751930f0f2136de1.jpg"
+              ],
+              [
+                "t",
+                "music"
+              ],
+              [
+                "t",
+                "final fantasy"
+              ],
+              [
+                "t",
+                "starfield"
+              ],
+              [
+                "t",
+                "starborn"
+              ],
+              [
+                "t",
+                "boss music"
+              ],
+              [
+                "t",
+                "audio"
+              ],
+              [
+                "t",
+                "sound"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://brs.degmods.com/551506e5803e989679d3f251f4826a6b26b0aaa016a880358a853313bf9246ef.zip\",\"hash\":\"551506e5803e989679d3f251f4826a6b26b0aaa016a880358a853313bf9246ef\",\"filename\":\"One-Winged Angel Starborn Combat Music.zip\"}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "credits",
+                "FoxSynth - Original Mix of One Winged Angel"
+              ],
+              [
+                "c",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "h",
+                "[\"audio\"]"
+              ],
+              [
+                "h",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "f",
+                "audio"
+              ],
+              [
+                "f",
+                "music"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "fae383"
+              ],
+              [
+                "nonce",
+                "90223",
+                "15"
+              ]
+            ],
+            "content": "### Description\nReplaces the Starborn Combat theme with [this version](https://www.youtube.com/watch?v=8_x1lKdVfy4) of Sephiroth's theme from Final Fantasy 7.\n\n### Installation instructions\nMake sure your StarfieldCustom.ini contains the following lines before you install any mods for this game.\n\n`[Archive]`\n`bInvalidateOlderFiles=1`\n`sResourceDataDirsFinal=`\n\nManual method:\n1. Download the mod manually\n2. Extract the archive file\n3. Put the Data folder in \\common\\Starfield\\Data\n\nThe Vortex method is very straightforward; no instructions are necessary.\n\n### Requirements\nNone\n\n### Shout Outs\nMany thanks to [Neurolepticer](https://www.nexusmods.com/profile/Neurolepticer/mods?gameId=4187) for their [Wwise Soundbank List](https://www.nexusmods.com/starfield/mods/1801). I couldn't have figured out the numbers otherwise.",
+            "sig": "a6e3df45b72233a8cb4b6f5e4c3d22e20380d8a24319c58e861375baf9b14e9005dd2e406c37ac98b8826fad25b83978157c243db2e93ae1e0afe11cfb95cd08"
+          }
+        ],
+        [
+          "EVENT",
+          "s19",
+          {
+            "kind": 31142,
+            "id": "000025cfb793755fee92d6605049c7230672d861654c2310ccfbaf84d99a06bf",
+            "pubkey": "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a",
+            "created_at": 1780594798,
+            "tags": [
+              [
+                "d",
+                "c0026d44-026f-4fd7-86dd-2c0cfe1dbda6"
+              ],
+              [
+                "published_at",
+                "1780594797"
+              ],
+              [
+                "g",
+                "Starfield"
+              ],
+              [
+                "title",
+                "Chat Music - Astral Lounge Music Replacer"
+              ],
+              [
+                "image",
+                "https://staticdelivery.nexusmods.com/mods/4187/images/17357/17357-1780522690-1666782675.jpg"
+              ],
+              [
+                "summary",
+                "Replaces the six BorealUS songs with six iconic songs by Chat Music."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshots",
+                "https://bs.degmods.com/2400e6992aebf8bbaed6fe750ad94c0ff9fbbab6e73a1b98fb672ece2a8e221c.jpg"
+              ],
+              [
+                "t",
+                "music"
+              ],
+              [
+                "t",
+                "audio"
+              ],
+              [
+                "t",
+                "ai-generated"
+              ],
+              [
+                "t",
+                "pop music"
+              ],
+              [
+                "t",
+                "rock music"
+              ],
+              [
+                "t",
+                "starfield"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://files.catbox.moe/glt7kh.zip\"}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "14cc4e"
+              ],
+              [
+                "nonce",
+                "30858",
+                "15"
+              ]
+            ],
+            "content": "### Description\nThe six songs are as follows:\n1. [MEAL ARMSTRONG](https://www.youtube.com/watch?v=hz73cBs3vQo)\n2. [OSAMA BIN SHREDDING](https://www.youtube.com/watch?v=mqeD1dlYJdI)\n3. [WHAT'S HER ONLYSTREETS](https://www.youtube.com/watch?v=9DWfq0Z5hOs)\n4. [ELASTIGGA](https://www.youtube.com/watch?v=lCdQkpFaZxA)\n5. [TONS N ROSES](https://www.youtube.com/watch?v=DlcwRoa6kt8)\n6. [METHALLICA](https://www.youtube.com/watch?v=LfEfTURA3Ts)\n\n### Installation instructions\nManual method:\n1\\. Download the mod manually\n2\\. Extract the archive file\n3\\. Put the Data folder in \\common\\Starfield\\Data\n\nThe Vortex method is very straightforward; no instructions are necessary.\n\n### Requirements\nNone\n\n### Shout Outs\nMany thanks to [Neurolepticer](https://www.nexusmods.com/profile/Neurolepticer) for their [Wwise Soundbank List](https://www.nexusmods.com/starfield/mods/1801). I couldn't have figured out the numbers otherwise.",
+            "sig": "5956067a419aed5027bebd10ddfe8398b1253c551ca54a6c99189e9a8c35e6f79ec45a0c06fbaf0b821cce2dabe8f34f55f6a0680444f77b2f180081d90d1987"
+          }
+        ],
+        [
+          "EOSE",
+          "s19"
+        ]
+      ]
+    },
+    {
+      "name": "the author's mods, page 5",
+      "request": [
+        "REQ",
+        "s20",
+        {
+          "kinds": [
+            31142
+          ],
+          "authors": [
+            "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a"
+          ],
+          "until": 1780594798,
+          "limit": 3
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s20",
+          {
+            "kind": 31142,
+            "id": "000025cfb793755fee92d6605049c7230672d861654c2310ccfbaf84d99a06bf",
+            "pubkey": "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a",
+            "created_at": 1780594798,
+            "tags": [
+              [
+                "d",
+                "c0026d44-026f-4fd7-86dd-2c0cfe1dbda6"
+              ],
+              [
+                "published_at",
+                "1780594797"
+              ],
+              [
+                "g",
+                "Starfield"
+              ],
+              [
+                "title",
+                "Chat Music - Astral Lounge Music Replacer"
+              ],
+              [
+                "image",
+                "https://staticdelivery.nexusmods.com/mods/4187/images/17357/17357-1780522690-1666782675.jpg"
+              ],
+              [
+                "summary",
+                "Replaces the six BorealUS songs with six iconic songs by Chat Music."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshots",
+                "https://bs.degmods.com/2400e6992aebf8bbaed6fe750ad94c0ff9fbbab6e73a1b98fb672ece2a8e221c.jpg"
+              ],
+              [
+                "t",
+                "music"
+              ],
+              [
+                "t",
+                "audio"
+              ],
+              [
+                "t",
+                "ai-generated"
+              ],
+              [
+                "t",
+                "pop music"
+              ],
+              [
+                "t",
+                "rock music"
+              ],
+              [
+                "t",
+                "starfield"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://files.catbox.moe/glt7kh.zip\"}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "14cc4e"
+              ],
+              [
+                "nonce",
+                "30858",
+                "15"
+              ]
+            ],
+            "content": "### Description\nThe six songs are as follows:\n1. [MEAL ARMSTRONG](https://www.youtube.com/watch?v=hz73cBs3vQo)\n2. [OSAMA BIN SHREDDING](https://www.youtube.com/watch?v=mqeD1dlYJdI)\n3. [WHAT'S HER ONLYSTREETS](https://www.youtube.com/watch?v=9DWfq0Z5hOs)\n4. [ELASTIGGA](https://www.youtube.com/watch?v=lCdQkpFaZxA)\n5. [TONS N ROSES](https://www.youtube.com/watch?v=DlcwRoa6kt8)\n6. [METHALLICA](https://www.youtube.com/watch?v=LfEfTURA3Ts)\n\n### Installation instructions\nManual method:\n1\\. Download the mod manually\n2\\. Extract the archive file\n3\\. Put the Data folder in \\common\\Starfield\\Data\n\nThe Vortex method is very straightforward; no instructions are necessary.\n\n### Requirements\nNone\n\n### Shout Outs\nMany thanks to [Neurolepticer](https://www.nexusmods.com/profile/Neurolepticer) for their [Wwise Soundbank List](https://www.nexusmods.com/starfield/mods/1801). I couldn't have figured out the numbers otherwise.",
+            "sig": "5956067a419aed5027bebd10ddfe8398b1253c551ca54a6c99189e9a8c35e6f79ec45a0c06fbaf0b821cce2dabe8f34f55f6a0680444f77b2f180081d90d1987"
+          }
+        ],
+        [
+          "EOSE",
+          "s20"
+        ]
+      ]
+    },
+    {
+      "name": "the author's old mods",
+      "request": [
+        "REQ",
+        "s21",
+        {
+          "kinds": [
+            30402
+          ],
+          "authors": [
+            "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a"
+          ],
+          "#t": [
+            "GameMod"
+          ],
+          "until": 1785542399,
+          "limit": 500
+        }
+      ],
+      "messages": [
+        [
+          "EOSE",
+          "s21"
+        ]
+      ]
+    },
+    {
+      "name": "the author's mods since 1785284477",
+      "request": [
+        "REQ",
+        "s22",
+        {
+          "kinds": [
+            31142,
+            30402
+          ],
+          "authors": [
+            "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a"
+          ],
+          "since": 1785284477
+        }
+      ],
+      "messages": [
+        [
+          "EVENT",
+          "s22",
+          {
+            "kind": 31142,
+            "id": "000046c58ce4e38b06f0858a3a132c0cedee64f0f80569abf04d7e348c92fa4d",
+            "pubkey": "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a",
+            "created_at": 1785288090,
+            "tags": [
+              [
+                "d",
+                "7c67587d-1e7c-4c65-b270-636f03bcf4b5"
+              ],
+              [
+                "published_at",
+                "1785288087"
+              ],
+              [
+                "g",
+                "Starfield"
+              ],
+              [
+                "title",
+                "Euphoria - Euphorika Music Replacer"
+              ],
+              [
+                "image",
+                "https://blossom.primal.net/8afa6d3f8135648f8918701ff8778f2d8b4ebe5357cbcbf5676776c6e245fd4d.jpg"
+              ],
+              [
+                "summary",
+                "Replaces all Euphorika bar music with Euphoria by Kendrick Lamar."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "video",
+                "https://youtu.be/NPqDIwWMtxg?si=QxlNnGbarSb10nI2&t=50"
+              ],
+              [
+                "screenshots",
+                "https://blossom.primal.net/8afa6d3f8135648f8918701ff8778f2d8b4ebe5357cbcbf5676776c6e245fd4d.jpg"
+              ],
+              [
+                "t",
+                "audio"
+              ],
+              [
+                "t",
+                "music"
+              ],
+              [
+                "t",
+                "kendrick lamar"
+              ],
+              [
+                "t",
+                "rap music"
+              ],
+              [
+                "t",
+                "drake"
+              ],
+              [
+                "t",
+                "hip-hop"
+              ],
+              [
+                "t",
+                "diss track"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://brs.degmods.com/b62d2c10523a6a7adb6816eadde616a4d8a744e91124301717dd208eef0b4885.zip\",\"hash\":\"b62d2c10523a6a7adb6816eadde616a4d8a744e91124301717dd208eef0b4885\",\"filename\":\"Euphoria Replaces Euphorika Music.zip\"}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "c",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "h",
+                "[\"audio\"]"
+              ],
+              [
+                "h",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "f",
+                "audio"
+              ],
+              [
+                "f",
+                "music"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "afe5d8"
+              ],
+              [
+                "nonce",
+                "12762",
+                "15"
+              ]
+            ],
+            "content": "### Description\nReplaces all Euphorika bar music with Euphoria by Kendrick Lamar.\n\n### Installation instructions\nMake sure your StarfieldCustom.ini contains the following lines before you install any mods for this game.\n\n`[Archive]`\n`bInvalidateOlderFiles=1`\n`sResourceDataDirsFinal=`\n\n## Manual method:\n1. Download the mod manually\n2. Extract the archive file\n3. Put the Data folder in \\common\\Starfield\\Data\n\nThe Vortex method is very straightforward; no instructions are necessary.\n\n### Requirements\nNone\n\n### Shout Outs\nMany thanks to [Neurolepticer](https://www.nexusmods.com/profile/Neurolepticer/mods?gameId=4187) for their [Wwise Soundbank List](https://www.nexusmods.com/starfield/mods/1801). I couldn't have figured out the numbers otherwise.",
+            "sig": "9011aa179cf394542379c6d1478a025cbf576728417005649b2bf5b7ba02dfddf305b575335ac7f7befe160f522635ffdcb2acf36ce97c0275cc4c36bce7c18e"
+          }
+        ],
+        [
+          "EVENT",
+          "s22",
+          {
+            "kind": 31142,
+            "id": "000011f8867f2fb6f27e444fd97507706dcc11af78beedf66a42ea2648624301",
+            "pubkey": "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a",
+            "created_at": 1785287010,
+            "tags": [
+              [
+                "d",
+                "4c41c4e6-0b14-43dc-84f8-49580373d62c"
+              ],
+              [
+                "published_at",
+                "1785287007"
+              ],
+              [
+                "g",
+                "Starfield"
+              ],
+              [
+                "title",
+                "Disturbia - Madame Sauvage's Place Music Replacer"
+              ],
+              [
+                "image",
+                "https://npub1kgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qj5fkyk.blossom.band/c35a406a743aafd785fadcfc07ae303e42d283e20eda10205495b6562f906702.jpg"
+              ],
+              [
+                "summary",
+                "Replaces all Madame Sauvage bar music with Disturbia by Rihanna."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "video",
+                "https://youtu.be/E1mU6h4Xdxc?si=lWtpB7NBLzLNhqWU&t=22"
+              ],
+              [
+                "screenshots",
+                "https://npub1kgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qj5fkyk.blossom.band/c35a406a743aafd785fadcfc07ae303e42d283e20eda10205495b6562f906702.jpg"
+              ],
+              [
+                "t",
+                "audio"
+              ],
+              [
+                "t",
+                "music"
+              ],
+              [
+                "t",
+                "disturbia"
+              ],
+              [
+                "t",
+                "rihanna"
+              ],
+              [
+                "t",
+                "pop music"
+              ],
+              [
+                "t",
+                "mainstream music"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://brs.degmods.com/8ff3a3f48399cadf17119537e6419b34ab4ec29848f3f3bac31515d48902fb65.zip\",\"hash\":\"8ff3a3f48399cadf17119537e6419b34ab4ec29848f3f3bac31515d48902fb65\",\"filename\":\"Disturbia Replaces Madame Sauvage Music.zip\"}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "c",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "h",
+                "[\"audio\"]"
+              ],
+              [
+                "h",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "f",
+                "audio"
+              ],
+              [
+                "f",
+                "music"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "65b51f"
+              ],
+              [
+                "nonce",
+                "6634",
+                "15"
+              ]
+            ],
+            "content": "### Description\nReplaces all Madame Sauvage bar music with Disturbia by Rihanna.\n\n### Installation instructions\nMake sure your StarfieldCustom.ini contains the following lines before you install any mods for this game.\n\n`[Archive]`\n`bInvalidateOlderFiles=1`\n`sResourceDataDirsFinal=`\n\n## Manual method:\n1. Download the mod manually\n2. Extract the archive file\n3. Put the Data folder in \\common\\Starfield\\Data\n\nThe Vortex method is very straightforward; no instructions are necessary.\n\n### Requirements\nNone\n\n### Shout Outs\nMany thanks to [Neurolepticer](https://www.nexusmods.com/profile/Neurolepticer/mods?gameId=4187) for their [Wwise Soundbank List](https://www.nexusmods.com/starfield/mods/1801). I couldn't have figured out the numbers otherwise.",
+            "sig": "5fb9ee5610160d7567e3d44621fb4e3c4153317f242a3b46dae12277095a26dd9b25b27484fca609fc36a86059530354c95bd8b2905376cadd1df01a7ec22806"
+          }
+        ],
+        [
+          "EVENT",
+          "s22",
+          {
+            "kind": 31142,
+            "id": "000155bfd2756c799f41afed1bc11a0d6bd06f1b7f37337f53ed2fa20e17eeb7",
+            "pubkey": "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a",
+            "created_at": 1785286502,
+            "tags": [
+              [
+                "d",
+                "7906514a-430a-447e-9baa-23891a966ead"
+              ],
+              [
+                "published_at",
+                "1785286499"
+              ],
+              [
+                "g",
+                "Starfield"
+              ],
+              [
+                "title",
+                "Halo & Doom OSTs - Combat Music Replacers"
+              ],
+              [
+                "image",
+                "https://blossom.primal.net/cac2d9493e528a60f60edc70973e1b7bcbb288ddc14845563c73ced5f0314d5b.jpg"
+              ],
+              [
+                "summary",
+                "Replaces all standard combat music with songs from the Halo and Doom series."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshots",
+                "https://npub1kgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qj5fkyk.blossom.band/a1d6b6d3865a4f69d17691759a314402c98acb27a0c7c82512c4179268bd79fd.jpg"
+              ],
+              [
+                "t",
+                "audio"
+              ],
+              [
+                "t",
+                "music"
+              ],
+              [
+                "t",
+                "halo"
+              ],
+              [
+                "t",
+                "doom"
+              ],
+              [
+                "t",
+                "ost"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://www.mediafire.com/file/hdufpfmnt93zfq9/Halo_%2526_Doom_Music_Replace_Combat_Music.zip\"}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "c",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "h",
+                "[\"audio\"]"
+              ],
+              [
+                "h",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "f",
+                "audio"
+              ],
+              [
+                "f",
+                "music"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "5db3ac"
+              ],
+              [
+                "nonce",
+                "131645",
+                "15"
+              ]
+            ],
+            "content": "### Description\nThe four songs are as follows:\n1. [Rock Anthem for Saving The World](https://www.youtube.com/watch?v=zptzXFVU1eg)\n2. [The Only Thing They Fear Is You](https://www.youtube.com/watch?v=kpnW68Q8ltc)\n3. [One Final Effort](https://www.youtube.com/watch?v=HIDR5ZBQBfo)\n4. [Super Gore Nest Beta](https://www.youtube.com/watch?v=Is7W5m_ug7E)\n\n### Installation instructions\nMake sure your StarfieldCustom.ini contains the following lines before you install any mods for this game.\n\n`[Archive]`\n`bInvalidateOlderFiles=1`\n`sResourceDataDirsFinal=`\n\n## Manual method:\n1. Download the mod manually\n2. Extract the archive file\n3. Put the Data folder in \\common\\Starfield\\Data\n\nThe Vortex method is very straightforward; no instructions are necessary.\n\n### Requirements\nNone\n\n### Shout Outs\nMany thanks to [Neurolepticer](https://www.nexusmods.com/profile/Neurolepticer/mods?gameId=4187) for their [Wwise Soundbank List](https://www.nexusmods.com/starfield/mods/1801). I couldn't have figured out the numbers otherwise.",
+            "sig": "0adb100c969429add6324a2383a3a3dc80ed2352cde9e1f2c12b00ae14abb55fb702d809f58df99cda21da57eba0dccb2a2ea3dd6b279bb113e4ada9eda519b1"
+          }
+        ],
+        [
+          "EVENT",
+          "s22",
+          {
+            "kind": 31142,
+            "id": "0000dce6ba705503266cb45995a9b46dbf049846840c358dffcedb4e0dd3db32",
+            "pubkey": "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a",
+            "created_at": 1785285171,
+            "tags": [
+              [
+                "d",
+                "87934fc6-a13c-476f-9bbd-ab7f66d4ef74"
+              ],
+              [
+                "published_at",
+                "1785285169"
+              ],
+              [
+                "g",
+                "Starfield"
+              ],
+              [
+                "title",
+                "Pirate Themed Music - The Last Nova Music Replacers"
+              ],
+              [
+                "image",
+                "https://blossom.primal.net/407363bcd143a8fa33547cebaaac962ee6783ba67ffa446d75b160358df0ea21.jpg"
+              ],
+              [
+                "summary",
+                "Replaces all the music in The Last Nova with several pirate themed songs."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshots",
+                "https://blossom.primal.net/407363bcd143a8fa33547cebaaac962ee6783ba67ffa446d75b160358df0ea21.jpg"
+              ],
+              [
+                "t",
+                "music"
+              ],
+              [
+                "t",
+                "audio"
+              ],
+              [
+                "t",
+                "crimson fleet"
+              ],
+              [
+                "t",
+                "pirates"
+              ],
+              [
+                "t",
+                "one piece"
+              ],
+              [
+                "t",
+                "pirates of the caribbean"
+              ],
+              [
+                "t",
+                "lazytown"
+              ],
+              [
+                "t",
+                "irish rovers"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://brs.degmods.com/5cc5a3b7d9e3f503b217168644c3d3842c90ea1d255a9f7900ac6200a9a27b25.zip\",\"hash\":\"5cc5a3b7d9e3f503b217168644c3d3842c90ea1d255a9f7900ac6200a9a27b25\",\"filename\":\"Pirate Songs Replace The Last Nova Music.zip\"}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "c",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "h",
+                "[\"audio\"]"
+              ],
+              [
+                "h",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "f",
+                "audio"
+              ],
+              [
+                "f",
+                "music"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "e0217d"
+              ],
+              [
+                "nonce",
+                "34369",
+                "15"
+              ]
+            ],
+            "content": "### Description\nThe four songs are as follows:\n1. [Pirates of the Caribbean Main Theme](https://youtu.be/rdB13lFexNk?si=OSY5ppDedP76nHOS&t=5)\n2. [We Are! The First Opening from One Piece](https://www.youtube.com/watch?v=92n9mXFwbF8)\n3. [You Are A Pirate from Lazytown](https://www.youtube.com/watch?v=i8ju_10NkGY)\n4. [The Drunken Sailor Sea Shanty](https://youtu.be/HILxaamOFBE?si=giO9ow3NLgiK94oi&t=27)\n\n### Installation instructions\nMake sure your StarfieldCustom.ini contains the following lines before you install any mods for this game.\n\n`[Archive]`\n`bInvalidateOlderFiles=1`\n`sResourceDataDirsFinal=`\n\n## Manual method:\n1. Download the mod manually\n2. Extract the archive file\n3. Put the Data folder in \\common\\Starfield\\Data\n\nThe Vortex method is very straightforward; no instructions are necessary.\n\n### Requirements\nNone\n\n### Shout Outs\nMany thanks to [Neurolepticer](https://www.nexusmods.com/profile/Neurolepticer/mods?gameId=4187) for their [Wwise Soundbank List](https://www.nexusmods.com/starfield/mods/1801). I couldn't have figured out the numbers otherwise.",
+            "sig": "eb1ab7103b1c64391220a220d9d83e95dc916195fb50195b7d1ad6a8061335b9aeca5acafec82f476f2648d72a486baf57b2406b8e9f405d7ee0ea9abd83a823"
+          }
+        ],
+        [
+          "EVENT",
+          "s22",
+          {
+            "kind": 31142,
+            "id": "0001d312d6e909e6b62d79e1078ee1a8b80ef46a7c3c8ddcceeb7fe47da9b3e1",
+            "pubkey": "b20828742c7a62a1c4547508c5d141eae619c27674bba56846b7cc7ac848020a",
+            "created_at": 1785284477,
+            "tags": [
+              [
+                "d",
+                "630f4cef-11b4-4075-9170-6bd5caf265e8"
+              ],
+              [
+                "published_at",
+                "1785284475"
+              ],
+              [
+                "g",
+                "Starfield"
+              ],
+              [
+                "title",
+                "Reggae Fusion - Jake's Bar Music Replacers"
+              ],
+              [
+                "image",
+                "https://npub1kgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qj5fkyk.blossom.band/e35dd1d2b52b63eedfb55a1ddf68ba38d53a8f43234ba2ddc86edd3c8db4f910.jpg"
+              ],
+              [
+                "summary",
+                "Replaces all Jake's Bar music with three reggae fusion songs that were popular during the mid-to-late 2000s."
+              ],
+              [
+                "repost",
+                "false"
+              ],
+              [
+                "screenshots",
+                "https://npub1kgyzsapv0f32r3z5w5yvt52patnpnsnkwja626zxklx84jzgqg9qj5fkyk.blossom.band/e35dd1d2b52b63eedfb55a1ddf68ba38d53a8f43234ba2ddc86edd3c8db4f910.jpg"
+              ],
+              [
+                "t",
+                "music"
+              ],
+              [
+                "t",
+                "audio"
+              ],
+              [
+                "t",
+                "pop music"
+              ],
+              [
+                "t",
+                "reggae music"
+              ],
+              [
+                "t",
+                "2000s music"
+              ],
+              [
+                "t",
+                "nostalgia"
+              ],
+              [
+                "t",
+                "reggae fusion"
+              ],
+              [
+                "t",
+                "throwback"
+              ],
+              [
+                "download",
+                "{\"file\":\"https://brs.degmods.com/3e841039d2fdde5f28d1ec3d88e5cc93709d92bed7d49165140bc0268353efd4.zip\",\"hash\":\"3e841039d2fdde5f28d1ec3d88e5cc93709d92bed7d49165140bc0268353efd4\",\"filename\":\"Reggae Pop Songs Replace Jake's Bar Music.zip\"}"
+              ],
+              [
+                "permissions",
+                "original-assets:true",
+                "reupload:true",
+                "modification:true",
+                "conversion:true",
+                "asset-usage:true",
+                "commercial:false"
+              ],
+              [
+                "c",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "h",
+                "[\"audio\"]"
+              ],
+              [
+                "h",
+                "[\"audio\",\"music\"]"
+              ],
+              [
+                "f",
+                "audio"
+              ],
+              [
+                "f",
+                "music"
+              ],
+              [
+                "client",
+                "DEG MODS"
+              ],
+              [
+                "s",
+                "babcc2"
+              ],
+              [
+                "nonce",
+                "100820",
+                "15"
+              ]
+            ],
+            "content": "### Description\nThe three songs are as follows:\n1. [Fire Burning by Sean Kingston](https://youtu.be/YkyhvCdJ_vM?si=A-YxQbgKfG91PbUw&t=5)\n2. [It Wasn't Me by Shaggy feat. Rik Rok](https://youtu.be/2g5Hz17C4is?si=3N_c09Sfb6fnR-nm&t=3)\n3. [Temperature by Sean Paul](https://youtu.be/dW2MmuA1nI4?si=Mwx_g4gdiqw1uCo9&t=1)\n\n### Installation instructions\nMake sure your StarfieldCustom.ini contains the following lines before you install any mods for this game.\n\n`[Archive]`\n`bInvalidateOlderFiles=1`\n`sResourceDataDirsFinal=`\n\n## Manual method:\n1. Download the mod manually\n2. Extract the archive file\n3. Put the Data folder in \\common\\Starfield\\Data\n\nThe Vortex method is very straightforward; no instructions are necessary.\n\n### Requirements\nNone\n\n### Shout Outs\nMany thanks to [Neurolepticer](https://www.nexusmods.com/profile/Neurolepticer/mods?gameId=4187) for their [Wwise Soundbank List](https://www.nexusmods.com/starfield/mods/1801). I couldn't have figured out the numbers otherwise.",
+            "sig": "54c3c1be6fba643445492c35eb0cd9ecaae6baefe61d90cb2980d152c8953aff9862a3b87e8d51ba97dcac364af357e5335444b0cdac3df77473964105505136"
+          }
+        ],
+        [
+          "EOSE",
+          "s22"
+        ]
+      ]
+    }
+  ]
+}
