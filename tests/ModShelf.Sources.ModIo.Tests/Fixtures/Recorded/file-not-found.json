@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "GET",
+    "host": "game",
+    "auth": "token",
+    "path": "/v1/games/6715/mods/4228735/files/999999999",
+    "query": ""
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "Content-Type": "application/json",
+      "x-modio-error-ref": "14000"
+    },
+    "body": {
+      "error": {
+        "code": 404,
+        "error_ref": 14000,
+        "message": "The requested file id could not be found."
+      }
+    }
+  }
+}

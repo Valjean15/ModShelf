@@ -1,0 +1,22 @@
+{
+  "request": {
+    "method": "GET",
+    "host": "game",
+    "auth": "token",
+    "path": "/v1/games/6715/mods",
+    "query": "_sort=-date_live&_limit=50&_offset=0&_q=qqzxjvnomatchqqzxjv"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "data": [],
+      "result_count": 0,
+      "result_offset": 0,
+      "result_limit": 100,
+      "result_total": 0
+    }
+  }
+}

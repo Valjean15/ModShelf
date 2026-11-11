@@ -1,0 +1,64 @@
+{
+  "request": {
+    "method": "GET",
+    "host": "game",
+    "auth": "token",
+    "path": "/v1/games/6715/mods/4228735/files",
+    "query": "_sort=-date_added&_limit=100",
+    "platform": "windows"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "data": [
+        {
+          "id": 6795889,
+          "mod_id": 4228735,
+          "date_added": 1758650113,
+          "date_updated": 1759143222,
+          "date_scanned": 1758650131,
+          "virus_status": 1,
+          "virus_positive": 0,
+          "virustotal_hash": null,
+          "filesize": 471507,
+          "filesize_uncompressed": 525870,
+          "filehash": {
+            "md5": "e9be965442ab4ad811b9cb93f305f91b"
+          },
+          "filename": "betterinventoryui_6b585be8-ed7-bplo.zip",
+          "version": "1.4.4.21",
+          "changelog": null,
+          "download": {
+            "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/4228735/files/6795889/download",
+            "date_expires": 1857558276
+          },
+          "platforms": [
+            {
+              "platform": "windows",
+              "status": 1
+            },
+            {
+              "platform": "mac",
+              "status": 1
+            },
+            {
+              "platform": "xboxseriesx",
+              "status": 1
+            },
+            {
+              "platform": "ps5",
+              "status": 1
+            }
+          ]
+        }
+      ],
+      "result_count": 1,
+      "result_offset": 0,
+      "result_limit": 100,
+      "result_total": 1
+    }
+  }
+}

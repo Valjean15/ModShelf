@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "GET",
+    "host": "game",
+    "auth": "key",
+    "path": "/v1/games/304/mods",
+    "query": "_limit=1"
+  },
+  "response": {
+    "status": 403,
+    "headers": {
+      "Content-Type": "application/json",
+      "x-modio-error-ref": "14007"
+    },
+    "body": {
+      "error": {
+        "code": 403,
+        "error_ref": 14007,
+        "message": "The game ID you have included in your request could not be found."
+      }
+    }
+  }
+}

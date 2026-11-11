@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "GET",
+    "host": "user",
+    "auth": "key",
+    "path": "/v1/games",
+    "query": "_limit=1"
+  },
+  "response": {
+    "status": 401,
+    "headers": {
+      "Content-Type": "application/json",
+      "x-modio-error-ref": "11002"
+    },
+    "body": {
+      "error": {
+        "code": 401,
+        "error_ref": 11002,
+        "message": "Invalid credentials. Please check that the api_key you are using is correct and valid. Refer to documentation at https://docs.mod.io"
+      }
+    }
+  }
+}

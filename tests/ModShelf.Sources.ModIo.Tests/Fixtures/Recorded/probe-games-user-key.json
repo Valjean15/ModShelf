@@ -1,0 +1,161 @@
+{
+  "request": {
+    "method": "GET",
+    "host": "user",
+    "auth": "key",
+    "path": "/v1/games",
+    "query": "_limit=1"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "data": [
+        {
+          "id": 14735,
+          "status": 1,
+          "submitted_by": {},
+          "date_added": 1794132332,
+          "date_updated": 1794399536,
+          "date_live": 1794331404,
+          "presentation_option": 0,
+          "community_options": 391449,
+          "monetization_options": 0,
+          "monetization_teams": [],
+          "cloud_cooking_status": 0,
+          "cloud_cooking_options": 0,
+          "isolation_options": 1,
+          "submission_option": 0,
+          "dependency_option": 0,
+          "limit_collection_mods": 100,
+          "min_collection_mods": 3,
+          "curation_option": 0,
+          "profanity_option": 1,
+          "revenue_options": 0,
+          "max_stock": 0,
+          "api_access_options": 2,
+          "maturity_options": 1,
+          "ugc_name": "Items",
+          "token_name": "cogs",
+          "icon": {
+            "filename": "icon_512x512.png",
+            "original": "https://image.modcdn.io/games/2919/14735/icon_512x512.png",
+            "thumb_64x64": "https://thumb.modcdn.io/games/2919/14735/crop_64x64/icon_512x512.png",
+            "thumb_128x128": "https://thumb.modcdn.io/games/2919/14735/crop_128x128/icon_512x512.png",
+            "thumb_256x256": "https://thumb.modcdn.io/games/2919/14735/crop_256x256/icon_512x512.png"
+          },
+          "logo": {
+            "filename": "preview_1280x720.png",
+            "original": "https://image.modcdn.io/games/2919/14735/preview_1280x720.png",
+            "thumb_320x180": "https://thumb.modcdn.io/games/2919/14735/crop_320x180/preview_1280x720.png",
+            "thumb_640x360": "https://thumb.modcdn.io/games/2919/14735/crop_640x360/preview_1280x720.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/games/2919/14735/crop_1280x720/preview_1280x720.png"
+          },
+          "header": {
+            "filename": "logo_800x200.png",
+            "original": "https://image.modcdn.io/games/2919/14735/logo_800x200.png"
+          },
+          "boxart": {
+            "filename": "boxart_720x960.png",
+            "original": "https://image.modcdn.io/games/2919/14735/boxart_720x960.png",
+            "thumb_720x960": "https://thumb.modcdn.io/games/2919/14735/thumb_720x960/boxart_720x960.png"
+          },
+          "featureart": {
+            "filename": "featured_1920x1080.png",
+            "original": "https://image.modcdn.io/games/2919/14735/featured_1920x1080.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/games/2919/14735/thumb_1280x720/featured_1920x1080.png"
+          },
+          "name": "YapTogether",
+          "name_id": "yaptogether",
+          "summary": "YapTogether is a set of online party games for your voice. Sound packs here are for Copycat mode: everyone hears a sound and copies it at the same time. Build packs in the game, upload them, and play them with your friends.",
+          "instructions_url": null,
+          "profile_url": "https://mod.io/g/yaptogether",
+          "other_urls": [],
+          "tag_options": [
+            {
+              "name": "Language",
+              "name_localized": "Language",
+              "type": "checkboxes",
+              "tags": [
+                "German",
+                "English"
+              ],
+              "tags_localized": {
+                "German": "German",
+                "English": "English"
+              },
+              "tag_count_map": {
+                "German": 0,
+                "English": 1
+              },
+              "hidden": false,
+              "locked": false
+            },
+            {
+              "name": "Category",
+              "name_localized": "Category",
+              "type": "dropdown",
+              "tags": [
+                "Animals",
+                "Everyday",
+                "Cartoon",
+                "Voices",
+                "Music",
+                "Mixed"
+              ],
+              "tags_localized": {
+                "Animals": "Animals",
+                "Everyday": "Everyday",
+                "Cartoon": "Cartoon",
+                "Voices": "Voices",
+                "Music": "Music",
+                "Mixed": "Mixed"
+              },
+              "tag_count_map": {
+                "Animals": 0,
+                "Everyday": 0,
+                "Cartoon": 1,
+                "Voices": 0,
+                "Music": 0,
+                "Mixed": 0
+              },
+              "hidden": false,
+              "locked": false
+            }
+          ],
+          "collection_tag_options": [],
+          "theme": {
+            "primary": "#208b7d",
+            "dark": "#d2ccc0",
+            "light": "#ffffff",
+            "success": "#68D391",
+            "warning": "#d6af2e",
+            "danger": "#ff000e"
+          },
+          "stats": {
+            "game_id": 14735,
+            "mods_count_total": 1,
+            "mods_downloads_today": 0,
+            "mods_downloads_total": 0,
+            "mods_downloads_daily_average": 0,
+            "mods_subscribers_total": 0,
+            "date_expires": 1794485702
+          },
+          "platforms": [],
+          "service_features": 13,
+          "marketplace_max_stock": 0,
+          "marketplace_min_price": 100,
+          "marketplace_max_price": 10000,
+          "marketplace_default_price": 0,
+          "placements": []
+        }
+      ],
+      "result_count": 1,
+      "result_offset": 0,
+      "result_limit": 1,
+      "result_total": 407
+    }
+  }
+}

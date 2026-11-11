@@ -1,0 +1,30 @@
+{
+  "request": {
+    "method": "GET",
+    "host": "game",
+    "auth": "token",
+    "path": "/v1/games/6715/mods/events",
+    "query": "_sort=date_added&_limit=1"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "data": [
+        {
+          "id": 28069119,
+          "mod_id": 4028745,
+          "user_id": 31443648,
+          "date_added": 1716897245,
+          "event_type": "MODFILE_CHANGED"
+        }
+      ],
+      "result_count": 1,
+      "result_offset": 0,
+      "result_limit": 1,
+      "result_total": 41287
+    }
+  }
+}

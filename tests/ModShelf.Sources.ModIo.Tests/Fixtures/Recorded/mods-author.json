@@ -1,0 +1,2855 @@
+{
+  "request": {
+    "method": "GET",
+    "host": "game",
+    "auth": "token",
+    "path": "/v1/games/6715/mods",
+    "query": "_sort=-date_live&_limit=50&_offset=0&submitted_by=50766638"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "data": [
+        {
+          "id": 6477638,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1792884062,
+          "date_updated": 1794358472,
+          "date_live": 1794396446,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/0ae2/6477638/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/0ae2/6477638/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/0ae2/6477638/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/0ae2/6477638/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Mage Tower Feats",
+          "name_id": "mage-tower-feats",
+          "summary": "22 feats: Deadly Precision, Dagger Master, Expert Fencer, Opportunistic Shot and 18 multiclass feats where two classes' levels count together. Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/mage-tower-feats",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8460120,
+            "mod_id": 6477638,
+            "date_added": 1794358378,
+            "date_updated": 0,
+            "date_scanned": 1794358393,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 3060004,
+            "filesize_uncompressed": 3408362,
+            "filehash": {
+              "md5": "8a15b9224d19f75f038a6f5345e0b779"
+            },
+            "filename": "magetowerfeats_daf73712-da90-4-a7s3.zip",
+            "version": "1.1.0.3",
+            "changelog": "Smaller feat icons (hotbar, character sheet, tooltips)\nTooltips now show damage, saving throw and conditions\nFixed missing icons",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6477638/files/8460120/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8460120
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6477638,
+            "popularity_rank_position": 14103,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 0,
+            "downloads_total": 0,
+            "downloads_unique": 0,
+            "subscribers_total": 0,
+            "ratings_total": 0,
+            "ratings_positive": 0,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 0,
+            "ratings_weighted_aggregate": 0,
+            "ratings_display_text": "Unrated",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6498225,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1793570988,
+          "date_updated": 1794386647,
+          "date_live": 1794386665,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/c02c/6498225/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/c02c/6498225/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/c02c/6498225/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/c02c/6498225/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Mage Tower Warlock Patrons",
+          "name_id": "mage-tower-warlock-patrons",
+          "summary": "7 Warlock patrons: Ancient Wyrm, Fate, four Primordials, Necromancer. Needs Mage Tower Spells. With UnlockLevelCurve, load this after it. Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/mage-tower-warlock-patrons",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461780,
+            "mod_id": 6498225,
+            "date_added": 1794386561,
+            "date_updated": 0,
+            "date_scanned": 1794386570,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 1258603,
+            "filesize_uncompressed": 1384540,
+            "filehash": {
+              "md5": "8244417003c92bea1ac8300537021e8a"
+            },
+            "filename": "magetowerwarlock_fff685de-0216-gexi.zip",
+            "version": "1.0.0.5",
+            "changelog": "Updated for the November 2026 Mage Tower update: smaller icons, and tooltips now show damage, saving throws and effects.",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6498225/files/8461780/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461780
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6498225,
+            "popularity_rank_position": 11092,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 0,
+            "downloads_total": 1,
+            "downloads_unique": 0,
+            "subscribers_total": 0,
+            "ratings_total": 0,
+            "ratings_positive": 0,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 0,
+            "ratings_weighted_aggregate": 0,
+            "ratings_display_text": "Unrated",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6497938,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1793565756,
+          "date_updated": 1794384280,
+          "date_live": 1794384299,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/ecdf/6497938/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/ecdf/6497938/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/ecdf/6497938/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/ecdf/6497938/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Mage Tower Paladin Oaths",
+          "name_id": "mage-tower-paladin-oaths",
+          "summary": "3 Paladin oaths: Exemplar, Knight Commander, Phoenix Knight, levels 1-20. Needs Mage Tower Spells. Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/mage-tower-paladin-oaths",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461674,
+            "mod_id": 6497938,
+            "date_added": 1794384190,
+            "date_updated": 0,
+            "date_scanned": 1794384197,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 561145,
+            "filesize_uncompressed": 616051,
+            "filehash": {
+              "md5": "32827510cebeaf1ac99a24a7cd798e67"
+            },
+            "filename": "magetowerpaladin_7ee0dc72-d197-drkf.zip",
+            "version": "1.2.0.3",
+            "changelog": "Updated for the November 2026 Mage Tower update: smaller icons, and tooltips now show damage, saving throws and effects.",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6497938/files/8461674/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461674
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6497938,
+            "popularity_rank_position": 4813,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 3,
+            "downloads_total": 4,
+            "downloads_unique": 0,
+            "subscribers_total": 0,
+            "ratings_total": 0,
+            "ratings_positive": 0,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 0,
+            "ratings_weighted_aggregate": 0,
+            "ratings_display_text": "Unrated",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6498333,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1793572783,
+          "date_updated": 1794383681,
+          "date_live": 1794383700,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/489b/6498333/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/489b/6498333/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/489b/6498333/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/489b/6498333/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Mage Tower Monk Subclasses",
+          "name_id": "mage-tower-monk-subclasses",
+          "summary": "Monk traditions: the Inscribed, nine Shen animal styles, Binding Hand and Unbroken Wall. Keeps vanilla traditions. Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/mage-tower-monk-subclasses",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461654,
+            "mod_id": 6498333,
+            "date_added": 1794383573,
+            "date_updated": 0,
+            "date_scanned": 1794383595,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 7972239,
+            "filesize_uncompressed": 9426049,
+            "filehash": {
+              "md5": "33f00ff618dc471e3426c5193840e304"
+            },
+            "filename": "magetowermonk_16b0734b-fb4e-43-2hx8.zip",
+            "version": "1.2.0.6",
+            "changelog": "Updated for the November 2026 Mage Tower update: smaller icons, and tooltips now show damage, saving throws and effects.",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6498333/files/8461654/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461654
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6498333,
+            "popularity_rank_position": 4812,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 3,
+            "downloads_total": 5,
+            "downloads_unique": 0,
+            "subscribers_total": 0,
+            "ratings_total": 0,
+            "ratings_positive": 0,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 0,
+            "ratings_weighted_aggregate": 0,
+            "ratings_display_text": "Unrated",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6498007,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1793567152,
+          "date_updated": 1794381316,
+          "date_live": 1794381334,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/a296/6498007/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/a296/6498007/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/a296/6498007/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/a296/6498007/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Mage Tower Bard Subclasses",
+          "name_id": "mage-tower-bard-subclasses",
+          "summary": "4 Bard colleges from Mage Tower Creations: Fate Spinning, Bladesingers, Espionage and Ringmaster. Keeps vanilla colleges. Needs Mage Tower Spells. No Script Extender. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/mage-tower-bard-subclasses",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461534,
+            "mod_id": 6498007,
+            "date_added": 1794381227,
+            "date_updated": 0,
+            "date_scanned": 1794381243,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 750103,
+            "filesize_uncompressed": 827397,
+            "filehash": {
+              "md5": "bd39130d9605e22060adfd722ceffec0"
+            },
+            "filename": "magetowerbard_0dcce6b6-974b-4d-aaz5.zip",
+            "version": "1.2.0.3",
+            "changelog": "Updated for the November 2026 Mage Tower update: smaller icons, and tooltips now show damage, saving throws and effects.",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6498007/files/8461534/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461534
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6498007,
+            "popularity_rank_position": 5654,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 2,
+            "downloads_total": 3,
+            "downloads_unique": 0,
+            "subscribers_total": 0,
+            "ratings_total": 0,
+            "ratings_positive": 0,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 0,
+            "ratings_weighted_aggregate": 0,
+            "ratings_display_text": "Unrated",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6508374,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1794002683,
+          "date_updated": 1794380130,
+          "date_live": 1794380148,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/22a9/6508374/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/22a9/6508374/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/22a9/6508374/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/22a9/6508374/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Dragon Paragon Class",
+          "name_id": "playing-a-dragon",
+          "summary": "Dragon Paragon Class: play a dragon, levels 1-20, with the Tarragon race and dragon feats. Needs Mage Tower Spells. By Mage Tower Creations. Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/playing-a-dragon",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461489,
+            "mod_id": 6508374,
+            "date_added": 1794380049,
+            "date_updated": 0,
+            "date_scanned": 1794380144,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 7350641,
+            "filesize_uncompressed": 8628428,
+            "filehash": {
+              "md5": "134cf6cb4178ee2700d65e347e8d8605"
+            },
+            "filename": "playingadragon_2fa74a42-6a5d-4-3uem.zip",
+            "version": "1.0.0.9",
+            "changelog": "Dragon form now counts as Wild Shape\nFixed: characters looked stretched after leaving dragon form\nDragon form can now path through doors\nNever Prey now gives Perception expertise\nSmaller icons; tooltips now show damage, saving throws and effects",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6508374/files/8461489/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461489
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6508374,
+            "popularity_rank_position": 10561,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 0,
+            "downloads_total": 2,
+            "downloads_unique": 0,
+            "subscribers_total": 0,
+            "ratings_total": 0,
+            "ratings_positive": 0,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 0,
+            "ratings_weighted_aggregate": 0,
+            "ratings_display_text": "Unrated",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6477846,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1792888983,
+          "date_updated": 1794379387,
+          "date_live": 1794379406,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/7382/6477846/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/7382/6477846/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/7382/6477846/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/7382/6477846/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Necromancer (Balanced)",
+          "name_id": "necromancer-balanced",
+          "summary": "Necromancer (Balanced), the tabletop v2 class: Risen, souls and five Necromantic Orders, tuned for balance. Needs Mage Tower Spells. Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/necromancer-balanced",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461444,
+            "mod_id": 6477846,
+            "date_added": 1794379309,
+            "date_updated": 0,
+            "date_scanned": 1794379327,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 7716965,
+            "filesize_uncompressed": 9209248,
+            "filehash": {
+              "md5": "35095230e4e47d6d2655cde8a3c884f2"
+            },
+            "filename": "necromancerbalanced_547bb21f-8-atfn.zip",
+            "version": "1.0.0.10",
+            "changelog": "Updated for the November 2026 Mage Tower update: smaller icons, and tooltips now show damage, saving throws and effects.",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6477846/files/8461444/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461444
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6477846,
+            "popularity_rank_position": 6956,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 1,
+            "downloads_total": 2,
+            "downloads_unique": 0,
+            "subscribers_total": 0,
+            "ratings_total": 0,
+            "ratings_positive": 0,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 0,
+            "ratings_weighted_aggregate": 0,
+            "ratings_display_text": "Unrated",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6465483,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1792447530,
+          "date_updated": 1794378818,
+          "date_live": 1794378836,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/6d2f/6465483/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/6d2f/6465483/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/6d2f/6465483/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/6d2f/6465483/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Necromancer (Overpowered)",
+          "name_id": "necromancer-class",
+          "summary": "Necromancer (Overpowered), a 20-level class: raise squads of Risen, harvest souls, pick a Necromantic Order. Needs Mage Tower Spells. Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/necromancer-class",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461420,
+            "mod_id": 6465483,
+            "date_added": 1794378734,
+            "date_updated": 0,
+            "date_scanned": 1794378756,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 7419362,
+            "filesize_uncompressed": 8840638,
+            "filehash": {
+              "md5": "02e21857dd2c5f55cb836a9d857c06ad"
+            },
+            "filename": "necromancer_dc0011cf-64dc-44e2-5oad.zip",
+            "version": "1.0.0.11",
+            "changelog": "Updated for the November 2026 Mage Tower update: smaller icons, and tooltips now show damage, saving throws and effects.",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6465483/files/8461420/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461420
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6465483,
+            "popularity_rank_position": 5656,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 2,
+            "downloads_total": 2,
+            "downloads_unique": 0,
+            "subscribers_total": 0,
+            "ratings_total": 0,
+            "ratings_positive": 0,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 0,
+            "ratings_weighted_aggregate": 0,
+            "ratings_display_text": "Unrated",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6498073,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1793568541,
+          "date_updated": 1794378208,
+          "date_live": 1794378223,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/a976/6498073/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/a976/6498073/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/a976/6498073/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/a976/6498073/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Swashbuckler Class",
+          "name_id": "swashbuckler-class1",
+          "summary": "Swashbuckler, a 20-level class of daring blades and flair, with the Duelist and Corsair subclasses. By Mage Tower Creations. Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/swashbuckler-class1",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461399,
+            "mod_id": 6498073,
+            "date_added": 1794378093,
+            "date_updated": 0,
+            "date_scanned": 1794378101,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 1832644,
+            "filesize_uncompressed": 2159238,
+            "filehash": {
+              "md5": "5457030855fe9210a45961564d9b4c6a"
+            },
+            "filename": "mtswashbuckler_30e07ed5-2fde-4-glby.zip",
+            "version": "1.0.0.8",
+            "changelog": "Updated for the November 2026 Mage Tower update: smaller icons, and tooltips now show damage, saving throws and effects.",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6498073/files/8461399/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461399
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6498073,
+            "popularity_rank_position": 10559,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 0,
+            "downloads_total": 2,
+            "downloads_unique": 0,
+            "subscribers_total": 0,
+            "ratings_total": 0,
+            "ratings_positive": 0,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 0,
+            "ratings_weighted_aggregate": 0,
+            "ratings_display_text": "Unrated",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6498268,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1793571633,
+          "date_updated": 1794377645,
+          "date_live": 1794377664,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/aa62/6498268/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/aa62/6498268/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/aa62/6498268/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/aa62/6498268/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Warlord Class",
+          "name_id": "warlord-class2",
+          "summary": "Warlord, a 20-level martial leader: Commander's Guidance, Rally, Issue Orders, a growing Leadership Aura and three Leadership Styles. Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/warlord-class2",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461371,
+            "mod_id": 6498268,
+            "date_added": 1794377486,
+            "date_updated": 0,
+            "date_scanned": 1794377497,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 2523986,
+            "filesize_uncompressed": 2946306,
+            "filehash": {
+              "md5": "7afdf666ec8dee33b73da79bb331f664"
+            },
+            "filename": "warlord_1cf03a63-f7d9-4c95-a43-fr7g.zip",
+            "version": "1.0.0.12",
+            "changelog": "Updated for the November 2026 Mage Tower update: smaller icons, and tooltips now show damage, saving throws and effects.",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6498268/files/8461371/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461371
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6498268,
+            "popularity_rank_position": 5655,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 2,
+            "downloads_total": 3,
+            "downloads_unique": 0,
+            "subscribers_total": 0,
+            "ratings_total": 0,
+            "ratings_positive": 0,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 0,
+            "ratings_weighted_aggregate": 0,
+            "ratings_display_text": "Unrated",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6477690,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1792885615,
+          "date_updated": 1794377032,
+          "date_live": 1794377049,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/71ce/6477690/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/71ce/6477690/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/71ce/6477690/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/71ce/6477690/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Battlemage Class",
+          "name_id": "battlemage-class",
+          "summary": "Battlemage, a 20-level Intelligence gish class: bond an Athame, armour in force, smite with arcane formulas. Needs Mage Tower Spells. Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/battlemage-class",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461317,
+            "mod_id": 6477690,
+            "date_added": 1794376956,
+            "date_updated": 0,
+            "date_scanned": 1794376968,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 3992314,
+            "filesize_uncompressed": 4699773,
+            "filehash": {
+              "md5": "adad6c6a180f77632c69e178269ee487"
+            },
+            "filename": "battlemage_a4c91213-b2da-4394-8hat.zip",
+            "version": "1.0.0.7",
+            "changelog": "Updated for the November 2026 Mage Tower update: smaller icons, and tooltips now show damage, saving throws and effects.",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6477690/files/8461317/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461317
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6477690,
+            "popularity_rank_position": 10557,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 0,
+            "downloads_total": 2,
+            "downloads_unique": 0,
+            "subscribers_total": 0,
+            "ratings_total": 0,
+            "ratings_positive": 0,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 0,
+            "ratings_weighted_aggregate": 0,
+            "ratings_display_text": "Unrated",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6508357,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1794002236,
+          "date_updated": 1794376437,
+          "date_live": 1794376455,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/9e36/6508357/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/9e36/6508357/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/9e36/6508357/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/9e36/6508357/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Arcanist Class",
+          "name_id": "arcanist-class",
+          "summary": "20-level Intelligence full caster: Elemental Strike, Metamagic, invocations, infusions. Needs Mage Tower Spells. Infusions inspired by Kidel's Artificer (MIT). Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/arcanist-class",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461283,
+            "mod_id": 6508357,
+            "date_added": 1794376347,
+            "date_updated": 0,
+            "date_scanned": 1794376499,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 220016,
+            "filesize_uncompressed": 245885,
+            "filehash": {
+              "md5": "02fabeec4f33515d2fe799e1b512e6ba"
+            },
+            "filename": "arcanist_aa220c1d-5877-4883-95-2oam.zip",
+            "version": "1.0.0.3",
+            "changelog": "Updated for the November 2026 Mage Tower update: smaller icons, and tooltips now show damage, saving throws and effects.",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6508357/files/8461283/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461283
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6508357,
+            "popularity_rank_position": 10560,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 0,
+            "downloads_total": 2,
+            "downloads_unique": 0,
+            "subscribers_total": 0,
+            "ratings_total": 0,
+            "ratings_positive": 0,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 0,
+            "ratings_weighted_aggregate": 0,
+            "ratings_display_text": "Unrated",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6477743,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1792886754,
+          "date_updated": 1794375864,
+          "date_live": 1794375886,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/be4c/6477743/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/be4c/6477743/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/be4c/6477743/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/be4c/6477743/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Mage Tower Species",
+          "name_id": "mage-tower-species",
+          "summary": "Two playable species from Mage Tower Creations: the Half-Dwarf and the Avariel, a winged elf subrace (no visible wings in BG3). Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/mage-tower-species",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461258,
+            "mod_id": 6477743,
+            "date_added": 1794375769,
+            "date_updated": 0,
+            "date_scanned": 1794375774,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 61218,
+            "filesize_uncompressed": 75052,
+            "filehash": {
+              "md5": "69de9b67758f92608a2543919275fdbd"
+            },
+            "filename": "magetowerspecies_581330e0-4279-cckg.zip",
+            "version": "1.0.0.5",
+            "changelog": "Updated for the November 2026 Mage Tower update: smaller icons, and tooltips now show damage, saving throws and effects.",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6477743/files/8461258/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461258
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6477743,
+            "popularity_rank_position": 5653,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 2,
+            "downloads_total": 3,
+            "downloads_unique": 0,
+            "subscribers_total": 0,
+            "ratings_total": 0,
+            "ratings_positive": 0,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 0,
+            "ratings_weighted_aggregate": 0,
+            "ratings_display_text": "Unrated",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6477811,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1792888004,
+          "date_updated": 1794375282,
+          "date_live": 1794375319,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/a9b4/6477811/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/a9b4/6477811/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/a9b4/6477811/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/a9b4/6477811/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Mage Tower Arsenal",
+          "name_id": "mage-tower-arsenal",
+          "summary": "Mage Tower magic items: weapons, armour, rings, amulets and staves, sold by traders, plus a free Arsenal Chest. Needs Mage Tower Spells. Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/mage-tower-arsenal",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461196,
+            "mod_id": 6477811,
+            "date_added": 1794375118,
+            "date_updated": 0,
+            "date_scanned": 1794375130,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 59406,
+            "filesize_uncompressed": 72551,
+            "filehash": {
+              "md5": "14aa229924f7f6d65c7fd334ccb44563"
+            },
+            "filename": "magetowerarsenal_7360b042-2210-7dir.zip",
+            "version": "1.0.0.4",
+            "changelog": "Updated for the November 2026 Mage Tower update: smaller icons, and tooltips now show damage, saving throws and effects.",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6477811/files/8461196/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461196
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6477811,
+            "popularity_rank_position": 6957,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 1,
+            "downloads_total": 1,
+            "downloads_unique": 0,
+            "subscribers_total": 0,
+            "ratings_total": 0,
+            "ratings_positive": 0,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 0,
+            "ratings_weighted_aggregate": 0,
+            "ratings_display_text": "Unrated",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6517898,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1794260295,
+          "date_updated": 1794374516,
+          "date_live": 1794263499,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/b828/6517898/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/b828/6517898/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/b828/6517898/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/b828/6517898/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Mage Tower Creations - Quality of Life",
+          "name_id": "mage-tower-creations-quality-of-life",
+          "summary": "Optional add-on for Mage Tower Creations - Complete Collection: faster leveling to 20, bonus feats at class levels 1 and 2, all dialogue options, and a Toolbox (party buffs, gold, bags, carry weight). No Script Extender.",
+          "profile_url": "https://mod.io/g/baldursgate3/m/mage-tower-creations-quality-of-life",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461133,
+            "mod_id": 6517898,
+            "date_added": 1794374420,
+            "date_updated": 0,
+            "date_scanned": 1794374481,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 42866,
+            "filesize_uncompressed": 45969,
+            "filehash": {
+              "md5": "6b217b5d7d0aaa20457244e6823a3f6c"
+            },
+            "filename": "magetowerqol_c7a1e2f0-3b4d-4e8-0u0f.zip",
+            "version": "1.0.0.5",
+            "changelog": "Fixed: Party Ritual did nothing when cast (it now applies its buffs again; they end on a long rest)\nPack Mule is now an on/off toggle in your passives, like All Dialogue Options",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6517898/files/8461133/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461133
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [
+            {
+              "name": "Quality of Life",
+              "name_localized": "Quality of Life",
+              "date_added": 0
+            }
+          ],
+          "stats": {
+            "mod_id": 6517898,
+            "popularity_rank_position": 1421,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 40,
+            "downloads_total": 64,
+            "downloads_unique": 0,
+            "subscribers_total": 25,
+            "ratings_total": 1,
+            "ratings_positive": 1,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 100,
+            "ratings_weighted_aggregate": 0.21,
+            "ratings_display_text": "Positive",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6498151,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1793569818,
+          "date_updated": 1794387471,
+          "date_live": 1794171793,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/637b/6498151/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/637b/6498151/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/637b/6498151/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/637b/6498151/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Mage Tower Wizard Subclasses",
+          "name_id": "mage-tower-wizard-subclasses",
+          "summary": "4 Wizard schools: the Argent, War Wizardry, the Awakened Mind, Blood Summoner. Needs Mage Tower Spells. Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/mage-tower-wizard-subclasses",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461793,
+            "mod_id": 6498151,
+            "date_added": 1794387315,
+            "date_updated": 0,
+            "date_scanned": 1794387323,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 741942,
+            "filesize_uncompressed": 817444,
+            "filehash": {
+              "md5": "b407ac8b9c59ae9c00b58f80b8a9f0ae"
+            },
+            "filename": "magetowerwizard_957d3224-7a07-d1ct.zip",
+            "version": "1.1.0.8",
+            "changelog": "Updated for the November 2026 Mage Tower update: smaller icons, and tooltips now show damage, saving throws and effects.",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6498151/files/8461793/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461793
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6498151,
+            "popularity_rank_position": 2139,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 17,
+            "downloads_total": 51,
+            "downloads_unique": 0,
+            "subscribers_total": 22,
+            "ratings_total": 2,
+            "ratings_positive": 2,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 100,
+            "ratings_weighted_aggregate": 0.34,
+            "ratings_display_text": "Positive",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6498315,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1793572448,
+          "date_updated": 1794386055,
+          "date_live": 1794171729,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/b5ef/6498315/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/b5ef/6498315/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/b5ef/6498315/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/b5ef/6498315/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Mage Tower Sorcerer Subclasses",
+          "name_id": "mage-tower-sorcerer-subclasses",
+          "summary": "7 Sorcerer origins: four Elemental Scions, Touched by Death, Fiendish Bloodline, Temporal Energy. Needs Mage Tower Spells. Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/mage-tower-sorcerer-subclasses",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461744,
+            "mod_id": 6498315,
+            "date_added": 1794385966,
+            "date_updated": 0,
+            "date_scanned": 1794385977,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 1291887,
+            "filesize_uncompressed": 1454156,
+            "filehash": {
+              "md5": "ab1eecb0c17c356a305795eb0e504c5e"
+            },
+            "filename": "magetowersorcerer_f6f05a50-516-8hid.zip",
+            "version": "1.1.0.7",
+            "changelog": "Updated for the November 2026 Mage Tower update: smaller icons, and tooltips now show damage, saving throws and effects.",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6498315/files/8461744/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461744
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6498315,
+            "popularity_rank_position": 2211,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 16,
+            "downloads_total": 46,
+            "downloads_unique": 0,
+            "subscribers_total": 18,
+            "ratings_total": 1,
+            "ratings_positive": 1,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 100,
+            "ratings_weighted_aggregate": 0.21,
+            "ratings_display_text": "Positive",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6498195,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1793570536,
+          "date_updated": 1794385475,
+          "date_live": 1794171663,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/e088/6498195/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/e088/6498195/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/e088/6498195/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/e088/6498195/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Mage Tower Rogue Subclasses",
+          "name_id": "mage-tower-rogue-subclasses",
+          "summary": "Rogue archetypes: Knife Fighter, Sniper, Brutish Thug, Ninja and Spell Striker (Int or Cha). Needs Mage Tower Spells. Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/mage-tower-rogue-subclasses",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461723,
+            "mod_id": 6498195,
+            "date_added": 1794385384,
+            "date_updated": 0,
+            "date_scanned": 1794385391,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 1062647,
+            "filesize_uncompressed": 1173628,
+            "filehash": {
+              "md5": "1282a0e90ff21015be88e39d5fec0eeb"
+            },
+            "filename": "magetowerrogue_01a606f0-c197-4-19rm.zip",
+            "version": "1.0.0.7",
+            "changelog": "Updated for the November 2026 Mage Tower update: smaller icons, Knife Fighter Menacing Attack text no longer cut off, and tooltips now show damage, saving throws and effects.",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6498195/files/8461723/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461723
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6498195,
+            "popularity_rank_position": 2000,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 20,
+            "downloads_total": 55,
+            "downloads_unique": 0,
+            "subscribers_total": 22,
+            "ratings_total": 0,
+            "ratings_positive": 0,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 0,
+            "ratings_weighted_aggregate": 0,
+            "ratings_display_text": "Unrated",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6498167,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1793570161,
+          "date_updated": 1794384878,
+          "date_live": 1794171598,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/975e/6498167/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/975e/6498167/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/975e/6498167/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/975e/6498167/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Mage Tower Ranger Subclasses",
+          "name_id": "mage-tower-ranger-subclasses",
+          "summary": "4 Ranger conclaves: Hunter of the Dead, Animal Lord, Commando, Marksman. Needs Mage Tower Spells. Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/mage-tower-ranger-subclasses",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461695,
+            "mod_id": 6498167,
+            "date_added": 1794384769,
+            "date_updated": 0,
+            "date_scanned": 1794384790,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 6304865,
+            "filesize_uncompressed": 7553261,
+            "filehash": {
+              "md5": "5b8230582fa4b93fef2b21f65ecea68d"
+            },
+            "filename": "magetowerranger_d9833d48-2383-6jco.zip",
+            "version": "1.1.0.10",
+            "changelog": "Updated for the November 2026 Mage Tower update: smaller icons, and tooltips now show damage, saving throws and effects.",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6498167/files/8461695/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461695
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6498167,
+            "popularity_rank_position": 2140,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 17,
+            "downloads_total": 48,
+            "downloads_unique": 0,
+            "subscribers_total": 17,
+            "ratings_total": 0,
+            "ratings_positive": 0,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 0,
+            "ratings_weighted_aggregate": 0,
+            "ratings_display_text": "Unrated",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6498099,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1793568960,
+          "date_updated": 1794382487,
+          "date_live": 1794171532,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/6aa7/6498099/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/6aa7/6498099/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/6aa7/6498099/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/6aa7/6498099/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Mage Tower Druid Subclasses",
+          "name_id": "mage-tower-druid-subclasses",
+          "summary": "6 Druid circles: Stone, Elements, Beast Lord, Sun, Thornguard, Hive. Needs Mage Tower Spells. Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/mage-tower-druid-subclasses",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461591,
+            "mod_id": 6498099,
+            "date_added": 1794382405,
+            "date_updated": 0,
+            "date_scanned": 1794382470,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 1065847,
+            "filesize_uncompressed": 1181382,
+            "filehash": {
+              "md5": "e1f08a8ca92a4cec808853b103597a4c"
+            },
+            "filename": "magetowerdruid_1ef3b52b-9727-4-akwi.zip",
+            "version": "1.4.0.6",
+            "changelog": "Updated for the November 2026 Mage Tower update: smaller icons, and tooltips now show damage, saving throws and effects.",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6498099/files/8461591/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461591
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6498099,
+            "popularity_rank_position": 2270,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 15,
+            "downloads_total": 44,
+            "downloads_unique": 0,
+            "subscribers_total": 18,
+            "ratings_total": 0,
+            "ratings_positive": 0,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 0,
+            "ratings_weighted_aggregate": 0,
+            "ratings_display_text": "Unrated",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6497981,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1793566501,
+          "date_updated": 1794380733,
+          "date_live": 1794171467,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/0f0b/6497981/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/0f0b/6497981/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/0f0b/6497981/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/0f0b/6497981/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Mage Tower Barbarian Subclasses",
+          "name_id": "mage-tower-barbarian-subclasses",
+          "summary": "5 Barbarian paths: Rage Mage, Whirling Dervish, Skald, Skinwalker, Tribal Shaman. Keeps vanilla paths. Needs Mage Tower Spells. Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/mage-tower-barbarian-subclasses",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461512,
+            "mod_id": 6497981,
+            "date_added": 1794380648,
+            "date_updated": 0,
+            "date_scanned": 1794380655,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 887633,
+            "filesize_uncompressed": 976642,
+            "filehash": {
+              "md5": "fc4772b9d5ed5fd828cf812132ef6990"
+            },
+            "filename": "magetowerbarbarian_e2f8ec6a-d1-foyk.zip",
+            "version": "1.2.0.6",
+            "changelog": "Updated for the November 2026 Mage Tower update: smaller icons, and tooltips now show damage, saving throws and effects.",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6497981/files/8461512/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461512
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6497981,
+            "popularity_rank_position": 2431,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 13,
+            "downloads_total": 41,
+            "downloads_unique": 0,
+            "subscribers_total": 18,
+            "ratings_total": 1,
+            "ratings_positive": 1,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 100,
+            "ratings_weighted_aggregate": 0.21,
+            "ratings_display_text": "Positive",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6498046,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1793568105,
+          "date_updated": 1794381911,
+          "date_live": 1794171402,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/2f2e/6498046/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/2f2e/6498046/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/2f2e/6498046/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/2f2e/6498046/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Mage Tower Cleric Domains",
+          "name_id": "mage-tower-cleric-domains",
+          "summary": "4 Cleric domains: Sacred Fist, Ambition, Eldritch, Covenant, levels 1-20. Needs Mage Tower Spells. Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/mage-tower-cleric-domains",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461553,
+            "mod_id": 6498046,
+            "date_added": 1794381826,
+            "date_updated": 0,
+            "date_scanned": 1794381839,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 748255,
+            "filesize_uncompressed": 818516,
+            "filehash": {
+              "md5": "4ec6428698bea5b9604c2717a1ba99a8"
+            },
+            "filename": "magetowercleric_2dc170b8-303b-4j5q.zip",
+            "version": "1.2.0.6",
+            "changelog": "Updated for the November 2026 Mage Tower update: smaller icons, and tooltips now show damage, saving throws and effects.",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6498046/files/8461553/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461553
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6498046,
+            "popularity_rank_position": 2346,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 14,
+            "downloads_total": 46,
+            "downloads_unique": 0,
+            "subscribers_total": 22,
+            "ratings_total": 0,
+            "ratings_positive": 0,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 0,
+            "ratings_weighted_aggregate": 0,
+            "ratings_display_text": "Unrated",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6498290,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1793571980,
+          "date_updated": 1794383089,
+          "date_live": 1794171338,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/f1be/6498290/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/f1be/6498290/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/f1be/6498290/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/f1be/6498290/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Mage Tower Fighter Subclasses",
+          "name_id": "mage-tower-fighter-subclasses",
+          "summary": "7 Fighter archetypes: Amalgamist, Duelist, Eldritch Archer, Mythic Warrior, Shield Warrior, Templar, Vanguard. Needs Mage Tower Spells. Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/mage-tower-fighter-subclasses",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461628,
+            "mod_id": 6498290,
+            "date_added": 1794382979,
+            "date_updated": 0,
+            "date_scanned": 1794382998,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 5427310,
+            "filesize_uncompressed": 6462152,
+            "filehash": {
+              "md5": "a36176067b05e840b6d8a6714e3426b7"
+            },
+            "filename": "magetowerfighter_f36c39c9-4e80-bkgb.zip",
+            "version": "1.0.0.11",
+            "changelog": "Updated for the November 2026 Mage Tower update: smaller icons, and tooltips now show damage, saving throws and effects.",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6498290/files/8461628/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461628
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6498290,
+            "popularity_rank_position": 2085,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 18,
+            "downloads_total": 54,
+            "downloads_unique": 0,
+            "subscribers_total": 22,
+            "ratings_total": 2,
+            "ratings_positive": 2,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 100,
+            "ratings_weighted_aggregate": 0.34,
+            "ratings_display_text": "Positive",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6465401,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1792445432,
+          "date_updated": 1794357880,
+          "date_live": 1794171275,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "thumbnail.png",
+            "original": "https://image.modcdn.io/mods/18cc/6465401/thumbnail.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/18cc/6465401/crop_320x180/thumbnail.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/18cc/6465401/crop_640x360/thumbnail.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/18cc/6465401/crop_1280x720/thumbnail.png"
+          },
+          "homepage_url": null,
+          "name": "Mage Tower Spells",
+          "name_id": "mage-tower-spells",
+          "summary": "Mage Tower Creations spell library: 5e spells BG3 left out plus original spells. Required by the Mage Tower classes, subclasses and items. Also in the Mage Tower Creations Complete Collection. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/mage-tower-spells",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8460080,
+            "mod_id": 6465401,
+            "date_added": 1794357828,
+            "date_updated": 0,
+            "date_scanned": 1794357839,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 4390285,
+            "filesize_uncompressed": 5287856,
+            "filehash": {
+              "md5": "388a18fd3842dd96933b0d96461f3345"
+            },
+            "filename": "magetowerspells_62aa483b-1165-i9t5.zip",
+            "version": "1.4.0.11",
+            "changelog": "Smaller spell icons (hotbar, character sheet, tooltips)\nTooltips now show damage, saving throw and conditions\nFixed descriptions that were cut off\nFixed missing icons",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6465401/files/8460080/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8460080
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [],
+          "stats": {
+            "mod_id": 6465401,
+            "popularity_rank_position": 1806,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 25,
+            "downloads_total": 65,
+            "downloads_unique": 0,
+            "subscribers_total": 25,
+            "ratings_total": 1,
+            "ratings_positive": 1,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 100,
+            "ratings_weighted_aggregate": 0.21,
+            "ratings_display_text": "Positive",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        },
+        {
+          "id": 6514073,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 50766638,
+            "name_id": "modiouser2js8",
+            "username": "ModioUser2js8",
+            "display_name_portal": null,
+            "date_online": 1794396489,
+            "date_joined": 1758393732,
+            "avatar": {
+              "filename": "avatar.png",
+              "original": "https://assets.modcdn.io/images/placeholder/avatar.png",
+              "thumb_50x50": "https://assets.modcdn.io/images/placeholder/avatar_50x50.png",
+              "thumb_100x100": "https://assets.modcdn.io/images/placeholder/avatar_100x100.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/modiouser2js8"
+          },
+          "date_added": 1794146464,
+          "date_updated": 1794374061,
+          "date_live": 1794170982,
+          "maturity_option": 0,
+          "community_options": 1024,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "mod_publish_logo.png",
+            "original": "https://image.modcdn.io/mods/5012/6514073/mod_publish_logo.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/5012/6514073/crop_320x180/mod_publish_logo.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/5012/6514073/crop_640x360/mod_publish_logo.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/5012/6514073/crop_1280x720/mod_publish_logo.png"
+          },
+          "homepage_url": null,
+          "name": "Mage Tower Creations - Complete Collection",
+          "name_id": "mage-tower-creations-complete-collection",
+          "summary": "Every Mage Tower Creations mod in one: classes, subclasses, spells, feats, species, items. Use INSTEAD of the separate Mage Tower mods. Levels 13-20 need a level-cap mod. No Script Extender. Feedback: stevenross19 at gmail.com",
+          "profile_url": "https://mod.io/g/baldursgate3/m/mage-tower-creations-complete-collection",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": []
+          },
+          "modfile": {
+            "id": 8461087,
+            "mod_id": 6514073,
+            "date_added": 1794373851,
+            "date_updated": 0,
+            "date_scanned": 1794373958,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 41579304,
+            "filesize_uncompressed": 54061720,
+            "filehash": {
+              "md5": "ec9b98743662d05a9cdc1cbf67084198"
+            },
+            "filename": "magetowercreations_b2813e90-f6-e1ph.zip",
+            "version": "1.0.0.20",
+            "changelog": "Dragon form can now walk through doors (it counted as a Huge creature before)",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/6514073/files/8461087/download",
+              "date_expires": 1857555982
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 0
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 8461087
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [
+            {
+              "name": "Classes",
+              "name_localized": "Classes",
+              "date_added": 0
+            },
+            {
+              "name": "Equipment",
+              "name_localized": "Equipment",
+              "date_added": 0
+            },
+            {
+              "name": "Quality of Life",
+              "name_localized": "Quality of Life",
+              "date_added": 0
+            },
+            {
+              "name": "Races",
+              "name_localized": "Races",
+              "date_added": 0
+            },
+            {
+              "name": "Spells",
+              "name_localized": "Spells",
+              "date_added": 0
+            },
+            {
+              "name": "Subclasses",
+              "name_localized": "Subclasses",
+              "date_added": 0
+            },
+            {
+              "name": "Patch 8 Tested",
+              "name_localized": "Patch 8 Tested",
+              "date_added": 0
+            },
+            {
+              "name": "Barbarian",
+              "name_localized": "Barbarian",
+              "date_added": 0
+            },
+            {
+              "name": "Bard",
+              "name_localized": "Bard",
+              "date_added": 0
+            },
+            {
+              "name": "Cleric",
+              "name_localized": "Cleric",
+              "date_added": 0
+            },
+            {
+              "name": "Druid",
+              "name_localized": "Druid",
+              "date_added": 0
+            },
+            {
+              "name": "Fighter",
+              "name_localized": "Fighter",
+              "date_added": 0
+            },
+            {
+              "name": "Monk",
+              "name_localized": "Monk",
+              "date_added": 0
+            },
+            {
+              "name": "Paladin",
+              "name_localized": "Paladin",
+              "date_added": 0
+            },
+            {
+              "name": "Ranger",
+              "name_localized": "Ranger",
+              "date_added": 0
+            },
+            {
+              "name": "Rogue",
+              "name_localized": "Rogue",
+              "date_added": 0
+            },
+            {
+              "name": "Sorcerer",
+              "name_localized": "Sorcerer",
+              "date_added": 0
+            },
+            {
+              "name": "Warlock",
+              "name_localized": "Warlock",
+              "date_added": 0
+            },
+            {
+              "name": "Wizard",
+              "name_localized": "Wizard",
+              "date_added": 0
+            },
+            {
+              "name": "Feats",
+              "name_localized": "Feats",
+              "date_added": 0
+            },
+            {
+              "name": "Other Classes",
+              "name_localized": "Other Classes",
+              "date_added": 0
+            },
+            {
+              "name": "Other Races",
+              "name_localized": "Other Races",
+              "date_added": 0
+            },
+            {
+              "name": "Armor",
+              "name_localized": "Armor",
+              "date_added": 0
+            },
+            {
+              "name": "Weapons",
+              "name_localized": "Weapons",
+              "date_added": 0
+            },
+            {
+              "name": "English",
+              "name_localized": "English",
+              "date_added": 0
+            }
+          ],
+          "stats": {
+            "mod_id": 6514073,
+            "popularity_rank_position": 677,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 123,
+            "downloads_total": 334,
+            "downloads_unique": 0,
+            "subscribers_total": 106,
+            "ratings_total": 8,
+            "ratings_positive": 8,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 100,
+            "ratings_weighted_aggregate": 0.68,
+            "ratings_display_text": "Very Positive",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        }
+      ],
+      "result_count": 25,
+      "result_offset": 0,
+      "result_limit": 50,
+      "result_total": 25
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "request": {
+    "method": "GET",
+    "host": "user",
+    "auth": "token",
+    "path": "/v1/me/subscribed",
+    "query": "_limit=100"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "data": [],
+      "result_count": 0,
+      "result_offset": 0,
+      "result_limit": 100,
+      "result_total": 0
+    }
+  }
+}

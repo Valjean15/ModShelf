@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "GET",
+    "host": "user",
+    "auth": "token",
+    "path": "/v1/me",
+    "query": ""
+  },
+  "response": {
+    "status": 401,
+    "headers": {
+      "Content-Type": "application/json",
+      "x-modio-error-ref": "11005"
+    },
+    "body": {
+      "error": {
+        "code": 401,
+        "error_ref": 11005,
+        "message": "The supplied access token has either been revoked, has expired or is malformed. Please generate a new one."
+      }
+    }
+  }
+}

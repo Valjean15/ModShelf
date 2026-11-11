@@ -1,0 +1,821 @@
+{
+  "request": {
+    "method": "GET",
+    "host": "user",
+    "auth": "token",
+    "path": "/v1/games",
+    "query": "_q=baldur&api_access_options-bitwise-and=1&_limit=100"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "data": [
+        {
+          "id": 6715,
+          "status": 1,
+          "submitted_by": {},
+          "date_added": 1716387856,
+          "date_updated": 1793197645,
+          "date_live": 1721917819,
+          "presentation_option": 0,
+          "community_options": 391691,
+          "monetization_options": 0,
+          "monetization_teams": [],
+          "cloud_cooking_status": 0,
+          "cloud_cooking_options": 0,
+          "isolation_options": 1,
+          "submission_option": 0,
+          "dependency_option": 2,
+          "limit_collection_mods": 100,
+          "min_collection_mods": 3,
+          "curation_option": 0,
+          "profanity_option": 1,
+          "revenue_options": 0,
+          "max_stock": 0,
+          "api_access_options": 3,
+          "maturity_options": 1,
+          "ugc_name": "Mods",
+          "token_name": "currency",
+          "icon": {
+            "filename": "bg3-icon.png",
+            "original": "https://image.modcdn.io/games/38fa/6715/bg3-icon.png",
+            "thumb_64x64": "https://thumb.modcdn.io/games/38fa/6715/crop_64x64/bg3-icon.png",
+            "thumb_128x128": "https://thumb.modcdn.io/games/38fa/6715/crop_128x128/bg3-icon.png",
+            "thumb_256x256": "https://thumb.modcdn.io/games/38fa/6715/crop_256x256/bg3-icon.png"
+          },
+          "logo": {
+            "filename": "bg3_keyart_master_horitontal_fi.jpg",
+            "original": "https://image.modcdn.io/games/38fa/6715/bg3_keyart_master_horitontal_fi.jpg",
+            "thumb_320x180": "https://thumb.modcdn.io/games/38fa/6715/crop_320x180/bg3_keyart_master_horitontal_fi.jpg",
+            "thumb_640x360": "https://thumb.modcdn.io/games/38fa/6715/crop_640x360/bg3_keyart_master_horitontal_fi.jpg",
+            "thumb_1280x720": "https://thumb.modcdn.io/games/38fa/6715/crop_1280x720/bg3_keyart_master_horitontal_fi.jpg"
+          },
+          "header": {
+            "filename": "logo.png",
+            "original": "https://image.modcdn.io/games/38fa/6715/logo.png"
+          },
+          "boxart": {
+            "filename": "1360x1920.png",
+            "original": "https://image.modcdn.io/games/38fa/6715/1360x1920.png",
+            "thumb_720x960": "https://thumb.modcdn.io/games/38fa/6715/thumb_720x960/1360x1920.png"
+          },
+          "featureart": {
+            "filename": "bg3_underdark.png",
+            "original": "https://image.modcdn.io/games/38fa/6715/bg3_underdark.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/games/38fa/6715/thumb_1280x720/bg3_underdark.png"
+          },
+          "name": "Baldur's Gate 3",
+          "name_id": "baldursgate3",
+          "summary": "An ancient evil has returned to Baldur's Gate, intent on devouring it from the inside out. The fate of Faerûn lies in your hands. Alone, you may resist. But together, you can overcome. Gather your party.",
+          "instructions_url": "https://baldursgate3.game/",
+          "profile_url": "https://mod.io/g/baldursgate3",
+          "other_urls": [
+            {
+              "url": "https://store.steampowered.com/app/1086940/Baldurs_Gate_3/",
+              "label": "Steam"
+            },
+            {
+              "url": "https://www.gog.com/game/baldurs_gate_iii",
+              "label": "GOG.com"
+            },
+            {
+              "url": "https://www.playstation.com/games/baldurs-gate-3/",
+              "label": "PlayStation"
+            },
+            {
+              "url": "https://www.xbox.com/games/store/baldurs-gate-3/9nd58lqtg09t",
+              "label": "Xbox"
+            }
+          ],
+          "tag_options": [
+            {
+              "name": "Type",
+              "name_localized": "Type",
+              "type": "checkboxes",
+              "tags": [
+                "Cheats",
+                "Classes",
+                "Customisation",
+                "Dice",
+                "Equipment",
+                "Languages",
+                "Quality of Life",
+                "Races",
+                "Spells",
+                "Subclasses",
+                "Characters",
+                "UI",
+                "Visual Effects",
+                "Overhaul",
+                "Rules Changes",
+                "Accessibility",
+                "For Fun",
+                "Just Testing",
+                "Patch 8 Tested"
+              ],
+              "tags_localized": {
+                "Cheats": "Cheats",
+                "Classes": "Classes",
+                "Customisation": "Customisation",
+                "Dice": "Dice",
+                "Equipment": "Equipment",
+                "Languages": "Languages",
+                "Quality of Life": "Quality of Life",
+                "Races": "Races",
+                "Spells": "Spells",
+                "Subclasses": "Subclasses",
+                "Characters": "Characters",
+                "UI": "UI",
+                "Visual Effects": "Visual Effects",
+                "Overhaul": "Overhaul",
+                "Rules Changes": "Rules Changes",
+                "Accessibility": "Accessibility",
+                "For Fun": "For Fun",
+                "Just Testing": "Just Testing",
+                "Patch 8 Tested": "Patch 8 Tested"
+              },
+              "tag_count_map": {
+                "Cheats": 1214,
+                "Classes": 1792,
+                "Customisation": 1627,
+                "Dice": 127,
+                "Equipment": 2168,
+                "Languages": 854,
+                "Quality of Life": 1960,
+                "Races": 411,
+                "Spells": 2036,
+                "Subclasses": 1379,
+                "Characters": 366,
+                "UI": 168,
+                "Visual Effects": 552,
+                "Overhaul": 108,
+                "Rules Changes": 86,
+                "Accessibility": 29,
+                "For Fun": 2015,
+                "Just Testing": 240,
+                "Patch 8 Tested": 3564
+              },
+              "hidden": false,
+              "locked": false
+            },
+            {
+              "name": "General",
+              "name_localized": "General",
+              "type": "checkboxes",
+              "tags": [
+                "Available on Mac and Console"
+              ],
+              "tags_localized": {
+                "Available on Mac and Console": "Available on Mac and Console"
+              },
+              "tag_count_map": {
+                "Available on Mac and Console": 1509
+              },
+              "hidden": false,
+              "locked": true
+            },
+            {
+              "name": "Character Customisation",
+              "name_localized": "Character Customisation",
+              "type": "checkboxes",
+              "tags": [
+                "Dyes",
+                "Eye Colors",
+                "Eye Makeup",
+                "Face Paint",
+                "Hair Colors",
+                "Hairstyles",
+                "Heads",
+                "Lip Makeup",
+                "Piercings",
+                "Scars",
+                "Skin Colors",
+                "Tattoos",
+                "Horns",
+                "Body Type 1",
+                "Body Type 2",
+                "Body Type 3",
+                "Body Type 4",
+                "Other Customisation"
+              ],
+              "tags_localized": {
+                "Dyes": "Dyes",
+                "Eye Colors": "Eye Colors",
+                "Eye Makeup": "Eye Makeup",
+                "Face Paint": "Face Paint",
+                "Hair Colors": "Hair Colors",
+                "Hairstyles": "Hairstyles",
+                "Heads": "Heads",
+                "Lip Makeup": "Lip Makeup",
+                "Piercings": "Piercings",
+                "Scars": "Scars",
+                "Skin Colors": "Skin Colors",
+                "Tattoos": "Tattoos",
+                "Horns": "Horns",
+                "Body Type 1": "Body Type 1",
+                "Body Type 2": "Body Type 2",
+                "Body Type 3": "Body Type 3",
+                "Body Type 4": "Body Type 4",
+                "Other Customisation": "Other Customisation"
+              },
+              "tag_count_map": {
+                "Dyes": 106,
+                "Eye Colors": 78,
+                "Eye Makeup": 48,
+                "Face Paint": 35,
+                "Hair Colors": 52,
+                "Hairstyles": 140,
+                "Heads": 271,
+                "Lip Makeup": 13,
+                "Piercings": 32,
+                "Scars": 42,
+                "Skin Colors": 59,
+                "Tattoos": 58,
+                "Horns": 15,
+                "Body Type 1": 334,
+                "Body Type 2": 261,
+                "Body Type 3": 186,
+                "Body Type 4": 167,
+                "Other Customisation": 420
+              },
+              "hidden": false,
+              "locked": false
+            },
+            {
+              "name": "Classes & Subclasses",
+              "name_localized": "Classes & Subclasses",
+              "type": "checkboxes",
+              "tags": [
+                "All Classes",
+                "Barbarian",
+                "Bard",
+                "Cleric",
+                "Druid",
+                "Fighter",
+                "Monk",
+                "Paladin",
+                "Ranger",
+                "Rogue",
+                "Sorcerer",
+                "Warlock",
+                "Wizard",
+                "Feats",
+                "Other Classes"
+              ],
+              "tags_localized": {
+                "All Classes": "All Classes",
+                "Barbarian": "Barbarian",
+                "Bard": "Bard",
+                "Cleric": "Cleric",
+                "Druid": "Druid",
+                "Fighter": "Fighter",
+                "Monk": "Monk",
+                "Paladin": "Paladin",
+                "Ranger": "Ranger",
+                "Rogue": "Rogue",
+                "Sorcerer": "Sorcerer",
+                "Warlock": "Warlock",
+                "Wizard": "Wizard",
+                "Feats": "Feats",
+                "Other Classes": "Other Classes"
+              },
+              "tag_count_map": {
+                "All Classes": 390,
+                "Barbarian": 301,
+                "Bard": 387,
+                "Cleric": 495,
+                "Druid": 435,
+                "Fighter": 408,
+                "Monk": 319,
+                "Paladin": 419,
+                "Ranger": 318,
+                "Rogue": 364,
+                "Sorcerer": 555,
+                "Warlock": 524,
+                "Wizard": 513,
+                "Feats": 90,
+                "Other Classes": 617
+              },
+              "hidden": false,
+              "locked": false
+            },
+            {
+              "name": "Races",
+              "name_localized": "Races",
+              "type": "checkboxes",
+              "tags": [
+                "All Races",
+                "Dragonborn",
+                "Drow",
+                "Dwarf",
+                "Elf",
+                "Githyanki",
+                "Gnome",
+                "Halfling",
+                "Human",
+                "Half-Elf",
+                "Half-Orc",
+                "Tiefling",
+                "Other Races"
+              ],
+              "tags_localized": {
+                "All Races": "All Races",
+                "Dragonborn": "Dragonborn",
+                "Drow": "Drow",
+                "Dwarf": "Dwarf",
+                "Elf": "Elf",
+                "Githyanki": "Githyanki",
+                "Gnome": "Gnome",
+                "Halfling": "Halfling",
+                "Human": "Human",
+                "Half-Elf": "Half-Elf",
+                "Half-Orc": "Half-Orc",
+                "Tiefling": "Tiefling",
+                "Other Races": "Other Races"
+              },
+              "tag_count_map": {
+                "All Races": 413,
+                "Dragonborn": 360,
+                "Drow": 592,
+                "Dwarf": 264,
+                "Elf": 633,
+                "Githyanki": 416,
+                "Gnome": 266,
+                "Halfling": 252,
+                "Human": 618,
+                "Half-Elf": 604,
+                "Half-Orc": 269,
+                "Tiefling": 582,
+                "Other Races": 323
+              },
+              "hidden": false,
+              "locked": false
+            },
+            {
+              "name": "Equipment",
+              "name_localized": "Equipment",
+              "type": "checkboxes",
+              "tags": [
+                "Armor",
+                "Books",
+                "Consumables",
+                "Weapons",
+                "Other"
+              ],
+              "tags_localized": {
+                "Armor": "Armor",
+                "Books": "Books",
+                "Consumables": "Consumables",
+                "Weapons": "Weapons",
+                "Other": "Other"
+              },
+              "tag_count_map": {
+                "Armor": 1317,
+                "Books": 73,
+                "Consumables": 281,
+                "Weapons": 1227,
+                "Other": 660
+              },
+              "hidden": false,
+              "locked": false
+            },
+            {
+              "name": "Languages",
+              "name_localized": "Languages",
+              "type": "checkboxes",
+              "tags": [
+                "English",
+                "French",
+                "German",
+                "Spanish",
+                "Polish",
+                "Russian",
+                "Chinese (Simplified)",
+                "Chinese (Traditional)",
+                "Turkish",
+                "Portuguese - Brazil",
+                "Italian",
+                "Ukrainian",
+                "Korean",
+                "Japanese",
+                "Other Language"
+              ],
+              "tags_localized": {
+                "English": "English",
+                "French": "French",
+                "German": "German",
+                "Spanish": "Spanish",
+                "Polish": "Polish",
+                "Russian": "Russian",
+                "Chinese (Simplified)": "Chinese (Simplified)",
+                "Chinese (Traditional)": "Chinese (Traditional)",
+                "Turkish": "Turkish",
+                "Portuguese - Brazil": "Portuguese - Brazil",
+                "Italian": "Italian",
+                "Ukrainian": "Ukrainian",
+                "Korean": "Korean",
+                "Japanese": "Japanese",
+                "Other Language": "Other Language"
+              },
+              "tag_count_map": {
+                "English": 4707,
+                "French": 255,
+                "German": 160,
+                "Spanish": 164,
+                "Polish": 115,
+                "Russian": 294,
+                "Chinese (Simplified)": 691,
+                "Chinese (Traditional)": 166,
+                "Turkish": 107,
+                "Portuguese - Brazil": 222,
+                "Italian": 234,
+                "Ukrainian": 150,
+                "Korean": 318,
+                "Japanese": 152,
+                "Other Language": 55
+              },
+              "hidden": false,
+              "locked": false
+            },
+            {
+              "name": "Community",
+              "name_localized": "Community",
+              "type": "checkboxes",
+              "tags": [
+                "BG3 ModJam 2025",
+                "Modathon 2025",
+                "Modathon 2026"
+              ],
+              "tags_localized": {
+                "BG3 ModJam 2025": "BG3 ModJam 2025",
+                "Modathon 2025": "Modathon 2025",
+                "Modathon 2026": "Modathon 2026"
+              },
+              "tag_count_map": {
+                "BG3 ModJam 2025": 48,
+                "Modathon 2025": 88,
+                "Modathon 2026": 95
+              },
+              "hidden": false,
+              "locked": false
+            },
+            {
+              "name": "Characters",
+              "name_localized": "Characters",
+              "type": "checkboxes",
+              "tags": [
+                "Astarion",
+                "Gale",
+                "Halsin",
+                "Jaheira",
+                "Karlach",
+                "Lae'zel",
+                "Minsc",
+                "Minthara",
+                "Shadowheart",
+                "The Dark Urge",
+                "Wyll",
+                "Summons",
+                "Other characters / NPCs"
+              ],
+              "tags_localized": {
+                "Astarion": "Astarion",
+                "Gale": "Gale",
+                "Halsin": "Halsin",
+                "Jaheira": "Jaheira",
+                "Karlach": "Karlach",
+                "Lae'zel": "Lae'zel",
+                "Minsc": "Minsc",
+                "Minthara": "Minthara",
+                "Shadowheart": "Shadowheart",
+                "The Dark Urge": "The Dark Urge",
+                "Wyll": "Wyll",
+                "Summons": "Summons",
+                "Other characters / NPCs": "Other characters / NPCs"
+              },
+              "tag_count_map": {
+                "Astarion": 99,
+                "Gale": 78,
+                "Halsin": 61,
+                "Jaheira": 47,
+                "Karlach": 74,
+                "Lae'zel": 80,
+                "Minsc": 45,
+                "Minthara": 51,
+                "Shadowheart": 108,
+                "The Dark Urge": 101,
+                "Wyll": 69,
+                "Summons": 179,
+                "Other characters / NPCs": 241
+              },
+              "hidden": false,
+              "locked": false
+            },
+            {
+              "name": "Seasonal",
+              "name_localized": "Seasonal",
+              "type": "dropdown",
+              "tags": [
+                "Spring",
+                "Summer",
+                "Autumn",
+                "Winter"
+              ],
+              "tags_localized": {
+                "Spring": "Spring",
+                "Summer": "Summer",
+                "Autumn": "Autumn",
+                "Winter": "Winter"
+              },
+              "tag_count_map": {
+                "Spring": 4,
+                "Summer": 1,
+                "Autumn": 28,
+                "Winter": 6
+              },
+              "hidden": false,
+              "locked": false
+            }
+          ],
+          "collection_tag_options": [
+            {
+              "name": "Category",
+              "name_localized": "Category",
+              "type": "dropdown",
+              "tags": [
+                "Essential",
+                "Themed",
+                "Miscellaneous"
+              ],
+              "tags_localized": {
+                "Essential": "Essential",
+                "Themed": "Themed",
+                "Miscellaneous": "Miscellaneous"
+              },
+              "tag_count_map": {
+                "Essential": 243,
+                "Themed": 171,
+                "Miscellaneous": 611
+              },
+              "hidden": false,
+              "locked": false
+            },
+            {
+              "name": "Tags",
+              "name_localized": "Tags",
+              "type": "checkboxes",
+              "tags": [
+                "Animation",
+                "Audio",
+                "Bug Fixes",
+                "Cheating",
+                "Environment",
+                "Gameplay",
+                "Quality of Life",
+                "UI",
+                "Visuals"
+              ],
+              "tags_localized": {
+                "Animation": "Animation",
+                "Audio": "Audio",
+                "Bug Fixes": "Bug Fixes",
+                "Cheating": "Cheating",
+                "Environment": "Environment",
+                "Gameplay": "Gameplay",
+                "Quality of Life": "Quality of Life",
+                "UI": "UI",
+                "Visuals": "Visuals"
+              },
+              "tag_count_map": {
+                "Animation": 264,
+                "Audio": 120,
+                "Bug Fixes": 224,
+                "Cheating": 219,
+                "Environment": 222,
+                "Gameplay": 738,
+                "Quality of Life": 633,
+                "UI": 442,
+                "Visuals": 466
+              },
+              "hidden": false,
+              "locked": false
+            }
+          ],
+          "theme": {
+            "primary": "#c19976",
+            "dark": "#16161a",
+            "light": "#F0F1F6",
+            "success": "#7EEF8C",
+            "warning": "#FEF376",
+            "danger": "#DB5355"
+          },
+          "stats": {
+            "game_id": 6715,
+            "mods_count_total": 9035,
+            "mods_downloads_today": 465607,
+            "mods_downloads_total": 596563218,
+            "mods_downloads_daily_average": 661378,
+            "mods_subscribers_total": 89415500,
+            "date_expires": 1794483002
+          },
+          "platforms": [
+            {
+              "platform": "windows",
+              "label": "Windows",
+              "moderated": false,
+              "locked": false
+            },
+            {
+              "platform": "mac",
+              "label": "Mac",
+              "moderated": true,
+              "locked": false
+            },
+            {
+              "platform": "xboxseriesx",
+              "label": "XBOX Series X/S",
+              "moderated": true,
+              "locked": false
+            },
+            {
+              "platform": "ps5",
+              "label": "PlayStation 5",
+              "moderated": true,
+              "locked": false
+            }
+          ],
+          "service_features": 47,
+          "marketplace_max_stock": 0,
+          "marketplace_min_price": 100,
+          "marketplace_max_price": 10000,
+          "marketplace_default_price": 1000,
+          "placements": [
+            {
+              "id": 145,
+              "config_type": "web",
+              "config_id": 15,
+              "name": "Trending",
+              "name_localized": "Trending",
+              "name_localization": {
+                "en": "Trending"
+              },
+              "type": "filter",
+              "display_position": 1,
+              "total": 10,
+              "filters": {
+                "_sort": "-downloads_today",
+                "timespan": "3_months",
+                "revenue_type": 3
+              },
+              "size": "large",
+              "enabled": true,
+              "date_added": "2026-10-14T11:16:35.000000Z",
+              "date_updated": "2026-11-02T10:13:36.000000Z"
+            },
+            {
+              "id": 146,
+              "config_type": "web",
+              "config_id": 15,
+              "name": "Available on Mac and Consoles",
+              "name_localized": "Available on Mac and Consoles",
+              "name_localization": {
+                "en": "Available on Mac and Consoles"
+              },
+              "type": "filter",
+              "display_position": 3,
+              "total": 20,
+              "filters": {
+                "tags": "Available on Mac and Console",
+                "_sort": "-downloads_today",
+                "timespan": "month",
+                "revenue_type": 3
+              },
+              "size": "small",
+              "enabled": true,
+              "date_added": "2026-10-14T11:16:36.000000Z",
+              "date_updated": "2026-11-02T10:13:37.000000Z"
+            },
+            {
+              "id": 147,
+              "config_type": "web",
+              "config_id": 15,
+              "name": "Recently added",
+              "name_localized": "Recently added",
+              "name_localization": {
+                "en": "Recently added"
+              },
+              "type": "filter",
+              "display_position": 4,
+              "total": 20,
+              "filters": {
+                "_sort": "-date_live",
+                "timespan": "all_time",
+                "revenue_type": 3
+              },
+              "size": "small",
+              "enabled": true,
+              "date_added": "2026-10-14T11:16:36.000000Z",
+              "date_updated": "2026-10-20T09:13:02.000000Z"
+            },
+            {
+              "id": 148,
+              "config_type": "web",
+              "config_id": 15,
+              "name": "Top rated",
+              "name_localized": "Top rated",
+              "name_localization": {
+                "en": "Top rated"
+              },
+              "type": "filter",
+              "display_position": 5,
+              "total": 20,
+              "filters": {
+                "_sort": "-ratings_weighted_aggregate",
+                "timespan": "all_time",
+                "revenue_type": 3
+              },
+              "size": "small",
+              "enabled": true,
+              "date_added": "2026-10-14T11:16:36.000000Z",
+              "date_updated": "2026-10-20T09:13:02.000000Z"
+            },
+            {
+              "id": 149,
+              "config_type": "web",
+              "config_id": 15,
+              "name": "Most popular",
+              "name_localized": "Most popular",
+              "name_localization": {
+                "en": "Most popular"
+              },
+              "type": "filter",
+              "display_position": 6,
+              "total": 20,
+              "filters": {
+                "_sort": "-downloads_total",
+                "timespan": "all_time",
+                "revenue_type": 3
+              },
+              "size": "small",
+              "enabled": true,
+              "date_added": "2026-10-14T11:16:37.000000Z",
+              "date_updated": "2026-10-20T09:13:02.000000Z"
+            },
+            {
+              "id": 150,
+              "config_type": "web",
+              "config_id": 15,
+              "name": "Last updated",
+              "name_localized": "Last updated",
+              "name_localization": {
+                "en": "Last updated"
+              },
+              "type": "filter",
+              "display_position": 8,
+              "total": 20,
+              "filters": {
+                "_sort": "-date_updated",
+                "timespan": "all_time",
+                "revenue_type": 3
+              },
+              "size": "small",
+              "enabled": true,
+              "date_added": "2026-10-14T11:16:37.000000Z",
+              "date_updated": "2026-10-20T09:13:02.000000Z"
+            },
+            {
+              "id": 156,
+              "config_type": "web",
+              "config_id": 15,
+              "name": "Spooky Season",
+              "name_localized": "Spooky Season",
+              "name_localization": {
+                "en": "Spooky Season"
+              },
+              "type": "filter",
+              "display_position": 2,
+              "total": 20,
+              "filters": {
+                "tags": "Autumn",
+                "_sort": "-date_live",
+                "timespan": "all_time",
+                "revenue_type": 3
+              },
+              "size": "small",
+              "enabled": false,
+              "date_added": "2026-10-20T09:13:02.000000Z",
+              "date_updated": "2026-11-02T10:13:37.000000Z"
+            }
+          ]
+        }
+      ],
+      "result_count": 1,
+      "result_offset": 0,
+      "result_limit": 100,
+      "result_total": 1
+    }
+  }
+}

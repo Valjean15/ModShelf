@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "GET",
+    "host": "user",
+    "auth": "token",
+    "path": "/v1/games/999999999",
+    "query": ""
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "Content-Type": "application/json",
+      "x-modio-error-ref": "14000"
+    },
+    "body": {
+      "error": {
+        "code": 404,
+        "error_ref": 14000,
+        "message": "The requested game id could not be found."
+      }
+    }
+  }
+}

@@ -1,0 +1,216 @@
+{
+  "request": {
+    "method": "GET",
+    "host": "user",
+    "auth": "token",
+    "path": "/v1/games",
+    "query": "_limit=1&api_access_options-bitwise-and=1"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "data": [
+        {
+          "id": 14636,
+          "status": 1,
+          "submitted_by": {},
+          "date_added": 1793126581,
+          "date_updated": 1793221391,
+          "date_live": 1793221391,
+          "presentation_option": 0,
+          "community_options": 391961,
+          "monetization_options": 0,
+          "monetization_teams": [],
+          "cloud_cooking_status": 0,
+          "cloud_cooking_options": 0,
+          "isolation_options": 1,
+          "submission_option": 1,
+          "dependency_option": 0,
+          "limit_collection_mods": 100,
+          "min_collection_mods": 3,
+          "curation_option": 0,
+          "profanity_option": 3,
+          "revenue_options": 0,
+          "max_stock": 0,
+          "api_access_options": 3,
+          "maturity_options": 0,
+          "ugc_name": "Addons",
+          "token_name": "cogs",
+          "icon": {
+            "filename": "soviicon.png",
+            "original": "https://image.modcdn.io/games/c5af/14636/soviicon.png",
+            "thumb_64x64": "https://thumb.modcdn.io/games/c5af/14636/crop_64x64/soviicon.png",
+            "thumb_128x128": "https://thumb.modcdn.io/games/c5af/14636/crop_128x128/soviicon.png",
+            "thumb_256x256": "https://thumb.modcdn.io/games/c5af/14636/crop_256x256/soviicon.png"
+          },
+          "logo": {
+            "filename": "21_play_forest_stroll.png",
+            "original": "https://image.modcdn.io/games/c5af/14636/21_play_forest_stroll.png",
+            "thumb_320x180": "https://thumb.modcdn.io/games/c5af/14636/crop_320x180/21_play_forest_stroll.png",
+            "thumb_640x360": "https://thumb.modcdn.io/games/c5af/14636/crop_640x360/21_play_forest_stroll.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/games/c5af/14636/crop_1280x720/21_play_forest_stroll.png"
+          },
+          "header": {
+            "filename": "screenshot2026-10-28154929.png",
+            "original": "https://image.modcdn.io/games/c5af/14636/screenshot2026-10-28154929.png"
+          },
+          "boxart": {},
+          "featureart": {},
+          "name": "Sovi",
+          "name_id": "sovi",
+          "summary": "Sovi is a falling-block puzzle game played to music. Make your own tracks with songs, cell art, sounds and backgrounds, or build challenge classes from them, then share them and play what others have made.",
+          "instructions_url": null,
+          "profile_url": "https://mod.io/g/sovi",
+          "other_urls": [
+            {
+              "url": "https://dualonn.itch.io/sovi",
+              "label": "Itch.io"
+            }
+          ],
+          "tag_options": [
+            {
+              "name": "Content Type",
+              "name_localized": "Content Type",
+              "type": "dropdown",
+              "tags": [
+                "Track",
+                "Class"
+              ],
+              "tags_localized": {
+                "Track": "Track",
+                "Class": "Class"
+              },
+              "tag_count_map": {
+                "Track": 1,
+                "Class": 0
+              },
+              "hidden": false,
+              "locked": false
+            },
+            {
+              "name": "Theme",
+              "name_localized": "Theme",
+              "type": "checkboxes",
+              "tags": [
+                "Electronic",
+                "Synthwave",
+                "Chiptune",
+                "Lo-fi",
+                "Ambient",
+                "Drum+Bass",
+                "House",
+                "Pop",
+                "Rock",
+                "Metal",
+                "Hip-Hop",
+                "Jazz",
+                "Funk",
+                "Orchestral",
+                "Acoustic",
+                "Experimental",
+                "Other"
+              ],
+              "tags_localized": {
+                "Electronic": "Electronic",
+                "Synthwave": "Synthwave",
+                "Chiptune": "Chiptune",
+                "Lo-fi": "Lo-fi",
+                "Ambient": "Ambient",
+                "Drum+Bass": "Drum+Bass",
+                "House": "House",
+                "Pop": "Pop",
+                "Rock": "Rock",
+                "Metal": "Metal",
+                "Hip-Hop": "Hip-Hop",
+                "Jazz": "Jazz",
+                "Funk": "Funk",
+                "Orchestral": "Orchestral",
+                "Acoustic": "Acoustic",
+                "Experimental": "Experimental",
+                "Other": "Other"
+              },
+              "tag_count_map": {
+                "Electronic": 1,
+                "Synthwave": 1,
+                "Chiptune": 0,
+                "Lo-fi": 0,
+                "Ambient": 0,
+                "Drum+Bass": 0,
+                "House": 0,
+                "Pop": 0,
+                "Rock": 0,
+                "Metal": 0,
+                "Hip-Hop": 0,
+                "Jazz": 0,
+                "Funk": 0,
+                "Orchestral": 0,
+                "Acoustic": 0,
+                "Experimental": 0,
+                "Other": 0
+              },
+              "hidden": false,
+              "locked": false
+            },
+            {
+              "name": "Artificially Generated Assets",
+              "name_localized": "Artificially Generated Assets",
+              "type": "dropdown",
+              "tags": [
+                "Yes (Art/Audio generators)",
+                "Yes (Scripts)",
+                "No",
+                "Mixed"
+              ],
+              "tags_localized": {
+                "Yes (Art/Audio generators)": "Yes (Art/Audio generators)",
+                "Yes (Scripts)": "Yes (Scripts)",
+                "No": "No",
+                "Mixed": "Mixed"
+              },
+              "tag_count_map": {
+                "Yes (Art/Audio generators)": 0,
+                "Yes (Scripts)": 0,
+                "No": 0,
+                "Mixed": 0
+              },
+              "hidden": false,
+              "locked": false
+            }
+          ],
+          "collection_tag_options": [],
+          "theme": {
+            "primary": "#44bfd5",
+            "dark": "#2c2c3f",
+            "light": "#ffffff",
+            "success": "#68D391",
+            "warning": "#d6af2e",
+            "danger": "#ff000e"
+          },
+          "stats": {
+            "game_id": 14636,
+            "mods_count_total": 1,
+            "mods_downloads_today": 0,
+            "mods_downloads_total": 10,
+            "mods_downloads_daily_average": 0,
+            "mods_subscribers_total": 0,
+            "date_expires": 1794483002
+          },
+          "platforms": [],
+          "service_features": 13,
+          "marketplace_max_stock": 0,
+          "marketplace_min_price": 100,
+          "marketplace_max_price": 10000,
+          "marketplace_default_price": 0,
+          "placements": []
+        }
+      ],
+      "result_count": 1,
+      "result_offset": 0,
+      "result_limit": 1,
+      "result_total": 390
+    }
+  }
+}

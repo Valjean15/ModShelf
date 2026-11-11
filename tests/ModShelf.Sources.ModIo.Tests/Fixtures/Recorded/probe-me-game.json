@@ -1,0 +1,36 @@
+{
+  "request": {
+    "method": "GET",
+    "host": "game",
+    "auth": "token",
+    "path": "/v1/me",
+    "query": ""
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "id": 1000001,
+      "name_id": "modshelf-tester",
+      "username": "ModShelfTester",
+      "display_name_portal": null,
+      "date_online": 1794397556,
+      "date_joined": 1794396796,
+      "avatar": {
+        "filename": "avatar.png",
+        "original": "https://example.com/avatar.png",
+        "thumb_50x50": "https://example.com/avatar.png",
+        "thumb_100x100": "https://example.com/avatar.png"
+      },
+      "timezone": "",
+      "language": "",
+      "country": null,
+      "privacy_options": 4,
+      "status": 1,
+      "monetization_status": 0,
+      "profile_url": "https://mod.io/u/modshelf-tester"
+    }
+  }
+}

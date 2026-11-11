@@ -1,0 +1,188 @@
+{
+  "request": {
+    "method": "GET",
+    "host": "game",
+    "auth": "token",
+    "path": "/v1/games/6715/mods",
+    "query": "name_id=better-inventory-ui1"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "data": [
+        {
+          "id": 4228735,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 32865776,
+            "name_id": "caites",
+            "username": "Caites",
+            "display_name_portal": null,
+            "date_online": 1794335949,
+            "date_joined": 1718706516,
+            "avatar": {
+              "filename": "userpic.png",
+              "original": "https://image.modcdn.io/members/36d9/32865776/userpic.png",
+              "thumb_50x50": "https://thumb.modcdn.io/members/36d9/32865776/crop_50x50/userpic.png",
+              "thumb_100x100": "https://thumb.modcdn.io/members/36d9/32865776/crop_100x100/userpic.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/caites"
+          },
+          "date_added": 1722713213,
+          "date_updated": 1759143222,
+          "date_live": 1722713249,
+          "maturity_option": 0,
+          "community_options": 132096,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "better_inv_ui_final.2.png",
+            "original": "https://image.modcdn.io/mods/7d37/4228735/better_inv_ui_final.2.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/7d37/4228735/crop_320x180/better_inv_ui_final.2.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/7d37/4228735/crop_640x360/better_inv_ui_final.2.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/7d37/4228735/crop_1280x720/better_inv_ui_final.2.png"
+          },
+          "homepage_url": null,
+          "name": "Better Inventory UI",
+          "name_id": "better-inventory-ui1",
+          "summary": "Makes inventories easier to read and organize. Adds new mini-icons, back and foregrounds to distinct useful loot from trash. Load order suggestions in full description. Links to different versions in full description on mod.io.",
+          "profile_url": "https://mod.io/g/baldursgate3/m/better-inventory-ui1",
+          "media": {
+            "youtube": [
+              "https://www.youtube.com/watch?v=amsCE8o9iNI",
+              "https://www.youtube.com/watch?v=6gpP4OFTFoI"
+            ],
+            "sketchfab": [],
+            "images": [
+              {
+                "filename": "better_inv_ui_final.3.png",
+                "original": "https://image.modcdn.io/mods/7d37/4228735/better_inv_ui_final.3.png",
+                "thumb_320x180": "https://thumb.modcdn.io/mods/7d37/4228735/crop_320x180/better_inv_ui_final.3.png",
+                "thumb_1280x720": "https://thumb.modcdn.io/mods/7d37/4228735/crop_1280x720/better_inv_ui_final.3.png"
+              },
+              {
+                "filename": "betterui_1.1.png",
+                "original": "https://image.modcdn.io/mods/7d37/4228735/betterui_1.1.png",
+                "thumb_320x180": "https://thumb.modcdn.io/mods/7d37/4228735/crop_320x180/betterui_1.1.png",
+                "thumb_1280x720": "https://thumb.modcdn.io/mods/7d37/4228735/crop_1280x720/betterui_1.1.png"
+              }
+            ]
+          },
+          "modfile": {
+            "id": 6795889,
+            "mod_id": 4228735,
+            "date_added": 1758650113,
+            "date_updated": 0,
+            "date_scanned": 1758650131,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 471507,
+            "filesize_uncompressed": 525870,
+            "filehash": {
+              "md5": "e9be965442ab4ad811b9cb93f305f91b"
+            },
+            "filename": "betterinventoryui_6b585be8-ed7-bplo.zip",
+            "version": "1.4.4.21",
+            "changelog": null,
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/4228735/files/6795889/download",
+              "date_expires": 1857555999
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 1
+              },
+              {
+                "platform": "xboxseriesx",
+                "status": 1
+              },
+              {
+                "platform": "ps5",
+                "status": 1
+              }
+            ]
+          },
+          "dependencies": true,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 6795889
+            },
+            {
+              "platform": "mac",
+              "modfile_live": 6795889
+            },
+            {
+              "platform": "xboxseriesx",
+              "modfile_live": 6795889
+            },
+            {
+              "platform": "ps5",
+              "modfile_live": 6795889
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [
+            {
+              "name": "Quality of Life",
+              "name_localized": "Quality of Life",
+              "date_added": 0
+            },
+            {
+              "name": "UI",
+              "name_localized": "UI",
+              "date_added": 0
+            },
+            {
+              "name": "Patch 8 Tested",
+              "name_localized": "Patch 8 Tested",
+              "date_added": 0
+            },
+            {
+              "name": "Available on Mac and Console",
+              "name_localized": "Available on Mac and Console",
+              "date_added": 0
+            }
+          ],
+          "stats": {
+            "mod_id": 4228735,
+            "popularity_rank_position": 16,
+            "popularity_rank_total_mods": 14107,
+            "downloads_today": 2755,
+            "downloads_total": 4858756,
+            "downloads_unique": 0,
+            "subscribers_total": 693251,
+            "ratings_total": 3813,
+            "ratings_positive": 3813,
+            "ratings_negative": 0,
+            "ratings_percentage_positive": 100,
+            "ratings_weighted_aggregate": 1,
+            "ratings_display_text": "Overwhelmingly Positive",
+            "date_expires": 1794483904
+          },
+          "skus": []
+        }
+      ],
+      "result_count": 1,
+      "result_offset": 0,
+      "result_limit": 100,
+      "result_total": 1
+    }
+  }
+}

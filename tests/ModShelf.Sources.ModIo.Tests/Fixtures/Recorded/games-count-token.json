@@ -1,0 +1,360 @@
+{
+  "request": {
+    "method": "GET",
+    "host": "user",
+    "auth": "token",
+    "path": "/v1/games",
+    "query": "_limit=1&api_access_options-bitwise-and=4"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "data": [
+        {
+          "id": 14198,
+          "status": 1,
+          "submitted_by": {},
+          "date_added": 1788129625,
+          "date_updated": 1791320482,
+          "date_live": 1791304979,
+          "presentation_option": 0,
+          "community_options": 383257,
+          "monetization_options": 0,
+          "monetization_teams": [],
+          "cloud_cooking_status": 0,
+          "cloud_cooking_options": 0,
+          "isolation_options": 1,
+          "submission_option": 1,
+          "dependency_option": 2,
+          "limit_collection_mods": 100,
+          "min_collection_mods": 3,
+          "curation_option": 8,
+          "profanity_option": 1,
+          "revenue_options": 0,
+          "max_stock": 0,
+          "api_access_options": 5,
+          "maturity_options": 0,
+          "ugc_name": "Mods",
+          "token_name": "cogs",
+          "icon": {
+            "filename": "4288510_6178d1a2beba9f8b0b27ef4.jpg",
+            "original": "https://image.modcdn.io/games/def1/14198/4288510_6178d1a2beba9f8b0b27ef4.jpg",
+            "thumb_64x64": "https://thumb.modcdn.io/games/def1/14198/crop_64x64/4288510_6178d1a2beba9f8b0b27ef4.jpg",
+            "thumb_128x128": "https://thumb.modcdn.io/games/def1/14198/crop_128x128/4288510_6178d1a2beba9f8b0b27ef4.jpg",
+            "thumb_256x256": "https://thumb.modcdn.io/games/def1/14198/crop_256x256/4288510_6178d1a2beba9f8b0b27ef4.jpg"
+          },
+          "logo": {
+            "filename": "mainsceneonline_1440p_14062026_.png",
+            "original": "https://image.modcdn.io/games/def1/14198/mainsceneonline_1440p_14062026_.png",
+            "thumb_320x180": "https://thumb.modcdn.io/games/def1/14198/crop_320x180/mainsceneonline_1440p_14062026_.png",
+            "thumb_640x360": "https://thumb.modcdn.io/games/def1/14198/crop_640x360/mainsceneonline_1440p_14062026_.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/games/def1/14198/crop_1280x720/mainsceneonline_1440p_14062026_.png"
+          },
+          "header": {
+            "filename": "logo.png",
+            "original": "https://image.modcdn.io/games/def1/14198/logo.png"
+          },
+          "boxart": {
+            "filename": "imgonline-com-ua-resize-23kpsa6.jpg",
+            "original": "https://image.modcdn.io/games/def1/14198/imgonline-com-ua-resize-23kpsa6.jpg",
+            "thumb_720x960": "https://thumb.modcdn.io/games/def1/14198/thumb_720x960/imgonline-com-ua-resize-23kpsa6.jpg"
+          },
+          "featureart": {},
+          "name": "Horizon Sandbox",
+          "name_id": "horizon-sandbox",
+          "summary": "Discover maps, objects and code mods on Mod.io, readily made and accessible to all!",
+          "instructions_url": null,
+          "profile_url": "https://mod.io/g/horizon-sandbox",
+          "other_urls": [
+            {
+              "url": "https://store.steampowered.com/app/4288510/Horizon_Sandbox/",
+              "label": "Steam"
+            },
+            {
+              "url": "https://www.meta.com/en-us/experiences/horizon-sandbox/1056009400587698/",
+              "label": "Meta Quest"
+            },
+            {
+              "url": "https://discord.gg/4DUTsqSS9r",
+              "label": "Discord"
+            }
+          ],
+          "tag_options": [
+            {
+              "name": "Vehicle",
+              "name_localized": "Vehicle",
+              "type": "checkboxes",
+              "tags": [
+                "Plane",
+                "Car (RWD)",
+                "Car (FWD)",
+                "Car (4x4)",
+                "Car (too many wheels)",
+                "Gokart",
+                "Other Vehicle"
+              ],
+              "tags_localized": {
+                "Plane": "Plane",
+                "Car (RWD)": "Car (RWD)",
+                "Car (FWD)": "Car (FWD)",
+                "Car (4x4)": "Car (4x4)",
+                "Car (too many wheels)": "Car (too many wheels)",
+                "Gokart": "Gokart",
+                "Other Vehicle": "Other Vehicle"
+              },
+              "tag_count_map": {
+                "Plane": 0,
+                "Car (RWD)": 0,
+                "Car (FWD)": 0,
+                "Car (4x4)": 0,
+                "Car (too many wheels)": 0,
+                "Gokart": 0,
+                "Other Vehicle": 0
+              },
+              "hidden": false,
+              "locked": false
+            },
+            {
+              "name": "Weapon",
+              "name_localized": "Weapon",
+              "type": "checkboxes",
+              "tags": [
+                "Blunt",
+                "Blade",
+                "Firearm (Light)",
+                "Firearm (Medium)",
+                "Firearm (Heavy)",
+                "Other Weapon"
+              ],
+              "tags_localized": {
+                "Blunt": "Blunt",
+                "Blade": "Blade",
+                "Firearm (Light)": "Firearm (Light)",
+                "Firearm (Medium)": "Firearm (Medium)",
+                "Firearm (Heavy)": "Firearm (Heavy)",
+                "Other Weapon": "Other Weapon"
+              },
+              "tag_count_map": {
+                "Blunt": 0,
+                "Blade": 0,
+                "Firearm (Light)": 0,
+                "Firearm (Medium)": 0,
+                "Firearm (Heavy)": 0,
+                "Other Weapon": 0
+              },
+              "hidden": false,
+              "locked": false
+            },
+            {
+              "name": "Gameplay",
+              "name_localized": "Gameplay",
+              "type": "checkboxes",
+              "tags": [
+                "Player Enhancements",
+                "General Enhancements",
+                "Other Gameplay modifying mod"
+              ],
+              "tags_localized": {
+                "Player Enhancements": "Player Enhancements",
+                "General Enhancements": "General Enhancements",
+                "Other Gameplay modifying mod": "Other Gameplay modifying mod"
+              },
+              "tag_count_map": {
+                "Player Enhancements": 0,
+                "General Enhancements": 0,
+                "Other Gameplay modifying mod": 0
+              },
+              "hidden": false,
+              "locked": false
+            },
+            {
+              "name": "Map",
+              "name_localized": "Map",
+              "type": "dropdown",
+              "tags": [
+                "Small",
+                "Medium",
+                "Large",
+                "Near-infinite"
+              ],
+              "tags_localized": {
+                "Small": "Small",
+                "Medium": "Medium",
+                "Large": "Large",
+                "Near-infinite": "Near-infinite"
+              },
+              "tag_count_map": {
+                "Small": 0,
+                "Medium": 0,
+                "Large": 0,
+                "Near-infinite": 0
+              },
+              "hidden": false,
+              "locked": false
+            },
+            {
+              "name": "Contraption",
+              "name_localized": "Contraption",
+              "type": "dropdown",
+              "tags": [
+                "Vehicle",
+                "Fixed",
+                "Other"
+              ],
+              "tags_localized": {
+                "Vehicle": "Vehicle",
+                "Fixed": "Fixed",
+                "Other": "Other"
+              },
+              "tag_count_map": {
+                "Vehicle": 0,
+                "Fixed": 0,
+                "Other": 0
+              },
+              "hidden": false,
+              "locked": false
+            },
+            {
+              "name": "Avatars",
+              "name_localized": "Avatars",
+              "type": "checkboxes",
+              "tags": [
+                "Female",
+                "Male",
+                "Non-Binary",
+                "None",
+                "Short",
+                "Tall",
+                "Stylized",
+                "Realistic",
+                "Low Poly",
+                "High Poly"
+              ],
+              "tags_localized": {
+                "Female": "Female",
+                "Male": "Male",
+                "Non-Binary": "Non-Binary",
+                "None": "None",
+                "Short": "Short",
+                "Tall": "Tall",
+                "Stylized": "Stylized",
+                "Realistic": "Realistic",
+                "Low Poly": "Low Poly",
+                "High Poly": "High Poly"
+              },
+              "tag_count_map": {
+                "Female": 0,
+                "Male": 0,
+                "Non-Binary": 0,
+                "None": 0,
+                "Short": 0,
+                "Tall": 0,
+                "Stylized": 0,
+                "Realistic": 0,
+                "Low Poly": 0,
+                "High Poly": 0
+              },
+              "hidden": false,
+              "locked": false
+            }
+          ],
+          "collection_tag_options": [
+            {
+              "name": "Category",
+              "name_localized": "Category",
+              "type": "dropdown",
+              "tags": [
+                "Essential",
+                "Themed",
+                "Miscellaneous"
+              ],
+              "tags_localized": {
+                "Essential": "Essential",
+                "Themed": "Themed",
+                "Miscellaneous": "Miscellaneous"
+              },
+              "tag_count_map": {
+                "Essential": 0,
+                "Themed": 0,
+                "Miscellaneous": 0
+              },
+              "hidden": false,
+              "locked": false
+            },
+            {
+              "name": "Tags",
+              "name_localized": "Tags",
+              "type": "checkboxes",
+              "tags": [
+                "Animation",
+                "Audio",
+                "Bug Fixes",
+                "Cheating",
+                "Environment",
+                "Gameplay",
+                "Quality of Life",
+                "UI",
+                "Visuals"
+              ],
+              "tags_localized": {
+                "Animation": "Animation",
+                "Audio": "Audio",
+                "Bug Fixes": "Bug Fixes",
+                "Cheating": "Cheating",
+                "Environment": "Environment",
+                "Gameplay": "Gameplay",
+                "Quality of Life": "Quality of Life",
+                "UI": "UI",
+                "Visuals": "Visuals"
+              },
+              "tag_count_map": {
+                "Animation": 0,
+                "Audio": 0,
+                "Bug Fixes": 0,
+                "Cheating": 0,
+                "Environment": 0,
+                "Gameplay": 0,
+                "Quality of Life": 0,
+                "UI": 0,
+                "Visuals": 0
+              },
+              "hidden": false,
+              "locked": false
+            }
+          ],
+          "theme": {
+            "primary": "#b18ae1",
+            "dark": "#110b15",
+            "light": "#ffffff",
+            "success": "#7EEF8C",
+            "warning": "#FEF376",
+            "danger": "#DB5355"
+          },
+          "stats": {
+            "game_id": 14198,
+            "mods_count_total": 2,
+            "mods_downloads_today": 0,
+            "mods_downloads_total": 1,
+            "mods_downloads_daily_average": 0,
+            "mods_subscribers_total": 5,
+            "date_expires": 1794483002
+          },
+          "platforms": [],
+          "service_features": 47,
+          "marketplace_max_stock": 0,
+          "marketplace_min_price": 100,
+          "marketplace_max_price": 10000,
+          "marketplace_default_price": 0,
+          "placements": []
+        }
+      ],
+      "result_count": 1,
+      "result_offset": 0,
+      "result_limit": 1,
+      "result_total": 18
+    }
+  }
+}

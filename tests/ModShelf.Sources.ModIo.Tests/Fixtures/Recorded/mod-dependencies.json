@@ -1,0 +1,156 @@
+{
+  "request": {
+    "method": "GET",
+    "host": "game",
+    "auth": "token",
+    "path": "/v1/games/6715/mods/4228735/dependencies",
+    "query": ""
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "data": [
+        {
+          "id": 4138213,
+          "game_id": 6715,
+          "status": 1,
+          "visible": 1,
+          "submitted_by": {
+            "id": 32533378,
+            "name_id": "therealdjmr",
+            "username": "Djmr",
+            "display_name_portal": null,
+            "date_online": 1747573961,
+            "date_joined": 1717477826,
+            "avatar": {
+              "filename": "8db93e1d717d6ccda085595ab2786b7.png",
+              "original": "https://image.modcdn.io/members/eeb4/32533378/8db93e1d717d6ccda085595ab2786b7.png",
+              "thumb_50x50": "https://thumb.modcdn.io/members/eeb4/32533378/crop_50x50/8db93e1d717d6ccda085595ab2786b7.png",
+              "thumb_100x100": "https://thumb.modcdn.io/members/eeb4/32533378/crop_100x100/8db93e1d717d6ccda085595ab2786b7.png"
+            },
+            "timezone": "",
+            "language": "",
+            "profile_url": "https://mod.io/u/therealdjmr"
+          },
+          "date_added": 1725174172,
+          "date_updated": 1745661127,
+          "date_live": 1720127610,
+          "maturity_option": 0,
+          "community_options": 132097,
+          "credit_options": 578,
+          "monetization_options": 0,
+          "stock": 0,
+          "price": 0,
+          "tax": 0,
+          "logo": {
+            "filename": "imp.png",
+            "original": "https://image.modcdn.io/mods/92e0/4138213/imp.png",
+            "thumb_320x180": "https://thumb.modcdn.io/mods/92e0/4138213/crop_320x180/imp.png",
+            "thumb_640x360": "https://thumb.modcdn.io/mods/92e0/4138213/crop_640x360/imp.png",
+            "thumb_1280x720": "https://thumb.modcdn.io/mods/92e0/4138213/crop_1280x720/imp.png"
+          },
+          "homepage_url": null,
+          "name": "ImpUI (ImprovedUI)",
+          "name_id": "impui",
+          "summary": "NOT MAINTAINED - An official updated version of ImpUI for Patch 8. Contains some UI changes from previous versions, as all other UI changes are now officially supported in the base game. Use only if other mods utilise, otherwise can be removed.",
+          "profile_url": "https://mod.io/g/baldursgate3/m/impui",
+          "media": {
+            "youtube": [],
+            "sketchfab": [],
+            "images": [
+              {
+                "filename": "20240704220204_1.png",
+                "original": "https://image.modcdn.io/mods/92e0/4138213/20240704220204_1.png",
+                "thumb_320x180": "https://thumb.modcdn.io/mods/92e0/4138213/crop_320x180/20240704220204_1.png",
+                "thumb_1280x720": "https://thumb.modcdn.io/mods/92e0/4138213/crop_1280x720/20240704220204_1.png"
+              }
+            ]
+          },
+          "modfile": {
+            "id": 6301190,
+            "mod_id": 4138213,
+            "date_added": 1745350455,
+            "date_updated": 0,
+            "date_scanned": 1745350460,
+            "virus_status": 1,
+            "virus_positive": 0,
+            "virustotal_hash": null,
+            "filesize": 356759,
+            "filesize_uncompressed": 384294,
+            "filehash": {
+              "md5": "905f0c424fc5c9df6869672aaf9fbb5d"
+            },
+            "filename": "impui_26922ba9-6018-5252-075d-eqgb.zip",
+            "version": "2.1.0.82",
+            "changelog": "22/4/25 - bibsan updated version - restore CC features compatibility",
+            "download": {
+              "binary_url": "https://g-6715.modapi.io/v1/games/6715/mods/4138213/files/6301190/download",
+              "date_expires": 1857558280
+            },
+            "platforms": [
+              {
+                "platform": "windows",
+                "status": 1
+              },
+              {
+                "platform": "mac",
+                "status": 1
+              },
+              {
+                "platform": "xboxseriesx",
+                "status": 1
+              },
+              {
+                "platform": "ps5",
+                "status": 1
+              }
+            ]
+          },
+          "dependencies": false,
+          "platforms": [
+            {
+              "platform": "windows",
+              "modfile_live": 6301190
+            },
+            {
+              "platform": "mac",
+              "modfile_live": 6301190
+            },
+            {
+              "platform": "xboxseriesx",
+              "modfile_live": 6301190
+            },
+            {
+              "platform": "ps5",
+              "modfile_live": 6301190
+            }
+          ],
+          "metadata_kvp": [],
+          "tags": [
+            {
+              "name": "UI",
+              "name_localized": "UI",
+              "date_added": 0
+            },
+            {
+              "name": "Available on Mac and Console",
+              "name_localized": "Available on Mac and Console",
+              "date_added": 0
+            }
+          ],
+          "stats": {},
+          "skus": [],
+          "mod_id": 4138213,
+          "dependency_depth": 0
+        }
+      ],
+      "result_count": 1,
+      "result_offset": 0,
+      "result_limit": 100,
+      "result_total": 1
+    }
+  }
+}
