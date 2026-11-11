@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="DisplayName" xml:space="preserve">
+    <value>mod.io</value>
+    <comment>The site's name, as it writes it: lowercase.</comment>
+  </data>
+  <data name="WordFollowed" xml:space="preserve">
+    <value>subscribed</value>
+    <comment>A mod the account subscribes to on mod.io, as in "subscribed mods". Lowercase.</comment>
+  </data>
+  <data name="WordApproval" xml:space="preserve">
+    <value>positive rating</value>
+    <comment>One of what mod.io counts as approval of a mod, as in "1 positive rating". Lowercase.</comment>
+  </data>
+  <data name="WordApprovals" xml:space="preserve">
+    <value>positive ratings</value>
+    <comment>More than one of what mod.io counts as approval, as in "87 positive ratings". Lowercase.</comment>
+  </data>
+  <data name="KeyAccount" xml:space="preserve">
+    <value>API key</value>
+    <comment>The account's name when it's linked with an API key, which doesn't say whose it is.</comment>
+  </data>
+  <data name="TierKey" xml:space="preserve">
+    <value>Without subscriptions</value>
+    <comment>The kind of credential linked: a mod.io API key, which reads only and can't list subscriptions.</comment>
+  </data>
+  <data name="TierToken" xml:space="preserve">
+    <value>Access token</value>
+    <comment>The kind of credential linked: a personal access token.</comment>
+  </data>
+  <data name="TokenAccount" xml:space="preserve">
+    <value>mod.io account</value>
+    <comment>What an account linked with an access token is called when mod.io gives no name.</comment>
+  </data>
+</root>

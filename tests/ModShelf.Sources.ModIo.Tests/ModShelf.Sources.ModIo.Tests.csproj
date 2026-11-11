@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ModShelf.Sources.ModIo\ModShelf.Sources.ModIo.csproj" />
+  </ItemGroup>
+
+  <!-- The source's client set up as the hosts set it up: the linked account, the app's retries, time limits and refusal of redirects. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ModShelf.Infrastructure\ModShelf.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <!-- Serves the recorded mod.io answers, so the tests never call mod.io, on a clock the tests set. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    <PackageReference Include="WireMock.Net" />
+  </ItemGroup>
+
+  <!-- The checks every source shares, and the helpers several test projects use. -->
+  <ItemGroup>
+    <Compile Include="..\Shared\RecordingLoggerProvider.cs" Link="Shared\RecordingLoggerProvider.cs" />
+    <Compile Include="..\Shared\SourceContractTests.cs" Link="Shared\SourceContractTests.cs" />
+  </ItemGroup>
+
+  <!-- The recordings Fixtures/Record-ModIoFixtures.ps1 makes. -->
+  <ItemGroup>
+    <None Include="Fixtures\Recorded\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
