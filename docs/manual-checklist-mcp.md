@@ -172,6 +172,25 @@ GameBanana needs no account. Start a new conversation, so the agent reads the se
   `accounts_status` lists GameBanana as linked, with `profile` its way to link one, no level, and `worksWithoutAccount`
   true; the agent never names the profile.
 
+## 6. mod.io
+
+Link a mod.io access token first, on the desktop app's Accounts screen (desktop checklist, 16.8), and start a new
+conversation.
+
+- [ ] **6.1 Which sites.** Ask the agent where it can find mods for Baldur's Gate 3.
+  It asks the sites with `mod_games` and `source` `nexus`, `gamebanana` and `modio`, and names the site of each game it
+  finds: Baldur's Gate 3, `6715`, on mod.io, and Nexus Mods' game of that name.
+- [ ] **6.2 A game's key alone.** Ask it to search mod.io's game 6715 for `inventory`.
+  `mod_search` with `game` `6715` and `source` `modio` (without `source`, it's told to choose between `gamebanana` and
+  `modio`); each result's `source` is `modio`, Better Inventory UI among them, the newest first.
+- [ ] **6.3 A file of a mod.io mod.** Ask it to download `https://mod.io/g/baldursgate3/m/better-inventory-ui1` into the
+  library, if it isn't there yet.
+  It reads the mod with `mod_show`, whose live file has a `https://g-6715.modapi.io/v1/games/6715/mods/4228735/files/…/download`
+  link, and downloads it; `library_list` lists it under game `6715` of `modio`.
+- [ ] **6.4 The account.** Ask the agent which accounts are linked.
+  `accounts_status` lists mod.io as linked, with `api-key` its way to link one, "Access token" its level, and
+  `worksWithoutAccount` false; the agent never sees the token.
+
 ## Results
 
 Copy this table into the release's notes or issue, and mark each check ✅, ❌ or – (not run). For a ❌, add what you
@@ -216,3 +235,7 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 5.4 A file of a GameBanana mod | | |
 | 5.5 Its updates | | |
 | 5.6 A linked profile | | |
+| 6.1 Which sites | | |
+| 6.2 A game's key alone | | |
+| 6.3 A file of a mod.io mod | | |
+| 6.4 The account | | |

@@ -184,6 +184,12 @@ declared order lists the mods in it, each filter narrows them, and pages are ful
   `IWatchlistReader` and never an `IWatchlistSync`. The credentials are what names the profile, such as GameBanana's
   member ID, which `Authorize` puts where a request names the linked one (`apiv11/Member/linked/…`). `GetProfileAsync`
   refuses a profile the site doesn't show.
+- One strategy can take more than one credential the site issues, told apart by their shape, as mod.io's `ApiKey`
+  takes an API key or an access token, each sent as the site reads it (ADR 0089).
+- The app takes a `401` for credentials that no longer work, and asks for the account to be linked again. A request the
+  site refuses for one kind of credential but not another, as mod.io refuses an API key its subscriptions, must never
+  go out with that kind: the strategy notes on the request what it added, and a handler of the source's client answers
+  such a request itself (mod.io's `ModIoTokenGate`).
 - The app keeps credentials in the system's secret store (`ISecretStore`), never in the database, settings or the log.
   The source never stores them.
 - The source asks `IHttpClientFactory` for the client named `SourceHttpClients.NameFor(Id)`: the app adds the linked
@@ -205,8 +211,9 @@ The source asks `IHttpClientFactory` for the client named `SourceHttpClients.Nam
 `Add<Name>Source()` sets up the rest of its client: the API's address; the headers the site asks for, such as the
 app's name and version (Nexus Mods: `Application-Name` and `Application-Version`); no overall timeout
 (`Timeout.InfiniteTimeSpan`), since each attempt has one; and handlers of its own, such as one that holds requests back
-before the site's rate limit, from its headers. Those sit inside the retries, so they see every attempt.
-`AddNexusSource()` shows it all.
+before the site's rate limit, from its headers. Those sit inside the retries, so they see every attempt, and inside
+each attempt's time limit, so one that waits long, such as for a minute's limit, waits before the client is called
+instead, as mod.io's `ModIoPacer` does (ADR 0089). `AddNexusSource()` shows it all.
 
 - `IApiQuota` shows what's left of the limit, when the site says.
 - Errors, as `SourceContractTests<T>` and the interfaces' remarks expect: `ArgumentException` for another source's game,

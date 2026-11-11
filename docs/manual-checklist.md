@@ -1,6 +1,6 @@
 # Manual checklist
 
-CI never calls a live mod site, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 13 checks GameBanana, once, without an account and then with a profile linked. Phase 3 is done when they all pass.
+CI never calls a live mod site, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 13 checks GameBanana, once, without an account and then with a profile linked; section 14 checks mod.io, once, with an API key and then with an access token. Phase 3 is done when they all pass.
 
 The checks use the CLI. They download files into a temporary folder, and keep the library database and credentials apart from your own. One section changes your account: it tracks SMAPI and untracks it again, leaving your tracked mods as they were.
 
@@ -234,13 +234,13 @@ $gb = Join-Path $test 'GameBanana'
   An "Old versions" section with the archived version, then the changelog, newest version first, as the mod's Updates tab on the website lists it.
 - [ ] **13.3 Games by name.** `ms mod games persona 5 --source gamebanana`, timing it: `Measure-Command { ms mod games persona 5 --source gamebanana | Out-Host }`; then `ms mod games --source gamebanana` and `ms mod games p5 --source gamebanana`.
   "10 games on GameBanana match.", `16951 Persona 5 Royal (PC)` among them, in a second or so: GameBanana's own search finds them by "persona", never its whole list of games. Then "GameBanana has too many games to list them all: give words of the game's name." and "GameBanana finds games by a word of 3 letters or more.", exit code 2 for each.
-- [ ] **13.4 A game's mods, and a game's key alone.** `ms mod search --game 16951 --page-size 5`.
-  "*N* mods match, in the site's own order." The newest mods of the game on the website first. The number alone picks GameBanana, without `--source`, though a Nexus Mods account is linked. The Downloads column is `-`: GameBanana's lists don't say.
-- [ ] **13.5 Words, author and category.** `ms mod search protagonist --game 16951 --page-size 20`, `ms mod search --game 16951 --author chlorophylls`, then `ms mod search --game 16951 --category models --page-size 5`.
+- [ ] **13.4 A game's mods, and a game's key alone.** `ms mod search --game 16951 --page-size 5`, then `ms mod search --game 16951 --source gamebanana --page-size 5`.
+  "More than one site can search; choose one with --source: gamebanana, modio.", exit code 2: a number could be GameBanana's or mod.io's, and never Nexus Mods', though a Nexus Mods account is linked. Then "*N* mods match, in the site's own order." The newest mods of the game on the website first. The Downloads column is `-`: GameBanana's lists don't say.
+- [ ] **13.5 Words, author and category.** `ms mod search protagonist --game 16951 --source gamebanana --page-size 20`, `ms mod search --game 16951 --source gamebanana --author chlorophylls`, then `ms mod search --game 16951 --source gamebanana --category models --page-size 5`.
   "best matches first", as the website's search for the words in the game; then the author's mods, P5R Female Protagonist among them; then only Models mods.
-- [ ] **13.6 Adult content.** `ms mod search --game 16951 --sort Endorsements --page-size 50`, then the same with `--adult`.
+- [ ] **13.6 Adult content.** `ms mod search --game 16951 --source gamebanana --sort Endorsements --page-size 50`, then the same with `--adult`.
   "most likes first". When the first 50 hold mods the website shows behind a warning, the first says "…, but *N* with adult content are left out (add --adult to see them)." and lists 50 less *N*; with `--adult`, 50, those included.
-- [ ] **13.7 What GameBanana can't search.** `ms mod search --game 16951 --updated-within 7`, then `ms mod search protagonist --game 16951 --sort Name`.
+- [ ] **13.7 What GameBanana can't search.** `ms mod search --game 16951 --source gamebanana --updated-within 7`, then `ms mod search protagonist --game 16951 --source gamebanana --sort Name`.
   "GameBanana can't search by when mods were updated. It can search by words, by author and by category." Then "GameBanana sorts a search by words by best match, popularity, newest or recently updated only." Exit code 2 for each.
 - [ ] **13.8 Download a file by its link.** `ms download "https://gamebanana.com/mmdl/1662079,Mod,440088" --to $gb`.
   "Checking the file", "Done", and `p5rpcfemaleprotagonist-jpnvoreleasemetadata.json`, 504 bytes, in the folder. Exit code 0.
@@ -262,6 +262,49 @@ $gb = Join-Path $test 'GameBanana'
   "ModShelf can only read your subscribed mods on GameBanana: change them on its website.", exit code 2 for each; the website's subscriptions unchanged.
 - [ ] **13.17 Unlink it.** `ms account unlink gamebanana`, then `ms mod tracked --source gamebanana`.
   "Unlinked gamebanana. Its stored credentials are deleted." Then "GameBanana needs a linked account to list its subscribed mods, or refused the one linked. Link it with account link, then run the same command again.", exit code 1. Everything else on GameBanana works as before.
+
+## 14. mod.io
+
+mod.io answers nothing without a credential. On [your API Access page](https://mod.io/me/access), copy your **API key**, and make a personal **access token** with the `read` scope; revoke the token once the checks are done. The checks use Baldur's Gate 3 (game 6715) and Better Inventory UI (mod 4228735), whose live file is about 460 KB. Subscribe to Better Inventory UI on the website before 14.12; ModShelf itself never subscribes.
+
+```powershell
+$mio = Join-Path $test 'modio'
+```
+
+- [ ] **14.1 Nothing without a credential.** `ms mod games baldur --source modio`.
+  "The site needs a linked account to list its games, or refused the one linked. …", exit code 1.
+- [ ] **14.2 A wrong key is refused.** `ms account link modio`, then type `not-a-real-key`; then again with 32 zeros (`00000000000000000000000000000000`).
+  "Find your API key for modio at https://mod.io/me/access" first. `not-a-real-key` is refused without asking mod.io: "modio refused the API key. Check it, then try again. Nothing was linked.", exit code 1; the zeros, shaped as a key, are asked of mod.io, which refuses them the same way.
+- [ ] **14.3 The API key links.** `ms account link modio`, paste the API key; then `ms account list`.
+  The key isn't shown. "Linked modio as API key (Without subscriptions)." The `modio` row shows "API key", "Without subscriptions" and today's date, with `api-key` under "Link with".
+- [ ] **14.4 Games.** `ms mod games baldur --source modio`, then `ms mod games --source modio --page-size 100`.
+  "Baldur's Gate 3" with the key `6715`; then about 390 games, open to apps such as ModShelf, in four requests.
+- [ ] **14.5 A mod's page.** `ms mod show "https://mod.io/g/baldursgate3/m/better-inventory-ui1"`, then the same with `--all --changelog`.
+  "Better Inventory UI", "Game: Baldur's Gate 3", "by Caites", its positive ratings and downloads, and its page. Under "Main files", its live file, version 1.4.4.21 as on the website, marked `*`, its link `https://g-6715.modapi.io/v1/games/6715/mods/4228735/files/<file>/download`. With `--all`, its earlier versions under "Old versions", each the website's earlier file for Windows; the changelog, if the author wrote one.
+- [ ] **14.6 A game's mods, and a game's key alone.** `ms mod search --game 6715 --page-size 5`, then `ms mod search --game 6715 --source modio --page-size 5`.
+  "More than one site can search; choose one with --source: gamebanana, modio.", exit code 2. Then "*N* mods match", the newest first, as the game's mods on the website sorted by "Recent".
+- [ ] **14.7 Words, author, tag, time and order.** `ms mod search better --game 6715 --source modio`, `ms mod search --game 6715 --source modio --author Caites`, `ms mod search --game 6715 --source modio --category "quality of life"`, `ms mod search --game 6715 --source modio --updated-within 7 --sort Updated`, then `ms mod search --game 6715 --source modio --sort Downloads --page-size 5`.
+  Mods with "better" in their names; Caites' mods, Better Inventory UI among them; mods tagged Quality of Life; mods updated in the last week, the latest first; the most downloaded, with their downloads. `--sort Endorsements` is refused, naming the orders mod.io has.
+- [ ] **14.8 Adult content.** `ms mod search --game 6715 --source modio --page-size 50`, then the same with `--adult`.
+  When the newest 50 hold mods the website marks explicit, the first says "…, but *N* with adult content are left out (add --adult to see them)." and lists 50 less *N*; with `--adult`, 50.
+- [ ] **14.9 Download a file by its link.** `ms download "https://mod.io/g/baldursgate3/m/better-inventory-ui1" --to $mio`.
+  "Checking the file", "Done", and `betterinventoryui_<…>.zip`, the size the website gives the live file, in the folder; its MD5 checked. Exit code 0.
+- [ ] **14.10 Into the library, and its update.** From 14.5's `--all`, copy the link of the version before the live one: `ms download "<that link>"`, then `ms library check` and `ms library updates`.
+  "Added to the library."; the file under `modio/6715/Better Inventory UI (4228735)`; the check finds the live file as its update, with its link.
+- [ ] **14.11 Subscriptions need a token.** `ms mod tracked --source modio`; then `ms account list`.
+  "mod.io couldn't list the subscribed mods: mod.io lists them for an access token only: link one in place of your API key.", exit code 1. The key is still linked, not waiting to be linked again.
+- [ ] **14.12 A token links, with subscriptions.** `ms account link modio`, paste the token; then `ms mod tracked --source modio`.
+  "Linked modio as *your name* (Access token)." Then "1 subscribed mod on mod.io." with Better Inventory UI, of game 6715, as your subscriptions on the website, then "ModShelf only reads them: change them on mod.io's website."
+- [ ] **14.13 Not changed here.** `ms mod track "https://mod.io/g/baldursgate3/m/better-inventory-ui1"`, then `ms mod untrack` with the same link.
+  "ModShelf can only read your subscribed mods on mod.io: change them on its website.", exit code 2 for each; the website's subscriptions unchanged.
+- [ ] **14.14 Updates.** `ms mod updates --game 6715 --source modio --since 7d`.
+  The mods whose live file changed in the last week, each with when, in one or a few requests.
+- [ ] **14.15 Refusals.** `ms mod show "https://mod.io/g/baldursgate3"`, `ms mod show "https://mod.io/g/baldursgate3/m/no-such-mod-zz-qq"`, then `ms mod show "https://mod.io/g/no-such-game-zz-qq/m/better-inventory-ui1"`.
+  "That mod.io link isn't to a mod: copy the link of a mod's page."; then that mod.io has no such mod of the game, perhaps renamed; then no such game. Exit code 2 for each.
+- [ ] **14.16 Nothing secret in the logs.** `Select-String -Path (Join-Path $test 'logs\*') -Pattern '<the first 12 characters of the key>', '<the first 12 characters of the token>'`.
+  Nothing found. The logs name mod.io's addresses without their queries (`?*`), and requests' headers without their values.
+- [ ] **14.17 Unlink it.** `ms account unlink modio`, then `ms mod search --game 6715 --source modio`.
+  "Unlinked modio. Its stored credentials are deleted." Then the search says the site needs a linked account, exit code 1. Revoke the token on mod.io.
 
 ## Clean up
 
@@ -353,3 +396,20 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 13.15 Subscribed mods | | – | |
 | 13.16 Not changed here | | – | |
 | 13.17 Unlink it | | – | |
+| 14.1 Nothing without a credential | | – | |
+| 14.2 A wrong key | | – | |
+| 14.3 The API key links | | – | |
+| 14.4 Games | | – | |
+| 14.5 A mod's page | | – | |
+| 14.6 A game's key alone | | – | |
+| 14.7 Words, author, tag, time, order | | – | |
+| 14.8 Adult content | | – | |
+| 14.9 Download by its link | | – | |
+| 14.10 Into the library, its update | | – | |
+| 14.11 Subscriptions need a token | | – | |
+| 14.12 A token, with subscriptions | | – | |
+| 14.13 Not changed here | | – | |
+| 14.14 Updates | | – | |
+| 14.15 Refusals | | – | |
+| 14.16 Nothing secret in the logs | | – | |
+| 14.17 Unlink it | | – | |

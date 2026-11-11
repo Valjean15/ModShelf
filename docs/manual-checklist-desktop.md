@@ -1,6 +1,6 @@
 # Manual checklist: the desktop app
 
-CI never calls a live mod site, and never clicks through the desktop app, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 15 checks GameBanana, once, without an account and then with a profile linked. Phase 5 is done when every flow of Phases 1 to 4 works from the app, without the command line. The command line has its own checklist, [manual-checklist.md](manual-checklist.md).
+CI never calls a live mod site, and never clicks through the desktop app, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 15 checks GameBanana, once, without an account and then with a profile linked; section 16 checks mod.io, once, with an API key and then with an access token. Phase 5 is done when every flow of Phases 1 to 4 works from the app, without the command line. The command line has its own checklist, [manual-checklist.md](manual-checklist.md).
 
 The checks download files into a test folder, and keep the library database, settings and credentials apart from your own. One section changes your account: it tracks SMAPI and untracks it again, leaving your tracked mods as they were.
 
@@ -372,6 +372,31 @@ GameBanana needs no account; 15.11 to 15.14 link a member's public profile, read
 - [ ] **15.14 Unlink it.** On the Accounts screen, **Unlink** on GameBanana's card, and confirm; then **Subscribed mods** again in Browse.
   The card says nothing is linked, and Browse says "GameBanana needs your account linked, or refused the one linked. Link it on the Accounts screen, then try again.", with a button to the Accounts screen. The mods Watch all watched stay in the library.
 
+## 16. mod.io
+
+mod.io answers nothing without a credential. On [your API Access page](https://mod.io/me/access), copy your **API key**, make a personal **access token** with the `read` scope, and subscribe to Better Inventory UI (`https://mod.io/g/baldursgate3/m/better-inventory-ui1`); revoke the token once the checks are done. The checks use Baldur's Gate 3 and Better Inventory UI, whose live file is about 460 KB.
+
+- [ ] **16.1 The card.** Open the Accounts screen.
+  A card for mod.io saying it needs a linked account, with **Link with an API key**. **Open the API key page** in its dialog opens your API Access page.
+- [ ] **16.2 Link the API key.** **Link with an API key**, paste `not-a-real-key`, and **Link**; then paste the API key, and **Link**.
+  "mod.io refused the API key. Check it, then try again." Then the card shows "API key", "Without subscriptions" in a tag, and "Linked on *today*", with no picture but the initial.
+- [ ] **16.3 A mod.io game.** On the Browse screen, type `baldur` in the game picker, and choose "Baldur's Gate 3 (mod.io)".
+  mod.io's games come from its list, beside Nexus Mods' and GameBanana's. **Trending** (the most downloaded today), **Recently added** and **Recently updated**, with mod.io's pictures and positive ratings; a mod the website marks explicit, should Trending have one, has its picture blurred and an "Adult content" tag, and the other rows leave such mods out.
+- [ ] **16.4 Filters.** Open **Filters**; then search `better`, choose **Quality of Life** in the category box, type `Caites` as the author, and **Updated within** a week, each in turn.
+  The order box offers **Newest**, **Oldest**, **Recently updated**, **Most downloaded**, **Name, A to Z** and **Name, Z to A**; the categories are the game's tags, its types first; "Updated within" is offered. Each narrows the mods as the website's filters do, and they work together.
+- [ ] **16.5 A mod's page.** Paste `https://mod.io/g/baldursgate3/m/better-inventory-ui1` into the search box, and **Search**.
+  Better Inventory UI: its picture, "by Caites", version 1.4.4.21 (or the website's live one), positive ratings, downloads and last update, and **Open on mod.io**. "Files on mod.io": the live file under "Main", **Show *N* more files** listing its earlier versions for Windows under "Old versions". Under what it needs, ImpUI (ImprovedUI), which opens on its page in ModShelf.
+- [ ] **16.6 Download it.** **Download** on the live file; then the Library screen.
+  It goes into the library: "In the library", and the Library shows Baldur's Gate 3 with mod.io's logo and "1 mod", in `Library\modio\6715\Better Inventory UI (4228735)`.
+- [ ] **16.7 Subscriptions need a token.** Back in Browse, **Subscribed mods**.
+  "mod.io couldn't list your subscribed mods: mod.io lists them for an access token only: link one in place of your API key." The Accounts card still shows the key linked, not waiting to be linked again.
+- [ ] **16.8 Link a token.** On the Accounts screen, **Link with an API key** on mod.io's card, paste the token, and **Link**; then **Subscribed mods** in Browse, and **Watch all**.
+  The card shows your name and picture, and "Access token". "1 subscribed mod of Baldur's Gate 3 on mod.io.", Better Inventory UI, tagged "Watched" since 16.6; its page has no button to subscribe or unsubscribe. **Watch all (0)**, greyed.
+- [ ] **16.9 Links it refuses.** Paste `https://mod.io/g/baldursgate3` into the Downloads screen's box, and **Download**.
+  "That mod.io link isn't to a mod: copy the link of a mod's page."
+- [ ] **16.10 Unlink it.** On the Accounts screen, **Unlink** on mod.io's card, and confirm; then search Baldur's Gate 3 in Browse.
+  The card says nothing is linked, and Browse says "mod.io needs your account linked, or refused the one linked. Link it on the Accounts screen, then try again.", with a button to the Accounts screen. Better Inventory UI stays in the library. Revoke the token on mod.io.
+
 ## Clean up
 
 If a run stopped before 12.7, give the links back on the Settings screen first: their registration starts ModShelf on the test folder. After both accounts, quit the app from the tray menu, then:
@@ -529,3 +554,13 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 15.12 Subscribed mods | | – | |
 | 15.13 Watch all | | – | |
 | 15.14 Unlink it | | – | |
+| 16.1 The card | | – | |
+| 16.2 Link the API key | | – | |
+| 16.3 A mod.io game | | – | |
+| 16.4 Filters | | – | |
+| 16.5 A mod's page | | – | |
+| 16.6 Download it | | – | |
+| 16.7 Subscriptions need a token | | – | |
+| 16.8 Link a token | | – | |
+| 16.9 Links it refuses | | – | |
+| 16.10 Unlink it | | – | |
