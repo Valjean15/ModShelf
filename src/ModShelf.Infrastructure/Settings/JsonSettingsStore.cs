@@ -44,7 +44,8 @@ namespace ModShelf.Infrastructure.Settings;
 ///   "pictures": { "maxSize": 1024, "adult": "hidden" },
 ///   "details": { "maxAge": "7d" },
 ///   "quota": { "warnBelow": 15 },
-///   "agents": { "enabled": true, "port": 47823 }
+///   "agents": { "enabled": true, "port": 47823 },
+///   "downloads": { "browserFolder": "C:\\Users\\Me\\Downloads" }
 /// }
 /// </code>
 /// </summary>
@@ -84,6 +85,8 @@ internal sealed class JsonSettingsStore : ISettingsStore
     private const string Agents = "agents";
     private const string Enabled = "enabled";
     private const string Port = "port";
+    private const string Downloads = "downloads";
+    private const string BrowserFolder = "browserFolder";
     private const string Games = "games";
     private const string CheckUpdates = "checkUpdates";
     private const string UpdateIntervalName = "updateInterval";
@@ -133,12 +136,19 @@ internal sealed class JsonSettingsStore : ISettingsStore
         JsonObject details = file?[Details] as JsonObject ?? [];
         JsonObject quota = file?[Quota] as JsonObject ?? [];
         JsonObject agents = file?[Agents] as JsonObject ?? [];
+        JsonObject downloads = file?[Downloads] as JsonObject ?? [];
         try
         {
             string? root = Text(library, Root);
             if (root is not null && !Path.IsPathFullyQualified(root))
             {
                 throw new InvalidDataException($"library.root must be a full path, not '{root}'.");
+            }
+
+            string? browserFolder = Text(downloads, BrowserFolder, Downloads);
+            if (browserFolder is not null && !Path.IsPathFullyQualified(browserFolder))
+            {
+                throw new InvalidDataException($"{Downloads}.{BrowserFolder} must be a full path, not '{browserFolder}'.");
             }
 
             string? folders = Text(library, Folders);
@@ -165,6 +175,7 @@ internal sealed class JsonSettingsStore : ISettingsStore
                 QuotaWarnBelow = ReadWarnBelow(quota),
                 AgentsEnabled = Flag(agents, Enabled, Agents),
                 AgentsPort = ReadPort(agents),
+                BrowserDownloadsFolder = browserFolder,
             };
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or InvalidDataException or FormatException)
@@ -325,6 +336,10 @@ internal sealed class JsonSettingsStore : ISettingsStore
         }
 
         Keep(file, Agents, agentsSection);
+
+        JsonObject downloadsSection = file[Downloads] as JsonObject ?? [];
+        Set(downloadsSection, BrowserFolder, settings.BrowserDownloadsFolder);
+        Keep(file, Downloads, downloadsSection);
 
         JsonObject appearanceSection = file[Appearance] as JsonObject ?? [];
         Set(appearanceSection, Theme, settings.Theme is { } theme ? ThemeName(theme) : null);

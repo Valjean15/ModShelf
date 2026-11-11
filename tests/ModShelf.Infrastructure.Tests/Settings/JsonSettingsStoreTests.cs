@@ -402,6 +402,28 @@ public sealed class JsonSettingsStoreTests : IDisposable
     }
 
     [Fact]
+    public async Task KeepsTheBrowsersDownloadsFolderAndItsDefaultLeavesTheFile()
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "Browser downloads");
+        await WriteAsync("""{ "downloads": { "later": true } }""");
+
+        await Store().SaveAsync(new AppSettings { BrowserDownloadsFolder = folder }, Cancellation);
+        AppSettings loaded = await Store().LoadAsync(Cancellation);
+        string chosen = await File.ReadAllTextAsync(FilePath, Cancellation);
+        await Store().SaveAsync(new AppSettings(), Cancellation);
+        string reset = await File.ReadAllTextAsync(FilePath, Cancellation);
+        await WriteAsync("{}");
+        await Store().SaveAsync(new AppSettings(), Cancellation);
+        string none = await File.ReadAllTextAsync(FilePath, Cancellation);
+
+        Assert.Equal(folder, loaded.BrowserDownloadsFolder);
+        Assert.Contains("\"browserFolder\"", chosen, StringComparison.Ordinal);
+        Assert.DoesNotContain("browserFolder", reset, StringComparison.Ordinal);
+        Assert.Contains("\"later\": true", reset, StringComparison.Ordinal);
+        Assert.DoesNotContain("downloads", none, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task KeepsTheQuotaWarningAndItsDefaultLeavesTheFile()
     {
         await WriteAsync("""{ "quota": { "warnBelow": 10, "later": true } }""");
@@ -463,6 +485,8 @@ public sealed class JsonSettingsStoreTests : IDisposable
     [InlineData("""{ "agents": { "port": 80 } }""", "agents.port must be a port from 1024 to 65535.")]
     [InlineData("""{ "agents": { "port": 65536 } }""", "agents.port must be a port from 1024 to 65535.")]
     [InlineData("""{ "agents": { "port": "47823" } }""", "agents.port must be a port from 1024 to 65535.")]
+    [InlineData("""{ "downloads": { "browserFolder": 3 } }""", "downloads.browserFolder must be text.")]
+    [InlineData("""{ "downloads": { "browserFolder": "Downloads" } }""", "downloads.browserFolder must be a full path, not 'Downloads'.")]
     public async Task SaysWhenAPreviewPictureOrDetailsSettingIsWrong(string content, string message)
     {
         await WriteAsync(content);

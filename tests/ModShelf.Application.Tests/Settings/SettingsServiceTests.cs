@@ -329,6 +329,32 @@ public sealed class SettingsServiceTests : IDisposable
         Assert.Equal(47823, AppSettings.DefaultAgentsPort);
     }
 
+    [Fact]
+    public async Task SetsTheBrowsersDownloadsFolderAsAFullPathAndBackToTheSystems()
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "Browser", "Downloads");
+
+        await _settings.SetBrowserDownloadsFolderAsync(folder + Path.DirectorySeparatorChar + " ", Cancellation);
+        AppSettings chosen = await _settings.GetAsync(Cancellation);
+        await _settings.SetBrowserDownloadsFolderAsync(null, Cancellation);
+
+        Assert.Equal(folder, chosen.BrowserDownloadsFolder);
+        Assert.Null((await _settings.GetAsync(Cancellation)).BrowserDownloadsFolder);
+    }
+
+    [Fact]
+    public async Task RefusesABrowsersDownloadsFolderThatIsntAFullPath()
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "Browser");
+        await _settings.SetBrowserDownloadsFolderAsync(folder, Cancellation);
+
+        ArgumentException refused = await Assert.ThrowsAsync<ArgumentException>(() => _settings.SetBrowserDownloadsFolderAsync("Downloads", Cancellation));
+
+        Assert.StartsWith("'Downloads' isn't a full path", refused.Message, StringComparison.Ordinal);
+        Assert.Equal("folder", refused.ParamName);
+        Assert.Equal(folder, (await _settings.GetAsync(Cancellation)).BrowserDownloadsFolder);
+    }
+
     [Theory]
     [InlineData(AppSettings.MinAgentsPort - 1)]
     [InlineData(AppSettings.MaxAgentsPort + 1)]

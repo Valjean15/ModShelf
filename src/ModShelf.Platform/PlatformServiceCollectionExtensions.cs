@@ -14,6 +14,7 @@ using ModShelf.Application.Settings.Ports;
 using ModShelf.Platform.Agents;
 using ModShelf.Platform.Browser;
 using ModShelf.Platform.Diagnostics;
+using ModShelf.Platform.Downloads;
 using ModShelf.Platform.Folders;
 using ModShelf.Platform.Instances;
 using ModShelf.Platform.Links;
@@ -63,6 +64,9 @@ public static class PlatformServiceCollectionExtensions
         services.AddSingleton<IOAuthRedirectListener, LoopbackRedirectListener>();
         services.AddSingleton<IBrowserLauncher>(_ => new SystemBrowserLauncher());
         services.AddSingleton(_ => UserFolders.ForThisSystem());
+        services.AddSingleton<IBrowserDownloads>(provider => new BrowserFolderWatcher(
+            provider.GetService<TimeProvider>() ?? TimeProvider.System,
+            provider.GetRequiredService<ILogger<BrowserFolderWatcher>>()));
         services.AddSingleton(_ => SchemeRegistrations.ForThisSystem(handler));
         services.AddSingleton(provider => NotificationServices.ForThisSystem(
             provider.GetRequiredService<ISchemeRegistration>(),

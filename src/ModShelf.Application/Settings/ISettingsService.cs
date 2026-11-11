@@ -178,4 +178,10 @@ public interface ISettingsService
     /// <paramref name="port"/> is below <see cref="AppSettings.MinAgentsPort"/> or above <see cref="AppSettings.MaxAgentsPort"/>.
     /// </exception>
     Task SetAgentsPortAsync(int? port, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets the folder the browser saves downloads to, or sets it back to the system's Downloads folder with null.
+    /// </summary>
+    /// <exception cref="ArgumentException"><paramref name="folder"/> isn't a full path.</exception>
+    Task SetBrowserDownloadsFolderAsync(string? folder, CancellationToken cancellationToken);
 }

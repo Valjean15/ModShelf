@@ -131,6 +131,9 @@ internal sealed class InMemorySettingsService : ISettingsService
     public Task SetAgentsPortAsync(int? port, CancellationToken cancellationToken)
         => ChangeAsync($"agentsPort {port?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "null"}", settings => settings with { AgentsPort = port });
 
+    public Task SetBrowserDownloadsFolderAsync(string? folder, CancellationToken cancellationToken)
+        => ChangeAsync($"browserDownloadsFolder {folder ?? "null"}", settings => settings with { BrowserDownloadsFolder = folder });
+
     /// <summary>
     /// The settings with the game's own as <paramref name="own"/>; without the game when it has none.
     /// </summary>

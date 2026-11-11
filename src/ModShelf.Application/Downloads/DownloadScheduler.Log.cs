@@ -48,4 +48,13 @@ internal sealed partial class DownloadScheduler
 
     [LoggerMessage(EventId = 13, Level = LogLevel.Information, Message = "Cleared {Count} completed download jobs from the queue, as the library asked")]
     private static partial void LogClearedCompleted(ILogger logger, int count);
+
+    [LoggerMessage(EventId = 14, Level = LogLevel.Information, Message = "Download job {JobId} took the file the browser downloaded")]
+    private static partial void LogFileTaken(ILogger logger, DownloadJobId jobId);
+
+    [LoggerMessage(EventId = 15, Level = LogLevel.Information, Message = "Download job {JobId} didn't take the file it was handed ({Outcome}); it waits on its page again")]
+    private static partial void LogFileRefused(ILogger logger, DownloadJobId jobId, TakeFileOutcome outcome);
+
+    [LoggerMessage(EventId = 16, Level = LogLevel.Warning, Message = "The file {FileName} couldn't be taken for a download")]
+    private static partial void LogTakeFailed(ILogger logger, Exception exception, string fileName);
 }

@@ -323,14 +323,16 @@ public static class ApplicationServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Runs the <see cref="DownloadScheduler"/> as a hosted service, so queued jobs download while the host runs.
-    /// A host that only reads the queue leaves this out.
+    /// Runs the <see cref="DownloadScheduler"/> as a hosted service, so queued jobs download while the host runs, and
+    /// <see cref="BrowserFiles"/>, which hands a download waiting on a site's page the file the browser saved for it,
+    /// with the host's <see cref="Downloads.Ports.IBrowserDownloads"/>. A host that only reads the queue leaves this out.
     /// </summary>
     public static IServiceCollection AddBackgroundDownloads(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
 
         services.AddHostedService(provider => provider.GetRequiredService<DownloadScheduler>());
+        services.AddHostedService<BrowserFiles>();
 
         return services;
     }

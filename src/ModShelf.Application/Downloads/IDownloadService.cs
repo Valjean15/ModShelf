@@ -53,6 +53,19 @@ public interface IDownloadService
     Task HandOffAsync(ModFileRef file, Uri handoff, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Hands a job waiting on a site's page (<see cref="DownloadJobStatus.AwaitingHandoff"/>) the file the user's browser
+    /// downloaded from it: checked against the file's hash when the site gives one, moved into the job's place, and the
+    /// job completes as if it had been downloaded here, going into the library as usual.
+    /// </summary>
+    /// <param name="path">The file's full path, such as in the browser's downloads folder.</param>
+    /// <returns>
+    /// Whether the file was taken; otherwise it's left where it was, and the job waits on its page again.
+    /// </returns>
+    /// <exception cref="ArgumentException"><paramref name="path"/> isn't a full path.</exception>
+    /// <exception cref="InvalidOperationException">The job isn't waiting on a page.</exception>
+    Task<TakeFileOutcome> TakeFileAsync(DownloadJobId id, string path, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Every job, oldest first: as saved, in a process that doesn't run downloads or while another runs the queue.
     /// </summary>
     Task<IReadOnlyList<DownloadJobSnapshot>> ListAsync(CancellationToken cancellationToken);

@@ -1,3 +1,4 @@
+using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Downloads;
 
 namespace ModShelf.Application.Downloads.Ports;
@@ -21,6 +22,18 @@ public interface IFileTransfer
         string destinationPath,
         ITransferProgress progress,
         CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Takes a file downloaded elsewhere, such as by the browser: checks it against <paramref name="expectedHash"/>, when
+    /// there is one, then moves it to <paramref name="destinationPath"/>, renamed on the same drive, or copied and then
+    /// removed from another. The file appears at <paramref name="destinationPath"/> only once it's whole.
+    /// </summary>
+    /// <returns>
+    /// <see cref="TransferOutcome.Completed"/>; <see cref="TransferOutcome.HashMismatch"/> or
+    /// <see cref="TransferOutcome.StorageError"/> with the file left where it was.
+    /// </returns>
+    /// <exception cref="FileNotFoundException">There's no file at <paramref name="sourcePath"/>.</exception>
+    Task<TransferOutcome> TakeAsync(string sourcePath, FileHash? expectedHash, string destinationPath, CancellationToken cancellationToken);
 
     /// <summary>
     /// Deletes the partial file of an abandoned download, if there is one. Never touches

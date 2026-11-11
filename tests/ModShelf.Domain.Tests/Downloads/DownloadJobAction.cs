@@ -11,6 +11,8 @@ public enum DownloadJobAction
     StartDownloading,
     ReportProgress,
     StartVerifying,
+    TakeFile,
+    RefuseTakenFile,
     Complete,
     Pause,
     Resume,

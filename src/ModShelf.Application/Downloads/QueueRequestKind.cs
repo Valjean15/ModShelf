@@ -21,4 +21,10 @@ public enum QueueRequestKind
     /// Cancels the download and deletes the partial file it left; a finished file is never deleted.
     /// </summary>
     Cancel,
+
+    /// <summary>
+    /// Hands a download waiting on a site's page the file the browser downloaded there, as
+    /// <see cref="IDownloadService.TakeFileAsync"/> does.
+    /// </summary>
+    TakeFile,
 }

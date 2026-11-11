@@ -11,7 +11,9 @@ namespace ModShelf.Domain.Downloads;
 /// <remarks>
 /// <para>
 /// The happy path is Queued → Resolving → Downloading → Verifying → Completed. A source that needs the
-/// user to start the download on its website goes Resolving → AwaitingHandoff → Resolving first.
+/// user to start the download on its website goes Resolving → AwaitingHandoff → Resolving first, or
+/// AwaitingHandoff → Verifying when the user hands over the file their browser downloaded instead
+/// (<see cref="TakeFile"/>), and back when it isn't the file (<see cref="RefuseTakenFile"/>).
 /// When a link expires mid-download, the job goes back from Downloading to Resolving for a fresh one.
 /// </para>
 /// <para>
@@ -205,6 +207,25 @@ public sealed class DownloadJob
     {
         EnsureStatus(nameof(StartVerifying), Downloading);
         Status = Verifying;
+    }
+
+    /// <summary>
+    /// The user handed over the file their browser downloaded from the source's page, which is being checked against
+    /// the source's hash and put in place.
+    /// </summary>
+    public void TakeFile()
+    {
+        EnsureStatus(nameof(TakeFile), AwaitingHandoff);
+        Status = Verifying;
+    }
+
+    /// <summary>
+    /// The file the user handed over isn't the one, or couldn't be put in place: the job waits on the page again.
+    /// </summary>
+    public void RefuseTakenFile()
+    {
+        EnsureStatus(nameof(RefuseTakenFile), Verifying);
+        Status = AwaitingHandoff;
     }
 
     /// <summary>

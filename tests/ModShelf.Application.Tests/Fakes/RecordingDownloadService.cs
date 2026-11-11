@@ -122,6 +122,26 @@ internal sealed class RecordingDownloadService(params DownloadJobSnapshot[] exis
     public Task PauseAsync(DownloadJobId id, CancellationToken cancellationToken) => throw new NotSupportedException();
 
     /// <summary>
+    /// Each file handed to a download: the download, the file's path, and what came of it.
+    /// </summary>
+    public List<(DownloadJobId Id, string Path)> TakenFiles { get; } = [];
+
+    /// <summary>
+    /// What handing a download a file comes to; taken unless the test says otherwise.
+    /// </summary>
+    public Func<DownloadJobId, string, TakeFileOutcome> TakeOutcome { get; set; } = (_, _) => TakeFileOutcome.Taken;
+
+    public Task<TakeFileOutcome> TakeFileAsync(DownloadJobId id, string path, CancellationToken cancellationToken)
+    {
+        lock (TakenFiles)
+        {
+            TakenFiles.Add((id, path));
+        }
+
+        return Task.FromResult(TakeOutcome(id, path));
+    }
+
+    /// <summary>
     /// What the next resume or retry throws, as the scheduler does for a job that went on meanwhile.
     /// </summary>
     public Exception? ControlRefusal { get; set; }

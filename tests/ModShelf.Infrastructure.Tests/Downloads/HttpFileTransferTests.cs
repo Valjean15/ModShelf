@@ -615,6 +615,129 @@ public sealed class HttpFileTransferTests : IDisposable
         }
     }
 
+    [Fact]
+    public async Task TakesAFileFromElsewhereCheckedThroughItsPartialName()
+    {
+        string downloaded = Downloaded(File1000);
+        List<(string From, string To)> moves = [];
+
+        TransferOutcome outcome = await CreateTransfer(move: (from, to) =>
+            {
+                moves.Add((from, to));
+                File.Move(from, to, overwrite: false);
+            })
+            .TakeAsync(downloaded, Sha256Of(File1000), Destination, TestContext.Current.CancellationToken);
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+        Assert.Equal(File1000, File.ReadAllBytes(Destination));
+        Assert.False(File.Exists(downloaded));
+        Assert.False(File.Exists(PartialFile));
+        Assert.Equal([(downloaded, PartialFile), (PartialFile, Destination)], moves);
+        Assert.Empty(_server.Requests);
+    }
+
+    [Fact]
+    public async Task TakesAFileWithoutAHashIntoAFolderItMakes()
+    {
+        string downloaded = Downloaded(File1000);
+        string destination = Path.Combine(_folder.Path, "game", "mod", "SkyUI_5_2_SE.7z");
+
+        TransferOutcome outcome = await CreateTransfer().TakeAsync(downloaded, expectedHash: null, destination, TestContext.Current.CancellationToken);
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+        Assert.Equal(File1000, File.ReadAllBytes(destination));
+    }
+
+    [Fact]
+    public async Task LeavesAFileWhoseHashIsAnothersWhereItWas()
+    {
+        string downloaded = Downloaded(File1000);
+
+        TransferOutcome outcome = await CreateTransfer().TakeAsync(downloaded, Sha256Of(File1000[..999]), Destination, TestContext.Current.CancellationToken);
+
+        Assert.Equal(TransferOutcome.HashMismatch, outcome);
+        Assert.Equal(File1000, File.ReadAllBytes(downloaded));
+        Assert.False(File.Exists(Destination));
+        Assert.False(File.Exists(PartialFile));
+        Assert.Contains(_logger.Entries, entry => entry.Contains("SkyUI_5_2_SE.7z, handed over from the browser, doesn't match its expected Sha256 hash", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task ChecksAFileWithTheSitesOtherHash()
+    {
+        string downloaded = Downloaded("abc"u8.ToArray());
+        FileHash md5 = new(FileHashAlgorithm.Md5, "900150983cd24fb0d6963f7d28e17f72");
+
+        TransferOutcome outcome = await CreateTransfer().TakeAsync(downloaded, md5, Destination, TestContext.Current.CancellationToken);
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+    }
+
+    [Fact]
+    public async Task NeverTakesAFileOverOneInPlace()
+    {
+        string downloaded = Downloaded(File1000);
+        File.WriteAllBytes(Destination, [1, 2, 3]);
+
+        TransferOutcome outcome = await CreateTransfer().TakeAsync(downloaded, expectedHash: null, Destination, TestContext.Current.CancellationToken);
+
+        Assert.Equal(TransferOutcome.StorageError, outcome);
+        Assert.Equal([1, 2, 3], File.ReadAllBytes(Destination));
+        Assert.True(File.Exists(downloaded));
+    }
+
+    [Fact]
+    public async Task ReplacesAPartialFileAnEarlierDownloadLeft()
+    {
+        string downloaded = Downloaded(File1000);
+        File.WriteAllBytes(PartialFile, File1000[..400]);
+
+        TransferOutcome outcome = await CreateTransfer().TakeAsync(downloaded, Sha256Of(File1000), Destination, TestContext.Current.CancellationToken);
+
+        Assert.Equal(TransferOutcome.Completed, outcome);
+        Assert.Equal(File1000, File.ReadAllBytes(Destination));
+        Assert.False(File.Exists(PartialFile));
+    }
+
+    [Fact]
+    public async Task AFileThatIsntThereIsNotFound()
+    {
+        await Assert.ThrowsAsync<FileNotFoundException>(() => CreateTransfer().TakeAsync(
+            Path.Combine(_folder.Path, "Browser", "gone.7z"),
+            expectedHash: null,
+            Destination,
+            TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task AFileThatCantBeMovedIsLeftWhereItWas()
+    {
+        string downloaded = Downloaded(File1000);
+
+        TransferOutcome outcome = await CreateTransfer(move: (_, _) => throw new UnauthorizedAccessException("Denied."))
+            .TakeAsync(downloaded, expectedHash: null, Destination, TestContext.Current.CancellationToken);
+
+        Assert.Equal(TransferOutcome.StorageError, outcome);
+        Assert.True(File.Exists(downloaded));
+        Assert.False(File.Exists(Destination));
+        Assert.Contains(_logger.Entries, entry => entry.Contains("Couldn't write SkyUI_5_2_SE.7z", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// A file the browser saved, in a folder of its own beside the destination's.
+    /// </summary>
+    private string Downloaded(byte[] content)
+    {
+        string folder = Path.Combine(_folder.Path, "Browser");
+        Directory.CreateDirectory(folder);
+        string path = Path.Combine(folder, "SkyUI_5_2_SE (1).7z");
+        File.WriteAllBytes(path, content);
+        return path;
+    }
+
+    private static FileHash Sha256Of(byte[] content)
+        => FileHash.FromDigest(FileHashAlgorithm.Sha256, System.Security.Cryptography.SHA256.HashData(content));
+
     /// <param name="freeSpace">The disk's room, for a folder; null for the system's own disk.</param>
     /// <param name="move">Moves the finished file into place, in place of the system; null for the system's.</param>
     /// <param name="delete">Deletes a partial file, in place of the system; null for the system's.</param>

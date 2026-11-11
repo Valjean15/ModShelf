@@ -21,6 +21,7 @@ public sealed class QueueMessagesTests
         QueueRequest.Resume(DownloadJobId.New()),
         QueueRequest.Retry(DownloadJobId.New()),
         QueueRequest.Cancel(DownloadJobId.New()),
+        QueueRequest.TakeFile(DownloadJobId.New(), Path.Combine(Path.GetTempPath(), "Downloads", "SMAPI 4.0 (1).zip")),
     ];
 
     public static TheoryData<QueueReply> Replies =>

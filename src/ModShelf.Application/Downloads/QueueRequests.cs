@@ -46,6 +46,12 @@ internal sealed partial class QueueRequests(IOpenedLinks links, IDownloadService
             }
 
             DownloadJobId job = request.Job ?? throw new ArgumentException("The request needs a download's ID.", nameof(request));
+            if (request.Kind == QueueRequestKind.TakeFile)
+            {
+                return await TakeFileAsync(job, request.Path ?? throw new ArgumentException("Handing a download a file needs its path.", nameof(request)), cancellationToken)
+                    .ConfigureAwait(false);
+            }
+
             Task change = request.Kind switch
             {
                 QueueRequestKind.Pause => downloads.PauseAsync(job, cancellationToken),
@@ -96,6 +102,29 @@ internal sealed partial class QueueRequests(IOpenedLinks links, IDownloadService
             LogFailed(logger, exception, request.Kind);
             return new QueueReply(QueueOutcome.Failed, "Something went wrong. ModShelf's log says what.");
         }
+    }
+
+    /// <summary>
+    /// Hands the download the file, and says how it went: in words for the user, unless it was taken.
+    /// </summary>
+    private async Task<QueueReply> TakeFileAsync(DownloadJobId job, string path, CancellationToken cancellationToken)
+    {
+        TakeFileOutcome outcome = await downloads.TakeFileAsync(job, path, cancellationToken).ConfigureAwait(false);
+        IReadOnlyList<DownloadJobSnapshot> jobs = await downloads.ListAsync(cancellationToken).ConfigureAwait(false);
+        DownloadJobSnapshot? now = jobs.FirstOrDefault(snapshot => snapshot.Id == job);
+        return outcome switch
+        {
+            TakeFileOutcome.Taken => new QueueReply(QueueOutcome.Done, Job: now),
+            TakeFileOutcome.HashMismatch => new QueueReply(
+                QueueOutcome.Refused,
+                "That file isn't the download's: its checksum isn't the one the site gives. It's left where it was, and the download still waits.",
+                now),
+            TakeFileOutcome.NotFound => new QueueReply(QueueOutcome.Refused, "There's no file at that path. The download still waits.", now),
+            _ => new QueueReply(
+                QueueOutcome.Refused,
+                "The file couldn't be moved into place, such as because another program has it open. It's left where it was, and ModShelf's log says more.",
+                now),
+        };
     }
 
     /// <summary>

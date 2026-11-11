@@ -240,6 +240,12 @@ internal sealed class SettingsService : ISettingsService, IDisposable
         return ChangeAsync((settings, _) => Task.FromResult(settings with { AgentsPort = port }), cancellationToken);
     }
 
+    public Task SetBrowserDownloadsFolderAsync(string? folder, CancellationToken cancellationToken)
+    {
+        string? normalized = folder is null ? null : FullRoot(folder, nameof(folder));
+        return ChangeAsync((settings, _) => Task.FromResult(settings with { BrowserDownloadsFolder = normalized }), cancellationToken);
+    }
+
     public Task SetAdultPicturesAsync(AdultPictures? pictures, CancellationToken cancellationToken)
     {
         if (pictures is { } value && !Enum.IsDefined(value))

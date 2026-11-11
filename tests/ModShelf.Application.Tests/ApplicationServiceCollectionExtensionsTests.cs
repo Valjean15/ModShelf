@@ -47,7 +47,7 @@ public sealed class ApplicationServiceCollectionExtensionsTests
     }
 
     [Fact]
-    public void BackgroundDownloadsRunTheSameScheduler()
+    public void BackgroundDownloadsRunTheSameSchedulerAndWatchTheBrowsersFolderOnce()
     {
         ServiceCollection services = new();
         services.AddDownloadEngine();
@@ -55,9 +55,12 @@ public sealed class ApplicationServiceCollectionExtensionsTests
         services.AddBackgroundDownloads();
         DownloadScheduler scheduler = NewScheduler();
 
-        object hosted = Single<IHostedService>(services).ImplementationFactory!(new StubServiceProvider(scheduler));
+        ServiceDescriptor[] hosted = [.. services.Where(descriptor => descriptor.ServiceType == typeof(IHostedService))];
+        object running = Assert.Single(hosted, descriptor => descriptor.ImplementationFactory is not null).ImplementationFactory!(new StubServiceProvider(scheduler));
 
-        Assert.Same(scheduler, hosted);
+        Assert.Same(scheduler, running);
+        Assert.Single(hosted, descriptor => descriptor.ImplementationType == typeof(BrowserFiles));
+        Assert.Equal(2, hosted.Length);
     }
 
     [Fact]

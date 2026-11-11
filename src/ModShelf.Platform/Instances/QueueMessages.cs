@@ -21,7 +21,7 @@ internal static class QueueMessages
     public static string Write(QueueRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
-        return JsonSerializer.Serialize(new QueueRequestMessage(request.Kind.ToString(), request.Link?.OriginalString, request.Job?.ToString()));
+        return JsonSerializer.Serialize(new QueueRequestMessage(request.Kind.ToString(), request.Link?.OriginalString, request.Job?.ToString(), request.Path));
     }
 
     public static string Write(QueueReply reply)
@@ -46,7 +46,8 @@ internal static class QueueMessages
             return new QueueRequest(
                 Parse<QueueRequestKind>(message.Kind),
                 message.Link is { } link ? new Uri(link, UriKind.Absolute) : null,
-                message.Job is { } job ? new DownloadJobId(Guid.Parse(job, CultureInfo.InvariantCulture)) : null);
+                message.Job is { } job ? new DownloadJobId(Guid.Parse(job, CultureInfo.InvariantCulture)) : null,
+                message.Path);
         }
         catch (Exception exception) when (exception is JsonException or FormatException or ArgumentException or UriFormatException)
         {

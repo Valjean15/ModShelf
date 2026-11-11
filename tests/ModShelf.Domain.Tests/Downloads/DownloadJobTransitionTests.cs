@@ -20,6 +20,8 @@ public sealed class DownloadJobTransitionTests
         [DownloadJobAction.StartDownloading] = new([Resolving], Downloading),
         [DownloadJobAction.ReportProgress] = new([Downloading], Downloading),
         [DownloadJobAction.StartVerifying] = new([Downloading], Verifying),
+        [DownloadJobAction.TakeFile] = new([AwaitingHandoff], Verifying),
+        [DownloadJobAction.RefuseTakenFile] = new([Verifying], AwaitingHandoff),
         [DownloadJobAction.Complete] = new([Verifying], Completed),
         [DownloadJobAction.Pause] = new([Queued, Resolving, AwaitingHandoff, Downloading], Paused),
         [DownloadJobAction.Resume] = new([Paused], Queued),
@@ -107,6 +109,12 @@ public sealed class DownloadJobTransitionTests
                 break;
             case DownloadJobAction.StartVerifying:
                 job.StartVerifying();
+                break;
+            case DownloadJobAction.TakeFile:
+                job.TakeFile();
+                break;
+            case DownloadJobAction.RefuseTakenFile:
+                job.RefuseTakenFile();
                 break;
             case DownloadJobAction.Complete:
                 job.Complete();

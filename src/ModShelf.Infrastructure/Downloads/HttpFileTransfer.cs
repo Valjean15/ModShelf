@@ -150,6 +150,56 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
             .ConfigureAwait(false);
     }
 
+    public async Task<TransferOutcome> TakeAsync(string sourcePath, FileHash? expectedHash, string destinationPath, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(sourcePath);
+        ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
+
+        string fileName = Path.GetFileName(destinationPath);
+        if (!File.Exists(sourcePath))
+        {
+            throw new FileNotFoundException("There's no file to take there.", Path.GetFileName(sourcePath));
+        }
+
+        if (File.Exists(destinationPath))
+        {
+            LogDestinationExists(_logger, fileName);
+            return TransferOutcome.StorageError;
+        }
+
+        try
+        {
+            if (expectedHash is not null)
+            {
+                FileHash actual = await ComputeHashAsync(sourcePath, expectedHash.Algorithm, cancellationToken).ConfigureAwait(false);
+                if (actual != expectedHash)
+                {
+                    LogTakenHashMismatch(_logger, fileName, expectedHash.Algorithm);
+                    return TransferOutcome.HashMismatch;
+                }
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(destinationPath))!);
+
+            // Through the partial file's name, so the file appears in place only whole: on the same drive, both are
+            // renames; from another, the system copies it, then removes the original.
+            string partialPath = PartialFiles.PathFor(destinationPath);
+            if (File.Exists(partialPath))
+            {
+                DiscardPartialFile(partialPath);
+            }
+
+            await MoveIntoPlaceAsync(sourcePath, partialPath, cancellationToken).ConfigureAwait(false);
+            await MoveIntoPlaceAsync(partialPath, destinationPath, cancellationToken).ConfigureAwait(false);
+            return TransferOutcome.Completed;
+        }
+        catch (Exception exception) when (IsStorageFailure(exception))
+        {
+            LogStorageFailed(_logger, exception, fileName);
+            return TransferOutcome.StorageError;
+        }
+    }
+
     public Task DeletePartialFileAsync(string destinationPath, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);

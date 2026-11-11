@@ -205,6 +205,46 @@ public sealed class QueueRequestsTests
             () => new QueueRequests(_links, _queue, _time, _logger).HandleAsync(QueueRequest.Download(Link), cancelled.Token));
     }
 
+    [Fact]
+    public async Task HandsAWaitingDownloadAFile()
+    {
+        DownloadJobSnapshot job = Job(DownloadJobStatus.AwaitingHandoff);
+        _queue.Jobs.Add(job);
+        string path = Path.Combine(Path.GetTempPath(), "Downloads", "mod.zip");
+
+        QueueReply reply = await Handle(QueueRequest.TakeFile(job.Id, path));
+
+        Assert.Equal(new QueueReply(QueueOutcome.Done, Job: job with { Status = DownloadJobStatus.Completed }), reply);
+        Assert.Equal([$"Take {path} {job.Id}"], _queue.Calls);
+        Assert.DoesNotContain(_logger.Entries, entry => entry.Contains(path, StringComparison.Ordinal));
+    }
+
+    [Theory]
+    [InlineData(TakeFileOutcome.HashMismatch, "That file isn't the download's: its checksum isn't the one the site gives.")]
+    [InlineData(TakeFileOutcome.NotFound, "There's no file at that path.")]
+    [InlineData(TakeFileOutcome.StorageError, "The file couldn't be moved into place")]
+    public async Task SaysWhyAFileWasntTaken(TakeFileOutcome outcome, string problem)
+    {
+        DownloadJobSnapshot job = Job(DownloadJobStatus.AwaitingHandoff);
+        _queue.Jobs.Add(job);
+        _queue.TakeOutcome = outcome;
+
+        QueueReply reply = await Handle(QueueRequest.TakeFile(job.Id, Path.Combine(Path.GetTempPath(), "mod.zip")));
+
+        Assert.Equal((QueueOutcome.Refused, job), (reply.Outcome, reply.Job));
+        Assert.StartsWith(problem, reply.Problem, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task HandingAFileNeedsItsPath()
+    {
+        QueueReply reply = await Handle(new QueueRequest(QueueRequestKind.TakeFile, Job: Job(DownloadJobStatus.AwaitingHandoff).Id));
+
+        Assert.Equal(QueueOutcome.Refused, reply.Outcome);
+        Assert.StartsWith("Handing a download a file needs its path.", reply.Problem, StringComparison.Ordinal);
+        Assert.Empty(_queue.Calls);
+    }
+
     private static DownloadJobSnapshot Job(DownloadJobStatus status)
         => new(DownloadJobId.New(), TestData.File(TestData.Nexus, "2"), TestData.TargetDirectory, "mod.zip", status, 0, null, null, TestData.Now);
 
@@ -270,6 +310,17 @@ public sealed class QueueRequestsTests
         public Task RetryAsync(DownloadJobId id, CancellationToken cancellationToken) => Change(id, "Retry", DownloadJobStatus.Queued);
 
         public Task CancelAsync(DownloadJobId id, CancellationToken cancellationToken) => Change(id, "Cancel", DownloadJobStatus.Cancelled);
+
+        /// <summary>
+        /// What handing a download a file comes to; taken, which completes it, unless the test says otherwise.
+        /// </summary>
+        public TakeFileOutcome TakeOutcome { get; set; } = TakeFileOutcome.Taken;
+
+        public async Task<TakeFileOutcome> TakeFileAsync(DownloadJobId id, string path, CancellationToken cancellationToken)
+        {
+            await Change(id, $"Take {path}", TakeOutcome == TakeFileOutcome.Taken ? DownloadJobStatus.Completed : DownloadJobStatus.AwaitingHandoff);
+            return TakeOutcome;
+        }
 
         public Task<int> ClearFinishedAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
 

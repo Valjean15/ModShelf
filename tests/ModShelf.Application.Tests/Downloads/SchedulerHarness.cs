@@ -30,7 +30,8 @@ internal sealed class SchedulerHarness : IAsyncDisposable
     {
         Repository = new InMemoryDownloadJobRepository(storedJobs);
         QueueLock.HeldElsewhere = queueBusyElsewhere;
-        IModSource[] sources = registerModIo ? [Nexus, ModIo] : [Nexus];
+        NexusSite = new ResolverWithFiles(Nexus);
+        IModSource[] sources = registerModIo ? [NexusSite, ModIo] : [NexusSite];
         Scheduler = new DownloadScheduler(Repository, new SourceRegistry(sources), Transfer, QueueLock, Storage, Time, options, Logger);
 
         IAsyncEnumerable<DownloadJobSnapshot> stream = Scheduler.WatchAsync(_stopWatching.Token);
@@ -51,6 +52,11 @@ internal sealed class SchedulerHarness : IAsyncDisposable
     public InMemoryDownloadJobRepository Repository { get; }
 
     public ScriptedResolver Nexus { get; } = new(TestData.Nexus);
+
+    /// <summary>
+    /// Nexus Mods as the scheduler sees it: <see cref="Nexus"/>'s downloads, with the files the test lists.
+    /// </summary>
+    public ResolverWithFiles NexusSite { get; }
 
     public ScriptedResolver ModIo { get; } = new(TestData.ModIo);
 

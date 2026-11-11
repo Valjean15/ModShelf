@@ -88,4 +88,6 @@ internal sealed class FakeSettingsService : ISettingsService
     public Task SetAgentsEnabledAsync(bool? enabled, CancellationToken cancellationToken) => throw new NotSupportedException();
 
     public Task SetAgentsPortAsync(int? port, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    public Task SetBrowserDownloadsFolderAsync(string? folder, CancellationToken cancellationToken) => throw new NotSupportedException();
 }

@@ -156,6 +156,12 @@ public sealed record AppSettings
     public int? AgentsPort { get; init; }
 
     /// <summary>
+    /// The folder the browser saves downloads to, a full path, where ModShelf looks for the file of a download waiting on
+    /// a site's page; null for the system's Downloads folder.
+    /// </summary>
+    public string? BrowserDownloadsFolder { get; init; }
+
+    /// <summary>
     /// The previews <paramref name="screen"/> shows: as set, or its default, thumbnails on the Library screen, cards on
     /// Browse, and none on the others.
     /// </summary>

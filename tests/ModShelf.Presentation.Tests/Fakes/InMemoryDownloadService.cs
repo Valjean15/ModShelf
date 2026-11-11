@@ -121,6 +121,26 @@ internal sealed class InMemoryDownloadService : IDownloadService
     public Task CancelAsync(DownloadJobId id, CancellationToken cancellationToken)
         => ControlAsync("Cancel", id, job => job with { Status = DownloadJobStatus.Cancelled });
 
+    /// <summary>
+    /// What handing a download a file comes to; taken, which completes it, unless the test says otherwise.
+    /// </summary>
+    public TakeFileOutcome TakeOutcome { get; set; } = TakeFileOutcome.Taken;
+
+    /// <summary>
+    /// The files handed to downloads, in turn: the download, and the file's path.
+    /// </summary>
+    public List<(DownloadJobId Id, string Path)> TakenFiles { get; } = [];
+
+    public async Task<TakeFileOutcome> TakeFileAsync(DownloadJobId id, string path, CancellationToken cancellationToken)
+    {
+        TakenFiles.Add((id, path));
+        await ControlAsync(
+            "Take",
+            id,
+            job => TakeOutcome == TakeFileOutcome.Taken ? job with { Status = DownloadJobStatus.Completed } : job);
+        return TakeOutcome;
+    }
+
     public Task<int> ClearFinishedAsync(CancellationToken cancellationToken)
     {
         if (Refusal is not null)

@@ -3,6 +3,7 @@ using System.Threading.Channels;
 
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Tests.Common;
+using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Downloads;
 
 namespace ModShelf.Application.Tests.Fakes;
@@ -34,6 +35,23 @@ internal sealed class ControlledFileTransfer : IFileTransfer
         Interlocked.Increment(ref _callCount);
         _calls.Writer.TryWrite(call);
         return call.Outcome;
+    }
+
+    /// <summary>
+    /// Each file taken: where it was, the hash it was checked with, and where it went.
+    /// </summary>
+    public ConcurrentQueue<(string Source, FileHash? Hash, string Destination)> Taken { get; } = new();
+
+    /// <summary>
+    /// What taking a file comes to; completed unless the test says otherwise. A <see cref="FileNotFoundException"/>
+    /// throws, as for a file that isn't there.
+    /// </summary>
+    public Func<string, Task<TransferOutcome>> TakeOutcome { get; set; } = _ => Task.FromResult(TransferOutcome.Completed);
+
+    public Task<TransferOutcome> TakeAsync(string sourcePath, FileHash? expectedHash, string destinationPath, CancellationToken cancellationToken)
+    {
+        Taken.Enqueue((sourcePath, expectedHash, destinationPath));
+        return TakeOutcome(sourcePath).WaitAsync(cancellationToken);
     }
 
     public Task DeletePartialFileAsync(string destinationPath, CancellationToken cancellationToken)

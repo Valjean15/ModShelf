@@ -37,6 +37,8 @@ internal sealed class ScriptedDownloads : IDownloadService
 
     public Task CancelAsync(DownloadJobId id, CancellationToken cancellationToken) => throw new NotSupportedException();
 
+    public Task<TakeFileOutcome> TakeFileAsync(DownloadJobId id, string path, CancellationToken cancellationToken) => throw new NotSupportedException();
+
     public Task<int> ClearFinishedAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
 
     public IAsyncEnumerable<DownloadJobSnapshot> WatchAsync(CancellationToken cancellationToken) => throw new NotSupportedException();

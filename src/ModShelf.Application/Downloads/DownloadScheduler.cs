@@ -78,6 +78,7 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
     private readonly Dictionary<DownloadJobId, long> _lastProgressSnapshot = [];
     private readonly Dictionary<ModFileRef, Uri> _handoffs = [];
     private readonly Dictionary<DownloadJobId, Uri> _handoffPages = [];
+    private readonly Dictionary<DownloadJobId, TakingFile> _taking = [];
 
     // Jobs whose last save failed, such as while the database was locked: saved again once a save works.
     private readonly HashSet<DownloadJobId> _unsaved = [];
@@ -526,8 +527,14 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
             running.RequestStop(StopReason.Shutdown, waiter: null);
         }
 
-        // Keep handling messages until every running download has reported back and been requeued.
-        while (_running.Count > 0)
+        foreach (TakingFile taking in _taking.Values)
+        {
+            await taking.Cancellation.CancelAsync().ConfigureAwait(false);
+        }
+
+        // Keep handling messages until every running download has reported back and been requeued, and every file being
+        // taken has been, or not.
+        while (_running.Count > 0 || _taking.Count > 0)
         {
             Message message = await _inbox.Reader.ReadAsync(CancellationToken.None).ConfigureAwait(false);
             await HandleAsync(message).ConfigureAwait(false);
@@ -548,6 +555,9 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
                 case HandOffCommand command:
                     _handoffs[command.File] = command.Link;
                     command.Reply.TrySetResult();
+                    break;
+                case TakeFileCommand command:
+                    await TakeFileAsync(command).ConfigureAwait(false);
                     break;
                 case ListCommand command:
                     command.Reply.TrySetResult([.. _jobs.Select(Snapshot)]);
@@ -575,6 +585,9 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
                     break;
                 case AttemptFinished report:
                     await OnAttemptFinishedAsync(report).ConfigureAwait(false);
+                    break;
+                case FileTaken report:
+                    await OnFileTakenAsync(report).ConfigureAwait(false);
                     break;
                 default:
                     throw new InvalidOperationException($"Unknown message {message.GetType().Name}.");
@@ -623,6 +636,12 @@ internal sealed partial class DownloadScheduler : BackgroundService, IDownloadSe
             // The reply completes once the download has stopped and the job has been updated.
             running.RequestStop(command.Control == JobControl.Cancel ? StopReason.Cancel : StopReason.Pause, command.Reply);
             return;
+        }
+
+        if (command.Control == JobControl.Cancel && _taking.TryGetValue(job.Id, out TakingFile? taking))
+        {
+            // The file stays where it was, unless it's in place already.
+            await taking.Cancellation.CancelAsync().ConfigureAwait(false);
         }
 
         switch (command.Control)

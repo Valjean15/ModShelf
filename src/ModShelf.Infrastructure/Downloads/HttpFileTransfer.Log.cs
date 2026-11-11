@@ -44,4 +44,7 @@ internal sealed partial class HttpFileTransfer
 
     [LoggerMessage(EventId = 110, Level = LogLevel.Warning, Message = "{Host} answered with a web page instead of {FileName}; the link needs refreshing")]
     private static partial void LogWebPage(ILogger logger, string host, string fileName);
+
+    [LoggerMessage(EventId = 111, Level = LogLevel.Warning, Message = "{FileName}, handed over from the browser, doesn't match its expected {Algorithm} hash; it was left where it was")]
+    private static partial void LogTakenHashMismatch(ILogger logger, string fileName, FileHashAlgorithm algorithm);
 }
