@@ -6,9 +6,13 @@ using Microsoft.Extensions.Hosting;
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Library;
+using ModShelf.Application.Settings;
+using ModShelf.Application.Settings.Ports;
+using ModShelf.Application.Sources;
 using ModShelf.Cli.Hosting;
 using ModShelf.Domain.Downloads;
 using ModShelf.Infrastructure.Logging;
+using ModShelf.Sources.Abstractions.Downloads;
 
 namespace ModShelf.Cli.Commands;
 
@@ -190,14 +194,34 @@ internal static partial class DownloadCommand
         DownloadJobSnapshot current = (await downloads.ListAsync(cancellationToken).ConfigureAwait(false))
             .Single(listed => listed.Id == job.Id);
 
+        bool handsOverLinks = services.GetRequiredService<ISourceRegistry>().Find<IDownloadResolver>(job.File.Mod.Game.Source)?.HandsOverLinks ?? true;
+        string browserFolder = await BrowserFolderAsync(services, cancellationToken).ConfigureAwait(false);
         Follow follow = new(
             environment,
+            downloads,
             links,
             library,
-            new HandoffPrompt(environment, services.GetRequiredService<IBrowserLauncher>()),
+            new HandoffPrompt(environment, services.GetRequiredService<IBrowserLauncher>(), handsOverLinks, browserFolder),
             current,
             services.GetService<LogFolder>()?.Path);
         return await follow.RunAsync(updates, watching, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// The folder the browser saves downloads to: as set, or the system's Downloads folder, also when the settings can't
+    /// be read.
+    /// </summary>
+    private static async Task<string> BrowserFolderAsync(IServiceProvider services, CancellationToken cancellationToken)
+    {
+        string systems = services.GetRequiredService<IUserFolders>().Downloads;
+        try
+        {
+            return (await services.GetRequiredService<ISettingsService>().GetAsync(cancellationToken).ConfigureAwait(false)).BrowserDownloadsFolder ?? systems;
+        }
+        catch (Exception exception) when (exception is IOException or InvalidDataException or UnauthorizedAccessException)
+        {
+            return systems;
+        }
     }
 
     private static async Task<int> NothingAddedAsync(CliEnvironment environment)

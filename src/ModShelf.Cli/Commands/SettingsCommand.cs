@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
+using ModShelf.Application.Settings.Ports;
 using ModShelf.Application.Sources;
 using ModShelf.Cli.Common;
 using ModShelf.Cli.Hosting;
@@ -64,7 +65,7 @@ internal static class SettingsCommand
                     string[][] rows =
                     [
                         ["Setting", "Value"],
-                        .. SettingChanges.List(stored, settings.DefaultLibraryRoot)
+                        .. SettingChanges.List(stored, settings.DefaultLibraryRoot, services.GetRequiredService<IUserFolders>().Downloads)
                             .Select(setting => new[] { setting.Name, setting.IsDefault ? $"{setting.Value} (default)" : setting.Value }),
                     ];
                     TextTable.Write(environment.Output, rows);

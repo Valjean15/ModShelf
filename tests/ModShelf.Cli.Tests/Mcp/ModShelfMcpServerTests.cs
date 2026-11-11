@@ -90,7 +90,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         Assert.Equal(
             [
                 "accounts_status", "diagnostics", "download", "downloads_cancel", "downloads_list", "downloads_pause",
-                "downloads_resume", "downloads_retry", "library_changes", "library_check", "library_forget", "library_list",
+                "downloads_resume", "downloads_retry", "downloads_take", "library_changes", "library_check", "library_forget", "library_list",
                 "library_note", "library_pin", "library_rescan", "library_skip", "library_unwatch", "library_updates", "library_watch",
                 "mod_games", "mod_search", "mod_show", "settings_reset", "settings_set", "settings_show",
             ],
@@ -548,6 +548,47 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         Assert.Equal(waiting.Id, cancelled.Download?.Id);
         Assert.Equal("Cancelled.", cancelled.Message);
         Assert.Contains("isn't allowed", await mcp.CallFailingAsync("downloads_pause", Arguments(("id", waiting.Id)), Cancellation), StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task ADownloadOnAPageThatHandsNothingOverSaysTheBrowserDownloadsIt()
+    {
+        _handoff.HandsOverLinks = false;
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        LinkDownloadResult result = await DownloadAsync(mcp, FileLink("1").AbsoluteUri);
+
+        Assert.Equal((nameof(DownloadJobStatus.AwaitingHandoff), Page("1").AbsoluteUri), (result.Download?.Status, result.Download?.HandoffPage));
+        Assert.Equal(
+            "The file is on a page only the user's browser downloads it from: the download's handoffPage. ModShelf takes the file "
+                + "from the browser's downloads folder once it's saved there, or downloads_take hands it the file's path.",
+            result.Message);
+    }
+
+    [Fact]
+    public async Task HandsADownloadWaitingOnItsPageTheFileTheBrowserSaved()
+    {
+        _handoff.Hashes["1"] = FileHash.FromDigest(FileHashAlgorithm.Sha256, SHA256.HashData(Content));
+        string elsewhere = Directory.CreateDirectory(Path.Combine(Cli.Folder, "Elsewhere")).FullName;
+        string other = Path.Combine(elsewhere, "other.zip");
+        string saved = Path.Combine(elsewhere, FileNameOf("1"));
+        await File.WriteAllBytesAsync(other, RandomNumberGenerator.GetBytes(64), Cancellation);
+        await File.WriteAllBytesAsync(saved, Content, Cancellation);
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await DownloadAsync(mcp, FileLink("1").AbsoluteUri);
+        DownloadEntry waiting = await WaitForDownloadAsync(mcp, download => download.Status == nameof(DownloadJobStatus.AwaitingHandoff));
+
+        string relative = await mcp.CallFailingAsync("downloads_take", Arguments(("id", waiting.Id), ("path", FileNameOf("1"))), Cancellation);
+        string notIts = await mcp.CallFailingAsync("downloads_take", Arguments(("id", waiting.Id), ("path", other)), Cancellation);
+        DownloadResult taken = await mcp.CallAsync<DownloadResult>("downloads_take", Arguments(("id", waiting.Id[..8]), ("path", saved)), Cancellation);
+
+        Assert.Contains("Give the file's full path.", relative, StringComparison.Ordinal);
+        Assert.Contains("That file isn't the download's", notIts, StringComparison.Ordinal);
+        Assert.True(File.Exists(other));
+        Assert.Equal("Taken: the file is in the library.", taken.Message);
+        Assert.Equal((waiting.Id, nameof(DownloadJobStatus.Completed)), (taken.Download?.Id, taken.Download?.Status));
+        Assert.Equal(Content, await File.ReadAllBytesAsync(Path.Combine(ModFolder, FileNameOf("1")), Cancellation));
+        Assert.False(File.Exists(saved));
     }
 
     [Theory]
@@ -1420,7 +1461,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
             await mcp.CloseAsync(Cancellation);
         }
 
-        Assert.Contains(Cli.Logs.Entries, entry => entry.Contains("The MCP server started, with 25 tools", StringComparison.Ordinal));
+        Assert.Contains(Cli.Logs.Entries, entry => entry.Contains("The MCP server started, with 26 tools", StringComparison.Ordinal));
         Assert.DoesNotContain(Cli.Logs.Entries, entry => entry.Contains(GoodKey, StringComparison.Ordinal));
         Assert.DoesNotContain(Cli.Logs.Entries, entry => entry.Contains("handoff.example", StringComparison.Ordinal));
     }

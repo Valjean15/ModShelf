@@ -5,6 +5,7 @@ using ModelContextProtocol.Server;
 
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
+using ModShelf.Application.Settings.Ports;
 using ModShelf.Application.Sources;
 using ModShelf.Cli.Common;
 
@@ -14,7 +15,7 @@ namespace ModShelf.Cli.Mcp;
 /// The MCP tools for the settings in <c>settings.json</c>, by the names the CLI's settings command gives them.
 /// </summary>
 [McpServerToolType]
-internal sealed class SettingsTools(ISettingsService settings, IModLibrary library, ISourceRegistry sources)
+internal sealed class SettingsTools(ISettingsService settings, IUserFolders folders, IModLibrary library, ISourceRegistry sources)
 {
     /// <summary>
     /// What changing whether agents may use ModShelf, or the port they reach it at, is answered: those are the user's.
@@ -24,12 +25,12 @@ internal sealed class SettingsTools(ISettingsService settings, IModLibrary libra
         + "Settings, Agents, or with the CLI.";
 
     [McpServerTool(Name = "settings_show", Title = "Show the settings", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Shows every setting, the ones left at their defaults too, where they're kept, and what each one's value can be. library.root is where the library is; library.folders, and library.folders.<site>/<game> for a game of its own, how its folders are named; library.oldVersions whether a file's old versions stay (all), move to an _archive folder (archive), or are deleted down to a number; updates.interval how often the desktop app checks for updates; games.<site>/<game>.<setting> a game's own settings in place of every game's, such as games.nexus/stardewvalley.notify or games.gamebanana/16951.notify, each site's game apart: root (the folder its files are in, in place of library.root), oldVersions, checkUpdates (false: its mods are checked only when the game alone is), updateInterval, notify, previews (how the desktop app shows its mods on its Library page and in Browse), hidden (left out of the desktop app's lists, still checked), and browse.sort, browse.direction, browse.window and browse.pageSize (how the desktop app's Browse screen starts for it).")]
+    [Description("Shows every setting, the ones left at their defaults too, where they're kept, and what each one's value can be. library.root is where the library is; library.folders, and library.folders.<site>/<game> for a game of its own, how its folders are named; library.oldVersions whether a file's old versions stay (all), move to an _archive folder (archive), or are deleted down to a number; updates.interval how often the desktop app checks for updates; downloads.browserFolder the folder the browser saves downloads to, where a download waiting on a site's page takes the file the browser downloaded (the system's Downloads folder by default); games.<site>/<game>.<setting> a game's own settings in place of every game's, such as games.nexus/stardewvalley.notify or games.gamebanana/16951.notify, each site's game apart: root (the folder its files are in, in place of library.root), oldVersions, checkUpdates (false: its mods are checked only when the game alone is), updateInterval, notify, previews (how the desktop app shows its mods on its Library page and in Browse), hidden (left out of the desktop app's lists, still checked), and browse.sort, browse.direction, browse.window and browse.pageSize (how the desktop app's Browse screen starts for it).")]
     public Task<SettingsListing> ShowAsync(CancellationToken cancellationToken)
         => McpProblems.GuardAsync(async () =>
         {
             AppSettings stored = await settings.GetAsync(cancellationToken).ConfigureAwait(false);
-            return new SettingsListing(settings.Location, SettingChanges.List(stored, settings.DefaultLibraryRoot), SettingChanges.Values);
+            return new SettingsListing(settings.Location, SettingChanges.List(stored, settings.DefaultLibraryRoot, folders.Downloads), SettingChanges.Values);
         });
 
     [McpServerTool(Name = "settings_set", Title = "Change a setting", Idempotent = true, Destructive = true, OpenWorld = false, UseStructuredContent = true)]

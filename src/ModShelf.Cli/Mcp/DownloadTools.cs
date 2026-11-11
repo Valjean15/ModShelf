@@ -4,7 +4,10 @@ using ModelContextProtocol;
 using ModelContextProtocol.Server;
 
 using ModShelf.Application.Downloads;
+using ModShelf.Application.Sources;
 using ModShelf.Domain.Downloads;
+using ModShelf.Domain.Mods;
+using ModShelf.Sources.Abstractions.Downloads;
 
 namespace ModShelf.Cli.Mcp;
 
@@ -13,7 +16,7 @@ namespace ModShelf.Cli.Mcp;
 /// cancelling a download. The desktop app runs the queue when it runs; otherwise this server does (<see cref="McpQueue"/>).
 /// </summary>
 [McpServerToolType]
-internal sealed class DownloadTools(McpQueue queue, IDownloadService downloads, McpDeprecations deprecations)
+internal sealed class DownloadTools(McpQueue queue, IDownloadService downloads, McpDeprecations deprecations, ISourceRegistry sources)
 {
     private const string DesktopApp = "desktop app";
     private const string ThisServer = "this MCP server";
@@ -101,6 +104,37 @@ internal sealed class DownloadTools(McpQueue queue, IDownloadService downloads, 
     [Description("Cancels a download that isn't finished, and deletes the part of the file it downloaded. A finished file is never deleted.")]
     public Task<DownloadResult> CancelAsync([Description(IdDescription)] string id, CancellationToken cancellationToken)
         => ChangeAsync(QueueRequest.Cancel, id, "Cancelled.", cancellationToken);
+
+    [McpServerTool(Name = "downloads_take", Title = "Hand a download its file", Idempotent = false, Destructive = false, OpenWorld = false, UseStructuredContent = true)]
+    [Description("Hands a download waiting for the user on a site's page the file the user's browser downloaded there, such as from MediaFire, or a file only DEG Mods' own server has. The file is checked against the site's checksum when it gives one, moved into the library, and the download completes. A file that isn't the download's is left where it was. ModShelf also takes such a file by itself from the browser's downloads folder (downloads.browserFolder).")]
+    public Task<DownloadResult> TakeAsync(
+        [Description(IdDescription)] string id,
+        [Description("The file's full path, such as in the user's Downloads folder.")] string path,
+        CancellationToken cancellationToken)
+        => McpProblems.GuardAsync(async () =>
+        {
+            if (string.IsNullOrWhiteSpace(path) || !Path.IsPathFullyQualified(path.Trim()))
+            {
+                throw new McpException("Give the file's full path.");
+            }
+
+            DownloadJobId job = await FindAsync(id, cancellationToken).ConfigureAwait(false);
+            (QueueReply reply, bool ranHere) = await SendAsync(QueueRequest.TakeFile(job, path.Trim()), cancellationToken).ConfigureAwait(false);
+            return new DownloadResult(
+                reply.Job is { } snapshot ? McpEntries.Download(snapshot) : null,
+                null,
+                false,
+                false,
+                ranHere ? ThisServer : DesktopApp,
+                "Taken: the file is in the library.");
+        });
+
+    /// <summary>
+    /// Whether the site's pages hand a link back to ModShelf, as Nexus Mods' nxm:// links; otherwise the browser downloads
+    /// the file.
+    /// </summary>
+    private bool HandsOverLinks(string source)
+        => sources.Find<IDownloadResolver>(new SourceId(source))?.HandsOverLinks ?? true;
 
     /// <summary>
     /// The one link's message, or such as "Of 3 links, 2 are downloading or waiting for the user, and 1 couldn't be
@@ -214,7 +248,7 @@ internal sealed class DownloadTools(McpQueue queue, IDownloadService downloads, 
     /// <summary>
     /// The result, with what happened to the link and what to expect said as its download is.
     /// </summary>
-    private static LinkDownloadResult Described(LinkDownloadResult result)
+    private LinkDownloadResult Described(LinkDownloadResult result)
     {
         string message = result switch
         {
@@ -227,9 +261,12 @@ internal sealed class DownloadTools(McpQueue queue, IDownloadService downloads, 
                 $"The download failed ({failure}). downloads_retry tries it again.",
             { Download.Status: nameof(DownloadJobStatus.Cancelled) } => "The download was cancelled.",
             { Download.Status: nameof(DownloadJobStatus.Paused) } => "The download is paused. downloads_resume goes on with it.",
-            { Download.Status: nameof(DownloadJobStatus.AwaitingHandoff) } =>
+            { Download: { Status: nameof(DownloadJobStatus.AwaitingHandoff), Source: var source } } when HandsOverLinks(source) =>
                 "The site needs the user to start this download on its website: the download's handoffPage is where, with "
                 + "its mod manager download. ModShelf's desktop app gets the link the site hands over, and the download goes on.",
+            { Download.Status: nameof(DownloadJobStatus.AwaitingHandoff) } =>
+                "The file is on a page only the user's browser downloads it from: the download's handoffPage. ModShelf takes "
+                + "the file from the browser's downloads folder once it's saved there, or downloads_take hands it the file's path.",
             { AlreadyQueued: true } => "A download of this file was in the queue already, and goes on.",
             { LibraryPath: null } => "A download of this file to a folder outside the library goes on with this link.",
             _ => "The file is downloading into the library. downloads_list shows how it goes, and the page to open when the "

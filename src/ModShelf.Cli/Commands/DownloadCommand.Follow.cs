@@ -14,13 +14,15 @@ internal static partial class DownloadCommand
     /// <summary>
     /// Shows the job's progress and how it ended, and asks for the link that completes its handoff whenever it waits
     /// for one. A link the user pastes is handed to the job through <see cref="ILinkDownloads.HandOverAsync"/>, so the
-    /// source checks it. A download into the library is recorded there once it's done.
+    /// source checks it; a file's path, through <see cref="IDownloadService.TakeFileAsync"/>, which checks the file. A
+    /// download into the library is recorded there once it's done.
     /// </summary>
     /// <param name="library">The library the file goes into; or null for a download with --to.</param>
     /// <param name="job">The job as it was read once the watch began.</param>
     /// <param name="logFolder">Where the log files are, to point to when the job fails unexpectedly.</param>
     private sealed class Follow(
         CliEnvironment environment,
+        IDownloadService downloads,
         ILinkDownloads links,
         ILibraryDownloads? library,
         HandoffPrompt prompt,
@@ -154,6 +156,13 @@ internal static partial class DownloadCommand
         /// </summary>
         private async Task HandOffAsync(string line, CancellationToken cancellationToken)
         {
+            string typed = line.Trim().Trim('"');
+            if (Path.IsPathFullyQualified(typed))
+            {
+                await TakeAsync(typed, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+
             if (!Uri.TryCreate(line.Trim(), UriKind.Absolute, out Uri? link))
             {
                 _typed = prompt.AskAgain($"That isn't a link. {PasteOrStop}");
@@ -183,6 +192,40 @@ internal static partial class DownloadCommand
                 default:
                     string other = handed.OtherFileName is { } name ? $"another file, {name}" : "another file";
                     _typed = prompt.AskAgain($"That link is to {other}. Paste the link for {job.FileName}, or press Ctrl+C to stop.");
+                    return;
+            }
+        }
+
+        /// <summary>
+        /// Hands the job the file at <paramref name="path"/>, such as one the browser downloaded. When it's the file, the job
+        /// completes with it; when it isn't, the user is asked again.
+        /// </summary>
+        private async Task TakeAsync(string path, CancellationToken cancellationToken)
+        {
+            const string Again = "Type the path of the file your browser downloaded, or press Ctrl+C to stop.";
+            TakeFileOutcome outcome;
+            try
+            {
+                outcome = await downloads.TakeFileAsync(job.Id, path, cancellationToken).ConfigureAwait(false);
+            }
+            catch (InvalidOperationException)
+            {
+                // It stopped waiting meanwhile, which the next snapshot shows.
+                return;
+            }
+
+            switch (outcome)
+            {
+                case TakeFileOutcome.Taken:
+                    return;
+                case TakeFileOutcome.HashMismatch:
+                    _typed = prompt.AskAgain($"That file isn't {job.FileName}: its checksum isn't the one the site gives. It's left where it was. {Again}");
+                    return;
+                case TakeFileOutcome.NotFound:
+                    _typed = prompt.AskAgain($"There's no file there. {Again}");
+                    return;
+                default:
+                    _typed = prompt.AskAgain($"ModShelf couldn't move that file into place, such as because another program has it open; the log has the details. {Again}");
                     return;
             }
         }
@@ -225,9 +268,11 @@ internal static partial class DownloadCommand
         {
             _display.Finish();
             environment.Output.WriteLine();
-            await environment.Error.WriteLineAsync(
-                    "No link was given, so the download is still waiting to be started on the site. Run the same command "
-                    + "again to continue, or run it with the link the site hands over.")
+            await environment.Error.WriteLineAsync(prompt.HandsOverLinks
+                    ? "No link was given, so the download is still waiting to be started on the site. Run the same command "
+                        + "again to continue, or run it with the link the site hands over."
+                    : "No file was given, so the download is still waiting for the file from its page. Run the same command "
+                        + "again to continue: while it runs, ModShelf takes the file your browser saves in its downloads folder.")
                 .ConfigureAwait(false);
             return ExitCodes.Waiting;
         }

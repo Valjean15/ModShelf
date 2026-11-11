@@ -10,6 +10,8 @@ namespace ModShelf.Cli.Tests.Commands;
 /// </summary>
 public sealed class HandoffPromptTests : IDisposable
 {
+    private static readonly string BrowserFolder = Path.Combine(Path.GetTempPath(), "Downloads");
+
     private static readonly Uri Page = new("https://handoff.example/files/1/download");
 
     private readonly StringWriter _output = new();
@@ -56,7 +58,7 @@ public sealed class HandoffPromptTests : IDisposable
             outputIsTerminal,
             _ => throw new InvalidOperationException("The prompt builds no host."));
 
-        Task<string?> read = await new HandoffPrompt(environment, _browser).AskAsync(Page, TestContext.Current.CancellationToken);
+        Task<string?> read = await new HandoffPrompt(environment, _browser, handsOverLinks: true, BrowserFolder).AskAsync(Page, TestContext.Current.CancellationToken);
 
         Assert.Null(await read.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken));
     }

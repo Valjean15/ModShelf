@@ -80,6 +80,7 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         Assert.Equal("10 (default)", Value(shown, "quota.warnBelow"));
         Assert.Equal("false (default)", Value(shown, "agents.enabled"));
         Assert.Equal("47823 (default)", Value(shown, "agents.port"));
+        Assert.Equal(_cli.Downloads + " (default)", Value(shown, "downloads.browserFolder"));
         Assert.Contains("To change a setting: settings set <setting> <value>", shown.Output, StringComparison.Ordinal);
     }
 
@@ -274,7 +275,7 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     [InlineData("set", "library.root", "Mods", "isn't a full path")]
     [InlineData("set", "library.folders", "{mod}", "The last part must be exactly {file}.")]
     [InlineData("set", "library.folders.skyrimspecialedition", "{name}/{file}", "{name} isn't a folder's part.")]
-    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<site>/<game>, library.oldVersions, updates.interval, updates.notify, appearance.theme, window.closeToTray, setup.done, app.checkForUpdates, previews.library, previews.updates, previews.browse, previews.downloads, pictures.maxSize, pictures.adult, details.maxAge, quota.warnBelow, agents.enabled, agents.port, games.<site>/<game>.root, games.<site>/<game>.folders, games.<site>/<game>.oldVersions, games.<site>/<game>.checkUpdates, games.<site>/<game>.updateInterval, games.<site>/<game>.notify, games.<site>/<game>.previews, games.<site>/<game>.hidden, games.<site>/<game>.browse.sort, games.<site>/<game>.browse.direction, games.<site>/<game>.browse.window, games.<site>/<game>.browse.pageSize, such as games.nexus/stardewvalley.notify; a game's key alone, as games.stardewvalley.notify, does while only one site's game has it.")]
+    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<site>/<game>, library.oldVersions, updates.interval, updates.notify, appearance.theme, window.closeToTray, setup.done, app.checkForUpdates, previews.library, previews.updates, previews.browse, previews.downloads, pictures.maxSize, pictures.adult, details.maxAge, quota.warnBelow, agents.enabled, agents.port, downloads.browserFolder, games.<site>/<game>.root, games.<site>/<game>.folders, games.<site>/<game>.oldVersions, games.<site>/<game>.checkUpdates, games.<site>/<game>.updateInterval, games.<site>/<game>.notify, games.<site>/<game>.previews, games.<site>/<game>.hidden, games.<site>/<game>.browse.sort, games.<site>/<game>.browse.direction, games.<site>/<game>.browse.window, games.<site>/<game>.browse.pageSize, such as games.nexus/stardewvalley.notify; a game's key alone, as games.stardewvalley.notify, does while only one site's game has it.")]
     [InlineData("reset", "library.folders.", null, "There's no setting called library.folders.")]
     [InlineData("set", "library.oldVersions", "0", "'0' isn't a rule for old versions. Use all, archive, or how many versions to keep, from 1 to 99, such as 2.")]
     [InlineData("set", "appearance.theme", "blue", "'blue' isn't system, light or dark.")]
@@ -363,6 +364,23 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         Assert.Equal("agents.enabled is back to its default, false: ModShelf's MCP server answers every agent's call saying agents are off.", reset.Output.Trim());
         Assert.Equal("agents.port is back to its default, 47823: while agents may use ModShelf, the desktop app serves its MCP server at http://127.0.0.1:47823/mcp.", portReset.Output.Trim());
         Assert.DoesNotContain("agents", await File.ReadAllTextAsync(SettingsFile, Cancellation), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SetsTheBrowsersDownloadsFolderAndResetsIt()
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "Browser downloads");
+
+        CliResult set = await RunAsync("set", "downloads.browserFolder", folder);
+        string shown = Value(await RunAsync("show"), "downloads.browserFolder");
+        CliResult reset = await RunAsync("reset", "downloads.browserFolder");
+        CliResult relative = await RunAsync("set", "downloads.browserFolder", "Downloads");
+
+        Assert.Equal($"downloads.browserFolder is now {folder}: a download waiting on a site's page takes the file your browser saves there.", set.Output.Trim());
+        Assert.Equal(folder, shown);
+        Assert.Equal("downloads.browserFolder is back to its default, the system's Downloads folder: a download waiting on a site's page takes the file your browser saves there.", reset.Output.Trim());
+        Assert.Contains("'Downloads' isn't a full path", relative.Errors, StringComparison.Ordinal);
+        Assert.DoesNotContain("downloads", await File.ReadAllTextAsync(SettingsFile, Cancellation), StringComparison.Ordinal);
     }
 
     [Fact]

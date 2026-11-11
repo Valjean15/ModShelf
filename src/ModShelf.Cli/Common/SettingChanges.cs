@@ -36,8 +36,9 @@ internal static class SettingChanges
     public const string QuotaWarnBelow = "quota.warnBelow";
     public const string AgentsEnabled = "agents.enabled";
     public const string AgentsPort = "agents.port";
+    public const string BrowserFolder = "downloads.browserFolder";
     public const string GamesPrefix = "games.";
-    public const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<site>/<game>, {OldVersions}, {Interval}, {Notify}, {Theme}, {CloseToTray}, {SetupDone}, {CheckForAppUpdates}, {PreviewsPrefix}library, {PreviewsPrefix}updates, {PreviewsPrefix}browse, {PreviewsPrefix}downloads, {PicturesMaxSize}, {AdultPictures}, {DetailsMaxAge}, {QuotaWarnBelow}, {AgentsEnabled}, {AgentsPort}, "
+    public const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<site>/<game>, {OldVersions}, {Interval}, {Notify}, {Theme}, {CloseToTray}, {SetupDone}, {CheckForAppUpdates}, {PreviewsPrefix}library, {PreviewsPrefix}updates, {PreviewsPrefix}browse, {PreviewsPrefix}downloads, {PicturesMaxSize}, {AdultPictures}, {DetailsMaxAge}, {QuotaWarnBelow}, {AgentsEnabled}, {AgentsPort}, {BrowserFolder}, "
         + $"{GamesPrefix}<site>/<game>.{GameRoot}, {GamesPrefix}<site>/<game>.{GameFolders}, {GamesPrefix}<site>/<game>.{GameOldVersions}, {GamesPrefix}<site>/<game>.{GameCheckUpdates}, {GamesPrefix}<site>/<game>.{GameInterval}, {GamesPrefix}<site>/<game>.{GameNotify}, {GamesPrefix}<site>/<game>.{GamePreviews}, {GamesPrefix}<site>/<game>.{GameHidden}, "
         + $"{GamesPrefix}<site>/<game>.{BrowseSort}, {GamesPrefix}<site>/<game>.{BrowseDirection}, {GamesPrefix}<site>/<game>.{BrowseWindow}, {GamesPrefix}<site>/<game>.{BrowsePageSize}, "
         + "such as games.nexus/stardewvalley.notify; a game's key alone, as games.stardewvalley.notify, does while only one site's game has it";
@@ -65,7 +66,7 @@ internal static class SettingChanges
     /// What each setting's value is.
     /// </summary>
     public const string Values =
-        "a full path for library.root and games.<site>/<game>.root; all, archive or how many versions to keep for "
+        "a full path for library.root, downloads.browserFolder and games.<site>/<game>.root; all, archive or how many versions to keep for "
         + "library.oldVersions; minutes, hours or days, such as 30m, 6h or 1d, for updates.interval and details.maxAge; true or false for "
         + "updates.notify, window.closeToTray, setup.done and app.checkForUpdates; system, light or dark for appearance.theme; "
         + "off, thumbnails or cards for previews.<screen> and games.<site>/<game>.previews; a number of megabytes from 64 to 8192 for pictures.maxSize; "
@@ -89,6 +90,7 @@ internal static class SettingChanges
             || setting.Equals(DetailsMaxAge, StringComparison.OrdinalIgnoreCase)
             || setting.Equals(QuotaWarnBelow, StringComparison.OrdinalIgnoreCase)
             || IsAgentSetting(setting)
+            || setting.Equals(BrowserFolder, StringComparison.OrdinalIgnoreCase)
             || setting.Equals(CloseToTray, StringComparison.OrdinalIgnoreCase)
             || setting.Equals(CheckForAppUpdates, StringComparison.OrdinalIgnoreCase)
             || setting.Equals(OldVersions, StringComparison.OrdinalIgnoreCase)
@@ -127,7 +129,8 @@ internal static class SettingChanges
     /// they're set, its folder pattern by its older name, <c>library.folders.&lt;game&gt;</c>.
     /// </summary>
     /// <param name="defaultLibraryRoot">Where the library is when <see cref="LibraryRoot"/> isn't set.</param>
-    public static IReadOnlyList<SettingValue> List(AppSettings stored, string defaultLibraryRoot)
+    /// <param name="systemsDownloads">The system's Downloads folder, the browser's when <see cref="BrowserFolder"/> isn't set.</param>
+    public static IReadOnlyList<SettingValue> List(AppSettings stored, string defaultLibraryRoot, string systemsDownloads)
     {
         ArgumentNullException.ThrowIfNull(stored);
 
@@ -156,6 +159,7 @@ internal static class SettingChanges
             Of(QuotaWarnBelow, stored.QuotaWarnBelow?.ToString(CultureInfo.InvariantCulture), AppSettings.DefaultQuotaWarnBelow.ToString(CultureInfo.InvariantCulture)),
             Of(AgentsEnabled, stored.AgentsEnabled is { } agents ? Text(agents) : null, Text(false)),
             Of(AgentsPort, stored.AgentsPort?.ToString(CultureInfo.InvariantCulture), AppSettings.DefaultAgentsPort.ToString(CultureInfo.InvariantCulture)),
+            Of(BrowserFolder, stored.BrowserDownloadsFolder, systemsDownloads),
             .. stored.Games
                 .OrderBy(game => game.Key.ToString(), StringComparer.OrdinalIgnoreCase)
                 .SelectMany(game => GameValues(game.Key, game.Value)),
@@ -306,6 +310,15 @@ internal static class SettingChanges
             return port is null
                 ? $"{AgentsPort} is back to its default, {AppSettings.DefaultAgentsPort.ToString(CultureInfo.InvariantCulture)}: while agents may use ModShelf, the desktop app serves its MCP server at {address}."
                 : $"{AgentsPort} is now {port.Value.ToString(CultureInfo.InvariantCulture)}: while agents may use ModShelf, the desktop app serves its MCP server at {address}.";
+        }
+
+        if (setting.Equals(BrowserFolder, StringComparison.OrdinalIgnoreCase))
+        {
+            await settings.SetBrowserDownloadsFolderAsync(value, cancellationToken).ConfigureAwait(false);
+            string? folder = (await settings.GetAsync(cancellationToken).ConfigureAwait(false)).BrowserDownloadsFolder;
+            return folder is null
+                ? $"{BrowserFolder} is back to its default, the system's Downloads folder: a download waiting on a site's page takes the file your browser saves there."
+                : $"{BrowserFolder} is now {folder}: a download waiting on a site's page takes the file your browser saves there.";
         }
 
         if (setting.Equals(CheckForAppUpdates, StringComparison.OrdinalIgnoreCase))

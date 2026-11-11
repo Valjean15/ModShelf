@@ -40,7 +40,7 @@ public sealed class AgentAccessTests : IAsyncDisposable
         string settings = await mcp.CallFailingAsync("settings_show", null, Cancellation);
         string diagnostics = await mcp.CallFailingAsync("diagnostics", null, Cancellation);
 
-        Assert.Equal(25, tools.Count);
+        Assert.Equal(26, tools.Count);
         Assert.EndsWith(AgentAccess.Off, settings, StringComparison.Ordinal);
         Assert.EndsWith(AgentAccess.Off, diagnostics, StringComparison.Ordinal);
         Assert.Contains("Ask the user to turn on \"Allow agents to use ModShelf\" in ModShelf's Settings, Agents", AgentAccess.Off, StringComparison.Ordinal);
