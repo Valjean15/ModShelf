@@ -98,6 +98,11 @@ public sealed partial class ExampleSite : ILinkRecognizer, IDownloadResolver, IM
 
     public string DisplayName => "Example Mods";
 
+    /// <summary>
+    /// False: the example site's files are downloaded from their link.
+    /// </summary>
+    public bool HandsOverLinks => false;
+
     public static Uri ModLink(ModRef mod) => new($"https://{Host}/{mod.Game.Key}/mod/{mod.Id}");
 
     public static Uri FileLink(ModRef mod, string file) => new($"https://{Host}/{mod.Game.Key}/mod/{mod.Id}/file/{file}");

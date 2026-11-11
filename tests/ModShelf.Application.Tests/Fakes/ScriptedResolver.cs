@@ -27,6 +27,8 @@ internal sealed class ScriptedResolver(SourceId id) : IDownloadResolver
 
     public SiteWords Words => SiteWords.None;
 
+    public bool HandsOverLinks { get; set; } = true;
+
     public int Calls => _calls.Count;
 
     /// <summary>

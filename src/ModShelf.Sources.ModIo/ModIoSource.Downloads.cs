@@ -23,6 +23,11 @@ public sealed partial class ModIoSource : IDownloadResolver
     private const int MayBeHarmful = 2;
 
     /// <summary>
+    /// False: mod.io's files are always downloaded from their link.
+    /// </summary>
+    public bool HandsOverLinks => false;
+
+    /// <summary>
     /// The flag of a game that gives its files to an access token only.
     /// </summary>
     private const int DownloadsNeedToken = 4;

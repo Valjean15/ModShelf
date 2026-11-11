@@ -23,6 +23,11 @@ public sealed partial class DegModsSource : IDownloadResolver
     /// </summary>
     private const int MaxRedirects = 5;
 
+    /// <summary>
+    /// False: a file on a page, or only on DEG Mods' own server, is downloaded by the browser.
+    /// </summary>
+    public bool HandsOverLinks => false;
+
     /// <param name="file">One of this source's files.</param>
     /// <param name="handoff">Ignored: DEG Mods hands no downloads over.</param>
     /// <returns>

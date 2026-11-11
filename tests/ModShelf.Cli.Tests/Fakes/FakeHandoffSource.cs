@@ -43,6 +43,11 @@ internal sealed class FakeHandoffSource(Uri fileUrl) : ILinkRecognizer, IDownloa
     public SiteWords Words => SiteWords.None;
 
     /// <summary>
+    /// Whether the page hands over a link, as Nexus Mods' does; true unless a test says otherwise.
+    /// </summary>
+    public bool HandsOverLinks { get; set; } = true;
+
+    /// <summary>
     /// The handoff link of every resolve so far, in order.
     /// </summary>
     public IReadOnlyList<Uri?> Handoffs => [.. _handoffs];
@@ -121,6 +126,11 @@ internal sealed class FakeHandoffSource(Uri fileUrl) : ILinkRecognizer, IDownloa
     public ConcurrentBag<string> Pulled { get; } = [];
 
     /// <summary>
+    /// The hash the catalog gives for a file, by its ID; none for the others.
+    /// </summary>
+    public ConcurrentDictionary<string, FileHash> Hashes { get; } = new(StringComparer.Ordinal);
+
+    /// <summary>
     /// Files 1 to 3, each the update of the one before, at versions 1.1 to 1.3, with their pages; but the pulled ones.
     /// </summary>
     public Task<IReadOnlyList<ModFile>> GetFilesAsync(ModRef modRef, CancellationToken cancellationToken)
@@ -134,7 +144,7 @@ internal sealed class FakeHandoffSource(Uri fileUrl) : ILinkRecognizer, IDownloa
                 ModFileCategory.Main,
                 null,
                 DateTimeOffset.UnixEpoch.AddDays(index),
-                [],
+                Hashes.TryGetValue(id, out FileHash? hash) ? [hash] : [],
                 FileLink(id),
                 index + 1 < FileIds.Length ? File(FileIds[index + 1]) : null))
                 .Where(file => !Pulled.Contains(file.Reference.Id)),

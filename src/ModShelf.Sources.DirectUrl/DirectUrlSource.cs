@@ -36,6 +36,11 @@ public sealed class DirectUrlSource : IDownloadResolver, ILinkRecognizer
 
     public SiteWords Words => SiteWords.None;
 
+    /// <summary>
+    /// False: a direct link never sends the user to a page.
+    /// </summary>
+    public bool HandsOverLinks => false;
+
     public Task<RecognizedLink?> RecognizeAsync(Uri link, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(link);

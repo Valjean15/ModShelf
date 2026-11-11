@@ -20,6 +20,12 @@ namespace ModShelf.Sources.Nexus;
 /// </remarks>
 public sealed partial class NexusSource : IDownloadResolver
 {
+    /// <summary>
+    /// True: a free account's download starts on the file's page, whose download for mod managers hands over an
+    /// <c>nxm://</c> link.
+    /// </summary>
+    public bool HandsOverLinks => true;
+
     /// <param name="file">One of this source's files.</param>
     /// <param name="handoff">
     /// An <c>nxm://</c> link to <paramref name="file"/>. Its key and expiry are sent with the request, and never

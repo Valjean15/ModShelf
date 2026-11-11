@@ -11,6 +11,13 @@ namespace ModShelf.Sources.Abstractions.Downloads;
 /// </remarks>
 public interface IDownloadResolver : IModSource
 {
+    /// <summary>
+    /// Whether a download that <see cref="HandoffRequired"/> sends to a page comes back as a link ModShelf takes, such
+    /// as Nexus Mods' <c>nxm://</c> links, given to <see cref="ResolveAsync"/>. Otherwise, as on a page that leads to the
+    /// file, such as MediaFire's, the browser downloads the file itself, and the user hands the file over instead.
+    /// </summary>
+    bool HandsOverLinks { get; }
+
     /// <param name="file">One of this source's files.</param>
     /// <param name="handoff">
     /// The link that completes a handoff for <paramref name="file"/>: the one the source's website handed over

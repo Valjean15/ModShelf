@@ -44,6 +44,12 @@ public abstract class SourceContractTests<TSource>
     /// </summary>
     protected virtual GameRef? SearchableGame => null;
 
+    /// <summary>
+    /// Whether a download the site sends to a page comes back as a link ModShelf takes, as Nexus Mods' nxm:// links do;
+    /// otherwise the file is downloaded in the browser, and ModShelf takes it from there.
+    /// </summary>
+    protected virtual bool HandsOverLinks => false;
+
     [Fact]
     public void KeepsItsDocumentedId()
     {
@@ -64,6 +70,12 @@ public abstract class SourceContractTests<TSource>
 
         await Assert.ThrowsAsync<ArgumentException>(
             () => resolver.ResolveAsync(foreign, handoff: null, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public void SaysWhetherItsPagesHandOverLinks()
+    {
+        Assert.Equal(HandsOverLinks, Capability<IDownloadResolver>().HandsOverLinks);
     }
 
     [Theory]

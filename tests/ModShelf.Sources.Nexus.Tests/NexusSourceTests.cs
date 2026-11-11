@@ -42,6 +42,8 @@ public sealed class NexusSourceTests : SourceContractTests<NexusSource>, IDispos
 
     protected override SourceId ExpectedId { get; } = new("nexus");
 
+    protected override bool HandsOverLinks => true;
+
     protected override IReadOnlyList<Uri> OwnLinks { get; } =
     [
         new("https://www.nexusmods.com/stardewvalley/mods/2400?tab=files&file_id=160380"),

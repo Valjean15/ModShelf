@@ -15,6 +15,11 @@ namespace ModShelf.Sources.GameBanana;
 /// </summary>
 public sealed partial class GameBananaSource : IDownloadResolver
 {
+    /// <summary>
+    /// False: GameBanana's files are always downloaded from their link.
+    /// </summary>
+    public bool HandsOverLinks => false;
+
     /// <param name="file">One of this source's files.</param>
     /// <param name="handoff">Ignored: GameBanana hands no downloads over.</param>
     /// <returns>A ticket for GameBanana's link to the file, with its MD5 checksum when GameBanana gives one.</returns>
