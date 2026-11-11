@@ -67,8 +67,14 @@ public static class DegModsServiceCollectionExtensions
             settings.Admin,
             settings.KeepModsFor,
             provider.GetService<TimeProvider>() ?? TimeProvider.System));
+        services.AddSingleton(provider => new GameCovers(
+            provider.GetRequiredService<DegModsRelays>(),
+            settings,
+            provider.GetRequiredService<IHttpClientFactory>(),
+            provider.GetRequiredService<ILogger<GameCovers>>()));
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IModSource, DegModsSource>(provider => new DegModsSource(
             provider.GetRequiredService<ModIndex>(),
+            provider.GetRequiredService<GameCovers>(),
             settings,
             provider.GetRequiredService<IHttpClientFactory>(),
             provider.GetService<TimeProvider>() ?? TimeProvider.System,

@@ -22,20 +22,23 @@ public sealed partial class DegModsSource
     internal static readonly SourceId DegModsId = new("degmods");
 
     private readonly ModIndex _index;
+    private readonly GameCovers _covers;
     private readonly DegModsOptions _options;
     private readonly IHttpClientFactory _clients;
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<DegModsSource> _logger;
 
-    internal DegModsSource(ModIndex index, DegModsOptions options, IHttpClientFactory clients, TimeProvider timeProvider, ILogger<DegModsSource> logger)
+    internal DegModsSource(ModIndex index, GameCovers covers, DegModsOptions options, IHttpClientFactory clients, TimeProvider timeProvider, ILogger<DegModsSource> logger)
     {
         ArgumentNullException.ThrowIfNull(index);
+        ArgumentNullException.ThrowIfNull(covers);
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(clients);
         ArgumentNullException.ThrowIfNull(timeProvider);
         ArgumentNullException.ThrowIfNull(logger);
 
         _index = index;
+        _covers = covers;
         _options = options;
         _clients = clients;
         _timeProvider = timeProvider;

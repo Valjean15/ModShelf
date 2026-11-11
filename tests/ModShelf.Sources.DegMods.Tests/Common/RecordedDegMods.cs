@@ -258,6 +258,19 @@ internal sealed class RecordedDegMods : IDisposable
     }
 
     /// <summary>
+    /// From now on, the file server at <paramref name="url"/>'s host answers GET for its path with <paramref name="body"/>,
+    /// before any recording.
+    /// </summary>
+    public void Serve(Uri url, byte[] body, string contentType = "text/csv")
+    {
+        ArgumentNullException.ThrowIfNull(url);
+        _server
+            .Given(Request.Create().UsingGet().WithPath($"/{url.Host}{url.AbsolutePath}"))
+            .AtPriority(0)
+            .RespondWith(Response.Create().WithStatusCode(200).WithHeader("Content-Type", contentType).WithBody(body));
+    }
+
+    /// <summary>
     /// The status each request to the file servers was answered with, oldest first.
     /// </summary>
     public IReadOnlyList<int> Answered => [.. Requests.Select(entry => Convert.ToInt32(entry.ResponseMessage!.StatusCode, System.Globalization.CultureInfo.InvariantCulture))];

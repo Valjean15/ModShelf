@@ -25,12 +25,15 @@ public sealed partial class DegModsSource : IModCatalog
             && !key.Any(char.IsUpper)
             && key.Any(character => !char.IsAsciiLetterLower(character) && !char.IsAsciiDigit(character) && character != '-');
 
-    /// <returns>Each game DEG Mods shows a mod of, once, named as most of its mods name it.</returns>
+    /// <returns>
+    /// Each game DEG Mods shows a mod of, once, named as most of its mods name it, with its cover from DEG Mods' games
+    /// database when it has one.
+    /// </returns>
     /// <exception cref="HttpRequestException">No relay could be read.</exception>
     public async Task<IReadOnlyList<GameInfo>> GetGamesAsync(CancellationToken cancellationToken)
     {
-        IReadOnlyList<DegMod> mods = await _index.AllAsync(cancellationToken).ConfigureAwait(false);
-        return [.. mods.GroupBy(mod => ModEvents.GameKey(mod.Game), StringComparer.Ordinal).Select(game => Game(game.Key, game))];
+        (IReadOnlyList<DegMod> mods, IReadOnlyDictionary<string, Uri> covers) = await ModsAndCoversAsync(cancellationToken).ConfigureAwait(false);
+        return [.. mods.GroupBy(mod => ModEvents.GameKey(mod.Game), StringComparer.Ordinal).Select(game => Game(game.Key, game, covers))];
     }
 
     /// <exception cref="ArgumentException">The game isn't DEG Mods'.</exception>
@@ -38,10 +41,10 @@ public sealed partial class DegModsSource : IModCatalog
     public async Task<GameInfo> GetGameAsync(GameRef game, CancellationToken cancellationToken)
     {
         string key = GameKey(game);
-        IReadOnlyList<DegMod> mods = await _index.AllAsync(cancellationToken).ConfigureAwait(false);
+        (IReadOnlyList<DegMod> mods, IReadOnlyDictionary<string, Uri> covers) = await ModsAndCoversAsync(cancellationToken).ConfigureAwait(false);
         DegMod[] its = [.. mods.Where(mod => ModEvents.GameKey(mod.Game) == key)];
         return its.Length > 0
-            ? Game(key, its)
+            ? Game(key, its, covers)
             : throw new HttpRequestException($"DEG Mods shows no mod of the game '{key}'.", null, HttpStatusCode.NotFound);
     }
 
@@ -75,16 +78,29 @@ public sealed partial class DegModsSource : IModCatalog
     }
 
     /// <summary>
-    /// The game, named as most of its mods name it, the first in order when as many name it two ways.
+    /// Every mod shown, and the covers of their games, read at once.
     /// </summary>
-    private GameInfo Game(string key, IEnumerable<DegMod> mods)
+    private async Task<(IReadOnlyList<DegMod> Mods, IReadOnlyDictionary<string, Uri> Covers)> ModsAndCoversAsync(CancellationToken cancellationToken)
+    {
+        Task<IReadOnlyList<DegMod>> mods = _index.AllAsync(cancellationToken);
+        IReadOnlyDictionary<string, Uri> covers = await _covers.ReadAsync(GamesOfAsync(mods), cancellationToken).ConfigureAwait(false);
+        return (await mods.ConfigureAwait(false), covers);
+    }
+
+    private static async Task<IReadOnlySet<string>> GamesOfAsync(Task<IReadOnlyList<DegMod>> mods)
+        => (await mods.ConfigureAwait(false)).Select(mod => ModEvents.GameKey(mod.Game)).ToHashSet(StringComparer.Ordinal);
+
+    /// <summary>
+    /// The game, named as most of its mods name it, the first in order when as many name it two ways, with its cover.
+    /// </summary>
+    private GameInfo Game(string key, IEnumerable<DegMod> mods, IReadOnlyDictionary<string, Uri> covers)
     {
         string name = mods
             .GroupBy(mod => mod.Game, StringComparer.Ordinal)
             .OrderByDescending(spelling => spelling.Count())
             .ThenBy(spelling => spelling.Key, StringComparer.Ordinal)
             .First().Key;
-        return new GameInfo(new GameRef(DegModsId, key), name, DegModsLink.GamePage(_options.SiteAddress, name));
+        return new GameInfo(new GameRef(DegModsId, key), name, DegModsLink.GamePage(_options.SiteAddress, name), coverUrl: covers.GetValueOrDefault(key));
     }
 
     private ModInfo Info(DegMod mod, ModRef modRef)
