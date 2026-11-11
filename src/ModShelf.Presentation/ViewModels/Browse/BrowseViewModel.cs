@@ -172,6 +172,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
             new BrowseRowViewModel(BrowseRowKind.RecentlyUpdated, Strings.BrowseRecentlyUpdated, ShowAllAsync),
         ];
         Results.CollectionChanged += (_, _) => ShowSelection();
+        ResultCards = CardRows.Of(Results);
         Previews = new PreviewsViewModel(PreviewScreen.Browse, pictures);
         Previews.PropertyChanged += (_, changed) =>
         {
@@ -314,6 +315,11 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     /// The mods the search found, or the account tracks, as far as listed.
     /// </summary>
     public ObservableCollection<BrowseModViewModel> Results { get; } = [];
+
+    /// <summary>
+    /// <see cref="Results"/> as cards, in rows.
+    /// </summary>
+    public CardRows ResultCards { get; }
 
     /// <summary>
     /// Such as "1,234 mods match."; empty before anything was listed.

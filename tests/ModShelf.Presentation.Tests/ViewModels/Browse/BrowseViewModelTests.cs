@@ -194,6 +194,21 @@ public sealed class BrowseViewModelTests : IDisposable
     }
 
     [Fact]
+    public async Task ShowsTheResultsAsCardsInRowsThatGrowAsMoreLoad()
+    {
+        await ChooseAsync(BrowseHarness.Skyrim, 45);
+        Screen.ResultCards.Columns = 3;
+        (int, int) first = (Screen.ResultCards.Rows.Count, Screen.ResultCards.Rows[^1].Cards.Count);
+
+        await Screen.LoadMoreCommand.ExecuteAsync(null);
+        await Screen.LoadMoreCommand.ExecuteAsync(null);
+
+        Assert.Equal((7, 2), first);
+        Assert.Equal((15, 3), (Screen.ResultCards.Rows.Count, Screen.ResultCards.Rows[^1].Cards.Count));
+        Assert.Equal<object>(Screen.Results, Screen.ResultCards.Rows.SelectMany(row => row.Cards));
+    }
+
+    [Fact]
     public async Task ThePageAfterOneWithModsLeftOutFollowsOnPastThem()
     {
         _harness.Lookup.LeavesOutAdultMods = true;

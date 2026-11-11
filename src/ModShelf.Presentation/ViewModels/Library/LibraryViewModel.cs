@@ -131,6 +131,8 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             timeProvider,
             logger);
         _timeProvider = timeProvider;
+        GameCards = CardRows.Of(Games);
+        ModCards = CardRows.Of(GameMods);
         screens.ModOpening += OnModOpening;
         screens.LibraryGameOpening += OnGameOpening;
         _allSites = new LibraryChoice<SourceId?>(null, Strings.LibraryAllSites);
@@ -184,6 +186,11 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     /// the hidden ones only with <see cref="ShowHiddenGames"/>.
     /// </summary>
     public ObservableCollection<LibraryGameViewModel> Games { get; } = [];
+
+    /// <summary>
+    /// <see cref="Games"/> as cards, in rows.
+    /// </summary>
+    public CardRows GameCards { get; }
 
     /// <summary>
     /// Whether the games the settings hide show too.
@@ -280,6 +287,11 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     /// <see cref="SelectedModOrder"/>.
     /// </summary>
     public ObservableCollection<LibraryModViewModel> GameMods { get; } = [];
+
+    /// <summary>
+    /// <see cref="GameMods"/> as cards, in rows.
+    /// </summary>
+    public CardRows ModCards { get; }
 
     /// <summary>
     /// What the open game's mods' names or authors must match to show, as <see cref="NameQuery"/> reads it; empty for every
@@ -1007,7 +1019,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             GameOrder.UpdatesFirst => shown.OrderByDescending(game => game.UpdateCount),
             _ => shown.OrderBy(game => 0),
         };
-        Games.SyncWith([.. ordered.ThenBy(game => game.Name, byName)]);
+        GameCards.Batch(() => Games.SyncWith([.. ordered.ThenBy(game => game.Name, byName)]));
 
         // The counts are the chosen site's.
         LibraryModViewModel[] counted = [.. _mods.Values.Where(mod => site is null || mod.Mod.Game.Source == site)];
@@ -1072,7 +1084,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             ModOrder.AddedToLibrary => shown.OrderByDescending(mod => mod.AddedAt),
             _ => shown.OrderBy(mod => 0),
         };
-        GameMods.SyncWith([.. ordered.ThenBy(mod => mod.Name, byName)]);
+        ModCards.Batch(() => GameMods.SyncWith([.. ordered.ThenBy(mod => mod.Name, byName)]));
         NoModMatches = GameMods.Count == 0;
     }
 
