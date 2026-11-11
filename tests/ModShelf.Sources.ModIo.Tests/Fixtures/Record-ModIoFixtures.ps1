@@ -7,17 +7,18 @@
     script. The tests serve these files with WireMock.Net, so CI never calls mod.io.
 
     mod.io answers nothing without a credential, and ModShelf will take either of the two a user can make on mod.io's
-    API Access page (https://mod.io/me/access), so the script asks for both, and for the API path shown there:
+    API Access page (https://mod.io/me/access), so the script asks for both, and for the API path, when it's shown there:
     - a personal access token, made under "OAuth 2" with the read scope only, so nothing on mod.io can be changed with
       it (from MODIO_TOKEN, or asked for without being shown);
-    - your API key (from MODIO_API_KEY, or asked for without being shown);
-    - your API path, such as https://u-12345.modapi.io/v1 (from MODIO_API_PATH, or asked for).
+    - your API key: the short code, not a token (from MODIO_API_KEY, or asked for without being shown);
+    - your API path, such as https://u-12345.modapi.io/v1 (from MODIO_API_PATH, or asked for; press Enter if the page
+      shows none, and the script asks api.mod.io who the token belongs to and builds the path from that).
     None of them is written to a file or the screen. Revoke the token on the same page once the run is done.
 
     Before a file is written, your user ID, name and profile are replaced with stand-ins, and every file is checked for
-    the token, the key (any 12 characters of either), your user ID, your name, your profile's address, this computer's
-    name and your home folder: the script stops before writing a file that has one. Review the files before committing
-    them anyway.
+    the token, the key (any 12 characters of either), your user ID, your name, your profile's address and your home
+    folder: the script stops before writing a file that has one. (This computer's name isn't looked for: mod.io never
+    sees it, and a name such as LEGION is a word mods use.) Review the files before committing them anyway.
 
     It records:
     - which hosts answer which credential: api.mod.io, your API path, and the game's own host (probe-*);
@@ -70,10 +71,11 @@ param(
     [ValidateLength(3, 100)]
     [string] $SearchWords,
 
-    # Only for testing this script against a local fake of mod.io: the hosts, each ending in /v1/; {0} is the game's ID.
+    # Only for testing this script against a local fake of mod.io: the hosts, each ending in /v1/; {0} is the game's or
+    # your user ID.
     [uri] $DefaultApi = 'https://api.mod.io/v1/',
     [string] $GameApi = 'https://g-{0}.modapi.io/v1/',
-    [uri] $UserApi
+    [string] $UserApiTemplate = 'https://u-{0}.modapi.io/v1/'
 )
 
 Set-StrictMode -Version Latest
@@ -142,19 +144,23 @@ function Get-Secret([string] $Variable, [string] $What) {
     return $value
 }
 
-# Your API path, as mod.io's API Access page shows it, and your user ID in it.
-function Get-UserPath {
+# Your user ID, from your API path as mod.io's API Access page shows it; null when it shows none.
+function Get-PathUserId {
     $path = $env:MODIO_API_PATH
     if ([string]::IsNullOrWhiteSpace($path)) {
-        $path = Read-Host -Prompt 'Your API path, as the API Access page shows it, such as https://u-12345.modapi.io/v1'
+        $path = Read-Host -Prompt 'Your API path, such as https://u-12345.modapi.io/v1 (press Enter if the API Access page shows none)'
     }
 
-    $path = $path.Trim().TrimEnd('/')
-    if ($path -notmatch '^https://u-(\d+)\.modapi\.io/v1$') {
-        throw "'$path' isn't an API path such as https://u-12345.modapi.io/v1. Copy it from mod.io's API Access page."
+    $path = $path.Trim()
+    if (-not $path) {
+        return $null
     }
 
-    return [pscustomobject]@{ Api = [uri]"$path/"; UserId = $Matches[1] }
+    if ($path -notmatch '^(?:https://)?u-(\d+)\.modapi\.io(?:/v1)?/?$') {
+        throw "'$path' isn't an API path such as https://u-12345.modapi.io/v1, with your number after u-. Copy it from mod.io's API Access page, or press Enter when the page shows none."
+    }
+
+    return $Matches[1]
 }
 
 # A query string from names and values, each escaped, in the order given.
@@ -392,7 +398,7 @@ function Hide-User($Node) {
 }
 
 # Fails if anything of yours is left: any 12 characters of the token or the key, your user ID in an address or a
-# field, your name, your profile's address, this computer's name or your home folder.
+# field, your name, your profile's address or your home folder.
 function Assert-Clean([string] $Json, [string] $File) {
     $problems = @()
     foreach ($secret in $script:Secrets) {
@@ -498,8 +504,12 @@ function Get-FirstWord([string] $Name) {
 
 $Token = Get-Secret 'MODIO_TOKEN' 'Your personal access token, with the read scope'
 $Key = Get-Secret 'MODIO_API_KEY' 'Your API key'
-$userPath = if ($UserApi) { [pscustomobject]@{ Api = $UserApi; UserId = $null } } else { Get-UserPath }
-$UserApi = $userPath.Api
+if ($Key -eq $Token) {
+    throw 'The API key and the token are the same. The API key is the short code under "API key" on the API Access page; the token is the long one made under "OAuth 2".'
+}
+
+$PathUserId = Get-PathUserId
+$UserApi = if ($PathUserId) { [uri]($UserApiTemplate -f $PathUserId) } else { $null }
 
 $Secrets = [System.Collections.Generic.List[object]]::new()
 $Secrets.Add([pscustomobject]@{ Label = 'your token'; Value = $Token })
@@ -515,9 +525,6 @@ if ($homeFolder.Length -ge 4) {
     }
 }
 
-if ([Environment]::MachineName.Length -ge 4) {
-    $Private.Add([pscustomobject]@{ Label = 'this computer''s name'; Pattern = "(?i)(?<![\w.-])$([regex]::Escape([Environment]::MachineName))(?![\w.-])" })
-}
 
 # The recordings are written apart, and take the earlier ones' place once all are written.
 $Recorded = Join-Path $PSScriptRoot 'Recorded'
@@ -535,14 +542,16 @@ $Http.DefaultRequestHeaders.UserAgent.ParseAdd($UserAgent)
 try {
     New-Item -ItemType Directory -Path $OutFolder | Out-Null
 
-    # Who the token belongs to, asked of your API path, then of api.mod.io.
+    # Who the token belongs to, asked of your API path when it's known, then of api.mod.io.
     $ListHost = 'user'
-    $meAnswer = Invoke-ModIo 'user' 'me'
-    if ($meAnswer.Status -ne 200) {
+    $meAnswer = if ($UserApi) { Invoke-ModIo 'user' 'me' } else { $null }
+    if (-not $meAnswer -or $meAnswer.Status -ne 200) {
         $ListHost = 'default'
         $meDefault = Invoke-ModIo 'default' 'me'
         if ($meDefault.Status -ne 200) {
-            throw "mod.io refused the token on your API path (HTTP $($meAnswer.Status)) and on api.mod.io (HTTP $($meDefault.Status)). Check it has the read scope and hasn't expired, then try again."
+            $onPath = if ($meAnswer) { "on your API path (HTTP $($meAnswer.Status)) and " } else { '' }
+            $ref = if ($meDefault.Headers.Contains('x-modio-error-ref')) { ", error $($meDefault.Headers['x-modio-error-ref'])" } else { '' }
+            throw "mod.io refused the token ${onPath}on api.mod.io (HTTP $($meDefault.Status)$ref). Check it has the read scope and hasn't expired$(if (-not $UserApi) { ', and give your API path if the page shows one' }), then try again."
         }
 
         $meAnswer = $meDefault
@@ -554,8 +563,12 @@ try {
         throw 'mod.io answered without a user ID or name, so the script cannot tell what to replace.'
     }
 
-    if ($userPath.UserId -and $userPath.UserId -ne $Me.UserId) {
+    if ($PathUserId -and $PathUserId -ne $Me.UserId) {
         throw 'The token and the API path are of two different accounts. Copy both from the same API Access page.'
+    }
+
+    if (-not $UserApi) {
+        $UserApi = [uri]($UserApiTemplate -f $Me.UserId)
     }
 
     # Your name as a whole word, in its own case, as a mod's name could have it in another; and your profile's address.
@@ -569,10 +582,14 @@ try {
     Write-Host "  The token answers on the $ListHost host; the key is $($Key.Length) characters, $(if ($Key -match '^[0-9a-fA-F]+$') { 'hexadecimal' } else { 'not all hexadecimal' }); the token $($Token.Length)."
     Save-Fixture 'me' $meAnswer
 
-    # Which hosts answer which credential.
+    # Which hosts answer which credential; the games are then listed from your API path when it answers the token.
     Save-Fixture 'probe-me-user' (Invoke-ModIo 'user' 'me')
     Save-Fixture 'probe-me-default' (Invoke-ModIo 'default' 'me')
-    Save-Fixture 'probe-games-user-token' (Invoke-ModIo 'user' 'games' ([ordered]@{ '_limit' = 1 }))
+    $gamesOnPath = Invoke-ModIo 'user' 'games' ([ordered]@{ '_limit' = 1 })
+    Save-Fixture 'probe-games-user-token' $gamesOnPath
+    if ($gamesOnPath.Status -eq 200) {
+        $ListHost = 'user'
+    }
     Save-Fixture 'probe-games-default-token' (Invoke-ModIo 'default' 'games' ([ordered]@{ '_limit' = 1 }))
     Save-Fixture 'probe-games-user-key' (Invoke-ModIo 'user' 'games' ([ordered]@{ '_limit' = 1 }) -Auth key)
     Save-Fixture 'probe-games-default-key' (Invoke-ModIo 'default' 'games' ([ordered]@{ '_limit' = 1 }) -Auth key)
