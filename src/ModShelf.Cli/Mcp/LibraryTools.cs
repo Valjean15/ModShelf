@@ -41,7 +41,7 @@ internal sealed class LibraryTools(
     [Description("Lists the mods in ModShelf's library, the ones watched for updates and the ones with downloaded files, by site, game and name, a page at a time (offset and limit; hasMore says whether there's another page): each with its files (their absolute paths, versions, sizes, SHA-256, whether they're old versions archived, and whether they're missing from disk), the updates found for it (each saying whether it's skipped), whether it's pinned, and its note. A large library reads best a game or a mod at a time, or compact first, which gives counts instead of files and updates; watchedOnly, updatesOnly and missingOnly narrow it. A file without a SHA-256 was recorded before ModShelf kept them: library_rescan reads it.")]
     public Task<LibraryListing> ListAsync(
         [Description("Only this game's mods, as the site names it in its links, such as stardewvalley.")] string? game = null,
-        [Description("Only this site's mods: nexus, gamebanana or modio.")] string? source = null,
+        [Description("Only this site's mods: nexus, gamebanana, modio or degmods.")] string? source = null,
         [Description("Only the mod with this ID, as in its link.")] string? mod = null,
         [Description("Only the mods watched for updates.")] bool watchedOnly = false,
         [Description("Only the mods with updates offered: found, and neither pinned nor skipped.")] bool updatesOnly = false,
@@ -167,7 +167,7 @@ internal sealed class LibraryTools(
     [McpServerTool(Name = "library_watch", Title = "Watch a mod", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
     [Description("Watches a mod for updates, adding it to the library. Nothing is downloaded.")]
     public Task<WatchResult> WatchAsync(
-        [Description("A link to the mod or one of its files, such as its page on Nexus Mods, GameBanana or mod.io.")] string link,
+        [Description("A link to the mod or one of its files, such as its page on Nexus Mods, GameBanana, mod.io or DEG Mods.")] string link,
         CancellationToken cancellationToken)
         => McpProblems.GuardAsync(async () =>
         {
@@ -180,7 +180,7 @@ internal sealed class LibraryTools(
     [McpServerTool(Name = "library_unwatch", Title = "Stop watching a mod", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
     [Description("Stops watching a mod for updates. A mod with downloaded files stays in the library, and its files stay.")]
     public Task<WatchResult> UnwatchAsync(
-        [Description("A link to the mod or one of its files, such as its page on Nexus Mods, GameBanana or mod.io.")] string link,
+        [Description("A link to the mod or one of its files, such as its page on Nexus Mods, GameBanana, mod.io or DEG Mods.")] string link,
         CancellationToken cancellationToken)
         => McpProblems.GuardAsync(async () =>
         {
@@ -200,7 +200,7 @@ internal sealed class LibraryTools(
     [McpServerTool(Name = "library_pin", Title = "Pin a mod", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
     [Description("Pins a library mod at the version it has, or unpins it: a pinned mod's updates are still found, but aren't offered, so library_updates, library_check and the desktop app leave them out. Nothing is downloaded or deleted.")]
     public Task<PinResult> PinAsync(
-        [Description("A link to the mod or one of its files, such as its page on Nexus Mods, GameBanana or mod.io.")] string link,
+        [Description("A link to the mod or one of its files, such as its page on Nexus Mods, GameBanana, mod.io or DEG Mods.")] string link,
         [Description("False to unpin it.")] bool pinned = true,
         CancellationToken cancellationToken = default)
         => McpProblems.GuardAsync(async () =>
@@ -247,7 +247,7 @@ internal sealed class LibraryTools(
     [McpServerTool(Name = "library_note", Title = "Keep a note of a mod", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
     [Description("Keeps the user's note of a library mod, such as why it's pinned, in place of the one it has; no note removes it. library_list and mod_show give the notes.")]
     public Task<NoteResult> NoteAsync(
-        [Description("A link to the mod or one of its files, such as its page on Nexus Mods, GameBanana or mod.io.")] string link,
+        [Description("A link to the mod or one of its files, such as its page on Nexus Mods, GameBanana, mod.io or DEG Mods.")] string link,
         [Description("The note, up to 2,000 characters; none, or blank, to remove the mod's note.")] string? note = null,
         CancellationToken cancellationToken = default)
         => McpProblems.GuardAsync(async () =>
@@ -267,7 +267,7 @@ internal sealed class LibraryTools(
     [McpServerTool(Name = "library_forget", Title = "Forget a mod", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
     [Description("Takes a mod out of ModShelf's library, with its file records and its updates, so it isn't watched any more, such as a mod the user no longer uses. Nothing on disk is touched: its downloaded files stay where they are, no longer the library's, and its completed downloads leave the download queue. Refused while a download of one of its files into the library isn't finished.")]
     public Task<ForgetResult> ForgetAsync(
-        [Description("A link to the mod or one of its files, such as its page on Nexus Mods, GameBanana or mod.io.")] string link,
+        [Description("A link to the mod or one of its files, such as its page on Nexus Mods, GameBanana, mod.io or DEG Mods.")] string link,
         CancellationToken cancellationToken)
         => McpProblems.GuardAsync(async () =>
         {
@@ -304,7 +304,7 @@ internal sealed class LibraryTools(
     [McpServerTool(Name = "library_rescan", Title = "Rescan the library", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
     [Description("Rescans the mods' folders: adds the files there that the library doesn't know, such as ones placed by hand, when they match one of the mod's files on its site by name and size, and reads the SHA-256 of the library's files that have none. Says which files are missing from disk, and which in the folders match nothing. With a link, one mod, which comes into the library, watched, if its files are found where the folder pattern puts them; without, every mod in the library. Nothing is moved, renamed or deleted, and the site is asked only about mods with files to match.")]
     public Task<RescanResult> RescanAsync(
-        [Description("A link to the mod or one of its files, such as its page on Nexus Mods, GameBanana or mod.io; leave it out to rescan the whole library.")] string? link = null,
+        [Description("A link to the mod or one of its files, such as its page on Nexus Mods, GameBanana, mod.io or DEG Mods; leave it out to rescan the whole library.")] string? link = null,
         CancellationToken cancellationToken = default)
         => McpProblems.GuardAsync(async () =>
         {

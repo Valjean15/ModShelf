@@ -6,6 +6,7 @@ using ModShelf.Hosting;
 using ModShelf.Platform;
 using ModShelf.Platform.Agents;
 using ModShelf.Platform.Links;
+using ModShelf.Sources.Abstractions;
 using ModShelf.Testing;
 
 namespace ModShelf.Cli.Tests.Hosting;
@@ -72,6 +73,22 @@ public sealed class HostServicesTests
 
         Assert.False(releases.IsInstalled);
         await Assert.ThrowsAsync<InvalidOperationException>(() => releases.CheckAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task BothAppsOfferEverySite()
+    {
+        using TempFolder folder = new();
+        IConfiguration configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { [HostServices.DatabasePathKey] = Path.Combine(folder.Path, "library.db") })
+            .Build();
+        ServiceCollection services = new();
+        services.AddModShelf(configuration, "cli");
+        await using ServiceProvider provider = services.BuildServiceProvider();
+
+        IEnumerable<string> sites = provider.GetServices<IModSource>().Select(source => source.Id.Value);
+
+        Assert.Equal(["degmods", "direct", "gamebanana", "modio", "nexus"], sites.Order(StringComparer.Ordinal));
     }
 
     [Fact]

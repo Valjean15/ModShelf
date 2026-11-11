@@ -30,12 +30,13 @@ internal static partial class ModShelfMcpServer
     /// What the server tells the agent about ModShelf when it connects.
     /// </summary>
     internal const string Instructions =
-        "ModShelf downloads mods' files from Nexus Mods (nexus), GameBanana (gamebanana) and mod.io (modio) into a "
-        + "library folder, keeps their versions, and checks the watched mods for updates. It never installs mods: a mod "
-        + "manager installs the files from the library.\n"
+        "ModShelf downloads mods' files from Nexus Mods (nexus), GameBanana (gamebanana), mod.io (modio) and DEG Mods "
+        + "(degmods) into a library folder, keeps their versions, and checks the watched mods for updates. It never "
+        + "installs mods: a mod manager installs the files from the library.\n"
         + "- Each game, mod and file is one site's, and every result says which as source; its links are that site's. A "
-        + "game is named by its site and its key there: nexus/stardewvalley, gamebanana/16951 or modio/6715, as "
-        + "GameBanana and mod.io name their games by number. The same game on two sites is two games, each with its own "
+        + "game is named by its site and its key there: nexus/stardewvalley, gamebanana/16951, modio/6715 or "
+        + "degmods/fallout: new vegas, as GameBanana and mod.io name their games by number and DEG Mods by name, in "
+        + "lowercase. The same game on two sites is two games, each with its own "
         + "mods, keys and settings: mod_games finds a site's games and their keys, and mod_search searches one site's "
         + "game, so search each site a game is on. A key alone that could be more than one site's needs its site, as "
         + "source.\n"

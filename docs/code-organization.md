@@ -93,7 +93,8 @@ Other projects see a project only through what it makes public, so keep that to 
 | 1700–1799 | Deprecated calls: counting them, and their file |
 | 1800–1899 | Sources.GameBanana |
 | 1900–1999 | Sources.ModIo |
-| 2000 onward | Next free block |
+| 2000–2099 | Sources.DegMods |
+| 2100 onward | Next free block |
 
 ## 7. Files
 

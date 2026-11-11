@@ -23,6 +23,7 @@ public sealed class DependencyRuleTests
         ProjectNames.SourcesNexus,
         ProjectNames.SourcesGameBanana,
         ProjectNames.SourcesModIo,
+        ProjectNames.SourcesDegMods,
         ProjectNames.SourcesDirectUrl,
         ProjectNames.Cli,
     ];

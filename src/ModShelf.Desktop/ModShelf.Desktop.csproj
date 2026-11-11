@@ -42,6 +42,7 @@
     <ProjectReference Include="..\ModShelf.Platform\ModShelf.Platform.csproj" />
     <ProjectReference Include="..\ModShelf.Presentation\ModShelf.Presentation.csproj" />
     <ProjectReference Include="..\ModShelf.Sources.Abstractions\ModShelf.Sources.Abstractions.csproj" />
+    <ProjectReference Include="..\ModShelf.Sources.DegMods\ModShelf.Sources.DegMods.csproj" />
     <ProjectReference Include="..\ModShelf.Sources.DirectUrl\ModShelf.Sources.DirectUrl.csproj" />
     <ProjectReference Include="..\ModShelf.Sources.GameBanana\ModShelf.Sources.GameBanana.csproj" />
     <ProjectReference Include="..\ModShelf.Sources.ModIo\ModShelf.Sources.ModIo.csproj" />
