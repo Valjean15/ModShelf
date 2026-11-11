@@ -15,6 +15,19 @@ public sealed class UiStateTests
         Assert.Empty(UiState.None.BrowseSearches);
     }
 
+    [Theory]
+    [InlineData(null, null)]
+    [InlineData("  ", null)]
+    [InlineData(" degmods ", "degmods")]
+    public void RemembersBrowsesSiteTrimmedOrNone(string? site, string? remembered)
+    {
+        UiState state = UiState.None with { BrowseSite = site };
+
+        Assert.Equal(remembered, state.BrowseSite);
+        Assert.Equal(remembered is null, state == UiState.None);
+        Assert.NotEqual(UiState.None with { BrowseSite = "nexus" }, UiState.None with { BrowseSite = "degmods" });
+    }
+
     [Fact]
     public void TheNewestSearchComesFirst()
     {

@@ -46,16 +46,18 @@ internal sealed partial class GamesByName
     /// can't search by what was typed, such as a word too short, finds none; so does one that can't be reached or refuses,
     /// which is logged.
     /// </summary>
+    /// <param name="only">The one site to ask, when it's among them; null for all of them.</param>
     /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> stopped it, as when more is typed.</exception>
-    public async Task<IReadOnlyList<GameInfo>> FindAsync(string typed, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<GameInfo>> FindAsync(string typed, SourceId? only, CancellationToken cancellationToken)
     {
         NameQuery query = NameQuery.Parse(typed);
-        if (query.IsEmpty || Sites.Count == 0)
+        SourceId[] sites = [.. Sites.Where(site => only is null || site == only)];
+        if (query.IsEmpty || sites.Length == 0)
         {
             return [];
         }
 
-        IReadOnlyList<GameInfo>[] found = await Task.WhenAll(Sites.Select(site => FindOnAsync(site, query, cancellationToken)));
+        IReadOnlyList<GameInfo>[] found = await Task.WhenAll(sites.Select(site => FindOnAsync(site, query, cancellationToken)));
         return [.. found.SelectMany(games => games).Where(game => !_leftOut(game.Game))];
     }
 

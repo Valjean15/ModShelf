@@ -754,6 +754,14 @@
     <value>Oldest</value>
     <comment>A sort: the first published first.</comment>
   </data>
+  <data name="BrowseAllSites" xml:space="preserve">
+    <value>All sites</value>
+    <comment>Browse's site box: the games of every site.</comment>
+  </data>
+  <data name="BrowseSiteLabel" xml:space="preserve">
+    <value>Site</value>
+    <comment>Browse's site box, for screen readers and its tooltip.</comment>
+  </data>
   <data name="BrowseGameOnSite" xml:space="preserve">
     <value>{0} ({1})</value>
     <comment>A game named with its site, where two sites' games could be told apart only so: {0} is the game's name, {1} the site's.</comment>

@@ -42,6 +42,12 @@ public sealed partial class BrowseViewModel
     /// </summary>
     partial void OnGameChanged(GameChoice? oldValue, GameChoice? newValue)
     {
+        if (newValue is not null && !OfSiteChosen(newValue.Game))
+        {
+            // A game of another site, as quick search opens: the site box follows it.
+            SelectedSite = SiteChoiceOf(newValue.Game.Source.Value);
+        }
+
         if (oldValue is not null)
         {
             KeepFilters(oldValue.Game);
@@ -163,7 +169,7 @@ public sealed partial class BrowseViewModel
         {
             await OpenFoundAsync(asked);
         }
-        else if (Game is null && Favourite([.. games.Concat(_foundGames).Select(game => game.Choice)]) is { } favourite)
+        else if (Game is null && Favourite([.. games.Concat(_foundGames).Select(game => game.Choice).Where(game => OfSiteChosen(game.Game))]) is { } favourite)
         {
             Game = favourite;
         }

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -135,6 +136,13 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         Filters = new BrowseFiltersViewModel(this);
         _byName = new GamesByName(lookup, lookup.SearchableSources, logger, hiddenGames.IsHidden);
         Picker = new GamePickerViewModel(pictures, sources, ChooseGame, SearchAgainFor, byName: _byName);
+        StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
+        Sites =
+        [
+            new SiteChoice(null, Strings.BrowseAllSites),
+            .. lookup.SearchableSources.Select(source => new SiteChoice(source, sources.SiteName(source))).OrderBy(choice => choice.Name, byName),
+        ];
+        ShowSite(Sites[0]);
         _services = new ModPageServices(
             library,
             libraryDownloads,
@@ -397,7 +405,9 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     {
         _stopping = cancellationToken;
         await ReadHiddenGamesAsync(cancellationToken);
-        Picker.ShowRecent((await _uiState.GetAsync(cancellationToken)).BrowseSearches);
+        UiState remembered = await _uiState.GetAsync(cancellationToken);
+        Picker.ShowRecent(remembered.BrowseSearches);
+        ShowSite(SiteChoiceOf(remembered.BrowseSite));
         _hiddenGames.Changed += (_, _) => _uiThread.Post(ShowGameChoices);
         await _pictures.LoadAsync();
         Previews.Refresh();

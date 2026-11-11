@@ -2,8 +2,8 @@ namespace ModShelf.Application.State;
 
 /// <summary>
 /// What the desktop app remembers for the user between runs, apart from the settings: where its window was, whether the
-/// menu was collapsed, the screen last open, and the recent searches of Browse and of quick search. Each left null hasn't
-/// been remembered yet.
+/// menu was collapsed, the screen last open, the recent searches of Browse and of quick search, and the site Browse's site
+/// box narrows its games to. Each left null hasn't been remembered yet.
 /// </summary>
 /// <remarks>
 /// A value the user sets on purpose is a setting, in the settings; one the app remembers for them is state, here.
@@ -60,6 +60,16 @@ public sealed record UiState
     } = [];
 
     /// <summary>
+    /// The site Browse's site box narrows its games to, by its source's ID, such as "degmods"; null for all sites. A site
+    /// ModShelf doesn't have is passed over.
+    /// </summary>
+    public string? BrowseSite
+    {
+        get;
+        init => field = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    /// <summary>
     /// Quick search's recent searches, the newest first: at most <see cref="MaxQuickSearches"/>, each once, case aside,
     /// with none empty.
     /// </summary>
@@ -94,9 +104,10 @@ public sealed record UiState
             && MenuCollapsed == other.MenuCollapsed
             && Screen == other.Screen
             && BrowseSearches.SequenceEqual(other.BrowseSearches)
+            && BrowseSite == other.BrowseSite
             && QuickSearches.SequenceEqual(other.QuickSearches);
 
-    public override int GetHashCode() => HashCode.Combine(Window, MenuCollapsed, Screen, BrowseSearches.Count, QuickSearches.Count);
+    public override int GetHashCode() => HashCode.Combine(Window, MenuCollapsed, Screen, BrowseSearches.Count, BrowseSite, QuickSearches.Count);
 
     private static string[] Searches(IEnumerable<string> searches, int most)
         => [

@@ -18,10 +18,19 @@
     <DockPanel Container.Name="BrowseScreen" Container.Sizing="Width">
         <TextBlock DockPanel.Dock="Top" Classes="heading" Text="{Binding Title}" />
 
-        <!-- The game, and the mods the account follows on its site. -->
-        <Grid DockPanel.Dock="Top" ColumnDefinitions="2*,*,Auto" ColumnSpacing="8">
-            <games:GamePicker DataContext="{Binding Picker}" />
-            <Button Grid.Column="2" Content="{Binding ShowFollowedText}" Command="{Binding ShowTrackedCommand}" IsVisible="{Binding CanFollow}" />
+        <!-- The site whose games the picker offers, once two sites can search; the game, and the mods the account follows on
+             its site. -->
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,2*,*,Auto" ColumnSpacing="8">
+            <ComboBox MinWidth="140"
+                      VerticalAlignment="Stretch"
+                      VerticalContentAlignment="Center"
+                      ItemsSource="{Binding Sites}"
+                      SelectedItem="{Binding SelectedSite}"
+                      IsVisible="{Binding HasSites}"
+                      ToolTip.Tip="{x:Static res:Strings.BrowseSiteLabel}"
+                      AutomationProperties.Name="{x:Static res:Strings.BrowseSiteLabel}" />
+            <games:GamePicker Grid.Column="1" DataContext="{Binding Picker}" />
+            <Button Grid.Column="3" Content="{Binding ShowFollowedText}" Command="{Binding ShowTrackedCommand}" IsVisible="{Binding CanFollow}" />
         </Grid>
 
         <!-- What to look for: words, or a link to a mod; the filter card, which counts the filters applied; the view. -->

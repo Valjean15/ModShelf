@@ -316,7 +316,7 @@ public sealed partial class QuickSearchViewModel : ObservableObject
 
     private async Task FindAsync(string typed, int asked)
     {
-        IReadOnlyList<GameInfo> found = await _byName.FindAsync(typed, CancellationToken.None);
+        IReadOnlyList<GameInfo> found = await _byName.FindAsync(typed, only: null, CancellationToken.None);
         if (asked != _asked)
         {
             // More was typed, and is being found.

@@ -41,6 +41,7 @@ public sealed class JsonUiStateStoreTests : IDisposable
             MenuCollapsed = true,
             Screen = "browse",
             BrowseSearches = ["skyui", "armour"],
+            BrowseSite = "degmods",
             QuickSearches = ["dragon", "old versions"],
         };
 
@@ -62,6 +63,7 @@ public sealed class JsonUiStateStoreTests : IDisposable
                 "skyui",
                 "armour"
               ],
+              "browseSite": "degmods",
               "quickSearches": [
                 "dragon",
                 "old versions"
@@ -81,6 +83,7 @@ public sealed class JsonUiStateStoreTests : IDisposable
               "menuCollapsed": false,
               "screen": "library",
               "browseSearches": [ "old" ],
+              "browseSite": "nexus",
               "libraryOrder": "name",
             }
             """);
@@ -93,6 +96,7 @@ public sealed class JsonUiStateStoreTests : IDisposable
         Assert.DoesNotContain("menuCollapsed", file, StringComparison.Ordinal);
         Assert.DoesNotContain("screen", file, StringComparison.Ordinal);
         Assert.DoesNotContain("browseSearches", file, StringComparison.Ordinal);
+        Assert.DoesNotContain("browseSite", file, StringComparison.Ordinal);
         Assert.Equal(new UiState { Window = new WindowPlacement(10, 20, 900, 600, maximized: false) }, await Store().LoadAsync(Cancellation));
     }
 

@@ -17,6 +17,7 @@ namespace ModShelf.Infrastructure.State;
 ///   "menuCollapsed": true,
 ///   "screen": "browse",
 ///   "browseSearches": [ "skyui", "armour" ],
+///   "browseSite": "degmods",
 ///   "quickSearches": [ "dragon", "old versions" ]
 /// }
 /// </code>
@@ -34,6 +35,7 @@ internal sealed partial class JsonUiStateStore : IUiStateStore
     private const string MenuCollapsed = "menuCollapsed";
     private const string Screen = "screen";
     private const string BrowseSearches = "browseSearches";
+    private const string BrowseSite = "browseSite";
     private const string QuickSearches = "quickSearches";
 
     private static readonly JsonDocumentOptions Reading = new() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
@@ -71,6 +73,7 @@ internal sealed partial class JsonUiStateStore : IUiStateStore
             MenuCollapsed = Flag(file[MenuCollapsed]),
             Screen = Text(file[Screen]),
             BrowseSearches = file[BrowseSearches] is JsonArray searches ? [.. searches.Select(Text).OfType<string>()] : [],
+            BrowseSite = Text(file[BrowseSite]),
             QuickSearches = file[QuickSearches] is JsonArray quick ? [.. quick.Select(Text).OfType<string>()] : [],
         };
     }
@@ -99,6 +102,7 @@ internal sealed partial class JsonUiStateStore : IUiStateStore
         Set(file, MenuCollapsed, state.MenuCollapsed is { } collapsed ? JsonValue.Create(collapsed) : null);
         Set(file, Screen, state.Screen is { } screen ? JsonValue.Create(screen) : null);
         Set(file, BrowseSearches, state.BrowseSearches.Count > 0 ? new JsonArray([.. state.BrowseSearches.Select(search => JsonValue.Create(search))]) : null);
+        Set(file, BrowseSite, state.BrowseSite is { } site ? JsonValue.Create(site) : null);
         Set(file, QuickSearches, state.QuickSearches.Count > 0 ? new JsonArray([.. state.QuickSearches.Select(search => JsonValue.Create(search))]) : null);
 
         try
