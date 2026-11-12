@@ -162,6 +162,14 @@ public sealed record AppSettings
     public string? BrowserDownloadsFolder { get; init; }
 
     /// <summary>
+    /// The sites' games picked for games installed on this computer: by the installed game's store and ID
+    /// (<see cref="Installed.Ports.InstalledGame.Key"/>, such as "steam/489830"), then by site, the game's key there, or
+    /// null when the installed game has none there. A site not named matches the installed game by its name.
+    /// </summary>
+    public IReadOnlyDictionary<string, IReadOnlyDictionary<SourceId, string?>> InstalledMatches { get; init; }
+        = ImmutableDictionary<string, IReadOnlyDictionary<SourceId, string?>>.Empty;
+
+    /// <summary>
     /// The previews <paramref name="screen"/> shows: as set, or its default, thumbnails on the Library screen, cards on
     /// Browse, and none on the others.
     /// </summary>

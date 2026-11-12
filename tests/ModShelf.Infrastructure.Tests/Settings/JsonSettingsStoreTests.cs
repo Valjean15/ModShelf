@@ -496,6 +496,63 @@ public sealed class JsonSettingsStoreTests : IDisposable
         Assert.StartsWith($"The settings in {FilePath} can't be read: {message}", refused.Message, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task KeepsTheGamesPickedForInstalledGamesAndNoneLeavesTheFile()
+    {
+        await WriteAsync("""{ "installedGames": { "steam/1": { "nexus": "old" } } }""");
+        AppSettings picked = new()
+        {
+            InstalledMatches = ImmutableDictionary<string, IReadOnlyDictionary<SourceId, string?>>.Empty
+                .Add("steam/489830", new Dictionary<SourceId, string?> { [new SourceId("nexus")] = "skyrimspecialedition", [new SourceId("mod-io")] = null })
+                .Add("steam/413150", new Dictionary<SourceId, string?> { [new SourceId("gamebanana")] = "6745" }),
+        };
+
+        await Store().SaveAsync(picked, Cancellation);
+        AppSettings loaded = await Store().LoadAsync(Cancellation);
+        string saved = await File.ReadAllTextAsync(FilePath, Cancellation);
+        await Store().SaveAsync(new AppSettings(), Cancellation);
+        string none = await File.ReadAllTextAsync(FilePath, Cancellation);
+
+        Assert.Equal(["steam/413150", "steam/489830"], loaded.InstalledMatches.Keys.Order(StringComparer.Ordinal));
+        Assert.Equal("6745", loaded.InstalledMatches["steam/413150"][new SourceId("gamebanana")]);
+        Assert.Equal("skyrimspecialedition", loaded.InstalledMatches["steam/489830"][new SourceId("nexus")]);
+        Assert.True(loaded.InstalledMatches["steam/489830"].TryGetValue(new SourceId("mod-io"), out string? modIo) && modIo is null);
+        Assert.DoesNotContain("steam/1\"", saved, StringComparison.Ordinal);
+        Assert.Contains("\"mod-io\": null", saved, StringComparison.Ordinal);
+        Assert.True(saved.IndexOf("steam/413150", StringComparison.Ordinal) < saved.IndexOf("steam/489830", StringComparison.Ordinal));
+        Assert.DoesNotContain("installedGames", none, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task AnInstalledGameWithNoSiteIsntKept()
+    {
+        await WriteAsync("""{ "installedGames": { "steam/1": {} } }""");
+
+        AppSettings loaded = await Store().LoadAsync(Cancellation);
+        await Store().SaveAsync(new AppSettings { InstalledMatches = ImmutableDictionary<string, IReadOnlyDictionary<SourceId, string?>>.Empty.Add("steam/2", new Dictionary<SourceId, string?>()) }, Cancellation);
+
+        Assert.Empty(loaded.InstalledMatches);
+        Assert.DoesNotContain("installedGames", await File.ReadAllTextAsync(FilePath, Cancellation), StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("""{ "installedGames": [] }""", "installedGames must hold the installed games by their store and ID.")]
+    [InlineData("""{ "installedGames": { "489830": { "nexus": "skyrim" } } }""", "installedGames.489830 must name a store and a game, such as steam/489830, and hold its games by site.")]
+    [InlineData("""{ "installedGames": { "steam/": { "nexus": "skyrim" } } }""", "installedGames.steam/ must name a store and a game")]
+    [InlineData("""{ "installedGames": { "/489830": { "nexus": "skyrim" } } }""", "installedGames./489830 must name a store and a game")]
+    [InlineData("""{ "installedGames": { "steam/489830": "nexus/skyrim" } }""", "installedGames.steam/489830 must name a store and a game")]
+    [InlineData("""{ "installedGames": { "steam/489830": { "nexus": 3 } } }""", "installedGames.steam/489830.nexus must be a game's key, or null for none.")]
+    [InlineData("""{ "installedGames": { "steam/489830": { "nexus": " " } } }""", "installedGames.steam/489830.nexus must be a game's key, or null for none.")]
+    [InlineData("""{ "installedGames": { "steam/489830": { "Nexus Mods": "skyrim" } } }""", "'Nexus Mods' is not a valid source ID.")]
+    public async Task SaysWhenAGamePickedForAnInstalledGameIsWrong(string content, string message)
+    {
+        await WriteAsync(content);
+
+        InvalidDataException refused = await Assert.ThrowsAsync<InvalidDataException>(() => Store().LoadAsync(Cancellation));
+
+        Assert.StartsWith($"The settings in {FilePath} can't be read: {message}", refused.Message, StringComparison.Ordinal);
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]

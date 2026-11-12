@@ -96,6 +96,7 @@ internal static class HostServices
         services.AddLibraryMover();
         services.AddUpdateChecks();
         services.AddSettings();
+        services.AddInstalledGames();
         services.AddDiagnostics(AppInfo.Of(typeof(HostServices).Assembly));
         services.AddLinks();
         services.AddQueueRequests();

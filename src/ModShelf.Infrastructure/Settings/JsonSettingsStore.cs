@@ -45,7 +45,10 @@ namespace ModShelf.Infrastructure.Settings;
 ///   "details": { "maxAge": "7d" },
 ///   "quota": { "warnBelow": 15 },
 ///   "agents": { "enabled": true, "port": 47823 },
-///   "downloads": { "browserFolder": "C:\\Users\\Me\\Downloads" }
+///   "downloads": { "browserFolder": "C:\\Users\\Me\\Downloads" },
+///   "installedGames": {
+///     "steam/489830": { "nexus": "skyrimspecialedition", "modio": null }
+///   }
 /// }
 /// </code>
 /// </summary>
@@ -56,7 +59,7 @@ namespace ModShelf.Infrastructure.Settings;
 /// its site when the settings are next saved. Games' folders in <c>library.gameFolders</c>, as 0.9.2 kept them, are read
 /// too, and move to <c>games</c> when the settings are next saved.
 /// </remarks>
-internal sealed class JsonSettingsStore : ISettingsStore
+internal sealed partial class JsonSettingsStore : ISettingsStore
 {
     private const string Library = "library";
     private const string Root = "root";
@@ -176,6 +179,7 @@ internal sealed class JsonSettingsStore : ISettingsStore
                 AgentsEnabled = Flag(agents, Enabled, Agents),
                 AgentsPort = ReadPort(agents),
                 BrowserDownloadsFolder = browserFolder,
+                InstalledMatches = ReadInstalledGames(file?[InstalledGames]),
             };
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or InvalidDataException or FormatException)
@@ -340,6 +344,8 @@ internal sealed class JsonSettingsStore : ISettingsStore
         JsonObject downloadsSection = file[Downloads] as JsonObject ?? [];
         Set(downloadsSection, BrowserFolder, settings.BrowserDownloadsFolder);
         Keep(file, Downloads, downloadsSection);
+
+        WriteInstalledGames(file, settings.InstalledMatches);
 
         JsonObject appearanceSection = file[Appearance] as JsonObject ?? [];
         Set(appearanceSection, Theme, settings.Theme is { } theme ? ThemeName(theme) : null);

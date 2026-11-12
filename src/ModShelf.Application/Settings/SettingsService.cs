@@ -261,6 +261,19 @@ internal sealed class SettingsService : ISettingsService, IDisposable
     /// <summary>
     /// Sets the root of a library whose files are there already, as moving the library does once they're all moved.
     /// </summary>
+    /// <summary>
+    /// Remembers <paramref name="key"/> as the game installed as <paramref name="installed"/> on <paramref name="site"/>;
+    /// null: it has none there.
+    /// </summary>
+    internal Task SetInstalledMatchAsync(string installed, SourceId site, string? key, CancellationToken cancellationToken)
+        => ChangeAsync((settings, _) => Task.FromResult(settings with { InstalledMatches = Matched(settings.InstalledMatches, installed, site, key) }), cancellationToken);
+
+    /// <summary>
+    /// Forgets the game picked for the game installed as <paramref name="installed"/> on <paramref name="site"/>.
+    /// </summary>
+    internal Task ForgetInstalledMatchAsync(string installed, SourceId site, CancellationToken cancellationToken)
+        => ChangeAsync((settings, _) => Task.FromResult(settings with { InstalledMatches = Forgotten(settings.InstalledMatches, installed, site) }), cancellationToken);
+
     internal Task MoveLibraryRootAsync(string root, CancellationToken cancellationToken)
     {
         string normalized = FullRoot(root, nameof(root));
@@ -312,6 +325,32 @@ internal sealed class SettingsService : ISettingsService, IDisposable
         }
 
         return Path.TrimEndingDirectorySeparator(Path.GetFullPath(root.Trim()));
+    }
+
+    private static ImmutableDictionary<string, IReadOnlyDictionary<SourceId, string?>> Matched(
+        IReadOnlyDictionary<string, IReadOnlyDictionary<SourceId, string?>> matches, string installed, SourceId site, string? key)
+    {
+        ImmutableDictionary<SourceId, string?> sites = matches.TryGetValue(installed, out IReadOnlyDictionary<SourceId, string?>? kept)
+            ? kept.ToImmutableDictionary()
+            : ImmutableDictionary<SourceId, string?>.Empty;
+        return matches.ToImmutableDictionary().SetItem(installed, sites.SetItem(site, key));
+    }
+
+    /// <summary>
+    /// The matches without the one of <paramref name="installed"/> on <paramref name="site"/>; without the installed game
+    /// once it has none left.
+    /// </summary>
+    private static ImmutableDictionary<string, IReadOnlyDictionary<SourceId, string?>> Forgotten(
+        IReadOnlyDictionary<string, IReadOnlyDictionary<SourceId, string?>> matches, string installed, SourceId site)
+    {
+        ImmutableDictionary<string, IReadOnlyDictionary<SourceId, string?>> all = matches.ToImmutableDictionary();
+        if (!matches.TryGetValue(installed, out IReadOnlyDictionary<SourceId, string?>? kept))
+        {
+            return all;
+        }
+
+        ImmutableDictionary<SourceId, string?> sites = kept.ToImmutableDictionary().Remove(site);
+        return sites.IsEmpty ? all.Remove(installed) : all.SetItem(installed, sites);
     }
 
     private static bool SameFolder(string? first, string? second)

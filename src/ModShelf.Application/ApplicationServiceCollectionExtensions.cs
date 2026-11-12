@@ -5,6 +5,7 @@ using ModShelf.Application.Accounts;
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Diagnostics;
 using ModShelf.Application.Downloads;
+using ModShelf.Application.Installed;
 using ModShelf.Application.Library;
 using ModShelf.Application.Links;
 using ModShelf.Application.Releases;
@@ -186,6 +187,22 @@ public static class ApplicationServiceCollectionExtensions
 
         services.TryAddSingleton<SettingsService>();
         services.TryAddSingleton<ISettingsService>(provider => provider.GetRequiredService<SettingsService>());
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers <see cref="IInstalledGameMatcher"/>, which matches the games installed on this computer with the sites'
+    /// games, with the settings (<see cref="AddSettings"/>), where the games picked for them are kept; it needs what they
+    /// need, and Platform's <see cref="Installed.Ports.IInstalledGames"/>.
+    /// </summary>
+    public static IServiceCollection AddInstalledGames(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddSettings();
+        services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
+        services.TryAddSingleton<IInstalledGameMatcher, InstalledGameMatcher>();
 
         return services;
     }

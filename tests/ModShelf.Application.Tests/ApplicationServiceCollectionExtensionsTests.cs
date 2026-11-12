@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using ModShelf.Application.Accounts;
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Downloads;
+using ModShelf.Application.Installed;
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
@@ -163,6 +164,20 @@ public sealed class ApplicationServiceCollectionExtensionsTests
         Assert.Equal(ServiceLifetime.Singleton, Single<ILibraryMover>(services).Lifetime);
         Assert.Equal(typeof(LibraryDownloads), Single<LibraryDownloads>(services).ImplementationType);
         Assert.Single(services, descriptor => descriptor.ServiceType == typeof(ILibraryHold));
+    }
+
+    [Fact]
+    public void RegistersTheInstalledGamesMatcherOnceWithTheSettings()
+    {
+        ServiceCollection services = new();
+        services.AddInstalledGames();
+        services.AddInstalledGames();
+
+        Assert.Equal(typeof(InstalledGameMatcher), Single<IInstalledGameMatcher>(services).ImplementationType);
+        Assert.Equal(typeof(SettingsService), Single<SettingsService>(services).ImplementationType);
+        Assert.Equal(typeof(SourceRegistry), Single<ISourceRegistry>(services).ImplementationType);
+        Assert.Single(services, descriptor => descriptor.ServiceType == typeof(ISettingsService));
+        Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
     }
 
     [Fact]
