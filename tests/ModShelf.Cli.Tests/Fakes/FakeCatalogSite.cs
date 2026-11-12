@@ -88,8 +88,15 @@ internal sealed partial class FakeCatalogSite : ILinkRecognizer, IModCatalog, IM
     /// </summary>
     public Exception? GameFailure { get; set; }
 
+    /// <summary>
+    /// What listing its games throws, while set.
+    /// </summary>
+    public Exception? GamesFailure { get; set; }
+
     public Task<IReadOnlyList<GameInfo>> GetGamesAsync(CancellationToken cancellationToken)
-        => Task.FromResult<IReadOnlyList<GameInfo>>([new GameInfo(new GameRef(Id, "game"), "Example Game", new Uri($"https://{Host}/game"), Categories), .. MoreGames]);
+        => GamesFailure is { } failure
+            ? Task.FromException<IReadOnlyList<GameInfo>>(failure)
+            : Task.FromResult<IReadOnlyList<GameInfo>>([new GameInfo(new GameRef(Id, "game"), "Example Game", new Uri($"https://{Host}/game"), Categories), .. MoreGames]);
 
     public Task<GameInfo> GetGameAsync(GameRef game, CancellationToken cancellationToken)
     {

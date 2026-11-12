@@ -13,8 +13,8 @@ using ModShelf.Sources.Abstractions.Catalog;
 namespace ModShelf.Cli.Commands;
 
 /// <summary>
-/// <c>mod games [words] [--source] [--page] [--page-size]</c>: a site's games whose names match, each with the key
-/// <c>--game</c> takes.
+/// <c>mod games [words] [--source] [--page] [--page-size] [--installed]</c>: a site's games whose names match, each with
+/// the key <c>--game</c> takes; or the games installed on this computer, each with its games on the sites.
 /// </summary>
 internal static partial class ModCommand
 {
@@ -52,12 +52,18 @@ internal static partial class ModCommand
             DefaultValueFactory = _ => DefaultGamesPageSize,
         };
 
-        Command games = new("games", "Lists a site's games whose names match, those that start with the words first, each with the key mod search's --game takes.")
+        Option<bool> installed = new("--installed")
+        {
+            Description = "Lists the games Steam installed on this computer instead, each with its games on the sites: the one of the same name, or as chosen in the desktop app's Settings › Games. With --source, its games there alone.",
+        };
+
+        Command games = new("games", "Lists a site's games whose names match, those that start with the words first, each with the key mod search's --game takes; or, with --installed, the games installed on this computer.")
         {
             words,
             source,
             page,
             pageSize,
+            installed,
         };
         games.SetAction((parsed, cancellationToken) =>
         {
@@ -76,7 +82,9 @@ internal static partial class ModCommand
             }
 
             NameQuery query = NameQuery.Parse(string.Join(' ', parsed.GetValue(words) ?? []));
-            return GamesAsync(environment, query, parsed.GetValue(source), (pageNumber - 1) * size, size, cancellationToken);
+            return parsed.GetValue(installed)
+                ? InstalledAsync(environment, query, parsed.GetValue(source), (pageNumber - 1) * size, size, cancellationToken)
+                : GamesAsync(environment, query, parsed.GetValue(source), (pageNumber - 1) * size, size, cancellationToken);
         });
         return games;
     }

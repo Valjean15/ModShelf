@@ -10,6 +10,8 @@ using ModelContextProtocol.Server;
 
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Downloads.Ports;
+using ModShelf.Application.Installed;
+using ModShelf.Application.Installed.Ports;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Cli.Mcp;
 using ModShelf.Cli.Tests.Common;
@@ -1329,6 +1331,60 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task ListsTheInstalledGamesWithTheirGamesOnTheSitesAPageAtATime()
+    {
+        ScriptedInstalledGames installed = InstalledGames();
+        await PickNoneAsync(installed.Games[2]);
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        GamesResult listed = await mcp.CallAsync<GamesResult>("mod_games", Arguments(("installed", true), ("source", "fake-catalog")), Cancellation);
+        GamesResult second = await mcp.CallAsync<GamesResult>("mod_games", Arguments(("installed", true), ("source", "fake-catalog"), ("pageSize", 1), ("page", 2)), Cancellation);
+        GamesResult named = await mcp.CallAsync<GamesResult>("mod_games", Arguments(("installed", true), ("source", "fake-catalog"), ("words", "zoo")), Cancellation);
+
+        Assert.Equal((3, 0, false), (listed.Total, listed.Offset, listed.HasMore));
+        Assert.Empty(listed.Games);
+        Assert.Equal(["Steam"], listed.Stores);
+        Assert.Empty(listed.Problems!);
+        Assert.Equal(
+            [
+                "steam 1 Example Game: fake-catalog by name: game Example Game https://catalog.example/game",
+                "steam 2 Unmatched: ",
+                "steam 3 Zoo: fake-catalog picked: ",
+            ],
+            Installed(listed));
+        Assert.Equal((3, 1, true), (second.Total, second.Offset, second.HasMore));
+        Assert.Equal(["steam 2 Unmatched: "], Installed(second));
+        Assert.Equal(["steam 3 Zoo: fake-catalog picked: "], Installed(named));
+    }
+
+    [Fact]
+    public async Task InstalledGamesWhoseSitesGamesCantBeReadMatchOnlyAsChosen()
+    {
+        ScriptedInstalledGames installed = InstalledGames();
+        _catalog.GamesFailure = new HttpRequestException("The site is down.");
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        GamesResult listed = await mcp.CallAsync<GamesResult>("mod_games", Arguments(("installed", true), ("source", "fake-catalog")), Cancellation);
+
+        Assert.Equal(["Fake catalog site couldn't list its games, so they match only as chosen: The site couldn't be asked: The site is down."], listed.Problems);
+        Assert.All(listed.Installed!, game => Assert.Empty(game.Sites));
+        Assert.Equal(3, installed.Games.Count);
+    }
+
+    [Fact]
+    public async Task WithoutSteamThereAreNoInstalledGames()
+    {
+        InstalledGames().HasSteam = false;
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        GamesResult listed = await mcp.CallAsync<GamesResult>("mod_games", Arguments(("installed", true), ("source", "fake-catalog")), Cancellation);
+
+        Assert.Equal((0, false), (listed.Total, listed.HasMore));
+        Assert.Empty(listed.Stores!);
+        Assert.Empty(listed.Installed!);
+    }
+
+    [Fact]
     public async Task ListsASitesGamesAPageAtATimeThoseStartingWithTheWordsFirst()
     {
         _catalog.MoreGames.AddRange([new GameInfo(new GameRef(FakeCatalogSite.SourceId, "gamebox"), "Game Box"), new GameInfo(new GameRef(FakeCatalogSite.SourceId, "zoo"), "Zoo")]);
@@ -1572,4 +1628,38 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         await DownloadAsync(mcp, HandoffLink(fileId).AbsoluteUri);
         await WaitForFileAsync(mcp, fileId);
     }
+
+    private static string[] Installed(GamesResult result)
+        => [.. result.Installed!.Select(game => $"{game.Store} {game.Id} {game.Name}: " + string.Join(
+            "; ",
+            game.Sites.Select(site => $"{site.Source} {(site.Picked ? "picked" : "by name")}: " + string.Join(", ", site.Games.Select(found => $"{found.Game} {found.Name} {found.Page}")))))];
+
+    /// <summary>
+    /// The games installed on this computer, from now on: Example Game, which the fake site has, Unmatched, and Zoo.
+    /// </summary>
+    private ScriptedInstalledGames InstalledGames()
+    {
+        ScriptedInstalledGames installed = new();
+        installed.Add("1", "Example Game");
+        installed.Add("2", "Unmatched");
+        installed.Add("3", "Zoo");
+        _cli = new InProcessCli(_site, _browser, sources: [_handoff, _catalog], configureServices: services =>
+        {
+            services.RemoveAll<IInstalledGames>();
+            services.AddSingleton<IInstalledGames>(installed);
+        });
+        return installed;
+    }
+
+    /// <summary>
+    /// Says the installed game has no game on the fake site, as the desktop app's Settings › Games does.
+    /// </summary>
+    private Task<bool> PickNoneAsync(InstalledGame game)
+        => Cli.InAppAsync(
+            async services =>
+            {
+                await services.GetRequiredService<IInstalledGameMatcher>().PickAsync(game, FakeCatalogSite.SourceId, null, Cancellation);
+                return true;
+            },
+            Cancellation);
 }

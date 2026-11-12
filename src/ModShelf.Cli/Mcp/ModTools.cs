@@ -7,6 +7,7 @@ using ModelContextProtocol.Server;
 
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Common;
+using ModShelf.Application.Installed;
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
@@ -24,7 +25,7 @@ namespace ModShelf.Cli.Mcp;
 /// site's games by name. Nothing is downloaded or saved.
 /// </summary>
 [McpServerToolType]
-internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettingsService settings, ISourceRegistry sources, TimeProvider timeProvider)
+internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettingsService settings, ISourceRegistry sources, IInstalledGameMatcher installedGames, TimeProvider timeProvider)
 {
     /// <summary>
     /// How many mods a page lists unless pageSize says otherwise, or fewer when the site's pages hold fewer.
@@ -227,12 +228,13 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
         });
 
     [McpServerTool(Name = "mod_games", Title = "Find a site's games", ReadOnly = true, Idempotent = true, OpenWorld = true, UseStructuredContent = true)]
-    [Description("Lists a site's games whose names match, those that start with the words first, a page at a time, each with the key mod_search's game takes. Each word must start a word of the name, in any order; case, accents, quotes and other punctuation don't count, and a Roman numeral from II to XXX is its number too: \"stalker 2\" finds S.T.A.L.K.E.R. 2, \"final fantasy 12\" Final Fantasy XII.")]
+    [Description("Lists a site's games whose names match, those that start with the words first, a page at a time, each with the key mod_search's game takes. Each word must start a word of the name, in any order; case, accents, quotes and other punctuation don't count, and a Roman numeral from II to XXX is its number too: \"stalker 2\" finds S.T.A.L.K.E.R. 2, \"final fantasy 12\" Final Fantasy XII. With installed, lists the games Steam installed on this computer instead, as installed, each with its games on the sites.")]
     public Task<GamesResult> GamesAsync(
         [Description("Words of the game's name; none to list every game, on a site that lists them all. GameBanana finds its games by name only, by a word of 3 letters or more.")] string? words = null,
-        [Description("The site: nexus, gamebanana, modio or degmods. Needed when more than one site lists its games, as several do: ask each site the game may be on.")] string? source = null,
+        [Description("The site: nexus, gamebanana, modio or degmods. Needed when more than one site lists its games, as several do: ask each site the game may be on. With installed, each game's games on that site alone; every site's when left out.")] string? source = null,
         [Description("Which page of games, from 1.")] int page = 1,
         [Description("How many games a page lists, from 1 to 100.")] int pageSize = 20,
+        [Description("True to list the games Steam installed on this computer, as installed, each with its games on the sites: the one of the same name, or the one the user chose in the desktop app's Settings › Games; picked says which. A name two of a site's games share gives both, for the user to choose.")] bool installed = false,
         CancellationToken cancellationToken = default)
         => McpProblems.GuardAsync(async () =>
         {
@@ -246,6 +248,11 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
                 throw new McpException("page must be 1 or more, and not that many pages in.");
             }
 
+            if (installed)
+            {
+                return await InstalledAsync(words, source, page, pageSize, cancellationToken).ConfigureAwait(false);
+            }
+
             SourceId site = ChooseSource([.. sources.All<IModCatalog>().Select(catalog => catalog.Id)], source, "list its games");
             IReadOnlyList<GameInfo> found = await lookup.FindGamesAsync(site, NameQuery.Parse(words), cancellationToken).ConfigureAwait(false);
             int offset = (page - 1) * pageSize;
@@ -255,6 +262,36 @@ internal sealed class ModTools(IModLookup lookup, IModLibrary library, ISettings
             ];
             return new GamesResult(found.Count, offset, offset + shown.Length < found.Count, shown);
         });
+
+    /// <summary>
+    /// The installed games whose names, or their games' names, have the words, a page at a time, each with its games on
+    /// the sites, <paramref name="source"/>'s alone when given.
+    /// </summary>
+    private async Task<GamesResult> InstalledAsync(string? words, string? source, int page, int pageSize, CancellationToken cancellationToken)
+    {
+        SourceId? site = source is null ? null : ChooseSource([.. sources.All<IModCatalog>().Select(catalog => catalog.Id)], source, "list its games");
+        InstalledGameListing listing = await InstalledGameList.ReadAsync(lookup, sources, installedGames, site, NameQuery.Parse(words), cancellationToken).ConfigureAwait(false);
+        int offset = (page - 1) * pageSize;
+        InstalledGameEntry[] shown =
+        [
+            .. listing.Games.Skip(offset).Take(pageSize).Select(game => new InstalledGameEntry(
+                game.Game.Store,
+                game.Game.Id,
+                game.Game.Name,
+                [
+                    .. game.Sites.Where(match => match.Picked || match.Games.Count > 0).Select(match => new InstalledSiteEntry(
+                        match.Site.Value,
+                        match.Picked,
+                        [.. match.Games.Select(found => new GameEntry(found.Game.Source.Value, found.Game.Key, found.Name, found.PageUrl?.AbsoluteUri))])),
+                ])),
+        ];
+        return new GamesResult(listing.Games.Count, offset, offset + shown.Length < listing.Games.Count, [])
+        {
+            Stores = [.. listing.Stores.Select(store => store.Name)],
+            Installed = shown,
+            Problems = [.. listing.Unread.Select(unread => $"{unread.Name} couldn't list its games, so they match only as chosen: {McpProblems.Describe(unread.Problem) ?? "something went wrong; the log has the details."}")],
+        };
+    }
 
     /// <summary>
     /// The game as its site describes it, read the first time it's asked for; null when its site has no catalog.
