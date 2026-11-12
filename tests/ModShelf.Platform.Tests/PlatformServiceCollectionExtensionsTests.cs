@@ -8,6 +8,7 @@ using ModShelf.Application.Desktop.Ports;
 using ModShelf.Application.Diagnostics;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Downloads.Ports;
+using ModShelf.Application.Installed.Ports;
 using ModShelf.Application.Links;
 using ModShelf.Application.Links.Ports;
 using ModShelf.Application.Notifications.Ports;
@@ -15,6 +16,7 @@ using ModShelf.Application.Releases.Ports;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Platform.Browser;
 using ModShelf.Platform.Diagnostics;
+using ModShelf.Platform.Installed;
 using ModShelf.Platform.Instances;
 using ModShelf.Platform.Links;
 using ModShelf.Platform.OAuth;
@@ -49,6 +51,17 @@ public sealed class PlatformServiceCollectionExtensionsTests : IDisposable
         Assert.IsType<SystemBrowserLauncher>(launcher);
         Assert.Equal(typeof(LoopbackRedirectListener), Single<IOAuthRedirectListener>(services).ImplementationType);
         Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
+    }
+
+    [Fact]
+    public void RegistersSteamsInstalledGames()
+    {
+        ServiceCollection services = new();
+        services.AddPlatformServices(new SecretStoreOptions { Folder = _folder.Path });
+
+        object games = Single<IInstalledGames>(services).ImplementationFactory!(new StubServiceProvider());
+
+        Assert.IsType<SteamGames>(games);
     }
 
     [Fact]

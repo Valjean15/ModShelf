@@ -7,6 +7,7 @@ using ModShelf.Application.Desktop.Ports;
 using ModShelf.Application.Diagnostics;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Downloads.Ports;
+using ModShelf.Application.Installed.Ports;
 using ModShelf.Application.Links.Ports;
 using ModShelf.Application.Notifications.Ports;
 using ModShelf.Application.Releases.Ports;
@@ -16,6 +17,7 @@ using ModShelf.Platform.Browser;
 using ModShelf.Platform.Diagnostics;
 using ModShelf.Platform.Downloads;
 using ModShelf.Platform.Folders;
+using ModShelf.Platform.Installed;
 using ModShelf.Platform.Instances;
 using ModShelf.Platform.Links;
 using ModShelf.Platform.Notifications;
@@ -38,8 +40,8 @@ public static class PlatformServiceCollectionExtensions
 
     /// <summary>
     /// Registers the secret store for this system, the OAuth loopback redirect listener, the browser launcher, the
-    /// user's folders as this system keeps them, the way this system shows notices, its register of the apps that open
-    /// link schemes, and what ModShelf registers for itself.
+    /// user's folders as this system keeps them, the games Steam installed on it, the way this system shows notices, its
+    /// register of the apps that open link schemes, and what ModShelf registers for itself.
     /// </summary>
     /// <param name="secrets">Where the secret store keeps its secrets; by default the user's own ModShelf secrets.</param>
     /// <param name="links">
@@ -67,6 +69,9 @@ public static class PlatformServiceCollectionExtensions
         services.AddSingleton<IBrowserDownloads>(provider => new BrowserFolderWatcher(
             provider.GetService<TimeProvider>() ?? TimeProvider.System,
             provider.GetRequiredService<ILogger<BrowserFolderWatcher>>()));
+        services.AddSingleton<IInstalledGames>(provider => new SteamGames(
+            SteamFolders.ForThisSystem,
+            provider.GetRequiredService<ILoggerFactory>().CreateLogger<SteamGames>()));
         services.AddSingleton(_ => SchemeRegistrations.ForThisSystem(handler));
         services.AddSingleton(provider => NotificationServices.ForThisSystem(
             provider.GetRequiredService<ISchemeRegistration>(),
