@@ -20,6 +20,7 @@ internal sealed class SettingsHarness
     public SettingsHarness(bool protectedByOs = true, ScriptedAppReleases? releases = null, ExampleSite? example = null, ScriptedCatalog? byName = null)
     {
         Releases = releases ?? new ScriptedAppReleases();
+        Registry = new FakeSourceRegistry([Catalog, .. example is null ? [] : new IModSource[] { example }, .. byName is null ? [] : new IModSource[] { byName }]);
         Mover = new ScriptedLibraryMover(Settings);
         About = new AboutViewModel(new AppInfo("0.9.0", "a60d76b"), Diagnostics, Diagnostics, new RecordingClipboard(), new ScriptedFolders(), new RecordingLogger<AboutViewModel>());
         Links = new LinksViewModel(LinkHandlers, Navigation, UiThread, LinksLogger);
@@ -30,6 +31,7 @@ internal sealed class SettingsHarness
         BrowserFolder = new BrowserFolderViewModel(Settings, Folders, Dialogs, BrowserFolderLogger);
         GameSettings = new GameSettingsOpener(Navigation);
         Screens = new ScreenOpener(Navigation);
+        InstalledCard = new InstalledGamesViewModel(Installed, Lookup, Registry, Pictures.Pictures, Dialogs, InstalledLogger);
         Screen = new SettingsViewModel(
             Settings,
             Library,
@@ -39,7 +41,7 @@ internal sealed class SettingsHarness
             Themes,
             Tray,
             Dialogs,
-            new FakeSourceRegistry([Catalog, .. example is null ? [] : new IModSource[] { example }, .. byName is null ? [] : new IModSource[] { byName }]),
+            Registry,
             Lookup,
             Hidden,
             GameSettings,
@@ -55,6 +57,7 @@ internal sealed class SettingsHarness
             About,
             AppUpdate,
             Accounts.Screen,
+            InstalledCard,
             Logger);
     }
 
@@ -64,6 +67,23 @@ internal sealed class SettingsHarness
     public AccountsHarness Accounts { get; } = new();
 
     public InMemorySettingsService Settings { get; } = new();
+
+    /// <summary>
+    /// The sites: Nexus Mods, and the example site or the one that finds its games by name when given.
+    /// </summary>
+    public FakeSourceRegistry Registry { get; }
+
+    /// <summary>
+    /// The games installed on this computer: none until the test adds some.
+    /// </summary>
+    public ScriptedInstalledGames Installed { get; } = new();
+
+    /// <summary>
+    /// Settings › Games' games on this PC.
+    /// </summary>
+    public InstalledGamesViewModel InstalledCard { get; }
+
+    public RecordingLogger<InstalledGamesViewModel> InstalledLogger { get; } = new();
 
     public TestPictures Pictures { get; }
 

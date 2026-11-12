@@ -82,6 +82,10 @@ public sealed partial class SettingsViewModel
         {
             Accounts.OnShown();
         }
+        else if (SelectedCategory?.Category == SettingsCategory.Games)
+        {
+            Installed.OnShown();
+        }
 
         GamesWork = ReadGamesAsync();
         ShownWork = ShowStoredAsync();

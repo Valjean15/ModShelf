@@ -3787,4 +3787,104 @@
     <value>Use the system's Downloads folder</value>
     <comment>Settings › Library: sets the browser's downloads folder back to the system's.</comment>
   </data>
+  <data name="SettingsInstalledHeading" xml:space="preserve">
+    <value>Games on this PC</value>
+    <comment>Settings › Games: the heading of the card listing the games installed on this computer.</comment>
+  </data>
+  <data name="SettingsInstalledNote" xml:space="preserve">
+    <value>The games Steam installed on this computer, each with its game on the sites, by the same name or as you chose. Browse's game picker offers them first. Choose a game a site names otherwise, or one of two that share a name.</value>
+    <comment>Settings › Games: under the heading of the games on this PC.</comment>
+  </data>
+  <data name="SettingsInstalledReading" xml:space="preserve">
+    <value>Reading the games on this PC…</value>
+    <comment>Settings › Games: while the games installed and the sites' games are read.</comment>
+  </data>
+  <data name="SettingsInstalledFound" xml:space="preserve">
+    <value>{0}: {1}, {2:N0} with a site's game.</value>
+    <comment>Settings › Games: {0} is the stores, such as Steam; {1} how many games are installed, as SettingsInstalledGames says it; {2} how many have a game on a site.</comment>
+  </data>
+  <data name="SettingsInstalledOneGame" xml:space="preserve">
+    <value>1 game installed</value>
+    <comment>Settings › Games: as {1} of SettingsInstalledFound.</comment>
+  </data>
+  <data name="SettingsInstalledGames" xml:space="preserve">
+    <value>{0:N0} games installed</value>
+    <comment>Settings › Games: as {1} of SettingsInstalledFound; {0} is how many.</comment>
+  </data>
+  <data name="SettingsInstalledNoStore" xml:space="preserve">
+    <value>Steam isn't on this computer, so there are no installed games to match.</value>
+    <comment>Settings › Games: when Steam wasn't found.</comment>
+  </data>
+  <data name="SettingsInstalledCantList" xml:space="preserve">
+    <value>{0} couldn't list its games, so they match only as you choose them: {1}</value>
+    <comment>Settings › Games: {0} is the site, {1} what went wrong.</comment>
+  </data>
+  <data name="InstalledRowNoGame" xml:space="preserve">
+    <value>No site's game yet</value>
+    <comment>Settings › Games: under an installed game that no site has a game for.</comment>
+  </data>
+  <data name="InstalledRowGame" xml:space="preserve">
+    <value>{0}: {1}</value>
+    <comment>Settings › Games: an installed game's game on a site, by its name: {0} is the site, {1} the game.</comment>
+  </data>
+  <data name="InstalledRowChosen" xml:space="preserve">
+    <value>{0}: {1}, chosen</value>
+    <comment>Settings › Games: the game chosen for an installed game on a site: {0} is the site, {1} the game.</comment>
+  </data>
+  <data name="InstalledRowNoneChosen" xml:space="preserve">
+    <value>{0}: none, chosen</value>
+    <comment>Settings › Games: the site an installed game was said to have no game on: {0} is the site.</comment>
+  </data>
+  <data name="InstalledRowShared" xml:space="preserve">
+    <value>{0}: {1:N0} games of this name</value>
+    <comment>Settings › Games: two or more of a site's games have the installed game's name: {0} is the site, {1} how many.</comment>
+  </data>
+  <data name="InstalledRowChoose" xml:space="preserve">
+    <value>Choose…</value>
+    <comment>Settings › Games: opens the dialog choosing an installed game's games.</comment>
+  </data>
+  <data name="InstalledRowChooseName" xml:space="preserve">
+    <value>Choose {0}'s games</value>
+    <comment>Settings › Games: what Choose… says to a screen reader: {0} is the installed game.</comment>
+  </data>
+  <data name="InstalledPickTitle" xml:space="preserve">
+    <value>Its games on the sites</value>
+    <comment>The title of the dialog choosing an installed game's games.</comment>
+  </data>
+  <data name="InstalledPickMessage" xml:space="preserve">
+    <value>{0}: choose its game on a site, below, or say a site has none.</value>
+    <comment>The dialog choosing an installed game's games: {0} is the installed game.</comment>
+  </data>
+  <data name="InstalledPickChoose" xml:space="preserve">
+    <value>Choose</value>
+    <comment>The dialog choosing an installed game's games: chooses the game the arrow keys are on.</comment>
+  </data>
+  <data name="InstalledSiteChosen" xml:space="preserve">
+    <value>{0}, chosen</value>
+    <comment>The dialog choosing an installed game's games: the game chosen on a site: {0} is the game.</comment>
+  </data>
+  <data name="InstalledSiteNoneChosen" xml:space="preserve">
+    <value>None, chosen</value>
+    <comment>The dialog choosing an installed game's games: none was chosen on the site.</comment>
+  </data>
+  <data name="InstalledSiteByName" xml:space="preserve">
+    <value>{0}, by its name</value>
+    <comment>The dialog choosing an installed game's games: the game whose name is the installed game's: {0} is the game.</comment>
+  </data>
+  <data name="InstalledSiteShared" xml:space="preserve">
+    <value>{0:N0} games of this name: choose one below</value>
+    <comment>The dialog choosing an installed game's games: {0} is how many of the site's games have the installed game's name.</comment>
+  </data>
+  <data name="InstalledSiteNone" xml:space="preserve">
+    <value>None here</value>
+    <comment>The dialog choosing an installed game's games: says the site has no game for it.</comment>
+  </data>
+  <data name="InstalledSiteMatchByName" xml:space="preserve">
+    <value>Match by name</value>
+    <comment>The dialog choosing an installed game's games: forgets what was chosen on the site, so its game is the one of the same name again.</comment>
+  </data>
+  <data name="InstalledPickNotKept" xml:space="preserve">
+    <value>Couldn't keep the choice: {0}</value>
+    <comment>The dialog choosing an installed game's games: {0} is what went wrong.</comment>
+  </data>
 </root>

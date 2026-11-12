@@ -97,6 +97,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
         AboutViewModel about,
         AppUpdateViewModel appUpdate,
         AccountsViewModel accounts,
+        InstalledGamesViewModel installed,
         ILogger<SettingsViewModel> logger)
     {
         ArgumentNullException.ThrowIfNull(settings);
@@ -123,6 +124,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
         ArgumentNullException.ThrowIfNull(about);
         ArgumentNullException.ThrowIfNull(appUpdate);
         ArgumentNullException.ThrowIfNull(accounts);
+        ArgumentNullException.ThrowIfNull(installed);
         ArgumentNullException.ThrowIfNull(logger);
 
         _settings = settings;
@@ -153,6 +155,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
         About = about;
         AppUpdate = appUpdate;
         Accounts = accounts;
+        Installed = installed;
         appUpdate.PropertyChanged += (_, changed) =>
         {
             if (changed.PropertyName == nameof(AppUpdateViewModel.WantsUser))
@@ -182,6 +185,11 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
     /// The sites' accounts: Settings' first category.
     /// </summary>
     public AccountsViewModel Accounts { get; }
+
+    /// <summary>
+    /// The games installed on this computer, with their games on the sites: in Games.
+    /// </summary>
+    public InstalledGamesViewModel Installed { get; }
 
     public override Screen Screen => Screen.Settings;
 

@@ -217,6 +217,15 @@ public sealed partial class SettingsViewModel
         Strings.AgentsPortLabel);
 
     /// <summary>
+    /// The games installed on this computer, with their games on the sites: Games.
+    /// </summary>
+    public SettingsSectionViewModel InstalledSection { get; } = new(
+        SettingsCategory.Games,
+        Strings.SettingsInstalledHeading,
+        Strings.SettingsInstalledNote,
+        Strings.InstalledRowChoose);
+
+    /// <summary>
     /// Single games' own settings: Games.
     /// </summary>
     public SettingsSectionViewModel GamesSection { get; } = new(
@@ -269,6 +278,7 @@ public sealed partial class SettingsViewModel
         QuotaSection,
         LinksSection,
         AgentsSection,
+        InstalledSection,
         GamesSection,
         AboutSection,
     ];
@@ -290,6 +300,10 @@ public sealed partial class SettingsViewModel
         if (value?.Category == SettingsCategory.Accounts)
         {
             Accounts.OnShown();
+        }
+        else if (value?.Category == SettingsCategory.Games)
+        {
+            Installed.OnShown();
         }
     }
 
@@ -342,6 +356,12 @@ public sealed partial class SettingsViewModel
         foreach (SettingsSectionViewModel section in Sections)
         {
             section.IsShown = section.Matches(search) || (section == GamesSection && GamesNamed(search).Any());
+        }
+
+        if (InstalledSection.IsShown && Installed.StatusText is null && !Installed.IsReading)
+        {
+            // Found by a search before Games was shown: the games on this PC are read for it.
+            Installed.OnShown();
         }
 
         foreach (SettingsCategoryViewModel shown in Categories)

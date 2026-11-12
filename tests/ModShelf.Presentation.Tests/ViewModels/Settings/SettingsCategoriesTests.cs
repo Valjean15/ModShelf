@@ -31,9 +31,31 @@ public sealed class SettingsCategoriesTests
         Assert.Equal(["Updates", "Quota"], shown["Updates"]);
         Assert.Equal(["Links"], shown["Links"]);
         Assert.Equal(["Agents"], shown["Agents"]);
-        Assert.Equal(["Games"], shown["Games"]);
+        Assert.Equal(["Installed", "Games"], shown["Games"]);
         Assert.Equal(["About"], shown["About"]);
         Assert.All(Screen.Categories, category => Assert.True(category.HasMatches));
+    }
+
+    [Fact]
+    public async Task GamesReadTheGamesOnThisPcEachTimeTheyreShownAndASearchFindsThem()
+    {
+        _harness.Installed.Add("413150", "Stardew Valley");
+        SettingsHarness searching = new();
+        searching.Installed.Add("413150", "Stardew Valley");
+
+        Screen.SelectedCategory = Screen.Categories.Single(category => category.Category == SettingsCategory.Games);
+        await _harness.InstalledCard.Reading;
+        Screen.OnShown();
+        await _harness.InstalledCard.Reading;
+        searching.Screen.SearchText = "steam";
+        await searching.InstalledCard.Reading;
+        searching.Screen.SearchText = "steam installed";
+        await searching.InstalledCard.Reading;
+
+        Assert.Equal(2, _harness.Installed.Matched.Count);
+        Assert.Equal("Steam: 1 game installed, 0 with a site's game.", _harness.InstalledCard.StatusText);
+        Assert.True(searching.Screen.InstalledSection.IsShown);
+        Assert.Single(searching.Installed.Matched);
     }
 
     [Fact]
@@ -188,6 +210,7 @@ public sealed class SettingsCategoriesTests
             ("Quota", Screen.QuotaSection),
             ("Links", Screen.LinksSection),
             ("Agents", Screen.AgentsSection),
+            ("Installed", Screen.InstalledSection),
             ("Games", Screen.GamesSection),
             ("About", Screen.AboutSection),
         }.Where(section => section.Section.IsShown).Select(section => section.Name)];

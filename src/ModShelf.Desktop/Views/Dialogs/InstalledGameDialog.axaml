@@ -1,0 +1,57 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ModShelf.Presentation.ViewModels.Settings"
+        xmlns:res="using:ModShelf.Presentation.Resources"
+        xmlns:games="using:ModShelf.Desktop.Views.Games"
+        x:Class="ModShelf.Desktop.Views.Dialogs.InstalledGameDialog"
+        x:DataType="vm:InstalledGamePickViewModel"
+        Title="{x:Static res:Strings.InstalledPickTitle}"
+        Width="560"
+        Classes="dialog">
+
+    <DockPanel>
+        <!-- Close first, so the main button sits in the corner. Choose chooses the game the arrow keys are on. -->
+        <StackPanel DockPanel.Dock="Bottom" Classes="dialogButtons">
+            <Button IsCancel="True" Content="{x:Static res:Strings.DialogClose}" Click="OnClose" />
+            <Button Classes="accent" Content="{x:Static res:Strings.InstalledPickChoose}" Command="{Binding Picker.ChooseCommand}" />
+        </StackPanel>
+        <TextBlock DockPanel.Dock="Top" Classes="dialogTitle" Text="{x:Static res:Strings.InstalledPickTitle}" />
+        <StackPanel Spacing="12" Margin="0,0,0,8">
+            <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding Message}" />
+
+            <!-- Its games on the sites, by name or chosen, each with what can be said of it. -->
+            <ItemsControl ItemsSource="{Binding Sites}" IsVisible="{Binding HasSites}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:InstalledSiteViewModel">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock FontWeight="SemiBold" Text="{Binding SiteName}" />
+                                <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding MatchText}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <Button Classes="quiet"
+                                        Content="{x:Static res:Strings.InstalledSiteMatchByName}"
+                                        Command="{Binding ByNameCommand}"
+                                        IsVisible="{Binding CanMatchByName}" />
+                                <Button Content="{x:Static res:Strings.InstalledSiteNone}"
+                                        Command="{Binding NoneCommand}"
+                                        IsVisible="{Binding CanSayNone}" />
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <games:GamePicker x:Name="Picker" IsInline="True" DataContext="{Binding Picker}" />
+            <TextBlock Classes="problem"
+                       TextWrapping="Wrap"
+                       Text="{Binding Problem}"
+                       IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        </StackPanel>
+    </DockPanel>
+</Window>

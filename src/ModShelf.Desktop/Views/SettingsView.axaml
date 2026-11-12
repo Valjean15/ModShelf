@@ -428,6 +428,44 @@
                             </Border>
                         </Panel>
 
+                        <!-- The games installed on this computer, each with its games on the sites, and Choose… to choose them. -->
+                        <Border Classes="card" IsVisible="{Binding InstalledSection.IsShown}">
+                            <StackPanel Spacing="12" DataContext="{Binding Installed}" x:DataType="vm:InstalledGamesViewModel">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Classes="subheading" Text="{x:Static res:Strings.SettingsInstalledHeading}" />
+                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.SettingsInstalledNote}" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsReading}">
+                                    <ProgressBar Width="80" IsIndeterminate="True" VerticalAlignment="Center" />
+                                    <TextBlock Classes="note" Text="{x:Static res:Strings.SettingsInstalledReading}" />
+                                </StackPanel>
+                                <TextBlock TextWrapping="Wrap" Text="{Binding StatusText}" IsVisible="{Binding StatusText, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                <TextBlock Classes="problem" TextWrapping="Wrap" Text="{Binding Problem}" IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                <ItemsControl ItemsSource="{Binding Games}" IsVisible="{Binding HasGames}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Spacing="10" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:InstalledGameRowViewModel">
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <TextBlock FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding Name}" />
+                                                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding MatchesText}" />
+                                                </StackPanel>
+                                                <Button Grid.Column="1"
+                                                        VerticalAlignment="Center"
+                                                        Content="{x:Static res:Strings.InstalledRowChoose}"
+                                                        Command="{Binding ChooseCommand}"
+                                                        AutomationProperties.Name="{Binding ChooseText}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+
                         <!-- The games, and the chosen one's own settings beside them; in a narrow card, below them. -->
                         <Border Classes="card" IsVisible="{Binding GamesSection.IsShown}" Container.Name="GamesCard" Container.Sizing="Width">
                             <StackPanel Spacing="12">

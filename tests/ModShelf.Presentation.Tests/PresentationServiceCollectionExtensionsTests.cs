@@ -31,6 +31,7 @@ public sealed class PresentationServiceCollectionExtensionsTests
         // The one Settings › Accounts shows too (ADR 0094).
         Assert.Single(services, descriptor => descriptor.ServiceType == typeof(AccountsViewModel));
         Assert.Single(services, descriptor => descriptor.ServiceType == typeof(SitesWantingAccounts));
+        Assert.Single(services, descriptor => descriptor.ServiceType == typeof(InstalledGamesViewModel));
         Assert.Single(services, descriptor => descriptor.ServiceType == typeof(MainWindowViewModel));
         Assert.Single(services, descriptor => descriptor.ServiceType == typeof(TrayViewModel));
         Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));

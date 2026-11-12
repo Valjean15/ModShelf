@@ -125,6 +125,14 @@ internal sealed class AvaloniaDialogService : IDialogService
         });
     }
 
+    public Task PickInstalledGameAsync(InstalledGamePickViewModel picking, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(picking);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Dispatcher.UIThread.InvokeAsync(() => ShowAsync(new InstalledGameDialog { DataContext = picking }, () => true, cancellationToken));
+    }
+
     public Task MoveGameAsync(GameMoveViewModel moving, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(moving);

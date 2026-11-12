@@ -122,6 +122,25 @@ internal sealed class ScriptedDialogs : IDialogService
     /// </summary>
     public Func<GameMoveViewModel, Task>? InMoveGame { get; set; }
 
+    /// <summary>
+    /// Each dialog choosing an installed game's games shown.
+    /// </summary>
+    public List<InstalledGamePickViewModel> PickingInstalled { get; } = [];
+
+    /// <summary>
+    /// What the user does in the dialog choosing an installed game's games; by default, they close it.
+    /// </summary>
+    public Func<InstalledGamePickViewModel, Task>? InPickInstalled { get; set; }
+
+    public async Task PickInstalledGameAsync(InstalledGamePickViewModel picking, CancellationToken cancellationToken)
+    {
+        PickingInstalled.Add(picking);
+        if (InPickInstalled is { } user)
+        {
+            await user(picking);
+        }
+    }
+
     public async Task MoveGameAsync(GameMoveViewModel moving, CancellationToken cancellationToken)
     {
         MovingGames.Add(moving);
