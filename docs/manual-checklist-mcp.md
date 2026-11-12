@@ -215,6 +215,18 @@ DEG Mods needs no account. Start a new conversation.
   the library; the name alone: "Give the file's full path."; the full path: "Taken: the file is in the library.",
   `library_list` lists Nipton Rebuilt Remade, and the file has left the test folder.
 
+## 8. Games on this PC (Steam)
+
+On a computer with Steam and a few games installed, after the desktop app's checklist, section 18, chose a game for The
+Elder Scrolls V: Skyrim Special Edition (or another). Start a new conversation.
+
+- [ ] **8.1 The games here.** Ask the agent which of the games installed on this computer have mods, and on which sites.
+  It calls `mod_games` with `installed` `true`: `stores` names Steam, `installed` each game with its name, `steam`, its
+  app ID and its games on the sites, each with its key and how it matched (Skyrim's `skyrimspecialedition` on `nexus`,
+  chosen), and `problems` any site that couldn't list its games. No folder's path is in the result.
+- [ ] **8.2 Then its mods.** Ask it to search the mods of one of those games.
+  It calls `mod_search` with the key and site `mod_games` gave, as for any game.
+
 ## Results
 
 Copy this table into the release's notes or issue, and mark each check ✅, ❌ or – (not run). For a ❌, add what you
@@ -268,3 +280,5 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 7.3 A file of a DEG Mods mod | | |
 | 7.4 One only DEG Mods' server has | | |
 | 7.5 The file from the browser | | |
+| 8.1 The games here | | |
+| 8.2 Then its mods | | |

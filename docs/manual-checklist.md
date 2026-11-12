@@ -1,6 +1,6 @@
 # Manual checklist
 
-CI never calls a live mod site, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 13 checks GameBanana, once, without an account and then with a profile linked; section 14 checks mod.io, once, with an API key and then with an access token; section 15 checks DEG Mods, once, without an account. Phase 3 is done when they all pass.
+CI never calls a live mod site, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 13 checks GameBanana, once, without an account and then with a profile linked; section 14 checks mod.io, once, with an API key and then with an access token; section 15 checks DEG Mods, once, without an account. Section 16 checks the games Steam installed on this computer, once, on a computer with Steam and a few games installed. Phase 3 is done when they all pass.
 
 The checks use the CLI. They download files into a temporary folder, and keep the library database and credentials apart from your own. One section changes your account: it tracks SMAPI and untracks it again, leaving your tracked mods as they were.
 
@@ -358,6 +358,17 @@ $blocked = 'https://degmods.com/mod/naddr1qqjrqvmyx4jrwef3956nxvec956rswry943xyw
 - [ ] **15.14 A relay down.** With the network cut, `ms mod games --source degmods`.
   It says DEG Mods' relay couldn't be reached, after 30 seconds at most, exit code 1.
 
+## 16. Games on this PC (Steam)
+
+Run it once, in the Premium run, on a computer with Steam and a few games installed, after the desktop app's checklist, section 18, chose a game for The Elder Scrolls V: Skyrim Special Edition (or another), in the same test folder. ModShelf only reads Steam's files.
+
+- [ ] **16.1 Every installed game.** `ms mod games --installed`.
+  "Steam has *N* games installed, *M* with a site's game.", then a row for each game on each site, by the installed game's name: its name, `steam` and its app ID, the site, the site game's key, and how it matched: "same name", "one of the same name", "chosen" or "none, chosen"; "no site's game" with neither. Skyrim's row says `nexus`, `skyrimspecialedition`, "chosen". Then "To search a game's mods: mod search --game <its key> --source <its site>" and "Choose an installed game's games in the desktop app's Settings › Games." No Proton, no Steam Linux Runtime, no game still downloading. Exit code 0.
+- [ ] **16.2 By words, a site, a page.** `ms mod games skyrim --installed`, then `ms mod games --installed --source nexus`, then `ms mod games --installed --page-size 2 --page 2`.
+  "1 installed game matches." (more if more are named so), found by the installed name or its games'; then each installed game with its Nexus Mods game alone; then the third and fourth games, "These are 3 to 4.", with "More on the next page: add --page 3." when there are more.
+- [ ] **16.3 A site that can't list its games.** With mod.io unlinked, as 14.17 leaves it, `ms mod games --installed`.
+  On the error output, "mod.io couldn't list its games, so they match only as chosen: it needs a linked account, or refused the one linked."; the list still comes, without mod.io's games but those chosen. Exit code 0.
+
 ## Clean up
 
 After both accounts:
@@ -482,3 +493,6 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 15.12 Moderation | | – | |
 | 15.13 Refusals | | – | |
 | 15.14 A relay down | | – | |
+| 16.1 Every installed game | | – | |
+| 16.2 By words, a site, a page | | – | |
+| 16.3 A site that can't list its games | | – | |

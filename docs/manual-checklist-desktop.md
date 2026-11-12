@@ -1,6 +1,6 @@
 # Manual checklist: the desktop app
 
-CI never calls a live mod site, and never clicks through the desktop app, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 15 checks GameBanana, once, without an account and then with a profile linked; section 16 checks mod.io, once, with an API key and then with an access token; section 17 checks DEG Mods, once, without an account. Phase 5 is done when every flow of Phases 1 to 4 works from the app, without the command line. The command line has its own checklist, [manual-checklist.md](manual-checklist.md).
+CI never calls a live mod site, and never clicks through the desktop app, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 15 checks GameBanana, once, without an account and then with a profile linked; section 16 checks mod.io, once, with an API key and then with an access token; section 17 checks DEG Mods, once, without an account. Section 18 checks the games Steam installed on this computer, once, on a computer with Steam and a few games installed. Phase 5 is done when every flow of Phases 1 to 4 works from the app, without the command line. The command line has its own checklist, [manual-checklist.md](manual-checklist.md).
 
 The checks download files into a test folder, and keep the library database, settings and credentials apart from your own. One section changes your account: it tracks SMAPI and untracks it again, leaving your tracked mods as they were.
 
@@ -436,6 +436,23 @@ DEG Mods needs no account. The checks use the links of the command line's checkl
 - [ ] **17.8 Remove it.** On the Library screen, remove Better Newspapers, and delete its file.
   The game leaves the Library.
 
+## 18. Games on this PC (Steam)
+
+Run it once, in the Premium run, after section 17, on a computer with Steam and a few games installed, Skyrim Special Edition among them if you have it. ModShelf only reads Steam's files: nothing in Steam changes.
+
+- [ ] **18.1 The games found.** Open Settings › Games.
+  "Games on this PC" comes first, above "Games' own settings": "Reading the games on this PC…" with a bar while the sites' games are read, each game listed at once and its matches filled in as each site answers; then "Steam: *N* games installed, *M* with a site's game.", the games as Steam's library lists them, by name, without Proton or the Steam Linux Runtime, nor a game still downloading. Each says its games on the sites, such as "Nexus Mods: Stardew Valley · mod.io: Stardew Valley · DEG Mods: Stardew Valley", or "No site's game yet". The log has "Steam has *N* games installed in *L* library folders", and no folder's path.
+- [ ] **18.2 Choose its game.** **Choose…** on The Elder Scrolls V: Skyrim Special Edition (or another game whose name the sites spell otherwise), type `skyrim special`, and choose Skyrim Special Edition of Nexus Mods.
+  The dialog says "The Elder Scrolls V: Skyrim Special Edition: choose its game on a site, below, or say a site has none.", the game picker in it lists every site's games, GameBanana's by name. Chosen, it closes, and the row says "Nexus Mods: Skyrim Special Edition, chosen". The settings file holds `"installedGames": { "steam/489830": { "nexus": "skyrimspecialedition" } }`.
+- [ ] **18.3 None here, then by name.** **Choose…** on a game with a match by name, and **None here** beside its site; then **Choose…** again, and **Match by name**.
+  The dialog lists only the sites with a game or a choice. **None here** closes it, and the row says "*Site*: none, chosen", the settings file holding `null` for that site. **Match by name** brings the game of the same name back, and the game leaves `installedGames` (the section goes when no game is left).
+- [ ] **18.4 In Browse.** On the Browse screen, choose **All sites** in the site box, and click the game picker. Type a word of an installed game's Steam name that its site's name lacks, such as `elder`. Then choose **Nexus Mods** in the box, and open the picker again.
+  "On this PC (Steam)" comes first, each installed game's games on the sites, each with its site, a game listed once however many installed games match it; "Your games" follow, without those. `elder` finds Skyrim Special Edition by the installed game's name. With **Nexus Mods**, only Nexus Mods' games of this PC. Choosing one searches its mods, as any game does.
+- [ ] **18.5 A name two games share.** Only if a row in 18.1 says "*N* games of this name": open Browse's picker on that site.
+  Both games show under "On this PC (Steam)", each saying "*key*, one of the games of this name". Choosing one keeps it for the installed game: Settings › Games then says "*Site*: *name*, chosen", and Browse lists that one alone.
+- [ ] **18.6 Steam's games changed.** Install or uninstall a small game in Steam (or move one to another library folder), then open Settings › Games again.
+  The list follows Steam's: read again each time Settings › Games shows, and each time Browse shows. A game uninstalled keeps its choices in the settings file, for when it's back.
+
 ## Clean up
 
 If a run stopped before 12.7, give the links back on the Settings screen first: their registration starts ModShelf on the test folder. After both accounts, quit the app from the tray menu, then:
@@ -620,3 +637,9 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 17.6a A file elsewhere | | – | |
 | 17.7 Moderation | | – | |
 | 17.8 Remove it | | – | |
+| 18.1 The games found | | – | |
+| 18.2 Choose its game | | – | |
+| 18.3 None here, then by name | | – | |
+| 18.4 In Browse | | – | |
+| 18.5 A name two games share | | – | |
+| 18.6 Steam's games changed | | – | |
