@@ -104,6 +104,12 @@ public sealed partial class BrowseViewModel
     {
         if (_gamesRead || IsReadingGames)
         {
+            if (_gamesRead)
+            {
+                // Games may have been installed, or uninstalled, since.
+                InstalledWork = ShowInstalledAsync();
+            }
+
             return;
         }
 
@@ -166,6 +172,7 @@ public sealed partial class BrowseViewModel
         _gamesRead = !GamesFailed;
         _allGames = games;
         ShowGameChoices();
+        InstalledWork = ShowInstalledAsync();
         GameRef? asked = _asked;
         _asked = null;
         if (asked is not null && Games.FirstOrDefault(choice => choice.Game == asked) is { } chosen)
@@ -283,7 +290,8 @@ public sealed partial class BrowseViewModel
         => new(game.Game, _lookup.SearchableSources.Count == 1 ? game.Name : Text.Format(Strings.BrowseGameOnSite, game.Name, _services.Sources.SiteName(game.Game.Source)));
 
     /// <summary>
-    /// Lists the sites' games by name, but those the settings hide, and offers them in the game picker.
+    /// Lists the sites' games by name, but those the settings hide, and offers them in the game picker, with the
+    /// installed games' games.
     /// </summary>
     private void ShowGameChoices()
     {
@@ -295,6 +303,7 @@ public sealed partial class BrowseViewModel
         ];
         Games.SyncWith([.. shown.Select(game => game.Choice).OrderBy(game => game.Name, byName)]);
         Picker.ShowGames(shown.Select(game => game.Info));
+        ShowInstalled();
     }
 
     /// <summary>

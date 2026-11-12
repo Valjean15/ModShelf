@@ -91,6 +91,7 @@ internal sealed class BrowseHarness : IDisposable
             Undo,
             Hidden,
             Sites,
+            Installed,
             UiState,
             Pictures.Pictures,
             UiThread,
@@ -112,6 +113,11 @@ internal sealed class BrowseHarness : IDisposable
     public HiddenGames Hidden { get; } = new();
 
     public ScriptedSitesInUse Sites { get; } = new();
+
+    /// <summary>
+    /// The games installed on this computer: none until the test adds some.
+    /// </summary>
+    public ScriptedInstalledGames Installed { get; } = new();
 
     public MemoryUiState UiState { get; } = new();
 

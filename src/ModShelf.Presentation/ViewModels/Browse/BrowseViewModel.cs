@@ -10,6 +10,7 @@ using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Common;
 using ModShelf.Application.Downloads;
+using ModShelf.Application.Installed;
 using ModShelf.Application.Library;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Settings;
@@ -60,6 +61,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     private readonly INavigationService _navigation;
     private readonly IHiddenGames _hiddenGames;
     private readonly ISitesInUse _sitesInUse;
+    private readonly IInstalledGameMatcher _installedGames;
     private readonly IUiState _uiState;
     private readonly ModPictures _pictures;
     private readonly IUiThread _uiThread;
@@ -105,6 +107,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         UndoBarViewModel undo,
         IHiddenGames hiddenGames,
         ISitesInUse sitesInUse,
+        IInstalledGameMatcher installedGames,
         IUiState uiState,
         ModPictures pictures,
         IUiThread uiThread,
@@ -118,6 +121,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(undo);
         ArgumentNullException.ThrowIfNull(hiddenGames);
         ArgumentNullException.ThrowIfNull(sitesInUse);
+        ArgumentNullException.ThrowIfNull(installedGames);
         ArgumentNullException.ThrowIfNull(uiState);
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(uiThread);
@@ -128,6 +132,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         _navigation = navigation;
         _hiddenGames = hiddenGames;
         _sitesInUse = sitesInUse;
+        _installedGames = installedGames;
         _uiState = uiState;
         _pictures = pictures;
         _uiThread = uiThread;
@@ -135,7 +140,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         screens.BrowseGameOpening += OnGameOpening;
         Filters = new BrowseFiltersViewModel(this);
         _byName = new GamesByName(lookup, lookup.SearchableSources, logger, hiddenGames.IsHidden);
-        Picker = new GamePickerViewModel(pictures, sources, ChooseGame, SearchAgainFor, byName: _byName);
+        Picker = new GamePickerViewModel(pictures, sources, ChooseGame, SearchAgainFor, byName: _byName, installedPicked: PickInstalled);
         StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
         Sites =
         [

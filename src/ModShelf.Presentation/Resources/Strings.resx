@@ -3219,6 +3219,14 @@
     <value>Not in your library</value>
     <comment>Under a game in the game picker that the library has no mods of.</comment>
   </data>
+  <data name="GamePickerInstalled" xml:space="preserve">
+    <value>On this PC ({0})</value>
+    <comment>The game picker's heading over the games installed on this computer, by their games on the sites: {0} is the stores, such as Steam.</comment>
+  </data>
+  <data name="GamePickerInstalledSharedName" xml:space="preserve">
+    <value>{0}, one of the games of this name</value>
+    <comment>Under an installed game's game in the game picker, when two or more of the site's games have its name: {0} is the game's key on its site, such as stardewvalley. Choosing it remembers it as the installed game's.</comment>
+  </data>
   <data name="GamePickerTypeToFind" xml:space="preserve">
     <value>Type to find any of the {0:N0} games on {1}.</value>
     <comment>The game picker while nothing's typed: {0} is how many games, {1} the sites.</comment>

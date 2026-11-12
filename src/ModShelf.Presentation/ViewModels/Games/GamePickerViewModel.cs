@@ -5,6 +5,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using ModShelf.Application.Common;
+using ModShelf.Application.Installed;
+using ModShelf.Application.Installed.Ports;
 using ModShelf.Application.Sources;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
@@ -20,7 +22,9 @@ namespace ModShelf.Presentation.ViewModels.Games;
 /// and the recent searches while nothing is. The arrow keys move from game to game, Enter chooses, and Escape closes it.
 /// A site that finds its games by name (<see cref="GamesByName"/>) is asked as the name is typed, each answer taking the
 /// last one's place; the games it found stay known, so one chosen keeps its name and cover. A site chosen
-/// (<see cref="ShowSite"/>) narrows it to that site's games.
+/// (<see cref="ShowSite"/>) narrows it to that site's games. The games installed on this computer
+/// (<see cref="ShowInstalled"/>) come first, by their games on the sites: choosing one of two a name matches picks it for
+/// the installed game.
 /// </summary>
 public sealed partial class GamePickerViewModel : ObservableObject
 {
@@ -35,9 +39,16 @@ public sealed partial class GamePickerViewModel : ObservableObject
     private readonly Action<string>? _searchAgain;
     private readonly Action<string>? _typed;
     private readonly GamesByName? _byName;
+    private readonly Action<InstalledGame, GameRef>? _installedPicked;
     private readonly Dictionary<GameRef, GamePickerEntryViewModel> _entries = [];
     private readonly Dictionary<GameRef, GameInfo> _found = [];
+    private readonly Dictionary<GameRef, GameInfo> _installedGames = [];
+
+    // The installed game each game listed under "On this PC" is one of two or more its name matches on its site.
+    private readonly Dictionary<GameRef, InstalledGame> _sharedNames = [];
     private IReadOnlyList<GameInfo> _games = [];
+    private IReadOnlyList<InstalledGameMatch> _installed = [];
+    private string _stores = string.Empty;
 
     // Which asking of the sites that find games by name is the latest: an answer to an earlier one is dropped.
     private int _asked;
@@ -50,13 +61,18 @@ public sealed partial class GamePickerViewModel : ObservableObject
     /// <param name="searchAgain">Searches a recent search again; null for a picker without recent searches.</param>
     /// <param name="typed">What Enter does with the text typed when no game is listed to choose; null for nothing.</param>
     /// <param name="byName">The sites that find their games by name, asked as it's typed; null for none.</param>
+    /// <param name="installedPicked">
+    /// Remembers the game chosen as an installed game's, when it was one of two or more its name matched; null for a picker
+    /// that lists no installed games.
+    /// </param>
     internal GamePickerViewModel(
         ModPictures pictures,
         ISourceRegistry sources,
         Action<GameRef> chosen,
         Action<string>? searchAgain = null,
         Action<string>? typed = null,
-        GamesByName? byName = null)
+        GamesByName? byName = null,
+        Action<InstalledGame, GameRef>? installedPicked = null)
     {
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(sources);
@@ -68,6 +84,7 @@ public sealed partial class GamePickerViewModel : ObservableObject
         _searchAgain = searchAgain;
         _typed = typed;
         _byName = byName is { Sites.Count: > 0 } ? byName : null;
+        _installedPicked = installedPicked;
     }
 
     /// <summary>
@@ -150,7 +167,7 @@ public sealed partial class GamePickerViewModel : ObservableObject
     /// What the picker knows of a game: listed, or found by name; null for one it doesn't.
     /// </summary>
     internal GameInfo? Known(GameRef game)
-        => _games.FirstOrDefault(listed => listed.Game == game) ?? _found.GetValueOrDefault(game);
+        => _games.FirstOrDefault(listed => listed.Game == game) ?? _found.GetValueOrDefault(game) ?? _installedGames.GetValueOrDefault(game);
 
     /// <summary>
     /// Offers <paramref name="games"/>: those the sites list that can be chosen. Their sites show when they're of two
@@ -191,6 +208,26 @@ public sealed partial class GamePickerViewModel : ObservableObject
 
         _library = counts;
         Arrange();
+    }
+
+    /// <summary>
+    /// Offers first, under "On this PC (Steam)", the games installed on this computer by their games on the sites: each
+    /// game matched, the one picked or those of the same name, on the sites offered.
+    /// </summary>
+    /// <param name="stores">The stores the games were installed from, such as Steam.</param>
+    internal void ShowInstalled(IEnumerable<GameStore> stores, IEnumerable<InstalledGameMatch> games)
+    {
+        ArgumentNullException.ThrowIfNull(stores);
+        ArgumentNullException.ThrowIfNull(games);
+
+        _installed = [.. games];
+        _stores = Text.List(stores.Select(store => store.Name).Distinct());
+        foreach (GameInfo game in _installed.SelectMany(installed => installed.Sites).SelectMany(site => site.Games))
+        {
+            _installedGames[game.Game] = game;
+        }
+
+        ShowSites();
     }
 
     /// <summary>
@@ -236,7 +273,7 @@ public sealed partial class GamePickerViewModel : ObservableObject
     /// Opens the list, as focusing the field does: once there are games or recent searches to show.
     /// </summary>
     [RelayCommand]
-    private void Open() => IsOpen = IsOpen || _games.Count > 0 || Recent.Count > 0 || ByNameSites.Count > 0;
+    private void Open() => IsOpen = IsOpen || _games.Count > 0 || Recent.Count > 0 || ByNameSites.Count > 0 || _installed.Count > 0;
 
     /// <summary>
     /// Closes the list, forgetting what was typed; the game chosen stays.
@@ -303,6 +340,11 @@ public sealed partial class GamePickerViewModel : ObservableObject
         _current = entry.Game;
         Picked = entry;
         IsOpen = false;
+        if (_sharedNames.TryGetValue(entry.Game, out InstalledGame? installed))
+        {
+            _installedPicked?.Invoke(installed, entry.Game);
+        }
+
         _chosen(entry.Game);
     }
 
@@ -338,15 +380,17 @@ public sealed partial class GamePickerViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Lists the library's games whose names have what's typed, the one with the most mods first, then, once something's
-    /// typed, the other games that have it, those that start with it first; the game highlighted stays while listed, or
-    /// else the first is.
+    /// Lists the installed games' games whose names, or the installed games', have what's typed; then the library's other
+    /// games that have it, the one with the most mods first; then, once something's typed, the other games that have it,
+    /// those that start with it first. The game highlighted stays while listed, or else the first is.
     /// </summary>
     private void Arrange()
     {
         StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
         NameQuery query = NameQuery.Parse(Query);
-        GameInfo[] offered = [.. _games.Where(game => Offers(game.Game.Source))];
+        (GameInfo Game, InstalledGame Installed, bool SharedName)[] installed = Installed(query, byName);
+        HashSet<GameRef> onThisPc = [.. installed.Select(game => game.Game.Game)];
+        GameInfo[] offered = [.. _games.Where(game => Offers(game.Game.Source) && !onThisPc.Contains(game.Game))];
         GameInfo[] yours =
         [
             .. offered
@@ -357,17 +401,35 @@ public sealed partial class GamePickerViewModel : ObservableObject
         IReadOnlyList<GameInfo> found = query.IsEmpty
             ? []
             : query.Find(
-                offered.Concat(_found.Values.Where(game => Offers(game.Game.Source) && !_games.Any(listed => listed.Game == game.Game)))
+                offered.Concat(_found.Values.Where(game => Offers(game.Game.Source) && !onThisPc.Contains(game.Game) && !_games.Any(listed => listed.Game == game.Game)))
                     .Where(game => !_library.ContainsKey(game.Game))
                     .OrderBy(game => game.Name, byName),
                 game => game.Name);
         List<GamePickerEntryViewModel> listed = [];
+        _sharedNames.Clear();
+        foreach ((GameInfo game, InstalledGame of, bool sharedName) in installed)
+        {
+            GamePickerEntryViewModel entry = EntryFor(game.Game)!;
+            entry.Meta = _library.TryGetValue(game.Game, out int mods) ? Counts.Of(mods, Strings.GamePickerOneMod, Strings.GamePickerMods)
+                : sharedName ? Text.Format(Strings.GamePickerInstalledSharedName, game.Game.Key)
+                : _library.Count > 0 ? Strings.GamePickerNotYours
+                : string.Empty;
+            entry.Heading = listed.Count == 0 ? Text.Format(Strings.GamePickerInstalled, _stores) : null;
+            entry.Cover.Show(CancellationToken.None);
+            listed.Add(entry);
+            if (sharedName)
+            {
+                _sharedNames[game.Game] = of;
+            }
+        }
+
+        int installedCount = listed.Count;
         foreach (GameInfo game in yours)
         {
             GamePickerEntryViewModel entry = EntryFor(game.Game)!;
             int mods = _library[game.Game];
             entry.Meta = Counts.Of(mods, Strings.GamePickerOneMod, Strings.GamePickerMods);
-            entry.Heading = listed.Count == 0 ? Strings.GamePickerYours : null;
+            entry.Heading = listed.Count == installedCount ? Strings.GamePickerYours : null;
             entry.Cover.Show(CancellationToken.None);
             listed.Add(entry);
         }
@@ -393,9 +455,31 @@ public sealed partial class GamePickerViewModel : ObservableObject
     }
 
     /// <summary>
+    /// The installed games' games on the sites offered whose names, or the installed games' names, have what's typed,
+    /// each once, by name: with the installed game, and whether the game is one of two or more its name matched there (a
+    /// site's game chosen is one alone).
+    /// </summary>
+    private (GameInfo Game, InstalledGame Installed, bool SharedName)[] Installed(NameQuery query, StringComparer byName)
+    {
+        List<(GameInfo Game, InstalledGame Installed, bool SharedName)> games = [];
+        foreach (InstalledGameMatch match in _installed)
+        {
+            foreach (SiteMatch site in match.Sites.Where(site => Offers(site.Site)))
+            {
+                games.AddRange(site.Games
+                    .Where(game => games.All(listed => listed.Game.Game != game.Game) && (query.Matches(game.Name) || query.Matches(match.Game.Name)))
+                    .Select(game => (game, match.Game, site.Games.Count > 1)));
+            }
+        }
+
+        return [.. games.OrderBy(game => game.Game.Name, byName).ThenBy(game => game.Game.Game.ToString(), StringComparer.Ordinal)];
+    }
+
+    /// <summary>
     /// Whether the games offered are of two sites or more, so each says its site.
     /// </summary>
-    private bool ShowsSites => _site is null && _games.Select(listed => listed.Game.Source).Concat(_byName?.Sites ?? []).Distinct().Skip(1).Any();
+    private bool ShowsSites => _site is null
+        && _games.Select(listed => listed.Game.Source).Concat(_byName?.Sites ?? []).Concat(_installedGames.Keys.Select(game => game.Source)).Distinct().Skip(1).Any();
 
     /// <summary>
     /// The sites that find their games by name whose games are offered.
