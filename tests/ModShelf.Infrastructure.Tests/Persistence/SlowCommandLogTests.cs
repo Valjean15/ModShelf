@@ -62,7 +62,9 @@ public sealed partial class SlowCommandLogTests : IAsyncLifetime
         // Waiting less than a second for another write.
         await WhileWritingAsync(TimeSpan.FromMilliseconds(300), () => _database.Repository.AddAsync(Job("2"), Cancellation));
 
-        Assert.Empty(Slow());
+        // Nothing quicker than a second is logged. A runner busy enough to make these take a second (Windows' CI on
+        // Nov 12) logs them rightly, as a second or more.
+        Assert.All(Slow(), entry => Assert.Matches(@"The library database took [1-9]\d*\.\d s for ", entry));
     }
 
     [Fact]

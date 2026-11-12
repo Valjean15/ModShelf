@@ -17,6 +17,11 @@ namespace ModShelf.Cli.Tests.Common;
 /// app connects to it: the client's messages go down one pipe, the server's come back up another. Each result is
 /// checked against its tool's output schema, as some clients check it.
 /// </summary>
+/// <remarks>
+/// The client waits for the server's host to start, as long as <see cref="Timeout"/>: by default, the SDK's client gives
+/// its <c>server/discover</c> 5 seconds, then sends <c>initialize</c> on the same connection, which a server that answered
+/// the first late refuses, as a busy CI runner showed (see <c>McpCommandProcessTests</c>).
+/// </remarks>
 internal sealed class McpSession : IAsyncDisposable
 {
     private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(60);
@@ -47,7 +52,7 @@ internal sealed class McpSession : IAsyncDisposable
             session._client = await McpClient
                 .CreateAsync(
                     new StreamClientTransport(session._toServer.Writer.AsStream(), session._fromServer.Reader.AsStream()),
-                    new McpClientOptions { ClientInfo = new Implementation { Name = ClientName, Version = "1.0" } },
+                    new McpClientOptions { ClientInfo = new Implementation { Name = ClientName, Version = "1.0" }, DiscoverProbeTimeout = Timeout },
                     cancellationToken: cancellationToken)
                 .WaitAsync(Timeout, cancellationToken)
                 .ConfigureAwait(false);
