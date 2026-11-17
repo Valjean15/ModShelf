@@ -63,7 +63,15 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="vm:QuickSearchEntryViewModel">
                                 <StackPanel>
-                                    <TextBlock Classes="pickerHeading" Margin="10,10,10,4" Text="{Binding Heading}" IsVisible="{Binding HasHeading}" />
+                                    <DockPanel Margin="10,10,4,4" IsVisible="{Binding HasHeading}">
+                                        <Button DockPanel.Dock="Right"
+                                                Classes="headingAction"
+                                                Content="{x:Static res:Strings.RecentSearchesClear}"
+                                                Command="{Binding ClearGroupCommand}"
+                                                IsVisible="{Binding CanClearGroup}"
+                                                AutomationProperties.Name="{x:Static res:Strings.RecentSearchesClearName}" />
+                                        <TextBlock Classes="pickerHeading" VerticalAlignment="Center" Text="{Binding Heading}" />
+                                    </DockPanel>
                                     <Button Classes="pickerRow quickRow"
                                             Classes.highlighted="{Binding IsHighlighted}"
                                             Command="{Binding OpenCommand}"

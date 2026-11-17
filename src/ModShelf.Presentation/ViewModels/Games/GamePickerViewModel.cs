@@ -41,6 +41,7 @@ public sealed partial class GamePickerViewModel : ObservableObject
     private readonly GamesByName? _byName;
     private readonly Action<InstalledGame, GameRef>? _installedPicked;
     private readonly Action? _cleared;
+    private readonly Action? _recentCleared;
     private readonly Dictionary<GameRef, GamePickerEntryViewModel> _entries = [];
     private readonly Dictionary<GameRef, GameInfo> _found = [];
     private readonly Dictionary<GameRef, GameInfo> _installedGames = [];
@@ -70,6 +71,7 @@ public sealed partial class GamePickerViewModel : ObservableObject
     /// What the chip's × does once it takes the game away, as Browse showing no game; null for a picker whose × only lets
     /// the user choose another, putting the chip back when they don't.
     /// </param>
+    /// <param name="recentCleared">Forgets the recent searches, as their Clear does; null for a picker that can't.</param>
     internal GamePickerViewModel(
         ModPictures pictures,
         ISourceRegistry sources,
@@ -78,7 +80,8 @@ public sealed partial class GamePickerViewModel : ObservableObject
         Action<string>? typed = null,
         GamesByName? byName = null,
         Action<InstalledGame, GameRef>? installedPicked = null,
-        Action? cleared = null)
+        Action? cleared = null,
+        Action? recentCleared = null)
     {
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(sources);
@@ -92,6 +95,7 @@ public sealed partial class GamePickerViewModel : ObservableObject
         _byName = byName is { Sites.Count: > 0 } ? byName : null;
         _installedPicked = installedPicked;
         _cleared = cleared;
+        _recentCleared = recentCleared;
     }
 
     /// <summary>
@@ -311,6 +315,11 @@ public sealed partial class GamePickerViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Whether the recent searches can be forgotten, for their Clear to show.
+    /// </summary>
+    public bool CanClearRecent => _recentCleared is not null;
+
+    /// <summary>
     /// Takes the chip away to choose another game, opening the list; closing it without choosing puts the chip back.
     /// </summary>
     internal void ChooseAnother()
@@ -337,6 +346,22 @@ public sealed partial class GamePickerViewModel : ObservableObject
         Query = string.Empty;
         IsOpen = false;
         cleared();
+    }
+
+    /// <summary>
+    /// Forgets the recent searches, here and for the next run.
+    /// </summary>
+    [RelayCommand]
+    private void ClearRecent()
+    {
+        if (_recentCleared is not { } forget)
+        {
+            return;
+        }
+
+        Recent.Clear();
+        Arrange();
+        forget();
     }
 
     partial void OnQueryChanged(string value)

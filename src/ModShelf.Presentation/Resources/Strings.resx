@@ -3895,4 +3895,12 @@
     <value>Find it in the box above, by its name. Browse opens on the game you chose last, until you take it away with ×.</value>
     <comment>Under BrowseNoGameHeading.</comment>
   </data>
+  <data name="RecentSearchesClear" xml:space="preserve">
+    <value>Clear</value>
+    <comment>Beside the recent searches' heading, in Browse's game picker and in quick search: forgets them.</comment>
+  </data>
+  <data name="RecentSearchesClearName" xml:space="preserve">
+    <value>Clear recent searches</value>
+    <comment>RecentSearchesClear, for a screen reader.</comment>
+  </data>
 </root>

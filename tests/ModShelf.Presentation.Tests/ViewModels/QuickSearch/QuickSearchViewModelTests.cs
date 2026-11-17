@@ -43,6 +43,33 @@ public sealed class QuickSearchViewModelTests
     }
 
     [Fact]
+    public async Task OnlyTheRecentSearchesHeadingOffersClear()
+    {
+        _harness.UiState.State = UiState.None with { QuickSearches = ["dragon", "old versions"] };
+
+        await _harness.OpenAsync(SkyUi);
+
+        Assert.Equal([true, false], Search.Entries.Where(entry => entry.Kind == QuickSearchKind.Recent).Select(entry => entry.CanClearGroup));
+        Assert.DoesNotContain(Search.Entries, entry => entry.Kind != QuickSearchKind.Recent && entry.CanClearGroup);
+    }
+
+    [Fact]
+    public async Task ClearForgetsTheRecentSearchesHereAndForTheNextRun()
+    {
+        _harness.UiState.State = UiState.None with { QuickSearches = ["dragon", "old versions"] };
+        await _harness.OpenAsync(SkyUi);
+
+        Search.Entries[0].ClearGroupCommand.Execute(null);
+        await Search.Forgetting;
+
+        Assert.Equal(["# Screens", "> Library"], _harness.Lines().Take(2));
+        Assert.Empty(_harness.UiState.State.QuickSearches);
+        Search.OpenCommand.Execute(null);
+        await Search.Reading;
+        Assert.DoesNotContain(Search.Entries, entry => entry.Kind == QuickSearchKind.Recent);
+    }
+
+    [Fact]
     public async Task FindsTheGamesTheModsTheSettingsAndTheScreensByName()
     {
         await _harness.OpenAsync(SkyUi, Address, Smapi);

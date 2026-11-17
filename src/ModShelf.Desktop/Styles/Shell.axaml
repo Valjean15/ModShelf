@@ -610,6 +610,27 @@
         <Setter Property="BorderBrush" Value="Transparent" />
     </Style>
 
+    <!-- A small action beside a list's heading, such as Clear beside the recent searches: quiet, in the accent. It never
+         takes the keyboard from the box being typed in. -->
+    <Style Selector="Button.headingAction">
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfAccentTextBrush}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="MinHeight" Value="22" />
+        <Setter Property="Padding" Value="8,1" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.headingAction:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfAccentTextBrush}" />
+    </Style>
+
     <!-- What a screen says while it has nothing to show yet, such as Browse before a game is chosen: centred, its sign
          faint, then a heading and a note. -->
     <Style Selector="StackPanel.emptyState">

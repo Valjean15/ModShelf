@@ -180,6 +180,28 @@ public sealed partial class BrowseViewModel
     }
 
     /// <summary>
+    /// Forgets Browse's recent searches, as the game picker's Clear does. Ones that can't be forgotten are logged, and
+    /// stay for the next run.
+    /// </summary>
+    private void ForgetSearches() => ForgettingSearches = ForgetSearchesAsync();
+
+    private async Task ForgetSearchesAsync()
+    {
+        try
+        {
+            await _uiState.ChangeAsync(state => state with { BrowseSearches = [] }, _stopping);
+        }
+        catch (IOException exception)
+        {
+            LogSearchesNotForgotten(_logger, exception);
+        }
+        catch (OperationCanceledException) when (_stopping.IsCancellationRequested)
+        {
+            // The app is closing.
+        }
+    }
+
+    /// <summary>
     /// Remembers the words as Browse's newest search, for the game picker to offer. One that can't be remembered is
     /// logged, and the search goes on.
     /// </summary>

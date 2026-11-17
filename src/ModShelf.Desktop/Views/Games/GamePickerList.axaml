@@ -19,7 +19,15 @@
         </Border>
 
         <StackPanel DockPanel.Dock="Top" Margin="18,12,18,4" Spacing="8" IsVisible="{Binding HasRecent}">
-            <TextBlock Classes="pickerHeading" Text="{x:Static res:Strings.GamePickerRecent}" />
+            <DockPanel>
+                <Button DockPanel.Dock="Right"
+                        Classes="headingAction"
+                        Content="{x:Static res:Strings.RecentSearchesClear}"
+                        Command="{Binding ClearRecentCommand}"
+                        IsVisible="{Binding CanClearRecent}"
+                        AutomationProperties.Name="{x:Static res:Strings.RecentSearchesClearName}" />
+                <TextBlock Classes="pickerHeading" VerticalAlignment="Center" Text="{x:Static res:Strings.GamePickerRecent}" />
+            </DockPanel>
             <ItemsControl ItemsSource="{Binding Recent}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

@@ -13,6 +13,7 @@ namespace ModShelf.Presentation.ViewModels.QuickSearch;
 public sealed partial class QuickSearchEntryViewModel : ObservableObject
 {
     private readonly Action<QuickSearchEntryViewModel> _open;
+    private readonly Action? _clearGroup;
 
     /// <param name="meta">Such as "In your library · 73 mods"; null for nothing.</param>
     /// <param name="action">Such as "Open in the Library", shown while it's highlighted; null for nothing.</param>
@@ -20,6 +21,7 @@ public sealed partial class QuickSearchEntryViewModel : ObservableObject
     /// <param name="colourKey">What the colour comes from, such as the game's key, as on its cover elsewhere; null for the
     /// name.</param>
     /// <param name="screen">The screen it opens, for its icon; null for one that isn't a screen.</param>
+    /// <param name="clearGroup">Clears the row's group, as the recent searches' Clear does; null for a group that can't be.</param>
     internal QuickSearchEntryViewModel(
         QuickSearchKind kind,
         string name,
@@ -28,7 +30,8 @@ public sealed partial class QuickSearchEntryViewModel : ObservableObject
         Action<QuickSearchEntryViewModel> open,
         GamePictureViewModel? picture = null,
         string? colourKey = null,
-        Services.Screen? screen = null)
+        Services.Screen? screen = null,
+        Action? clearGroup = null)
     {
         ArgumentNullException.ThrowIfNull(name);
         ArgumentNullException.ThrowIfNull(open);
@@ -42,6 +45,7 @@ public sealed partial class QuickSearchEntryViewModel : ObservableObject
         Initial = Covers.InitialOf(name);
         Hue = Covers.HueOf(colourKey ?? name);
         Screen = screen;
+        _clearGroup = clearGroup;
     }
 
     public QuickSearchKind Kind { get; }
@@ -88,13 +92,25 @@ public sealed partial class QuickSearchEntryViewModel : ObservableObject
     public bool HasHeading => Heading is not null;
 
     /// <summary>
+    /// Whether the row heads a group that can be cleared, for its heading to offer Clear.
+    /// </summary>
+    public bool CanClearGroup => HasHeading && _clearGroup is not null;
+
+    /// <summary>
     /// Whether Enter opens this row.
     /// </summary>
     [ObservableProperty]
     public partial bool IsHighlighted { get; internal set; }
 
-    partial void OnHeadingChanged(string? value) => OnPropertyChanged(nameof(HasHeading));
+    partial void OnHeadingChanged(string? value)
+    {
+        OnPropertyChanged(nameof(HasHeading));
+        OnPropertyChanged(nameof(CanClearGroup));
+    }
 
     [RelayCommand]
     private void Open() => _open(this);
+
+    [RelayCommand]
+    private void ClearGroup() => _clearGroup?.Invoke();
 }

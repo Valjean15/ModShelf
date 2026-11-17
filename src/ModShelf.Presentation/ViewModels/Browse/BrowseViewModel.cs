@@ -148,7 +148,8 @@ public sealed partial class BrowseViewModel : ScreenViewModel
             SearchAgainFor,
             byName: _byName,
             installedPicked: PickInstalled,
-            cleared: () => Game = null);
+            cleared: () => Game = null,
+            recentCleared: ForgetSearches);
         StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
         Sites =
         [
@@ -427,6 +428,11 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     /// The game chosen last being remembered, or forgotten, for tests to wait on.
     /// </summary>
     internal Task RememberingGame { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
+    /// The recent searches being forgotten, for tests to wait on.
+    /// </summary>
+    internal Task ForgettingSearches { get; private set; } = Task.CompletedTask;
 
     /// <summary>
     /// Reads the previews from the settings and the recent searches, lists the library, and follows its changes while the

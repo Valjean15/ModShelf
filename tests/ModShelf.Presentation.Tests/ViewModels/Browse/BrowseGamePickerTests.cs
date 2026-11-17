@@ -121,6 +121,39 @@ public sealed class BrowseGamePickerTests : IDisposable
     }
 
     [Fact]
+    public async Task ClearForgetsTheRecentSearchesHereAndForTheNextRun()
+    {
+        _harness.UiState.State = UiState.None with { BrowseSearches = ["skyui", "armour"] };
+        await _harness.StartAsync();
+        await _harness.ShowAsync();
+        Screen.Picker.OpenCommand.Execute(null);
+        bool before = Screen.Picker.HasRecent;
+
+        Screen.Picker.ClearRecentCommand.Execute(null);
+        await Screen.ForgettingSearches;
+
+        Assert.True(before);
+        Assert.True(Screen.Picker.CanClearRecent);
+        Assert.Empty(Screen.Picker.Recent);
+        Assert.False(Screen.Picker.HasRecent);
+        Assert.Empty(_harness.UiState.State.BrowseSearches);
+    }
+
+    [Fact]
+    public async Task RecentSearchesThatCantBeForgottenAreStillClearedHere()
+    {
+        _harness.UiState.State = UiState.None with { BrowseSearches = ["skyui"] };
+        await _harness.StartAsync();
+        _harness.UiState.Refusal = new IOException("The disk is full.");
+
+        Screen.Picker.ClearRecentCommand.Execute(null);
+        await Screen.ForgettingSearches;
+
+        Assert.Empty(Screen.Picker.Recent);
+        Assert.Equal(["skyui"], _harness.UiState.State.BrowseSearches);
+    }
+
+    [Fact]
     public async Task ARecentSearchSearchesAgainInTheChosenGame()
     {
         _harness.UiState.State = UiState.None with { BrowseSearches = ["skyui", "armour"] };

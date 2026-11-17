@@ -169,6 +169,11 @@ public sealed partial class QuickSearchViewModel : ObservableObject
     internal Task Remembering { get; private set; } = Task.CompletedTask;
 
     /// <summary>
+    /// Forgetting the recent searches, for tests to wait on.
+    /// </summary>
+    internal Task Forgetting { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
     /// Opens the box, empty, and reads the library and the sites' games afresh; the recent searches the first time.
     /// </summary>
     [RelayCommand]
@@ -268,7 +273,7 @@ public sealed partial class QuickSearchViewModel : ObservableObject
         List<QuickSearchEntryViewModel> listed = [];
         if (query.IsEmpty)
         {
-            AddGroup(listed, Strings.QuickSearchRecent, _recent.Select(text => Entry(QuickSearchKind.Recent, text, null, null, () => Query = text)));
+            AddGroup(listed, Strings.QuickSearchRecent, _recent.Select(text => Entry(QuickSearchKind.Recent, text, null, null, () => Query = text, clearGroup: ClearRecent)));
             AddGroup(listed, Strings.QuickSearchScreens, ScreenEntries());
         }
         else
@@ -422,8 +427,39 @@ public sealed partial class QuickSearchViewModel : ObservableObject
     private string NameOf(GameRef game) => _named.TryGetValue(game, out GameInfo? named) ? named.Name : game.Key;
 
     private QuickSearchEntryViewModel Entry(
-        QuickSearchKind kind, string name, string? meta, string? action, Action open, GameRef? game = null, string? colourKey = null, Screen? screen = null)
-        => new(kind, name, meta, action, entry => Opened(entry, open), game is null ? null : CoverOf(game), colourKey ?? game?.Key, screen);
+        QuickSearchKind kind,
+        string name,
+        string? meta,
+        string? action,
+        Action open,
+        GameRef? game = null,
+        string? colourKey = null,
+        Screen? screen = null,
+        Action? clearGroup = null)
+        => new(kind, name, meta, action, entry => Opened(entry, open), game is null ? null : CoverOf(game), colourKey ?? game?.Key, screen, clearGroup);
+
+    /// <summary>
+    /// Forgets the recent searches, here and for the next run, as their Clear does. Ones that can't be forgotten are
+    /// logged, and come back in the next run.
+    /// </summary>
+    private void ClearRecent()
+    {
+        _recent = [];
+        Arrange();
+        Forgetting = ForgetAsync();
+    }
+
+    private async Task ForgetAsync()
+    {
+        try
+        {
+            await _uiState.ChangeAsync(state => state with { QuickSearches = [] }, CancellationToken.None);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            LogNotForgotten(_logger, exception);
+        }
+    }
 
     /// <summary>
     /// The game's cover, as the Library shows it: its picture from its site's list while the Library shows pictures, read
