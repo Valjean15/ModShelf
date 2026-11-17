@@ -20,7 +20,7 @@
             <DockPanel>
                 <Border DockPanel.Dock="Top" Classes="quickSearchField">
                     <DockPanel>
-                        <PathIcon DockPanel.Dock="Left" Width="16" Height="16" Margin="4,0,8,0" Data="{StaticResource BrowseIcon}" />
+                        <PathIcon DockPanel.Dock="Left" Width="16" Height="16" Margin="4,0,8,0" Data="{StaticResource SearchIcon}" />
                         <TextBox x:Name="Field"
                                  Classes="bare"
                                  FontSize="16"

@@ -54,7 +54,7 @@
                                 ToolTip.Tip="{Binding QuickSearch.Tip}"
                                 AutomationProperties.Name="{x:Static res:Strings.QuickSearchTitle}">
                             <Grid ColumnDefinitions="Auto,*,Auto">
-                                <PathIcon Width="14" Height="14" Data="{StaticResource BrowseIcon}" />
+                                <PathIcon Width="14" Height="14" Data="{StaticResource SearchIcon}" />
                                 <TextBlock Grid.Column="1"
                                            Margin="8,0"
                                            VerticalAlignment="Center"
