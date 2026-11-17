@@ -1,6 +1,6 @@
 # Architecture
 
-This page describes how ModShelf is built as of 1.0.6, and why. It replaces the 96 decision records (ADRs) written
+This page describes how ModShelf is built as of 1.0.7, and why. It replaces the 96 decision records (ADRs) written
 while building 1.0: their decisions are summarized here, each section naming the ADRs it draws on. The full records
 are listed in [adr/README.md](adr/README.md) and kept in git history at tag `v1.0.6`.
 
@@ -202,7 +202,7 @@ GameBanana).
 
 - **A value the user sets on purpose is a setting**, in `settings.json` beside the database. **A value the app
   remembers for them is state**, in `ui-state.json` (the window, the sidebar, the screen last open, recent searches,
-  Browse's site). Deprecated MCP calls are counted in `deprecated-calls.json`.
+  Browse's game and site). Deprecated MCP calls are counted in `deprecated-calls.json`.
 - `settings.json` allows comments and trailing commas, keeps keys it doesn't know, and a file it can't read is an
   error naming the file.
 - **Games have their own settings** (folder pattern, root folder, old versions, update checks and interval, notices,
@@ -212,19 +212,22 @@ GameBanana).
 
 ## The desktop app
 
-*ADRs 0023–0026, 0029, 0037, 0046, 0047, 0050–0055, 0065, 0069–0075, 0084, 0092, 0094–0096.*
+*ADRs 0023–0026, 0029, 0037, 0046, 0047, 0050–0055, 0065, 0069–0075, 0084, 0092, 0094–0097.*
 
 - **Presentation** holds every ViewModel, built with CommunityToolkit.Mvvm and tested without a UI thread;
   navigation, dialogs and the clipboard are interfaces the views implement. **Desktop** holds the Avalonia views, with
   compiled bindings and code-behind for view logic only. User-facing strings are in `.resx` resources.
-- **Screens:** Library (by game, then a game's mods, then a mod's page), Updates, Browse, Downloads, and Settings,
-  which holds the accounts. Light and dark themes come from one set of brushes in `Styles/Theme.axaml`, with text
+- **Screens:** Library (by game, then a game's mods, then a mod's page), Updates, Browse (the globe in the sidebar;
+  the magnifier is quick search), Downloads, and Settings, which holds the accounts. Browse lists nothing until a game
+  is chosen, then opens on the game chosen last. Light and dark themes come from one set of brushes in `Styles/Theme.axaml`, with text
   contrast of at least 4.5:1.
 - **Shared pieces:** one name matcher (`NameQuery`) for every box that finds games or mods by name, so "stalker 2"
   finds S.T.A.L.K.E.R. 2; one game picker for Browse and Settings, which offers the games Steam installed first; quick
-  search (Ctrl+K); site names shown only once two sites are in use; an undo bar; a quota strip.
+  search (Ctrl+K); site names shown only once two sites are in use; an undo bar, which can undo a change made to
+  several selected mods at once; a quota strip.
 - **Big libraries stay quick:** list rows are virtualized, and cards are grouped in rows (`CardRows`) built only as
-  they scroll into view. Pictures and mods' details are cached (`pictures` folder, 512 MB by default, least recently
+  they scroll into view. Lists that sit inside a scrolling page, such as Settings › Games' hundreds of games, scroll
+  on their own so they can be virtualized too, and read a game's cover once its row shows. Pictures and mods' details are cached (`pictures` folder, 512 MB by default, least recently
   shown first) so screens fill at once and offline.
 - **One app per library:** a second start brings the running window forward through a named pipe, and hands it any
   `nxm://` link. Closing can keep the app in the tray. A first-run setup covers the library folder, an account and

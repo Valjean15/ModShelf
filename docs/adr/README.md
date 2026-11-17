@@ -10,6 +10,12 @@ the code's comments cite stay unique. Use the sections the earlier records used:
 **Consequences**, and **Testing**. When a decision changes how ModShelf works, update
 [architecture.md](../architecture.md) too, so it keeps describing the app as it is.
 
+## Since 1.0.6
+
+| ADR | Title |
+|---|---|
+| 0097 | [Browse starts empty, actions on the selected mods, and game lists for hundreds of games](0097-browse-starts-empty-batch-actions-and-compact-game-lists.md) |
+
 ## The records of 1.0 (0001–0096)
 
 The 96 records written while building 1.0 are summarized in [architecture.md](../architecture.md), whose
