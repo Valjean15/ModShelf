@@ -3903,4 +3903,52 @@
     <value>Clear recent searches</value>
     <comment>RecentSearchesClear, for a screen reader.</comment>
   </data>
+  <data name="LibraryWatchSelected" xml:space="preserve">
+    <value>Watch ({0:N0})</value>
+    <comment>Library, beside Update selected: watches the selected mods that aren't watched; how many.</comment>
+  </data>
+  <data name="LibraryUnwatchSelected" xml:space="preserve">
+    <value>Unwatch ({0:N0})</value>
+    <comment>Library, beside Update selected: stops watching the selected mods that are watched; how many.</comment>
+  </data>
+  <data name="LibraryRemoveSelected" xml:space="preserve">
+    <value>Remove ({0:N0})</value>
+    <comment>Library, beside Update selected: takes the selected mods out of the library, their files staying; how many.</comment>
+  </data>
+  <data name="LibraryWatchSelectedTip" xml:space="preserve">
+    <value>Watch the selected mods, so they're checked for updates.</value>
+    <comment>Tooltip of LibraryWatchSelected.</comment>
+  </data>
+  <data name="LibraryUnwatchSelectedTip" xml:space="preserve">
+    <value>Stop watching the selected mods. A mod without files leaves the library.</value>
+    <comment>Tooltip of LibraryUnwatchSelected.</comment>
+  </data>
+  <data name="LibraryRemoveSelectedTip" xml:space="preserve">
+    <value>Take the selected mods out of the library. Their files stay in their folders.</value>
+    <comment>Tooltip of LibraryRemoveSelected.</comment>
+  </data>
+  <data name="LibraryWatchSelectedFailed" xml:space="preserve">
+    <value>Some mods weren't watched</value>
+    <comment>Heading of what couldn't be watched among the selected mods.</comment>
+  </data>
+  <data name="LibraryUnwatchSelectedFailed" xml:space="preserve">
+    <value>Some mods are still watched</value>
+    <comment>Heading of what couldn't be unwatched among the selected mods.</comment>
+  </data>
+  <data name="LibraryRemoveSelectedFailed" xml:space="preserve">
+    <value>Some mods weren't removed</value>
+    <comment>Heading of what couldn't be removed among the selected mods.</comment>
+  </data>
+  <data name="LibrarySelectedProblem" xml:space="preserve">
+    <value>{0}: {1}</value>
+    <comment>One selected mod that couldn't be changed: its name, and why.</comment>
+  </data>
+  <data name="UndoUnwatchedMany" xml:space="preserve">
+    <value>{0:N0} mods are no longer watched.</value>
+    <comment>Undo bar, after unwatching several selected mods; how many.</comment>
+  </data>
+  <data name="UndoRemovedMany" xml:space="preserve">
+    <value>{0:N0} mods removed from the library; their files stay in their folders.</value>
+    <comment>Undo bar, after removing several selected mods; how many.</comment>
+  </data>
 </root>

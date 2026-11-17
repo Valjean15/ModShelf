@@ -457,11 +457,21 @@
                     <CheckBox Classes="selectAll"
                               IsChecked="{Binding AreAllShownSelected}"
                               Content="{x:Static res:Strings.SelectAllShown}" />
-                    <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding HasSelection}">
+                    <WrapPanel ItemSpacing="10" LineSpacing="8" IsVisible="{Binding HasSelection}">
                         <TextBlock Classes="note" VerticalAlignment="Center" Text="{Binding SelectionText}" />
                         <Button Classes="accent" Content="{Binding UpdateSelectedText}" Command="{Binding UpdateSelectedCommand}" />
+                        <Button Content="{Binding WatchSelectedText}"
+                                Command="{Binding WatchSelectedCommand}"
+                                ToolTip.Tip="{x:Static res:Strings.LibraryWatchSelectedTip}" />
+                        <Button Content="{Binding UnwatchSelectedText}"
+                                Command="{Binding UnwatchSelectedCommand}"
+                                ToolTip.Tip="{x:Static res:Strings.LibraryUnwatchSelectedTip}" />
+                        <Button Content="{Binding RemoveSelectedText}"
+                                Command="{Binding RemoveSelectedCommand}"
+                                ToolTip.Tip="{x:Static res:Strings.LibraryRemoveSelectedTip}" />
+                        <ProgressBar Width="60" IsIndeterminate="True" VerticalAlignment="Center" IsVisible="{Binding IsChangingSelected}" />
                         <Button Classes="quiet" Content="{x:Static res:Strings.SelectionClear}" Command="{Binding ClearSelectionCommand}" />
-                    </StackPanel>
+                    </WrapPanel>
                 </WrapPanel>
             </StackPanel>
 

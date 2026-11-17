@@ -7,7 +7,8 @@ using ModShelf.Presentation.ViewModels.Library;
 namespace ModShelf.Presentation.Tests.ViewModels.Library;
 
 /// <summary>
-/// Selecting a game's mods in the Library, and Update selected: what's selected is always among the mods shown.
+/// Selecting a game's mods in the Library, and Update selected, Watch, Unwatch and Remove: what's selected is always among
+/// the mods shown.
 /// </summary>
 public sealed class LibrarySelectionTests : IDisposable
 {
@@ -170,6 +171,114 @@ public sealed class LibrarySelectionTests : IDisposable
 
         Assert.Equal(("1 selected", "Update selected (0)"), (Screen.SelectionText, Screen.UpdateSelectedText));
     }
+
+    [Fact]
+    public async Task SaysWhatWatchUnwatchAndRemoveWouldDoToTheSelection()
+    {
+        await StartAsync();
+        await Row(Other).UnwatchCommand.ExecuteAsync(null);
+
+        Row(SkyUi).IsSelected = true;
+        Row(Address).IsSelected = true;
+        (string, bool, string, bool, string, bool) watchedOnly = Buttons();
+        Row(Other).IsSelected = true;
+
+        Assert.Equal(("Watch (0)", false, "Unwatch (2)", true, "Remove (2)", true), watchedOnly);
+        Assert.Equal(("Watch (1)", true, "Unwatch (2)", true, "Remove (3)", true), Buttons());
+    }
+
+    [Fact]
+    public async Task UnwatchSelectedUnwatchesThemOfferingToUndoThemTogether()
+    {
+        await StartAsync();
+        Row(SkyUi).IsSelected = true;
+        Row(Address).IsSelected = true;
+
+        await Screen.UnwatchSelectedCommand.ExecuteAsync(null);
+
+        Assert.Equal(["Unwatch 3863", "Unwatch 12604"], _harness.Library.Asked);
+        Assert.Equal((true, true, "2 mods are no longer watched."), (_harness.Undo.IsShown, _harness.Undo.CanUndo, _harness.Undo.Message));
+        Assert.Equal(("0 selected", false), (Screen.SelectionText, Screen.HasSelection));
+        Assert.Equal([false, true, false], Screen.GameMods.OrderBy(mod => mod.Name, StringComparer.Ordinal).Select(mod => mod.IsWatched));
+
+        await _harness.Undo.UndoCommand.ExecuteAsync(null);
+
+        Assert.Equal(["Unwatch 3863", "Unwatch 12604", "Restore 12604", "Restore 3863"], _harness.Library.Asked);
+        Assert.All(Screen.GameMods, mod => Assert.True(mod.IsWatched));
+    }
+
+    [Fact]
+    public async Task WatchSelectedWatchesOnlyThoseNotWatchedAndOffersNoUndo()
+    {
+        await StartAsync();
+        await Row(Other).UnwatchCommand.ExecuteAsync(null);
+        _harness.Undo.CloseCommand.Execute(null);
+        Row(SkyUi).IsSelected = true;
+        Row(Other).IsSelected = true;
+
+        await Screen.WatchSelectedCommand.ExecuteAsync(null);
+
+        Assert.Equal(["Unwatch 1", "Watch 1"], _harness.Library.Asked);
+        Assert.True(Row(Other).IsWatched);
+        Assert.False(_harness.Undo.IsShown);
+        Assert.Equal(("1 selected", true), (Screen.SelectionText, Row(SkyUi).IsSelected));
+    }
+
+    [Fact]
+    public async Task RemoveSelectedRemovesThemOfferingToBringThemAllBack()
+    {
+        await StartAsync();
+        _ = Row(SkyUi);
+        Screen.AreAllShownSelected = true;
+
+        await Screen.RemoveSelectedCommand.ExecuteAsync(null);
+
+        Assert.Equal(["Forget 3863", "Forget 1", "Forget 12604"], _harness.Library.Asked);
+        Assert.Empty(_harness.Dialogs.Confirmations);
+        Assert.Equal("3 mods removed from the library; their files stay in their folders.", _harness.Undo.Message);
+        Assert.DoesNotContain(_harness.Library.Mods, mod => mod.Mod.Game == SkyUi.Game);
+
+        await _harness.Undo.UndoCommand.ExecuteAsync(null);
+
+        Assert.Equal(["Restore 12604", "Restore 1", "Restore 3863"], _harness.Library.Asked.Skip(3));
+        Assert.Equal(4, _harness.Library.Mods.Count);
+    }
+
+    [Fact]
+    public async Task OneModRemovedIsNamed()
+    {
+        await StartAsync();
+        Row(SkyUi).IsSelected = true;
+
+        await Screen.RemoveSelectedCommand.ExecuteAsync(null);
+
+        Assert.Equal("SkyUI removed from the library; its files stay in its folder.", _harness.Undo.Message);
+    }
+
+    [Fact]
+    public async Task WhatCouldntBeDoneIsSaidOnceAndStaysSelected()
+    {
+        await StartAsync();
+        Row(SkyUi).IsSelected = true;
+        Row(Address).IsSelected = true;
+        _harness.Library.Refusal = new InvalidOperationException("A download of one of its files isn't finished.");
+
+        await Screen.RemoveSelectedCommand.ExecuteAsync(null);
+
+        (string Title, string Message) said = Assert.Single(_harness.Dialogs.Messages);
+        Assert.Equal("Some mods weren't removed", said.Title);
+        Assert.Equal(
+            ["Address Library: A download of one of its files isn't finished.", "SkyUI: A download of one of its files isn't finished."],
+            said.Message.Split(Environment.NewLine));
+        Assert.Equal("2 selected", Screen.SelectionText);
+        Assert.False(_harness.Undo.IsShown);
+        Assert.True(Screen.RemoveSelectedCommand.CanExecute(null));
+    }
+
+    private (string, bool, string, bool, string, bool) Buttons()
+        => (Screen.WatchSelectedText, Screen.WatchSelectedCommand.CanExecute(null),
+            Screen.UnwatchSelectedText, Screen.UnwatchSelectedCommand.CanExecute(null),
+            Screen.RemoveSelectedText, Screen.RemoveSelectedCommand.CanExecute(null));
 
     private LibraryModViewModel Row(ModRef mod) => _harness.Row(TestData.LibraryMod(mod, "any"));
 

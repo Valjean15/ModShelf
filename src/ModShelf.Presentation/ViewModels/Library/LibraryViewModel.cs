@@ -861,6 +861,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         HasSelection = selected.Length > 0;
         UpdateSelectedText = Text.Format(Strings.LibraryUpdateSelected, updates);
         CanUpdateSelected = updates > 0 && OpenGame is { IsUpdating: false };
+        ShowSelectedChanges(selected);
         _showingSelection = true;
         try
         {

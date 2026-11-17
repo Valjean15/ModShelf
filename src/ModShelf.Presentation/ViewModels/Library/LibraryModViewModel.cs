@@ -259,6 +259,17 @@ public sealed partial class LibraryModViewModel : ObservableObject
     partial void OnIsSelectedChanged(bool value) => _services.SelectionChanged();
 
     /// <summary>
+    /// A selected mod watched or unwatched changes what the screen's buttons would do to the selection.
+    /// </summary>
+    partial void OnIsWatchedChanged(bool value)
+    {
+        if (IsSelected)
+        {
+            _services.SelectionChanged();
+        }
+    }
+
+    /// <summary>
     /// Shows how many of its files aren't on disk. Runs on the UI thread.
     /// </summary>
     internal void ShowMissing(int count)

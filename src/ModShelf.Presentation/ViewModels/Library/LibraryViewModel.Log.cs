@@ -15,4 +15,7 @@ public sealed partial class LibraryViewModel
 
     [LoggerMessage(EventId = 943, Level = LogLevel.Warning, Message = "Checking the files and saved details of game {Game}'s mods failed")]
     private static partial void LogCheckFailed(ILogger logger, Exception exception, string game);
+
+    [LoggerMessage(EventId = 979, Level = LogLevel.Error, Message = "Changing selected mod {ModId} of {Game} failed")]
+    private static partial void LogSelectedChangeFailed(ILogger logger, Exception exception, string modId, string game);
 }
