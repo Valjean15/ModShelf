@@ -1,6 +1,6 @@
 # Manual checklist: the installers and self-update
 
-CI packs nothing yet and never runs an installer, so before each release someone installs ModShelf by hand on each system, then updates it from one version to the next. The checks pack two versions, 0.9.0 and 0.9.1, into a folder of your own, install the first, and let it update itself to the second from that folder rather than from GitHub. The desktop app's own flows have their checklist, [manual-checklist-desktop.md](manual-checklist-desktop.md); here, only what the installed app does differently.
+The release workflow packs the installers, but nothing runs one, so before each release someone installs ModShelf by hand on each system, then updates it from one version to the next. The checks pack two versions, 0.9.0 and 0.9.1, into a folder of your own, install the first, and let it update itself to the second from that folder rather than from GitHub. The desktop app's own flows have their checklist, [manual-checklist-desktop.md](manual-checklist-desktop.md); here, only what the installed app does differently.
 
 The checks keep the library database, settings and credentials in a test folder, apart from your own. Each check says what to do, then what you should see. Quoted text is what the app shows.
 

@@ -4,11 +4,11 @@ These rules apply to every agent working in this repository. Read this file full
 
 ## The product
 
-ModShelf is a cross-platform desktop app (Avalonia 12 on .NET 10) that downloads mods from multiple sources and tracks their updates in one place. Nexus Mods is the first source. Every layer must stay ready for more sources, such as mod.io, Modrinth and CurseForge.
+ModShelf is a cross-platform desktop app (Avalonia 12 on .NET 10) that downloads mods from multiple sources and tracks their updates in one place. It supports Nexus Mods, GameBanana, mod.io and DEG Mods, plus plain web links, through a desktop app, a command line and an MCP server for AI agents. Every layer must stay ready for more sources, such as Modrinth and CurseForge.
 
 **ModShelf downloads and manages files. It never installs mods.** It does not extract into game folders, deploy, manage load order, detect conflicts, run FOMOD installers or install collections. This applies even to "optional" features.
 
-The implementation plan in `docs/implementation-plan.md` is the source of truth for scope and phase order. The plan was drafted under the placeholder name "ModHub", so read every `ModHub` as `ModShelf`. Work on the current phase only, unless the human asks otherwise.
+`docs/architecture.md` describes how ModShelf works today, and the pages beside it in `docs/` describe each part in detail. The 1.0 plan, `docs/implementation-plan.md`, is complete and kept as a record; it was drafted under the placeholder name "ModHub", so read every `ModHub` as `ModShelf`. The plan for the current milestone, once the human adds it, is the source of truth for scope and order. Work on its current step only, unless the human asks otherwise.
 
 ## Environment
 
@@ -35,7 +35,7 @@ dotnet run --project src/ModShelf.Cli -- download <url> --to <folder>
 | `ModShelf.Application` | Use cases and ports (interfaces): download scheduler, update checker, account service |
 | `ModShelf.Infrastructure` | EF Core + SQLite, HTTP file transfer, settings, logging |
 | `ModShelf.Platform` | OS integration: secret stores, `nxm://` registration, single instance, notifications |
-| `ModShelf.Sources.<Name>` | One project per mod site (first: `ModShelf.Sources.Nexus`) |
+| `ModShelf.Sources.<Name>` | One project per mod site: `Nexus`, `GameBanana`, `ModIo`, `DegMods`, and `DirectUrl` for plain web links |
 | `ModShelf.Presentation` | ViewModels, plus navigation and dialog interfaces. No Avalonia reference. |
 | `ModShelf.Desktop` | Avalonia views, styles, startup, composition root |
 | `ModShelf.Cli` | Headless host for testing, composition root |
@@ -98,7 +98,7 @@ Never add a reference that breaks these rules. Never weaken or skip an architect
 3. Before saying a task is done, run `dotnet build` with zero warnings and get `dotnet test` all green.
 4. Use Conventional Commits (`feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `chore:`), with one logical change per commit.
 5. **Never push, force-push, rewrite history or change remotes.** The human owns GitHub. Commit locally only when asked.
-6. Record significant design decisions as an ADR in `docs/adr/NNNN-short-title.md`.
+6. Record significant design decisions as an ADR in `docs/adr/NNNN-short-title.md`, numbered from 0097 on (`docs/adr/README.md` says why). Keep `docs/architecture.md` and the other pages in `docs/` in step with what changed.
 7. Finish with a short summary: what changed, which files, how it was tested, and anything left open.
 
 ## Ask before

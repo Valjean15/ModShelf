@@ -2,7 +2,7 @@
 
 The tests run the MCP server in process and as a process an MCP client starts, with fake sites; they never run an
 agent's app, Nexus Mods, or the desktop app beside the server. Before a release, check those by hand with an installed
-ModShelf, on Windows at least, with Claude Desktop or Claude Code configured as the README says ([ADR 0040](adr/0040-the-mcp-server.md)).
+ModShelf, on Windows at least, with Claude Desktop or Claude Code configured as [mcp-server.md](mcp-server.md) says.
 
 Use a test library, as the installer checklist's settings do (`ModShelf__DatabasePath`, `ModShelf__SecretsFolder` and
 `ModShelf__SecretScope`), set in the server's `"env"` as well as for the desktop app, and a Nexus Mods account linked

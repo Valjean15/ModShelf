@@ -13,7 +13,7 @@ action that makes a game do so.
 Before writing code, find out and write down, for the ADR:
 
 - **The official API**, and its documentation, or the open protocol the site's own pages read, such as DEG Mods' Nostr
-  relays (ADR 0090). ModShelf uses official APIs only and never reads a site's web pages.
+  relays ([ADR 0090](https://github.com/Valjean15/ModShelf/blob/v1.0.6/docs/adr/0090-degmods-source.md)). ModShelf uses official APIs only and never reads a site's web pages.
 - **The terms:** whether an app must register, ask for approval or show attribution; what it may keep, and for how long.
 - **The limits:** requests per minute, hour or day, per user or per app, and the headers that say what's left.
 - **Accounts:** whether reading, searching or downloading needs one, and how a user links it: a personal API key, a
@@ -104,7 +104,7 @@ never asks it to: the screens find its games as a name is typed and show each si
 - Give the file's hash in the ticket when the site publishes one, in any algorithm `FileHash` takes.
 - `HandoffRequired` names the page where the user starts the download. A file only a browser can get, such as one on a
   page that leads to it (MediaFire) or one a site gives only to its own pages after an ad, is `HandoffRequired` with that
-  page too: nothing hands it back, so the download waits there until cancelled (DEG Mods, ADR 0090). A handoff link can
+  page too: nothing hands it back, so the download waits there until cancelled (DEG Mods, [ADR 0090](https://github.com/Valjean15/ModShelf/blob/v1.0.6/docs/adr/0090-degmods-source.md)). A handoff link can
   carry a key: it's kept in memory only and never logged. A source with `IHandoffScheme` makes ModShelf able to register
   that scheme with the system, which other mod managers may claim too: that's raised and asked about first.
 
@@ -119,7 +119,7 @@ ModShelf works out updates from a mod's files as the catalog lists them, never f
 A site that lists a mod's files side by side, without saying which is the main one or which replaced which, such as
 variants ("pale" and "tan") or add-ons uploaded at different times, says so with `IModCatalog.FilesSideBySide`. Its
 files are never taken for each other's update by date: a library file's update comes only from its chain, and the main
-files uploaded since a check are new files too. GameBanana is one (ADR 0087).
+files uploaded since a check are new files too. GameBanana is one ([ADR 0087](https://github.com/Valjean15/ModShelf/blob/v1.0.6/docs/adr/0087-gamebanana-source.md)).
 
 So map the site's categories onto `ModFileCategory` with care:
 
@@ -129,9 +129,9 @@ So map the site's categories onto `ModFileCategory` with care:
   as replaced or withdrawn. A file that isn't the mod, such as the small release file a mod manager reads, is
   `Miscellaneous`.
 - `ReplacedBy` only when the site says a file replaced another, and only forward in time: leave out a link to a file
-  uploaded before the one it replaces (Nexus Mods lists some; ADR 0059). A site that keeps a file's older versions
+  uploaded before the one it replaces (Nexus Mods lists some; [ADR 0059](https://github.com/Valjean15/ModShelf/blob/v1.0.6/docs/adr/0059-mcp-feedback-november-3.md)). A site that keeps a file's older versions
   apart without naming their successor may link each to the newer file of the same name, its version left out
-  (GameBanana's archived files; ADR 0087).
+  (GameBanana's archived files; [ADR 0087](https://github.com/Valjean15/ModShelf/blob/v1.0.6/docs/adr/0087-gamebanana-source.md)).
 - `UploadedAt` as the site says; `SizeInBytes` exact when the site gives it (a size rounded to the kilobyte still
   matches on a rescan); every hash the site publishes.
 - `PageUrl` is a link the source's own recognizer takes as the file: its page, or, for a site that gives files no
@@ -175,7 +175,7 @@ updated."), and the screens offer only these.
   follow on whole.
 
 A site whose own moderation hides mods by default, such as DEG Mods' blocked mods and hidden tags, has them hidden in
-ModShelf too, listed nowhere and their links refused; mods sexualizing minors are always left out (ADR 0090).
+ModShelf too, listed nowhere and their links refused; mods sexualizing minors are always left out ([ADR 0090](https://github.com/Valjean15/ModShelf/blob/v1.0.6/docs/adr/0090-degmods-source.md)).
 
 The source may still refuse what it can't do with `ArgumentException`; it's never sent. The contract checks that each
 declared order lists the mods in it, each filter narrows them, and pages are full, against a game the test names
@@ -191,7 +191,7 @@ declared order lists the mods in it, each filter narrows them, and pages are ful
   member ID, which `Authorize` puts where a request names the linked one (`apiv11/Member/linked/…`). `GetProfileAsync`
   refuses a profile the site doesn't show.
 - One strategy can take more than one credential the site issues, told apart by their shape, as mod.io's `ApiKey`
-  takes an API key or an access token, each sent as the site reads it (ADR 0089).
+  takes an API key or an access token, each sent as the site reads it ([ADR 0089](https://github.com/Valjean15/ModShelf/blob/v1.0.6/docs/adr/0089-modio-source.md)).
 - The app takes a `401` for credentials that no longer work, and asks for the account to be linked again. A request the
   site refuses for one kind of credential but not another, as mod.io refuses an API key its subscriptions, must never
   go out with that kind: the strategy notes on the request what it added, and a handler of the source's client answers
@@ -219,12 +219,12 @@ app's name and version (Nexus Mods: `Application-Name` and `Application-Version`
 (`Timeout.InfiniteTimeSpan`), since each attempt has one; and handlers of its own, such as one that holds requests back
 before the site's rate limit, from its headers. Those sit inside the retries, so they see every attempt, and inside
 each attempt's time limit, so one that waits long, such as for a minute's limit, waits before the client is called
-instead, as mod.io's `ModIoPacer` does (ADR 0089). `AddNexusSource()` shows it all.
+instead, as mod.io's `ModIoPacer` does ([ADR 0089](https://github.com/Valjean15/ModShelf/blob/v1.0.6/docs/adr/0089-modio-source.md)). `AddNexusSource()` shows it all.
 
 A site read over another protocol, such as Nostr's relays over WebSockets, opens it through a client of its own from the
 factory (`IHttpMessageHandlerFactory.CreateHandler`), with a retry for a connection that fails for a passing reason, and
 its own time limits: the source's named client reads each answer whole within an attempt's time, which a WebSocket's
-never is. Its HTTP requests, such as for files, still go through the named client (ADR 0090).
+never is. Its HTTP requests, such as for files, still go through the named client ([ADR 0090](https://github.com/Valjean15/ModShelf/blob/v1.0.6/docs/adr/0090-degmods-source.md)).
 
 - `IApiQuota` shows what's left of the limit, when the site says.
 - Errors, as `SourceContractTests<T>` and the interfaces' remarks expect: `ArgumentException` for another source's game,
@@ -267,7 +267,10 @@ tied to a personal account never leave the developer's machine.
 - An ADR, `docs/adr/NNNN-<name>-source.md`: what the research found, the capabilities taken and left, how the site's
   categories map, its limits, and what a user sees differently.
 - A section in `docs/manual-checklist.md` for the human's live checks, with each kind of account the site has.
-- The site in the README's list, and in the release notes of the patch release it ships in (1.0.1, 1.0.2 and on).
+- The site in [architecture.md](architecture.md): its column in the table of capabilities and a few lines under
+  "Each site".
+- The site in the README's list, in [command-line.md](command-line.md) and [desktop-app.md](desktop-app.md) where
+  they name each site, and in the release notes of the release it ships in.
 
 ## When the site doesn't fit
 
