@@ -31,6 +31,9 @@ public sealed partial class BrowseViewModel
     [LoggerMessage(EventId = 972, Level = LogLevel.Warning, Message = "Couldn't remember the game of {Source} chosen for an installed game")]
     private static partial void LogInstalledNotPicked(ILogger logger, Exception exception, string source);
 
+    [LoggerMessage(EventId = 976, Level = LogLevel.Warning, Message = "Couldn't remember the game chosen in Browse for the next run")]
+    private static partial void LogGameNotRemembered(ILogger logger, Exception exception);
+
     [LoggerMessage(EventId = 968, Level = LogLevel.Error, Message = "Watching mod {Mod} of {Source} failed")]
     private static partial void LogWatchFailed(ILogger logger, Exception exception, string mod, string source);
 }

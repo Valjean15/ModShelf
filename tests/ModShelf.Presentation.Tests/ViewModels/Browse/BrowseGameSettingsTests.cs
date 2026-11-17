@@ -1,4 +1,5 @@
 using ModShelf.Application.Settings;
+using ModShelf.Application.State;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.ViewModels.Browse;
 using ModShelf.Sources.Abstractions.Search;
@@ -29,17 +30,15 @@ public sealed class BrowseGameSettingsTests : IDisposable
     }
 
     [Fact]
-    public async Task AHiddenGameIsntChosenForTheLibrarysMostMods()
+    public async Task AHiddenGameChosenLastIsntChosenAgain()
     {
         _harness.Settings.Stored = Settings(("stardewvalley", new GameSettings { Hidden = true }));
+        _harness.UiState.State = UiState.None with { BrowseGame = BrowseHarness.Stardew.Game };
 
-        await _harness.StartAsync(
-            TestData.LibraryMod(TestData.Mod("1", "stardewvalley"), "One"),
-            TestData.LibraryMod(TestData.Mod("2", "stardewvalley"), "Two"),
-            TestData.LibraryMod(TestData.Mod("12604"), "SkyUI"));
+        await _harness.StartAsync(TestData.LibraryMod(TestData.Mod("1", "stardewvalley"), "One"));
         await _harness.ShowAsync();
 
-        Assert.Equal(BrowseHarness.Skyrim.Game, Screen.Game?.Game);
+        Assert.Null(Screen.Game);
     }
 
     [Fact]

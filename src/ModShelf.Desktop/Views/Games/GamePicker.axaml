@@ -38,7 +38,8 @@
                         <Border Classes="site" IsVisible="{Binding Picked.ShowSite, FallbackValue=False}">
                             <TextBlock Text="{Binding Picked.SiteName, FallbackValue=''}" />
                         </Border>
-                        <Button Classes="pickerClear"
+                        <Button x:Name="ClearButton"
+                                Classes="pickerClear"
                                 Command="{Binding ClearCommand}"
                                 ToolTip.Tip="{x:Static res:Strings.GamePickerClear}"
                                 AutomationProperties.Name="{x:Static res:Strings.GamePickerClear}">

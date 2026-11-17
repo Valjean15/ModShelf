@@ -57,7 +57,8 @@ public sealed partial class BrowseViewModel
             }
             else
             {
-                Picker.ClearCommand.Execute(null);
+                // The game stays until another is chosen: closing the list without choosing puts it back.
+                Picker.ChooseAnother();
             }
         }
     }

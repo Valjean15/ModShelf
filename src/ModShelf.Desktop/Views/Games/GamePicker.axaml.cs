@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
+using Avalonia.VisualTree;
 
 using ModShelf.Presentation.ViewModels.Games;
 
@@ -9,7 +10,7 @@ namespace ModShelf.Desktop.Views.Games;
 
 /// <summary>
 /// The game picker's field and its list: under the field in a popup, or, in a dialog (<see cref="IsInline"/>), in place.
-/// Focusing or clicking the field opens the list.
+/// Focusing or clicking the field opens the list; clicking the chip's × doesn't, so it can take the game away.
 /// </summary>
 public sealed partial class GamePicker : UserControl
 {
@@ -22,8 +23,13 @@ public sealed partial class GamePicker : UserControl
     {
         InitializeComponent();
         Field.GotFocus += (_, _) => Picker?.OpenCommand.Execute(null);
-        FieldBorder.AddHandler(PointerPressedEvent, (_, _) =>
+        FieldBorder.AddHandler(PointerPressedEvent, (_, pressed) =>
         {
+            if (pressed.Source is Visual source && (source == ClearButton || ClearButton.IsVisualAncestorOf(source)))
+            {
+                return;
+            }
+
             Field.Focus();
             Picker?.OpenCommand.Execute(null);
         }, handledEventsToo: true);

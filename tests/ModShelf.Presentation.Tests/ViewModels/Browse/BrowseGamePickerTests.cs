@@ -43,8 +43,9 @@ public sealed class BrowseGamePickerTests : IDisposable
     public async Task TheGameChosenIsTheChip()
     {
         await _harness.StartAsync(TestData.LibraryMod(SkyUi, "SkyUI"));
-
         await _harness.ShowAsync();
+
+        await _harness.ChooseAsync(BrowseHarness.Skyrim);
 
         Assert.Equal(BrowseHarness.Skyrim.Game, Screen.Game?.Game);
         Assert.Equal(("Skyrim Special Edition", false), (Screen.Picker.Picked?.Name, Screen.Picker.Picked?.ShowSite));

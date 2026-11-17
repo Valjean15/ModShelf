@@ -67,6 +67,7 @@ public sealed class BrowseSiteBoxTests : IDisposable
     [Fact]
     public async Task ChoosingASiteChoosesItsGameTheLibraryHasTheMostModsOf()
     {
+        _harness.UiState.State = UiState.None with { BrowseGame = BrowseHarness.Royal.Game };
         await _harness.StartAsync(
             TestData.LibraryMod(Protagonist, "P5R Female Protagonist"),
             TestData.LibraryMod(new ModRef(BrowseHarness.Royal.Game, "414644"), "Restored Outfits Dialogue"),
@@ -88,6 +89,7 @@ public sealed class BrowseSiteBoxTests : IDisposable
     [Fact]
     public async Task ChoosingASiteTheLibraryHasNoGameOfOpensThePickerKeepingTheGame()
     {
+        _harness.UiState.State = UiState.None with { BrowseGame = BrowseHarness.Skyrim.Game };
         await _harness.StartAsync(TestData.LibraryMod(SkyUi, "SkyUI"));
         await _harness.ShowAsync();
 
@@ -147,8 +149,22 @@ public sealed class BrowseSiteBoxTests : IDisposable
         await _harness.ShowAsync();
 
         Assert.Equal(shown, Screen.SelectedSite.Name);
-        Assert.Equal(shown == "Nexus Mods" ? BrowseHarness.Skyrim.Game : BrowseHarness.Royal.Game, Screen.Game?.Game);
+        Assert.Null(Screen.Game);
         Assert.Equal(remembered, _harness.UiState.State.BrowseSite);
+    }
+
+    [Fact]
+    public async Task AGameChosenLastOfAnotherSiteThanTheOneRememberedMovesTheBoxToItsSite()
+    {
+        _harness.UiState.State = UiState.None with { BrowseSite = "nexus", BrowseGame = BrowseHarness.Royal.Game };
+        await _harness.StartAsync(TestData.LibraryMod(Protagonist, "P5R Female Protagonist"));
+
+        await _harness.ShowAsync();
+        await Screen.RememberingSite;
+
+        Assert.Equal(BrowseHarness.Royal.Game, Screen.Game?.Game);
+        Assert.Equal("GameBanana", Screen.SelectedSite.Name);
+        Assert.Equal("gamebanana", _harness.UiState.State.BrowseSite);
     }
 
     [Fact]

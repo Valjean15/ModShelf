@@ -1,10 +1,11 @@
 using ModShelf.Application.State;
+using ModShelf.Domain.Mods;
 
 namespace ModShelf.Application.Tests.State;
 
 /// <summary>
-/// What the desktop app remembers: Browse's recent searches, the newest first, each once; the screen by its name; and
-/// where the window was.
+/// What the desktop app remembers: Browse's recent searches, the newest first, each once; the game Browse showed last;
+/// the screen by its name; and where the window was.
 /// </summary>
 public sealed class UiStateTests
 {
@@ -13,6 +14,18 @@ public sealed class UiStateTests
     {
         Assert.Equal((null, null, null), (UiState.None.Window, UiState.None.MenuCollapsed, UiState.None.Screen));
         Assert.Empty(UiState.None.BrowseSearches);
+    }
+
+    [Fact]
+    public void RemembersBrowsesGameOrNone()
+    {
+        GameRef skyrim = new(new SourceId("nexus"), "skyrimspecialedition");
+
+        Assert.Null(UiState.None.BrowseGame);
+        Assert.Equal(UiState.None with { BrowseGame = skyrim }, UiState.None with { BrowseGame = new GameRef(new SourceId("nexus"), "skyrimspecialedition") });
+        Assert.NotEqual(UiState.None, UiState.None with { BrowseGame = skyrim });
+        Assert.NotEqual(UiState.None with { BrowseGame = skyrim }, UiState.None with { BrowseGame = new GameRef(new SourceId("degmods"), "skyrimspecialedition") });
+        Assert.Equal(UiState.None, UiState.None with { BrowseGame = skyrim } with { BrowseGame = null });
     }
 
     [Theory]

@@ -101,6 +101,44 @@ public sealed partial class BrowseViewModel
     }
 
     /// <summary>
+    /// Shows no game: drops what's being listed and what was, and closes the mod opened, until a game is chosen. Why the
+    /// games couldn't be read is still said.
+    /// </summary>
+    private void ShowNoGame()
+    {
+        foreach (CancellationTokenSource? dropped in new[] { Interlocked.Exchange(ref _listing, null), Interlocked.Exchange(ref _rowsListing, null) })
+        {
+            try
+            {
+                dropped?.Cancel();
+            }
+            catch (ObjectDisposedException)
+            {
+                // It ended meanwhile.
+            }
+        }
+
+        IsBusy = false;
+        Mod = null;
+        Results.Clear();
+        _query = null;
+        _searched = null;
+        _trackedSource = null;
+        _rowsListed = null;
+        IsShowingTracked = false;
+        IsShowingRows = false;
+        CanFollow = false;
+        ShowFollowedText = string.Empty;
+        HasMore = false;
+        ResultsText = string.Empty;
+        OrderText = string.Empty;
+        if (!IsGamesProblem)
+        {
+            Tell(null, needsAccount: false);
+        }
+    }
+
+    /// <summary>
     /// Lists the game's rows afresh, all three at once, dropping a listing of the rows under way. Trending shows where
     /// the game's site lists its trending mods, and the newest and the recently updated where its search has those
     /// orders; adult mods only when the user asked for them.

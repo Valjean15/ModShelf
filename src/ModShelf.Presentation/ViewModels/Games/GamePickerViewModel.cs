@@ -40,6 +40,7 @@ public sealed partial class GamePickerViewModel : ObservableObject
     private readonly Action<string>? _typed;
     private readonly GamesByName? _byName;
     private readonly Action<InstalledGame, GameRef>? _installedPicked;
+    private readonly Action? _cleared;
     private readonly Dictionary<GameRef, GamePickerEntryViewModel> _entries = [];
     private readonly Dictionary<GameRef, GameInfo> _found = [];
     private readonly Dictionary<GameRef, GameInfo> _installedGames = [];
@@ -65,6 +66,10 @@ public sealed partial class GamePickerViewModel : ObservableObject
     /// Remembers the game chosen as an installed game's, when it was one of two or more its name matched; null for a picker
     /// that lists no installed games.
     /// </param>
+    /// <param name="cleared">
+    /// What the chip's × does once it takes the game away, as Browse showing no game; null for a picker whose × only lets
+    /// the user choose another, putting the chip back when they don't.
+    /// </param>
     internal GamePickerViewModel(
         ModPictures pictures,
         ISourceRegistry sources,
@@ -72,7 +77,8 @@ public sealed partial class GamePickerViewModel : ObservableObject
         Action<string>? searchAgain = null,
         Action<string>? typed = null,
         GamesByName? byName = null,
-        Action<InstalledGame, GameRef>? installedPicked = null)
+        Action<InstalledGame, GameRef>? installedPicked = null,
+        Action? cleared = null)
     {
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(sources);
@@ -85,6 +91,7 @@ public sealed partial class GamePickerViewModel : ObservableObject
         _typed = typed;
         _byName = byName is { Sites.Count: > 0 } ? byName : null;
         _installedPicked = installedPicked;
+        _cleared = cleared;
     }
 
     /// <summary>
@@ -304,13 +311,32 @@ public sealed partial class GamePickerViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Takes the chip away to choose another game: the list opens, and closing it without choosing puts the chip back.
+    /// Takes the chip away to choose another game, opening the list; closing it without choosing puts the chip back.
+    /// </summary>
+    internal void ChooseAnother()
+    {
+        Picked = null;
+        IsOpen = true;
+    }
+
+    /// <summary>
+    /// The chip's ×: takes the game away, where the picker's screen shows none then; elsewhere, lets the user choose another,
+    /// as <see cref="ChooseAnother"/> does.
     /// </summary>
     [RelayCommand]
     private void Clear()
     {
+        if (_cleared is not { } cleared)
+        {
+            ChooseAnother();
+            return;
+        }
+
+        _current = null;
         Picked = null;
-        IsOpen = true;
+        Query = string.Empty;
+        IsOpen = false;
+        cleared();
     }
 
     partial void OnQueryChanged(string value)

@@ -1,9 +1,11 @@
+using ModShelf.Domain.Mods;
+
 namespace ModShelf.Application.State;
 
 /// <summary>
 /// What the desktop app remembers for the user between runs, apart from the settings: where its window was, whether the
-/// menu was collapsed, the screen last open, the recent searches of Browse and of quick search, and the site Browse's site
-/// box narrows its games to. Each left null hasn't been remembered yet.
+/// menu was collapsed, the screen last open, the recent searches of Browse and of quick search, the site Browse's site
+/// box narrows its games to, and the game Browse showed last. Each left null hasn't been remembered yet.
 /// </summary>
 /// <remarks>
 /// A value the user sets on purpose is a setting, in the settings; one the app remembers for them is state, here.
@@ -70,6 +72,12 @@ public sealed record UiState
     }
 
     /// <summary>
+    /// The game the user chose in Browse last, which Browse shows again when it opens; null for none, as before one was
+    /// chosen, or once its chip's × took it away. A game no site lists any more is passed over.
+    /// </summary>
+    public GameRef? BrowseGame { get; init; }
+
+    /// <summary>
     /// Quick search's recent searches, the newest first: at most <see cref="MaxQuickSearches"/>, each once, case aside,
     /// with none empty.
     /// </summary>
@@ -105,9 +113,10 @@ public sealed record UiState
             && Screen == other.Screen
             && BrowseSearches.SequenceEqual(other.BrowseSearches)
             && BrowseSite == other.BrowseSite
+            && BrowseGame == other.BrowseGame
             && QuickSearches.SequenceEqual(other.QuickSearches);
 
-    public override int GetHashCode() => HashCode.Combine(Window, MenuCollapsed, Screen, BrowseSearches.Count, BrowseSite, QuickSearches.Count);
+    public override int GetHashCode() => HashCode.Combine(Window, MenuCollapsed, Screen, BrowseSearches.Count, BrowseSite, BrowseGame, QuickSearches.Count);
 
     private static string[] Searches(IEnumerable<string> searches, int most)
         => [

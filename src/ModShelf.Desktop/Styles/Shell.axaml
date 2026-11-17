@@ -610,6 +610,28 @@
         <Setter Property="BorderBrush" Value="Transparent" />
     </Style>
 
+    <!-- What a screen says while it has nothing to show yet, such as Browse before a game is chosen: centred, its sign
+         faint, then a heading and a note. -->
+    <Style Selector="StackPanel.emptyState">
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="MaxWidth" Value="440" />
+        <Setter Property="Spacing" Value="10" />
+        <Setter Property="Margin" Value="0,0,0,60" />
+    </Style>
+
+    <Style Selector="StackPanel.emptyState > PathIcon">
+        <Setter Property="Foreground" Value="{DynamicResource ShelfFaintBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="Margin" Value="0,0,0,6" />
+    </Style>
+
+    <Style Selector="StackPanel.emptyState > TextBlock">
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="TextAlignment" Value="Center" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
     <!-- One of Browse's recent searches, in the game picker: a pill. -->
     <Style Selector="Button.recentSearch">
         <Setter Property="MinHeight" Value="30" />

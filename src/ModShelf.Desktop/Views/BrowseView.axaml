@@ -133,6 +133,13 @@
         </Border>
 
         <Panel Margin="0,12,0,0">
+            <!-- No game chosen: nothing is listed until one is. -->
+            <StackPanel Classes="emptyState" IsVisible="{Binding HasNoGame}">
+                <PathIcon Width="44" Height="44" Data="{StaticResource BrowseIcon}" />
+                <TextBlock Classes="subheading" Text="{x:Static res:Strings.BrowseNoGameHeading}" />
+                <TextBlock Classes="note" Text="{x:Static res:Strings.BrowseNoGameNote}" />
+            </StackPanel>
+
             <!-- A game's rows before a search: its trending, newest and recently updated mods. Clicking a mod opens it. -->
             <ScrollViewer>
                 <ScrollViewer.IsVisible>
@@ -220,6 +227,7 @@
                     <MultiBinding Converter="{x:Static BoolConverters.And}">
                         <Binding Path="!IsShowingRows" />
                         <Binding Path="!IsModOpen" />
+                        <Binding Path="!HasNoGame" />
                     </MultiBinding>
                 </DockPanel.IsVisible>
                 <!-- How many match; selecting the mods listed, and what to do with those selected. -->

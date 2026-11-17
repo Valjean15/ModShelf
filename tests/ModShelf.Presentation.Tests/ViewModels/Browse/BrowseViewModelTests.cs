@@ -1,6 +1,7 @@
 using System.Net;
 
 using ModShelf.Application.Catalog;
+using ModShelf.Application.State;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Services;
@@ -51,7 +52,7 @@ public sealed class BrowseViewModelTests : IDisposable
     }
 
     [Fact]
-    public async Task ChoosesTheGameTheLibraryHasTheMostModsOfAndShowsItsRows()
+    public async Task ChoosesNoGameUntilTheUserDoesEvenWithALibrary()
     {
         _harness.Searchable(BrowseHarness.Stardew, 3);
         await _harness.StartAsync(
@@ -61,7 +62,24 @@ public sealed class BrowseViewModelTests : IDisposable
 
         await _harness.ShowAsync();
 
+        Assert.Null(Screen.Game);
+        Assert.True(Screen.HasNoGame);
+        Assert.False(Screen.IsShowingRows);
+        Assert.Empty(_harness.Lookup.Searches);
+        Assert.Null(_harness.UiState.State.BrowseGame);
+    }
+
+    [Fact]
+    public async Task ChoosesTheGameChosenLastAndShowsItsRows()
+    {
+        _harness.Searchable(BrowseHarness.Stardew, 3);
+        _harness.UiState.State = UiState.None with { BrowseGame = BrowseHarness.Stardew.Game };
+        await _harness.StartAsync(TestData.LibraryMod(TestData.Mod("1"), "A"));
+
+        await _harness.ShowAsync();
+
         Assert.Equal(BrowseHarness.Stardew.Game, Screen.Game?.Game);
+        Assert.False(Screen.HasNoGame);
         Assert.True(Screen.IsShowingRows);
         Assert.Equal(
             [
@@ -73,6 +91,84 @@ public sealed class BrowseViewModelTests : IDisposable
         Assert.Empty(Screen.Results);
         Assert.Equal(string.Empty, Screen.ResultsText);
         Assert.False(Screen.HasMore);
+    }
+
+    [Fact]
+    public async Task AGameChosenLastThatNoSiteListsNowIsPassedOver()
+    {
+        _harness.UiState.State = UiState.None with { BrowseGame = new GameRef(BrowseHarness.Skyrim.Game.Source, "gone") };
+        await _harness.StartAsync();
+
+        await _harness.ShowAsync();
+
+        Assert.Null(Screen.Game);
+        Assert.Empty(_harness.Lookup.Searches);
+    }
+
+    [Fact]
+    public async Task ChoosingAGameRemembersItForTheNextRun()
+    {
+        await _harness.StartAsync();
+        await _harness.ShowAsync();
+
+        await _harness.ChooseAsync(BrowseHarness.Stardew);
+        await Screen.RememberingGame;
+
+        Assert.Equal(BrowseHarness.Stardew.Game, _harness.UiState.State.BrowseGame);
+    }
+
+    [Fact]
+    public async Task TheChipsCrossTakesTheGameAwayListsNothingAndForgetsIt()
+    {
+        _harness.Searchable(BrowseHarness.Stardew, 3);
+        _harness.UiState.State = UiState.None with { BrowseGame = BrowseHarness.Stardew.Game };
+        await _harness.StartAsync();
+        await _harness.ShowAsync();
+
+        bool couldFollow = Screen.CanFollow;
+        Screen.Picker.ClearCommand.Execute(null);
+        await Screen.RememberingGame;
+
+        Assert.True(couldFollow);
+        Assert.False(Screen.CanFollow);
+        Assert.Null(Screen.Game);
+        Assert.True(Screen.HasNoGame);
+        Assert.Null(Screen.Picker.Picked);
+        Assert.False(Screen.Picker.IsOpen);
+        Assert.False(Screen.IsShowingRows);
+        Assert.Empty(Screen.Results);
+        Assert.Null(_harness.UiState.State.BrowseGame);
+    }
+
+    [Fact]
+    public async Task TheChipsCrossClosesTheModOpenAndDropsTheSearch()
+    {
+        _harness.Searchable(BrowseHarness.Stardew, 25);
+        await _harness.StartAsync();
+        await _harness.ShowAsync();
+        await _harness.ChooseAndSearchAsync(BrowseHarness.Stardew);
+
+        Screen.Picker.ClearCommand.Execute(null);
+
+        Assert.Empty(Screen.Results);
+        Assert.False(Screen.HasMore);
+        Assert.Equal(string.Empty, Screen.ResultsText);
+        Assert.Null(Screen.Mod);
+        Assert.False(Screen.IsBusy);
+    }
+
+    [Fact]
+    public async Task AGameThatCantBeRememberedIsStillChosen()
+    {
+        await _harness.StartAsync();
+        await _harness.ShowAsync();
+        _harness.UiState.Refusal = new IOException("The disk is full.");
+
+        await _harness.ChooseAsync(BrowseHarness.Stardew);
+        await Screen.RememberingGame;
+
+        Assert.Equal(BrowseHarness.Stardew.Game, Screen.Game?.Game);
+        Assert.Null(_harness.UiState.State.BrowseGame);
     }
 
     [Fact]
@@ -623,7 +719,7 @@ public sealed class BrowseViewModelTests : IDisposable
         _harness.Searchable(BrowseHarness.Skyrim, 2);
         await _harness.StartAsync(TestData.LibraryMod(first, "Mod 1", watched: false, TestData.LibraryFile(first, "10", "a.7z")));
         await _harness.ShowAsync();
-        await Screen.SearchCommand.ExecuteAsync(null);
+        await _harness.ChooseAndSearchAsync(BrowseHarness.Skyrim);
         (bool, bool)[] before = [.. Screen.Results.Select(row => (row.IsDownloaded, row.IsWatched))];
 
         _harness.Library.Change(second, TestData.LibraryMod(second, "Mod 2"));

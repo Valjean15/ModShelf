@@ -1,3 +1,4 @@
+using ModShelf.Application.State;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.ViewModels.Browse;
 using ModShelf.Testing;
@@ -36,16 +37,15 @@ public sealed class BrowseGamesByNameTests : IDisposable
     }
 
     [Fact]
-    public async Task ItStartsOnTheGameTheLibraryHasTheMostModsOfWhateverItsSite()
+    public async Task ItStartsOnTheGameChosenLastOfASiteThatFindsItsGamesByName()
     {
-        await _harness.StartAsync(
-            TestData.LibraryMod(Protagonist, "P5R Female Protagonist"),
-            TestData.LibraryMod(new ModRef(BrowseHarness.Royal.Game, "414644"), "Restored Outfits Dialogue"),
-            TestData.LibraryMod(SkyUi, "SkyUI"));
+        _harness.UiState.State = UiState.None with { BrowseGame = BrowseHarness.Royal.Game };
+        await _harness.StartAsync(TestData.LibraryMod(SkyUi, "SkyUI"));
 
         await _harness.ShowAsync();
 
         Assert.Equal(BrowseHarness.Royal.Game, Screen.Game?.Game);
+        Assert.Contains(Screen.Games, choice => choice.Game == BrowseHarness.Royal.Game);
     }
 
     [Fact]
@@ -66,6 +66,24 @@ public sealed class BrowseGamesByNameTests : IDisposable
         Assert.True(reading);
         Assert.Equal(4, Screen.Games.Count);
         Assert.False(Screen.IsReadingGames);
+    }
+
+    [Fact]
+    public async Task TheGameChosenLastIsChosenAsSoonAsItsSiteListsIt()
+    {
+        TaskCompletionSource nexus = new();
+        _harness.Lookup.HeldGames[TestData.Nexus] = nexus;
+        _harness.UiState.State = UiState.None with { BrowseGame = BrowseHarness.Royal.Game };
+        await _harness.StartAsync(TestData.LibraryMod(Protagonist, "P5R Female Protagonist"));
+
+        _harness.Navigation.NavigateTo(Presentation.Services.Screen.Browse);
+        await WaitForAsync(() => Screen.Game is not null);
+        (GameRef?, bool) whileNexusReads = (Screen.Game?.Game, Screen.IsReadingGames);
+        nexus.SetResult();
+        await Screen.GamesWork;
+
+        Assert.Equal((BrowseHarness.Royal.Game, true), whileNexusReads);
+        Assert.Equal(BrowseHarness.Royal.Game, Screen.Game?.Game);
     }
 
     [Fact]

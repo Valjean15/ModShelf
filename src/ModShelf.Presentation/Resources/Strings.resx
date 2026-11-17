@@ -3887,4 +3887,12 @@
     <value>Couldn't keep the choice: {0}</value>
     <comment>The dialog choosing an installed game's games: {0} is what went wrong.</comment>
   </data>
+  <data name="BrowseNoGameHeading" xml:space="preserve">
+    <value>Choose a game to browse its mods</value>
+    <comment>Browse before a game is chosen, or once its chip's × took it away.</comment>
+  </data>
+  <data name="BrowseNoGameNote" xml:space="preserve">
+    <value>Find it in the box above, by its name. Browse opens on the game you chose last, until you take it away with ×.</value>
+    <comment>Under BrowseNoGameHeading.</comment>
+  </data>
 </root>

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.State;
 using ModShelf.Application.State.Ports;
+using ModShelf.Domain.Mods;
 using ModShelf.Infrastructure.Settings;
 
 namespace ModShelf.Infrastructure.State;
@@ -18,6 +19,7 @@ namespace ModShelf.Infrastructure.State;
 ///   "screen": "browse",
 ///   "browseSearches": [ "skyui", "armour" ],
 ///   "browseSite": "degmods",
+///   "browseGame": "nexus/stardewvalley",
 ///   "quickSearches": [ "dragon", "old versions" ]
 /// }
 /// </code>
@@ -36,6 +38,7 @@ internal sealed partial class JsonUiStateStore : IUiStateStore
     private const string Screen = "screen";
     private const string BrowseSearches = "browseSearches";
     private const string BrowseSite = "browseSite";
+    private const string BrowseGame = "browseGame";
     private const string QuickSearches = "quickSearches";
 
     private static readonly JsonDocumentOptions Reading = new() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
@@ -74,6 +77,7 @@ internal sealed partial class JsonUiStateStore : IUiStateStore
             Screen = Text(file[Screen]),
             BrowseSearches = file[BrowseSearches] is JsonArray searches ? [.. searches.Select(Text).OfType<string>()] : [],
             BrowseSite = Text(file[BrowseSite]),
+            BrowseGame = GameRef.TryParse(Text(file[BrowseGame]), out GameRef? game) ? game : null,
             QuickSearches = file[QuickSearches] is JsonArray quick ? [.. quick.Select(Text).OfType<string>()] : [],
         };
     }
@@ -103,6 +107,7 @@ internal sealed partial class JsonUiStateStore : IUiStateStore
         Set(file, Screen, state.Screen is { } screen ? JsonValue.Create(screen) : null);
         Set(file, BrowseSearches, state.BrowseSearches.Count > 0 ? new JsonArray([.. state.BrowseSearches.Select(search => JsonValue.Create(search))]) : null);
         Set(file, BrowseSite, state.BrowseSite is { } site ? JsonValue.Create(site) : null);
+        Set(file, BrowseGame, state.BrowseGame is { } game ? JsonValue.Create(game.ToString()) : null);
         Set(file, QuickSearches, state.QuickSearches.Count > 0 ? new JsonArray([.. state.QuickSearches.Select(search => JsonValue.Create(search))]) : null);
 
         try

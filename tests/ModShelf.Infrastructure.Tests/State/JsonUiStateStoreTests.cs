@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using ModShelf.Application.State;
 using ModShelf.Application.State.Ports;
+using ModShelf.Domain.Mods;
 using ModShelf.Infrastructure.State;
 using ModShelf.Testing;
 
@@ -42,6 +43,7 @@ public sealed class JsonUiStateStoreTests : IDisposable
             Screen = "browse",
             BrowseSearches = ["skyui", "armour"],
             BrowseSite = "degmods",
+            BrowseGame = new GameRef(new SourceId("degmods"), "fallout: new vegas"),
             QuickSearches = ["dragon", "old versions"],
         };
 
@@ -64,6 +66,7 @@ public sealed class JsonUiStateStoreTests : IDisposable
                 "armour"
               ],
               "browseSite": "degmods",
+              "browseGame": "degmods/fallout: new vegas",
               "quickSearches": [
                 "dragon",
                 "old versions"
@@ -84,6 +87,7 @@ public sealed class JsonUiStateStoreTests : IDisposable
               "screen": "library",
               "browseSearches": [ "old" ],
               "browseSite": "nexus",
+              "browseGame": "nexus/stardewvalley",
               "libraryOrder": "name",
             }
             """);
@@ -97,6 +101,7 @@ public sealed class JsonUiStateStoreTests : IDisposable
         Assert.DoesNotContain("screen", file, StringComparison.Ordinal);
         Assert.DoesNotContain("browseSearches", file, StringComparison.Ordinal);
         Assert.DoesNotContain("browseSite", file, StringComparison.Ordinal);
+        Assert.DoesNotContain("browseGame", file, StringComparison.Ordinal);
         Assert.Equal(new UiState { Window = new WindowPlacement(10, 20, 900, 600, maximized: false) }, await Store().LoadAsync(Cancellation));
     }
 
@@ -175,6 +180,19 @@ public sealed class JsonUiStateStoreTests : IDisposable
         UiState state = await Store().LoadAsync(Cancellation);
 
         Assert.Equal(new UiState { BrowseSearches = ["skyui", "armour"] }, state);
+        Assert.Empty(_logger.Entries);
+    }
+
+    [Theory]
+    [InlineData("""{ "browseGame": 3 }""")]
+    [InlineData("""{ "browseGame": "stardewvalley" }""")]
+    [InlineData("""{ "browseGame": "nexus/" }""")]
+    [InlineData("""{ "browseGame": [ "nexus/stardewvalley" ] }""")]
+    public async Task ABrowseGameThatIsntASitesGameIsLeftOut(string content)
+    {
+        await WriteAsync(content);
+
+        Assert.Equal(UiState.None, await Store().LoadAsync(Cancellation));
         Assert.Empty(_logger.Entries);
     }
 

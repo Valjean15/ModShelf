@@ -16,7 +16,7 @@ using ModShelf.Sources.Abstractions.Search;
 namespace ModShelf.Presentation.ViewModels.Browse;
 
 /// <summary>
-/// Reading the games the sites have, and choosing the one shown first.
+/// Reading the games the sites have, choosing the one the user chose last, and remembering the one chosen.
 /// </summary>
 public sealed partial class BrowseViewModel
 {
@@ -29,6 +29,12 @@ public sealed partial class BrowseViewModel
     /// The game quick search opened Browse on before the games were read; chosen once they are.
     /// </summary>
     private GameRef? _asked;
+
+    /// <summary>
+    /// The game the user chose last, in this run or an earlier one; chosen again once the games are read, while no other
+    /// is. Null for none.
+    /// </summary>
+    private GameRef? _rememberedGame;
 
     /// <summary>
     /// The sites whose games couldn't be read, with why, in the order they failed: said while the site box offers their
@@ -44,7 +50,8 @@ public sealed partial class BrowseViewModel
     /// <summary>
     /// Keeps the filters of the game chosen before, closing the filter card; then shows the chosen game's previews,
     /// offers what its site can search by, shows its rows and reads its categories. A game chosen before while the app
-    /// runs gets its filters back; another starts the filters as its own settings say.
+    /// runs gets its filters back; another starts the filters as its own settings say. With no game, nothing is listed.
+    /// The game is remembered for the next run, and none forgets it.
     /// </summary>
     partial void OnGameChanged(GameChoice? oldValue, GameChoice? newValue)
     {
@@ -73,11 +80,18 @@ public sealed partial class BrowseViewModel
                 DefaultsWork = StartAsTheGameSaysAsync(newValue.Game);
             }
         }
+        else
+        {
+            ShowNoGame();
+        }
+
+        _rememberedGame = newValue?.Game;
+        RememberingGame = RememberGameAsync(newValue?.Game);
     }
 
     /// <summary>
-    /// Reads the games of every site that can search, keeping the ones read when another site fails. The game the library
-    /// has the most mods of is chosen, unless the user chose one already.
+    /// Reads the games of every site that can search, keeping the ones read when another site fails. The game the user
+    /// chose last is chosen again, unless another is chosen already; with none, nothing is.
     /// </summary>
     [RelayCommand(CanExecute = nameof(CanReadGames))]
     private Task ReadGamesAsync()
@@ -157,6 +171,11 @@ public sealed partial class BrowseViewModel
 
                 _allGames = [.. games];
                 ShowGameChoices();
+                if (Game is null && _asked is null && _rememberedGame is { } last && Games.FirstOrDefault(choice => choice.Game == last) is { } early)
+                {
+                    // As soon as its site lists it: a slow site keeps it waiting no longer.
+                    Game = early;
+                }
             }
         }
         finally
@@ -183,9 +202,43 @@ public sealed partial class BrowseViewModel
         {
             await OpenFoundAsync(asked);
         }
-        else if (Game is null && Favourite([.. games.Concat(_foundGames).Select(game => game.Choice).Where(game => OfSiteChosen(game.Game))]) is { } favourite)
+        else if (Game is null && _rememberedGame is { } last)
         {
-            Game = favourite;
+            await ChooseRememberedAsync(last);
+        }
+    }
+
+    /// <summary>
+    /// Chooses the game the user chose last, when a site lists it and the settings don't hide it; otherwise none.
+    /// </summary>
+    private async Task ChooseRememberedAsync(GameRef game)
+    {
+        if (Games.FirstOrDefault(choice => choice.Game == game) is { } listed)
+        {
+            Game = listed;
+        }
+        else if (_byName.Finds(game.Source) && !_hiddenGames.IsHidden(game))
+        {
+            await OpenFoundAsync(game);
+        }
+    }
+
+    /// <summary>
+    /// Remembers the game chosen for the next run, or forgets it for none. One that can't be remembered is logged.
+    /// </summary>
+    private async Task RememberGameAsync(GameRef? game)
+    {
+        try
+        {
+            await _uiState.ChangeAsync(state => state with { BrowseGame = game }, _stopping);
+        }
+        catch (IOException exception)
+        {
+            LogGameNotRemembered(_logger, exception);
+        }
+        catch (OperationCanceledException) when (_stopping.IsCancellationRequested)
+        {
+            // The app is closing.
         }
     }
 

@@ -37,7 +37,8 @@ namespace ModShelf.Presentation.ViewModels.Browse;
 /// author, category and how recently updated, in an order and a page at a time; or listing the ones the account tracks.
 /// Opening one, from a list or from a link, shows its files and changelog, to download them, watch it and track it. The
 /// games are read from the sites the first time the screen is shown. What the library has of each mod follows the
-/// library's changes.
+/// library's changes. Nothing is listed until the user chooses a game; the game chosen last is shown again in the next
+/// run, until its chip's × takes it away.
 /// </summary>
 public sealed partial class BrowseViewModel : ScreenViewModel
 {
@@ -140,7 +141,14 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         screens.BrowseGameOpening += OnGameOpening;
         Filters = new BrowseFiltersViewModel(this);
         _byName = new GamesByName(lookup, lookup.SearchableSources, logger, hiddenGames.IsHidden);
-        Picker = new GamePickerViewModel(pictures, sources, ChooseGame, SearchAgainFor, byName: _byName, installedPicked: PickInstalled);
+        Picker = new GamePickerViewModel(
+            pictures,
+            sources,
+            ChooseGame,
+            SearchAgainFor,
+            byName: _byName,
+            installedPicked: PickInstalled,
+            cleared: () => Game = null);
         StringComparer byName = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: true);
         Sites =
         [
@@ -203,11 +211,18 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     public GamePickerViewModel Picker { get; }
 
     /// <summary>
-    /// The game whose mods are searched; null until one is chosen. Choosing one searches it.
+    /// The game whose mods are searched; null until one is chosen, and once its chip's × takes it away. Choosing one
+    /// shows its rows, and is remembered for the next run.
     /// </summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNoGame))]
     [NotifyCanExecuteChangedFor(nameof(ShowTrackedCommand))]
     public partial GameChoice? Game { get; set; }
+
+    /// <summary>
+    /// Whether no game is chosen, so the screen asks for one and lists nothing.
+    /// </summary>
+    public bool HasNoGame => Game is null;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ReadGamesCommand))]
@@ -409,6 +424,11 @@ public sealed partial class BrowseViewModel : ScreenViewModel
     internal Task RememberingSearch { get; private set; } = Task.CompletedTask;
 
     /// <summary>
+    /// The game chosen last being remembered, or forgotten, for tests to wait on.
+    /// </summary>
+    internal Task RememberingGame { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
     /// Reads the previews from the settings and the recent searches, lists the library, and follows its changes while the
     /// app runs, so each mod shows what the library has of it. The games are read the first time the screen is shown.
     /// </summary>
@@ -419,6 +439,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         UiState remembered = await _uiState.GetAsync(cancellationToken);
         Picker.ShowRecent(remembered.BrowseSearches);
         ShowSite(SiteChoiceOf(remembered.BrowseSite));
+        _rememberedGame = remembered.BrowseGame;
         _hiddenGames.Changed += (_, _) => _uiThread.Post(ShowGameChoices);
         await _pictures.LoadAsync();
         Previews.Refresh();
