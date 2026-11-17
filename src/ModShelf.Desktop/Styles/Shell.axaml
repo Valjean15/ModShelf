@@ -1090,6 +1090,101 @@
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
+    <!-- A box that finds rows of a list by name, such as the games in Settings: as wide as it's given, up to 320. -->
+    <Style Selector="TextBox.filter">
+        <Setter Property="MinWidth" Value="200" />
+        <Setter Property="MaxWidth" Value="320" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <!-- A compact list of many rows inside a card, such as the games on this PC: framed, each row a line apart. -->
+    <Style Selector="Border.compactList">
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+
+    <Style Selector="Border.compactRow">
+        <Setter Property="MinHeight" Value="44" />
+        <Setter Property="Padding" Value="14,6,8,6" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <Style Selector="Border.compactRow:pointerover">
+        <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />
+    </Style>
+
+    <Style Selector="Border.compactRow TextBlock.rowName">
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+
+    <!-- A row's own small button, such as Choose…: quiet until pointed at. -->
+    <Style Selector="Button.rowAction">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfAccentTextBrush}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="MinHeight" Value="30" />
+        <Setter Property="Padding" Value="10,2" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.rowAction:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ShelfSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfAccentTextBrush}" />
+    </Style>
+
+    <!-- An installed game's game on a site: a small pill, soft accent when chosen, faint for none, warm for several of a
+         name to choose from. -->
+    <Style Selector="Border.sitePill">
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="8,1" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />
+        <Setter Property="Background" Value="{DynamicResource ShelfRaisedBrush}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="MaxWidth" Value="300" />
+    </Style>
+
+    <Style Selector="Border.sitePill TextBlock">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Foreground" Value="{DynamicResource ShelfMutedBrush}" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+
+    <Style Selector="Border.sitePill.chosen">
+        <Setter Property="Background" Value="{DynamicResource ShelfAccentSoftBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+
+    <Style Selector="Border.sitePill.chosen TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource ShelfAccentTextBrush}" />
+    </Style>
+
+    <Style Selector="Border.sitePill.none">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <Style Selector="Border.sitePill.none TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource ShelfFaintBrush}" />
+    </Style>
+
+    <Style Selector="Border.sitePill.shared">
+        <Setter Property="Background" Value="{DynamicResource ShelfWarnSoftBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+
+    <Style Selector="Border.sitePill.shared TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource ShelfTextBrush}" />
+    </Style>
+
     <!-- A game's own settings, framed beside the games. -->
     <Style Selector="Border.gamePage">
         <Setter Property="BorderBrush" Value="{DynamicResource ShelfLineBrush}" />

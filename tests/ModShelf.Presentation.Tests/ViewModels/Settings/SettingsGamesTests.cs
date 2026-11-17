@@ -49,7 +49,39 @@ public sealed class SettingsGamesTests
     }
 
     [Fact]
-    public async Task EachLibraryGameShowsTheCoverItsSiteGives()
+    public async Task TheFilterListsOnlyTheGamesWhoseNamesHaveItsWordsAndCountsThem()
+    {
+        _harness.Library.Add(TestData.LibraryMod(TestData.Mod("12604"), "SkyUI"), TestData.LibraryMod(TestData.Mod("2400", "stardewvalley"), "SMAPI"));
+        Store(("fallout4", new GameSettings { Hidden = true }));
+        await StartAsync();
+        string all = Screen.GamesCountText;
+
+        Screen.GamesFilter = "valley";
+        string[] foundNames = [.. Screen.Games.Select(row => row.Name)];
+        (string, string?, GameRef?) found = (Screen.GamesCountText, Screen.GamesFilterNothing, Screen.SelectedGame?.Game);
+        Screen.GamesFilter = "zelda";
+        (int, string, string?, bool) none = (Screen.Games.Count, Screen.GamesCountText, Screen.GamesFilterNothing, Screen.HasNoGames);
+        Screen.GamesFilter = string.Empty;
+
+        Assert.Equal("3 games", all);
+        Assert.Equal(["Stardew Valley"], foundNames);
+        Assert.Equal(("1 of 3 games", null, Stardew), found);
+        Assert.Equal((0, "0 of 3 games", "No game's name has “zelda”.", false), none);
+        Assert.Equal(("3 games", 3), (Screen.GamesCountText, Screen.Games.Count));
+    }
+
+    [Fact]
+    public async Task OneGameIsCountedAsOne()
+    {
+        _harness.Library.Add(TestData.LibraryMod(TestData.Mod("12604"), "SkyUI"));
+
+        await StartAsync();
+
+        Assert.Equal("1 game", Screen.GamesCountText);
+    }
+
+    [Fact]
+    public async Task EachLibraryGameShowsTheCoverItsSiteGivesOnceItsRowShows()
     {
         Uri skyrimCover = new("https://images.nexusmods.com/images/games/v2/1704/skyrim-hero.jpg");
         Uri stardewCover = new("https://images.nexusmods.com/images/games/v2/1303/stardew-hero.jpg");
@@ -61,6 +93,15 @@ public sealed class SettingsGamesTests
 
         await StartAsync();
         await CoversShownAsync();
+        int readBeforeShown = _harness.Pictures.Cache.Asked.Count;
+        foreach (GameRowViewModel row in Screen.Games)
+        {
+            // As the list does once a row comes into view, and again when it's built again: once is enough.
+            row.ShowCover();
+            row.ShowCover();
+        }
+
+        await CoversShownAsync();
         GameRowViewModel skyrim = Screen.Games.Single(row => row.Game == Skyrim);
         Screen.OnShown();
         await Screen.GamesWork;
@@ -71,6 +112,7 @@ public sealed class SettingsGamesTests
             [("fallout4", null), ("skyrimspecialedition", ScriptedPictureCache.FileOf(skyrimCover)), ("stardewvalley", null)],
             Screen.Games.Select(row => (row.Game.Key, row.Cover.File)));
         Assert.Same(skyrim, Screen.Games[1]);
+        Assert.Equal(0, readBeforeShown);
         Assert.Equal([skyrimCover], _harness.Pictures.Cache.Asked);
     }
 

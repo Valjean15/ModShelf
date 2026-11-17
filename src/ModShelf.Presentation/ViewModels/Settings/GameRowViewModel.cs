@@ -7,11 +7,14 @@ using ModShelf.Presentation.ViewModels.Pictures;
 namespace ModShelf.Presentation.ViewModels.Settings;
 
 /// <summary>
-/// A game in the Settings screen's Games category: its cover, its name, and whether it has settings of its own.
+/// A game in the Settings screen's Games category: its cover, its name, and whether it has settings of its own. Its cover
+/// is read once the row shows, so a list of hundreds of games reads only the covers scrolled to.
 /// </summary>
 public sealed partial class GameRowViewModel : ObservableObject
 {
     /// <param name="siteName">The game's site's name, such as Nexus Mods.</param>
+    private bool _coverShown;
+
     internal GameRowViewModel(GameRef game, string siteName, string name, ModPictures pictures)
     {
         ArgumentNullException.ThrowIfNull(game);
@@ -68,6 +71,18 @@ public sealed partial class GameRowViewModel : ObservableObject
     /// </summary>
     [ObservableProperty]
     public partial string Note { get; internal set; } = string.Empty;
+
+    /// <summary>
+    /// Shows the game's cover from now on, reading it, as when its row comes into view; again changes nothing.
+    /// </summary>
+    public void ShowCover()
+    {
+        if (!_coverShown)
+        {
+            _coverShown = true;
+            Cover.Show(CancellationToken.None);
+        }
+    }
 
     public override string ToString() => Name;
 }

@@ -43,6 +43,24 @@ public sealed partial class SettingsViewModel
     public partial bool HasNoGames { get; private set; } = true;
 
     /// <summary>
+    /// Words to find a game among those listed, by its name; empty for every game.
+    /// </summary>
+    [ObservableProperty]
+    public partial string GamesFilter { get; set; } = string.Empty;
+
+    /// <summary>
+    /// How many games are listed, such as "124 games", or "3 of 124 games" while <see cref="GamesFilter"/> finds some.
+    /// </summary>
+    [ObservableProperty]
+    public partial string GamesCountText { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// Such as "No game's name has “zelda”."; null while the filter finds games, or there's none.
+    /// </summary>
+    [ObservableProperty]
+    public partial string? GamesFilterNothing { get; private set; }
+
+    /// <summary>
     /// Whether each game shows its site, as a chip: once two sites are in use, as <see cref="ISitesInUse"/> says when the
     /// screen is shown. While they do, a game goes by its own name, without its site's.
     /// </summary>
@@ -96,6 +114,11 @@ public sealed partial class SettingsViewModel
     /// Names the games plainly beside their sites' chips, or with their sites when same-named, once sites no longer show.
     /// </summary>
     partial void OnShowSitesChanged(bool value) => ShowGames();
+
+    /// <summary>
+    /// Lists only the games whose names have the words typed.
+    /// </summary>
+    partial void OnGamesFilterChanged(string value) => ShowGames();
 
     /// <summary>
     /// Shows the chosen game's own settings.
@@ -334,9 +357,9 @@ public sealed partial class SettingsViewModel
     }
 
     /// <summary>
-    /// Lists the games by name, each with its picture once its site gives one, and saying whether it has settings of its
-    /// own, and shows the chosen one's, or the first's. While searching, only the games whose names match are listed,
-    /// when some do.
+    /// Lists the games by name, each with its picture once its site gives one and its row shows, and saying whether it
+    /// has settings of its own, and shows the chosen one's, or the first's. Only the games whose names have the filter's
+    /// words are listed; while searching, only those whose names match too, when some do.
     /// </summary>
     private void ShowGames()
     {
@@ -353,11 +376,17 @@ public sealed partial class SettingsViewModel
             rows.Add(row);
         }
 
+        NameQuery filter = NameQuery.Parse(GamesFilter);
+        GameRowViewModel[] kept = [.. rows.Where(row => filter.Matches(row.Name))];
         NameQuery search = Search();
-        GameRowViewModel[] named = [.. rows.Where(row => !search.IsEmpty && search.Matches(row.Name))];
-        IEnumerable<GameRowViewModel> listed = named.Length > 0 ? named : rows;
+        GameRowViewModel[] named = [.. kept.Where(row => !search.IsEmpty && search.Matches(row.Name))];
+        IEnumerable<GameRowViewModel> listed = named.Length > 0 ? named : kept;
         Games.SyncWith([.. listed.OrderBy(row => row.Name, byName)]);
-        HasNoGames = Games.Count == 0;
+        HasNoGames = rows.Count == 0;
+        GamesCountText = Games.Count == rows.Count
+            ? Counts.Of(rows.Count, string.Empty, Strings.SettingsGamesCountOne, Strings.SettingsGamesCount)
+            : Text.Format(Strings.SettingsGamesCountOf, Games.Count, rows.Count);
+        GamesFilterNothing = rows.Count > 0 && kept.Length == 0 ? Text.Format(Strings.SettingsGamesFilterNothing, filter.Text) : null;
         if (Game is { } page)
         {
             page.Name = NameOf(page.Game);
@@ -440,8 +469,7 @@ public sealed partial class SettingsViewModel
 
     private GameRowViewModel NewRow(GameRef game)
     {
-        GameRowViewModel row = new(game, _sources.SiteName(game.Source), NameOf(game), _covers);
-        row.Cover.Show(CancellationToken.None);
-        return row;
+        // Its cover is read once its row shows.
+        return new GameRowViewModel(game, _sources.SiteName(game.Source), NameOf(game), _covers);
     }
 }

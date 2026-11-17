@@ -10,7 +10,8 @@ using ModShelf.Presentation.Resources;
 namespace ModShelf.Presentation.ViewModels.Settings;
 
 /// <summary>
-/// An installed game in Settings › Games: its name, its games on the sites, and <b>Choose…</b>.
+/// An installed game in Settings › Games: its name, its games on the sites, as a sentence and as pills, and
+/// <b>Choose…</b>.
 /// </summary>
 public sealed partial class InstalledGameRowViewModel : ObservableObject
 {
@@ -57,6 +58,15 @@ public sealed partial class InstalledGameRowViewModel : ObservableObject
     public partial bool HasGame { get; private set; }
 
     /// <summary>
+    /// Its games on the sites, one pill per site with a game or a choice, in the sites' order; none while no site has one.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPills))]
+    public partial IReadOnlyList<InstalledPill> Pills { get; private set; } = [];
+
+    public bool HasPills => Pills.Count > 0;
+
+    /// <summary>
     /// Shows the game's games as matched again.
     /// </summary>
     internal void Show(InstalledGameMatch match)
@@ -64,10 +74,36 @@ public sealed partial class InstalledGameRowViewModel : ObservableObject
         ArgumentNullException.ThrowIfNull(match);
 
         Match = match;
-        string[] sites = [.. match.Sites.Where(site => site.Picked || site.Games.Count > 0).Select(Describe)];
-        MatchesText = sites.Length == 0 ? Strings.InstalledRowNoGame : string.Join(" · ", sites);
+        SiteMatch[] said = [.. match.Sites.Where(site => site.Picked || site.Games.Count > 0)];
+        MatchesText = said.Length == 0 ? Strings.InstalledRowNoGame : string.Join(" · ", said.Select(Describe));
         HasGame = match.Sites.Any(site => site.Games.Count > 0);
+        Pills = [.. said.Select(Pill)];
     }
+
+    /// <summary>
+    /// The site's game as a pill: the site's name alone when the game has the installed game's name, punctuation and case
+    /// aside, as most do.
+    /// </summary>
+    private InstalledPill Pill(SiteMatch site)
+    {
+        string name = _sources.SiteName(site.Site);
+        string tip = Describe(site);
+        return (site.Picked, site.Games.Count) switch
+        {
+            (true, 0) => new InstalledPill(Text.Format(Strings.InstalledPillNone, name), tip, IsChosen: false, IsNone: true, IsShared: false),
+            (_, 1) => new InstalledPill(
+                SameName(site.Games[0].Name, Game.Name) ? name : Text.Format(Strings.InstalledRowGame, name, site.Games[0].Name),
+                tip,
+                IsChosen: site.Picked,
+                IsNone: false,
+                IsShared: false),
+            _ => new InstalledPill(Text.Format(Strings.InstalledPillShared, name, site.Games.Count), tip, IsChosen: false, IsNone: false, IsShared: true),
+        };
+    }
+
+    private static bool SameName(string one, string other) => Letters(one) == Letters(other);
+
+    private static string Letters(string name) => string.Concat(name.Where(char.IsLetterOrDigit)).ToUpperInvariant();
 
     [RelayCommand]
     private Task ChooseAsync() => _choose(this);

@@ -61,6 +61,67 @@ public sealed class InstalledGamesViewModelTests
     }
 
     [Fact]
+    public async Task EachSitesGameIsAPillNamingTheGameOnlyWhereItsNameDiffers()
+    {
+        _installed.Pick(_stardew, Banana, Royal);
+
+        await ReadAsync();
+
+        Assert.Equal(
+            [
+                [("Nexus Mods", "Nexus Mods: Stardew Valley", false, false, false), ("GameBanana: Persona 5 Royal (PC)", "GameBanana: Persona 5 Royal (PC), chosen", true, false, false)],
+                [],
+                [("Nexus Mods: none", "Nexus Mods: none, chosen", false, true, false)],
+            ],
+            _card.Games.Select(row => row.Pills.Select(pill => (pill.Text, pill.Tip, pill.IsChosen, pill.IsNone, pill.IsShared))));
+        Assert.Equal([true, false, true], _card.Games.Select(row => row.HasPills));
+    }
+
+    [Fact]
+    public async Task TheFilterFindsAnInstalledGameByItsNameOrItsGamesNames()
+    {
+        _installed.Pick(_stardew, Banana, Royal);
+        await ReadAsync();
+
+        _card.Filter = "skyrim";
+        string[] byName = [.. _card.Shown.Select(row => row.Name)];
+        _card.Filter = "persona";
+        string[] byGame = [.. _card.Shown.Select(row => row.Name)];
+        _card.Filter = "zelda";
+        (int, string?) none = (_card.Shown.Count, _card.NothingShown);
+        _card.Filter = string.Empty;
+
+        Assert.Equal(["The Elder Scrolls V: Skyrim Special Edition"], byName);
+        Assert.Equal(["Stardew Valley"], byGame);
+        Assert.Equal((0, "No installed game's name has “zelda”."), none);
+        Assert.Equal(3, _card.Shown.Count);
+        Assert.Null(_card.NothingShown);
+    }
+
+    [Fact]
+    public async Task TheToggleShowsOnlyTheInstalledGamesWithoutASitesGame()
+    {
+        await ReadAsync();
+        int count = _card.WithoutGameCount;
+
+        _card.OnlyWithoutGame = true;
+
+        Assert.Equal(2, count);
+        Assert.Equal(["The Elder Scrolls V: Skyrim Special Edition", "Fallout 4"], _card.Shown.Select(row => row.Name));
+    }
+
+    [Fact]
+    public async Task TheToggleTurnsItselfOffOnceEveryGameHasASitesGame()
+    {
+        _installed.Pick(_elderScrolls, TestData.Nexus, Skyrim);
+        _installed.Pick(_fallout, TestData.Nexus, Stardew);
+        await ReadAsync();
+        _card.OnlyWithoutGame = true;
+
+        Assert.Equal((0, false, 3), (_card.WithoutGameCount, _card.OnlyWithoutGame, _card.Shown.Count));
+    }
+
+    [Fact]
     public async Task SaysWhenASitesGamesShareTheInstalledGamesName()
     {
         _lookup.Games[TestData.Nexus] = [Stardew, new GameInfo(new GameRef(TestData.Nexus, "stardewvalleyexpanded"), "Stardew Valley")];

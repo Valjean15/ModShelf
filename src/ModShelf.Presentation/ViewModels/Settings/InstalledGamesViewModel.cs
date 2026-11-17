@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Catalog;
+using ModShelf.Application.Common;
 using ModShelf.Application.Installed;
 using ModShelf.Application.Installed.Ports;
 using ModShelf.Application.Sources;
@@ -60,6 +61,40 @@ public sealed partial class InstalledGamesViewModel : ObservableObject
     /// The installed games, by name.
     /// </summary>
     public ObservableCollection<InstalledGameRowViewModel> Games { get; } = [];
+
+    /// <summary>
+    /// The installed games the list shows: those whose names, or their sites' games' names, have <see cref="Filter"/>'s
+    /// words, and only those without a site's game while <see cref="OnlyWithoutGame"/> is on.
+    /// </summary>
+    public ObservableCollection<InstalledGameRowViewModel> Shown { get; } = [];
+
+    /// <summary>
+    /// Words to find an installed game by its name, or its games' names on the sites; empty for every game.
+    /// </summary>
+    [ObservableProperty]
+    public partial string Filter { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Whether only the installed games no site has a game for are shown, to choose theirs.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool OnlyWithoutGame { get; set; }
+
+    /// <summary>
+    /// Such as "Without a site's game · 6": the toggle for <see cref="OnlyWithoutGame"/>, counting them.
+    /// </summary>
+    [ObservableProperty]
+    public partial int WithoutGameCount { get; private set; }
+
+    /// <summary>
+    /// Such as "No installed game's name has “zelda”."; null while some are shown, or there are none.
+    /// </summary>
+    [ObservableProperty]
+    public partial string? NothingShown { get; private set; }
+
+    partial void OnFilterChanged(string value) => ShowFiltered();
+
+    partial void OnOnlyWithoutGameChanged(bool value) => ShowFiltered();
 
     [ObservableProperty]
     public partial bool HasGames { get; private set; }
@@ -200,6 +235,7 @@ public sealed partial class InstalledGamesViewModel : ObservableObject
 
         Games.SyncWith(shown);
         HasGames = Games.Count > 0;
+        ShowFiltered();
         _stores = matched.Stores;
     }
 
@@ -213,5 +249,24 @@ public sealed partial class InstalledGamesViewModel : ObservableObject
         await picking.Changing;
         OnShown();
         await Reading;
+    }
+
+    /// <summary>
+    /// Shows the installed games the filter and the toggle keep, and counts those without a site's game.
+    /// </summary>
+    private void ShowFiltered()
+    {
+        NameQuery query = NameQuery.Parse(Filter);
+        WithoutGameCount = Games.Count(row => !row.HasGame);
+        if (WithoutGameCount == 0)
+        {
+            OnlyWithoutGame = false;
+        }
+
+        Shown.SyncWith([
+            .. Games.Where(row => (!OnlyWithoutGame || !row.HasGame)
+                && (query.Matches(row.Name) || row.Match.Sites.SelectMany(site => site.Games).Any(game => query.Matches(game.Name)))),
+        ]);
+        NothingShown = Games.Count > 0 && Shown.Count == 0 && !query.IsEmpty ? Text.Format(Strings.SettingsInstalledNothingShown, query.Text) : null;
     }
 }

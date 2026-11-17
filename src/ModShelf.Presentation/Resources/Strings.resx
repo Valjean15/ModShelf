@@ -3951,4 +3951,44 @@
     <value>{0:N0} mods removed from the library; their files stay in their folders.</value>
     <comment>Undo bar, after removing several selected mods; how many.</comment>
   </data>
+  <data name="SettingsGamesFilterHint" xml:space="preserve">
+    <value>Find a game</value>
+    <comment>Settings › Games: the box above the games, finding one by its name.</comment>
+  </data>
+  <data name="SettingsGamesCount" xml:space="preserve">
+    <value>{0:N0} games</value>
+    <comment>Settings › Games: how many games are listed.</comment>
+  </data>
+  <data name="SettingsGamesCountOne" xml:space="preserve">
+    <value>1 game</value>
+    <comment>Settings › Games: one game listed.</comment>
+  </data>
+  <data name="SettingsGamesCountOf" xml:space="preserve">
+    <value>{0:N0} of {1:N0} games</value>
+    <comment>Settings › Games: how many games the filter shows, of how many.</comment>
+  </data>
+  <data name="SettingsGamesFilterNothing" xml:space="preserve">
+    <value>No game's name has “{0}”.</value>
+    <comment>Settings › Games: the filter finds no game; what was typed.</comment>
+  </data>
+  <data name="SettingsInstalledFilterHint" xml:space="preserve">
+    <value>Find an installed game</value>
+    <comment>Settings › Games › Games on this PC: the box finding an installed game by its name or its games' names.</comment>
+  </data>
+  <data name="SettingsInstalledWithoutGame" xml:space="preserve">
+    <value>Without a site's game</value>
+    <comment>Settings › Games › Games on this PC: the toggle showing only the installed games no site has a game for.</comment>
+  </data>
+  <data name="SettingsInstalledNothingShown" xml:space="preserve">
+    <value>No installed game's name has “{0}”.</value>
+    <comment>Settings › Games › Games on this PC: the filter finds none; what was typed.</comment>
+  </data>
+  <data name="InstalledPillNone" xml:space="preserve">
+    <value>{0}: none</value>
+    <comment>An installed game's pill for a site chosen to have none of it; the site's name.</comment>
+  </data>
+  <data name="InstalledPillShared" xml:space="preserve">
+    <value>{0}: {1:N0} games</value>
+    <comment>An installed game's pill for a site with several games of its name; the site's name, how many.</comment>
+  </data>
 </root>
