@@ -36,6 +36,11 @@ internal sealed class TestLibraryDatabase : IAsyncDisposable
     /// </summary>
     public RecordingLoggerProvider Logs { get; } = new();
 
+    /// <summary>
+    /// When the database starts a command or a transaction, across restarts.
+    /// </summary>
+    public CommandStarts Starts { get; } = new();
+
     public IDownloadJobRepository Repository => _services.GetRequiredService<IDownloadJobRepository>();
 
     public ILinkedAccountRepository LinkedAccounts => _services.GetRequiredService<ILinkedAccountRepository>();
@@ -101,6 +106,7 @@ internal sealed class TestLibraryDatabase : IAsyncDisposable
         ServiceCollection services = new();
         services.AddLogging(logging => logging.AddProvider(Logs));
         services.AddLibraryDatabase(DatabasePath);
+        services.ConfigureDbContext<ModShelfDbContext>((_, options) => options.AddInterceptors(Starts));
         return services.BuildServiceProvider();
     }
 }

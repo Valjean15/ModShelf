@@ -22,6 +22,17 @@ public sealed partial class SlowCommandLogTests : IAsyncLifetime
     private static readonly ModRef Smapi = new(new GameRef(new SourceId("nexus"), "stardewvalley"), "2400");
     private static readonly DateTimeOffset Now = new(2026, 11, 9, 13, 28, 0, TimeSpan.Zero);
 
+    /// <summary>
+    /// The text of the command that adds a download job.
+    /// </summary>
+    private const string InsertJob = "INSERT INTO \"DownloadJobs\"";
+
+    /// <summary>
+    /// How long a change waits for the other write, once the command that waits has started: over the second that makes
+    /// it slow.
+    /// </summary>
+    private static readonly TimeSpan WaitsFor = TimeSpan.FromMilliseconds(1_300);
+
     private readonly TestLibraryDatabase _database = new();
 
     private static CancellationToken Cancellation => TestContext.Current.CancellationToken;
@@ -35,11 +46,10 @@ public sealed partial class SlowCommandLogTests : IAsyncLifetime
     {
         await _database.Repository.AddAsync(Job("1"), Cancellation);
 
-        await WhileWritingAsync(TimeSpan.FromMilliseconds(1_300), () => _database.Repository.AddAsync(Job("2"), Cancellation));
+        string[] logged = await SlowWhileWritingAsync(InsertJob, () => _database.Repository.AddAsync(Job("2"), Cancellation));
 
-        string logged = Assert.Single(Slow());
-        Assert.Matches(@"The library database took [1-9]\d*\.\d s for INSERT into DownloadJobs \|", logged);
-        Assert.DoesNotContain("SMAPI", logged, StringComparison.Ordinal);
+        Assert.Single(logged, entry => InsertTook().IsMatch(entry));
+        Assert.All(Slow(), entry => Assert.DoesNotContain("SMAPI", entry, StringComparison.Ordinal));
     }
 
     [Fact]
@@ -48,9 +58,12 @@ public sealed partial class SlowCommandLogTests : IAsyncLifetime
         ModRef contentPatcher = new(Smapi.Game, "1915");
         await _database.Library.UpdateAsync(contentPatcher, _ => LibraryMod.Watch(contentPatcher, "Content Patcher", null, null, Now), Cancellation);
 
-        await WhileWritingAsync(TimeSpan.FromMilliseconds(1_300), () => _database.Library.UpdateAsync(Smapi, _ => LibraryMod.Watch(Smapi, "SMAPI", null, null, Now), Cancellation));
+        string[] logged = await SlowWhileWritingAsync(
+            CommandStarts.Begin,
+            () => _database.Library.UpdateAsync(Smapi, _ => LibraryMod.Watch(Smapi, "SMAPI", null, null, Now), Cancellation));
 
-        Assert.Matches(@"The library database took [1-9]\d*\.\d s for BEGIN \|", Assert.Single(Slow()));
+        Assert.Single(logged, entry => BeginTook().IsMatch(entry));
+        Assert.All(Slow(), entry => Assert.DoesNotContain("SMAPI", entry, StringComparison.Ordinal));
     }
 
     [Fact]
@@ -60,7 +73,7 @@ public sealed partial class SlowCommandLogTests : IAsyncLifetime
         await _database.Repository.ListAsync(Cancellation);
 
         // Waiting less than a second for another write.
-        await WhileWritingAsync(TimeSpan.FromMilliseconds(300), () => _database.Repository.AddAsync(Job("2"), Cancellation));
+        await WhileWritingAsync(TimeSpan.FromMilliseconds(300), InsertJob, () => _database.Repository.AddAsync(Job("2"), Cancellation));
 
         // Nothing quicker than a second is logged. A runner busy enough to make these take a second (Windows' CI on
         // Nov 12) logs them rightly, as a second or more.
@@ -96,6 +109,12 @@ public sealed partial class SlowCommandLogTests : IAsyncLifetime
     [GeneratedRegex(@"The library database failed INSERT into DownloadJobs after [1-9]\d*\.\d s \|")]
     private static partial Regex FailedAfterWaiting();
 
+    [GeneratedRegex(@"The library database took [1-9]\d*\.\d s for INSERT into DownloadJobs \|")]
+    private static partial Regex InsertTook();
+
+    [GeneratedRegex(@"The library database took [1-9]\d*\.\d s for BEGIN \|")]
+    private static partial Regex BeginTook();
+
     private IEnumerable<string> Slow()
         => _database.Logs.Entries.Where(entry => entry.StartsWith($"[{typeof(SlowCommandLog).FullName}]", StringComparison.Ordinal));
 
@@ -106,17 +125,36 @@ public sealed partial class SlowCommandLogTests : IAsyncLifetime
         => DownloadJob.Create(new ModFileRef(Smapi, fileId), Path.GetDirectoryName(_database.DatabasePath)!, $"SMAPI {fileId}.zip", Now);
 
     /// <summary>
-    /// Runs <paramref name="change"/> while another connection holds a write of the database for
-    /// <paramref name="writeFor"/>, which the change waits for, whatever the journal.
+    /// Runs <paramref name="change"/> as <see cref="WhileWritingAsync"/> does, its command <paramref name="waits"/> waiting
+    /// <see cref="WaitsFor"/>, and returns the slow commands logged meanwhile, each saying it took a second or more. Only
+    /// those: on a runner busy enough (Windows' CI on Nov 17, where a test took 18.5 s), opening the database and the
+    /// changes before take a second too, and are logged rightly.
     /// </summary>
-    private async Task WhileWritingAsync(TimeSpan writeFor, Func<Task> change)
+    private async Task<string[]> SlowWhileWritingAsync(string waits, Func<Task> change)
+    {
+        int before = Slow().Count();
+        await WhileWritingAsync(WaitsFor, waits, change);
+        string[] logged = [.. Slow().Skip(before)];
+        Assert.All(logged, entry => Assert.Matches(@"The library database took [1-9]\d*\.\d s for ", entry));
+        return logged;
+    }
+
+    /// <summary>
+    /// Runs <paramref name="change"/> while another connection holds a write of the database, which the change's command
+    /// or transaction <paramref name="waits"/> waits for, whatever the journal: for <paramref name="writeFor"/> once it
+    /// has started, however late a busy runner starts it.
+    /// </summary>
+    private async Task WhileWritingAsync(TimeSpan writeFor, string waits, Func<Task> change)
     {
         await using SqliteConnection writer = new(new SqliteConnectionStringBuilder { DataSource = _database.DatabasePath, Pooling = false }.ToString());
         await writer.OpenAsync(Cancellation);
         await using SqliteTransaction writing = writer.BeginTransaction(deferred: false);
 
         // On a thread of its own: SQLite waits for the write by blocking the thread it runs on.
+        Task started = _database.Starts.NextAsync(waits);
         Task changing = Task.Run(change, Cancellation);
+        await Task.WhenAny(started, changing).WaitAsync(TimeSpan.FromSeconds(30), Cancellation);
+        Assert.True(started.IsCompleted, changing.Exception?.ToString() ?? $"The change never started {waits}.");
         await Task.WhenAny(changing, Task.Delay(writeFor, Cancellation));
         Assert.False(changing.IsCompleted, changing.Exception?.ToString() ?? "The change didn't wait for the write.");
 
