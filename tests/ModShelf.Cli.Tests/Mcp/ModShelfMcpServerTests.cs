@@ -12,6 +12,7 @@ using ModShelf.Application.Downloads;
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Installed;
 using ModShelf.Application.Installed.Ports;
+using ModShelf.Application.Library;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Cli.Mcp;
 using ModShelf.Cli.Tests.Common;
@@ -1580,11 +1581,17 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         return found!;
     }
 
-    private static async Task WaitForFileAsync(McpSession mcp, string fileId)
-        => await WaitUntilAsync(
-            async () => (await mcp.CallAsync<LibraryListing>("library_list", null, Cancellation)).Mods
-                .Any(mod => mod.Source == FakeHandoffSource.SourceId.Value && mod.Files!.Any(file => file.FileId == fileId)),
+    private static async Task<LibraryFileEntry> WaitForFileAsync(McpSession mcp, string fileId)
+    {
+        LibraryFileEntry? found = null;
+        await WaitUntilAsync(
+            async () => (found = (await mcp.CallAsync<LibraryListing>("library_list", null, Cancellation)).Mods
+                .Where(mod => mod.Source == FakeHandoffSource.SourceId.Value)
+                .SelectMany(mod => mod.Files!)
+                .FirstOrDefault(file => file.FileId == fileId)) is not null,
             $"File {fileId} didn't come into the library.");
+        return found!;
+    }
 
     /// <summary>
     /// Stands in a desktop app that runs the queue, and replies to a download of file 3 that it's queued, while the queue
@@ -1623,10 +1630,27 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         return result;
     }
 
-    private static async Task DownloadAndWaitAsync(McpSession mcp, string fileId)
+    /// <summary>
+    /// Downloads a file into the library, and waits until it's recorded there in full. The file comes into the library
+    /// first; the old versions it leaves out are deleted next, and only then does the history keep the download, which
+    /// library_changes reads to say which version it replaced. A disk slow to delete, as on a busy Windows runner, would
+    /// otherwise leave a test reading the changes before the history has them.
+    /// </summary>
+    private async Task DownloadAndWaitAsync(McpSession mcp, string fileId)
     {
         await DownloadAsync(mcp, HandoffLink(fileId).AbsoluteUri);
-        await WaitForFileAsync(mcp, fileId);
+        LibraryFileEntry file = await WaitForFileAsync(mcp, fileId);
+        await Cli.InAppAsync(
+            async services =>
+            {
+                ILibraryHistory history = services.GetRequiredService<ILibraryHistory>();
+                await WaitUntilAsync(
+                    async () => (await history.ListAsync(file.DownloadedAt, 100, Cancellation))
+                        .Any(happened => happened.Kind == LibraryEventKind.Downloaded && happened.File?.Id == fileId),
+                    $"The history didn't keep the download of file {fileId}.");
+                return true;
+            },
+            Cancellation);
     }
 
     private static string[] Installed(GamesResult result)
