@@ -196,6 +196,9 @@ namespace ModShelf.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTimeOffset?>("GoneSince")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsPinned")
                         .HasColumnType("INTEGER");
 

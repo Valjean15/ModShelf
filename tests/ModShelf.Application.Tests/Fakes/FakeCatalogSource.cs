@@ -34,6 +34,11 @@ internal sealed class FakeCatalogSource(SourceId id) : ILinkRecognizer, IModCata
 
     public ModInfo Mod => new(LinkedFile.Mod, "SkyUI");
 
+    /// <summary>
+    /// How it describes the mod instead of <see cref="Mod"/>, such as hidden; null for <see cref="Mod"/>.
+    /// </summary>
+    public ModInfo? Describe { get; set; }
+
     public IReadOnlyList<ModFile> Files =>
     [
         new(LinkedFile, "SkyUI 5.2", "SkyUI_5_2_SE.7z", "5.2", ModFileCategory.Main, 100, TestData.Now, []),
@@ -72,7 +77,7 @@ internal sealed class FakeCatalogSource(SourceId id) : ILinkRecognizer, IModCata
         => Answer(nameof(GetGameAsync), () => Game);
 
     public Task<ModInfo> GetModAsync(ModRef modRef, CancellationToken cancellationToken)
-        => Answer(nameof(GetModAsync), () => Mod);
+        => Answer(nameof(GetModAsync), () => Describe ?? Mod);
 
     public Task<IReadOnlyList<ModFile>> GetFilesAsync(ModRef modRef, CancellationToken cancellationToken)
         => Answer(nameof(GetFilesAsync), () => Files);

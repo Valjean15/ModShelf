@@ -163,6 +163,11 @@ public sealed partial class LibraryModViewModel : ObservableObject
     public int MissingCount { get; private set; }
 
     /// <summary>
+    /// Whether a check found it gone from its site, hidden or removed there, so its files here may be the only copies.
+    /// </summary>
+    public bool IsGone { get; private set; }
+
+    /// <summary>
     /// When it came into the library.
     /// </summary>
     public DateTimeOffset AddedAt { get; private set; }
@@ -247,6 +252,7 @@ public sealed partial class LibraryModViewModel : ObservableObject
         SizeText = HasFiles ? Sizes.Format(Size) : Strings.NoValue;
         AddedAt = mod.AddedAt;
         CheckedAt = mod.CheckedAt;
+        IsGone = mod.IsGone;
         LibraryFile? yours = mod.Files
             .Where(file => !OwnFileViewModel.IsInArchive(file.RelativePath))
             .OrderByDescending(file => file.Category == ModFileCategory.Main)
@@ -507,13 +513,22 @@ public sealed partial class LibraryModViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Whether it's pinned, such as "Pinned at 2.7"; its updates offered: "Update to" the new version when one replaces a
-    /// file, a new optional file, or how many; how many it skipped; then the files missing from disk; then whether it's
-    /// watched only, or not watched.
+    /// Whether it's gone from its site, such as "Gone from Nexus Mods", with since when; whether it's pinned, such as
+    /// "Pinned at 2.7"; its updates offered: "Update to" the new version when one replaces a file, a new optional file,
+    /// or how many; how many it skipped; then the files missing from disk; then whether it's watched only, or not watched.
     /// </summary>
     private void ShowStatuses()
     {
         List<ModStatus> statuses = [];
+        if (_mod.GoneSince is { } goneSince)
+        {
+            string site = _services.SiteName(_mod.Mod.Game.Source);
+            statuses.Add(new ModStatus(
+                Text.Format(Strings.ModStatusGone, site),
+                ModStatusKind.Problem,
+                Text.Format(Strings.ModStatusGoneDetail, site, Dates.Day(goneSince, _services.TimeProvider))));
+        }
+
         if (_mod.IsPinned)
         {
             string text = VersionText == Strings.NoValue ? Strings.ModStatusPinned : Text.Format(Strings.ModStatusPinnedAt, VersionText);

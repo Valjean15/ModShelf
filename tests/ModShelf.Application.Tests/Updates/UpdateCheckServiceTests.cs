@@ -254,6 +254,25 @@ public sealed class UpdateCheckServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task ShowsANoticeOfTheModsThatLeftTheirSitesAfterTheUpdates()
+    {
+        _library.Add(Watched("1", checkedAt: null));
+        _library.Add(Watched("2", checkedAt: null));
+        _checker.Found = [Update("1", "10")];
+        _checker.Gone = [Watched("2", checkedAt: null).LeftSite(TestData.Now)];
+
+        await RunAsync(async () =>
+        {
+            await WaitForChecksAsync(1);
+            await WaitForNoticesAsync(2);
+        });
+
+        Assert.Equal(
+            [new Notification("1 new update", "Mod 1"), new Notification("A mod left its site", "Mod 2: your copies may be the only ones left.")],
+            _notifications.Shown);
+    }
+
+    [Fact]
     public async Task AGameWithAnIntervalOfItsOwnIsCheckedApartOnIt()
     {
         _library.Add(Watched("1", checkedAt: TestData.Now.AddHours(-1)));
@@ -588,6 +607,11 @@ public sealed class UpdateCheckServiceTests : IDisposable
         public IReadOnlyList<LibraryUpdate> Found { get; set; } = [];
 
         /// <summary>
+        /// The mods each check finds gone from their sites.
+        /// </summary>
+        public IReadOnlyList<LibraryMod> Gone { get; set; } = [];
+
+        /// <summary>
         /// Runs during each check, with its number, from 1.
         /// </summary>
         public Action<int>? OnCheck { get; set; }
@@ -601,7 +625,7 @@ public sealed class UpdateCheckServiceTests : IDisposable
         {
             OnCheck?.Invoke(Checks + 1);
             Interlocked.Increment(ref _checks);
-            return Failure is { } failure ? Task.FromException<UpdateCheck>(failure) : Task.FromResult(new UpdateCheck(0, 0, Found, []));
+            return Failure is { } failure ? Task.FromException<UpdateCheck>(failure) : Task.FromResult(new UpdateCheck(0, 0, Found, []) { Gone = Gone });
         }
 
         public Task<UpdateCheck> CheckAsync(IReadOnlyCollection<GameRef> games, CancellationToken cancellationToken)

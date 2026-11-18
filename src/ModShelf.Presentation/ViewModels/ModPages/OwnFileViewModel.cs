@@ -28,9 +28,11 @@ public sealed partial class OwnFileViewModel
     /// <param name="isMissing">Whether the file isn't on disk where the library says it is.</param>
     /// <param name="copy">Puts text on the clipboard, saying so when it can't.</param>
     /// <param name="delete">Deletes the file from disk and the library, once the user confirms.</param>
+    /// <param name="isOnlyCopy">Whether its site no longer offers it, so this copy may be the only one left.</param>
     internal OwnFileViewModel(
         LibraryFile file,
         bool isMissing,
+        bool isOnlyCopy,
         TimeProvider timeProvider,
         Func<string, CancellationToken, Task> copy,
         Func<OwnFileViewModel, CancellationToken, Task> delete)
@@ -50,6 +52,7 @@ public sealed partial class OwnFileViewModel
         Sha256 = file.Sha256 ?? string.Empty;
         Sha256Text = Sha256.Length > (Sha256Ends * 2) + 1 ? $"{Sha256[..Sha256Ends]}…{Sha256[^Sha256Ends..]}" : Sha256;
         IsMissing = isMissing;
+        IsOnlyCopy = isOnlyCopy;
         _copy = copy;
         _delete = delete;
     }
@@ -100,6 +103,12 @@ public sealed partial class OwnFileViewModel
     /// Whether it isn't on disk where the library says it is.
     /// </summary>
     public bool IsMissing { get; }
+
+    /// <summary>
+    /// Whether its site no longer offers it: the mod is gone from the site, or the site lists the file as archived, or
+    /// no longer lists it. This copy may be the only one left (ADR 0099).
+    /// </summary>
+    public bool IsOnlyCopy { get; }
 
     /// <summary>
     /// Puts the file's whole SHA-256 on the clipboard.

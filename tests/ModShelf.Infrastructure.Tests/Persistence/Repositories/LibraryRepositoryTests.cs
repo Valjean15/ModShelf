@@ -286,6 +286,21 @@ public sealed class LibraryRepositoryTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task WhenAModLeftItsSiteSurvivesARestartAndGoesWhenItsBack()
+    {
+        DateTimeOffset left = new(2026, 12, 3, 8, 30, 0, TimeSpan.FromHours(1));
+        await StoreAsync(Watched(Smapi).LeftSite(left));
+        await StoreAsync(Watched(ContentPatcher));
+
+        await _database.RestartAsync();
+        IReadOnlyList<LibraryMod> listed = await _database.Library.ListAsync(Cancellation);
+        await _database.Library.UpdateAsync(Smapi, mod => mod!.BackOnSite(), Cancellation);
+
+        Assert.Equal([left, null], listed.Select(mod => mod.GoneSince));
+        Assert.Null((await _database.Library.FindAsync(Smapi, Cancellation))!.GoneSince);
+    }
+
+    [Fact]
     public async Task SkippedUpdatesAreChangedInPlaceAddedAndRemoved()
     {
         await StoreAsync(Watched(Smapi).WithUpdates([Update(Smapi, "1"), Update(Smapi, "2")]).WithUpdateSkipped(new ModFileRef(Smapi, "1"), true));

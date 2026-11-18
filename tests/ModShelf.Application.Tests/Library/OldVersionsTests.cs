@@ -93,6 +93,25 @@ public sealed class OldVersionsTests
     }
 
     [Fact]
+    public void KeepingTheLatestArchivesAVersionItsSiteArchivedRatherThanDeletingIt()
+    {
+        // 50 and 51 may be the only copies left: their site lists them as archived. 51 is in _archive already.
+        ModFile[] site =
+        [
+            Listed("50", replacedBy: "51", category: ModFileCategory.Archived),
+            Listed("51", replacedBy: "52", category: ModFileCategory.Archived),
+            Listed("52", replacedBy: "53"),
+            Listed("53"),
+        ];
+        LibraryMod mod = Mod(("50", "mods/SkyUI/50.7z"), ("51", "mods/SkyUI/_archive/51.7z"), ("52", "mods/SkyUI/52.7z"));
+
+        OldVersionPlan plan = OldVersions.Plan(mod, File("53"), site, OldVersionRule.KeepLatest(1));
+
+        Assert.Equal(["50"], plan.Archive.Select(file => file.File.Id));
+        Assert.Equal(["52"], plan.Delete.Select(file => file.File.Id));
+    }
+
+    [Fact]
     public void ArchivingLeavesFilesArchivedAlready()
     {
         LibraryMod mod = Mod(("50", "mods/SkyUI/_ARCHIVE/50.7z"), ("51", "mods/SkyUI/51.7z"), ("70", "mods/SkyUI/70.7z"));
@@ -124,8 +143,8 @@ public sealed class OldVersionsTests
 
     private static ModFileRef File(string id) => new(SkyUi, id);
 
-    private static ModFile Listed(string id, string? replacedBy = null, int days = 0)
-        => new(File(id), $"SkyUI {id}", $"{id}.7z", null, ModFileCategory.Main, null, TestData.Now.AddDays(days), [], replacedBy: replacedBy is null ? null : File(replacedBy));
+    private static ModFile Listed(string id, string? replacedBy = null, int days = 0, ModFileCategory category = ModFileCategory.Main)
+        => new(File(id), $"SkyUI {id}", $"{id}.7z", null, category, null, TestData.Now.AddDays(days), [], replacedBy: replacedBy is null ? null : File(replacedBy));
 
     private static LibraryMod Mod(params string[] ids) => Mod([.. ids.Select(id => (id, $"mods/SkyUI/{id}.7z"))]);
 

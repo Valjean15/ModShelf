@@ -51,6 +51,8 @@ public sealed partial class LibraryActivityViewModel : ObservableObject
             new(LibraryEventKind.Deleted, Strings.ActivityKindDeleted),
             new(LibraryEventKind.Found, Strings.ActivityKindFound),
             new(LibraryEventKind.Removed, Strings.ActivityKindRemoved),
+            new(LibraryEventKind.LeftSite, Strings.ActivityKindLeftSite),
+            new(LibraryEventKind.BackOnSite, Strings.ActivityKindBackOnSite),
         ];
         SelectedKind = Kinds[0];
     }

@@ -12,7 +12,8 @@ namespace ModShelf.Cli.Tests.Fakes;
 
 /// <summary>
 /// A mod site with a catalog and a search, at <c>https://catalog.example/game/mods/{mod}[?file_id={file}]</c>. Mod 1
-/// has files in every section; mod 2 is hidden and has none. A link without a file means mod 1's newest main file, 12.
+/// has files in every section; mod 2 is hidden and has none; mod 403 is hidden too, and its files can't be listed, as Nexus
+/// Mods answers for a mod it hid. A link without a file means mod 1's newest main file, 12.
 /// Links to mod <c>404</c> are to a mod it doesn't have, and to mod <c>401</c> need an account it doesn't have.
 /// </summary>
 /// <remarks>
@@ -109,7 +110,7 @@ internal sealed partial class FakeCatalogSite : ILinkRecognizer, IModCatalog, IM
     public Task<ModInfo> GetModAsync(ModRef modRef, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(modRef);
-        return Task.FromResult(modRef.Id == "2"
+        return Task.FromResult(modRef.Id is "2" or "403"
             ? new ModInfo(modRef, "Hidden Mod", isAvailable: false)
             : new ModInfo(
                 modRef,
@@ -130,6 +131,11 @@ internal sealed partial class FakeCatalogSite : ILinkRecognizer, IModCatalog, IM
         if (modRef.Game.Key == "broken")
         {
             return Task.FromException<IReadOnlyList<ModFile>>(new HttpRequestException("Service unavailable.", null, HttpStatusCode.ServiceUnavailable));
+        }
+
+        if (modRef.Id == "403")
+        {
+            return Task.FromException<IReadOnlyList<ModFile>>(new HttpRequestException("This mod is hidden.", null, HttpStatusCode.Forbidden));
         }
 
         if (modRef.Id == "2")

@@ -4239,4 +4239,52 @@
     <value>Optional</value>
     <comment>The import dialog: marks a thing needed from elsewhere that the collection marks optional.</comment>
   </data>
+  <data name="ModFilterGone" xml:space="preserve">
+    <value>Gone from their site</value>
+    <comment>Library: the toggle that shows only the mods gone from their sites, hidden or removed there.</comment>
+  </data>
+  <data name="ModStatusGone" xml:space="preserve">
+    <value>Gone from {0}</value>
+    <comment>A library mod's status: a check found it gone from its site, hidden or removed there. {0} is the site's name.</comment>
+  </data>
+  <data name="ModStatusGoneDetail" xml:space="preserve">
+    <value>Gone from {0} since {1}: your copies of its files may be the only ones left.</value>
+    <comment>The tooltip of a library mod's Gone status. {0} is the site's name, {1} the day it was first found gone.</comment>
+  </data>
+  <data name="ActivityKindLeftSite" xml:space="preserve">
+    <value>Mods that left their site</value>
+    <comment>Recent activity filter: mods a check found gone from their sites.</comment>
+  </data>
+  <data name="ActivityKindBackOnSite" xml:space="preserve">
+    <value>Mods back on their site</value>
+    <comment>Recent activity filter: mods gone from their sites that came back.</comment>
+  </data>
+  <data name="ActivityTagLeftSite" xml:space="preserve">
+    <value>Left its site</value>
+    <comment>Tag on a recent activity row: a check found the mod gone from its site.</comment>
+  </data>
+  <data name="ActivityTagBackOnSite" xml:space="preserve">
+    <value>Back</value>
+    <comment>Tag on a recent activity row: a mod gone from its site came back.</comment>
+  </data>
+  <data name="ActivityLeftSite" xml:space="preserve">
+    <value>Gone from its site, hidden or removed there: your copies of its files may be the only ones left.</value>
+    <comment>A mod a check found gone from its site.</comment>
+  </data>
+  <data name="ActivityBackOnSite" xml:space="preserve">
+    <value>Back on its site.</value>
+    <comment>A mod gone from its site that a check found back.</comment>
+  </data>
+  <data name="ModPageGone" xml:space="preserve">
+    <value>Gone from {0} since {1}: your copies of its files may be the only ones left, and the details here are the last ones seen.</value>
+    <comment>A library mod's page, when a check found it gone from its site. {0} is the site's name, {1} the day it was first found gone.</comment>
+  </data>
+  <data name="ModPageOnlyCopy" xml:space="preserve">
+    <value>Only copy</value>
+    <comment>Tag on a library file whose site no longer offers it.</comment>
+  </data>
+  <data name="ModPageOnlyCopyTip" xml:space="preserve">
+    <value>Its site no longer offers this file, so your copy may be the only one left. Keep it.</value>
+    <comment>Tooltip of the Only copy tag.</comment>
+  </data>
 </root>

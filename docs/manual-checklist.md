@@ -396,6 +396,19 @@ Nothing here installs anything.
   "The site has no such collection." (or what Nexus Mods said of it), exit code 2 or 1; then "That link isn't to a
   collection ModShelf can read. …", exit code 2.
 
+## 18. A mod that left its site
+
+Run it once, in the Premium run. Find a mod Nexus Mods has hidden (its page says it's hidden or under moderation),
+and copy its page's link into `$hidden`.
+
+- [ ] **18.1 Gone, not failed.** `ms library watch $hidden`, then `ms library check`, then `ms library check` again.
+  The first check says "*Name* (*game* *ID*) left Nexus Mods: it's hidden or removed there, so your copies of its files
+  may be the only ones left. ModShelf asks about it again weekly.", exit code 0, nothing on the error output. The
+  second checks it no more ("Checked 0 mods" for it). The log has one warning that it's gone.
+- [ ] **18.2 Listed so.** `ms library list`.
+  "Gone from their sites, so your copies of their files may be the only ones left:", then the mod, "gone from Nexus Mods
+  since" the check's time. Then `ms library forget $hidden`.
+
 ## Clean up
 
 After both accounts:
@@ -529,3 +542,5 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 17.4 A collection | | | |
 | 17.5 Import the collection, watching only | | | |
 | 17.6 Refusals | | | |
+| 18.1 Gone, not failed | | – | |
+| 18.2 Listed so | | – | |

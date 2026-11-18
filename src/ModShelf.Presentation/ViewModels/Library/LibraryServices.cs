@@ -24,6 +24,7 @@ internal sealed class LibraryServices(
     UndoBarViewModel undo,
     Func<ModRef, CancellationToken, Task> open,
     Action selectionChanged,
+    Func<SourceId, string> siteName,
     TimeProvider timeProvider,
     ILogger logger)
 {
@@ -55,6 +56,11 @@ internal sealed class LibraryServices(
     /// Tells the screen a mod was selected, or no longer is.
     /// </summary>
     public Action SelectionChanged { get; } = selectionChanged ?? throw new ArgumentNullException(nameof(selectionChanged));
+
+    /// <summary>
+    /// A site's name, such as "Nexus Mods".
+    /// </summary>
+    public Func<SourceId, string> SiteName { get; } = siteName ?? throw new ArgumentNullException(nameof(siteName));
 
     public TimeProvider TimeProvider { get; } = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
 

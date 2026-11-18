@@ -73,6 +73,8 @@ public sealed partial class ActivityEntryViewModel
         LibraryEventKind.Archived => Strings.ActivityTagArchived,
         LibraryEventKind.Deleted => Strings.ActivityTagDeleted,
         LibraryEventKind.Found => Strings.ActivityTagFound,
+        LibraryEventKind.LeftSite => Strings.ActivityTagLeftSite,
+        LibraryEventKind.BackOnSite => Strings.ActivityTagBackOnSite,
         _ => Strings.ActivityTagRemoved,
     };
 
@@ -84,6 +86,8 @@ public sealed partial class ActivityEntryViewModel
         LibraryEventKind.Archived => Common.Text.Format(Strings.ActivityArchived, FileOf(happened)),
         LibraryEventKind.Deleted => Common.Text.Format(happened.ByRule ? Strings.ActivityDeletedByRule : Strings.ActivityDeleted, FileOf(happened)),
         LibraryEventKind.Found => Common.Text.Format(Strings.ActivityFound, FileOf(happened)),
+        LibraryEventKind.LeftSite => Strings.ActivityLeftSite,
+        LibraryEventKind.BackOnSite => Strings.ActivityBackOnSite,
         _ => Strings.ActivityRemoved,
     };
 

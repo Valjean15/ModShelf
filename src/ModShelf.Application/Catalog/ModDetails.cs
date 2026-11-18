@@ -87,11 +87,34 @@ internal sealed partial class ModDetails : IModDetails, IDisposable
         }
 
         // Read for whoever asks first and those who ask meanwhile, so one caller giving up doesn't stop the others.
-        Lazy<Task<ModInfo?>> reading = _reads.GetOrAdd(modRef, key => new Lazy<Task<ModInfo?>>(() => ReadAsync(catalog, key)));
+        Lazy<Task<ModInfo?>> reading = _reads.GetOrAdd(modRef, key => new Lazy<Task<ModInfo?>>(() => ReadAsync(catalog, key, saved?.Details)));
         return await reading.Value.WaitAsync(cancellationToken).ConfigureAwait(false) ?? saved?.Details;
     }
 
     public void Dispose() => _reading.Dispose();
+
+    /// <summary>
+    /// The details last seen of a mod its site now hides or removed, marked so.
+    /// </summary>
+    private static ModInfo Unavailable(ModInfo seen)
+        => new(
+            seen.Mod,
+            seen.Name,
+            seen.Summary,
+            seen.Author,
+            seen.Version,
+            seen.PageUrl,
+            seen.PictureUrl,
+            seen.UpdatedAt,
+            isAvailable: false,
+            seen.HasAdultContent,
+            seen.Downloads,
+            seen.Endorsements,
+            seen.ThumbnailUrl,
+            seen.ThumbnailBlurredUrl,
+            seen.Category,
+            seen.Size,
+            seen.PublishedAt);
 
     private async Task<SavedModDetails?> FindAsync(ModRef mod, CancellationToken cancellationToken)
     {
@@ -124,8 +147,12 @@ internal sealed partial class ModDetails : IModDetails, IDisposable
         return age >= TimeSpan.Zero && age < maxAge;
     }
 
-    /// <returns>The site's details, saved; null when the site couldn't say.</returns>
-    private async Task<ModInfo?> ReadAsync(IModCatalog catalog, ModRef mod)
+    /// <param name="seen">The details saved before, if any.</param>
+    /// <returns>
+    /// The site's details, saved; null when the site couldn't say. When the site says the mod is hidden or removed, the
+    /// details seen before stay, marked so (ADR 0099): they may be all that's left of the mod.
+    /// </returns>
+    private async Task<ModInfo?> ReadAsync(IModCatalog catalog, ModRef mod, ModInfo? seen)
     {
         try
         {
@@ -144,6 +171,11 @@ internal sealed partial class ModDetails : IModDetails, IDisposable
             finally
             {
                 _reading.Release();
+            }
+
+            if (!details.IsAvailable && seen is not null)
+            {
+                details = Unavailable(seen);
             }
 
             await _repository.SaveAsync(new SavedModDetails(details, _time.GetUtcNow()), CancellationToken.None).ConfigureAwait(false);

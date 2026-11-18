@@ -38,7 +38,8 @@ internal static class McpEntries
             files.Count(file => file.Missing),
             mod.OfferedUpdates.Count,
             compact ? null : files,
-            compact ? null : [.. mod.Updates.OrderByDescending(update => update.UploadedAt).Select(update => Update(update, mod, roots))]);
+            compact ? null : [.. mod.Updates.OrderByDescending(update => update.UploadedAt).Select(update => Update(update, mod, roots))],
+            mod.GoneSince);
     }
 
     public static LibraryFileEntry File(LibraryFile file, LibraryRoots roots)

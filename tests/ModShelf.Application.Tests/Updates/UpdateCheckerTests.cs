@@ -280,13 +280,15 @@ public sealed class UpdateCheckerTests : IDisposable
     [Fact]
     public async Task AModThatCantBeCheckedStaysAsItWas()
     {
-        _site.ModFailures["1"] = new HttpRequestException("Not found.", null, HttpStatusCode.NotFound);
+        // A site that no longer knows the mod means it's gone from it (UpdateCheckerGoneTests); this one fails otherwise.
+        _site.ModFailures["1"] = new HttpRequestException("Server error.", null, HttpStatusCode.InternalServerError);
 
         UpdateCheck check = await CheckAsync(_feed);
 
         Assert.Equal(2, check.Checked);
         UpdateCheckFailure failure = Assert.Single(check.Failures);
-        Assert.Equal((Mod("1").Mod.Game, Mod("1").Mod, "Not found."), (failure.Game, failure.Mod, failure.Reason));
+        Assert.Equal((Mod("1").Mod.Game, Mod("1").Mod, "Server error."), (failure.Game, failure.Mod, failure.Reason));
+        Assert.Empty(check.Gone);
         Assert.Null(Mod("1").CheckedAt);
         Assert.Contains(_logger.Entries, entry => entry.StartsWith("Warning: Couldn't check mod 1 of skyrimspecialedition on fake-mods", StringComparison.Ordinal));
     }
@@ -599,5 +601,5 @@ public sealed class UpdateCheckerTests : IDisposable
     }
 
     private UpdateChecker Checker(IModSource source)
-        => new(new SourceRegistry([source]), _library, _settings, _changes, _time, _logger);
+        => new(new SourceRegistry([source]), _library, _settings, _changes, new InMemoryLibraryHistory().History(_time), _time, _logger);
 }

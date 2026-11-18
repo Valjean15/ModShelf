@@ -152,6 +152,7 @@
         </Grid>
 
         <TextBlock Classes="problem" TextWrapping="Wrap" Text="{x:Static res:Strings.BrowseUnavailable}" IsVisible="{Binding IsUnavailable}" />
+        <TextBlock Classes="problem" TextWrapping="Wrap" Text="{Binding GoneText}" IsVisible="{Binding IsGone}" />
         <TextBlock Classes="note message" Classes.problem="{Binding IsNoteAProblem}" Text="{Binding Note}" />
 
         <!-- What the user keeps of the mod in the library: that it's pinned, and their note. -->
@@ -203,6 +204,9 @@
                                                     </Border>
                                                     <Border Classes="tag warn" IsVisible="{Binding IsMissing}">
                                                         <TextBlock Text="{x:Static res:Strings.ModPageMissing}" />
+                                                    </Border>
+                                                    <Border Classes="tag warn" IsVisible="{Binding IsOnlyCopy}" ToolTip.Tip="{x:Static res:Strings.ModPageOnlyCopyTip}">
+                                                        <TextBlock Text="{x:Static res:Strings.ModPageOnlyCopy}" />
                                                     </Border>
                                                 </WrapPanel>
                                                 <WrapPanel ItemSpacing="14">

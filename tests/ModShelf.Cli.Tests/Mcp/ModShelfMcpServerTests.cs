@@ -325,9 +325,9 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     [InlineData("download", "links", "\"https://www.nexusmods.com/stardewvalley/mods/2400\"", "links is a list of strings or null, not a string. It takes links, link.")]
     [InlineData("download", "links", "[\"https://www.nexusmods.com/stardewvalley/mods/2400\", 3]", "links is a list of strings or null, not a list. It takes links, link.")]
     [InlineData("download", "link", "[\"https://www.nexusmods.com/stardewvalley/mods/2400\"]", "link is a string or null, not a list. It takes links, link.")]
-    [InlineData("library_list", "limit", "\"many\"", "limit is an integer, not a string. It takes game, source, mod, watchedOnly, updatesOnly, missingOnly, compact, offset, limit.")]
-    [InlineData("library_list", "limit", "2.5", "limit is an integer, not a number. It takes game, source, mod, watchedOnly, updatesOnly, missingOnly, compact, offset, limit.")]
-    [InlineData("library_list", "compact", "\"yes\"", "compact is true or false, not a string. It takes game, source, mod, watchedOnly, updatesOnly, missingOnly, compact, offset, limit.")]
+    [InlineData("library_list", "limit", "\"many\"", "limit is an integer, not a string. It takes game, source, mod, watchedOnly, updatesOnly, missingOnly, goneOnly, compact, offset, limit.")]
+    [InlineData("library_list", "limit", "2.5", "limit is an integer, not a number. It takes game, source, mod, watchedOnly, updatesOnly, missingOnly, goneOnly, compact, offset, limit.")]
+    [InlineData("library_list", "compact", "\"yes\"", "compact is true or false, not a string. It takes game, source, mod, watchedOnly, updatesOnly, missingOnly, goneOnly, compact, offset, limit.")]
     [InlineData("library_changes", "since", "null", "since is a string, not null. It takes since (required).")]
     public async Task AnArgumentOfAnotherTypeSaysWhatTheToolTakes(string tool, string name, string json, string said)
     {
@@ -823,6 +823,24 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
             ("elsewhere", "game", "9", "Far Mod", (string?)null, "noSite", "ModShelf can't reach elsewhere here, so the mod is left out."),
             (problem.Source, problem.Game, problem.Mod, problem.ModName, problem.File, problem.Kind, problem.Problem));
         Assert.Contains("This isn't a ModShelf list", refused, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ACheckSaysWhichModsLeftTheirSitesAndTheListingMarksThem()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await mcp.CallAsync<WatchResult>("library_watch", Arguments(("link", FakeCatalogSite.ModLink("403").AbsoluteUri)), Cancellation);
+        await mcp.CallAsync<WatchResult>("library_watch", Arguments(("link", FakeCatalogSite.ModLink("1").AbsoluteUri)), Cancellation);
+
+        UpdateCheckResult check = await mcp.CallAsync<UpdateCheckResult>("library_check", null, Cancellation);
+        LibraryListing gone = await mcp.CallAsync<LibraryListing>("library_list", Arguments(("goneOnly", true), ("compact", true)), Cancellation);
+
+        Assert.Empty(check.Failures);
+        LibraryModEntry left = Assert.Single(check.Gone);
+        Assert.Equal(("403", true), (left.ModId, left.GoneSince is not null));
+        Assert.Empty(check.Back);
+        Assert.Equal(["403"], gone.Mods.Select(mod => mod.ModId));
+        Assert.Equal(left.GoneSince, gone.Mods[0].GoneSince);
     }
 
     [Fact]

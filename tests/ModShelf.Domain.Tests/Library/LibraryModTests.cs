@@ -100,6 +100,32 @@ public sealed class LibraryModTests
     }
 
     [Fact]
+    public void AModThatLeftItsSiteKeepsWhenItFirstLeftAndLosesItsUpdates()
+    {
+        LibraryMod withUpdates = Watched().WithFile(File("1")).WithUpdates([Update("2", replaces: "1")]).WithUpdateSkipped(Ref("2"), true);
+
+        LibraryMod gone = withUpdates.LeftSite(Later);
+        LibraryMod stillGone = gone.Checked(Later.AddDays(7)).LeftSite(Later.AddDays(7)).WithNote("Keep this one.");
+
+        Assert.False(withUpdates.IsGone);
+        Assert.Equal((Later, true), (gone.GoneSince, gone.IsGone));
+        Assert.Empty(gone.Updates);
+        Assert.Empty(gone.SkippedUpdates);
+        Assert.Equal((Later, "Keep this one."), (stillGone.GoneSince, stillGone.Note));
+        Assert.Equal(Later, stillGone.Unwatched()!.GoneSince);
+    }
+
+    [Fact]
+    public void AModBackOnItsSiteIsNoLongerGone()
+    {
+        LibraryMod mod = Watched();
+
+        Assert.Same(mod, mod.BackOnSite());
+        Assert.Null(mod.LeftSite(Later).BackOnSite().GoneSince);
+        Assert.Equal(Later, LibraryMod.Restore(TestData.SkyUi, "SkyUI", null, null, isWatched: true, TestData.CreatedAt, null, [], goneSince: Later).GoneSince);
+    }
+
+    [Fact]
     public void AddsFilesInOrderAndReplacesTheSameFile()
     {
         LibraryFile first = File("1", "SkyUI_1.7z");

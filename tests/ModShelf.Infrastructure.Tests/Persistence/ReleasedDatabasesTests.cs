@@ -12,9 +12,10 @@ using ModShelf.Infrastructure.Persistence;
 namespace ModShelf.Infrastructure.Tests.Persistence;
 
 /// <summary>
-/// 1.0.0 opens the library database of every version released before it, 0.9.0 to 0.9.5, as it shipped: the linked
+/// ModShelf opens the library database of every version released before it, 0.9.0 to 1.0.7, as it shipped: the linked
 /// account, the download queue, and the library's mods with their files, updates, from 0.9.2 their files' hashes, and
-/// from 0.9.3 pins, notes, skipped updates and the history, all kept, and the database then works as 1.0.0's.
+/// from 0.9.3 pins, notes, skipped updates and the history, all kept, and the database then works as today's: from 1.0.8,
+/// a mod gone from its site is kept so.
 /// </summary>
 public sealed class ReleasedDatabasesTests
 {
@@ -25,7 +26,7 @@ public sealed class ReleasedDatabasesTests
         // The release, the last migration it shipped with, and whether it kept files' hashes, and pins and notes.
         { "0.9.0 and 0.9.1", "20261029231706_AddNeedsFullCheck", false, false },
         { "0.9.2", "20261102113041_AddFileHashes", true, false },
-        { "0.9.3 to 0.9.5", "20261103171052_AddPinsAndNotes", true, true },
+        { "0.9.3 to 1.0.7", "20261103171052_AddPinsAndNotes", true, true },
     };
 
     [Theory]
@@ -78,6 +79,7 @@ public sealed class ReleasedDatabasesTests
         Assert.Equal(("160380", 41_889_142L, hashes ? new string('a', 64) : null), (file.File.Id, file.SizeInBytes, file.Sha256));
         Assert.Equal("161000", Assert.Single(mod.Updates).File.Id);
         Assert.Equal((pins, pins ? "Keep 4.5.2." : null, pins ? 1 : 0), (mod.IsPinned, mod.Note, mod.SkippedUpdates.Count));
+        Assert.Null(mod.GoneSince);
         if (pins)
         {
             // From 0.9.3, the library's history, the file's download in it.
@@ -90,11 +92,17 @@ public sealed class ReleasedDatabasesTests
             Assert.Equal((long)context.Database.GetMigrations().Count(), await database.QueryAsync("SELECT COUNT(*) FROM __EFMigrationsHistory"));
         }
 
-        // And it works as 1.0.0's: a note kept, a removal in the history, and the mod back as it was.
-        LibraryChange noted = await database.Library.UpdateAsync(Smapi, stored => stored!.WithNote("From 1.0.0."), cancellation);
-        await database.History.AddAsync([new LibraryEvent(DateTimeOffset.UnixEpoch.AddYears(57), LibraryEventKind.Removed, Smapi, "SMAPI")], DateTimeOffset.UnixEpoch, cancellation);
+        // And it works as today's: a note kept, the mod gone from its site, a removal in the history, and the mod back as it was.
+        DateTimeOffset left = DateTimeOffset.UnixEpoch.AddYears(57);
+        LibraryChange noted = await database.Library.UpdateAsync(Smapi, stored => stored!.WithNote("From 1.0.0.").LeftSite(left), cancellation);
+        Assert.Equal(left, Assert.Single(await database.Library.ListAsync(cancellation)).GoneSince);
+        await database.History.AddAsync(
+            [new LibraryEvent(left, LibraryEventKind.LeftSite, Smapi, "SMAPI"), new LibraryEvent(left, LibraryEventKind.Removed, Smapi, "SMAPI")],
+            DateTimeOffset.UnixEpoch,
+            cancellation);
         await database.Library.UpdateAsync(Smapi, _ => noted.Before, cancellation);
-        Assert.Equal(mod.Note, Assert.Single(await database.Library.ListAsync(cancellation)).Note);
-        Assert.Equal(pins ? 2 : 1, (await database.History.ListAsync(null, 10, cancellation)).Count);
+        LibraryMod restored = Assert.Single(await database.Library.ListAsync(cancellation));
+        Assert.Equal((mod.Note, (DateTimeOffset?)null), (restored.Note, restored.GoneSince));
+        Assert.Equal(pins ? 3 : 2, (await database.History.ListAsync(null, 10, cancellation)).Count);
     }
 }

@@ -51,6 +51,11 @@ internal sealed class FakeModSite : ILinkRecognizer, IModCatalog, IHandoffScheme
     public ConcurrentDictionary<string, Exception> ModFailures { get; } = new();
 
     /// <summary>
+    /// The mods it hides, by their IDs: described as unavailable, as a site describes a mod hidden or removed.
+    /// </summary>
+    public ConcurrentDictionary<string, bool> Hidden { get; } = new();
+
+    /// <summary>
     /// While set, every catalog answer waits for it.
     /// </summary>
     public TaskCompletionSource? Hold { get; set; }
@@ -125,7 +130,7 @@ internal sealed class FakeModSite : ILinkRecognizer, IModCatalog, IHandoffScheme
 
     public Task<ModInfo> GetModAsync(ModRef modRef, CancellationToken cancellationToken)
         => AnswerAsync(nameof(GetModAsync), modRef, () => _mods.TryGetValue(modRef.Id, out string? name)
-            ? new ModInfo(modRef, name, author: "Someone", pageUrl: new Uri($"https://mods.example/{modRef.Id}"))
+            ? new ModInfo(modRef, name, author: "Someone", pageUrl: new Uri($"https://mods.example/{modRef.Id}"), isAvailable: !Hidden.ContainsKey(modRef.Id))
             : throw new HttpRequestException("No such mod.", null, HttpStatusCode.NotFound));
 
     public Task<IReadOnlyList<ModFile>> GetFilesAsync(ModRef modRef, CancellationToken cancellationToken)

@@ -53,6 +53,21 @@ public sealed class ModDetailsTests : IDisposable
     }
 
     [Fact]
+    public async Task AModItsSiteNowHidesKeepsTheDetailsLastSeenMarkedSo()
+    {
+        ModInfo seen = new(Mod, "SkyUI", summary: "A menu replacer.", author: "schlangster", pictureUrl: new Uri("https://pictures.example/skyui.png"), downloads: 9);
+        _repository.Add(new SavedModDetails(seen, TestData.Now - TimeSpan.FromDays(2)));
+        _site.Describe = new ModInfo(Mod, "Hidden mod", isAvailable: false);
+
+        ModInfo? details = await _details.GetAsync(Mod, Cancellation);
+
+        Assert.NotNull(details);
+        Assert.Equal(("SkyUI", "A menu replacer.", "schlangster", new Uri("https://pictures.example/skyui.png"), 9L, false),
+            (details.Name, details.Summary, details.Author, details.PictureUrl, details.Downloads, details.IsAvailable));
+        Assert.Equal(new SavedModDetails(details, TestData.Now), _repository[Mod]);
+    }
+
+    [Fact]
     public async Task ShowsSavedDetailsUntilTheyreADayOld()
     {
         ModInfo saved = new(Mod, "SkyUI, as saved");

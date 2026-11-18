@@ -40,6 +40,7 @@ public sealed partial class ModPageViewModel : ObservableObject
     private readonly List<(ModFileCategory Category, ModFileSectionViewModel Section)> _sections = [];
     private readonly List<ModFileViewModel> _files = [];
     private readonly ModFileRef? _linkedFile;
+    private readonly HashSet<ModFileRef> _offered;
     private readonly Func<ModRef, LibraryMod?> _library;
     private LibraryMod? _inLibrary;
     private LibraryRoots? _roots;
@@ -66,6 +67,7 @@ public sealed partial class ModPageViewModel : ObservableObject
         _services = services;
         _info = page.Mod;
         _linkedFile = page.LinkedFile;
+        _offered = [.. page.Files.Where(file => file.Category != ModFileCategory.Archived).Select(file => file.Reference)];
         _library = library;
         Previews = previews;
         Picture = new ModPictureViewModel(services.Pictures);
@@ -376,6 +378,16 @@ public sealed partial class ModPageViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasKept))]
     public partial string? UserNote { get; private set; }
+
+    /// <summary>
+    /// When a check found the mod in the library gone from its site, what that means, such as "Gone from Nexus Mods since
+    /// 12/3/2026: your copies of its files may be the only ones left."; empty while it isn't.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsGone))]
+    public partial string GoneText { get; private set; } = string.Empty;
+
+    public bool IsGone => GoneText.Length > 0;
 
     /// <summary>
     /// Whether it's pinned or has a note, which show above its files.
@@ -756,6 +768,9 @@ public sealed partial class ModPageViewModel : ObservableObject
         PinnedText = !IsPinned ? string.Empty
             : version is null ? Strings.ModPagePinned
             : Text.Format(Strings.ModPagePinnedAt, version);
+        GoneText = inLibrary?.GoneSince is { } goneSince
+            ? Text.Format(Strings.ModPageGone, SiteName, Dates.Day(goneSince, _services.TimeProvider))
+            : string.Empty;
         HashSet<ModFileRef> kept = [.. inLibrary?.Files.Select(file => file.File) ?? []];
         foreach (ModFileViewModel file in _files)
         {
@@ -778,6 +793,13 @@ public sealed partial class ModPageViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Whether the site no longer offers a file of the library's: the mod is gone from it, or the files it lists, when it
+    /// lists any, have it only as archived, or not at all. A page shown without the site's files says nothing of them.
+    /// </summary>
+    private bool IsOnlyCopy(LibraryFile file)
+        => IsUnavailable || _inLibrary?.IsGone == true || (_files.Count > 0 && !_offered.Contains(file.File));
+
+    /// <summary>
     /// Shows the library's files of the mod, the latest downloaded first, each saying whether it's on disk once the
     /// library's folder is known; archived versions when asked.
     /// </summary>
@@ -790,6 +812,7 @@ public sealed partial class ModPageViewModel : ObservableObject
                 .Select(file => new OwnFileViewModel(
                     file,
                     _roots is { } roots && !_services.Storage.FileExists(roots.Resolve(file)),
+                    IsOnlyCopy(file),
                     _services.TimeProvider,
                     CopyAsync,
                     DeleteFileAsync)),

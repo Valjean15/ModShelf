@@ -338,7 +338,7 @@ public sealed class LibraryByGameTests : IDisposable
         LibraryFile yours = TestData.LibraryFile(SkyUi, "1", "SkyUI.7z");
         _harness.Storage.Files.Add(Path(yours));
         LibraryMod updated = WithUpdates(TestData.LibraryMod(SkyUi, "SkyUI", watched: true, yours), Update(SkyUi, "2", "2.0", ModFileCategory.Main, yours.File));
-        LibraryMod archived = TestData.LibraryMod(Address, "Address Library", watched: false, Archived(Address, "1", 10));
+        LibraryMod archived = TestData.LibraryMod(Address, "Address Library", watched: false, Archived(Address, "1", 10)).LeftSite(TestData.Now);
         ModRef missing = TestData.Mod("1");
 
         await _harness.StartAsync(updated, archived, TestData.LibraryMod(missing, "Missing", watched: true, File(missing, "1", 10)));
@@ -356,8 +356,8 @@ public sealed class LibraryByGameTests : IDisposable
         Screen.ModFilters[1].IsOn = true;
         Screen.ModFilters[3].IsOn = true;
 
-        Assert.Equal([1, 2, 1, 2], counts);
-        Assert.Equal([["SkyUI"], ["Missing", "SkyUI"], ["Address Library"], ["Address Library", "Missing"]], shown);
+        Assert.Equal([1, 2, 1, 2, 1], counts);
+        Assert.Equal([["SkyUI"], ["Missing", "SkyUI"], ["Address Library"], ["Address Library", "Missing"], ["Address Library"]], shown);
         Assert.Equal(["Missing"], Screen.GameMods.Select(mod => mod.Name));
         Assert.Equal(counts, Screen.ModFilters.Select(toggle => toggle.Count));
     }

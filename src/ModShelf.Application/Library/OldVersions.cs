@@ -46,7 +46,8 @@ internal static class OldVersions
 
     /// <summary>
     /// What <paramref name="rule"/> does with the old versions of <paramref name="newer"/>, a file the mod has or is
-    /// getting. Old versions already in an <c>_archive</c> folder aren't archived again.
+    /// getting. Old versions already in an <c>_archive</c> folder aren't archived again. Keeping the latest never deletes
+    /// a version its site lists as archived, which may be the only copy left (ADR 0099): it's archived instead.
     /// </summary>
     public static OldVersionPlan Plan(LibraryMod mod, ModFileRef newer, IReadOnlyList<ModFile> siteFiles, OldVersionRule rule)
     {
@@ -58,7 +59,7 @@ internal static class OldVersions
             OldVersionAction.Archive => new OldVersionPlan([.. older.Where(file => !IsArchived(file.RelativePath))], []),
 
             // The newer file counts as the first version kept.
-            OldVersionAction.KeepLatest => new OldVersionPlan([], [.. older.Skip(rule.Count - 1)]),
+            OldVersionAction.KeepLatest => KeepLatest([.. older.Skip(rule.Count - 1)], siteFiles),
             _ => OldVersionPlan.None,
         };
     }
@@ -85,6 +86,18 @@ internal static class OldVersions
         int separator = relativePath.LastIndexOf(LibraryPaths.Separator);
         string folder = separator < 0 ? ArchiveFolder : $"{relativePath[..separator]}{LibraryPaths.Separator}{ArchiveFolder}";
         return $"{folder}{LibraryPaths.Separator}{name}";
+    }
+
+    /// <summary>
+    /// The versions beyond those kept: deleted while their site offers them; one it lists as archived moved into
+    /// <c>_archive</c> instead, or left there when it's there already.
+    /// </summary>
+    private static OldVersionPlan KeepLatest(LibraryFile[] beyond, IReadOnlyList<ModFile> siteFiles)
+    {
+        HashSet<ModFileRef> archivedOnSite = [.. siteFiles.Where(file => file.Category == ModFileCategory.Archived).Select(file => file.Reference)];
+        return new OldVersionPlan(
+            [.. beyond.Where(file => archivedOnSite.Contains(file.File) && !IsArchived(file.RelativePath))],
+            [.. beyond.Where(file => !archivedOnSite.Contains(file.File))]);
     }
 
     /// <summary>

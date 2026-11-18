@@ -483,6 +483,21 @@ public collection on Nexus Mods at hand. Nothing here installs anything.
   "That link isn't to a collection ModShelf can read…", then "The site has no such collection." (or what Nexus Mods
   said of it), each under "The collection couldn't be read".
 
+## 20. A mod that left its site
+
+Run it once, in the Premium run, with the command line's section 18 done just before, its mod not yet forgotten, and the
+app closed while it ran.
+
+- [ ] **20.1 Said so.** Open the app, and the hidden mod's game in the Library.
+  Its row's first status is "Gone from Nexus Mods", in the problem colour, its tooltip saying since when, and **Gone from their site 1**
+  shows beside the other toggles, narrowing to it. Without a gone mod, that toggle isn't there.
+- [ ] **20.2 Its page.** Open the mod.
+  "Gone from Nexus Mods since *day*: your copies of its files may be the only ones left, and the details here are the
+  last ones seen.", the details it had before (its picture and summary, if any), and each of your files of it tagged
+  **Only copy**.
+- [ ] **20.3 In the activity.** **Recent activity**, then **Show** › **Mods that left their site**.
+  "Left its site" with the mod, and that your copies may be the only ones left.
+
 ## Clean up
 
 If a run stopped before 12.7, give the links back on the Settings screen first: their registration starts ModShelf on the test folder. After both accounts, quit the app from the tray menu, then:
@@ -680,3 +695,6 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 19.2 Import a list | | | |
 | 19.3 Import a collection | | | |
 | 19.4 Refusals | | | |
+| 20.1 Said so | | – | |
+| 20.2 Its page | | – | |
+| 20.3 In the activity | | – | |

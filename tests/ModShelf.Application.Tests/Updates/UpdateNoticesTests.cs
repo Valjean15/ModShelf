@@ -57,6 +57,16 @@ public sealed class UpdateNoticesTests
         Assert.Throws<ArgumentException>(() => UpdateNotices.For([], Library));
     }
 
+    [Fact]
+    public void NamesTheModsThatLeftTheirSites()
+    {
+        Assert.Equal(new Notification("A mod left its site", "SkyUI: your copies may be the only ones left."), UpdateNotices.LeftSite([Library[0]]));
+        Assert.Equal(
+            new Notification("3 mods left their sites", "SkyUI, SMAPI and 1 more: your copies may be the only ones left."),
+            UpdateNotices.LeftSite([.. Library.Take(3)]));
+        Assert.Throws<ArgumentException>(() => UpdateNotices.LeftSite([]));
+    }
+
     private static LibraryMod Watched(string mod, string name) => LibraryMod.Watch(FakeModSite.Mod(mod), name, null, null, TestData.Now);
 
     private static LibraryUpdate Update(string mod, string file)

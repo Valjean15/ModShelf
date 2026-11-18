@@ -16,7 +16,8 @@ namespace ModShelf.Application.Updates;
 
 /// <summary>
 /// Checks the watched mods game by game, through each source's update feed where it can, and keeps what it finds on
-/// each mod, in a change of its own.
+/// each mod, in a change of its own. A mod whose files its site won't list, and which the site then says is hidden or
+/// removed, is marked gone from it rather than failed, and asked about again weekly, until it's back (ADR 0099).
 /// </summary>
 internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
 {
@@ -24,6 +25,11 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
     /// How much earlier than a mod's last check a change still counts, for clocks that differ from the site's.
     /// </summary>
     internal static readonly TimeSpan Margin = TimeSpan.FromMinutes(10);
+
+    /// <summary>
+    /// How long a mod gone from its site goes before its site is asked about it again.
+    /// </summary>
+    internal static readonly TimeSpan GoneRecheck = TimeSpan.FromDays(7);
 
     /// <summary>
     /// How much later than a feed's reach the oldest question goes, so the source's clock never finds it too early.
@@ -34,6 +40,7 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
     private readonly ILibraryRepository _library;
     private readonly ISettingsService _settings;
     private readonly LibraryChanges _changes;
+    private readonly LibraryHistory _history;
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<UpdateChecker> _logger;
     private readonly SemaphoreSlim _checking = new(1, 1);
@@ -43,6 +50,7 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
         ILibraryRepository library,
         ISettingsService settings,
         LibraryChanges changes,
+        LibraryHistory history,
         TimeProvider timeProvider,
         ILogger<UpdateChecker> logger)
     {
@@ -50,6 +58,7 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
         ArgumentNullException.ThrowIfNull(library);
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(changes);
+        ArgumentNullException.ThrowIfNull(history);
         ArgumentNullException.ThrowIfNull(timeProvider);
         ArgumentNullException.ThrowIfNull(logger);
 
@@ -57,6 +66,7 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
         _library = library;
         _settings = settings;
         _changes = changes;
+        _history = history;
         _timeProvider = timeProvider;
         _logger = logger;
     }
@@ -97,7 +107,8 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
         {
             Check check = new(_timeProvider.GetUtcNow());
             IReadOnlyList<LibraryMod> library = await _library.ListAsync(cancellationToken).ConfigureAwait(false);
-            foreach (IGrouping<GameRef, LibraryMod> game in library.Where(mod => mod.IsWatched && checks(mod.Mod.Game)).GroupBy(mod => mod.Mod.Game))
+            IEnumerable<LibraryMod> due = library.Where(mod => mod.IsWatched && checks(mod.Mod.Game) && IsDue(mod, check.StartedAt));
+            foreach (IGrouping<GameRef, LibraryMod> game in due.GroupBy(mod => mod.Mod.Game))
             {
                 if (check.Stopped.TryGetValue(game.Key.Source, out string? stopped))
                 {
@@ -108,7 +119,7 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
                 await CheckGameAsync(check, game.Key, [.. game], cancellationToken).ConfigureAwait(false);
             }
 
-            UpdateCheck result = new(check.Checked, check.Requests, check.Found, check.Failures);
+            UpdateCheck result = new(check.Checked, check.Requests, check.Found, check.Failures) { Gone = check.Gone, Back = check.Back };
             LogChecked(_logger, result.Checked, result.Requests, result.Found.Count, result.Failures.Count);
             return result;
         }
@@ -128,6 +139,18 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
             or HttpRequestException { StatusCode: null };
 
     /// <summary>
+    /// Whether a mod is checked now: any that's on its site; one gone from it only once a week has passed since its
+    /// last check, since its site was asked about it then.
+    /// </summary>
+    private static bool IsDue(LibraryMod mod, DateTimeOffset now) => !mod.IsGone || now - LastChecked(mod, now) >= GoneRecheck;
+
+    /// <summary>
+    /// Whether a failure to list a mod's files might mean the site no longer has the mod, so it's worth asking.
+    /// </summary>
+    private static bool MightBeGone(Exception exception)
+        => exception is HttpRequestException { StatusCode: HttpStatusCode.NotFound or HttpStatusCode.Gone or HttpStatusCode.Forbidden };
+
+    /// <summary>
     /// When <paramref name="mod"/> was last checked, as far as can be told: a check later than <paramref name="now"/>,
     /// recorded before the clock moved back, is taken as none, and a mod never checked was last checked when it was added.
     /// </summary>
@@ -135,6 +158,29 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
         => mod.CheckedAt is { } checkedAt && checkedAt <= now ? checkedAt
             : mod.AddedAt <= now ? mod.AddedAt
             : now;
+
+    /// <summary>
+    /// Whether the site says the mod is gone, asked once when it wouldn't list the mod's files: it describes the mod as
+    /// hidden or removed, or doesn't know it at all. Anything else, such as a site that can't be reached, isn't taken
+    /// to mean so, and the check fails as it would have.
+    /// </summary>
+    private static async Task<bool> IsGoneAsync(IModCatalog catalog, ModRef mod, Check check, CancellationToken cancellationToken)
+    {
+        try
+        {
+            check.Requests++;
+            ModInfo info = await catalog.GetModAsync(mod, cancellationToken).ConfigureAwait(false);
+            return !info.IsAvailable;
+        }
+        catch (HttpRequestException exception) when (exception.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Gone)
+        {
+            return true;
+        }
+        catch (Exception exception) when (exception is HttpRequestException or AuthenticationFailedException or ArgumentException)
+        {
+            return false;
+        }
+    }
 
     private async Task CheckGameAsync(Check check, GameRef game, IReadOnlyList<LibraryMod> mods, CancellationToken cancellationToken)
     {
@@ -153,6 +199,7 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
         LibraryMod[] byFeed =
         [
             .. mods.Where(mod => !mod.NeedsFullCheck
+                && !mod.IsGone
                 && mod.CheckedAt is { } checkedAt
                 && checkedAt <= check.StartedAt
                 && checkedAt - Margin >= reach),
@@ -221,6 +268,12 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
+                if (MightBeGone(exception) && await IsGoneAsync(catalog, mod.Mod, check, cancellationToken).ConfigureAwait(false))
+                {
+                    await LeftSiteAsync(check, mod.Mod, cancellationToken).ConfigureAwait(false);
+                    continue;
+                }
+
                 LogCantCheckMod(_logger, exception, mod.Mod.Id, game.Key, game.Source.Value);
                 check.Fail(game, mod.Mod, exception.Message);
                 if (StopsTheSource(exception))
@@ -235,18 +288,52 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
             LibraryChange change = await _library.UpdateAsync(
                     mod.Mod,
                     stored => stored is { IsWatched: true }
-                        ? stored.Checked(check.StartedAt).WithUpdates(
+                        ? stored.Checked(check.StartedAt).BackOnSite().WithUpdates(
                             UpdateFinder.Find(stored, files, LastChecked(stored, check.StartedAt) - Margin, check.StartedAt, catalog.FilesSideBySide))
                         : stored,
                     cancellationToken)
                 .ConfigureAwait(false);
             _changes.Publish(change);
+            if (change is { Before.IsGone: true, After: { IsGone: false } back })
+            {
+                LogBackOnSite(_logger, mod.Mod.Id, game.Key, game.Source.Value);
+                check.Back.Add(back);
+                await _history.RecordAsync([new LibraryEvent(check.StartedAt, LibraryEventKind.BackOnSite, back.Mod, back.Name)], CancellationToken.None)
+                    .ConfigureAwait(false);
+            }
+
             if (change.After is { IsWatched: true } after)
             {
                 check.Checked++;
                 // A pinned mod's are kept, but not offered.
                 check.Found.AddRange(after.OfferedUpdates.Where(update => change.Before?.Updates.All(earlier => earlier.File != update.File) ?? true));
             }
+        }
+    }
+
+    /// <summary>
+    /// Marks the mod gone from its site, checked now; and, the first time, keeps that in its history and in the check.
+    /// </summary>
+    private async Task LeftSiteAsync(Check check, ModRef mod, CancellationToken cancellationToken)
+    {
+        LibraryChange change = await _library.UpdateAsync(
+                mod,
+                stored => stored is { IsWatched: true } ? stored.Checked(check.StartedAt).LeftSite(check.StartedAt) : stored,
+                cancellationToken)
+            .ConfigureAwait(false);
+        _changes.Publish(change);
+        if (change.After is not { IsWatched: true } after)
+        {
+            return;
+        }
+
+        check.Checked++;
+        if (change.Before?.IsGone != true)
+        {
+            LogLeftSite(_logger, mod.Id, mod.Game.Key, mod.Game.Source.Value);
+            check.Gone.Add(after);
+            await _history.RecordAsync([new LibraryEvent(check.StartedAt, LibraryEventKind.LeftSite, after.Mod, after.Name)], CancellationToken.None)
+                .ConfigureAwait(false);
         }
     }
 
@@ -264,6 +351,10 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
         public List<LibraryUpdate> Found { get; } = [];
 
         public List<UpdateCheckFailure> Failures { get; } = [];
+
+        public List<LibraryMod> Gone { get; } = [];
+
+        public List<LibraryMod> Back { get; } = [];
 
         /// <summary>
         /// The sources not to ask again, and why.

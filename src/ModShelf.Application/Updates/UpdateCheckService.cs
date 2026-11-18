@@ -265,13 +265,13 @@ internal sealed partial class UpdateCheckService : BackgroundService
     }
 
     /// <summary>
-    /// Shows a notice of the updates <paramref name="check"/> found that no check had found before, of the games that
-    /// ask for one, unless there are none. Settings that can't be read mean a notice. A notice that can't be put together
-    /// or shown is logged.
+    /// Shows a notice of the updates <paramref name="check"/> found that no check had found before, and another of the
+    /// mods it found gone from their sites, of the games that ask for one, unless there are none. Settings that can't be
+    /// read mean a notice. A notice that can't be put together or shown is logged.
     /// </summary>
     private async Task NotifyAsync(UpdateCheck check, CancellationToken cancellationToken)
     {
-        if (check.Found.Count == 0)
+        if (check.Found.Count == 0 && check.Gone.Count == 0)
         {
             return;
         }
@@ -285,6 +285,12 @@ internal sealed partial class UpdateCheckService : BackgroundService
             {
                 IReadOnlyList<LibraryMod> library = await _library.ListAsync(cancellationToken).ConfigureAwait(false);
                 await _notifications.ShowAsync(UpdateNotices.For(found, library), cancellationToken).ConfigureAwait(false);
+            }
+
+            LibraryMod[] gone = [.. check.Gone.Where(mod => settings?.NotifiesFor(mod.Mod.Game) ?? true)];
+            if (gone.Length > 0)
+            {
+                await _notifications.ShowAsync(UpdateNotices.LeftSite(gone), cancellationToken).ConfigureAwait(false);
             }
         }
         catch (Exception exception) when (!cancellationToken.IsCancellationRequested)

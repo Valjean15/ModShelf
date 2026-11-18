@@ -38,7 +38,7 @@ internal sealed class LibraryTools(
     private const int HistoryLimit = 1000;
 
     [McpServerTool(Name = "library_list", Title = "List the library", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Lists the mods in ModShelf's library, the ones watched for updates and the ones with downloaded files, by site, game and name, a page at a time (offset and limit; hasMore says whether there's another page): each with its files (their absolute paths, versions, sizes, SHA-256, whether they're old versions archived, and whether they're missing from disk), the updates found for it (each saying whether it's skipped), whether it's pinned, and its note. A large library reads best a game or a mod at a time, or compact first, which gives counts instead of files and updates; watchedOnly, updatesOnly and missingOnly narrow it. A file without a SHA-256 was recorded before ModShelf kept them: library_rescan reads it.")]
+    [Description("Lists the mods in ModShelf's library, the ones watched for updates and the ones with downloaded files, by site, game and name, a page at a time (offset and limit; hasMore says whether there's another page): each with its files (their absolute paths, versions, sizes, SHA-256, whether they're old versions archived, and whether they're missing from disk), the updates found for it (each saying whether it's skipped), whether it's pinned, its note, and goneSince when a check found it gone from its site (hidden or removed there, so the library's copies of its files may be the only ones left). A large library reads best a game or a mod at a time, or compact first, which gives counts instead of files and updates; watchedOnly, updatesOnly, missingOnly and goneOnly narrow it. A file without a SHA-256 was recorded before ModShelf kept them: library_rescan reads it.")]
     public Task<LibraryListing> ListAsync(
         [Description("Only this game's mods, as the site names it in its links, such as stardewvalley.")] string? game = null,
         [Description("Only this site's mods: nexus, gamebanana, modio or degmods.")] string? source = null,
@@ -46,6 +46,7 @@ internal sealed class LibraryTools(
         [Description("Only the mods watched for updates.")] bool watchedOnly = false,
         [Description("Only the mods with updates offered: found, and neither pinned nor skipped.")] bool updatesOnly = false,
         [Description("Only the mods with files missing from disk, which library_forget can take out of the library.")] bool missingOnly = false,
+        [Description("Only the mods gone from their sites, whose files in the library may be the only copies left.")] bool goneOnly = false,
         [Description("Leave out each mod's files and updates, and give how many there are.")] bool compact = false,
         [Description("How many mods to skip: the offset of the page.")] int offset = 0,
         [Description("How many mods a page lists, from 1 to 200.")] int limit = 50,
@@ -73,6 +74,7 @@ internal sealed class LibraryTools(
                     .Where(found => !watchedOnly || found.IsWatched)
                     .Where(found => !updatesOnly || found.OfferedUpdates.Count > 0)
                     .Where(found => !missingOnly || found.Files.Any(file => McpEntries.File(file, roots).Missing))
+                    .Where(found => !goneOnly || found.IsGone)
                     .OrderBy(found => found.Mod.Game.Source.Value, StringComparer.Ordinal)
                     .ThenBy(found => found.Mod.Game.Key, StringComparer.Ordinal)
                     .ThenBy(found => found.Name, StringComparer.OrdinalIgnoreCase)
@@ -150,7 +152,7 @@ internal sealed class LibraryTools(
         });
 
     [McpServerTool(Name = "library_check", Title = "Check for updates", Idempotent = false, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
-    [Description("Checks the watched mods for updates now, asking their sites as little as it can, and lists the new updates found. Nothing is downloaded.")]
+    [Description("Checks the watched mods for updates now, asking their sites as little as it can, and lists the new updates found, and the mods it found gone from their sites (hidden or removed there, so the library's copies of their files may be the only ones left) or back on them. Nothing is downloaded.")]
     public Task<UpdateCheckResult> CheckAsync(CancellationToken cancellationToken)
         => McpProblems.GuardAsync(async () =>
         {
@@ -161,7 +163,9 @@ internal sealed class LibraryTools(
                 check.Checked,
                 check.Requests,
                 [.. check.Found.Select(update => McpEntries.Found(update, byRef, roots))],
-                [.. check.Failures.Select(failure => new UpdateCheckFailureEntry(failure.Game.Source.Value, failure.Game.Key, failure.Mod?.Id, failure.Reason))]);
+                [.. check.Failures.Select(failure => new UpdateCheckFailureEntry(failure.Game.Source.Value, failure.Game.Key, failure.Mod?.Id, failure.Reason))],
+                [.. check.Gone.Select(mod => McpEntries.Mod(mod, roots, compact: true))],
+                [.. check.Back.Select(mod => McpEntries.Mod(mod, roots, compact: true))]);
         });
 
     [McpServerTool(Name = "library_watch", Title = "Watch a mod", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]

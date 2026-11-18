@@ -13,6 +13,10 @@ namespace ModShelf.Cli.Mcp;
 /// <param name="UpdateCount">How many updates are offered for it: none for a pinned mod, and none skipped.</param>
 /// <param name="Files">Its files, the newest first; null in a compact listing.</param>
 /// <param name="Updates">Its updates, the newest first, skipped ones too; null in a compact listing.</param>
+/// <param name="GoneSince">
+/// When a check first found it gone from its site, hidden or removed there, so the library's copies of its files may be
+/// the only ones left; null while its site has it.
+/// </param>
 internal sealed record LibraryModEntry(
     string Source,
     string Game,
@@ -29,4 +33,5 @@ internal sealed record LibraryModEntry(
     int MissingCount,
     int UpdateCount,
     IReadOnlyList<LibraryFileEntry>? Files,
-    IReadOnlyList<LibraryUpdateEntry>? Updates);
+    IReadOnlyList<LibraryUpdateEntry>? Updates,
+    DateTimeOffset? GoneSince);

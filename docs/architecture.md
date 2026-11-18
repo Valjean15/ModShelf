@@ -148,7 +148,7 @@ GameBanana).
 *ADRs 0005, 0018–0020, 0034, 0042, 0044, 0045, 0056, 0057, 0067, 0076, 0081–0083, 0098.*
 
 - **One SQLite database**, `library.db` in the user's local application data folder, holds the jobs, the library
-  and the linked accounts. EF Core migrations shape it (nine so far, `InitialCreate` to `AddPinsAndNotes`); a
+  and the linked accounts. EF Core migrations shape it (ten so far, `InitialCreate` to `AddGoneSince`); a
   committed migration is never edited. Since 1.0.1 it runs in WAL mode, so the app, the CLI and agents read while
   another process writes. Database calls run off the caller's thread, and any command taking a second or more is
   logged, with what it was but never its values.
@@ -163,7 +163,8 @@ GameBanana).
   same change that records the new file, and the disk after it.
 - **Moving** the library or a game's files never overwrites a file, and puts every file back if one can't move.
 - **Rescan** finds files placed by hand (by name, and size within 1 KB) and hashes files that have none.
-- **History:** each download, archive, deletion, file found and mod removed is a `LibraryEvent`, kept for a year.
+- **History:** each download, archive, deletion, file found, mod removed, and mod leaving its site or coming back is a
+  `LibraryEvent`, kept for a year.
 - **Pins, skipped updates and notes** belong to the mod. **Forget** removes a mod and leaves its files on disk.
   **Undo** restores a mod exactly as a change found it, in one transaction, never touching the disk.
 - **Lists** (`IModLists`): the library exported as a `modshelf-list` JSON file of mods and files by the sites' IDs,
@@ -174,7 +175,7 @@ GameBanana).
 
 ## Finding updates
 
-*ADRs 0017, 0021, 0022, 0034, 0043, 0051, 0057, 0059.*
+*ADRs 0017, 0021, 0022, 0034, 0043, 0051, 0057, 0059, 0099.*
 
 - **Version labels are never compared.** An update is the newest file of a library file's chain that the library
   doesn't have; for a main file without a chain, a newer main file; for a mod that's only watched, a main file uploaded
@@ -183,6 +184,10 @@ GameBanana).
   reach (28 days); only the changed mods are then read. A mod never checked, or last checked beyond the reach, gets a
   full check. Sites without a feed are asked mod by mod.
 - **Pinned mods' updates and skipped updates** are still found but not offered; a skip lasts until a newer file comes.
+- **Mods that leave their site** (ADR 0099): when a site won't list a mod's files (403, 404 or 410), it's asked once
+  about the mod; one it describes as hidden or removed, or doesn't know, is marked gone (`LibraryMod.GoneSince`), not
+  failed, and asked about again weekly until its files are listed again. Its saved details stay, marked unavailable,
+  and keeping the latest old versions archives a version its site lists as archived rather than deleting it.
 - The desktop app checks every `updates.interval` (6 hours by default, or per game) and shows a notice for new ones.
   A notice that can't be shown is logged, never thrown.
 - Before work that would likely run out a site's requests, the app says so and asks; a strip warns when fewer than

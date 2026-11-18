@@ -70,6 +70,18 @@ internal static partial class LibraryCommand
                         }
 
                         ISourceRegistry sources = services.GetRequiredService<ISourceRegistry>();
+                        foreach (LibraryMod gone in check.Gone)
+                        {
+                            environment.Output.WriteLine(
+                                $"{gone.Name} ({gone.Mod.Game.Key} {gone.Mod.Id}) left {CliText.SiteName(sources, gone.Mod.Game.Source)}: it's hidden or removed "
+                                + "there, so your copies of its files may be the only ones left. ModShelf asks about it again weekly.");
+                        }
+
+                        foreach (LibraryMod back in check.Back)
+                        {
+                            environment.Output.WriteLine($"{back.Name} ({back.Mod.Game.Key} {back.Mod.Id}) is back on {CliText.SiteName(sources, back.Mod.Game.Source)}.");
+                        }
+
                         foreach (UpdateCheckFailure failure in check.Failures)
                         {
                             string what = failure.Mod is { } mod ? $"mod {mod.Id} of {failure.Game.Key}" : failure.Game.Key;

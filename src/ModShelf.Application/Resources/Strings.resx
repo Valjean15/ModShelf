@@ -74,4 +74,16 @@
     <value>{0}, {1} and {2} more</value>
     <comment>The notice's text when more than two mods have new updates. {0} and {1} are two mods' names, {2} how many others have new updates.</comment>
   </data>
+  <data name="OneModLeftSite" xml:space="preserve">
+    <value>A mod left its site</value>
+    <comment>Title of the notice shown when a background check finds a mod gone from its site, hidden or removed there.</comment>
+  </data>
+  <data name="ModsLeftSite" xml:space="preserve">
+    <value>{0} mods left their sites</value>
+    <comment>Title of the notice shown when a background check finds several mods gone from their sites. {0} is how many.</comment>
+  </data>
+  <data name="LeftSiteMessage" xml:space="preserve">
+    <value>{0}: your copies may be the only ones left.</value>
+    <comment>The notice's text when mods left their sites. {0} names them, as "SkyUI", "SkyUI and SMAPI" or "SkyUI, SMAPI and 2 more".</comment>
+  </data>
 </root>

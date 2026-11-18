@@ -117,7 +117,8 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         _pictures = pictures;
         _uiThread = uiThread;
         _logger = logger;
-        _services = new LibraryServices(library, rescan, settings, browser, folders, dialogs, pictures, undo, OpenAsync, ShowSelection, timeProvider, logger);
+        _services = new LibraryServices(
+            library, rescan, settings, browser, folders, dialogs, pictures, undo, OpenAsync, ShowSelection, source => sources.SiteName(source), timeProvider, logger);
         _pageServices = new ModPageServices(
             library,
             libraryDownloads,
@@ -165,6 +166,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             new(ModFilterKind.Watched, Strings.ModFilterWatched, ArrangeMods),
             new(ModFilterKind.Archived, Strings.ModFilterArchived, ArrangeMods),
             new(ModFilterKind.Missing, Strings.ModFilterMissing, ArrangeMods),
+            new(ModFilterKind.Gone, Strings.ModFilterGone, ArrangeMods, hidesWhenNone: true),
         ];
         Activity = new LibraryActivityViewModel(history, OpenAsync, GameNameOf, SiteNameOf, timeProvider, logger);
         Previews = new PreviewsViewModel(PreviewScreen.Library, pictures);
@@ -1100,6 +1102,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         ModFilterKind.Watched => mod.IsWatched,
         ModFilterKind.Archived => mod.ArchivedCount > 0,
         ModFilterKind.Missing => mod.MissingCount > 0,
+        ModFilterKind.Gone => mod.IsGone,
         _ => false,
     };
 

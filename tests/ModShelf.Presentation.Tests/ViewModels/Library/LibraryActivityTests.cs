@@ -66,6 +66,29 @@ public sealed class LibraryActivityTests : IDisposable
     }
 
     [Fact]
+    public async Task SaysWhenAModLeftItsSiteAndWhenItCameBack()
+    {
+        _harness.History.Events.AddRange(
+        [
+            new(TestData.Now.AddMinutes(-10), LibraryEventKind.BackOnSite, SkyUi, "SkyUI"),
+            new(TestData.Now.AddMinutes(-20), LibraryEventKind.LeftSite, SkyUi, "SkyUI"),
+        ]);
+        await _harness.StartAsync(InLibrary);
+
+        await Screen.ShowActivityCommand.ExecuteAsync(null);
+        (string, string)[] all = [.. Activity.Days[0].Entries.Select(entry => (entry.KindText, entry.Text))];
+        Activity.SelectedKind = Activity.Kinds.Single(kind => kind.Value == LibraryEventKind.LeftSite);
+
+        Assert.Equal(
+            [
+                ("Back", "Back on its site."),
+                ("Left its site", "Gone from its site, hidden or removed there: your copies of its files may be the only ones left."),
+            ],
+            all);
+        Assert.Equal(["Left its site"], Activity.Days.SelectMany(day => day.Entries).Select(entry => entry.KindText));
+    }
+
+    [Fact]
     public async Task DaysAndTimesAreTheUsersOwn()
     {
         // Six hours behind UTC, today's 3:00 UTC was yesterday at 9 PM.
@@ -131,7 +154,7 @@ public sealed class LibraryActivityTests : IDisposable
         Assert.Equal(2, Activity.Days.Count);
         Assert.Null(Activity.EmptyText);
         Assert.Equal(
-            ["Everything", "Downloads", "Archived versions", "Deleted files", "Found by rescans", "Removed mods"],
+            ["Everything", "Downloads", "Archived versions", "Deleted files", "Found by rescans", "Removed mods", "Mods that left their site", "Mods back on their site"],
             Activity.Kinds.Select(kind => kind.Label));
     }
 

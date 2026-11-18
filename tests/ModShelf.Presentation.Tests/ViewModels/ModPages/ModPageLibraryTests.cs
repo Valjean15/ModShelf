@@ -47,6 +47,42 @@ public sealed class ModPageLibraryTests : IDisposable
     }
 
     [Fact]
+    public async Task SaysWhichOfTheLibrarysFilesItsSiteNoLongerOffers()
+    {
+        // File 1 is no longer listed, 2 is, and 3 is archived on the site.
+        LibraryFile[] files =
+        [
+            TestData.LibraryFile(SkyUi, "1", "SkyUI_1.7z", daysAgo: 9),
+            TestData.LibraryFile(SkyUi, "2", "SkyUI_2.7z", daysAgo: 8),
+            TestData.LibraryFile(SkyUi, "3", "SkyUI_3.7z", daysAgo: 7),
+        ];
+        await _harness.StartAsync(TestData.LibraryMod(SkyUi, "SkyUI", files: files));
+
+        ModPageViewModel listed = await OpenAsync(BrowseHarness.File(SkyUi, "2"), BrowseHarness.File(SkyUi, "3", ModFileCategory.Archived));
+        ModPageViewModel offline = await OpenAsync();
+
+        Assert.Equal([("3", true), ("2", false), ("1", true)], listed.OwnFiles.Select(file => (file.File.Id, file.IsOnlyCopy)));
+        Assert.All(offline.OwnFiles, file => Assert.False(file.IsOnlyCopy));
+        Assert.False(listed.IsGone);
+    }
+
+    [Fact]
+    public async Task AModGoneFromItsSiteSaysSoAndEachOfItsFilesIsTheOnlyCopy()
+    {
+        using CultureScope culture = new("en-US");
+        LibraryFile file = TestData.LibraryFile(SkyUi, "2", "SkyUI_5_2.7z");
+        await _harness.StartAsync(TestData.LibraryMod(SkyUi, "SkyUI", files: [file]).LeftSite(TestData.Now.AddDays(-2)));
+
+        ModPageViewModel mod = await OpenAsync(BrowseHarness.File(SkyUi, "2"));
+
+        Assert.True(mod.IsGone);
+        Assert.Equal(
+            "Gone from Nexus Mods since 10/25/2026: your copies of its files may be the only ones left, and the details here are the last ones seen.",
+            mod.GoneText);
+        Assert.True(Assert.Single(mod.OwnFiles).IsOnlyCopy);
+    }
+
+    [Fact]
     public async Task LooksForAGamesFilesInItsOwnFolder()
     {
         string skyrim = Path.Combine(Path.GetTempPath(), "ModShelf.Tests", "Skyrim");

@@ -16,4 +16,7 @@ public enum ModFilterKind
 
     /// <summary>Mods with files the library has that aren't on disk.</summary>
     Missing,
+
+    /// <summary>Mods gone from their sites, hidden or removed there.</summary>
+    Gone,
 }

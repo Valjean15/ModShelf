@@ -453,7 +453,7 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="vm:ModFilterViewModel">
-                            <ToggleButton Classes="chip" IsChecked="{Binding IsOn}">
+                            <ToggleButton Classes="chip" IsChecked="{Binding IsOn}" IsVisible="{Binding IsShown}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock Text="{Binding Label}" />
                                     <TextBlock Opacity="0.75" Text="{Binding Count}" />
@@ -561,7 +561,8 @@
                                                 <DataTemplate x:DataType="vm:ModStatus">
                                                     <Border Classes="tag"
                                                             Classes.accent="{Binding Kind, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:ModStatusKind.Update}}"
-                                                            Classes.warn="{Binding Kind, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:ModStatusKind.Problem}}">
+                                                            Classes.warn="{Binding Kind, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:ModStatusKind.Problem}}"
+                                                            ToolTip.Tip="{Binding Detail}">
                                                         <TextBlock Text="{Binding Text}" />
                                                     </Border>
                                                 </DataTemplate>
@@ -673,7 +674,8 @@
                                                                 <DataTemplate x:DataType="vm:ModStatus">
                                                                     <Border Classes="tag"
                                                                             Classes.accent="{Binding Kind, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:ModStatusKind.Update}}"
-                                                                            Classes.warn="{Binding Kind, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:ModStatusKind.Problem}}">
+                                                                            Classes.warn="{Binding Kind, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:ModStatusKind.Problem}}"
+                                                                            ToolTip.Tip="{Binding Detail}">
                                                                         <TextBlock Text="{Binding Text}" />
                                                                     </Border>
                                                                 </DataTemplate>

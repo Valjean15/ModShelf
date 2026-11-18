@@ -76,6 +76,28 @@ public sealed class LibraryUpdatesCommandTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task AModGoneFromItsSiteIsSaidSoNotFailedAndListedSo()
+    {
+        await RunAsync("library", "watch", FakeCatalogSite.ModLink("403").AbsoluteUri);
+
+        CliResult check = await RunAsync("library", "check");
+        CliResult again = await RunAsync("library", "check");
+        CliResult list = await RunAsync("library", "list");
+
+        Assert.Equal((Done, string.Empty), (check.ExitCode, check.Errors.Trim()));
+        Assert.Equal(
+            [
+                "Checked 1 mod with 2 requests.",
+                "No new updates.",
+                "Hidden Mod (game 403) left Fake catalog site: it's hidden or removed there, so your copies of its files may be the only ones left. ModShelf asks about it again weekly.",
+            ],
+            Lines(check));
+        Assert.Equal(["Checked 0 mods with 0 requests.", "No new updates."], Lines(again));
+        Assert.Equal("Gone from their sites, so your copies of their files may be the only ones left:", Lines(list)[^2]);
+        Assert.StartsWith("Hidden Mod (game 403): gone from Fake catalog site since ", Lines(list)[^1], StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task ListsTheUpdatesWithTheirChanges()
     {
         await RunAsync("download", HandoffLink("1").AbsoluteUri);

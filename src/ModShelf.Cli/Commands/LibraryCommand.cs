@@ -193,6 +193,7 @@ internal static partial class LibraryCommand
                     ];
                     TextTable.Write(environment.Output, rows);
                     WriteNotes(environment.Output, mods);
+                    WriteGone(environment.Output, mods, services.GetRequiredService<ISourceRegistry>());
                     if (files)
                     {
                         LibraryRoots roots;
@@ -238,6 +239,33 @@ internal static partial class LibraryCommand
         foreach (LibraryMod mod in noted)
         {
             output.WriteLine($"{mod.Name} ({mod.Mod.Game.Key} {mod.Mod.Id}): {mod.Note!.ReplaceLineEndings(" / ")}");
+        }
+    }
+
+    /// <summary>
+    /// The mods gone from their sites, by mod as the mods are listed, each with when it was first found gone; nothing
+    /// when none is.
+    /// </summary>
+    private static void WriteGone(TextWriter output, IReadOnlyList<LibraryMod> mods, ISourceRegistry sources)
+    {
+        LibraryMod[] gone =
+        [
+            .. mods
+                .Where(mod => mod.IsGone)
+                .OrderBy(mod => mod.Mod.Game.Source.Value, StringComparer.Ordinal)
+                .ThenBy(mod => mod.Mod.Game.Key, StringComparer.Ordinal)
+                .ThenBy(mod => mod.Name, StringComparer.CurrentCultureIgnoreCase),
+        ];
+        if (gone.Length == 0)
+        {
+            return;
+        }
+
+        output.WriteLine();
+        output.WriteLine("Gone from their sites, so your copies of their files may be the only ones left:");
+        foreach (LibraryMod mod in gone)
+        {
+            output.WriteLine($"{mod.Name} ({mod.Mod.Game.Key} {mod.Mod.Id}): gone from {CliText.SiteName(sources, mod.Mod.Game.Source)} since {CliText.Time(mod.GoneSince!.Value)}");
         }
     }
 

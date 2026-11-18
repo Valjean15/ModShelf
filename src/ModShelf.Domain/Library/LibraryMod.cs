@@ -34,7 +34,8 @@ public sealed class LibraryMod
         bool needsFullCheck,
         bool isPinned,
         string? note,
-        ModFileRef[] skippedUpdates)
+        ModFileRef[] skippedUpdates,
+        DateTimeOffset? goneSince)
     {
         Mod = mod;
         Name = name;
@@ -49,6 +50,7 @@ public sealed class LibraryMod
         IsPinned = isPinned;
         Note = note;
         SkippedUpdates = Array.AsReadOnly(skippedUpdates);
+        GoneSince = goneSince;
     }
 
     public ModRef Mod { get; }
@@ -111,6 +113,17 @@ public sealed class LibraryMod
     public IReadOnlyList<ModFileRef> SkippedUpdates { get; }
 
     /// <summary>
+    /// When a check first found the mod gone from its site, hidden or removed there, so the library's copies of its files
+    /// may be the only ones left; null while its site has it.
+    /// </summary>
+    public DateTimeOffset? GoneSince { get; }
+
+    /// <summary>
+    /// Whether the mod is gone from its site (<see cref="GoneSince"/>).
+    /// </summary>
+    public bool IsGone => GoneSince is not null;
+
+    /// <summary>
     /// The updates offered to the user: none for a pinned mod, and none skipped.
     /// </summary>
     public IReadOnlyList<LibraryUpdate> OfferedUpdates
@@ -127,7 +140,7 @@ public sealed class LibraryMod
 
         return new LibraryMod(
             mod, name, Blank(author), pageUrl, isWatched: true, addedAt, checkedAt: null,
-            [], [], needsFullCheck: false, isPinned: false, note: null, []);
+            [], [], needsFullCheck: false, isPinned: false, note: null, [], goneSince: null);
     }
 
     /// <summary>
@@ -151,7 +164,8 @@ public sealed class LibraryMod
         bool needsFullCheck = false,
         bool isPinned = false,
         string? note = null,
-        IEnumerable<ModFileRef>? skippedUpdates = null)
+        IEnumerable<ModFileRef>? skippedUpdates = null,
+        DateTimeOffset? goneSince = null)
     {
         ArgumentNullException.ThrowIfNull(mod);
         EnsureDetails(name, pageUrl);
@@ -187,7 +201,7 @@ public sealed class LibraryMod
 
         return new LibraryMod(
             mod, name, Blank(author), pageUrl, isWatched, addedAt, checkedAt,
-            fileList, updateList, needsFullCheck, isPinned, NoteOf(note, nameof(note)), skipped);
+            fileList, updateList, needsFullCheck, isPinned, NoteOf(note, nameof(note)), skipped, goneSince);
     }
 
     /// <summary>
@@ -202,7 +216,7 @@ public sealed class LibraryMod
     public LibraryMod? Unwatched()
         => Files.Count == 0
             ? null
-            : new LibraryMod(Mod, Name, Author, PageUrl, isWatched: false, AddedAt, CheckedAt, [.. Files], [], NeedsFullCheck, IsPinned, Note, []);
+            : new LibraryMod(Mod, Name, Author, PageUrl, isWatched: false, AddedAt, CheckedAt, [.. Files], [], NeedsFullCheck, IsPinned, Note, [], GoneSince);
 
     /// <summary>
     /// The mod with its details as its site gives them now.
@@ -214,7 +228,7 @@ public sealed class LibraryMod
 
         return new LibraryMod(
             Mod, name, Blank(author), pageUrl, IsWatched, AddedAt, CheckedAt,
-            [.. Files], [.. Updates], NeedsFullCheck, IsPinned, Note, [.. SkippedUpdates]);
+            [.. Files], [.. Updates], NeedsFullCheck, IsPinned, Note, [.. SkippedUpdates], GoneSince);
     }
 
     /// <summary>
@@ -223,7 +237,24 @@ public sealed class LibraryMod
     public LibraryMod Checked(DateTimeOffset at)
         => new(
             Mod, Name, Author, PageUrl, IsWatched, AddedAt, at,
-            [.. Files], [.. Updates], needsFullCheck: false, IsPinned, Note, [.. SkippedUpdates]);
+            [.. Files], [.. Updates], needsFullCheck: false, IsPinned, Note, [.. SkippedUpdates], GoneSince);
+
+    /// <summary>
+    /// The mod, gone from its site since <paramref name="at"/>, or since it was first found gone when it was already:
+    /// without updates, which can't be downloaded from a site that no longer has the mod.
+    /// </summary>
+    public LibraryMod LeftSite(DateTimeOffset at)
+        => new(
+            Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt,
+            [.. Files], [], NeedsFullCheck, IsPinned, Note, [], GoneSince ?? at);
+
+    /// <summary>
+    /// The mod, on its site again.
+    /// </summary>
+    public LibraryMod BackOnSite()
+        => IsGone
+            ? new(Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt, [.. Files], [.. Updates], NeedsFullCheck, IsPinned, Note, [.. SkippedUpdates], goneSince: null)
+            : this;
 
     /// <summary>
     /// The mod with the updates a check found, in place of the ones it had. An update of a file it had already keeps
@@ -249,7 +280,7 @@ public sealed class LibraryMod
         EnsureUpdates(Mod, IsWatched, [.. Files], updateList, nameof(updates));
         return new LibraryMod(
             Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt,
-            [.. Files], updateList, NeedsFullCheck, IsPinned, Note, SkippedAmong(updateList));
+            [.. Files], updateList, NeedsFullCheck, IsPinned, Note, SkippedAmong(updateList), GoneSince);
     }
 
     /// <summary>
@@ -260,7 +291,7 @@ public sealed class LibraryMod
             ? this
             : new LibraryMod(
                 Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt,
-                [.. Files], [.. Updates], NeedsFullCheck, pinned, Note, [.. SkippedUpdates]);
+                [.. Files], [.. Updates], NeedsFullCheck, pinned, Note, [.. SkippedUpdates], GoneSince);
 
     /// <summary>
     /// The mod with <paramref name="note"/>, its ends trimmed; with none when it's null or blank.
@@ -269,7 +300,7 @@ public sealed class LibraryMod
     public LibraryMod WithNote(string? note)
         => new(
             Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt,
-            [.. Files], [.. Updates], NeedsFullCheck, IsPinned, NoteOf(note, nameof(note)), [.. SkippedUpdates]);
+            [.. Files], [.. Updates], NeedsFullCheck, IsPinned, NoteOf(note, nameof(note)), [.. SkippedUpdates], GoneSince);
 
     /// <summary>
     /// The mod with <paramref name="update"/> skipped, until a newer one comes; or offered again.
@@ -292,7 +323,7 @@ public sealed class LibraryMod
         ModFileRef[] skippedUpdates = skipped ? [.. SkippedUpdates, update] : [.. SkippedUpdates.Where(other => other != update)];
         return new LibraryMod(
             Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt,
-            [.. Files], [.. Updates], NeedsFullCheck, IsPinned, Note, skippedUpdates);
+            [.. Files], [.. Updates], NeedsFullCheck, IsPinned, Note, skippedUpdates, GoneSince);
     }
 
     /// <summary>
@@ -311,7 +342,7 @@ public sealed class LibraryMod
         LibraryUpdate[] updates = [.. Updates.Where(update => update.File != file.File)];
         return new LibraryMod(
             Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt,
-            files, updates, NeedsFullCheck || index < 0, IsPinned, Note, SkippedAmong(updates));
+            files, updates, NeedsFullCheck || index < 0, IsPinned, Note, SkippedAmong(updates), GoneSince);
     }
 
     /// <summary>
@@ -327,7 +358,7 @@ public sealed class LibraryMod
             ? null
             : new LibraryMod(
                 Mod, Name, Author, PageUrl, IsWatched, AddedAt, CheckedAt,
-                files, updates, needsFullCheck: true, IsPinned, Note, SkippedAmong(updates));
+                files, updates, needsFullCheck: true, IsPinned, Note, SkippedAmong(updates), GoneSince);
     }
 
     private static void EnsureDetails(string name, Uri? pageUrl)
@@ -430,5 +461,5 @@ public sealed class LibraryMod
     private LibraryMod With(bool isWatched, bool needsFullCheck)
         => new(
             Mod, Name, Author, PageUrl, isWatched, AddedAt, CheckedAt,
-            [.. Files], [.. Updates], needsFullCheck, IsPinned, Note, [.. SkippedUpdates]);
+            [.. Files], [.. Updates], needsFullCheck, IsPinned, Note, [.. SkippedUpdates], GoneSince);
 }

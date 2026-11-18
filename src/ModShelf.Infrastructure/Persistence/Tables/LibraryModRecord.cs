@@ -42,6 +42,11 @@ internal sealed class LibraryModRecord
 
     public string? Note { get; set; }
 
+    /// <summary>
+    /// When a check first found the mod gone from its site (<see cref="LibraryMod.GoneSince"/>); null while its site has it.
+    /// </summary>
+    public DateTimeOffset? GoneSince { get; set; }
+
     public List<LibraryFileRecord> Files { get; set; } = [];
 
     public List<LibraryUpdateRecord> Updates { get; set; } = [];
@@ -76,6 +81,7 @@ internal sealed class LibraryModRecord
         NeedsFullCheck = mod.NeedsFullCheck;
         IsPinned = mod.IsPinned;
         Note = mod.Note;
+        GoneSince = mod.GoneSince;
 
         Files.RemoveAll(record => mod.Files.All(file => file.File.Id != record.FileId));
         foreach (LibraryFile file in mod.Files)
@@ -133,7 +139,8 @@ internal sealed class LibraryModRecord
                 NeedsFullCheck,
                 IsPinned,
                 Note,
-                SkippedUpdates.OrderBy(skipped => skipped.FileId, StringComparer.Ordinal).Select(skipped => new ModFileRef(mod, skipped.FileId)));
+                SkippedUpdates.OrderBy(skipped => skipped.FileId, StringComparer.Ordinal).Select(skipped => new ModFileRef(mod, skipped.FileId)),
+                GoneSince);
         }
         catch (Exception exception) when (exception is ArgumentException or UriFormatException)
         {
