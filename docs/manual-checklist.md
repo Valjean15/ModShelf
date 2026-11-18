@@ -426,6 +426,39 @@ records an abstention, and nothing puts back a mod you never endorsed nor abstai
   "The site wouldn't endorse the mod: " and what Nexus Mods said, on the error output, exit code 1; then "This link
   isn't to a mod on a site where ModShelf can endorse mods.", exit code 2. Neither changes anything on the sites.
 
+## 20. Archives from another mod manager
+
+Run it once, in the Premium run. Make a folder of Stardew Valley archives the library doesn't have, as another mod
+manager keeps them: a few Mod Organizer 2 downloaded, each with its `.meta` note beside it; one downloaded by hand from a
+mod's Files tab (**Manual download**), whose name carries the mod's ID; a copy of that one renamed `renamed.zip`; and a
+`.zip` from elsewhere. Note the folder's files' sizes and times.
+
+```powershell
+$mo2 = Join-Path $test 'MO2 downloads'
+Get-ChildItem $mo2 | Select-Object Name, Length, LastWriteTime
+```
+
+- [ ] **20.1 What it would do.** `ms library import-archives $mo2 --game nexus/stardewvalley`.
+  "Identifying *N* archives of nexus/stardewvalley in … takes about *M* requests to Nexus Mods.", then each archive:
+  the noted ones "by its Mod Organizer note", the hand-downloaded one "by its name", `renamed.zip` "by its content", and
+  the one from elsewhere "unknown, left alone: Nexus Mods has no file of the game with its content: …". Then "Importing
+  would copy …" and "Run the command again with --yes to import them. …". Exit code 0. `ms library list` is as it was.
+- [ ] **20.2 Stopped halfway.** The same with `--yes`, and Ctrl+C once the first archive is copied (with small archives,
+  skip to 20.3).
+  "Stopped. What was copied stays in the library; run the same command again to go on.", exit code 1. The library's
+  folders hold only whole copies: the one being copied left nothing behind.
+- [ ] **20.3 Import.** The same with `--yes`.
+  "Copied *N* archives into the library, and watched *K* new mods." `ms library list --files` lists each under its mod,
+  in `stardewvalley/<mod> (<id>)/`, with its SHA-256. `Get-ChildItem $mo2` shows the same files, sizes and times as
+  before: nothing there changed.
+- [ ] **20.4 Again.** `ms library import-archives $mo2 --game nexus/stardewvalley`.
+  Each archive copied is "in the library already, as …", and "Importing would copy nothing: …". The log's requests list
+  no `md5_search` for them.
+- [ ] **20.5 Refusals.** `ms library import-archives (Join-Path $test 'nowhere') --game nexus/stardewvalley`, then
+  `ms library import-archives $downloads --game nexus/stardewvalley`.
+  "There's no folder at …", exit code 2; then "… is in the library, whose files can't be imported into it. …", exit
+  code 2.
+
 ## Clean up
 
 After both accounts:
@@ -564,3 +597,8 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 19.1 Endorse | | – | |
 | 19.2 Abstain | | – | |
 | 19.3 Refusals | | – | |
+| 20.1 What it would do | | – | |
+| 20.2 Stopped halfway | | – | |
+| 20.3 Import | | – | |
+| 20.4 Again | | – | |
+| 20.5 Refusals | | – | |

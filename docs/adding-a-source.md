@@ -80,6 +80,7 @@ site has. What ModShelf does without each:
 | `IUpdateFeed` | Which of a game's mods changed lately, in one request. | Each watched mod is asked for its files on its own: one request per mod per check. |
 | `IWatchlistReader` | The mods the account follows on the site, to read only. | Browse has no followed mods. |
 | `IWatchlistSync` | The `IWatchlistReader` ModShelf can change too: following and no longer following a mod. | The mod page has no button to follow. |
+| `IFileLookup` | A game's files by a hash of their content, each with its mod, in the hash its `LookupAlgorithm` names. | Archives of its games are identified only by Mod Organizer 2's notes and Nexus-style names. |
 | `IModEndorsements` | The account's endorsements, by mod, and endorsing or abstaining from a mod, with the version endorsed when the site wants it. | The mod page and the Library have no button to endorse, and `mod endorse` refuses the site's mods. |
 | `IAccountLinker` | Linking an account, with one `IAuthStrategy` per way the site allows. | No account is offered. |
 | `IApiQuota` | What's left of the account's allowances, when the site says. | No quota is shown. |

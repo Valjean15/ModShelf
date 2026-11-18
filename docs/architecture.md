@@ -85,6 +85,7 @@ GameBanana).
 | `IModRequirements` | What a mod needs | ✓ | | ✓ | | |
 | `IModCollections` | A collection's files, read as a list to import | ✓ | | | | |
 | `IModEndorsements` | The account's endorsements; endorses or abstains from a mod | ✓ | | | | |
+| `IFileLookup` | A game's files by a hash of their content (MD5 on Nexus Mods), for archive import | ✓ | | | | |
 | `IAccountLinker` | Links an account; its `IAuthStrategy`s are the ways to link one | ✓ | ✓ (profile) | ✓ | | |
 | `IWatchlistReader` / `IWatchlistSync` | Reads the mods followed on the site; `Sync` also follows and unfollows | Sync | Reader | Reader | | |
 | `IApiQuota` | The requests left, from the site's answers | ✓ | | | | |
@@ -148,7 +149,7 @@ GameBanana).
 
 ## The library
 
-*ADRs 0005, 0018–0020, 0034, 0042, 0044, 0045, 0056, 0057, 0067, 0076, 0081–0083, 0098.*
+*ADRs 0005, 0018–0020, 0034, 0042, 0044, 0045, 0056, 0057, 0067, 0076, 0081–0083, 0098, 0101.*
 
 - **One SQLite database**, `library.db` in the user's local application data folder, holds the jobs, the library
   and the linked accounts. EF Core migrations shape it (ten so far, `InitialCreate` to `AddGoneSince`); a
@@ -166,6 +167,11 @@ GameBanana).
   same change that records the new file, and the disk after it.
 - **Moving** the library or a game's files never overwrites a file, and puts every file back if one can't move.
 - **Rescan** finds files placed by hand (by name, and size within 1 KB) and hashes files that have none.
+- **Archive import** (`IArchiveImport`, ADR 0101) copies another mod manager's archives in, never moving or deleting
+  them: each is read once for its SHA-256 and MD5, and identified the cheapest way first, by the library's SHA-256s,
+  Mod Organizer 2's `.meta` note or a Nexus-style name confirmed against the mod's files, then the site's lookup by hash
+  (`IFileLookup`). Copies go where downloads would, through a hidden partial file, their SHA-256 checked, recorded as
+  found.
 - **History:** each download, archive, deletion, file found, mod removed, and mod leaving its site or coming back is a
   `LibraryEvent`, kept for a year.
 - **Pins, skipped updates and notes** belong to the mod. **Forget** removes a mod and leaves its files on disk.

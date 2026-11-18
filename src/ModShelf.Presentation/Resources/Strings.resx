@@ -4335,4 +4335,196 @@
     <value>Endorse the selected mods on their site with your linked account, after saying which. The site may refuse a mod you didn't download.</value>
     <comment>Tooltip of the Library's Endorse button for the selected mods.</comment>
   </data>
+  <data name="LibraryImportArchives" xml:space="preserve">
+    <value>Import archives…</value>
+    <comment>The Library's button that imports another mod manager's archives.</comment>
+  </data>
+  <data name="LibraryImportArchivesTip" xml:space="preserve">
+    <value>Copy another mod manager's downloads, such as Mod Organizer 2's or Vortex's, into the library: the archives ModShelf identifies as files of a game's mods. Nothing in their folder changes.</value>
+    <comment>Tooltip of the Library's Import archives… button.</comment>
+  </data>
+  <data name="ArchiveGameTitle" xml:space="preserve">
+    <value>Which game are the archives of?</value>
+    <comment>The heading of the dialog choosing the game whose archives to import.</comment>
+  </data>
+  <data name="ArchiveGameMessage" xml:space="preserve">
+    <value>Choose the game, then the folder of its archives, such as Mod Organizer 2's or Vortex's downloads of it.</value>
+    <comment>What the dialog choosing the archives' game says.</comment>
+  </data>
+  <data name="ArchiveGameConfirm" xml:space="preserve">
+    <value>Choose</value>
+    <comment>The button choosing the archives' game.</comment>
+  </data>
+  <data name="ArchiveGameByKey" xml:space="preserve">
+    <value>Choose the game from the list, so ModShelf knows which site its archives are from.</value>
+    <comment>Said when a game's key was typed rather than a game chosen for importing archives.</comment>
+  </data>
+  <data name="ArchivePickFolderTitle" xml:space="preserve">
+    <value>Choose the folder of {0}'s archives</value>
+    <comment>The folder picker's title: {0} the game's name.</comment>
+  </data>
+  <data name="ArchiveScanFailedTitle" xml:space="preserve">
+    <value>Can't import from this folder</value>
+    <comment>The heading when a folder's archives can't be listed.</comment>
+  </data>
+  <data name="ArchiveNoneTitle" xml:space="preserve">
+    <value>No archives here</value>
+    <comment>The heading when a folder has no archives.</comment>
+  </data>
+  <data name="ArchiveNoneMessage" xml:space="preserve">
+    <value>{0} has no archives: .7z, .zip or .rar files. Its subfolders aren't read.</value>
+    <comment>Said when a folder has no archives: {0} the folder.</comment>
+  </data>
+  <data name="ArchiveImportTitle" xml:space="preserve">
+    <value>Import archives of {0}</value>
+    <comment>The import dialog's title: {0} the game's name.</comment>
+  </data>
+  <data name="ArchiveScannedOne" xml:space="preserve">
+    <value>1 archive in {1}.</value>
+    <comment>The archives found: {1} the folder.</comment>
+  </data>
+  <data name="ArchiveScanned" xml:space="preserve">
+    <value>{0:N0} archives in {1}.</value>
+    <comment>The archives found: {0} how many, {1} the folder.</comment>
+  </data>
+  <data name="ArchiveRequestsNone" xml:space="preserve">
+    <value>Identifying them reads each one, and asks {1} nothing.</value>
+    <comment>{1} the site.</comment>
+  </data>
+  <data name="ArchiveRequestsOne" xml:space="preserve">
+    <value>Identifying them reads each one, and takes about 1 request to {1}.</value>
+    <comment>{1} the site.</comment>
+  </data>
+  <data name="ArchiveRequests" xml:space="preserve">
+    <value>Identifying them reads each one, and takes about {0:N0} requests to {1}.</value>
+    <comment>{0} how many requests, {1} the site.</comment>
+  </data>
+  <data name="ArchiveCantLookUp" xml:space="preserve">
+    <value>{0} can't find archives by their content, so only those with Mod Organizer 2's note, or a name that gives their mod, can be identified.</value>
+    <comment>{0} the site.</comment>
+  </data>
+  <data name="ArchiveIdentify" xml:space="preserve">
+    <value>Identify</value>
+    <comment>The button that identifies the archives.</comment>
+  </data>
+  <data name="ArchiveIdentifying" xml:space="preserve">
+    <value>Identifying {0:N0} of {1:N0}…</value>
+    <comment>Progress of identifying archives.</comment>
+  </data>
+  <data name="ArchiveImportConfirm" xml:space="preserve">
+    <value>Copy into the library</value>
+    <comment>The button that imports the identified archives.</comment>
+  </data>
+  <data name="ArchiveCopying" xml:space="preserve">
+    <value>Copying {0:N0} of {1:N0}…</value>
+    <comment>Progress of copying archives into the library.</comment>
+  </data>
+  <data name="ArchiveToCopyLabel" xml:space="preserve">
+    <value>To copy</value>
+    <comment>The label of the archives the import copies.</comment>
+  </data>
+  <data name="ArchiveToCopyNone" xml:space="preserve">
+    <value>None</value>
+    <comment>No archives to copy.</comment>
+  </data>
+  <data name="ArchiveToCopyOne" xml:space="preserve">
+    <value>1 archive</value>
+    <comment>One archive to copy.</comment>
+  </data>
+  <data name="ArchiveToCopy" xml:space="preserve">
+    <value>{0:N0} archives</value>
+    <comment>{0} how many archives to copy.</comment>
+  </data>
+  <data name="ArchiveNewModsOne" xml:space="preserve">
+    <value>, of 1 mod new to the library, which is watched</value>
+    <comment>After the count of archives to copy.</comment>
+  </data>
+  <data name="ArchiveNewMods" xml:space="preserve">
+    <value>, of {0:N0} mods new to the library, which are watched</value>
+    <comment>After the count of archives to copy: {0} how many mods.</comment>
+  </data>
+  <data name="ArchiveInLibraryLabel" xml:space="preserve">
+    <value>In the library</value>
+    <comment>The label of the archives the library has already.</comment>
+  </data>
+  <data name="ArchiveDuplicatesLabel" xml:space="preserve">
+    <value>Copies of others here</value>
+    <comment>The label of the archives the same as another in the folder.</comment>
+  </data>
+  <data name="ArchiveUnknownLabel" xml:space="preserve">
+    <value>Unknown</value>
+    <comment>The label of the archives that couldn't be identified.</comment>
+  </data>
+  <data name="ArchiveCount" xml:space="preserve">
+    <value>{0:N0}</value>
+    <comment>A count of archives.</comment>
+  </data>
+  <data name="ArchiveByNotes" xml:space="preserve">
+    <value>{0}, {1}: by its Mod Organizer note</value>
+    <comment>An identified archive: {0} the mod, {1} the file.</comment>
+  </data>
+  <data name="ArchiveByName" xml:space="preserve">
+    <value>{0}, {1}: by its name</value>
+    <comment>An identified archive: {0} the mod, {1} the file.</comment>
+  </data>
+  <data name="ArchiveByHash" xml:space="preserve">
+    <value>{0}, {1}: by its content</value>
+    <comment>An identified archive: {0} the mod, {1} the file.</comment>
+  </data>
+  <data name="ArchiveInLibrary" xml:space="preserve">
+    <value>In the library already</value>
+    <comment>An archive the library has, as nothing else is known.</comment>
+  </data>
+  <data name="ArchiveInLibraryAs" xml:space="preserve">
+    <value>In the library already, as {0}, {1}</value>
+    <comment>An archive the library has: {0} the mod, {1} the file.</comment>
+  </data>
+  <data name="ArchiveUnknown" xml:space="preserve">
+    <value>Unknown: {0}</value>
+    <comment>An archive not identified: {0} why.</comment>
+  </data>
+  <data name="ArchiveImportNote" xml:space="preserve">
+    <value>Only copies: the archives stay in their folder as they are, and nothing is installed. Those not identified are left alone.</value>
+    <comment>The note under what importing archives would do.</comment>
+  </data>
+  <data name="ArchiveImportedOne" xml:space="preserve">
+    <value>Copied 1 archive into the library.</value>
+    <comment>What importing archives did.</comment>
+  </data>
+  <data name="ArchiveImported" xml:space="preserve">
+    <value>Copied {0:N0} archives into the library.</value>
+    <comment>What importing archives did: {0} how many.</comment>
+  </data>
+  <data name="ArchiveWatchedOne" xml:space="preserve">
+    <value>Watched 1 new mod.</value>
+    <comment>After what importing archives copied.</comment>
+  </data>
+  <data name="ArchiveWatched" xml:space="preserve">
+    <value>Watched {0:N0} new mods.</value>
+    <comment>After what importing archives copied: {0} how many.</comment>
+  </data>
+  <data name="ArchiveAlreadyOne" xml:space="preserve">
+    <value>1 was in it already.</value>
+    <comment>An archive the library had by the time it came up.</comment>
+  </data>
+  <data name="ArchiveAlready" xml:space="preserve">
+    <value>{0:N0} were in it already.</value>
+    <comment>Archives the library had by the time they came up: {0} how many.</comment>
+  </data>
+  <data name="ArchiveImportStopped" xml:space="preserve">
+    <value>Stopped. What was copied stays in the library; import the folder again to go on.</value>
+    <comment>Said when importing archives was stopped.</comment>
+  </data>
+  <data name="ArchiveIdentifyStopped" xml:space="preserve">
+    <value>Stopped. Nothing was copied.</value>
+    <comment>Said when identifying archives was stopped.</comment>
+  </data>
+  <data name="ArchiveImportFailed" xml:space="preserve">
+    <value>The import failed. The log says why.</value>
+    <comment>Said when importing archives failed.</comment>
+  </data>
+  <data name="ArchiveProblems" xml:space="preserve">
+    <value>Not copied:</value>
+    <comment>The heading of the archives that couldn't be copied.</comment>
+  </data>
 </root>

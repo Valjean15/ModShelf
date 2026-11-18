@@ -19,9 +19,6 @@ namespace ModShelf.Application.Library;
 /// </summary>
 internal sealed partial class LibraryRescanner : ILibraryRescan
 {
-    // A site may give a file's size rounded to the kilobyte, as Nexus Mods does for some files.
-    private const long SizeTolerance = 1024;
-
     private readonly ISourceRegistry _sources;
     private readonly ILibraryRepository _repository;
     private readonly ISettingsService _settings;
@@ -88,18 +85,6 @@ internal sealed partial class LibraryRescanner : ILibraryRescan
             or HttpRequestException { StatusCode: HttpStatusCode.TooManyRequests }
             or HttpRequestException { StatusCode: null };
 
-    /// <summary>
-    /// Whether a file on disk of <paramref name="size"/> bytes, named <paramref name="name"/>, is the site's file, saved as
-    /// a download saves it: under its own name, made safe, or with its ID added.
-    /// </summary>
-    private static bool Matches(string name, long? size, ModFile file)
-    {
-        string saved = LibraryNames.File(file.FileName);
-        bool named = string.Equals(name, saved, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(name, LibraryLocations.WithId(saved, file.Reference.Id), StringComparison.OrdinalIgnoreCase);
-        return named && (file.SizeInBytes is not { } listed || (size is { } found && Math.Abs(found - listed) <= SizeTolerance));
-    }
-
     private async Task RescanModAsync(Scan scan, ModRef mod, LibraryMod? stored, CancellationToken cancellationToken)
     {
         // What needs no site: the hashes the library lacks, and the files that are gone.
@@ -143,7 +128,7 @@ internal sealed partial class LibraryRescanner : ILibraryRescan
                 long? size = _storage.FileSize(path);
                 ModFile[] candidates =
                 [
-                    .. siteFiles.Where(file => !have.Contains(file.Reference) && Matches(Path.GetFileName(path), size, file)),
+                    .. siteFiles.Where(file => !have.Contains(file.Reference) && SiteFiles.Matches(Path.GetFileName(path), size, file)),
                 ];
                 if (candidates is not [ModFile match] || size is not { } length || scan.Roots.RelativeTo(mod.Game, path) is not { } relativePath)
                 {

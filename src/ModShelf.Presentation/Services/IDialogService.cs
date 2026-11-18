@@ -80,6 +80,13 @@ public interface IDialogService
     Task ImportListAsync(ImportListViewModel importing, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Shows the dialog that imports a folder's archives, until it asks to close
+    /// (<see cref="ImportArchivesViewModel.CloseRequested"/>) or the user closes it, which can't happen while it
+    /// identifies or copies them.
+    /// </summary>
+    Task ImportArchivesAsync(ImportArchivesViewModel importing, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Shows the first-run setup over the main window, until it asks to close (<see cref="FirstRunViewModel.CloseRequested"/>)
     /// or the user closes it.
     /// </summary>

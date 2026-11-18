@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 using ModShelf.Application.Accounts;
+using ModShelf.Application.Archives;
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Diagnostics;
 using ModShelf.Application.Downloads;
@@ -368,6 +369,22 @@ public static class ApplicationServiceCollectionExtensions
         services.AddLibrary();
         services.AddLibraryDownloads();
         services.TryAddSingleton<IModLists, ModLists>();
+        services.TryAddSingleton(TimeProvider.System);
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers <see cref="IArchiveImport"/>, which identifies a folder's archives and copies them into the library, over
+    /// the library and its downloads (<see cref="AddLibrary"/> and <see cref="AddLibraryDownloads"/>), whose hold it takes.
+    /// </summary>
+    public static IServiceCollection AddArchiveImport(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddLibrary();
+        services.AddLibraryDownloads();
+        services.TryAddSingleton<IArchiveImport, ArchiveImport>();
         services.TryAddSingleton(TimeProvider.System);
 
         return services;

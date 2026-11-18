@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Abstractions;
 
 using ModShelf.Application.Accounts;
+using ModShelf.Application.Archives;
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Endorsements;
@@ -261,6 +262,19 @@ public sealed class ApplicationServiceCollectionExtensionsTests
 
         Assert.Equal(typeof(SiteEndorsements), Single<IEndorsements>(services).ImplementationType);
         Assert.Equal(typeof(SourceRegistry), Single<ISourceRegistry>(services).ImplementationType);
+        Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
+    }
+
+    [Fact]
+    public void AddArchiveImportRegistersItOnceWithTheLibraryAndItsHold()
+    {
+        ServiceCollection services = new();
+        services.AddArchiveImport();
+        services.AddArchiveImport();
+
+        Assert.Equal(typeof(ArchiveImport), Single<IArchiveImport>(services).ImplementationType);
+        Single<ILibraryHold>(services);
+        Single<LibraryChanges>(services);
         Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
     }
 

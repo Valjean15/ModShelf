@@ -36,6 +36,7 @@ internal sealed class LibraryHarness : IDisposable
             Rescan,
             LibraryDownloads,
             Lists,
+            Archives,
             Links,
             Watchlists,
             new EndorsedMods(Endorsements),
@@ -88,6 +89,8 @@ internal sealed class LibraryHarness : IDisposable
     public ScriptedLibraryDownloads LibraryDownloads { get; } = new();
 
     public ScriptedModLists Lists { get; } = new();
+
+    public ScriptedArchiveImport Archives { get; } = new();
 
     public ScriptedLinkDownloads Links { get; } = new();
 

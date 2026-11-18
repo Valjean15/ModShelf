@@ -20,6 +20,13 @@ internal sealed class FakeLibraryStorage : ILibraryStorage
 
     public Task<string> Sha256Async(string path, CancellationToken cancellationToken) => throw new NotSupportedException();
 
+    public Task<FileHashes> HashesAsync(string path, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    public Task<byte[]> ReadSmallFileAsync(string path, int maxBytes, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    public Task CopyFileAsync(string source, string destination, string sha256, CancellationToken cancellationToken)
+        => throw new NotSupportedException();
+
     public bool IsSameFolder(string first, string second) => throw new NotSupportedException();
 
     public long? FreeSpace(string folder) => throw new NotSupportedException();

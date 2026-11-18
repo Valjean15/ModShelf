@@ -194,7 +194,8 @@ public sealed partial class NexusSource : IModCatalog
             && newer < old;
 
     /// <param name="replacedBy">The ID of the file Nexus Mods says replaced this one, if any.</param>
-    private static ModFile ToModFile(ModRef modRef, NexusLink mod, NexusFile file, long? replacedBy)
+    /// <param name="hashes">Its content's hashes, when the API gives them.</param>
+    private static ModFile ToModFile(ModRef modRef, NexusLink mod, NexusFile file, long? replacedBy, IEnumerable<FileHash>? hashes = null)
     {
         string fileId = file.FileId.ToString(CultureInfo.InvariantCulture);
         long? size = file.SizeInBytes ?? file.SizeKb * 1024;
@@ -206,7 +207,7 @@ public sealed partial class NexusSource : IModCatalog
             Category(file),
             size is >= 0 ? size : null,
             FromUnixSeconds(file.UploadedTimestamp),
-            hashes: [],
+            hashes: hashes ?? [],
             pageUrl: (mod with { FileId = fileId }).PageUrl,
             replacedBy: replacedBy is { } newer ? new ModFileRef(modRef, newer.ToString(CultureInfo.InvariantCulture)) : null);
     }

@@ -124,6 +124,82 @@ public sealed class FileSystemLibraryStorageTests : IDisposable
     }
 
     [Fact]
+    public async Task ReadsAFilesSha256AndMd5AtOnce()
+    {
+        // The hashes of "abc", from FIPS 180-2 and RFC 1321.
+        string file = Path.Combine(_folder.Path, "SkyUI.7z");
+        await File.WriteAllTextAsync(file, "abc", TestContext.Current.CancellationToken);
+        FileSystemLibraryStorage storage = new();
+
+        FileHashes hashes = await storage.HashesAsync(file, TestContext.Current.CancellationToken);
+
+        Assert.Equal(
+            new FileHashes("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", "900150983cd24fb0d6963f7d28e17f72"),
+            hashes);
+        await Assert.ThrowsAsync<FileNotFoundException>(
+            () => storage.HashesAsync(Path.Combine(_folder.Path, "SKSE.7z"), TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task ReadsASmallFileWholeButNotALargerOne()
+    {
+        string note = Path.Combine(_folder.Path, "SkyUI.7z.meta");
+        await File.WriteAllTextAsync(note, "[General]\nmodID=12604\n", TestContext.Current.CancellationToken);
+        FileSystemLibraryStorage storage = new();
+
+        byte[] read = await storage.ReadSmallFileAsync(note, 64, TestContext.Current.CancellationToken);
+
+        Assert.Equal(await File.ReadAllBytesAsync(note, TestContext.Current.CancellationToken), read);
+        await Assert.ThrowsAsync<IOException>(() => storage.ReadSmallFileAsync(note, 8, TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<FileNotFoundException>(
+            () => storage.ReadSmallFileAsync(Path.Combine(_folder.Path, "SKSE.7z.meta"), 64, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task CopiesAFileIntoFoldersItMakesLeavingTheOriginal()
+    {
+        byte[] content = new byte[3 * 1024 * 1024 + 17];
+        Random.Shared.NextBytes(content);
+        string from = Path.Combine(_folder.Path, "Downloads", "SkyUI.7z");
+        string to = Path.Combine(_folder.Path, "Library", "SkyUI (12604)", "SkyUI.7z");
+        Directory.CreateDirectory(Path.GetDirectoryName(from)!);
+        await File.WriteAllBytesAsync(from, content, TestContext.Current.CancellationToken);
+        FileSystemLibraryStorage storage = new();
+        string sha256 = Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(content));
+
+        await storage.CopyFileAsync(from, to, sha256.ToUpperInvariant(), TestContext.Current.CancellationToken);
+
+        Assert.Equal(content, await File.ReadAllBytesAsync(from, TestContext.Current.CancellationToken));
+        Assert.Equal(content, await File.ReadAllBytesAsync(to, TestContext.Current.CancellationToken));
+        Assert.Equal([to], Directory.GetFiles(Path.GetDirectoryName(to)!));
+    }
+
+    [Fact]
+    public async Task NeverCopiesOverAFileNorKeepsACopyThatChangedOrStopped()
+    {
+        string from = Path.Combine(_folder.Path, "SkyUI.7z");
+        string taken = Path.Combine(_folder.Path, "Library", "Taken.7z");
+        string to = Path.Combine(_folder.Path, "Library", "SkyUI.7z");
+        await File.WriteAllTextAsync(from, "abc", TestContext.Current.CancellationToken);
+        Directory.CreateDirectory(Path.GetDirectoryName(taken)!);
+        await File.WriteAllTextAsync(taken, "theirs", TestContext.Current.CancellationToken);
+        FileSystemLibraryStorage storage = new();
+        const string Abc = "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
+        using CancellationTokenSource stopped = new();
+        await stopped.CancelAsync();
+
+        await Assert.ThrowsAsync<IOException>(() => storage.CopyFileAsync(from, taken, Abc, TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<InvalidDataException>(() => storage.CopyFileAsync(from, to, new string('0', 64), TestContext.Current.CancellationToken));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => storage.CopyFileAsync(from, to, Abc, stopped.Token));
+        await Assert.ThrowsAsync<FileNotFoundException>(
+            () => storage.CopyFileAsync(Path.Combine(_folder.Path, "SKSE.7z"), to, Abc, TestContext.Current.CancellationToken));
+
+        Assert.Equal("theirs", await File.ReadAllTextAsync(taken, TestContext.Current.CancellationToken));
+        Assert.Equal([taken], Directory.GetFiles(Path.GetDirectoryName(to)!));
+        Assert.Equal("abc", await File.ReadAllTextAsync(from, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public void MovesAFileIntoFoldersItMakes()
     {
         string from = Path.Combine(_folder.Path, "SkyUI.7z");

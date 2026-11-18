@@ -142,6 +142,81 @@ internal sealed class FakeLibraryStorage : ILibraryStorage
             : Task.FromException<string>(new FileNotFoundException($"No file at {path}.", path));
     }
 
+    /// <summary>
+    /// The MD5s reading a file at a path gives; any other file's is made from its path and size.
+    /// </summary>
+    public ConcurrentDictionary<string, string> Md5s { get; } = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// Every copy, in order.
+    /// </summary>
+    public ConcurrentQueue<(string Source, string Destination)> Copies { get; } = new();
+
+    /// <summary>
+    /// Runs before each copy, with where the file goes; it may throw, as a copy cancelled or failing does.
+    /// </summary>
+    public Action<string>? BeforeCopy { get; set; }
+
+    /// <summary>
+    /// The MD5 a file at <paramref name="path"/> has, as <see cref="HashesAsync"/> gives it.
+    /// </summary>
+    public string Md5Of(string path)
+        => Md5s.TryGetValue(path, out string? md5)
+            ? md5
+            : Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes($"md5 {path}:{FileSize(path)}")))[..32];
+
+    /// <summary>
+    /// What reading a small file at a path gives, such as a mod manager's note; put there with <see cref="Add"/> too.
+    /// </summary>
+    public ConcurrentDictionary<string, byte[]> Contents { get; } = new(StringComparer.Ordinal);
+
+    public Task<byte[]> ReadSmallFileAsync(string path, int maxBytes, CancellationToken cancellationToken)
+    {
+        if (Failures.TryGetValue(path, out Exception? failure))
+        {
+            return Task.FromException<byte[]>(failure);
+        }
+
+        return Contents.TryGetValue(path, out byte[]? bytes) && _files.ContainsKey(path)
+            ? bytes.Length > maxBytes ? Task.FromException<byte[]>(new IOException($"{path} is too large.")) : Task.FromResult(bytes)
+            : Task.FromException<byte[]>(new FileNotFoundException($"No file at {path}.", path));
+    }
+
+    public async Task<FileHashes> HashesAsync(string path, CancellationToken cancellationToken)
+        => new(await Sha256Async(path, cancellationToken).ConfigureAwait(false), Md5Of(path));
+
+    public Task CopyFileAsync(string source, string destination, string sha256, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (Failures.TryGetValue(source, out Exception? failure))
+        {
+            return Task.FromException(failure);
+        }
+
+        if (!_files.TryGetValue(source, out long size))
+        {
+            return Task.FromException(new FileNotFoundException($"No file at {source}.", source));
+        }
+
+        if (_files.ContainsKey(destination))
+        {
+            return Task.FromException(new IOException($"There's a file at {destination} already."));
+        }
+
+        BeforeCopy?.Invoke(destination);
+        if (!string.Equals(HashOf(source), sha256, StringComparison.OrdinalIgnoreCase))
+        {
+            return Task.FromException(new InvalidDataException($"{source} changed since it was read."));
+        }
+
+        // The copy reads as the original does.
+        Add(destination, size);
+        Hashes[destination] = HashOf(source);
+        Md5s[destination] = Md5Of(source);
+        Copies.Enqueue((source, destination));
+        return Task.CompletedTask;
+    }
+
     public void MoveFile(string source, string destination)
     {
         if (Failures.TryGetValue(source, out Exception? failure))

@@ -5,7 +5,7 @@
         xmlns:games="using:ModShelf.Desktop.Views.Games"
         x:Class="ModShelf.Desktop.Views.Dialogs.AddGameDialog"
         x:DataType="vm:AddGameViewModel"
-        Title="{x:Static res:Strings.SettingsAddGameTitle}"
+        Title="{Binding Title}"
         Width="560"
         Classes="dialog">
 
@@ -14,11 +14,11 @@
              typed by its key when no game is listed. -->
         <StackPanel DockPanel.Dock="Bottom" Classes="dialogButtons">
             <Button IsCancel="True" Content="{x:Static res:Strings.DialogCancel}" Click="OnCancel" />
-            <Button Classes="accent" Content="{x:Static res:Strings.SettingsAddGameConfirm}" Command="{Binding Picker.ChooseCommand}" />
+            <Button Classes="accent" Content="{Binding ConfirmText}" Command="{Binding Picker.ChooseCommand}" />
         </StackPanel>
-        <TextBlock DockPanel.Dock="Top" Classes="dialogTitle" Text="{x:Static res:Strings.SettingsAddGameTitle}" />
+        <TextBlock DockPanel.Dock="Top" Classes="dialogTitle" Text="{Binding Title}" />
         <StackPanel Spacing="12" Margin="0,0,0,8">
-            <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.SettingsAddGameMessage}" />
+            <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding Message}" />
             <games:GamePicker x:Name="Picker" IsInline="True" DataContext="{Binding Picker}" />
             <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsReading}">
                 <ProgressBar Width="80" IsIndeterminate="True" VerticalAlignment="Center" />

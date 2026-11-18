@@ -71,6 +71,10 @@
                             </MenuFlyout>
                         </Button.Flyout>
                     </Button>
+                    <!-- Another mod manager's downloads of a game, the game chosen first. -->
+                    <Button Content="{x:Static res:Strings.LibraryImportArchives}"
+                            Command="{Binding ImportArchivesCommand}"
+                            ToolTip.Tip="{x:Static res:Strings.LibraryImportArchivesTip}" />
                     <Button Content="{x:Static res:Strings.LibraryExportList}" Command="{Binding ExportListCommand}" IsVisible="{Binding !IsEmpty}" />
                 </StackPanel>
             </Grid>
@@ -412,6 +416,9 @@
                         <PathIcon Data="{StaticResource SettingsIcon}" />
                     </Button>
                     <Button Content="{x:Static res:Strings.LibraryRescan}" Command="{Binding RescanCommand}" />
+                    <Button Content="{x:Static res:Strings.LibraryImportArchives}"
+                            Command="{Binding ImportArchivesCommand}"
+                            ToolTip.Tip="{x:Static res:Strings.LibraryImportArchivesTip}" />
                     <Button Content="{x:Static res:Strings.LibraryExportList}" Command="{Binding ExportListCommand}" />
                     <Button Classes="accent"
                             Content="{Binding OpenGame.UpdateAllText, FallbackValue=''}"

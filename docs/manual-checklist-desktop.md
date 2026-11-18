@@ -518,6 +518,27 @@ the website first, since abstaining afterwards records an abstention.
   **Endorse** shows, and clicked, says Nexus Mods needs a linked account; the log has one line that the endorsements
   couldn't be read, without a stack trace.
 
+## 22. Archives from another mod manager
+
+Run it once, in the Premium run, with a folder of Stardew Valley archives the library doesn't have, as for the command
+line's section 20: some with Mod Organizer 2's notes, one named as Nexus Mods names them, a renamed copy, and one from
+elsewhere.
+
+- [ ] **22.1 The game, then the folder.** On the Library's games, **Import archives…**; choose Stardew Valley, then the
+  folder.
+  "Which game are the archives of?", with every site's games to choose from; then "Choose the folder of Stardew Valley's
+  archives"; then the dialog: "*N* archives in …. Identifying them reads each one, and takes about *M* requests to Nexus
+  Mods."
+- [ ] **22.2 Identify.** **Identify**.
+  A progress bar while it reads them, with **Stop**; then **To copy**, how many, of how many mods new to the library;
+  **Unknown**; and each archive, by its Mod Organizer note, its name or its content, or unknown and why, muted.
+- [ ] **22.3 Copy.** **Copy into the library**.
+  "Copied *N* archives into the library. Watched *K* new mods." Stardew Valley's mods list them, each with its file;
+  **Recent activity** shows each as found. The folder's files are as they were.
+- [ ] **22.4 On the game's page.** Open Stardew Valley, **Import archives…**, and the same folder.
+  No game is asked; **Identify** says each copied archive is "In the library already, as …"; **To copy** says "None",
+  and **Copy into the library** is off.
+
 ## Clean up
 
 If a run stopped before 12.7, give the links back on the Settings screen first: their registration starts ModShelf on the test folder. After both accounts, quit the app from the tray menu, then:
@@ -721,3 +742,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 21.1 On a mod's page | | – | |
 | 21.2 From the Library | | – | |
 | 21.3 Without an account | | – | |
+| 22.1 The game, then the folder | | – | |
+| 22.2 Identify | | – | |
+| 22.3 Copy | | – | |
+| 22.4 On the game's page | | – | |

@@ -1,12 +1,14 @@
 namespace ModShelf.Sources.Nexus.Api;
 
 /// <summary>
-/// One of a mod's files, from <c>v1/games/{game}/mods/{mod}/files/{file}.json</c> or the list of a mod's files.
+/// One of a mod's files, from <c>v1/games/{game}/mods/{mod}/files/{file}.json</c>, the list of a mod's files, or a
+/// search by MD5.
 /// </summary>
 /// <param name="CategoryId">Which section of the Files tab it's in: <see cref="MainCategory"/> for the main files.</param>
 /// <param name="CategoryName">The section's name, such as <c>MAIN</c> or <c>OLD_VERSION</c>; missing for some.</param>
 /// <param name="UploadedTimestamp">When it was uploaded, in seconds since 1970.</param>
 /// <param name="SizeKb">The size in kilobytes, for files without <paramref name="SizeInBytes"/>.</param>
+/// <param name="Md5">The MD5 of its content, which only a search by MD5 gives.</param>
 internal sealed record NexusFile(
     long FileId,
     string? Name,
@@ -16,7 +18,8 @@ internal sealed record NexusFile(
     string? CategoryName = null,
     string? Version = null,
     long? SizeInBytes = null,
-    long? SizeKb = null)
+    long? SizeKb = null,
+    string? Md5 = null)
 {
     /// <summary>
     /// The category of a mod's main files. The others are updates (2), optional files (3), old versions (4) and

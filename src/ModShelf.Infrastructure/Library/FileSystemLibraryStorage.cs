@@ -19,8 +19,12 @@ internal sealed class FileSystemLibraryStorage : ILibraryStorage
     /// </remarks>
     internal const int MaxWindowsPath = 259;
 
-    // The start of the name of the file that marks a folder while it's looked for under another name.
+    // The start of the name of the file that marks a folder while it's looked for under another name, and of a copy
+    // under way.
     private const string MarkPrefix = ".modshelf-";
+
+    // Read and written a megabyte at a time, as a download is.
+    private const int CopyBufferSize = 1024 * 1024;
 
     private readonly bool _isWindows;
     private readonly Func<string> _markName;
@@ -76,7 +80,7 @@ internal sealed class FileSystemLibraryStorage : ILibraryStorage
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
-        // The files a download under way writes, and the mark that compares folders, aren't the library's.
+        // The files a download under way writes, a copy under way, and the mark that compares folders, aren't the library's.
         return Directory.Exists(path)
             ? [.. Directory.EnumerateFiles(path).Where(file => !PartialFiles.IsPartial(file) && !IsMark(file)).Order(StringComparer.Ordinal)]
             : [];
@@ -86,18 +90,85 @@ internal sealed class FileSystemLibraryStorage : ILibraryStorage
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
-        // Read once, front to back, sharing it with programs that read it too.
-        FileStream file = new(path, new FileStreamOptions
-        {
-            Mode = FileMode.Open,
-            Access = FileAccess.Read,
-            Share = FileShare.Read,
-            Options = FileOptions.Asynchronous | FileOptions.SequentialScan,
-        });
+        FileStream file = OpenToRead(path);
         await using (file.ConfigureAwait(false))
         {
             byte[] digest = await SHA256.HashDataAsync(file, cancellationToken).ConfigureAwait(false);
             return Convert.ToHexStringLower(digest);
+        }
+    }
+
+    public async Task<FileHashes> HashesAsync(string path, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+
+        FileStream file = OpenToRead(path);
+        await using (file.ConfigureAwait(false))
+        {
+            using IncrementalHash sha256 = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+
+            // MD5 isn't for security here: it's how a site such as Nexus Mods names a file's content.
+            using IncrementalHash md5 = IncrementalHash.CreateHash(HashAlgorithmName.MD5);
+            byte[] buffer = new byte[CopyBufferSize];
+            int read;
+            while ((read = await file.ReadAsync(buffer, cancellationToken).ConfigureAwait(false)) > 0)
+            {
+                sha256.AppendData(buffer, 0, read);
+                md5.AppendData(buffer, 0, read);
+            }
+
+            return new FileHashes(Convert.ToHexStringLower(sha256.GetHashAndReset()), Convert.ToHexStringLower(md5.GetHashAndReset()));
+        }
+    }
+
+    public async Task<byte[]> ReadSmallFileAsync(string path, int maxBytes, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        ArgumentOutOfRangeException.ThrowIfNegative(maxBytes);
+
+        FileStream file = OpenToRead(path);
+        await using (file.ConfigureAwait(false))
+        {
+            if (file.Length > maxBytes)
+            {
+                throw new IOException($"{Path.GetFileName(path)} has {file.Length} bytes, more than the {maxBytes} read.");
+            }
+
+            byte[] bytes = new byte[file.Length];
+            await file.ReadExactlyAsync(bytes, cancellationToken).ConfigureAwait(false);
+            return bytes;
+        }
+    }
+
+    public async Task CopyFileAsync(string source, string destination, string sha256, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(source);
+        ArgumentException.ThrowIfNullOrWhiteSpace(destination);
+        ArgumentException.ThrowIfNullOrWhiteSpace(sha256);
+
+        if (File.Exists(destination))
+        {
+            throw new IOException($"There's a file at {destination} already, which a copy never replaces.");
+        }
+
+        // A partial file a rescan doesn't list, in the same folder, so it becomes the file by a rename.
+        string folder = Path.GetDirectoryName(Path.GetFullPath(destination))!;
+        Directory.CreateDirectory(folder);
+        string partial = Path.Combine(folder, $"{MarkPrefix}copy-{Guid.NewGuid():N}.tmp");
+        try
+        {
+            string copied = await CopyToAsync(source, partial, cancellationToken).ConfigureAwait(false);
+            if (!string.Equals(copied, sha256, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidDataException($"{Path.GetFileName(source)} changed since it was read, so it wasn't copied.");
+            }
+
+            File.Move(partial, destination, overwrite: false);
+        }
+        catch
+        {
+            TryDelete(partial);
+            throw;
         }
     }
 
@@ -171,4 +242,64 @@ internal sealed class FileSystemLibraryStorage : ILibraryStorage
     }
 
     private static bool IsMark(string path) => Path.GetFileName(path).StartsWith(MarkPrefix, StringComparison.Ordinal);
+
+    /// <summary>
+    /// Opens a file to read once, front to back, sharing it with programs that read it too.
+    /// </summary>
+    private static FileStream OpenToRead(string path)
+        => new(path, new FileStreamOptions
+        {
+            Mode = FileMode.Open,
+            Access = FileAccess.Read,
+            Share = FileShare.Read,
+            Options = FileOptions.Asynchronous | FileOptions.SequentialScan,
+        });
+
+    /// <summary>
+    /// Copies the file at <paramref name="source"/> to a new one at <paramref name="partial"/>, reading it once.
+    /// </summary>
+    /// <returns>The SHA-256 of what was copied.</returns>
+    private static async Task<string> CopyToAsync(string source, string partial, CancellationToken cancellationToken)
+    {
+        FileStream from = OpenToRead(source);
+        await using (from.ConfigureAwait(false))
+        {
+            FileStream to = new(partial, new FileStreamOptions
+            {
+                Mode = FileMode.CreateNew,
+                Access = FileAccess.Write,
+                Share = FileShare.None,
+                Options = FileOptions.Asynchronous | FileOptions.SequentialScan,
+            });
+            await using (to.ConfigureAwait(false))
+            {
+                using IncrementalHash hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+                byte[] buffer = new byte[CopyBufferSize];
+                int read;
+                while ((read = await from.ReadAsync(buffer, cancellationToken).ConfigureAwait(false)) > 0)
+                {
+                    hash.AppendData(buffer, 0, read);
+                    await to.WriteAsync(buffer.AsMemory(0, read), cancellationToken).ConfigureAwait(false);
+                }
+
+                await to.FlushAsync(cancellationToken).ConfigureAwait(false);
+                return Convert.ToHexStringLower(hash.GetHashAndReset());
+            }
+        }
+    }
+
+    /// <summary>
+    /// Deletes a partial copy, which isn't the user's: when it can't be, it stays, hidden from rescans.
+    /// </summary>
+    private static void TryDelete(string partial)
+    {
+        try
+        {
+            File.Delete(partial);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            // Left behind, under a name no rescan lists.
+        }
+    }
 }

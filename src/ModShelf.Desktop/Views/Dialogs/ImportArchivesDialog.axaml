@@ -1,0 +1,97 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="using:System"
+        xmlns:vm="using:ModShelf.Presentation.ViewModels.Dialogs"
+        xmlns:res="using:ModShelf.Presentation.Resources"
+        x:Class="ModShelf.Desktop.Views.Dialogs.ImportArchivesDialog"
+        x:DataType="vm:ImportArchivesViewModel"
+        Title="{Binding Title}"
+        Width="640"
+        Classes="dialog">
+
+    <DockPanel>
+        <!-- Cancel, or OK once it's done, first, so the main button sits in the corner: Identify, then Copy into the
+             library; Stop while it works. -->
+        <StackPanel DockPanel.Dock="Bottom" Classes="dialogButtons">
+            <Button IsCancel="True" Content="{Binding CloseText}" Command="{Binding CloseCommand}" IsVisible="{Binding CanClose}" />
+            <Button Classes="accent" IsDefault="True" Content="{x:Static res:Strings.ArchiveIdentify}" Command="{Binding IdentifyCommand}" IsVisible="{Binding IsScanned}" />
+            <Button Classes="accent" Content="{x:Static res:Strings.ArchiveImportConfirm}" Command="{Binding ImportCommand}" IsVisible="{Binding IsIdentified}" />
+            <Button Content="{x:Static res:Strings.ListImportStop}" Command="{Binding StopCommand}" IsVisible="{Binding IsWorking}" />
+        </StackPanel>
+        <TextBlock DockPanel.Dock="Top" Classes="dialogTitle" TextWrapping="Wrap" Text="{Binding Title}" />
+        <StackPanel Spacing="12" Margin="0,0,0,8">
+            <SelectableTextBlock TextWrapping="Wrap" Text="{Binding ScanText}" IsVisible="{Binding IsScanned}" />
+            <TextBlock Classes="note"
+                       TextWrapping="Wrap"
+                       Text="{Binding LookUpText}"
+                       IsVisible="{Binding ShowsLookUpText}" />
+
+            <StackPanel Spacing="6" IsVisible="{Binding IsWorking}">
+                <ProgressBar MinHeight="6" Minimum="0" Maximum="100" Value="{Binding ProgressPercent}" />
+                <TextBlock Classes="note" Text="{Binding ProgressText}" />
+            </StackPanel>
+
+            <!-- What importing would do, each fact's name in a column as wide as the longest. -->
+            <ItemsControl ItemsSource="{Binding Facts}" IsVisible="{Binding IsIdentified}" Grid.IsSharedSizeScope="True">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ImportListFact">
+                        <Grid ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="FactName" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Classes="note" Text="{Binding Label}" />
+                            <SelectableTextBlock Grid.Column="1" TextWrapping="Wrap" Text="{Binding Value}" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Each archive, what it is or why it's left alone; those copied in the usual colour, the others muted. -->
+            <ScrollViewer MaxHeight="260" IsVisible="{Binding IsIdentified}">
+                <ItemsControl ItemsSource="{Binding Rows}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="6" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ImportArchiveRow">
+                            <StackPanel Spacing="1">
+                                <TextBlock FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Text="{Binding Name}" ToolTip.Tip="{Binding Name}" />
+                                <TextBlock TextWrapping="Wrap" Text="{Binding Said}" IsVisible="{Binding IsCopied}" />
+                                <TextBlock Classes="note" TextWrapping="Wrap" Text="{Binding Said}" IsVisible="{Binding !IsCopied}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            <TextBlock Classes="note" FontSize="12.5" TextWrapping="Wrap" Text="{x:Static res:Strings.ArchiveImportNote}" IsVisible="{Binding IsIdentified}" />
+
+            <!-- What it did, then what it couldn't, a sentence each, scrolling when there are many. -->
+            <SelectableTextBlock TextWrapping="Wrap" Text="{Binding ResultText}" IsVisible="{Binding IsDone}" />
+            <StackPanel Spacing="6" IsVisible="{Binding HasProblems}">
+                <TextBlock Classes="note" Text="{x:Static res:Strings.ArchiveProblems}" />
+                <ScrollViewer MaxHeight="220">
+                    <ItemsControl ItemsSource="{Binding Problems}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="4" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="sys:String">
+                                <SelectableTextBlock TextWrapping="Wrap" Text="{Binding}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </StackPanel>
+        </StackPanel>
+    </DockPanel>
+</Window>

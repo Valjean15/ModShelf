@@ -169,6 +169,14 @@ internal sealed class AvaloniaDialogService : IDialogService
         return Dispatcher.UIThread.InvokeAsync(() => ShowAsync(new ImportListDialog { DataContext = importing }, () => true, cancellationToken));
     }
 
+    public Task ImportArchivesAsync(ImportArchivesViewModel importing, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(importing);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Dispatcher.UIThread.InvokeAsync(() => ShowAsync(new ImportArchivesDialog { DataContext = importing }, () => true, cancellationToken));
+    }
+
     public Task ShowFirstRunAsync(FirstRunViewModel setup, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(setup);

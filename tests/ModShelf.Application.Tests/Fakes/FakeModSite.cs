@@ -104,6 +104,11 @@ internal sealed class FakeModSite : ILinkRecognizer, IModCatalog, IHandoffScheme
             replacedBy: replacedBy is null ? null : File(modId, replacedBy)));
 
     /// <summary>
+    /// One of the files the test added, without asking the site.
+    /// </summary>
+    public ModFile FileOf(string modId, string fileId) => _files[modId].Single(file => file.Reference.Id == fileId);
+
+    /// <summary>
     /// Takes a file off the mod's list, as when its author deletes it.
     /// </summary>
     public void RemoveFile(string modId, string fileId) => _files[modId].RemoveAll(file => file.Reference.Id == fileId);

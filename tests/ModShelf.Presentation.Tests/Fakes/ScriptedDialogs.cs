@@ -226,6 +226,41 @@ internal sealed class ScriptedDialogs : IDialogService
     }
 
     /// <summary>
+    /// Each archive import dialog shown.
+    /// </summary>
+    public List<ImportArchivesViewModel> ImportingArchives { get; } = [];
+
+    /// <summary>
+    /// What the user does in the dialog that imports archives; by default, they close it. Once this is done, unless the
+    /// dialog closed itself, the user closes it.
+    /// </summary>
+    public Func<ImportArchivesViewModel, Task>? InImportArchives { get; set; }
+
+    public async Task ImportArchivesAsync(ImportArchivesViewModel importing, CancellationToken cancellationToken)
+    {
+        ImportingArchives.Add(importing);
+        bool closed = false;
+        void Close(object? sender, EventArgs e) => closed = true;
+        importing.CloseRequested += Close;
+        try
+        {
+            if (InImportArchives is { } user)
+            {
+                await user(importing);
+            }
+
+            if (!closed && importing.CloseCommand.CanExecute(null))
+            {
+                importing.CloseCommand.Execute(null);
+            }
+        }
+        finally
+        {
+            importing.CloseRequested -= Close;
+        }
+    }
+
+    /// <summary>
     /// Each first-run setup shown.
     /// </summary>
     public List<FirstRunViewModel> FirstRuns { get; } = [];

@@ -9,6 +9,7 @@ using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Downloads;
 using ModShelf.Sources.Abstractions.Endorsements;
 using ModShelf.Sources.Abstractions.Links;
+using ModShelf.Sources.Abstractions.Lookup;
 using ModShelf.Sources.Abstractions.Quota;
 using ModShelf.Sources.Abstractions.Search;
 using ModShelf.Sources.Abstractions.Updates;
@@ -115,6 +116,27 @@ public abstract class SourceContractTests<TSource>
         await Assert.ThrowsAsync<ArgumentException>(
             () => endorsements.EndorseAsync(foreign, Endorsement.Endorsed, "1.0", TestContext.Current.CancellationToken));
         Assert.True(endorsements.Words.CanApprove, $"{typeof(TSource).Name} endorses, so it names endorsing in its words.");
+    }
+
+    [Fact]
+    public async Task RefusesToLookUpFilesOfAnotherSourcesGameOrByAnotherHash()
+    {
+        IFileLookup lookup = Capability<IFileLookup>();
+        GameRef foreign = new(new SourceId("someone-else"), "game");
+        FileHashAlgorithm other = lookup.LookupAlgorithm == FileHashAlgorithm.Sha512 ? FileHashAlgorithm.Md5 : FileHashAlgorithm.Sha512;
+        FileHash hash = new(lookup.LookupAlgorithm, new string('a', lookup.LookupAlgorithm switch
+        {
+            FileHashAlgorithm.Md5 => 32,
+            FileHashAlgorithm.Sha1 => 40,
+            FileHashAlgorithm.Sha256 => 64,
+            _ => 128,
+        }));
+
+        await Assert.ThrowsAsync<ArgumentException>(() => lookup.FindByHashAsync(foreign, hash, TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ArgumentException>(() => lookup.FindByHashAsync(
+            new GameRef(lookup.Id, "game"),
+            new FileHash(other, new string('a', other == FileHashAlgorithm.Md5 ? 32 : 128)),
+            TestContext.Current.CancellationToken));
     }
 
     [Fact]

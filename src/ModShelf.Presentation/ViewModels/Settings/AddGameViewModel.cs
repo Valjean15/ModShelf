@@ -16,7 +16,8 @@ namespace ModShelf.Presentation.ViewModels.Settings;
 /// <summary>
 /// Settings' Add a game…: the game picker over the sites' games not listed yet, a game chosen added at once; or a game's
 /// key typed, such as skyrimspecialedition, for a game the sites can't list, as without an account. A site that finds its
-/// games by name is asked as the name is typed.
+/// games by name is asked as the name is typed. The Library's Import archives… asks for a game with it too, in its own
+/// words.
 /// </summary>
 public sealed partial class AddGameViewModel : ObservableObject
 {
@@ -27,7 +28,18 @@ public sealed partial class AddGameViewModel : ObservableObject
     private readonly GamesByName _byName;
 
     /// <param name="listed">The games listed already, which aren't offered.</param>
-    internal AddGameViewModel(IModLookup lookup, ISourceRegistry sources, ModPictures pictures, IEnumerable<GameRef> listed, ILogger logger)
+    /// <param name="title">What the dialog asks; Settings' words unless given.</param>
+    /// <param name="message">What it says under that.</param>
+    /// <param name="confirm">Its button's words.</param>
+    internal AddGameViewModel(
+        IModLookup lookup,
+        ISourceRegistry sources,
+        ModPictures pictures,
+        IEnumerable<GameRef> listed,
+        ILogger logger,
+        string? title = null,
+        string? message = null,
+        string? confirm = null)
     {
         ArgumentNullException.ThrowIfNull(lookup);
         ArgumentNullException.ThrowIfNull(sources);
@@ -40,6 +52,9 @@ public sealed partial class AddGameViewModel : ObservableObject
         _logger = logger;
         _byName = new GamesByName(lookup, sources.All<IModCatalog>().Select(catalog => catalog.Id), logger, _listed.Contains);
         Picker = new GamePickerViewModel(pictures, sources, Choose, typed: Type, byName: _byName);
+        Title = title ?? Strings.SettingsAddGameTitle;
+        Message = message ?? Strings.SettingsAddGameMessage;
+        ConfirmText = confirm ?? Strings.SettingsAddGameConfirm;
     }
 
     /// <summary>
@@ -48,6 +63,12 @@ public sealed partial class AddGameViewModel : ObservableObject
     public event EventHandler? AddRequested;
 
     public GamePickerViewModel Picker { get; }
+
+    public string Title { get; }
+
+    public string Message { get; }
+
+    public string ConfirmText { get; }
 
     /// <summary>
     /// Whether the sites' games are being read.

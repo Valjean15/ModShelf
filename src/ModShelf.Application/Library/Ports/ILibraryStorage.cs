@@ -33,6 +33,37 @@ public interface ILibraryStorage
     Task<string> Sha256Async(string path, CancellationToken cancellationToken);
 
     /// <summary>
+    /// The SHA-256 and the MD5 of the file at <paramref name="path"/>, read through once for both, each as lowercase
+    /// hexadecimal digits: the library keeps the first, and a site may find the file by the second (ADR 0101).
+    /// </summary>
+    /// <inheritdoc cref="Sha256Async" path="/exception"/>
+    Task<FileHashes> HashesAsync(string path, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// The bytes of a small file, read whole, such as the note a mod manager keeps beside an archive (ADR 0101).
+    /// </summary>
+    /// <exception cref="FileNotFoundException">There's no file there.</exception>
+    /// <exception cref="IOException">
+    /// The file couldn't be read, or is larger than <paramref name="maxBytes"/>, so it isn't such a file.
+    /// </exception>
+    /// <exception cref="UnauthorizedAccessException">This user may not read it.</exception>
+    Task<byte[]> ReadSmallFileAsync(string path, int maxBytes, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Copies a file to <paramref name="destination"/>, making the folders it goes into, through a partial file beside
+    /// it that a rescan doesn't list, which becomes the file only once it's whole and its SHA-256 is
+    /// <paramref name="sha256"/>. The file at <paramref name="source"/> is only read.
+    /// </summary>
+    /// <remarks>Nothing is left at <paramref name="destination"/> when the copy fails or is cancelled.</remarks>
+    /// <exception cref="InvalidDataException">What was copied has another SHA-256: the file changed since it was read.</exception>
+    /// <exception cref="IOException">
+    /// The file couldn't be copied, such as when a file is at <paramref name="destination"/> already, which is never
+    /// overwritten, or the drive is full.
+    /// </exception>
+    /// <exception cref="UnauthorizedAccessException">This user may not read the file, or write there.</exception>
+    Task CopyFileAsync(string source, string destination, string sha256, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Whether two paths lead to the same folder, however differently they name it: through a link or junction,
     /// another drive letter, or in another case or Unicode form on a file system that ignores them. False when either
     /// isn't a folder.
