@@ -92,6 +92,7 @@ public sealed class DownloadCommandBrowserFileTests : IAsyncDisposable
         using ControlledTextReader input = new();
         await using CliRun run = _cli.Start(Download(FileLink("1")), input);
         await run.WaitForOutputAsync("Path: ", Cancellation);
+        await WaitUntilWatchingAsync();
 
         await File.WriteAllBytesAsync(Path.Combine(_cli.Downloads, FileNameOf("1")), Content, Cancellation);
 
@@ -126,6 +127,21 @@ public sealed class DownloadCommandBrowserFileTests : IAsyncDisposable
     }
 
     private string[] Download(Uri link) => ["download", link.AbsoluteUri, "--to", Downloads];
+
+    /// <summary>
+    /// Waits until the app watches the browser's downloads folder. The CLI asks for the path as soon as the download
+    /// waits on the page, and the app starts watching a moment later; a file saved before then isn't seen, as a busy
+    /// runner showed.
+    /// </summary>
+    private async Task WaitUntilWatchingAsync()
+    {
+        using CancellationTokenSource patience = CancellationTokenSource.CreateLinkedTokenSource(Cancellation);
+        patience.CancelAfter(TimeSpan.FromSeconds(30));
+        while (!_cli.Logs.Entries.Any(entry => entry.Contains("Watching the browser's downloads folder", StringComparison.Ordinal)))
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(50), patience.Token);
+        }
+    }
 
     /// <summary>
     /// A file the browser saved, in a folder of the test's.
