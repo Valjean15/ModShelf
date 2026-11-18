@@ -179,5 +179,6 @@ public sealed partial class LibraryViewModel
         CanWatchSelected = !IsChangingSelected && selected.Length > watched;
         CanUnwatchSelected = !IsChangingSelected && watched > 0;
         CanRemoveSelected = !IsChangingSelected && selected.Length > 0;
+        ShowSelectedEndorsements(selected);
     }
 }

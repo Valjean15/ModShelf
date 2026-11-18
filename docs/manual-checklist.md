@@ -409,6 +409,23 @@ and copy its page's link into `$hidden`.
   "Gone from their sites, so your copies of their files may be the only ones left:", then the mod, "gone from Nexus Mods
   since" the check's time. Then `ms library forget $hidden`.
 
+## 19. Endorse
+
+Run it once, in the Premium run. Endorsing changes your account on Nexus Mods for everyone to see, so pick a mod you
+downloaded with this account and are happy to endorse, and copy its page's link into `$endorse`; and a mod this
+account never downloaded, into `$notDownloaded`. Note how the first stands on its page first: abstaining afterwards
+records an abstention, and nothing puts back a mod you never endorsed nor abstained from.
+
+- [ ] **19.1 Endorse.** `ms mod endorse $endorse`, then the same again.
+  "Endorsed on Nexus Mods: mod *ID* of *game*.", exit code 0, both times. The mod's page on the website says you
+  endorsed it.
+- [ ] **19.2 Abstain.** `ms mod abstain $endorse`.
+  "Abstained on Nexus Mods: mod *ID* of *game*.", exit code 0; the website no longer counts your endorsement. If you'd
+  endorsed it before 19.1, `ms mod endorse $endorse` again.
+- [ ] **19.3 Refusals.** `ms mod endorse $notDownloaded`, then `ms mod endorse "https://gamebanana.com/mods/440088"`.
+  "The site wouldn't endorse the mod: " and what Nexus Mods said, on the error output, exit code 1; then "This link
+  isn't to a mod on a site where ModShelf can endorse mods.", exit code 2. Neither changes anything on the sites.
+
 ## Clean up
 
 After both accounts:
@@ -544,3 +561,6 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 17.6 Refusals | | | |
 | 18.1 Gone, not failed | | – | |
 | 18.2 Listed so | | – | |
+| 19.1 Endorse | | – | |
+| 19.2 Abstain | | – | |
+| 19.3 Refusals | | – | |

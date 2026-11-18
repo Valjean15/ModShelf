@@ -40,6 +40,17 @@ public sealed record SiteWords
     public string? Approvals { get; init => field = Word(value); }
 
     /// <summary>
+    /// Approving a mod with the account, as <see cref="Endorsements.IModEndorsements.EndorseAsync"/> does, such as
+    /// "endorse".
+    /// </summary>
+    public string? Approve { get; init => field = Word(value); }
+
+    /// <summary>
+    /// Choosing not to approve a mod, or taking an approval back, such as "abstain".
+    /// </summary>
+    public string? Unapprove { get; init => field = Word(value); }
+
+    /// <summary>
     /// Whether it has the words for following a mod: all three, or none.
     /// </summary>
     public bool CanFollow => Follow is not null && Unfollow is not null && Followed is not null;
@@ -48,6 +59,11 @@ public sealed record SiteWords
     /// Whether it has the words for approval: one and more, or none.
     /// </summary>
     public bool CountsApproval => Approval is not null && Approvals is not null;
+
+    /// <summary>
+    /// Whether it has the words for approving a mod with the account: both, or none.
+    /// </summary>
+    public bool CanApprove => Approve is not null && Unapprove is not null;
 
     private static string? Word(string? word) => string.IsNullOrWhiteSpace(word) ? null : word.Trim();
 }

@@ -23,6 +23,7 @@ internal sealed class ModPageServices(
     ISettingsService settings,
     FolderDownloads folders,
     TrackedMods tracked,
+    EndorsedMods endorsed,
     ISourceRegistry sources,
     IBrowserLauncher browser,
     IFolderOpener folderOpener,
@@ -46,6 +47,11 @@ internal sealed class ModPageServices(
     public FolderDownloads Folders { get; } = folders ?? throw new ArgumentNullException(nameof(folders));
 
     public TrackedMods Tracked { get; } = tracked ?? throw new ArgumentNullException(nameof(tracked));
+
+    /// <summary>
+    /// What the linked accounts said of mods on the sites that let ModShelf endorse.
+    /// </summary>
+    public EndorsedMods Endorsed { get; } = endorsed ?? throw new ArgumentNullException(nameof(endorsed));
 
     public ISourceRegistry Sources { get; } = sources ?? throw new ArgumentNullException(nameof(sources));
 

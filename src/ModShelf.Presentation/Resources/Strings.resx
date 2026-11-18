@@ -4287,4 +4287,52 @@
     <value>Its site no longer offers this file, so your copy may be the only one left. Keep it.</value>
     <comment>Tooltip of the Only copy tag.</comment>
   </data>
+  <data name="ModPageEndorsed" xml:space="preserve">
+    <value>Endorsed</value>
+    <comment>The endorse button once the account endorsed the mod.</comment>
+  </data>
+  <data name="ModPageEndorsedNote" xml:space="preserve">
+    <value>{0} has your {1}.</value>
+    <comment>After endorsing a mod: {0} is the site, {1} its word for an endorsement, such as endorsement.</comment>
+  </data>
+  <data name="ModPageAbstainedNote" xml:space="preserve">
+    <value>You chose to {0} on {1}.</value>
+    <comment>After abstaining from a mod: {0} is the site's word for it, such as abstain; {1} the site.</comment>
+  </data>
+  <data name="ModPageEndorseFailed" xml:space="preserve">
+    <value>{0} wouldn't let you {2} the mod: {1}</value>
+    <comment>{0} is the site; {1} what it said, such as that the account didn't download the mod; {2} its word for endorsing, such as endorse.</comment>
+  </data>
+  <data name="ModFilterNotEndorsed" xml:space="preserve">
+    <value>Not endorsed</value>
+    <comment>Library: the toggle that shows only the mods the account hasn't endorsed on a site that lets ModShelf endorse.</comment>
+  </data>
+  <data name="LibraryEndorseSelected" xml:space="preserve">
+    <value>{0} ({1:N0})</value>
+    <comment>Library: the button that endorses the selected mods: {0} is the site's word for it, capitalized, such as Endorse; {1} how many aren't endorsed.</comment>
+  </data>
+  <data name="LibraryEndorseAskOne" xml:space="preserve">
+    <value>{0} this mod on {1}?</value>
+    <comment>The title of the question before endorsing one selected mod: {0} the site's word, capitalized, such as Endorse; {1} the site.</comment>
+  </data>
+  <data name="LibraryEndorseAsk" xml:space="preserve">
+    <value>{0} these {1:N0} mods on {2}?</value>
+    <comment>The title of the question before endorsing selected mods: {0} the site's word, capitalized, such as Endorse; {1} how many; {2} the site.</comment>
+  </data>
+  <data name="LibraryEndorseMore" xml:space="preserve">
+    <value>and {0:N0} more</value>
+    <comment>The last line of the mods named before endorsing many: how many more.</comment>
+  </data>
+  <data name="LibraryEndorseSelectedProblem" xml:space="preserve">
+    <value>{0} refused: {1}</value>
+    <comment>What the site said of a mod it wouldn't let the account endorse: {0} the site, {1} what it said.</comment>
+  </data>
+  <data name="LibraryEndorseSelectedFailed" xml:space="preserve">
+    <value>Some mods weren't {0}d</value>
+    <comment>The heading of the mods the site wouldn't let the account endorse: {0} the site's word, such as endorse.</comment>
+  </data>
+  <data name="LibraryEndorseSelectedTip" xml:space="preserve">
+    <value>Endorse the selected mods on their site with your linked account, after saying which. The site may refuse a mod you didn't download.</value>
+    <comment>Tooltip of the Library's Endorse button for the selected mods.</comment>
+  </data>
 </root>

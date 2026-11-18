@@ -41,7 +41,16 @@ internal sealed partial class FakeCatalogSite : ILinkRecognizer, IModCatalog, IM
     /// <summary>
     /// Its words are Nexus Mods'.
     /// </summary>
-    public SiteWords Words { get; set; } = new() { Follow = "track", Unfollow = "untrack", Followed = "tracked", Approval = "endorsement", Approvals = "endorsements" };
+    public SiteWords Words { get; set; } = new()
+    {
+        Follow = "track",
+        Unfollow = "untrack",
+        Followed = "tracked",
+        Approval = "endorsement",
+        Approvals = "endorsements",
+        Approve = "endorse",
+        Unapprove = "abstain",
+    };
 
     /// <summary>
     /// Every order either way round, by relevance first; every filter; 100 mods a page.

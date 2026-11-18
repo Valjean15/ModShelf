@@ -18,7 +18,7 @@ internal static class TestData
     public static readonly SourceId Nexus = new("nexus");
 
     /// <summary>
-    /// Nexus Mods' words: it tracks mods, and counts endorsements.
+    /// Nexus Mods' words: it tracks mods, and counts endorsements, which an account gives or abstains from.
     /// </summary>
     public static readonly SiteWords NexusWords = new()
     {
@@ -27,6 +27,8 @@ internal static class TestData
         Followed = "tracked",
         Approval = "endorsement",
         Approvals = "endorsements",
+        Approve = "endorse",
+        Unapprove = "abstain",
     };
 
     public static readonly Uri ModPage = new("https://www.nexusmods.com/skyrimspecialedition/mods/12604");

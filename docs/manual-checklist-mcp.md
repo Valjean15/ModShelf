@@ -51,7 +51,7 @@ Settings › **Agents** in the desktop app. Agents are off until you turn them o
 ## 1. The server
 
 - [ ] **1.1 Tools.** Start the agent's app, and ask it which ModShelf tools it has.
-  28 tools, from `library_list` to `diagnostics`. Claude Desktop's settings show the server as running. After ModShelf
+  29 tools, from `library_list` to `diagnostics`. Claude Desktop's settings show the server as running. After ModShelf
   is updated, quit Claude Desktop completely, start it again and begin a new conversation: an older list of the tools
   makes calls such as `download` with `link` fail with "download doesn't take these arguments: it needs links. …".
 - [ ] **1.2 Reading.** Ask for the library, the updates and the settings; then for the mods with files missing from disk.
@@ -242,6 +242,18 @@ conversation.
   `elsewhere` and `filesUnavailable` when it has them; then, with `watchOnly` `true`, the mods are watched, and nothing
   is downloaded or installed.
 
+## 10. Endorse
+
+With a Nexus Mods mod you downloaded with the linked account and are happy to endorse, and one it never downloaded.
+Endorsing shows on Nexus Mods for everyone; abstaining afterwards records an abstention.
+
+- [ ] **10.1 Endorse, then abstain.** Give the agent the first mod's link and ask it to endorse the mod; then to take
+  that back.
+  It calls `mod_endorse` with the link, which gives `endorsement` `endorsed` and "Endorsed mod *ID* of *game* on Nexus
+  Mods."; then with `abstain` `true`, `abstained`. The mod's page on the website shows each.
+- [ ] **10.2 Refused.** Ask it to endorse the second mod.
+  The call fails with what Nexus Mods said, and the agent says so; nothing changes on the site.
+
 ## Results
 
 Copy this table into the release's notes or issue, and mark each check ✅, ❌ or – (not run). For a ❌, add what you
@@ -299,3 +311,5 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 8.2 Then its mods | | |
 | 9.1 Export, then preview it back | | |
 | 9.2 A collection | | |
+| 10.1 Endorse, then abstain | | |
+| 10.2 Refused | | |

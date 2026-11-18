@@ -18,4 +18,7 @@ public sealed partial class LibraryViewModel
 
     [LoggerMessage(EventId = 979, Level = LogLevel.Error, Message = "Changing selected mod {ModId} of {Game} failed")]
     private static partial void LogSelectedChangeFailed(ILogger logger, Exception exception, string modId, string game);
+
+    [LoggerMessage(EventId = 983, Level = LogLevel.Information, Message = "Couldn't read the endorsements on {Source}, so which mods are endorsed isn't known: {Reason}")]
+    private static partial void LogEndorsementsUnknown(ILogger logger, string source, string reason);
 }

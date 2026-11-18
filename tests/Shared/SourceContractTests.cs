@@ -7,6 +7,7 @@ using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Collections;
 using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Downloads;
+using ModShelf.Sources.Abstractions.Endorsements;
 using ModShelf.Sources.Abstractions.Links;
 using ModShelf.Sources.Abstractions.Quota;
 using ModShelf.Sources.Abstractions.Search;
@@ -103,6 +104,17 @@ public abstract class SourceContractTests<TSource>
             Assert.NotNull(match);
             Assert.Equal(ExpectedId, match.File.Mod.Game.Source);
         }
+    }
+
+    [Fact]
+    public async Task RefusesToEndorseAnotherSourcesModAndNamesEndorsing()
+    {
+        IModEndorsements endorsements = Capability<IModEndorsements>();
+        ModRef foreign = new(new GameRef(new SourceId("someone-else"), "game"), "mod");
+
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => endorsements.EndorseAsync(foreign, Endorsement.Endorsed, "1.0", TestContext.Current.CancellationToken));
+        Assert.True(endorsements.Words.CanApprove, $"{typeof(TSource).Name} endorses, so it names endorsing in its words.");
     }
 
     [Fact]

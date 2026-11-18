@@ -356,8 +356,9 @@ public sealed class LibraryByGameTests : IDisposable
         Screen.ModFilters[1].IsOn = true;
         Screen.ModFilters[3].IsOn = true;
 
-        Assert.Equal([1, 2, 1, 2, 1], counts);
-        Assert.Equal([["SkyUI"], ["Missing", "SkyUI"], ["Address Library"], ["Address Library", "Missing"], ["Address Library"]], shown);
+        // No site here endorses, so none is known not to be endorsed.
+        Assert.Equal([1, 2, 1, 2, 1, 0], counts);
+        Assert.Equal([["SkyUI"], ["Missing", "SkyUI"], ["Address Library"], ["Address Library", "Missing"], ["Address Library"], []], shown);
         Assert.Equal(["Missing"], Screen.GameMods.Select(mod => mod.Name));
         Assert.Equal(counts, Screen.ModFilters.Select(toggle => toggle.Count));
     }

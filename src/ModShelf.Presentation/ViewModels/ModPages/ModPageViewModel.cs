@@ -12,6 +12,7 @@ using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Common;
+using ModShelf.Sources.Abstractions.Endorsements;
 
 namespace ModShelf.Presentation.ViewModels.ModPages;
 
@@ -93,6 +94,8 @@ public sealed partial class ModPageViewModel : ObservableObject
         CategoryText = page.Mod.Category ?? string.Empty;
         Changelog = NewestFirst(page.Changelogs, page.Mod.Version);
         CanTrack = services.Tracked.CanChange(Mod.Game.Source) && words.CanFollow;
+        CanEndorse = services.Endorsed.CanEndorse(Mod.Game.Source) && words.CanApprove;
+        EndorseText = words.Approve is { } approve ? Text.Capitalized(approve) : string.Empty;
         string site = services.Sources.SiteName(Mod.Game.Source);
         SiteName = site;
         TrackText = words.Follow is { } follow ? Text.Format(Strings.BrowseFollow, Text.Capitalized(follow), site) : string.Empty;
@@ -134,6 +137,8 @@ public sealed partial class ModPageViewModel : ObservableObject
         Watch,
         Unwatch,
         Track,
+        Endorse,
+        Abstain,
         Untrack,
         OpenFolder,
         Rescan,
@@ -400,6 +405,22 @@ public sealed partial class ModPageViewModel : ObservableObject
     public bool CanTrack { get; }
 
     /// <summary>
+    /// Whether the mod's site lets ModShelf endorse its mods, which needs an account linked there.
+    /// </summary>
+    public bool CanEndorse { get; }
+
+    /// <summary>
+    /// Whether the account endorsed the mod, as far as is known.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsEndorsed { get; private set; }
+
+    /// <summary>
+    /// The site's word for endorsing, capitalized, such as "Endorse".
+    /// </summary>
+    public string EndorseText { get; }
+
+    /// <summary>
     /// Whether the linked account tracks it on its site, as far as the screen knows.
     /// </summary>
     [ObservableProperty]
@@ -456,6 +477,45 @@ public sealed partial class ModPageViewModel : ObservableObject
     /// Shows whether the account tracks the mod, reading its site's list the first time any mod of the site asks. When
     /// the list can't be read, such as without a linked account, it's logged, and tracking the mod is still offered.
     /// </summary>
+    /// <summary>
+    /// Shows whether the account endorsed the mod, reading its site's endorsements the first time any mod of the site
+    /// asks. When they can't be read, such as without a linked account, it's logged, and endorsing is still offered.
+    /// </summary>
+    internal async Task ShowEndorsedAsync(CancellationToken cancellationToken)
+    {
+        if (!CanEndorse)
+        {
+            return;
+        }
+
+        if (_services.Endorsed.IsEndorsed(Mod) is not { } endorsed)
+        {
+            try
+            {
+                await _services.Endorsed.ReadAsync(Mod.Game.Source, cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+            catch (Exception exception) when (SiteProblems.IsSiteProblem(exception))
+            {
+                // Expected without a linked account, or offline: no stack trace for it.
+                LogEndorsedUnknown(_services.Logger, Mod.Game.Source.Value, exception.Message);
+                return;
+            }
+            catch (Exception exception)
+            {
+                LogEndorsedFailed(_services.Logger, exception, Mod.Game.Source.Value);
+                return;
+            }
+
+            endorsed = _services.Endorsed.IsEndorsed(Mod) == true;
+        }
+
+        IsEndorsed = endorsed;
+    }
+
     internal async Task ShowTrackedAsync(CancellationToken cancellationToken)
     {
         if (!CanTrack)
@@ -620,6 +680,40 @@ public sealed partial class ModPageViewModel : ObservableObject
                     track
                         ? Text.Format(Strings.BrowseFollowedNote, Text.Capitalized(followed), site)
                         : Text.Format(Strings.BrowseUnfollowedNote, followed, site),
+                    isProblem: false);
+            },
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// Endorses the mod on its site with the linked account, with the version its details say, or abstains from it once
+    /// endorsed. A refusal, such as for a mod the account didn't download, is said in the site's words.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanEndorse))]
+    private Task ToggleEndorseAsync(CancellationToken cancellationToken)
+    {
+        bool endorse = !IsEndorsed;
+        string site = _services.Sources.SiteName(Mod.Game.Source);
+        SiteWords words = _services.Sources.Words(Mod.Game.Source);
+        return RunAsync(
+            endorse ? PageAction.Endorse : PageAction.Abstain,
+            async () =>
+            {
+                try
+                {
+                    await _services.Endorsed.SetAsync(Mod, endorse ? Endorsement.Endorsed : Endorsement.Abstained, _info.Version, cancellationToken);
+                }
+                catch (Exception exception) when (SiteProblems.Describe(exception, site, SiteProblems.InWords(Strings.ModPageEndorseFailed, words.Approve ?? string.Empty)) is { } problem)
+                {
+                    Tell(problem, isProblem: true);
+                    return;
+                }
+
+                IsEndorsed = endorse;
+                Tell(
+                    endorse
+                        ? Text.Format(Strings.ModPageEndorsedNote, site, words.Approval ?? string.Empty)
+                        : Text.Format(Strings.ModPageAbstainedNote, words.Unapprove ?? string.Empty, site),
                     isProblem: false);
             },
             cancellationToken);

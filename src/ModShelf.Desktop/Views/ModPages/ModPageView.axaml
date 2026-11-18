@@ -141,6 +141,15 @@
                             </StackPanel>
                         </Panel>
                     </Button>
+                    <Button Classes.on="{Binding IsEndorsed}" Command="{Binding ToggleEndorseCommand}" IsVisible="{Binding CanEndorse}">
+                        <Panel>
+                            <TextBlock Text="{Binding EndorseText}" IsVisible="{Binding !IsEndorsed}" />
+                            <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsEndorsed}">
+                                <Path Classes="line" Width="14" Height="14" Data="{StaticResource CheckGlyph}" />
+                                <TextBlock VerticalAlignment="Center" Text="{x:Static res:Strings.ModPageEndorsed}" />
+                            </StackPanel>
+                        </Panel>
+                    </Button>
                     <Button Content="{x:Static res:Strings.LibraryRescan}" Command="{Binding RescanCommand}" IsVisible="{Binding IsInLibrary}" />
                     <Button Classes="quiet"
                             Foreground="{DynamicResource ShelfMutedBrush}"

@@ -6,6 +6,7 @@ using ModShelf.Presentation.ViewModels.Accounts;
 using ModShelf.Presentation.ViewModels.Browse;
 using ModShelf.Presentation.ViewModels.Downloads;
 using ModShelf.Presentation.ViewModels.Library;
+using ModShelf.Presentation.ViewModels.ModPages;
 using ModShelf.Presentation.ViewModels.Settings;
 using ModShelf.Presentation.ViewModels.Updates;
 
@@ -31,6 +32,9 @@ public sealed class PresentationServiceCollectionExtensionsTests
         // The one Settings › Accounts shows too (ADR 0094).
         Assert.Single(services, descriptor => descriptor.ServiceType == typeof(AccountsViewModel));
         Assert.Single(services, descriptor => descriptor.ServiceType == typeof(SitesWantingAccounts));
+
+        // One for Browse and the Library, so they agree on what the account endorsed (ADR 0100).
+        Assert.Single(services, descriptor => descriptor.ServiceType == typeof(EndorsedMods));
         Assert.Single(services, descriptor => descriptor.ServiceType == typeof(InstalledGamesViewModel));
         Assert.Single(services, descriptor => descriptor.ServiceType == typeof(MainWindowViewModel));
         Assert.Single(services, descriptor => descriptor.ServiceType == typeof(TrayViewModel));

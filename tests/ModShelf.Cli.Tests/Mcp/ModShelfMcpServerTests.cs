@@ -22,6 +22,7 @@ using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Common;
+using ModShelf.Sources.Abstractions.Endorsements;
 using ModShelf.Sources.Abstractions.Search;
 
 using static ModShelf.Cli.Tests.Fakes.FakeHandoffSource;
@@ -96,7 +97,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
                 "downloads_resume", "downloads_retry", "downloads_take", "library_changes", "library_check", "library_export",
                 "library_forget", "library_import", "library_list", "library_note", "library_pin", "library_rescan", "library_skip",
                 "library_unwatch", "library_updates", "library_watch",
-                "mod_games", "mod_search", "mod_show", "settings_reset", "settings_set", "settings_show",
+                "mod_endorse", "mod_games", "mod_search", "mod_show", "settings_reset", "settings_set", "settings_show",
             ],
             tools.Select(tool => tool.Name).Order(StringComparer.Ordinal));
         Assert.Equal(ModShelfMcpServer.Instructions, mcp.Client.ServerInstructions);
@@ -1488,6 +1489,34 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         Assert.Equal((2, 1, false, "game"), (second.Total, second.Offset, second.HasMore, Assert.Single(second.Games).Game));
     }
 
+    [Fact]
+    public async Task EndorsesOrAbstainsFromOneModByItsLink()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        EndorseResult endorsed = await mcp.CallAsync<EndorseResult>("mod_endorse", Arguments(("link", FakeCatalogSite.FileLink("42", "12").AbsoluteUri)), Cancellation);
+        EndorseResult abstained = await mcp.CallAsync<EndorseResult>("mod_endorse", Arguments(("link", FakeCatalogSite.ModLink("43").AbsoluteUri), ("abstain", true)), Cancellation);
+
+        Assert.Equal(new EndorseResult("fake-catalog", "game", "42", "endorsed", "Endorsed mod 42 of game on Fake catalog site."), endorsed);
+        Assert.Equal(new EndorseResult("fake-catalog", "game", "43", "abstained", "Abstained from mod 43 of game on Fake catalog site."), abstained);
+        Assert.Equal(
+            [(new ModRef(new GameRef(FakeCatalogSite.SourceId, "game"), "42"), Endorsement.Endorsed), (new ModRef(new GameRef(FakeCatalogSite.SourceId, "game"), "43"), Endorsement.Abstained)],
+            _catalog.Endorsed.Select(endorsement => (endorsement.Key, endorsement.Value)).OrderBy(endorsement => endorsement.Key.Id, StringComparer.Ordinal));
+    }
+
+    [Fact]
+    public async Task SaysWhyAModCantBeEndorsed()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        string refused = await mcp.CallFailingAsync("mod_endorse", Arguments(("link", FakeCatalogSite.ModLink("2").AbsoluteUri)), Cancellation);
+        string elsewhere = await mcp.CallFailingAsync("mod_endorse", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
+
+        Assert.Contains("You need to download the mod before endorsing it.", refused, StringComparison.Ordinal);
+        Assert.Contains("isn't to a mod on a site where ModShelf can endorse mods.", elsewhere, StringComparison.Ordinal);
+        Assert.Empty(_catalog.Endorsed);
+    }
+
     [Theory]
     [InlineData("pageSize", 0, "pageSize must be from 1 to 100.")]
     [InlineData("pageSize", 101, "pageSize must be from 1 to 100.")]
@@ -1608,7 +1637,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
             await mcp.CloseAsync(Cancellation);
         }
 
-        Assert.Contains(Cli.Logs.Entries, entry => entry.Contains("The MCP server started, with 28 tools", StringComparison.Ordinal));
+        Assert.Contains(Cli.Logs.Entries, entry => entry.Contains("The MCP server started, with 29 tools", StringComparison.Ordinal));
         Assert.DoesNotContain(Cli.Logs.Entries, entry => entry.Contains(GoodKey, StringComparison.Ordinal));
         Assert.DoesNotContain(Cli.Logs.Entries, entry => entry.Contains("handoff.example", StringComparison.Ordinal));
     }

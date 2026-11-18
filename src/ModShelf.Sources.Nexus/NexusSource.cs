@@ -57,7 +57,7 @@ public sealed partial class NexusSource : IAccountLinker
     public string DisplayName => Strings.DisplayName;
 
     /// <summary>
-    /// Nexus Mods tracks mods, and counts endorsements.
+    /// Nexus Mods tracks mods, and counts endorsements, which an account gives or abstains from.
     /// </summary>
     public SiteWords Words { get; } = new()
     {
@@ -66,6 +66,8 @@ public sealed partial class NexusSource : IAccountLinker
         Followed = Strings.WordFollowed,
         Approval = Strings.WordApproval,
         Approvals = Strings.WordApprovals,
+        Approve = Strings.WordApprove,
+        Unapprove = Strings.WordUnapprove,
     };
 
     /// <summary>

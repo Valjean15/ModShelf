@@ -168,6 +168,11 @@ public sealed partial class LibraryModViewModel : ObservableObject
     public bool IsGone { get; private set; }
 
     /// <summary>
+    /// Whether the account endorsed it on its site; null while that isn't known, as for a site that doesn't endorse.
+    /// </summary>
+    public bool? IsEndorsed { get; private set; }
+
+    /// <summary>
     /// When it came into the library.
     /// </summary>
     public DateTimeOffset AddedAt { get; private set; }
@@ -292,6 +297,11 @@ public sealed partial class LibraryModViewModel : ObservableObject
         SiteUpdatedAt = updatedAt;
         UpdatedText = updatedAt is { } updated ? Dates.Ago(updated, _services.TimeProvider) : Strings.NoValue;
     }
+
+    /// <summary>
+    /// Shows whether the account endorsed it on its site; null while that isn't known. Runs on the UI thread.
+    /// </summary>
+    internal void ShowEndorsed(bool? endorsed) => IsEndorsed = endorsed;
 
     /// <summary>
     /// Opens the mod on its page, in place of the list.

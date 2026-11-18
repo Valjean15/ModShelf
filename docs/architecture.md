@@ -84,6 +84,7 @@ GameBanana).
 | `IUpdateFeed` | Which of a game's mods changed since a time, in one request | ✓ | | ✓ | ✓ | |
 | `IModRequirements` | What a mod needs | ✓ | | ✓ | | |
 | `IModCollections` | A collection's files, read as a list to import | ✓ | | | | |
+| `IModEndorsements` | The account's endorsements; endorses or abstains from a mod | ✓ | | | | |
 | `IAccountLinker` | Links an account; its `IAuthStrategy`s are the ways to link one | ✓ | ✓ (profile) | ✓ | | |
 | `IWatchlistReader` / `IWatchlistSync` | Reads the mods followed on the site; `Sync` also follows and unfollows | Sync | Reader | Reader | | |
 | `IApiQuota` | The requests left, from the site's answers | ✓ | | | | |
@@ -102,7 +103,9 @@ GameBanana).
   Every request carries `Application-Name` and `Application-Version`, and the source backs off before the daily and
   hourly limits. Linked with a personal API key; signing in through the browser (OAuth with PKCE and a loopback
   redirect) is built but stays off until Nexus Mods issues ModShelf a client ID. Premium accounts download directly;
-  free accounts start each download on the website and the `nxm://` link hands it back. Tracked mods sync both ways.
+  free accounts start each download on the website and the `nxm://` link hands it back. Tracked mods sync both ways,
+  and mods can be endorsed or abstained from (ADR 0100), from a mod's page, the Library's selection, `mod endorse` and
+  `mod_endorse`.
 - **GameBanana** — needs no account. A member's profile can be linked, read-only, to list the mods it subscribes to.
   Too many games to list, so games are found by GameBanana's own search (a word of 3 letters or more). No update
   feed, so each watched mod is asked. Its files sit side by side: an archived file is the old version of the newer
@@ -266,7 +269,7 @@ GameBanana).
   also serves `http://127.0.0.1:47823/mcp` (Streamable HTTP, `agents.port`), answering this computer only.
 - **Off until the user turns it on** (`agents.enabled`, read at every call). An agent can't change that, link
   accounts, delete files, move the library or take a site's links.
-- 28 tools (`library_*`, `download` and `downloads_*`, `mod_games`, `mod_show`, `mod_search`, `settings_*`,
+- 29 tools (`library_*`, `download` and `downloads_*`, `mod_games`, `mod_show`, `mod_search`, `mod_endorse`, `settings_*`,
   `accounts_status`, `diagnostics`), each with an output schema and annotations (read-only, changing, destructive,
   reaching the sites). Results include their nulls, so clients that validate against the schema accept them.
 - Arguments that don't fit a tool's schema fail before it runs, saying what it takes. A renamed argument keeps

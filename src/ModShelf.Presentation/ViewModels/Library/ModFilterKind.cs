@@ -19,4 +19,7 @@ public enum ModFilterKind
 
     /// <summary>Mods gone from their sites, hidden or removed there.</summary>
     Gone,
+
+    /// <summary>Mods the account hasn't endorsed, on a site that lets ModShelf endorse.</summary>
+    NotEndorsed,
 }

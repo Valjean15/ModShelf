@@ -79,6 +79,14 @@
     <value>endorsements</value>
     <comment>More than one, as in "87 endorsements" and "Most endorsements". Lowercase.</comment>
   </data>
+  <data name="WordApprove" xml:space="preserve">
+    <value>endorse</value>
+    <comment>Approving a mod with the account, as in "Endorse" on a mod's page. Lowercase.</comment>
+  </data>
+  <data name="WordUnapprove" xml:space="preserve">
+    <value>abstain</value>
+    <comment>Choosing not to endorse a mod, or taking an endorsement back, as in "Abstain". Lowercase.</comment>
+  </data>
   <data name="WordFollow" xml:space="preserve">
     <value>track</value>
     <comment>Following a mod with the account, as the mod page's Track button does: "Track on Nexus Mods". Lowercase.</comment>

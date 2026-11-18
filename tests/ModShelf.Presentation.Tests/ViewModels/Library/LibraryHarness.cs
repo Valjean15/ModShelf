@@ -5,6 +5,7 @@ using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.ViewModels.Library;
+using ModShelf.Presentation.ViewModels.ModPages;
 using ModShelf.Presentation.ViewModels.Undo;
 using ModShelf.Testing;
 
@@ -37,6 +38,7 @@ internal sealed class LibraryHarness : IDisposable
             Lists,
             Links,
             Watchlists,
+            new EndorsedMods(Endorsements),
             Storage,
             Settings,
             Browser,
@@ -90,6 +92,8 @@ internal sealed class LibraryHarness : IDisposable
     public ScriptedLinkDownloads Links { get; } = new();
 
     public ScriptedWatchlists Watchlists { get; } = new();
+
+    public ScriptedEndorsements Endorsements { get; } = new();
 
     public FakeLibraryStorage Storage { get; } = new();
 

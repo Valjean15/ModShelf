@@ -51,7 +51,7 @@ internal static partial class ModCommand
         show.SetAction((parsed, cancellationToken)
             => ShowAsync(environment, parsed.GetValue(link)!, parsed.GetValue(all), parsed.GetValue(changelog), cancellationToken));
 
-        return new Command("mod", "Looks mods up on the sites ModShelf knows, and follows them there, such as tracking them on Nexus Mods.")
+        return new Command("mod", "Looks mods up on the sites ModShelf knows, and follows and endorses them there, such as tracking them on Nexus Mods.")
         {
             show,
             CreateSearch(environment),
@@ -60,6 +60,8 @@ internal static partial class ModCommand
             CreateTracked(environment),
             CreateTrack(environment, track: true),
             CreateTrack(environment, track: false),
+            CreateEndorse(environment, endorse: true),
+            CreateEndorse(environment, endorse: false),
         };
     }
 

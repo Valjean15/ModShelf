@@ -477,6 +477,10 @@
                         <Button Content="{Binding UnwatchSelectedText}"
                                 Command="{Binding UnwatchSelectedCommand}"
                                 ToolTip.Tip="{x:Static res:Strings.LibraryUnwatchSelectedTip}" />
+                        <Button Content="{Binding EndorseSelectedText}"
+                                Command="{Binding EndorseSelectedCommand}"
+                                IsVisible="{Binding ShowsEndorseSelected}"
+                                ToolTip.Tip="{x:Static res:Strings.LibraryEndorseSelectedTip}" />
                         <Button Content="{Binding RemoveSelectedText}"
                                 Command="{Binding RemoveSelectedCommand}"
                                 ToolTip.Tip="{x:Static res:Strings.LibraryRemoveSelectedTip}" />

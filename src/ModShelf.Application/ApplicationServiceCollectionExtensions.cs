@@ -5,6 +5,7 @@ using ModShelf.Application.Accounts;
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Diagnostics;
 using ModShelf.Application.Downloads;
+using ModShelf.Application.Endorsements;
 using ModShelf.Application.Installed;
 using ModShelf.Application.Library;
 using ModShelf.Application.Links;
@@ -338,6 +339,20 @@ public static class ApplicationServiceCollectionExtensions
 
         services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
         services.TryAddSingleton<IWatchlists, Watchlists>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers <see cref="IEndorsements"/>, which reads and changes the linked accounts' endorsements on the sites that
+    /// let ModShelf endorse.
+    /// </summary>
+    public static IServiceCollection AddEndorsements(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
+        services.TryAddSingleton<IEndorsements, SiteEndorsements>();
 
         return services;
     }

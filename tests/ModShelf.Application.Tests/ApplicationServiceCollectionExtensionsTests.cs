@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using ModShelf.Application.Accounts;
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Downloads;
+using ModShelf.Application.Endorsements;
 using ModShelf.Application.Installed;
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
@@ -247,6 +248,18 @@ public sealed class ApplicationServiceCollectionExtensionsTests
         services.AddWatchlists();
 
         Assert.Equal(typeof(Watchlists), Single<IWatchlists>(services).ImplementationType);
+        Assert.Equal(typeof(SourceRegistry), Single<ISourceRegistry>(services).ImplementationType);
+        Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
+    }
+
+    [Fact]
+    public void AddEndorsementsRegistersThemOnceOverTheSources()
+    {
+        ServiceCollection services = new();
+        services.AddEndorsements();
+        services.AddEndorsements();
+
+        Assert.Equal(typeof(SiteEndorsements), Single<IEndorsements>(services).ImplementationType);
         Assert.Equal(typeof(SourceRegistry), Single<ISourceRegistry>(services).ImplementationType);
         Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
     }

@@ -51,16 +51,18 @@ public sealed class LibraryGoneTests : IDisposable
         (bool, int) none = (toggle.IsShown, toggle.Count);
 
         _harness.Library.Change(SkyUi, skyUi.LeftSite(TestData.Now));
+        await Screen.Checking;
         (bool, int) one = (toggle.IsShown, toggle.Count);
         toggle.IsOn = true;
         string[] shown = [.. Screen.GameMods.Select(mod => mod.Name)];
         _harness.Library.Change(SkyUi, skyUi);
+        await Screen.Checking;
 
         Assert.Equal((false, 0), none);
         Assert.Equal((true, 1), one);
         Assert.Equal(["SkyUI"], shown);
         Assert.Equal((true, 0), (toggle.IsShown, toggle.Count));
         Assert.Equal("Gone from their site", toggle.Label);
-        Assert.All(Screen.ModFilters.Where(filter => filter.Kind != ModFilterKind.Gone), filter => Assert.True(filter.IsShown));
+        Assert.All(Screen.ModFilters.Where(filter => !filter.HidesWhenNone), filter => Assert.True(filter.IsShown));
     }
 }

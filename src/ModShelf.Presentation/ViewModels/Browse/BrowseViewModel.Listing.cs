@@ -345,6 +345,7 @@ public sealed partial class BrowseViewModel
                 Mod = opened;
                 await opened.LoadAsync(token);
                 await opened.ShowTrackedAsync(token);
+                await opened.ShowEndorsedAsync(token);
             });
 
     /// <summary>

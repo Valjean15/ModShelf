@@ -62,8 +62,9 @@ internal static partial class ModShelfMcpServer
         + "- library_forget takes a mod out of the library, such as one the user no longer uses; its files stay on disk.\n"
         + "- library_rescan adds files placed by hand in the mods' folders, and reads the hashes the library lacks.\n"
         + "- library_export gives the library as a list of its mods and files (modshelf-list JSON) to save or share; "
-        + "library_import brings such a list in, watching its mods and downloading the files the library lacks, and with "
-        + "preview says what it would do first.\n"
+        + "library_import brings such a list in, or a site's collection by its link, watching its mods and downloading the "
+        + "files the library lacks, and with preview says what it would do first.\n"
+        + "- mod_endorse endorses one mod the user names, or abstains from it, with the linked account; never in bulk.\n"
         + "- Linking accounts, deleting files and moving the library are for the user, in the desktop app or the CLI.";
 
     /// <summary>
@@ -156,6 +157,7 @@ internal static partial class ModShelfMcpServer
             ActivatorUtilities.CreateInstance<ListTools>(services, queue),
             ActivatorUtilities.CreateInstance<DownloadTools>(services, queue, ActivatorUtilities.CreateInstance<McpDeprecations>(services)),
             ActivatorUtilities.CreateInstance<ModTools>(services),
+            ActivatorUtilities.CreateInstance<EndorsementTools>(services),
             ActivatorUtilities.CreateInstance<SettingsTools>(services),
             ActivatorUtilities.CreateInstance<StatusTools>(services),
         ];

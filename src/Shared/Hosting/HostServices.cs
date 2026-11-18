@@ -90,6 +90,7 @@ internal static class HostServices
         services.AddModDetails();
         services.AddModUpdates();
         services.AddWatchlists();
+        services.AddEndorsements();
         services.AddLibrary();
         services.AddLibraryStorage();
         services.AddLibraryDownloads();

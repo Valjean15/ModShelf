@@ -75,6 +75,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         IModLists lists,
         ILinkDownloads links,
         IWatchlists watchlists,
+        EndorsedMods endorsed,
         ILibraryStorage storage,
         ISettingsService settings,
         IBrowserLauncher browser,
@@ -127,6 +128,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             settings,
             new FolderDownloads(links, dialogs),
             new TrackedMods(watchlists),
+            endorsed,
             sources,
             browser,
             folders,
@@ -167,6 +169,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             new(ModFilterKind.Archived, Strings.ModFilterArchived, ArrangeMods),
             new(ModFilterKind.Missing, Strings.ModFilterMissing, ArrangeMods),
             new(ModFilterKind.Gone, Strings.ModFilterGone, ArrangeMods, hidesWhenNone: true),
+            new(ModFilterKind.NotEndorsed, Strings.ModFilterNotEndorsed, ArrangeMods, hidesWhenNone: true),
         ];
         Activity = new LibraryActivityViewModel(history, OpenAsync, GameNameOf, SiteNameOf, timeProvider, logger);
         Previews = new PreviewsViewModel(PreviewScreen.Library, pictures);
@@ -630,6 +633,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             if (problem is null)
             {
                 await opened.ShowTrackedAsync(token);
+                await opened.ShowEndorsedAsync(token);
             }
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested)
@@ -940,6 +944,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
                     cancellationToken);
             // The game's saved details at once, not a read a mod (ADR 0084).
             IReadOnlyDictionary<ModRef, ModInfo> saved = await _pictures.Details.GetSavedAsync([.. mods.Select(mod => mod.Mod)], cancellationToken);
+            await ReadEndorsementsAsync([.. mods.Select(mod => mod.Mod.Game.Source).Distinct()], cancellationToken);
 
             _uiThread.Post(() =>
             {
@@ -954,6 +959,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
                     {
                         row.ShowMissing(missing.GetValueOrDefault(mod.Mod));
                         row.ShowSiteUpdate(saved.GetValueOrDefault(mod.Mod)?.UpdatedAt);
+                        row.ShowEndorsed(_pageServices.Endorsed.IsEndorsed(mod.Mod));
                     }
                 }
 
@@ -1103,6 +1109,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         ModFilterKind.Archived => mod.ArchivedCount > 0,
         ModFilterKind.Missing => mod.MissingCount > 0,
         ModFilterKind.Gone => mod.IsGone,
+        ModFilterKind.NotEndorsed => mod.IsEndorsed == false,
         _ => false,
     };
 

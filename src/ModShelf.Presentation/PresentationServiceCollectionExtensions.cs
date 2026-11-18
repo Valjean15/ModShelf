@@ -8,6 +8,7 @@ using ModShelf.Presentation.ViewModels.Browse;
 using ModShelf.Presentation.ViewModels.Downloads;
 using ModShelf.Presentation.ViewModels.FirstRun;
 using ModShelf.Presentation.ViewModels.Library;
+using ModShelf.Presentation.ViewModels.ModPages;
 using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Presentation.ViewModels.Quota;
 using ModShelf.Presentation.ViewModels.QuickSearch;
@@ -39,6 +40,7 @@ public static class PresentationServiceCollectionExtensions
         services.TryAddSingleton<IScreenOpener, ScreenOpener>();
         services.TryAddSingleton<ModPictures>();
         services.TryAddSingleton<SitesWantingAccounts>();
+        services.TryAddSingleton<EndorsedMods>();
         services.TryAddSingleton<AccountsViewModel>();
         services.TryAddSingleton<UndoBarViewModel>();
         services.TryAddSingleton<QuotaWarningViewModel>();

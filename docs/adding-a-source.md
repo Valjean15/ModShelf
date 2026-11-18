@@ -80,6 +80,7 @@ site has. What ModShelf does without each:
 | `IUpdateFeed` | Which of a game's mods changed lately, in one request. | Each watched mod is asked for its files on its own: one request per mod per check. |
 | `IWatchlistReader` | The mods the account follows on the site, to read only. | Browse has no followed mods. |
 | `IWatchlistSync` | The `IWatchlistReader` ModShelf can change too: following and no longer following a mod. | The mod page has no button to follow. |
+| `IModEndorsements` | The account's endorsements, by mod, and endorsing or abstaining from a mod, with the version endorsed when the site wants it. | The mod page and the Library have no button to endorse, and `mod endorse` refuses the site's mods. |
 | `IAccountLinker` | Linking an account, with one `IAuthStrategy` per way the site allows. | No account is offered. |
 | `IApiQuota` | What's left of the account's allowances, when the site says. | No quota is shown. |
 | `IHandoffScheme` | The link scheme the site hands downloads over with. | ModShelf can't offer to open those links. |
@@ -153,11 +154,14 @@ sentence starts. Nexus Mods' are:
 | `Followed` | tracked | **Tracked mods**, "Tracked on Nexus Mods.", "12 tracked mods of Stardew Valley on Nexus Mods." |
 | `Approval` | endorsement | "1 endorsement" |
 | `Approvals` | endorsements | "87 endorsements", **Most endorsements**, **Fewest endorsements**, the CLI's Endorsements column |
+| `Approve` | endorse | **Endorse**, "Endorsed on Nexus Mods: …", **Endorse (3)** in the Library |
+| `Unapprove` | abstain | "You chose to abstain on Nexus Mods.", "Abstained on Nexus Mods: …" |
 
 A site with `IWatchlistSync` gives all three words for following; one with only `IWatchlistReader` gives `Followed`
 alone, as GameBanana's "subscribed"; one with neither gives none. A site that counts approval in `ModInfo.Endorsements`
 gives both words for it, and one that sorts by `SearchSort.Endorsements` must; a site without gives neither, and nothing
-shows it: no count, no order by it, no CLI column. `SiteWords.None` is a site with neither.
+shows it: no count, no order by it, no CLI column. A site with `IModEndorsements` gives `Approve` and `Unapprove` too
+(`SiteWords.CanApprove`): without them, nothing offers to endorse. `SiteWords.None` is a site with neither.
 
 ### Search
 
