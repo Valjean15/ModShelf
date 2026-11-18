@@ -51,7 +51,7 @@ Settings › **Agents** in the desktop app. Agents are off until you turn them o
 ## 1. The server
 
 - [ ] **1.1 Tools.** Start the agent's app, and ask it which ModShelf tools it has.
-  26 tools, from `library_list` to `diagnostics`. Claude Desktop's settings show the server as running. After ModShelf
+  28 tools, from `library_list` to `diagnostics`. Claude Desktop's settings show the server as running. After ModShelf
   is updated, quit Claude Desktop completely, start it again and begin a new conversation: an older list of the tools
   makes calls such as `download` with `link` fail with "download doesn't take these arguments: it needs links. …".
 - [ ] **1.2 Reading.** Ask for the library, the updates and the settings; then for the mods with files missing from disk.
@@ -227,6 +227,21 @@ Elder Scrolls V: Skyrim Special Edition (or another). Start a new conversation.
 - [ ] **8.2 Then its mods.** Ask it to search the mods of one of those games.
   It calls `mod_search` with the key and site `mod_games` gave, as for any game.
 
+## 9. Lists and collections
+
+With a few mods in the library, and the link of a small public collection on Nexus Mods at hand. Start a new
+conversation.
+
+- [ ] **9.1 Export, then preview it back.** Ask the agent to export the library as a list, then to say what importing that
+  list would do.
+  It calls `library_export`, which gives the list's JSON and counts, then `library_import` with `list` and `preview`
+  `true`: every mod in the library already, nothing done.
+- [ ] **9.2 A collection.** Give it the collection's link and ask what importing it would do, then to import it watching
+  only.
+  `library_import` with `collection` and `preview` `true` gives the collection's name, its mods and files, and
+  `elsewhere` and `filesUnavailable` when it has them; then, with `watchOnly` `true`, the mods are watched, and nothing
+  is downloaded or installed.
+
 ## Results
 
 Copy this table into the release's notes or issue, and mark each check ✅, ❌ or – (not run). For a ❌, add what you
@@ -282,3 +297,5 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 7.5 The file from the browser | | |
 | 8.1 The games here | | |
 | 8.2 Then its mods | | |
+| 9.1 Export, then preview it back | | |
+| 9.2 A collection | | |

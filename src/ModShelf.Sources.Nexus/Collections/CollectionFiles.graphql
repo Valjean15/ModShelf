@@ -1,0 +1,38 @@
+# A collection revision's files, for the Nexus source's IModCollections, from the v2 API, by its game and slug: the
+# revision asked for, or the latest published when it's null. Each file with its mod's name and author; a file Nexus Mods
+# no longer offers comes without them. Then what the collection needs from elsewhere. Adult collections are read too:
+# the user named this one. The recording script reads this file too, so the recorded answers are to this exact query.
+query CollectionFiles($slug: String!, $domainName: String!, $revision: Int) {
+  collectionRevision(slug: $slug, domainName: $domainName, revision: $revision, viewAdultContent: true) {
+    revisionNumber
+    collection {
+      name
+      slug
+    }
+    modFiles {
+      fileId
+      optional
+      version
+      file {
+        fileId
+        modId
+        name
+        version
+        category
+        game {
+          domainName
+        }
+        mod {
+          name
+          author
+        }
+      }
+    }
+    externalResources {
+      name
+      optional
+      resourceType
+      resourceUrl
+    }
+  }
+}

@@ -96,7 +96,8 @@ Other projects see a project only through what it makes public, so keep that to 
 | 2000–2099 | Sources.DegMods |
 | 2100–2199 | Platform: the browser's downloads folder |
 | 2200–2299 | Installed games: Platform reading Steam's files, Application matching them to the sites' games |
-| 2300 onward | Next free block |
+| 2300–2399 | Application: mod lists and collections |
+| 2400 onward | Next free block |
 
 ## 7. Files
 

@@ -5,7 +5,7 @@ follows from it.
 
 ## Writing a new one
 
-Add `docs/adr/NNNN-short-title.md`, numbered after the last one. Numbering continues from **0097**, so the numbers
+Add `docs/adr/NNNN-short-title.md`, numbered after the last one. Numbering continues from **0098**, so the numbers
 the code's comments cite stay unique. Use the sections the earlier records used: **Context**, **Decision**,
 **Consequences**, and **Testing**. When a decision changes how ModShelf works, update
 [architecture.md](../architecture.md) too, so it keeps describing the app as it is.
@@ -15,6 +15,7 @@ the code's comments cite stay unique. Use the sections the earlier records used:
 | ADR | Title |
 |---|---|
 | 0097 | [Browse starts empty, actions on the selected mods, and game lists for hundreds of games](0097-browse-starts-empty-batch-actions-and-compact-game-lists.md) |
+| 0098 | [Mod lists, and collections read as lists](0098-mod-lists-and-collections.md) |
 
 ## The records of 1.0 (0001–0096)
 

@@ -215,15 +215,8 @@ public sealed partial class NexusSource : IModCatalog
     /// The section of the Files tab, by its name when Nexus Mods gives one, otherwise by its number. A section with
     /// neither known, such as the unnamed category 6, is Unknown.
     /// </summary>
-    private static ModFileCategory Category(NexusFile file) => file.CategoryName?.ToUpperInvariant() switch
-    {
-        "MAIN" => ModFileCategory.Main,
-        "UPDATE" => ModFileCategory.Update,
-        "OPTIONAL" => ModFileCategory.Optional,
-        "OLD_VERSION" => ModFileCategory.OldVersion,
-        "MISCELLANEOUS" => ModFileCategory.Miscellaneous,
-        "ARCHIVED" => ModFileCategory.Archived,
-        null => file.CategoryId switch
+    private static ModFileCategory Category(NexusFile file) => file.CategoryName is null
+        ? file.CategoryId switch
         {
             NexusFile.MainCategory => ModFileCategory.Main,
             2 => ModFileCategory.Update,
@@ -231,7 +224,20 @@ public sealed partial class NexusSource : IModCatalog
             4 => ModFileCategory.OldVersion,
             5 => ModFileCategory.Miscellaneous,
             _ => ModFileCategory.Unknown,
-        },
+        }
+        : CategoryNamed(file.CategoryName);
+
+    /// <summary>
+    /// The section of the Files tab by the name both APIs give it, such as <c>OLD_VERSION</c>; Unknown for any other.
+    /// </summary>
+    private static ModFileCategory CategoryNamed(string? name) => name?.ToUpperInvariant() switch
+    {
+        "MAIN" => ModFileCategory.Main,
+        "UPDATE" => ModFileCategory.Update,
+        "OPTIONAL" => ModFileCategory.Optional,
+        "OLD_VERSION" => ModFileCategory.OldVersion,
+        "MISCELLANEOUS" => ModFileCategory.Miscellaneous,
+        "ARCHIVED" => ModFileCategory.Archived,
         _ => ModFileCategory.Unknown,
     };
 

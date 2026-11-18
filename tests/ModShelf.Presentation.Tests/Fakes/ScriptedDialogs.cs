@@ -1,4 +1,5 @@
 using ModShelf.Presentation.Services;
+using ModShelf.Presentation.ViewModels.Dialogs;
 using ModShelf.Presentation.ViewModels.FirstRun;
 using ModShelf.Presentation.ViewModels.Settings;
 
@@ -40,6 +41,16 @@ internal sealed class ScriptedDialogs : IDialogService
     /// </summary>
     public List<(string Title, string? Folder)> FilePickers { get; } = [];
 
+    /// <summary>
+    /// Where the user saves each time in turn; null cancels.
+    /// </summary>
+    public Queue<string?> SaveFiles { get; } = new();
+
+    /// <summary>
+    /// The save dialogs shown: each one's title and the name it suggests.
+    /// </summary>
+    public List<(string Title, string SuggestedName)> SavePickers { get; } = [];
+
     public Task ShowMessageAsync(string title, string message, CancellationToken cancellationToken)
     {
         Messages.Add((title, message));
@@ -74,6 +85,12 @@ internal sealed class ScriptedDialogs : IDialogService
     {
         FilePickers.Add((title, folder));
         return Task.FromResult(Files.TryDequeue(out string? file) ? file : null);
+    }
+
+    public Task<string?> PickSaveFileAsync(string title, string suggestedName, CancellationToken cancellationToken)
+    {
+        SavePickers.Add((title, suggestedName));
+        return Task.FromResult(SaveFiles.TryDequeue(out string? file) ? file : null);
     }
 
     /// <summary>
@@ -170,6 +187,41 @@ internal sealed class ScriptedDialogs : IDialogService
         if (moving.MoveCommand.CanExecute(null))
         {
             await moving.MoveCommand.ExecuteAsync(null);
+        }
+    }
+
+    /// <summary>
+    /// Each dialog that imported a list, or would have.
+    /// </summary>
+    public List<ImportListViewModel> ImportingLists { get; } = [];
+
+    /// <summary>
+    /// What the user does in the dialog that imports a list; by default, they close it. Once this is done, unless the
+    /// dialog closed itself, the user closes it.
+    /// </summary>
+    public Func<ImportListViewModel, Task>? InImportList { get; set; }
+
+    public async Task ImportListAsync(ImportListViewModel importing, CancellationToken cancellationToken)
+    {
+        ImportingLists.Add(importing);
+        bool closed = false;
+        void Close(object? sender, EventArgs e) => closed = true;
+        importing.CloseRequested += Close;
+        try
+        {
+            if (InImportList is { } user)
+            {
+                await user(importing);
+            }
+
+            if (!closed && importing.CloseCommand.CanExecute(null))
+            {
+                importing.CloseCommand.Execute(null);
+            }
+        }
+        finally
+        {
+            importing.CloseRequested -= Close;
         }
     }
 

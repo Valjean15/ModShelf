@@ -459,6 +459,30 @@ Run it once, in the Premium run, after section 17, on a computer with Steam and 
 - [ ] **18.6 Steam's games changed.** Install or uninstall a small game in Steam (or move one to another library folder), then open Settings › Games again.
   The list follows Steam's: read again each time Settings › Games shows, and each time Browse shows. A game uninstalled keeps its choices in the settings file, for when it's back.
 
+## 19. Lists and collections
+
+Run it in both runs, after section 8, with a few mods in the library. For the collection, have the link of a small
+public collection on Nexus Mods at hand. Nothing here installs anything.
+
+- [ ] **19.1 Export.** On the Library screen, **Export list…**, and save it. Then open a game, select two of its mods, and
+  **Export list…** there.
+  The save dialog suggests `library.modshelf-list.json`, then the game's key; a message says how many mods were
+  exported, and where. The second file holds the two selected mods alone.
+- [ ] **19.2 Import a list.** Remove one of the mods, then **Import list…** › **From a list file…**, and choose the first file.
+  The dialog says how many mods are new and in the library already, and how many files it would download. **Only watch
+  the mods** says none would be. **Import** watches the mod again and, with downloads chosen, queues its files; the
+  dialog then says what it did.
+- [ ] **19.3 Import a collection.** **Import list…** › **From a collection link…**, paste the collection's link, and
+  **Read collection**.
+  The dialog's title names the collection, its facts count its mods and files, and, when it has them, the files Nexus
+  Mods no longer offers and what it needs from elsewhere, each with **Open page**, which opens the page in the browser.
+  The optional files' choice counts them. **Only watch the mods**, then **Import**: the mods are watched, nothing is
+  downloaded, nothing installed.
+- [ ] **19.4 Refusals.** **From a collection link…** with `https://www.nexusmods.com/stardewvalley/mods/2400`, then with
+  a collection link whose slug doesn't exist.
+  "That link isn't to a collection ModShelf can read…", then "The site has no such collection." (or what Nexus Mods
+  said of it), each under "The collection couldn't be read".
+
 ## Clean up
 
 If a run stopped before 12.7, give the links back on the Settings screen first: their registration starts ModShelf on the test folder. After both accounts, quit the app from the tray menu, then:
@@ -652,3 +676,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 18.4 In Browse | | – | |
 | 18.5 A name two games share | | – | |
 | 18.6 Steam's games changed | | – | |
+| 19.1 Export | | | |
+| 19.2 Import a list | | | |
+| 19.3 Import a collection | | | |
+| 19.4 Refusals | | | |

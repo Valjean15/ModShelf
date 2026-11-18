@@ -28,7 +28,8 @@ internal sealed record NexusLink(string Game, string ModId, string? FileId, bool
     /// </summary>
     public static readonly Uri Website = new("https://www.nexusmods.com/");
 
-    private const string NotCollections = "ModShelf downloads single files, not collections.";
+    private const string NotCollections = "ModShelf downloads single files, not collections. To download a collection's "
+        + "files into the library, import its link as a list: Library › Import list…, or library import <link>.";
 
     private const string NotPages = "That's a link to Nexus Mods' servers, not to a page: a download link from them stops "
         + "working after a while. Copy the mod's page link, or the file's link on its Files tab, instead.";
@@ -161,6 +162,32 @@ internal sealed record NexusLink(string Game, string ModId, string? FileId, bool
             ? new NexusLink(domain, modId.ToString(CultureInfo.InvariantCulture), FileId: null, IsHandoff: false)
             : null;
 
+    /// <summary>
+    /// Whether the link is to a page of the website, on one of its hosts.
+    /// </summary>
+    internal static bool IsWebsite(Uri link)
+        => (link.Scheme == Uri.UriSchemeHttps || link.Scheme == Uri.UriSchemeHttp)
+            && WebsiteHosts.Contains(link.IdnHost, StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// The link's path, a segment at a time, without empty ones.
+    /// </summary>
+    internal static string[] Segments(Uri link)
+        => link.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+    /// <summary>
+    /// The game's domain name in lower case, or null unless it has only letters, digits, '-' and '_', since it goes
+    /// into the API's paths.
+    /// </summary>
+    internal static string? GameDomain(string text)
+    {
+        string game = text.ToLowerInvariant();
+        return game.Length is > 0 and <= MaxGameLength
+            && game.All(character => char.IsAsciiLetterLower(character) || char.IsAsciiDigit(character) || character is '-' or '_')
+                ? game
+                : null;
+    }
+
     private string RequireFile() => FileId ?? throw new InvalidOperationException("The link is to a mod, not to one of its files.");
 
     private static bool IsServer(string host)
@@ -209,27 +236,11 @@ internal sealed record NexusLink(string Game, string ModId, string? FileId, bool
         return new NexusLink(GameIn(link.Host, link), IdIn(mod, link), IdIn(file, link), IsHandoff: true);
     }
 
-    private static string[] Segments(Uri link)
-        => link.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
-
     private static string GameIn(string text, Uri link)
         => GameDomain(text) ?? throw new ArgumentException("That Nexus Mods link names no game ModShelf can look up.", nameof(link));
 
     private static string IdIn(string text, Uri link)
         => Id(text) ?? throw new ArgumentException("That Nexus Mods link has a mod or file ID that isn't a number.", nameof(link));
-
-    /// <summary>
-    /// The game's domain name in lower case, or null unless it has only letters, digits, '-' and '_', since it goes
-    /// into the API's paths.
-    /// </summary>
-    private static string? GameDomain(string text)
-    {
-        string game = text.ToLowerInvariant();
-        return game.Length is > 0 and <= MaxGameLength
-            && game.All(character => char.IsAsciiLetterLower(character) || char.IsAsciiDigit(character) || character is '-' or '_')
-                ? game
-                : null;
-    }
 
     /// <summary>
     /// A positive whole number, written without leading zeros, so that the same mod or file always has the same ID.

@@ -3991,4 +3991,252 @@
     <value>{0}: {1:N0} games</value>
     <comment>An installed game's pill for a site with several games of its name; the site's name, how many.</comment>
   </data>
+  <data name="LibraryExportList" xml:space="preserve">
+    <value>Export list…</value>
+    <comment>Library: the button that exports the library, or the game shown, as a list file.</comment>
+  </data>
+  <data name="LibraryImportList" xml:space="preserve">
+    <value>Import list…</value>
+    <comment>Library: the button that imports a list file into the library.</comment>
+  </data>
+  <data name="ListExportTitle" xml:space="preserve">
+    <value>Export the library as a list</value>
+    <comment>The title of the dialog choosing where to save a list.</comment>
+  </data>
+  <data name="ListExportGameTitle" xml:space="preserve">
+    <value>Export {0}'s mods as a list</value>
+    <comment>The title of the dialog choosing where to save a game's list; the game's name.</comment>
+  </data>
+  <data name="ListExportSelectedTitle" xml:space="preserve">
+    <value>Export the selected mods as a list</value>
+    <comment>The title of the dialog choosing where to save the selected mods' list.</comment>
+  </data>
+  <data name="ListExportedTitle" xml:space="preserve">
+    <value>List exported</value>
+    <comment>The title of the message saying a list was written.</comment>
+  </data>
+  <data name="ListExportedOne" xml:space="preserve">
+    <value>Exported 1 mod and its files to {0}. Import list… brings it into a library, here or on another computer.</value>
+    <comment>Says a list of one mod was written; the file's path.</comment>
+  </data>
+  <data name="ListExported" xml:space="preserve">
+    <value>Exported {0:N0} mods and their files to {1}. Import list… brings them into a library, here or on another computer.</value>
+    <comment>Says a list was written; how many mods, and the file's path.</comment>
+  </data>
+  <data name="ListExportFailedTitle" xml:space="preserve">
+    <value>The list wasn't exported</value>
+    <comment>The title of the message saying a list couldn't be written.</comment>
+  </data>
+  <data name="ListImportPickTitle" xml:space="preserve">
+    <value>Choose a list to import</value>
+    <comment>The title of the file picker choosing a list file to import.</comment>
+  </data>
+  <data name="ListUnreadableTitle" xml:space="preserve">
+    <value>That isn't a list ModShelf can import</value>
+    <comment>The title of the message saying a file isn't a list ModShelf reads; the reason follows.</comment>
+  </data>
+  <data name="ListImportTitle" xml:space="preserve">
+    <value>Import a list</value>
+    <comment>The title of the import dialog for a list without a title.</comment>
+  </data>
+  <data name="ListImportTitleNamed" xml:space="preserve">
+    <value>Import “{0}”</value>
+    <comment>The title of the import dialog for a list with a title, such as a collection's name.</comment>
+  </data>
+  <data name="ListImportModsLabel" xml:space="preserve">
+    <value>Mods</value>
+    <comment>The import dialog: the label of the line about the list's mods.</comment>
+  </data>
+  <data name="ListImportModsValue" xml:space="preserve">
+    <value>{0:N0} in the list: {1:N0} new to the library, {2:N0} in it already</value>
+    <comment>The import dialog: the list's mods; how many, how many new, how many in the library.</comment>
+  </data>
+  <data name="ListImportModsNoSite" xml:space="preserve">
+    <value>, {0:N0} of sites ModShelf can't reach here</value>
+    <comment>The import dialog: added to the mods' line when some are of sites ModShelf doesn't know.</comment>
+  </data>
+  <data name="ListImportFilesLabel" xml:space="preserve">
+    <value>Files</value>
+    <comment>The import dialog: the label of the line about the files to download.</comment>
+  </data>
+  <data name="ListImportFilesOne" xml:space="preserve">
+    <value>1 to download into the library</value>
+    <comment>The import dialog: one file would be downloaded.</comment>
+  </data>
+  <data name="ListImportFiles" xml:space="preserve">
+    <value>{0:N0} to download into the library</value>
+    <comment>The import dialog: how many files would be downloaded.</comment>
+  </data>
+  <data name="ListImportFilesNone" xml:space="preserve">
+    <value>None to download: the library has them all</value>
+    <comment>The import dialog: no file to download.</comment>
+  </data>
+  <data name="ListImportFilesWatchOnly" xml:space="preserve">
+    <value>None: the mods are only watched</value>
+    <comment>The import dialog: Only watch the mods is chosen.</comment>
+  </data>
+  <data name="ListImportDownload" xml:space="preserve">
+    <value>Watch the mods and download the listed files</value>
+    <comment>The import dialog: the choice that downloads the files.</comment>
+  </data>
+  <data name="ListImportWatchOnly" xml:space="preserve">
+    <value>Only watch the mods</value>
+    <comment>The import dialog: the choice that downloads nothing.</comment>
+  </data>
+  <data name="ListImportOptionalOne" xml:space="preserve">
+    <value>Also download the file the list marks optional</value>
+    <comment>The import dialog: the option to download one optional file too.</comment>
+  </data>
+  <data name="ListImportOptional" xml:space="preserve">
+    <value>Also download the {0:N0} files the list marks optional</value>
+    <comment>The import dialog: the option to download the optional files too; how many.</comment>
+  </data>
+  <data name="ListImportNewest" xml:space="preserve">
+    <value>For a file its site no longer offers, download the mod's newest main file</value>
+    <comment>The import dialog: the option to replace a file the site no longer has.</comment>
+  </data>
+  <data name="ListImportNote" xml:space="preserve">
+    <value>A mod the library has keeps its own watching, pin and note. Nothing is installed.</value>
+    <comment>The import dialog: the note under the choices.</comment>
+  </data>
+  <data name="ListImportConfirm" xml:space="preserve">
+    <value>Import</value>
+    <comment>The import dialog: the button that imports the list.</comment>
+  </data>
+  <data name="ListImportStop" xml:space="preserve">
+    <value>Stop</value>
+    <comment>The import dialog: the button that stops an import under way.</comment>
+  </data>
+  <data name="ListImportProgress" xml:space="preserve">
+    <value>Importing… {0:N0} of {1:N0} mods</value>
+    <comment>The import dialog: how far the import is.</comment>
+  </data>
+  <data name="ListImportAddedOne" xml:space="preserve">
+    <value>Watched 1 new mod.</value>
+    <comment>The import dialog's result: one mod was watched.</comment>
+  </data>
+  <data name="ListImportAdded" xml:space="preserve">
+    <value>Watched {0:N0} new mods.</value>
+    <comment>The import dialog's result: how many mods were watched.</comment>
+  </data>
+  <data name="ListImportQueuedOne" xml:space="preserve">
+    <value>Queued 1 file for the library; it shows on the Downloads screen.</value>
+    <comment>The import dialog's result: one file was queued.</comment>
+  </data>
+  <data name="ListImportQueued" xml:space="preserve">
+    <value>Queued {0:N0} files for the library; they show on the Downloads screen.</value>
+    <comment>The import dialog's result: how many files were queued.</comment>
+  </data>
+  <data name="ListImportInLibraryOne" xml:space="preserve">
+    <value>1 file was in the library already.</value>
+    <comment>The import dialog's result: one listed file was there already.</comment>
+  </data>
+  <data name="ListImportInLibrary" xml:space="preserve">
+    <value>{0:N0} files were in the library already.</value>
+    <comment>The import dialog's result: how many listed files were there already.</comment>
+  </data>
+  <data name="ListImportNothing" xml:space="preserve">
+    <value>Nothing needed importing: the library has it all.</value>
+    <comment>The import dialog's result: nothing was done.</comment>
+  </data>
+  <data name="ListImportStopped" xml:space="preserve">
+    <value>Stopped. What was queued stays on the Downloads screen.</value>
+    <comment>The import dialog: the import was stopped.</comment>
+  </data>
+  <data name="ListImportFailed" xml:space="preserve">
+    <value>The list couldn't be imported. The log says why.</value>
+    <comment>The import dialog: the import failed unexpectedly.</comment>
+  </data>
+  <data name="ListImportProblems" xml:space="preserve">
+    <value>Not done:</value>
+    <comment>The import dialog: the heading of what couldn't be done.</comment>
+  </data>
+  <data name="ListProblemNoSite" xml:space="preserve">
+    <value>{0}: ModShelf can't reach {1} here.</value>
+    <comment>A list's mod of a site ModShelf doesn't know; the mod's name and the site.</comment>
+  </data>
+  <data name="ListProblemSiteFailed" xml:space="preserve">
+    <value>{0}: its site couldn't be asked. {1}</value>
+    <comment>A list's mod its site couldn't be asked about; the mod's name and what the site said.</comment>
+  </data>
+  <data name="ListProblemFileGone" xml:space="preserve">
+    <value>{0}: its site no longer offers file {1}.</value>
+    <comment>A listed file the site no longer has; the mod's name and the file's ID.</comment>
+  </data>
+  <data name="ListProblemNotDone" xml:space="preserve">
+    <value>{0}: {1}</value>
+    <comment>A listed mod or file that couldn't be watched or queued; the mod's name and why.</comment>
+  </data>
+  <data name="ListTooLarge" xml:space="preserve">
+    <value>The file is too large to be a ModShelf list.</value>
+    <comment>Says a file chosen to import is far too large to be a list.</comment>
+  </data>
+  <data name="LibraryImportFromFile" xml:space="preserve">
+    <value>From a list file…</value>
+    <comment>Library: the menu item of Import list… that imports a list file.</comment>
+  </data>
+  <data name="LibraryImportFromCollection" xml:space="preserve">
+    <value>From a collection link…</value>
+    <comment>Library: the menu item of Import list… that imports a site's collection by its link.</comment>
+  </data>
+  <data name="CollectionAskTitle" xml:space="preserve">
+    <value>Import a collection</value>
+    <comment>The title of the dialog asking for a collection's link.</comment>
+  </data>
+  <data name="CollectionAskMessage" xml:space="preserve">
+    <value>Paste the link of a collection's page, such as a Nexus Mods collection's. Its files are downloaded into the library at the versions it pins. Nothing is installed, and its install steps aren't run.</value>
+    <comment>The dialog asking for a collection's link: what to paste, and what importing does.</comment>
+  </data>
+  <data name="CollectionAskHint" xml:space="preserve">
+    <value>https://www.nexusmods.com/games/…/collections/…</value>
+    <comment>The placeholder of the field for a collection's link.</comment>
+  </data>
+  <data name="CollectionAskConfirm" xml:space="preserve">
+    <value>Read collection</value>
+    <comment>The button that reads the collection at the link given.</comment>
+  </data>
+  <data name="CollectionUnreadableTitle" xml:space="preserve">
+    <value>The collection couldn't be read</value>
+    <comment>The title of the message saying a collection couldn't be read; the reason follows.</comment>
+  </data>
+  <data name="CollectionNotALink" xml:space="preserve">
+    <value>That isn't a complete link. Copy the address of the collection's page.</value>
+    <comment>Says the text given isn't a link.</comment>
+  </data>
+  <data name="CollectionNotOne" xml:space="preserve">
+    <value>That link isn't to a collection ModShelf can read, such as a Nexus Mods collection's page.</value>
+    <comment>Says no site reads the link as a collection.</comment>
+  </data>
+  <data name="CollectionNotFound" xml:space="preserve">
+    <value>The site has no such collection.</value>
+    <comment>Says the site doesn't have the collection linked.</comment>
+  </data>
+  <data name="CollectionNeedsAccount" xml:space="preserve">
+    <value>The site needs a linked account to read the collection, or refused the one linked. Link it in Settings › Accounts, then try again.</value>
+    <comment>Says the site refused for want of an account.</comment>
+  </data>
+  <data name="CollectionFailed" xml:space="preserve">
+    <value>The site couldn't be asked: {0}</value>
+    <comment>Says the site couldn't be reached or refused; {0} is what it said.</comment>
+  </data>
+  <data name="ListImportUnavailableLabel" xml:space="preserve">
+    <value>Unavailable</value>
+    <comment>The import dialog: the label of the line about the collection's files its site no longer offers.</comment>
+  </data>
+  <data name="ListImportUnavailableOne" xml:space="preserve">
+    <value>1 file the collection names is no longer offered by its site</value>
+    <comment>The import dialog: one file the collection names is gone from its site.</comment>
+  </data>
+  <data name="ListImportUnavailable" xml:space="preserve">
+    <value>{0:N0} files the collection names are no longer offered by its site</value>
+    <comment>The import dialog: how many files the collection names are gone from its site.</comment>
+  </data>
+  <data name="ListImportElsewhere" xml:space="preserve">
+    <value>Needed from elsewhere, which ModShelf doesn't download:</value>
+    <comment>The import dialog: the heading of what a collection needs from outside its mods' site.</comment>
+  </data>
+  <data name="ListImportElsewhereOptional" xml:space="preserve">
+    <value>Optional</value>
+    <comment>The import dialog: marks a thing needed from elsewhere that the collection marks optional.</comment>
+  </data>
 </root>

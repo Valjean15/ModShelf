@@ -113,6 +113,26 @@ internal sealed class AvaloniaDialogService : IDialogService
         });
     }
 
+    public Task<string?> PickSaveFileAsync(string title, string suggestedName, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(title);
+        ArgumentException.ThrowIfNullOrWhiteSpace(suggestedName);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            // The system's save dialog needs a window to belong to; it asks itself before a file is replaced.
+            if (AppWindows.Top is not { } owner)
+            {
+                return null;
+            }
+
+            IStorageFile? file = await owner.StorageProvider.SaveFilePickerAsync(
+                new FilePickerSaveOptions { Title = title, SuggestedFileName = suggestedName, ShowOverwritePrompt = true });
+            return file?.TryGetLocalPath();
+        });
+    }
+
     public Task<bool> AddGameAsync(AddGameViewModel adding, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(adding);
@@ -139,6 +159,14 @@ internal sealed class AvaloniaDialogService : IDialogService
         cancellationToken.ThrowIfCancellationRequested();
 
         return Dispatcher.UIThread.InvokeAsync(() => ShowAsync(new GameMoveDialog { DataContext = moving }, () => true, cancellationToken));
+    }
+
+    public Task ImportListAsync(ImportListViewModel importing, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(importing);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Dispatcher.UIThread.InvokeAsync(() => ShowAsync(new ImportListDialog { DataContext = importing }, () => true, cancellationToken));
     }
 
     public Task ShowFirstRunAsync(FirstRunViewModel setup, CancellationToken cancellationToken)

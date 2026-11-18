@@ -157,7 +157,7 @@ This section changes your account. If SMAPI is tracked when you start, track it 
 - [ ] **9.1 A mod that doesn't exist.** `ms mod show "https://www.nexusmods.com/stardewvalley/mods/999999999"`.
   "The site has no such mod or file." Exit code 2.
 - [ ] **9.2 A collection.** `ms mod show "https://next.nexusmods.com/stardewvalley/collections/abcdef"`.
-  "ModShelf downloads single files, not collections." Exit code 2.
+  "ModShelf downloads single files, not collections. To download a collection's files into the library, import its link as a list: Library › Import list…, or library import <link>." Exit code 2.
 - [ ] **9.3 A Nexus Mods page that isn't a mod.** `ms download "https://www.nexusmods.com/stardewvalley/news" --to $downloads`.
   "That Nexus Mods link isn't to a mod. Copy the link of the mod's page, or of a file on its Files tab." Exit code 2.
 - [ ] **9.4 A link to Nexus Mods' file servers.** `ms download "https://cf-files.nexusmods.com/cdn/1704/2400/SMAPI.zip" --to $downloads`.
@@ -369,6 +369,33 @@ Run it once, in the Premium run, on a computer with Steam and a few games instal
 - [ ] **16.3 A site that can't list its games.** With mod.io unlinked, as 14.17 leaves it, `ms mod games --installed`.
   On the error output, "mod.io couldn't list its games, so they match only as chosen: it needs a linked account, or refused the one linked."; the list still comes, without mod.io's games but those chosen. Exit code 0.
 
+## 17. Lists and collections
+
+Run it in both runs, after section 7, with the library holding at least one Nexus Mods mod with a file. For the
+collection, pick a small public Stardew Valley collection on Nexus Mods, and copy its page's link into `$collection`.
+Nothing here installs anything.
+
+- [ ] **17.1 Export.** `ms library export --to (Join-Path $test list.json)`, then `ms library export --game nexus/stardewvalley`.
+  "Wrote *N* mods and *M* files to …list.json."; the file is JSON with `"format": "modshelf-list"`, `"version": 1`,
+  each mod's site, game, ID, name, page and files, and no download link. The second prints only Stardew Valley's mods.
+- [ ] **17.2 What importing would do.** `ms library forget` one of the mods in the list, then `ms library import (Join-Path $test list.json)`.
+  "The list has *N* mods: 1 new to the library and … in it already.", what it would queue, and "Run the command again
+  with --yes to import the list."; nothing changes. Exit code 0.
+- [ ] **17.3 Import it.** The same with `--yes`.
+  "Watched 1 new mod.", its files queued and downloaded (Premium), or listed with their pages to start on the site
+  (free). `ms library list` has the mod again, with its pin and note if it had them.
+- [ ] **17.4 A collection.** `ms library import $collection`, then `ms library import "$collection/revisions/1"`.
+  The collection's name, its mods, the files it would queue, the optional ones left out, and, when it has any, the files
+  Nexus Mods no longer offers and what it needs from elsewhere, each with its page. The second reads revision 1. Nothing
+  changes. One request each, as the log's lines for `v2/graphql` show.
+- [ ] **17.5 Import the collection, watching only.** `ms library import $collection --watch-only --yes`.
+  "Watched *N* new mods."; `ms library list` has them, watched, without files. Nothing is installed, and no game folder
+  changes.
+- [ ] **17.6 Refusals.** `ms library import "https://www.nexusmods.com/games/stardewvalley/collections/zzzzzzzz"`, then
+  `ms library import "https://www.nexusmods.com/stardewvalley/mods/2400"`.
+  "The site has no such collection." (or what Nexus Mods said of it), exit code 2 or 1; then "That link isn't to a
+  collection ModShelf can read. …", exit code 2.
+
 ## Clean up
 
 After both accounts:
@@ -496,3 +523,9 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 16.1 Every installed game | | – | |
 | 16.2 By words, a site, a page | | – | |
 | 16.3 A site that can't list its games | | – | |
+| 17.1 Export | | | |
+| 17.2 What importing would do | | | |
+| 17.3 Import it | | | |
+| 17.4 A collection | | | |
+| 17.5 Import the collection, watching only | | | |
+| 17.6 Refusals | | | |

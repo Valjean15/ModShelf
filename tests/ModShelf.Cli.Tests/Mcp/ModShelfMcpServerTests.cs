@@ -93,8 +93,9 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         Assert.Equal(
             [
                 "accounts_status", "diagnostics", "download", "downloads_cancel", "downloads_list", "downloads_pause",
-                "downloads_resume", "downloads_retry", "downloads_take", "library_changes", "library_check", "library_forget", "library_list",
-                "library_note", "library_pin", "library_rescan", "library_skip", "library_unwatch", "library_updates", "library_watch",
+                "downloads_resume", "downloads_retry", "downloads_take", "library_changes", "library_check", "library_export",
+                "library_forget", "library_import", "library_list", "library_note", "library_pin", "library_rescan", "library_skip",
+                "library_unwatch", "library_updates", "library_watch",
                 "mod_games", "mod_search", "mod_show", "settings_reset", "settings_set", "settings_show",
             ],
             tools.Select(tool => tool.Name).Order(StringComparer.Ordinal));
@@ -784,6 +785,77 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         Assert.Equal(
             [("2", new ReplacedFileEntry("1", "1.1", "File 1", "gone")), ("3", new ReplacedFileEntry("2", "1.2", "File 2", "archived"))],
             changes.Files.Select(file => (file.File.FileId, file.Replaces)));
+    }
+
+    [Fact]
+    public async Task ExportsTheLibraryAsAListThatImportBringsBack()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        await DownloadAndWaitAsync(mcp, "1");
+
+        ListExport exported = await mcp.CallAsync<ListExport>("library_export", null, Cancellation);
+        await mcp.CallAsync<ForgetResult>("library_forget", Arguments(("link", FileLink("1").AbsoluteUri)), Cancellation);
+        ListImportEntry preview = await mcp.CallAsync<ListImportEntry>("library_import", Arguments(("list", exported.List), ("preview", true)), Cancellation);
+        ListImportEntry imported = await mcp.CallAsync<ListImportEntry>("library_import", Arguments(("list", exported.List)), Cancellation);
+
+        Assert.Equal((1, 1, "The list holds 1 mods and 1 files."), (exported.Mods, exported.Files, exported.Message));
+        Assert.Contains("\"format\": \"modshelf-list\"", exported.List, StringComparison.Ordinal);
+        Assert.Equal((true, 1, 1, 1, 0, 0), (preview.Preview, preview.Mods, preview.NewMods, preview.FilesToDownload, preview.ModsAdded, preview.FilesQueued));
+        // The file is still on disk, where its download put it: the library takes it back rather than download it again.
+        Assert.Equal((false, 1, 0, 1, (string?)null), (imported.Preview, imported.ModsAdded, imported.FilesQueued, imported.FilesInLibrary, imported.RunBy));
+        Assert.Empty(imported.Problems);
+        Assert.Equal("Watched 1 new mods, queued 0 files for the library, and found 1 there already.", imported.Message);
+        LibraryListing listing = await mcp.CallAsync<LibraryListing>("library_list", null, Cancellation);
+        Assert.Equal("1", Assert.Single(Assert.Single(listing.Mods).Files!).FileId);
+    }
+
+    [Fact]
+    public async Task SaysWhatAListImportCouldntDo()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+        const string List = """{"format": "modshelf-list", "version": 1, "mods": [{"site": "elsewhere", "game": "game", "mod": "9", "name": "Far Mod"}]}""";
+
+        ListImportEntry imported = await mcp.CallAsync<ListImportEntry>("library_import", Arguments(("list", List)), Cancellation);
+        string refused = await mcp.CallFailingAsync("library_import", Arguments(("list", "{}")), Cancellation);
+
+        ListProblemEntry problem = Assert.Single(imported.Problems);
+        Assert.Equal(
+            ("elsewhere", "game", "9", "Far Mod", (string?)null, "noSite", "ModShelf can't reach elsewhere here, so the mod is left out."),
+            (problem.Source, problem.Game, problem.Mod, problem.ModName, problem.File, problem.Kind, problem.Problem));
+        Assert.Contains("This isn't a ModShelf list", refused, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task PreviewsACollectionByItsLinkWithWhatItDoesntDownload()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        ListImportEntry previewed = await mcp.CallAsync<ListImportEntry>(
+            "library_import", Arguments(("collection", FakeCatalogSite.CollectionLink("essentials").AbsoluteUri), ("preview", true)), Cancellation);
+
+        Assert.Equal(("Essentials", 1, 1, 1, 1), (previewed.Title, previewed.NewMods, previewed.FilesToDownload, previewed.OptionalFilesLeftOut, previewed.FilesUnavailable));
+        Assert.Equal([new ListElsewhereEntry("Script extender", "https://extender.example/", false)], previewed.Elsewhere);
+        Assert.EndsWith(
+            "1 files it names are no longer offered by its site. It needs 1 things from elsewhere, which ModShelf doesn't download: elsewhere names them, for the user to get.",
+            previewed.Message,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SaysWhyItCantImportWhatItWasGiven()
+    {
+        await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
+
+        string neither = await mcp.CallFailingAsync("library_import", Arguments(("preview", true)), Cancellation);
+        string both = await mcp.CallFailingAsync(
+            "library_import", Arguments(("list", "{}"), ("collection", FakeCatalogSite.CollectionLink("essentials").AbsoluteUri)), Cancellation);
+        string gone = await mcp.CallFailingAsync("library_import", Arguments(("collection", FakeCatalogSite.CollectionLink("gone").AbsoluteUri)), Cancellation);
+        string notOne = await mcp.CallFailingAsync("library_import", Arguments(("collection", "https://elsewhere.example/lists/mine")), Cancellation);
+
+        Assert.Equal(neither, both);
+        Assert.Contains("Give one of list", neither, StringComparison.Ordinal);
+        Assert.Contains("The site has no such collection.", gone, StringComparison.Ordinal);
+        Assert.Contains("That link isn't to a collection ModShelf can read", notOne, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1518,7 +1590,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
             await mcp.CloseAsync(Cancellation);
         }
 
-        Assert.Contains(Cli.Logs.Entries, entry => entry.Contains("The MCP server started, with 26 tools", StringComparison.Ordinal));
+        Assert.Contains(Cli.Logs.Entries, entry => entry.Contains("The MCP server started, with 28 tools", StringComparison.Ordinal));
         Assert.DoesNotContain(Cli.Logs.Entries, entry => entry.Contains(GoodKey, StringComparison.Ordinal));
         Assert.DoesNotContain(Cli.Logs.Entries, entry => entry.Contains("handoff.example", StringComparison.Ordinal));
     }

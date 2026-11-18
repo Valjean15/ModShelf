@@ -62,6 +62,16 @@
                 <StackPanel Classes="headerTools" Orientation="Horizontal" Spacing="10" VerticalAlignment="Top">
                     <Button Content="{x:Static res:Strings.LibraryActivity}" Command="{Binding ShowActivityCommand}" />
                     <Button Content="{x:Static res:Strings.LibraryRescan}" Command="{Binding RescanCommand}" IsVisible="{Binding !IsEmpty}" />
+                    <!-- A list file, or a site's collection by its link. -->
+                    <Button Content="{x:Static res:Strings.LibraryImportList}">
+                        <Button.Flyout>
+                            <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                <MenuItem Header="{x:Static res:Strings.LibraryImportFromFile}" Command="{Binding ImportListCommand}" />
+                                <MenuItem Header="{x:Static res:Strings.LibraryImportFromCollection}" Command="{Binding ImportCollectionCommand}" />
+                            </MenuFlyout>
+                        </Button.Flyout>
+                    </Button>
+                    <Button Content="{x:Static res:Strings.LibraryExportList}" Command="{Binding ExportListCommand}" IsVisible="{Binding !IsEmpty}" />
                 </StackPanel>
             </Grid>
 
@@ -402,6 +412,7 @@
                         <PathIcon Data="{StaticResource SettingsIcon}" />
                     </Button>
                     <Button Content="{x:Static res:Strings.LibraryRescan}" Command="{Binding RescanCommand}" />
+                    <Button Content="{x:Static res:Strings.LibraryExportList}" Command="{Binding ExportListCommand}" />
                     <Button Classes="accent"
                             Content="{Binding OpenGame.UpdateAllText, FallbackValue=''}"
                             Command="{Binding OpenGame.UpdateAllCommand, FallbackValue={x:Null}}"

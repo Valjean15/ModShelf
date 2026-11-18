@@ -8,6 +8,7 @@ using ModShelf.Application.Downloads;
 using ModShelf.Application.Installed;
 using ModShelf.Application.Library;
 using ModShelf.Application.Links;
+using ModShelf.Application.Lists;
 using ModShelf.Application.Releases;
 using ModShelf.Application.Settings;
 using ModShelf.Application.State;
@@ -335,6 +336,22 @@ public static class ApplicationServiceCollectionExtensions
 
         services.TryAddSingleton<ISourceRegistry, SourceRegistry>();
         services.TryAddSingleton<IWatchlists, Watchlists>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers <see cref="IModLists"/>, which exports the library as a list and imports lists into it, over the library
+    /// and its downloads (<see cref="AddLibrary"/> and <see cref="AddLibraryDownloads"/>).
+    /// </summary>
+    public static IServiceCollection AddModLists(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddLibrary();
+        services.AddLibraryDownloads();
+        services.TryAddSingleton<IModLists, ModLists>();
+        services.TryAddSingleton(TimeProvider.System);
 
         return services;
     }

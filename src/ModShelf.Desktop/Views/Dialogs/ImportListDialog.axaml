@@ -1,0 +1,112 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="using:System"
+        xmlns:vm="using:ModShelf.Presentation.ViewModels.Dialogs"
+        xmlns:res="using:ModShelf.Presentation.Resources"
+        x:Class="ModShelf.Desktop.Views.Dialogs.ImportListDialog"
+        x:DataType="vm:ImportListViewModel"
+        Title="{Binding Title}"
+        Width="580"
+        Classes="dialog">
+
+    <DockPanel>
+        <!-- Cancel, or OK once it's done, first, so the main button sits in the corner: Import; Stop while it imports. -->
+        <StackPanel DockPanel.Dock="Bottom" Classes="dialogButtons">
+            <Button IsCancel="True" Content="{Binding CloseText}" Command="{Binding CloseCommand}" IsVisible="{Binding CanClose}" />
+            <Button Classes="accent" IsDefault="True" Content="{x:Static res:Strings.ListImportConfirm}" Command="{Binding ImportCommand}" IsVisible="{Binding IsAsking}" />
+            <Button Content="{x:Static res:Strings.ListImportStop}" Command="{Binding StopCommand}" IsVisible="{Binding IsImporting}" />
+        </StackPanel>
+        <TextBlock DockPanel.Dock="Top" Classes="dialogTitle" TextWrapping="Wrap" Text="{Binding Title}" />
+        <StackPanel Spacing="12" Margin="0,0,0,8">
+            <!-- What importing would do: each fact's name in a column as wide as the longest. -->
+            <ItemsControl ItemsSource="{Binding Facts}" IsVisible="{Binding IsAsking}" Grid.IsSharedSizeScope="True">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ImportListFact">
+                        <Grid ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="FactName" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Classes="note" Text="{Binding Label}" />
+                            <SelectableTextBlock Grid.Column="1" TextWrapping="Wrap" Text="{Binding Value}" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Download the files, with what to download beside the listed main files, or only watch the mods. -->
+            <StackPanel Spacing="6" IsVisible="{Binding IsAsking}">
+                <RadioButton GroupName="ListImportFiles" Content="{x:Static res:Strings.ListImportDownload}" IsChecked="{Binding DownloadFiles}" />
+                <StackPanel Margin="28,0,0,0" Spacing="6">
+                    <CheckBox IsChecked="{Binding IncludeOptional}" IsEnabled="{Binding DownloadFiles}" IsVisible="{Binding HasOptional}">
+                        <TextBlock TextWrapping="Wrap" Text="{Binding OptionalText}" />
+                    </CheckBox>
+                    <CheckBox IsChecked="{Binding NewestForMissing}" IsEnabled="{Binding DownloadFiles}">
+                        <TextBlock TextWrapping="Wrap" Text="{x:Static res:Strings.ListImportNewest}" />
+                    </CheckBox>
+                </StackPanel>
+                <RadioButton GroupName="ListImportFiles" Content="{x:Static res:Strings.ListImportWatchOnly}" IsChecked="{Binding WatchOnly}" />
+            </StackPanel>
+            <!-- What a collection needs from elsewhere, each with its page to open: ModShelf doesn't download them. -->
+            <StackPanel Spacing="6" IsVisible="{Binding HasElsewhere}">
+                <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.ListImportElsewhere}" />
+                <ScrollViewer MaxHeight="180">
+                    <ItemsControl ItemsSource="{Binding Elsewhere}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="4" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ImportListElsewhereViewModel">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                        <TextBlock FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding Name}" />
+                                        <TextBlock Classes="note" FontSize="12.5" Text="{x:Static res:Strings.ListImportElsewhereOptional}" IsVisible="{Binding IsOptional}" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Command="{Binding OpenPageCommand}" IsVisible="{Binding HasPage}">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock VerticalAlignment="Center" Text="{x:Static res:Strings.ModOpenPage}" />
+                                            <Path Classes="line" Width="13" Height="13" Data="{StaticResource ExternalGlyph}" />
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </StackPanel>
+            <TextBlock Classes="note" FontSize="12.5" TextWrapping="Wrap" Text="{x:Static res:Strings.ListImportNote}" IsVisible="{Binding IsAsking}" />
+
+            <StackPanel Spacing="6" IsVisible="{Binding IsImporting}">
+                <ProgressBar MinHeight="6" Minimum="0" Maximum="100" Value="{Binding ProgressPercent}" />
+                <TextBlock Classes="note" Text="{Binding ProgressText}" />
+            </StackPanel>
+
+            <!-- What it did, then what it couldn't, a sentence each, scrolling when there are many. -->
+            <SelectableTextBlock TextWrapping="Wrap" Text="{Binding ResultText}" IsVisible="{Binding IsDone}" />
+            <StackPanel Spacing="6" IsVisible="{Binding HasProblems}">
+                <TextBlock Classes="note" Text="{x:Static res:Strings.ListImportProblems}" />
+                <ScrollViewer MaxHeight="220">
+                    <ItemsControl ItemsSource="{Binding Problems}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="4" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="sys:String">
+                                <SelectableTextBlock TextWrapping="Wrap" Text="{Binding}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </StackPanel>
+        </StackPanel>
+    </DockPanel>
+</Window>

@@ -4,6 +4,7 @@ using ModShelf.Domain.Mods;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Sources.Abstractions.Accounts;
 using ModShelf.Sources.Abstractions.Catalog;
+using ModShelf.Sources.Abstractions.Collections;
 using ModShelf.Sources.Abstractions.Common;
 using ModShelf.Sources.Abstractions.Downloads;
 using ModShelf.Sources.Abstractions.Links;
@@ -101,6 +102,18 @@ public abstract class SourceContractTests<TSource>
 
             Assert.NotNull(match);
             Assert.Equal(ExpectedId, match.File.Mod.Game.Source);
+        }
+    }
+
+    [Fact]
+    public async Task ReadsNoCollectionFromItsModLinksNorAnotherSites()
+    {
+        IModCollections collections = Capability<IModCollections>();
+        Uri[] links = [.. OwnLinks, new Uri("https://example.com/games/game/collections/abc"), new Uri("file:///collections/abc")];
+
+        foreach (Uri link in links)
+        {
+            Assert.Null(await collections.GetCollectionAsync(link, TestContext.Current.CancellationToken));
         }
     }
 

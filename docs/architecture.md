@@ -83,6 +83,7 @@ GameBanana).
 | `IGameSearch` | Finds games by name, for a site with too many to list | | ✓ | | | |
 | `IUpdateFeed` | Which of a game's mods changed since a time, in one request | ✓ | | ✓ | ✓ | |
 | `IModRequirements` | What a mod needs | ✓ | | ✓ | | |
+| `IModCollections` | A collection's files, read as a list to import | ✓ | | | | |
 | `IAccountLinker` | Links an account; its `IAuthStrategy`s are the ways to link one | ✓ | ✓ (profile) | ✓ | | |
 | `IWatchlistReader` / `IWatchlistSync` | Reads the mods followed on the site; `Sync` also follows and unfollows | Sync | Reader | Reader | | |
 | `IApiQuota` | The requests left, from the site's answers | ✓ | | | | |
@@ -144,7 +145,7 @@ GameBanana).
 
 ## The library
 
-*ADRs 0005, 0018–0020, 0034, 0042, 0044, 0045, 0056, 0057, 0067, 0076, 0081–0083.*
+*ADRs 0005, 0018–0020, 0034, 0042, 0044, 0045, 0056, 0057, 0067, 0076, 0081–0083, 0098.*
 
 - **One SQLite database**, `library.db` in the user's local application data folder, holds the jobs, the library
   and the linked accounts. EF Core migrations shape it (nine so far, `InitialCreate` to `AddPinsAndNotes`); a
@@ -165,6 +166,11 @@ GameBanana).
 - **History:** each download, archive, deletion, file found and mod removed is a `LibraryEvent`, kept for a year.
 - **Pins, skipped updates and notes** belong to the mod. **Forget** removes a mod and leaves its files on disk.
   **Undo** restores a mod exactly as a change found it, in one transaction, never touching the disk.
+- **Lists** (`IModLists`): the library exported as a `modshelf-list` JSON file of mods and files by the sites' IDs,
+  and imported back after a plan made from the library alone: new mods watched, with the list's pins and notes, and the
+  listed files the library lacks queued. A site's collection (`IModCollections`, Nexus Mods' so far) reads as such a
+  list: its files at the versions it pins, what it needs from elsewhere named, never downloaded. Nothing is installed,
+  and a collection's install steps are never run.
 
 ## Finding updates
 
@@ -255,7 +261,7 @@ GameBanana).
   also serves `http://127.0.0.1:47823/mcp` (Streamable HTTP, `agents.port`), answering this computer only.
 - **Off until the user turns it on** (`agents.enabled`, read at every call). An agent can't change that, link
   accounts, delete files, move the library or take a site's links.
-- 26 tools (`library_*`, `download` and `downloads_*`, `mod_games`, `mod_show`, `mod_search`, `settings_*`,
+- 28 tools (`library_*`, `download` and `downloads_*`, `mod_games`, `mod_show`, `mod_search`, `settings_*`,
   `accounts_status`, `diagnostics`), each with an output schema and annotations (read-only, changing, destructive,
   reaching the sites). Results include their nulls, so clients that validate against the schema accept them.
 - Arguments that don't fit a tool's schema fail before it runs, saying what it takes. A renamed argument keeps

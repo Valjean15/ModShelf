@@ -34,6 +34,7 @@ internal sealed class LibraryHarness : IDisposable
             Lookup,
             Rescan,
             LibraryDownloads,
+            Lists,
             Links,
             Watchlists,
             Storage,
@@ -83,6 +84,8 @@ internal sealed class LibraryHarness : IDisposable
     public ScriptedLookup Lookup { get; }
 
     public ScriptedLibraryDownloads LibraryDownloads { get; } = new();
+
+    public ScriptedModLists Lists { get; } = new();
 
     public ScriptedLinkDownloads Links { get; } = new();
 

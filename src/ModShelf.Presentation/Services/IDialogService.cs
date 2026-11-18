@@ -1,3 +1,4 @@
+using ModShelf.Presentation.ViewModels.Dialogs;
 using ModShelf.Presentation.ViewModels.FirstRun;
 using ModShelf.Presentation.ViewModels.Settings;
 
@@ -46,6 +47,13 @@ public interface IDialogService
     Task<string?> PickFileAsync(string title, string? folder, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Asks the user where to save a file, suggesting <paramref name="suggestedName"/>; the system's own dialog asks
+    /// before a file there is replaced.
+    /// </summary>
+    /// <returns>The file's full path; null when they cancelled, or picked a place that isn't on this computer.</returns>
+    Task<string?> PickSaveFileAsync(string title, string suggestedName, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Asks the user to find a game to add, by its name or its key, as Settings' Add a game… does, until they choose one,
     /// type a key and add it (<see cref="AddGameViewModel.AddRequested"/>), or close the dialog.
     /// </summary>
@@ -64,6 +72,12 @@ public interface IDialogService
     /// once they've moved, when there was nothing to move, or when the user closes it, which can't happen while they move.
     /// </summary>
     Task MoveGameAsync(GameMoveViewModel moving, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Shows the dialog that imports a list, until it asks to close (<see cref="ImportListViewModel.CloseRequested"/>) or
+    /// the user closes it, which can't happen while the list is imported.
+    /// </summary>
+    Task ImportListAsync(ImportListViewModel importing, CancellationToken cancellationToken);
 
     /// <summary>
     /// Shows the first-run setup over the main window, until it asks to close (<see cref="FirstRunViewModel.CloseRequested"/>)

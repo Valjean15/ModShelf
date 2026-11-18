@@ -22,6 +22,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Search\*.graphql" LogicalName="ModShelf.Sources.Nexus.Search.%(Filename)%(Extension)" />
     <EmbeddedResource Include="Catalog\*.graphql" LogicalName="ModShelf.Sources.Nexus.Catalog.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Collections\*.graphql" LogicalName="ModShelf.Sources.Nexus.Collections.%(Filename)%(Extension)" />
   </ItemGroup>
 
   <!-- The Strings class is generated from Strings.resx at build time, as in ModShelf.Sources.DirectUrl. -->

@@ -76,6 +76,7 @@ site has. What ModShelf does without each:
 | `IModSearch` | A game's mods, a page at a time, in the orders and by the filters its `Capabilities` say. | Browse doesn't list the site's games. |
 | `ITrendingMods` | What the site says is trending for a game. | Browse shows no trending row for it. |
 | `IModRequirements` | What a mod needs, as its author listed it. | The mod page lists no requirements. |
+| `IModCollections` | A collection's files, at the versions it pins, and what it needs from elsewhere, by the collection's link. | Its collections can't be imported as lists. |
 | `IUpdateFeed` | Which of a game's mods changed lately, in one request. | Each watched mod is asked for its files on its own: one request per mod per check. |
 | `IWatchlistReader` | The mods the account follows on the site, to read only. | Browse has no followed mods. |
 | `IWatchlistSync` | The `IWatchlistReader` ModShelf can change too: following and no longer following a mod. | The mod page has no button to follow. |

@@ -72,6 +72,16 @@
     where games' pictures are, with the Nexus source's own query, Catalog/GameArtwork.graphql. Works with either
     account, and changes nothing on it.
 
+.PARAMETER Collections
+    Records a collection's files from the v2 GraphQL API, for importing a collection as a list: the collection given to
+    -CollectionSlug, of the game given to -Game, at its latest revision, and a collection that doesn't exist, both with
+    the Nexus source's own query, Collections/CollectionFiles.graphql. Leaves the other recordings as they are; with the
+    other modes, those too. Works with either account, and changes nothing on it.
+
+.PARAMETER CollectionSlug
+    With -Collections: a collection of the game, by the slug in its link, as in
+    nexusmods.com/games/<game>/collections/<slug>.
+
 .PARAMETER RequiringModId
     With -Details: a mod of the game that needs other mods, such as Content Patcher, which needs SMAPI.
 
@@ -104,6 +114,9 @@
 
 .EXAMPLE
     ./Record-NexusFixtures.ps1 -Account Premium -Covers
+
+.EXAMPLE
+    ./Record-NexusFixtures.ps1 -Account Premium -Collections -CollectionSlug tckf0m
 #>
 
 #Requires -Version 7.2
@@ -137,6 +150,9 @@ param(
     [switch] $Details,
 
     [switch] $Covers,
+    [switch] $Collections,
+    [ValidatePattern('^[a-z0-9]+$')]
+    [string] $CollectionSlug,
 
     [ValidateRange(1, [int]::MaxValue)]
     [int] $RequiringModId = 1915,
@@ -168,6 +184,12 @@ if ($Covers -and ($NxmLink -or $ExpiredNxmLink)) {
     throw '-Covers records only games'' artwork; run the nxm:// links separately.'
 }
 
+if ($Collections -and ($NxmLink -or $ExpiredNxmLink)) {
+    throw '-Collections records only collections; run the nxm:// links separately.'
+}
+if ($Collections -and -not $CollectionSlug) {
+    throw '-Collections needs -CollectionSlug: the slug in the collection''s link, as in nexusmods.com/games/<game>/collections/<slug>.'
+}
 if ($Details -and $RequiringModId -eq $ModId) {
     throw '-RequiringModId should be another mod, one that needs the mod given to -ModId or others.'
 }
@@ -194,6 +216,7 @@ fragment TypeRef on __Type { kind name ofType { kind name ofType { kind name ofT
 
 # The queries for a mod's page, as the Nexus source will send them.
 $CatalogFolder = Join-Path $PSScriptRoot '..' '..' '..' 'src' 'ModShelf.Sources.Nexus' 'Catalog'
+$CollectionsFolder = Join-Path $PSScriptRoot '..' '..' '..' 'src' 'ModShelf.Sources.Nexus' 'Collections'
 
 # The parts of the v2 schema around a mod's details and requirements, and around games, for their covers. A type that
 # doesn't exist comes back as null.
@@ -590,6 +613,28 @@ function Save-Covers {
     Save-GraphQlFixture 'game-artwork' (Invoke-NexusGraphQl (Get-Content -Raw $artworkFile) 'GameArtwork')
 }
 
+# A collection's files, for importing one as a list, asked with the source's own query: the collection given to
+# -CollectionSlug at its latest revision, then one that doesn't exist.
+function Save-Collections {
+    $collectionFile = Join-Path $CollectionsFolder 'CollectionFiles.graphql'
+    if (-not (Test-Path $collectionFile)) {
+        throw "The query isn't at $collectionFile. Run the script from its place in the repository."
+    }
+
+    $query = Get-Content -Raw $collectionFile
+    Save-GraphQlFixture 'collection' (Invoke-NexusGraphQl $query 'CollectionFiles' (New-CollectionVariables $CollectionSlug))
+    Save-GraphQlFixture 'collection-not-found' (Invoke-NexusGraphQl $query 'CollectionFiles' (New-CollectionVariables 'zzzzzzzz'))
+}
+
+# The variables the Nexus source sends for a collection of the game, by its slug, at its latest revision.
+function New-CollectionVariables([string] $Slug) {
+    $variables = [System.Text.Json.Nodes.JsonObject]::new()
+    $variables['slug'] = [System.Text.Json.Nodes.JsonValue]::Create($Slug)
+    $variables['domainName'] = [System.Text.Json.Nodes.JsonValue]::Create($Game)
+    $variables['revision'] = $null
+    return , $variables
+}
+
 # The fields of a type to ask for, as the schema names them: each scalar and enum, and each object's own, down to
 # $Depth levels. A field that needs arguments is left out. Empty when the type has none, or doesn't exist.
 function Get-Selection([string] $TypeName, [int] $Depth) {
@@ -953,7 +998,7 @@ try {
     }
 
     Write-Host "Recording as a $Account account into $OutFolder"
-    if ($SearchOnly -or $Tracking -or $Details -or $Covers) {
+    if ($SearchOnly -or $Tracking -or $Details -or $Covers -or $Collections) {
         if ($SearchOnly) {
             Save-Searches
         }
@@ -968,6 +1013,10 @@ try {
 
         if ($Covers) {
             Save-Covers
+        }
+
+        if ($Collections) {
+            Save-Collections
         }
 
         if ($Refused) {
