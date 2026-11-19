@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/api/experimental/package/ModShelf/modshelf_missing_783394/",
+    "query": ""
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "detail": "No Package matches the given query."
+    }
+  }
+}

@@ -74,8 +74,8 @@ internal sealed class ThunderstoreServer : IDisposable
     public static JsonNode Body(string name) => Recording(name)["response"]!["body"]!;
 
     /// <summary>
-    /// Serves every recording: a request that asks something else isn't answered. The index is answered unchanged only
-    /// when asked with <c>If-Modified-Since</c>.
+    /// Serves every recording: a request that asks something else isn't answered. The index's answer when it was asked
+    /// again, with <c>If-Modified-Since</c>, is served only to a request with that header.
     /// </summary>
     public void ServeRecordings()
     {

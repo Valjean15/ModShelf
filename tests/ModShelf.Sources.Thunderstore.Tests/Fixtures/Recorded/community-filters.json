@@ -1,0 +1,87 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/api/cyberstorm/community/hades-ii/filters/",
+    "query": ""
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json",
+      "Last-Modified": "Thu, 19 Nov 2026 17:00:30 GMT"
+    },
+    "body": {
+      "package_categories": [
+        {
+          "id": "828",
+          "name": "Mods",
+          "slug": "mods"
+        },
+        {
+          "id": "829",
+          "name": "Modpacks",
+          "slug": "modpacks"
+        },
+        {
+          "id": "830",
+          "name": "Tools",
+          "slug": "tools"
+        },
+        {
+          "id": "831",
+          "name": "Libraries",
+          "slug": "libraries"
+        },
+        {
+          "id": "832",
+          "name": "Misc",
+          "slug": "misc"
+        },
+        {
+          "id": "833",
+          "name": "Audio",
+          "slug": "audio"
+        },
+        {
+          "id": "2672",
+          "name": "Gameplay",
+          "slug": "gameplay"
+        },
+        {
+          "id": "2673",
+          "name": "Cheats",
+          "slug": "cheats"
+        },
+        {
+          "id": "2674",
+          "name": "Cosmetics",
+          "slug": "cosmetics"
+        },
+        {
+          "id": "2675",
+          "name": "Accessibility",
+          "slug": "accessibility"
+        },
+        {
+          "id": "2676",
+          "name": "AI Generated",
+          "slug": "ai-generated"
+        }
+      ],
+      "sections": [
+        {
+          "uuid": "018f0a5c-be42-830e-8377-7407454b0ad9",
+          "name": "Mods",
+          "slug": "mods",
+          "priority": 0
+        },
+        {
+          "uuid": "018f0a5c-be4c-6b5a-a314-c77f25be9653",
+          "name": "Modpacks",
+          "slug": "modpacks",
+          "priority": -1
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "GET",
+    "host": "ccdn.thunderstore.io",
+    "path": "/live/blob-storage/sha256/0534b292209703ba835cebc106d2e299f9dcf4006be46d68b232de089c85e4b0.sh_adQqRtv.blob",
+    "query": ""
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/octet-stream",
+      "Last-Modified": "Thu, 19 Nov 2026 16:45:29 GMT"
+    },
+    "gzip": true,
+    "body": [
+      "https://ccdn.thunderstore.io/live/blob-storage/sha256/23e328267f3691372af9c29127f03456772e603cfc313d9275adcea896eb8f1e.sh_p2qkwMi.blob"
+    ]
+  }
+}

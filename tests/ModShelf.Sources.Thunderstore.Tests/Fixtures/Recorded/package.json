@@ -1,0 +1,57 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/api/experimental/package/Jowday/DamageMeter/",
+    "query": ""
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json",
+      "Last-Modified": "Thu, 19 Nov 2026 17:00:32 GMT"
+    },
+    "body": {
+      "namespace": "Jowday",
+      "name": "DamageMeter",
+      "full_name": "Jowday-DamageMeter",
+      "owner": "Jowday",
+      "package_url": "https://thunderstore.io/package/Jowday/DamageMeter/",
+      "date_created": "2024-05-15T23:29:41.982844Z",
+      "date_updated": "2026-10-28T19:04:31.298296Z",
+      "rating_score": -1,
+      "is_pinned": false,
+      "is_deprecated": false,
+      "total_downloads": -1,
+      "latest": {
+        "namespace": "Jowday",
+        "name": "DamageMeter",
+        "version_number": "2.9.15",
+        "full_name": "Jowday-DamageMeter-2.9.15",
+        "description": "Adds some damage meters. Configure Skelly's health to test new builds! All languages supported! Uses localized names for most damage types (>95%).",
+        "icon": "https://ccdn.thunderstore.io/live/repository/icons/Jowday-DamageMeter-2.9.15.png",
+        "dependencies": [
+          "SGG_Modding-ENVY-1.0.0",
+          "SGG_Modding-SJSON-1.0.0",
+          "SGG_Modding-ReLoad-1.0.1",
+          "SGG_Modding-ModUtil-3.1.1",
+          "SGG_Modding-Chalk-2.0.2"
+        ],
+        "download_url": "https://thunderstore.io/package/download/Jowday/DamageMeter/2.9.15/",
+        "downloads": 871,
+        "date_created": "2026-10-28T19:04:30.502554Z",
+        "website_url": "https://github.com/The-Black-Lodge/JowdayDamageMeter",
+        "is_active": true
+      },
+      "community_listings": [
+        {
+          "has_nsfw_content": false,
+          "categories": [
+            "Mods"
+          ],
+          "community": "hades-ii",
+          "review_status": "unreviewed"
+        }
+      ]
+    }
+  }
+}

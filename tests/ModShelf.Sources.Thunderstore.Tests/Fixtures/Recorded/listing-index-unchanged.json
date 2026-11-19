@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/c/hades-ii/api/v1/package-listing-index/",
+    "query": "",
+    "headers": {
+      "If-Modified-Since": "Thu, 19 Nov 2026 16:45:29 GMT"
+    }
+  },
+  "response": {
+    "status": 302,
+    "headers": {
+      "Content-Type": "text/html; charset=utf-8",
+      "Location": "https://ccdn.thunderstore.io/live/blob-storage/sha256/0534b292209703ba835cebc106d2e299f9dcf4006be46d68b232de089c85e4b0.sh_adQqRtv.blob",
+      "Last-Modified": "Thu, 19 Nov 2026 16:45:29 GMT"
+    },
+    "body": ""
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/api/experimental/package/BepInEx/BepInExPack/",
+    "query": ""
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json",
+      "Last-Modified": "Thu, 19 Nov 2026 17:00:34 GMT"
+    },
+    "body": {
+      "namespace": "BepInEx",
+      "name": "BepInExPack",
+      "full_name": "BepInEx-BepInExPack",
+      "owner": "BepInEx",
+      "package_url": "https://thunderstore.io/package/BepInEx/BepInExPack/",
+      "date_created": "2023-01-17T16:24:38.370139Z",
+      "date_updated": "2026-03-17T05:05:21.490966Z",
+      "rating_score": -1,
+      "is_pinned": true,
+      "is_deprecated": false,
+      "total_downloads": -1,
+      "latest": {
+        "namespace": "BepInEx",
+        "name": "BepInExPack",
+        "version_number": "5.4.2305",
+        "full_name": "BepInEx-BepInExPack-5.4.2305",
+        "description": "BepInEx pack for Mono Unity games. Preconfigured and ready to use.",
+        "icon": "https://ccdn.thunderstore.io/live/repository/icons/BepInEx-BepInExPack-5.4.2305.png",
+        "dependencies": [],
+        "download_url": "https://thunderstore.io/package/download/BepInEx/BepInExPack/5.4.2305/",
+        "downloads": 5930263,
+        "date_created": "2026-03-17T05:05:21.058304Z",
+        "website_url": "https://github.com/BepInEx/BepInEx",
+        "is_active": true
+      },
+      "community_listings": [
+        {
+          "has_nsfw_content": false,
+          "categories": [
+            "Mods",
+            "Tools",
+            "Libraries"
+          ],
+          "community": "ultrakill",
+          "review_status": "unreviewed"
+        },
+        {
+          "has_nsfw_content": false,
+          "categories": [
+            "Libraries"
+          ],
+          "community": "ultimate-chicken-horse",
+          "review_status": "unreviewed"
+        },
+        {
+          "has_nsfw_content": false,
+          "categories": [
+            "Libraries"
+          ],
+          "community": "atrio-the-dark-wild",
+          "review_status": "unreviewed"
+        },
+        {
+          "has_nsfw_content": false,
+          "categories": [
+            "Libraries"
+          ],
+          "community": "the-ouroboros-king",
+          "review_status": "unreviewed"
+        },
+        {
+          "has_nsfw_content": false,
+          "categories": [
+            "Libraries"
+          ],
+          "community": "wrestling-empire",
+          "review_status": "unreviewed"
+        }
+      ]
+    }
+  }
+}
