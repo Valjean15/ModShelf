@@ -116,7 +116,7 @@ internal sealed partial class LibraryRescanner : ILibraryRescan
         }
 
         string name = stored?.Name ?? info!.Name;
-        string[] unknown = [.. FoldersOf(scan, mod, stored, name).SelectMany(ListFiles).Where(path => !scan.Known.Contains(path)).Distinct(StringComparer.OrdinalIgnoreCase)];
+        string[] unknown = [.. ModFolders.Of(scan.Roots, scan.Settings, mod, stored, name).SelectMany(ListFiles).Where(path => !scan.Known.Contains(path)).Distinct(StringComparer.OrdinalIgnoreCase)];
         List<LibraryFile> added = [];
         if (unknown.Length > 0
             && await AskAsync(scan, mod, catalog, site => site.GetFilesAsync(mod, cancellationToken)).ConfigureAwait(false) is { } siteFiles)
@@ -192,20 +192,6 @@ internal sealed partial class LibraryRescanner : ILibraryRescan
         }
 
         await _history.RecordAsync(found, CancellationToken.None).ConfigureAwait(false);
-    }
-
-    /// <summary>
-    /// The library's folders of the mod, and where its game's pattern puts its new files, each with its <c>_archive</c>.
-    /// </summary>
-    private static IEnumerable<string> FoldersOf(Scan scan, ModRef mod, LibraryMod? stored, string name)
-    {
-        string byPattern = LibraryLocations.FolderOf(
-            scan.Settings.FoldersFor(mod.Game).Render(mod.Game.Source.Value, mod.Game.Key, name, mod.Id, "file"));
-        return (stored?.Files.Select(file => LibraryLocations.ModFolderOf(file.RelativePath)) ?? [])
-            .Append(byPattern)
-            .Distinct(StringComparer.Ordinal)
-            .SelectMany(folder => new[] { folder, folder.Length == 0 ? OldVersions.ArchiveFolder : $"{folder}{LibraryPaths.Separator}{OldVersions.ArchiveFolder}" })
-            .Select(folder => folder.Length == 0 ? scan.Roots.For(mod.Game) : scan.Roots.Resolve(mod.Game, folder));
     }
 
     /// <summary>
