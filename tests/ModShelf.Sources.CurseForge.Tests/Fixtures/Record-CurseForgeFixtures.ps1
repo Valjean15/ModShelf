@@ -19,8 +19,8 @@
     - two pages of a search of the mod's class, 50 mods each, which the tests search again in each order, and the mod
       found by its slug, as a link to it is read;
     - a mod that doesn't exist; the game asked for without a key, and its main file's changelog with a key CurseForge
-      doesn't take. Neither was asked for before: CurseForge's CDN answers a request it has just answered from what it
-      kept, with or without a key.
+      doesn't take. CurseForge once answered a game's classes without a key, so these ask for what it's known to
+      refuse without one.
 
     The files keep only what's left once each file's "modules" and "sortableGameVersions", and each mod's
     "latestFilesIndexes", "latestEarlyAccessFilesIndexes" and "screenshots", which the source doesn't read, are taken
@@ -383,8 +383,8 @@ try {
     Compress-Mods $slugBody['data']
     Save-Fixture 'slug' $slugAnswer $slugBody
 
-    # A mod that doesn't exist; and, at addresses not asked for before, a request without the key and one with a key
-    # CurseForge doesn't take.
+    # A mod that doesn't exist; and, for what CurseForge needs a key for, a request without the key and one with a key
+    # it doesn't take.
     Save-Fixture 'mod-not-found' (Invoke-CurseForge "v1/mods/$MissingMod")
     Save-Fixture 'no-key' (Invoke-CurseForge "v1/games/$gameId" -NoKey)
     Save-Fixture 'wrong-key' (Invoke-CurseForge "v1/mods/$Mod/files/$mainFileId/changelog" -WrongKey $WrongKey)

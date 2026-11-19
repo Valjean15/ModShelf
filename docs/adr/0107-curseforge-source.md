@@ -10,8 +10,9 @@ What the research found:
 - **The API** is CurseForge's Core API (`api.curseforge.com`, documented at docs.curseforge.com): games, their
   categories, mods by ID or by search, a mod's files a page at a time, a file, several mods at once, and a file's
   download link. It answers only with an API key, sent as `x-api-key`; without one, or with one it doesn't take, it
-  answers 403 with nothing in it. It never says 401. Its CDN keeps answers for a moment, though: a request answered with
-  a key, asked for again at once without one, was answered 200 from what it kept.
+  answers 403 with nothing in it. It never says 401. Its CDN keeps answers apart for each key: checked from the human's
+  computer, an answer to a key never went to a request without it, nor a refusal to a request with one. A key just made
+  was refused at first, then taken for the list of games, and only some minutes later for searches.
 - **The terms** say an API key is personal and may not be shared with anyone. So ModShelf ships no key: each user makes
   their own on the CurseForge for Studios console (console.curseforge.com, **API keys**) and links it, as they link
   Nexus Mods' and mod.io's keys. The human chose this over a key built into releases.
@@ -93,6 +94,8 @@ reaches its 10,000th mod at most, so the total is capped there and a page beyond
 - Updates are found only between builds for the same game versions: a mod's first build for a new game version is a new
   file, not an update.
 - Files whose author lets no app download them work only with the browser, as on DEG Mods.
+- A key just made can be refused for some minutes, by searches longer than the rest: ModShelf says the account was
+  refused, and trying again later works, with no need to link it again.
 
 ## Testing
 
@@ -106,7 +109,8 @@ reaches its 10,000th mod at most, so the total is capped there and a page beyond
 - `CurseForgeSourceTests` derives from `SourceContractTests<CurseForgeSource>`, over the answers
   `Fixtures/Record-CurseForgeFixtures.ps1` recorded with the human's key: Minecraft and Mod Menu, its files, its main
   file and the mods it needs, two pages of a search, searched again in each order and by each filter over the mods
-  recorded, as mod.io's tests do, the mod by its slug, a mod that doesn't exist, and a request without a key and
-  one with a made-up key, each at an address not asked for before, so the CDN can't answer them from what it kept. The
+  recorded, as mod.io's tests do, the mod by its slug, a mod that doesn't exist, and a request for a game without a key
+  and one for a changelog with a made-up key. CurseForge once answered a game's classes without a key, so the requests
+  without one ask for what it's known to refuse. The
   script takes out the fields the source doesn't read, such as each mod's `latestFilesIndexes`, so the files stay
   small.
