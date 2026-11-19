@@ -13,6 +13,7 @@ using ModShelf.Sources.DirectUrl;
 using ModShelf.Sources.GameBanana;
 using ModShelf.Sources.ModIo;
 using ModShelf.Sources.Nexus;
+using ModShelf.Sources.Thunderstore;
 
 namespace ModShelf.Hosting;
 
@@ -110,6 +111,7 @@ internal static class HostServices
         services.AddGameBananaSource();
         services.AddModIoSource();
         services.AddDegModsSource(new DegModsOptions { ReadsGameCovers = showsCovers });
+        services.AddThunderstoreSource();
         return folder;
     }
 

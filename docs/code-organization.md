@@ -99,7 +99,8 @@ Other projects see a project only through what it makes public, so keep that to 
 | 2300–2399 | Application: mod lists and collections |
 | 2400–2499 | Application: archive import |
 | 2500–2599 | Application: downloads with requirements |
-| 2600 onward | Next free block |
+| 2600–2699 | Sources.Thunderstore |
+| 2700 onward | Next free block |
 
 ## 7. Files
 

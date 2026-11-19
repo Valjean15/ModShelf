@@ -27,7 +27,7 @@ internal sealed class ListTools(IModLists lists, McpQueue queue)
     [Description("Exports ModShelf's library as a list of its mods and their files, by the sites' IDs, in ModShelf's list format (modshelf-list, JSON): each mod's site, game, ID, name, page, whether it's watched or pinned, its note, and its files but the old versions archived. Save the list as a file to back the library up or share it; library_import, or the desktop app's Import list, brings it into a library. Nothing is asked of any site.")]
     public Task<ListExport> ExportAsync(
         [Description("Only this game's mods, as the site names it in its links, such as stardewvalley.")] string? game = null,
-        [Description("Only this site's mods: nexus, gamebanana, modio or degmods.")] string? source = null,
+        [Description("Only this site's mods: nexus, gamebanana, modio, degmods or thunderstore.")] string? source = null,
         CancellationToken cancellationToken = default)
         => McpProblems.GuardAsync(async () =>
         {

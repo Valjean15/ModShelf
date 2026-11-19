@@ -30,7 +30,10 @@
     <string>NSApplication</string>
     <key>NSHighResolutionCapable</key>
     <true />
-    <!-- The links Nexus Mods' "mod manager download" buttons hand over: ModShelf opens them once the user says so. -->
+    <!--
+      The links Nexus Mods' "mod manager download" buttons and Thunderstore's "Install with Mod Manager" hand over:
+      ModShelf opens them once the user says so.
+    -->
     <key>CFBundleURLTypes</key>
     <array>
       <dict>
@@ -39,6 +42,14 @@
         <key>CFBundleURLSchemes</key>
         <array>
           <string>nxm</string>
+        </array>
+      </dict>
+      <dict>
+        <key>CFBundleURLName</key>
+        <string>Thunderstore install links</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>ror2mm</string>
         </array>
       </dict>
     </array>

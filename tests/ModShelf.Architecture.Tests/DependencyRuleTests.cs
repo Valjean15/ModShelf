@@ -24,6 +24,7 @@ public sealed class DependencyRuleTests
         ProjectNames.SourcesGameBanana,
         ProjectNames.SourcesModIo,
         ProjectNames.SourcesDegMods,
+        ProjectNames.SourcesThunderstore,
         ProjectNames.SourcesDirectUrl,
         ProjectNames.Cli,
     ];

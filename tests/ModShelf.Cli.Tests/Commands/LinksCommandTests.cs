@@ -5,6 +5,8 @@ using ModShelf.Application.Links;
 using ModShelf.Application.Links.Ports;
 using ModShelf.Cli.Tests.Common;
 using ModShelf.Cli.Tests.Fakes;
+using ModShelf.Sources.Abstractions;
+using ModShelf.Sources.Thunderstore;
 using ModShelf.Testing;
 
 namespace ModShelf.Cli.Tests.Commands;
@@ -95,13 +97,28 @@ public sealed class LinksCommandTests : IAsyncDisposable
     [Fact]
     public async Task TheOnlySiteCanBeLeftOut()
     {
-        CliResult taken = await _cli.RunAsync(["links", "take"], Cancellation);
-        CliResult givenBack = await _cli.RunAsync(["links", "give-back"], Cancellation);
+        await using InProcessCli cli = WithNexusLinksOnly();
+
+        CliResult taken = await cli.RunAsync(["links", "take"], Cancellation);
+        CliResult givenBack = await cli.RunAsync(["links", "give-back"], Cancellation);
 
         Assert.Equal((Done, Done), (taken.ExitCode, givenBack.ExitCode));
         Assert.Equal("The desktop app opens nxm:// links from Nexus Mods now. links give-back nexus stops it.", taken.Output.Trim());
         Assert.Equal("ModShelf no longer opens nxm:// links from Nexus Mods. No app opens them now.", givenBack.Output.Trim());
         Assert.Equal(["Register nxm", "Unregister nxm"], _registration.Calls);
+    }
+
+    [Fact]
+    public async Task OfSeveralSitesTheOneIsNamed()
+    {
+        CliResult refused = await _cli.RunAsync(["links", "take"], Cancellation);
+        CliResult taken = await _cli.RunAsync(["links", "take", "thunderstore"], Cancellation);
+
+        Assert.Equal((BadInput, "Name the site, such as nexus: links status lists them."), (refused.ExitCode, refused.Errors.Trim()));
+        Assert.Equal(
+            (Done, "The desktop app opens ror2mm:// links from Thunderstore now. links give-back thunderstore stops it."),
+            (taken.ExitCode, taken.Output.Trim()));
+        Assert.Equal(["Register ror2mm"], _registration.Calls);
     }
 
     [Fact]
@@ -146,6 +163,17 @@ public sealed class LinksCommandTests : IAsyncDisposable
         Assert.Equal(Failed, taken.ExitCode);
         Assert.Equal("The system's apps for links couldn't be changed: Access to the registry key is denied.", taken.Errors.Trim());
     }
+
+    /// <summary>
+    /// The CLI without Thunderstore, so Nexus Mods is the only site that hands its downloads over with links.
+    /// </summary>
+    private InProcessCli WithNexusLinksOnly() => new(_site, _browser, configureServices: services =>
+    {
+        services.RemoveAll<ISchemeRegistration>();
+        services.AddSingleton<ISchemeRegistration>(_registration);
+        services.Remove(services.Single(descriptor => descriptor.ServiceType == typeof(IModSource)
+            && descriptor.ImplementationFactory?.Method.ReturnType == typeof(ThunderstoreSource)));
+    });
 
     private static string[] Lines(string output) => output.ReplaceLineEndings("\n").Split('\n', StringSplitOptions.RemoveEmptyEntries);
 }
