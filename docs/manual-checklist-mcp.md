@@ -51,7 +51,7 @@ Settings › **Agents** in the desktop app. Agents are off until you turn them o
 ## 1. The server
 
 - [ ] **1.1 Tools.** Start the agent's app, and ask it which ModShelf tools it has.
-  29 tools, from `library_list` to `diagnostics`. Claude Desktop's settings show the server as running. After ModShelf
+  30 tools, from `library_list` to `diagnostics`. Claude Desktop's settings show the server as running. After ModShelf
   is updated, quit Claude Desktop completely, start it again and begin a new conversation: an older list of the tools
   makes calls such as `download` with `link` fail with "download doesn't take these arguments: it needs links. …".
 - [ ] **1.2 Reading.** Ask for the library, the updates and the settings; then for the mods with files missing from disk.
@@ -267,6 +267,17 @@ SMAPI, and Content Patcher not in the library.
 - [ ] **11.2 Only when asked.** Ask it to download another mod, without mentioning requirements.
   The call has no `withRequirements`, and its result no `requirements`.
 
+## 12. Free up space
+
+With the library cluttered as the command line's section 23 does, before its deletions.
+
+- [ ] **12.1 What could go, and nothing deleted.** Ask the agent what could be deleted to free up space in Hades 2's
+  part of the library, and to delete it.
+  A call to `library_cleanup` with `source` `thunderstore` and `game` `hades-ii`: its `groups` give archived,
+  unwatched and unmatched, one file each that can go; its `files` give each one's absolute path, size and `canGo`. The
+  agent lists them, and says it can't delete files: that's for you, in the desktop app's **Free up space…** or with
+  `ms library cleanup --delete`. Every file is still on disk.
+
 ## Results
 
 Copy this table into the release's notes or issue, and mark each check ✅, ❌ or – (not run). For a ❌, add what you
@@ -328,3 +339,4 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 10.2 Refused | | |
 | 11.1 With what it needs | | |
 | 11.2 Only when asked | | |
+| 12.1 What could go, and nothing deleted | | |

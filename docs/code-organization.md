@@ -100,7 +100,8 @@ Other projects see a project only through what it makes public, so keep that to 
 | 2400–2499 | Application: archive import |
 | 2500–2599 | Application: downloads with requirements |
 | 2600–2699 | Sources.Thunderstore |
-| 2700 onward | Next free block |
+| 2700–2799 | Application: freeing up space |
+| 2800 onward | Next free block |
 
 ## 7. Files
 

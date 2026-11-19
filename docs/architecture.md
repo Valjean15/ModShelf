@@ -179,6 +179,11 @@ GameBanana).
   Mod Organizer 2's `.meta` note or a Nexus-style name confirmed against the mod's files, then the site's lookup by hash
   (`IFileLookup`). Copies go where downloads would, through a hidden partial file, their SHA-256 checked, recorded as
   found.
+- **Free up space** (`ILibraryCleanup`, ADR 0104) lists the files that could go, by group: duplicates by SHA-256 and
+  size, archived old versions, files of mods not watched, and files in the mods' folders that match nothing. An
+  archived or unwatched file is kept when it may be the only copy left: its mod left its site, or the site, asked once
+  a mod, no longer offers it. Deleting holds the library, checks each file is as it was listed, and goes through the
+  library's own delete.
 - **History:** each download, archive, deletion, file found, mod removed, and mod leaving its site or coming back is a
   `LibraryEvent`, kept for a year.
 - **Pins, skipped updates and notes** belong to the mod. **Forget** removes a mod and leaves its files on disk.
@@ -286,7 +291,7 @@ GameBanana).
   also serves `http://127.0.0.1:47823/mcp` (Streamable HTTP, `agents.port`), answering this computer only.
 - **Off until the user turns it on** (`agents.enabled`, read at every call). An agent can't change that, link
   accounts, delete files, move the library or take a site's links.
-- 29 tools (`library_*`, `download` and `downloads_*`, `mod_games`, `mod_show`, `mod_search`, `mod_endorse`, `settings_*`,
+- 30 tools (`library_*`, `download` and `downloads_*`, `mod_games`, `mod_show`, `mod_search`, `mod_endorse`, `settings_*`,
   `accounts_status`, `diagnostics`), each with an output schema and annotations (read-only, changing, destructive,
   reaching the sites). Results include their nulls, so clients that validate against the schema accept them.
 - Arguments that don't fit a tool's schema fail before it runs, saying what it takes. A renamed argument keeps

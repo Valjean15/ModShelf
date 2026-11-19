@@ -522,6 +522,40 @@ $meter = 'https://thunderstore.io/c/hades-ii/p/Jowday/DamageMeter/'
   desktop app starts on the Downloads screen, and the version downloads into the library. Quit it from its tray menu.
   Giving them back says which app opens them now.
 
+## 23. Free up space
+
+Run it once, in the Premium run, after 22. It clutters Hades 2's part of the library with packages section 22 didn't
+download: an archived old version of ModUtil, SJSON no longer watched, and a file that matches nothing.
+
+```powershell
+$modutil = 'https://thunderstore.io/c/hades-ii/p/SGG_Modding/ModUtil/'
+$sjson = 'https://thunderstore.io/c/hades-ii/p/SGG_Modding/SJSON/'
+ms settings set library.oldVersions archive
+ms download "$($modutil)v/4.0.0/"
+ms download "$($modutil)v/4.0.1/"
+ms download $sjson
+ms library unwatch $sjson
+```
+
+Then put a text file, `Readme.txt`, in ModUtil's folder, the one `ms library list --files` gives for its 4.0.1 zip.
+
+- [ ] **23.1 What could go.** `ms library cleanup --game thunderstore/hades-ii`.
+  A table: `archived`, ModUtil's `_archive/SGG_Modding-ModUtil-4.0.0.zip`, "can go"; `unwatched`, SJSON's zip, "can
+  go"; `unmatched`, ModUtil's `Readme.txt`, "can go". Under it, each group's line, such as "Archived old versions: 1
+  file can go, 46.6 KB.", then "In all, 3 files, … can go." and how to delete a group. Exit code 0, and every file is
+  still on disk.
+- [ ] **23.2 What deleting would do.** The same with `--delete archived`.
+  The table again, then "Run it again with --yes to delete the 1 file of archived that can go, 46.6 KB." Nothing is
+  deleted.
+- [ ] **23.3 Delete.** The same with `--delete archived --yes`, then with `--delete unmatched --yes`.
+  "Deleted 1 file, freeing 46.6 KB.", then "Deleted 1 file, freeing …". ModUtil's `_archive` folder and `Readme.txt`
+  are gone; `ms library list --files` no longer lists ModUtil 4.0.0; the 4.0.1 zip and SJSON's are where they were.
+- [ ] **23.4 Refusals.** `ms library cleanup --yes`, then `ms library cleanup --delete all`.
+  "--yes deletes the files of the group --delete names: archived, duplicates, unwatched or unmatched.", exit code 2;
+  then an error naming the groups it takes, exit code 2. Nothing is deleted.
+
+Then `ms settings reset library.oldVersions`.
+
 ## Clean up
 
 After both accounts:
@@ -675,3 +709,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 22.5 Links that name no game | | – | |
 | 22.6 Updates | | – | |
 | 22.7 Install with Mod Manager | | – | |
+| 23.1 What could go | | – | |
+| 23.2 What deleting would do | | – | |
+| 23.3 Delete | | – | |
+| 23.4 Refusals | | – | |

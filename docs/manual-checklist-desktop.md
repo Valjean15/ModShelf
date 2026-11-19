@@ -588,6 +588,31 @@ DamageMeter, as the command line's section 22 does.
   The check covers Hades 2's packages with one read of its listing, and finds no update for DamageMeter: the library has
   its newest version.
 
+## 25. Free up space
+
+Run it once, in the Premium run, after 24. Clutter Hades 2's part of the library as the command line's section 23 does,
+before its checks: ModUtil 4.0.0 archived, SJSON not watched, and `Readme.txt` in ModUtil's folder.
+
+- [ ] **25.1 What could go.** Open Hades 2 on the Library, then **Free up space…** at its top.
+  "Free up space in Hades 2", a moment of "Asking the sites which files they still offer…", then "3 files can go, …" and three
+  groups, each with its note and total: **Archived old versions**, ticked, with SGG_Modding-ModUtil-4.0.0.zip, "ModUtil ·
+  thunderstore/hades-ii/ModUtil (SGG_Modding-ModUtil)/_archive" and its size; **Files of mods not watched**, unticked,
+  with SJSON's zip; **Files that match nothing**, unticked, with Readme.txt. The note says deleted files go for good.
+  **Delete selected (46.6 KB)…**.
+- [ ] **25.2 Ticking.** Tick **Files that match nothing**, then untick and tick its file.
+  Its file is ticked with it, and the button's size grows by Readme.txt's; unticking the file unticks the group, and
+  the size shrinks again.
+- [ ] **25.3 Delete.** With the archived version and Readme.txt ticked, **Delete selected (…)…**.
+  "Delete the selected files?", "Delete 2 files, … for good? They don't go to the trash." **Delete**: "Deleted 2 files,
+  freeing …", and **OK**. Hades 2's size on the Library drops, its archived size goes; ModUtil's `_archive` folder and
+  Readme.txt are gone from disk. **Recent activity**: "Deleted ModUtil 4.0.0 (4.0.0) from disk and the library." and
+  "Deleted Readme.txt, which matched none of the mod's files, from disk."
+- [ ] **25.4 Every game.** Back on the Library's games, **Free up space…**.
+  "Free up space", with SJSON's zip under **Files of mods not watched**, beside what other games' sections left, if
+  anything; nothing of Hades 2's that 25.3 deleted. **Cancel**.
+
+Then, in Settings › Library, set old versions back as they were.
+
 ## Clean up
 
 If a run stopped before 12.7, give the links back on the Settings screen first: their registration starts ModShelf on the test folder. After both accounts, quit the app from the tray menu, then:
@@ -804,3 +829,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 24.3 Download with requirements | | – | |
 | 24.4 Install with Mod Manager | | – | |
 | 24.5 Updates | | – | |
+| 25.1 What could go | | – | |
+| 25.2 Ticking | | – | |
+| 25.3 Delete | | – | |
+| 25.4 Every game | | – | |
