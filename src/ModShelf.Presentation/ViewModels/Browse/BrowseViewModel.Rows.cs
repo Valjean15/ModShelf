@@ -139,6 +139,25 @@ public sealed partial class BrowseViewModel
     }
 
     /// <summary>
+    /// Back on Browse, lists the game's rows again when they show and weren't all listed, such as before its site's
+    /// account was linked in Settings, taking away what the rows said of the account.
+    /// </summary>
+    private void ListRowsAgainIfUnlisted()
+    {
+        if (!IsShowingRows || Game is not { } game || _rowsListed is not null)
+        {
+            return;
+        }
+
+        if (!IsGamesProblem)
+        {
+            Tell(null, needsAccount: false);
+        }
+
+        RowsWork = ListRowsAsync(game.Game);
+    }
+
+    /// <summary>
     /// Lists the game's rows afresh, all three at once, dropping a listing of the rows under way. Trending shows where
     /// the game's site lists its trending mods, and the newest and the recently updated where its search has those
     /// orders; adult mods only when the user asked for them.

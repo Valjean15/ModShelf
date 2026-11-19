@@ -127,6 +127,39 @@ public sealed class BrowseRowsTests : IDisposable
     }
 
     [Fact]
+    public async Task RowsThatNeededAnAccountAreListedAgainBackOnBrowse()
+    {
+        _harness.Trending.Refusal = new AuthenticationFailedException();
+        await StartAsync();
+        bool needed = Screen.NeedsAccount;
+
+        // The account is linked in Settings, and Browse shown again.
+        _harness.Trending.Refusal = null;
+        _harness.Trending.Mods[Skyrim] = [Mod("12604", "SkyUI")];
+        _harness.Navigation.NavigateTo(Presentation.Services.Screen.Settings);
+        await _harness.ShowAsync();
+
+        Assert.True(needed);
+        Assert.Equal((null, false), (Screen.Problem, Screen.NeedsAccount));
+        Assert.Equal(["SkyUI"], Names(0));
+        Assert.Null(Screen.Rows[0].Problem);
+        Assert.Equal([Skyrim, Skyrim], _harness.Trending.Asked);
+    }
+
+    [Fact]
+    public async Task RowsListedAreNotListedAgainBackOnBrowse()
+    {
+        _harness.Trending.Mods[Skyrim] = [Mod("12604", "SkyUI")];
+        await StartAsync();
+
+        _harness.Navigation.NavigateTo(Presentation.Services.Screen.Settings);
+        await _harness.ShowAsync();
+
+        Assert.Equal(["SkyUI"], Names(0));
+        Assert.Single(_harness.Trending.Asked);
+    }
+
+    [Fact]
     public async Task ARowThatFailsUnexpectedlyIsLogged()
     {
         _harness.Trending.Refusal = new InvalidOperationException("Something broke.");

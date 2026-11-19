@@ -106,7 +106,11 @@ public sealed partial class BrowseViewModel
     {
         if (screen == Screen.Browse)
         {
-            _uiThread.Post(() => GamesWork = ReadingGamesAsync());
+            _uiThread.Post(() =>
+            {
+                GamesWork = ReadingGamesAsync();
+                ListRowsAgainIfUnlisted();
+            });
         }
     }
 

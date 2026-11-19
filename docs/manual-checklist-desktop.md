@@ -634,8 +634,12 @@ Run it once, after 24, with DamageMeter's zip in the library.
 
 With your own CurseForge API key, made on the console's API keys page (console.curseforge.com).
 
-- [ ] **27.1 Link the key.** Settings › Accounts: CurseForge under "Needs an account". **Link…**.
-  It opens the console's API keys page and asks for the key. Pasted, the row says "CurseForge API key" with "API key".
+- [ ] **27.1 Link the key.** Before linking, on Browse, pick CurseForge's Minecraft. Then Settings › Accounts: CurseForge
+  under "Needs an account". **Link…**, and back to Browse.
+  Before linking, Browse says CurseForge needs your account linked, in its rows too. **Link…** opens the console's API
+  keys page and asks for the key. Pasted, the row says "CurseForge API key" with "API key". Back on Browse, the rows list
+  Minecraft's mods without choosing it again. A key made minutes before can still be refused for a while, searches
+  longest: wait, then show Browse again.
 - [ ] **27.2 Browse.** On Browse, pick CurseForge's Minecraft, choose the class **Mods**, and search `map`.
   Minecraft's Mods with their downloads, the most popular first; the orders are popularity, downloads, when updated, when
   released and name. A mod's page lists its builds for each Minecraft version and loader.
