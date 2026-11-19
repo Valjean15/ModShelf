@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using ModShelf.Application.Accounts;
 using ModShelf.Application.Archives;
 using ModShelf.Application.Catalog;
+using ModShelf.Application.Cleanup;
 using ModShelf.Application.Diagnostics;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Endorsements;
@@ -401,6 +402,23 @@ public static class ApplicationServiceCollectionExtensions
         services.AddLibrary();
         services.AddLibraryDownloads();
         services.TryAddSingleton<IArchiveImport, ArchiveImport>();
+        services.TryAddSingleton(TimeProvider.System);
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers <see cref="ILibraryCleanup"/>, which lists what could go from the library's folders and deletes what the
+    /// user chooses, over the library and its downloads (<see cref="AddLibrary"/> and <see cref="AddLibraryDownloads"/>),
+    /// whose hold it takes.
+    /// </summary>
+    public static IServiceCollection AddLibraryCleanup(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddLibrary();
+        services.AddLibraryDownloads();
+        services.TryAddSingleton<ILibraryCleanup, LibraryCleanup>();
         services.TryAddSingleton(TimeProvider.System);
 
         return services;
