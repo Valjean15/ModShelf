@@ -474,10 +474,6 @@ public sealed partial class ModPageViewModel : ObservableObject
     internal void ShowLibrary() => ShowLibrary(_library(Mod));
 
     /// <summary>
-    /// Shows whether the account tracks the mod, reading its site's list the first time any mod of the site asks. When
-    /// the list can't be read, such as without a linked account, it's logged, and tracking the mod is still offered.
-    /// </summary>
-    /// <summary>
     /// Shows whether the account endorsed the mod, reading its site's endorsements the first time any mod of the site
     /// asks. When they can't be read, such as without a linked account, it's logged, and endorsing is still offered.
     /// </summary>
@@ -516,6 +512,10 @@ public sealed partial class ModPageViewModel : ObservableObject
         IsEndorsed = endorsed;
     }
 
+    /// <summary>
+    /// Shows whether the account tracks the mod, reading its site's list the first time any mod of the site asks. When
+    /// the list can't be read, such as without a linked account, it's logged, and tracking the mod is still offered.
+    /// </summary>
     internal async Task ShowTrackedAsync(CancellationToken cancellationToken)
     {
         if (!CanTrack)
