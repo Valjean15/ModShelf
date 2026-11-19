@@ -67,34 +67,35 @@ Every dependency points inward, toward `Domain`. Each mod site lives in its own 
 
 ## Sites and their capabilities
 
-*ADRs 0006, 0007, 0012–0017, 0026, 0028, 0036, 0048, 0053, 0058, 0062–0064, 0087–0093.*
+*ADRs 0006, 0007, 0012–0017, 0026, 0028, 0036, 0048, 0053, 0058, 0062–0064, 0087–0093, 0103.*
 
 A site implements only the small capability interfaces its website supports. The app asks the source registry which
 sites can do what, and offers only that, in each site's own words (such as "endorsements" on Nexus Mods and "likes" on
 GameBanana).
 
-| Capability | What it does | Nexus | GameBanana | mod.io | DEG Mods | Web links |
-|---|---|:-:|:-:|:-:|:-:|:-:|
-| `ILinkRecognizer` | Recognizes a link to a mod or file | ✓ | ✓ | ✓ | ✓ | ✓ (catch-all) |
-| `IDownloadResolver` | Turns a file into a short-lived download ticket, or asks for a handoff | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `IModCatalog` | A game, its list of games, a mod, its files | ✓ | ✓ | ✓ | ✓ | |
-| `IModSearch` | A game's mods a page at a time, with the orders and filters the site has | ✓ | ✓ | ✓ | ✓ | |
-| `ITrendingMods` | Browse's **Trending** row | ✓ | ✓ | ✓ | | |
-| `IGameSearch` | Finds games by name, for a site with too many to list | | ✓ | | | |
-| `IUpdateFeed` | Which of a game's mods changed since a time, in one request | ✓ | | ✓ | ✓ | |
-| `IModRequirements` | What a mod needs | ✓ | | ✓ | | |
-| `IModCollections` | A collection's files, read as a list to import | ✓ | | | | |
-| `IModEndorsements` | The account's endorsements; endorses or abstains from a mod | ✓ | | | | |
-| `IFileLookup` | A game's files by a hash of their content (MD5 on Nexus Mods), for archive import | ✓ | | | | |
-| `IAccountLinker` | Links an account; its `IAuthStrategy`s are the ways to link one | ✓ | ✓ (profile) | ✓ | | |
-| `IWatchlistReader` / `IWatchlistSync` | Reads the mods followed on the site; `Sync` also follows and unfollows | Sync | Reader | Reader | | |
-| `IApiQuota` | The requests left, from the site's answers | ✓ | | | | |
-| `IHandoffScheme` | The link scheme the website hands downloads over with | `nxm` | | | | |
+| Capability | What it does | Nexus | GameBanana | mod.io | DEG Mods | Thunderstore | Web links |
+|---|---|:-:|:-:|:-:|:-:|:-:|:-:|
+| `ILinkRecognizer` | Recognizes a link to a mod or file | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ (catch-all) |
+| `IDownloadResolver` | Turns a file into a short-lived download ticket, or asks for a handoff | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `IModCatalog` | A game, its list of games, a mod, its files | ✓ | ✓ | ✓ | ✓ | ✓ | |
+| `IModSearch` | A game's mods a page at a time, with the orders and filters the site has | ✓ | ✓ | ✓ | ✓ | ✓ | |
+| `ITrendingMods` | Browse's **Trending** row | ✓ | ✓ | ✓ | | | |
+| `IGameSearch` | Finds games by name, for a site with too many to list | | ✓ | | | | |
+| `IUpdateFeed` | Which of a game's mods changed since a time, in one request | ✓ | | ✓ | ✓ | ✓ | |
+| `IModRequirements` | What a mod needs | ✓ | | ✓ | | ✓ | |
+| `IModCollections` | A collection's files, read as a list to import | ✓ | | | | | |
+| `IModEndorsements` | The account's endorsements; endorses or abstains from a mod | ✓ | | | | | |
+| `IFileLookup` | A game's files by a hash of their content (MD5 on Nexus Mods), for archive import | ✓ | | | | | |
+| `IAccountLinker` | Links an account; its `IAuthStrategy`s are the ways to link one | ✓ | ✓ (profile) | ✓ | | | |
+| `IWatchlistReader` / `IWatchlistSync` | Reads the mods followed on the site; `Sync` also follows and unfollows | Sync | Reader | Reader | | | |
+| `IApiQuota` | The requests left, from the site's answers | ✓ | | | | | |
+| `IHandoffScheme` | The link scheme the website hands downloads over with | `nxm` | | | | `ror2mm` | |
 
 - **Links:** a site's own match wins over the catch-all for web links; two sites claiming a link is a conflict.
 - **IDs never change:** games are named by their site and key (`GameRef`, written `nexus/stardewvalley`,
-  `gamebanana/16951`, `modio/6715`, `degmods/fallout: new vegas`). The same game on two sites is two games, each with
-  its own mods, keys and settings.
+  `gamebanana/16951`, `modio/6715`, `degmods/fallout: new vegas`, `thunderstore/lethal-company`). The same game on two
+  sites is two games, each with its own mods, keys and settings. A key alone is the site's whose keys look like it
+  (`IModCatalog.CouldBeGameKey`); Thunderstore's look like Nexus Mods', so a key alone stays Nexus Mods'.
 - **Download links are never cached**, stored or logged; they expire.
 - **Every source passes `SourceContractTests<T>`**, the shared contract in `tests/Shared`.
 
@@ -118,6 +119,12 @@ GameBanana).
   their SHA-256, and taken from a server other than DEG Mods' own. Files elsewhere (MediaFire, Google Drive, Mega)
   open in the browser and come back through the browser's downloads folder. Hidden or blocked mods, and any mod
   sexualizing minors, are left out. Game covers come from the games database its admin publishes (desktop only).
+- **Thunderstore** — needs no account. Its communities are the games, and its packages the mods, named `Team-Name`,
+  each version a file. A community's packages come from its listing, the gzip-compressed chunks its
+  `package-listing-index` points to on the CDN, kept in memory and asked again at most hourly with `If-Modified-Since`;
+  search, updates and requirements (the newest version's dependencies) are read from it. Its `ror2mm://` links, from
+  **Install with Mod Manager**, name no community, which is asked of Thunderstore; a package listed in several needs
+  its page's link. No hashes.
 - **Web links** — any `http(s)` file, saved to a folder of your own, never into the library. A `#sha256=` (or `md5`,
   `sha1`, `sha512`) fragment checks the file and is never sent.
 

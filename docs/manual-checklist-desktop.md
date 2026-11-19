@@ -562,6 +562,32 @@ line's section 21).
   "Download what Content Patcher needs": SMAPI "In library", "The library has every mod it needs, or is downloading
   them.", and **Download** off.
 
+## 24. Thunderstore
+
+Run it once, in the Premium run. Thunderstore needs no account. The checks use Hades 2's community and Jowday's
+DamageMeter, as the command line's section 22 does.
+
+- [ ] **24.1 Browse.** In Browse, choose Thunderstore in the site box, then Hades 2.
+  "Hades 2 (Thunderstore)" with its picture; after the listing is read, a few seconds the first time, its packages,
+  last updated first, each with its icon, likes and downloads, and no deprecated one. **Filters** offers last updated,
+  newest, downloads, likes, name and size, either way, and the community's categories. No **Trending** row.
+- [ ] **24.2 A package's page.** Search `damage`, open DamageMeter.
+  Its icon, "by Jowday", its version, likes and downloads; "Files on Thunderstore" lists its newest version with
+  **Download**, and **Show *N* more files** its older versions; its changelog; and "Requirements", its dependencies,
+  each opening on its page in ModShelf.
+- [ ] **24.3 Download with requirements.** Beside **Download**, the menu's **Download with requirements…**, then
+  **Download**.
+  The dependencies the library lacks are ticked; once done, the Library lists DamageMeter and each, watched, under
+  Hades 2 (Thunderstore). Nothing is extracted.
+- [ ] **24.4 Install with Mod Manager.** Settings › Links from websites: Thunderstore's `ror2mm://` links, **Open them with
+  ModShelf**. On DamageMeter's page on the website, an older version's **Install**. Then **Give them back**. Skip it on
+  macOS, unless the app is installed.
+  The row names the app that had them, such as r2modman. The click brings ModShelf forward on the Downloads screen, and
+  that version downloads into the library.
+- [ ] **24.5 Updates.** On the Updates screen, **Check now**.
+  The check covers Hades 2's packages with one read of its listing, and finds no update for DamageMeter: the library has
+  its newest version.
+
 ## Clean up
 
 If a run stopped before 12.7, give the links back on the Settings screen first: their registration starts ModShelf on the test folder. After both accounts, quit the app from the tray menu, then:
@@ -773,3 +799,8 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 23.2 Deeper | | – | |
 | 23.3 Download | | – | |
 | 23.4 What's missing | | – | |
+| 24.1 Browse | | – | |
+| 24.2 A package's page | | – | |
+| 24.3 Download with requirements | | – | |
+| 24.4 Install with Mod Manager | | – | |
+| 24.5 Updates | | – | |

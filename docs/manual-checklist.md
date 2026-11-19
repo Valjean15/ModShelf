@@ -1,6 +1,6 @@
 # Manual checklist
 
-CI never calls a live mod site, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 13 checks GameBanana, once, without an account and then with a profile linked; section 14 checks mod.io, once, with an API key and then with an access token; section 15 checks DEG Mods, once, without an account. Section 16 checks the games Steam installed on this computer, once, on a computer with Steam and a few games installed. A release is ready when they all pass.
+CI never calls a live mod site, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 13 checks GameBanana, once, without an account and then with a profile linked; section 14 checks mod.io, once, with an API key and then with an access token; section 15 checks DEG Mods, once, without an account; section 22 checks Thunderstore, once, without an account. Section 16 checks the games Steam installed on this computer, once, on a computer with Steam and a few games installed. A release is ready when they all pass.
 
 The checks use the CLI. They download files into a temporary folder, and keep the library database and credentials apart from your own. One section changes your account: it tracks SMAPI and untracks it again, leaving your tracked mods as they were.
 
@@ -65,7 +65,7 @@ A new terminal needs all these lines again, with the same folders. Never paste a
 - [ ] **3.4 No match.** `ms mod search zqxj no such mod zqxj --game stardewvalley`.
   "No mods match." Exit code 0.
 - [ ] **3.4a Games by name.** `ms mod games stalker 2 --source nexus`, then `ms mod games final fantasy 12 --source nexus`, then `ms mod games valley stardew --source nexus`; then `ms mod games stalker 2`.
-  S.T.A.L.K.E.R. 2: Heart of Chornobyl, with its key; Final Fantasy XII: The Zodiac Age; Stardew Valley, key `stardewvalley`. Each says how many match, and "To search a game's mods: mod search --game <its key>". Without `--source`, "More than one site can list its games; choose one with --source: nexus, gamebanana.", exit code 2.
+  S.T.A.L.K.E.R. 2: Heart of Chornobyl, with its key; Final Fantasy XII: The Zodiac Age; Stardew Valley, key `stardewvalley`. Each says how many match, and "To search a game's mods: mod search --game <its key>". Without `--source`, "More than one site can list its games; choose one with --source:" and the sites, exit code 2.
 - [ ] **3.5 The site's own order, and endorsements.** `ms mod search --game stardewvalley`, then the same with `--sort Endorsements`.
   "*N* mods match, in the site's own order. These are 1 to 20.", the most endorsed at the top, then "…, most endorsements first." with the same mods. The table's columns are ID, Name, Author, Endorsements, Downloads, Updated and Link.
 - [ ] **3.6 A category, and how long since updated.** `ms mod search --game stardewvalley --category "user interface" --updated-within 30`, then `ms mod search --game stardewvalley --category Armour`.
@@ -196,7 +196,7 @@ This section changes your account. If SMAPI is tracked when you start, track it 
 
 ## 11. Links from websites
 
-These checks make the desktop app open Nexus Mods' `nxm://` links, from the command line, then give them back. Skip them on macOS: only the installed app can take the links there.
+These checks make the desktop app open Nexus Mods' `nxm://` links, from the command line, then give them back. Section 22 does the same with Thunderstore's. Skip them on macOS: only the installed app can take the links there.
 
 - [ ] **11.1 Who opens them.** Point the CLI at the desktop app it was built with, then ask:
 
@@ -205,12 +205,12 @@ These checks make the desktop app open Nexus Mods' `nxm://` links, from the comm
   ms links status
   ```
 
-  A table with `nexus`, `nxm://` and the app that opens them, such as `Vortex`, or `no app`. Exit code 0.
-- [ ] **11.2 Take them.** `ms links take`.
-  "The desktop app opens nxm:// links from Nexus Mods now. Vortex opened them before; links give-back nexus gives them back to it." (or "… now. links give-back nexus stops it." when no app had them). `ms links status` shows `ModShelf (before it, Vortex)`.
+  A table with `nexus`, `nxm://` and the app that opens them, such as `Vortex`, or `no app`, and `thunderstore`, `ror2mm://` and its app, such as `r2modman`. Exit code 0.
+- [ ] **11.2 Take them.** `ms links take`, then `ms links take nexus`.
+  "Name the site, such as nexus: links status lists them.", exit code 2; then "The desktop app opens nxm:// links from Nexus Mods now. Vortex opened them before; links give-back nexus gives them back to it." (or "… now. links give-back nexus stops it." when no app had them). `ms links status` shows `ModShelf (before it, Vortex)`.
 - [ ] **11.3 A click opens the desktop app.** On SMAPI's Files tab on the website, click **Mod manager download** on its main file (with the free account, then **Slow download**).
   The desktop app starts on the Downloads screen, with the test folder's library, and the download ends "Done". Quit it from its tray menu.
-- [ ] **11.4 Give them back.** `ms links give-back`.
+- [ ] **11.4 Give them back.** `ms links give-back nexus`.
   "ModShelf no longer opens nxm:// links from Nexus Mods. Vortex opens them now." (or "No app opens them now."). `ms links status` shows what 11.1 did.
 - [ ] **11.5 An unknown site.** `ms links take moddb`.
   "No site 'moddb' hands its downloads over with links: links status lists them." Exit code 2.
@@ -480,6 +480,48 @@ first.
   "--deep and --yes work with --with-requirements only.", exit code 2; then "--with-requirements downloads into the
   library only: leave out --to.", exit code 2.
 
+## 22. Thunderstore
+
+Thunderstore needs no account. Run it once, in the Premium run. The checks use Hades 2's community, `hades-ii`, and its
+package Jowday's DamageMeter, which depends on other packages of the community; and BepInEx's pack, which dozens of
+communities list.
+
+```powershell
+$meter = 'https://thunderstore.io/c/hades-ii/p/Jowday/DamageMeter/'
+```
+
+- [ ] **22.1 Games.** `ms mod games hades --source thunderstore`, then `ms mod games --source thunderstore --page-size 100`.
+  "Hades 2" with the key `hades-ii`; then the communities, about 380, from one request. `account list` has no
+  Thunderstore row: it needs no account.
+- [ ] **22.2 A package's page.** `ms mod show $meter --all --changelog`.
+  "DamageMeter" by Jowday, its newest version marked `*` under "Main files", each older one under old versions, named
+  `Jowday-DamageMeter-<version>.zip`, each with its version's page as its link; and its changelog's latest versions, as
+  the package's Changelog tab shows them. The log says the listing of hades-ii was read: about 240 packages in 1 chunk.
+- [ ] **22.3 Search.** `ms mod search damage --game hades-ii --source thunderstore`, then
+  `ms mod search --game hades-ii --source thunderstore --sort Endorsements --page-size 5`, then the same with `--category Mods`,
+  then `ms mod search --game hades-ii`.
+  DamageMeter among the matches; then the five most liked, a Likes column; then Mods only. No deprecated package is
+  listed: the website's list of hades-ii shows the same ones, without "Deprecated". The last asks Nexus Mods, as a key
+  alone always does, which has no game `hades-ii`.
+- [ ] **22.4 Download into the library.** `ms download $meter --with-requirements --yes`.
+  The list of what it needs: Hades 2's packages it depends on, such as Hell2Modding, "downloads its newest main file"
+  or "in the library already". Then DamageMeter's zip and each of theirs downloads, "Added to the library.", under
+  `thunderstore/hades-ii/DamageMeter (Jowday-DamageMeter)/`. Nothing is extracted. `ms library list` lists them,
+  watched.
+- [ ] **22.5 Links that name no game.** `ms mod show "https://thunderstore.io/package/download/Jowday/DamageMeter/<an older version>/"`,
+  then `ms mod show "ror2mm://v1/install/thunderstore.io/BepInEx/BepInExPack/5.4.2305/"`.
+  The first shows DamageMeter of hades-ii, that version marked `*`; the second "BepInEx-BepInExPack is listed for *N*
+  games on Thunderstore, such as …, and the link doesn't say which. Use the link of its page in the game's community,
+  such as …", exit code 2.
+- [ ] **22.6 Updates.** `ms mod updates --game hades-ii --source thunderstore --since 7d`, then `ms library check`.
+  The packages updated in the last week, from one read of hades-ii's listing; then the check of the watched packages,
+  one read of the listing for them all, and no update for what 22.4 downloaded.
+- [ ] **22.7 Install with Mod Manager.** `ms links take thunderstore`; on DamageMeter's page on the website, an older
+  version from its Versions tab, **Install**; then `ms links give-back thunderstore`. Skip it on macOS.
+  "The desktop app opens ror2mm:// links from Thunderstore now." (and the app that had them, such as r2modman). The
+  desktop app starts on the Downloads screen, and the version downloads into the library. Quit it from its tray menu.
+  Giving them back says which app opens them now.
+
 ## Clean up
 
 After both accounts:
@@ -626,3 +668,10 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 21.1 Only listed | | – | |
 | 21.2 Deeper, and downloaded | | – | |
 | 21.3 Refusals | | – | |
+| 22.1 Games | | – | |
+| 22.2 A package's page | | – | |
+| 22.3 Search | | – | |
+| 22.4 Download into the library | | – | |
+| 22.5 Links that name no game | | – | |
+| 22.6 Updates | | – | |
+| 22.7 Install with Mod Manager | | – | |
