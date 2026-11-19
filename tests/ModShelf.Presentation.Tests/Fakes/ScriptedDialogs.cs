@@ -1,6 +1,7 @@
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.Dialogs;
 using ModShelf.Presentation.ViewModels.FirstRun;
+using ModShelf.Presentation.ViewModels.ModPages;
 using ModShelf.Presentation.ViewModels.Settings;
 
 namespace ModShelf.Presentation.Tests.Fakes;
@@ -222,6 +223,25 @@ internal sealed class ScriptedDialogs : IDialogService
         finally
         {
             importing.CloseRequested -= Close;
+        }
+    }
+
+    /// <summary>
+    /// Each dialog that downloads a mod with its requirements, as shown.
+    /// </summary>
+    public List<DownloadRequirementsViewModel> DownloadingRequirements { get; } = [];
+
+    /// <summary>
+    /// What the user does in the dialog that downloads requirements; by default, they close it.
+    /// </summary>
+    public Func<DownloadRequirementsViewModel, Task>? InDownloadRequirements { get; set; }
+
+    public async Task DownloadRequirementsAsync(DownloadRequirementsViewModel downloading, CancellationToken cancellationToken)
+    {
+        DownloadingRequirements.Add(downloading);
+        if (InDownloadRequirements is { } user)
+        {
+            await user(downloading);
         }
     }
 

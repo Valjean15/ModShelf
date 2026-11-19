@@ -17,8 +17,9 @@ using ModShelf.Sources.Abstractions.Downloads;
 namespace ModShelf.Cli.Commands;
 
 /// <summary>
-/// <c>download &lt;link&gt; [--to &lt;folder&gt; [--name &lt;file&gt;]]</c>: adds the file to the queue and runs the
-/// download engine until that file is done. Without <c>--to</c>, the file goes into the library and is recorded there.
+/// <c>download &lt;link&gt; [--to &lt;folder&gt; [--name &lt;file&gt;]] [--with-requirements [--deep] [--yes]]</c>: adds the
+/// file to the queue and runs the download engine until that file is done. Without <c>--to</c>, the file goes into the
+/// library and is recorded there; with <c>--with-requirements</c>, so do the mods it needs that the user agrees to.
 /// When the site wants the download started on its website, it shows the page and asks for the link the site hands
 /// over. Ctrl+C stops cleanly; running the same command again continues.
 /// </summary>
@@ -45,6 +46,20 @@ internal static partial class DownloadCommand
             HelpName = "file",
         };
 
+        Option<bool> withRequirements = new("--with-requirements")
+        {
+            Description = "Also download the mods it needs that the library lacks, as its site lists them, each by its newest main "
+                + "file. Without --yes, it only lists them. Things off the site, such as a script extender, are only pointed to.",
+        };
+        Option<bool> deep = new("--deep")
+        {
+            Description = "With --with-requirements, also list what those mods need, down to three levels, each mod once.",
+        };
+        Option<bool> yes = new("--yes")
+        {
+            Description = "With --with-requirements, download the mods it needs too, rather than only listing them.",
+        };
+
         Command command = new(
             "download",
             "Downloads a file into the library, or into a folder with --to, and waits until it's done. Ctrl+C stops the "
@@ -53,9 +68,18 @@ internal static partial class DownloadCommand
             link,
             to,
             name,
+            withRequirements,
+            deep,
+            yes,
         };
         command.SetAction((parsed, cancellationToken)
-            => RunAsync(environment, parsed.GetValue(link)!, parsed.GetValue(to), parsed.GetValue(name), cancellationToken));
+            => RunAsync(
+                environment,
+                parsed.GetValue(link)!,
+                parsed.GetValue(to),
+                parsed.GetValue(name),
+                new Requiring(parsed.GetValue(withRequirements), parsed.GetValue(deep), parsed.GetValue(yes)),
+                cancellationToken));
         return command;
     }
 
@@ -64,6 +88,7 @@ internal static partial class DownloadCommand
         string linkText,
         DirectoryInfo? folder,
         string? fileName,
+        Requiring requiring,
         CancellationToken cancellationToken)
     {
         if (!Uri.TryCreate(linkText, UriKind.Absolute, out Uri? link))
@@ -76,6 +101,20 @@ internal static partial class DownloadCommand
         {
             await environment.Error.WriteLineAsync(
                     "--name works with --to only: files in the library keep the names their sites give them.")
+                .ConfigureAwait(false);
+            return ExitCodes.BadInput;
+        }
+
+        if (!requiring.With && (requiring.Deep || requiring.Yes))
+        {
+            await environment.Error.WriteLineAsync("--deep and --yes work with --with-requirements only.").ConfigureAwait(false);
+            return ExitCodes.BadInput;
+        }
+
+        if (requiring.With && folder is not null)
+        {
+            await environment.Error.WriteLineAsync(
+                    "--with-requirements downloads into the library only: leave out --to.")
                 .ConfigureAwait(false);
             return ExitCodes.BadInput;
         }
@@ -105,7 +144,7 @@ internal static partial class DownloadCommand
         {
             await host.StartAsync(cancellationToken).ConfigureAwait(false);
             started = true;
-            return await DownloadAsync(environment, host.Services, link, targetDirectory, fileName, cancellationToken).ConfigureAwait(false);
+            return await DownloadAsync(environment, host.Services, link, targetDirectory, fileName, requiring, cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -127,6 +166,7 @@ internal static partial class DownloadCommand
         Uri link,
         string? targetDirectory,
         string? fileName,
+        Requiring requiring,
         CancellationToken cancellationToken)
     {
         IDownloadService downloads = services.GetRequiredService<IDownloadService>();
@@ -138,6 +178,21 @@ internal static partial class DownloadCommand
         {
             await environment.Error.WriteLineAsync(LinkProblems.QueueBusyElsewhere).ConfigureAwait(false);
             return ExitCodes.Failed;
+        }
+
+        List<DownloadJobSnapshot> required = [];
+        bool requirementsFailed = false;
+        if (requiring.With)
+        {
+            switch (await RequirementsAsync(environment, services, link, requiring, cancellationToken).ConfigureAwait(false))
+            {
+                case { ExitCode: { } exitCode }:
+                    return exitCode;
+                case { Jobs: var jobs, Failed: var failed }:
+                    required.AddRange(jobs);
+                    requirementsFailed = failed;
+                    break;
+            }
         }
 
         LinkDownload added;
@@ -158,7 +213,9 @@ internal static partial class DownloadCommand
                 if (placed.Queued is null)
                 {
                     environment.Output.WriteLine($"{placed.Path} is in the library already.");
-                    return ExitCodes.Done;
+                    return required.Count == 0
+                        ? requirementsFailed ? ExitCodes.Failed : ExitCodes.Done
+                        : Worst(await FollowEachAsync(environment, services, library, required, cancellationToken).ConfigureAwait(false), requirementsFailed);
                 }
 
                 added = placed.Queued;
@@ -187,6 +244,24 @@ internal static partial class DownloadCommand
             environment.Output.WriteLine($"Downloading {job.FileName} to {job.TargetDirectory}");
         }
 
+        int ended = await FollowOneAsync(environment, services, library, job, cancellationToken).ConfigureAwait(false);
+        return required.Count == 0 || ended != ExitCodes.Done
+            ? Worst(ended, requirementsFailed)
+            : Worst(await FollowEachAsync(environment, services, library!, required, cancellationToken).ConfigureAwait(false), requirementsFailed);
+    }
+
+    /// <summary>
+    /// Follows one job until it's done, as the command does its file.
+    /// </summary>
+    private static async Task<int> FollowOneAsync(
+        CliEnvironment environment,
+        IServiceProvider services,
+        ILibraryDownloads? library,
+        DownloadJobSnapshot job,
+        CancellationToken cancellationToken)
+    {
+        IDownloadService downloads = services.GetRequiredService<IDownloadService>();
+
         // Watch first and read the job after, so no change from here on is missed, and none from before (such as the page
         // a job waited on before the link it got just now) is taken for news.
         using CancellationTokenSource watching = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -199,13 +274,45 @@ internal static partial class DownloadCommand
         Follow follow = new(
             environment,
             downloads,
-            links,
+            services.GetRequiredService<ILinkDownloads>(),
             library,
             new HandoffPrompt(environment, services.GetRequiredService<IBrowserLauncher>(), handsOverLinks, browserFolder),
             current,
             services.GetService<LogFolder>()?.Path);
         return await follow.RunAsync(updates, watching, cancellationToken).ConfigureAwait(false);
     }
+
+    /// <summary>
+    /// Follows the requirements' downloads in turn, after the file's; one that fails doesn't stop the others.
+    /// </summary>
+    /// <returns>The worst way one ended: <see cref="ExitCodes.Done"/> when they all did.</returns>
+    private static async Task<int> FollowEachAsync(
+        CliEnvironment environment,
+        IServiceProvider services,
+        ILibraryDownloads library,
+        IReadOnlyList<DownloadJobSnapshot> jobs,
+        CancellationToken cancellationToken)
+    {
+        int worst = ExitCodes.Done;
+        foreach (DownloadJobSnapshot job in jobs)
+        {
+            environment.Output.WriteLine($"Downloading {job.FileName}, which it needs, to {job.TargetDirectory}");
+            int ended = await FollowOneAsync(environment, services, library, job, cancellationToken).ConfigureAwait(false);
+            if (ended == ExitCodes.Interrupted)
+            {
+                return ended;
+            }
+
+            if (ended != ExitCodes.Done)
+            {
+                worst = ExitCodes.Failed;
+            }
+        }
+
+        return worst;
+    }
+
+    private static int Worst(int exitCode, bool requirementsFailed) => exitCode == ExitCodes.Done && requirementsFailed ? ExitCodes.Failed : exitCode;
 
     /// <summary>
     /// The folder the browser saves downloads to: as set, or the system's Downloads folder, also when the settings can't

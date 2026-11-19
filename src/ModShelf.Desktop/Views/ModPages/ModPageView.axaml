@@ -325,6 +325,19 @@
                                                                         Content="{x:Static res:Strings.FileDownload}"
                                                                         Command="{Binding DownloadCommand}"
                                                                         IsVisible="{Binding !IsInLibrary}" />
+                                                                <!-- Beside Download, for a mod that needs other mods: the dialog that downloads them with it. -->
+                                                                <Button Classes="more"
+                                                                        VerticalAlignment="Center"
+                                                                        ToolTip.Tip="{x:Static res:Strings.MoreActions}"
+                                                                        AutomationProperties.Name="{x:Static res:Strings.MoreActions}"
+                                                                        IsVisible="{Binding CanDownloadWithRequirements}">
+                                                                    <PathIcon Width="18" Height="18" Data="{StaticResource MoreIcon}" />
+                                                                    <Button.Flyout>
+                                                                        <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                                                            <MenuItem Header="{x:Static res:Strings.FileDownloadWithRequirements}" Command="{Binding DownloadWithRequirementsCommand}" />
+                                                                        </MenuFlyout>
+                                                                    </Button.Flyout>
+                                                                </Button>
                                                             </StackPanel>
                                                         </Grid>
                                                     </Border>
@@ -406,6 +419,10 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                         <TextBlock Classes="note" FontSize="12.5" TextWrapping="Wrap" Text="{x:Static res:Strings.ModPageRequirementsNote}" />
+                        <Button HorizontalAlignment="Left"
+                                Content="{x:Static res:Strings.ModPageDownloadRequirements}"
+                                Command="{Binding DownloadRequirementsCommand}"
+                                IsVisible="{Binding NeedsMods}" />
                     </StackPanel>
                 </Border>
 

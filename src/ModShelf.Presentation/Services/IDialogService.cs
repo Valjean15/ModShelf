@@ -1,5 +1,6 @@
 using ModShelf.Presentation.ViewModels.Dialogs;
 using ModShelf.Presentation.ViewModels.FirstRun;
+using ModShelf.Presentation.ViewModels.ModPages;
 using ModShelf.Presentation.ViewModels.Settings;
 
 namespace ModShelf.Presentation.Services;
@@ -85,6 +86,12 @@ public interface IDialogService
     /// identifies or copies them.
     /// </summary>
     Task ImportArchivesAsync(ImportArchivesViewModel importing, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Shows the dialog that downloads a mod with what it needs, until it asks to close
+    /// (<see cref="DownloadRequirementsViewModel.CloseRequested"/>) or the user closes it.
+    /// </summary>
+    Task DownloadRequirementsAsync(DownloadRequirementsViewModel downloading, CancellationToken cancellationToken);
 
     /// <summary>
     /// Shows the first-run setup over the main window, until it asks to close (<see cref="FirstRunViewModel.CloseRequested"/>)

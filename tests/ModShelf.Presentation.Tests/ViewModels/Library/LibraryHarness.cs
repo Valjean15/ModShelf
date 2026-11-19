@@ -40,6 +40,7 @@ internal sealed class LibraryHarness : IDisposable
             Links,
             Watchlists,
             new EndorsedMods(Endorsements),
+            Requirements,
             Storage,
             Settings,
             Browser,
@@ -97,6 +98,8 @@ internal sealed class LibraryHarness : IDisposable
     public ScriptedWatchlists Watchlists { get; } = new();
 
     public ScriptedEndorsements Endorsements { get; } = new();
+
+    public ScriptedRequirementDownloads Requirements { get; } = new();
 
     public FakeLibraryStorage Storage { get; } = new();
 

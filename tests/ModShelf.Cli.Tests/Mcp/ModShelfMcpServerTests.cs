@@ -323,9 +323,9 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     }
 
     [Theory]
-    [InlineData("download", "links", "\"https://www.nexusmods.com/stardewvalley/mods/2400\"", "links is a list of strings or null, not a string. It takes links, link.")]
-    [InlineData("download", "links", "[\"https://www.nexusmods.com/stardewvalley/mods/2400\", 3]", "links is a list of strings or null, not a list. It takes links, link.")]
-    [InlineData("download", "link", "[\"https://www.nexusmods.com/stardewvalley/mods/2400\"]", "link is a string or null, not a list. It takes links, link.")]
+    [InlineData("download", "links", "\"https://www.nexusmods.com/stardewvalley/mods/2400\"", "links is a list of strings or null, not a string. It takes links, withRequirements, deep, link.")]
+    [InlineData("download", "links", "[\"https://www.nexusmods.com/stardewvalley/mods/2400\", 3]", "links is a list of strings or null, not a list. It takes links, withRequirements, deep, link.")]
+    [InlineData("download", "link", "[\"https://www.nexusmods.com/stardewvalley/mods/2400\"]", "link is a string or null, not a list. It takes links, withRequirements, deep, link.")]
     [InlineData("library_list", "limit", "\"many\"", "limit is an integer, not a string. It takes game, source, mod, watchedOnly, updatesOnly, missingOnly, goneOnly, compact, offset, limit.")]
     [InlineData("library_list", "limit", "2.5", "limit is an integer, not a number. It takes game, source, mod, watchedOnly, updatesOnly, missingOnly, goneOnly, compact, offset, limit.")]
     [InlineData("library_list", "compact", "\"yes\"", "compact is true or false, not a string. It takes game, source, mod, watchedOnly, updatesOnly, missingOnly, goneOnly, compact, offset, limit.")]
@@ -434,14 +434,14 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
     }
 
     [Fact]
-    public async Task DownloadTakesLinksOrTheDeprecatedLinkAndNothingElse()
+    public async Task DownloadTakesLinksWithTheirRequirementsOrTheDeprecatedLinkAndNothingElse()
     {
         await using McpSession mcp = await Cli.StartMcpAsync(Cancellation);
 
         McpClientTool download = Assert.Single(await mcp.Client.ListToolsAsync(cancellationToken: Cancellation), tool => tool.Name == "download");
 
         System.Text.Json.JsonElement schema = download.ProtocolTool.InputSchema;
-        Assert.Equal(["link", "links"], schema.GetProperty("properties").EnumerateObject().Select(property => property.Name).Order(StringComparer.Ordinal));
+        Assert.Equal(["deep", "link", "links", "withRequirements"], schema.GetProperty("properties").EnumerateObject().Select(property => property.Name).Order(StringComparer.Ordinal));
         Assert.False(schema.TryGetProperty("required", out System.Text.Json.JsonElement required) && required.GetArrayLength() > 0);
         Assert.EndsWith("(link, a single link, still works but is deprecated.)", schema.GetProperty("properties").GetProperty("links").GetProperty("description").GetString(), StringComparison.Ordinal);
     }

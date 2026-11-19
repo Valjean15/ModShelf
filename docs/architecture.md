@@ -149,7 +149,7 @@ GameBanana).
 
 ## The library
 
-*ADRs 0005, 0018–0020, 0034, 0042, 0044, 0045, 0056, 0057, 0067, 0076, 0081–0083, 0098, 0101.*
+*ADRs 0005, 0018–0020, 0034, 0042, 0044, 0045, 0056, 0057, 0067, 0076, 0081–0083, 0098, 0101, 0102.*
 
 - **One SQLite database**, `library.db` in the user's local application data folder, holds the jobs, the library
   and the linked accounts. EF Core migrations shape it (ten so far, `InitialCreate` to `AddGoneSince`); a
@@ -181,6 +181,10 @@ GameBanana).
   listed files the library lacks queued. A site's collection (`IModCollections`, Nexus Mods' so far) reads as such a
   list: its files at the versions it pins, what it needs from elsewhere named, never downloaded. Nothing is installed,
   and a collection's install steps are never run.
+- **Requirements** (`IRequirementDownloads`, ADR 0102): what a mod needs, from its site's `IModRequirements`, planned
+  against the library and the queue, level by level down to three when asked, each mod once, then put in tree order;
+  the chosen mods the library lacks are queued by their newest main file's link, as Download queues a link. Things off
+  the site are only pointed to.
 
 ## Finding updates
 

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Library;
 using ModShelf.Application.Library.Ports;
+using ModShelf.Application.Requirements;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
 using ModShelf.Presentation.Services;
@@ -24,6 +25,7 @@ internal sealed class ModPageServices(
     FolderDownloads folders,
     TrackedMods tracked,
     EndorsedMods endorsed,
+    IRequirementDownloads requirements,
     ISourceRegistry sources,
     IBrowserLauncher browser,
     IFolderOpener folderOpener,
@@ -52,6 +54,11 @@ internal sealed class ModPageServices(
     /// What the linked accounts said of mods on the sites that let ModShelf endorse.
     /// </summary>
     public EndorsedMods Endorsed { get; } = endorsed ?? throw new ArgumentNullException(nameof(endorsed));
+
+    /// <summary>
+    /// What a mod needs, planned for downloading with it.
+    /// </summary>
+    public IRequirementDownloads Requirements { get; } = requirements ?? throw new ArgumentNullException(nameof(requirements));
 
     public ISourceRegistry Sources { get; } = sources ?? throw new ArgumentNullException(nameof(sources));
 

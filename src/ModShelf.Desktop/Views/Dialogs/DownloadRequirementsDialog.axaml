@@ -1,0 +1,87 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ModShelf.Presentation.ViewModels.ModPages"
+        xmlns:res="using:ModShelf.Presentation.Resources"
+        x:Class="ModShelf.Desktop.Views.Dialogs.DownloadRequirementsDialog"
+        x:DataType="vm:DownloadRequirementsViewModel"
+        Title="{Binding Title}"
+        Width="620"
+        Classes="dialog">
+
+    <DockPanel>
+        <!-- Cancel, or OK once it's queued them, first, so Download sits in the corner. -->
+        <StackPanel DockPanel.Dock="Bottom" Classes="dialogButtons">
+            <Button IsCancel="True" Content="{Binding CloseText}" Command="{Binding CloseCommand}" />
+            <Button Classes="accent"
+                    IsDefault="True"
+                    Content="{Binding DownloadText}"
+                    Command="{Binding DownloadCommand}"
+                    IsVisible="{Binding !IsDone}" />
+        </StackPanel>
+        <TextBlock DockPanel.Dock="Top" Classes="dialogTitle" TextWrapping="Wrap" Text="{Binding Title}" />
+        <StackPanel Spacing="12" Margin="0,0,0,8">
+            <TextBlock TextWrapping="Wrap"
+                       Text="{Binding FileText}"
+                       IsVisible="{Binding FileText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+            <CheckBox Content="{x:Static res:Strings.RequirementsDeeper}"
+                      ToolTip.Tip="{x:Static res:Strings.RequirementsDeeperTip}"
+                      IsChecked="{Binding IncludesDeeper}"
+                      IsEnabled="{Binding CanChangeDepth}" />
+            <TextBlock Classes="note message"
+                       Classes.problem="{Binding IsMessageAProblem}"
+                       TextWrapping="Wrap"
+                       Text="{Binding Message}"
+                       IsVisible="{Binding Message, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+            <!-- Each requirement: a box for those to download, what becomes of the others, a page for things off the site. -->
+            <ScrollViewer MaxHeight="340">
+                <ItemsControl ItemsSource="{Binding Rows}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="6" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:RequirementRowViewModel">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                <CheckBox VerticalAlignment="Top"
+                                          IsChecked="{Binding IsChosen}"
+                                          IsVisible="{Binding CanChoose}"
+                                          AutomationProperties.Name="{Binding Name}" />
+                                <StackPanel Grid.Column="1" Spacing="1">
+                                    <TextBlock FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding Name}" />
+                                    <TextBlock Classes="note" FontSize="12.5" TextWrapping="Wrap" Text="{Binding Said}" />
+                                    <TextBlock Classes="note"
+                                               FontSize="12.5"
+                                               TextWrapping="Wrap"
+                                               Text="{Binding NeededByText}"
+                                               IsVisible="{Binding NeededByText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                    <TextBlock Classes="note"
+                                               FontSize="12.5"
+                                               TextWrapping="Wrap"
+                                               Text="{Binding Notes}"
+                                               IsVisible="{Binding Notes, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                </StackPanel>
+                                <Button Grid.Column="2"
+                                        VerticalAlignment="Center"
+                                        Command="{Binding OpenPageCommand}"
+                                        IsVisible="{Binding IsElsewhere}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock VerticalAlignment="Center" Text="{x:Static res:Strings.ModOpenPage}" />
+                                        <Path Classes="line" Width="13" Height="13" Data="{StaticResource ExternalGlyph}" />
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            <TextBlock Classes="note" FontSize="12.5" TextWrapping="Wrap" Text="{x:Static res:Strings.RequirementsNote}" />
+            <TextBlock Classes="note message"
+                       Classes.problem="{Binding IsResultAProblem}"
+                       TextWrapping="Wrap"
+                       Text="{Binding ResultText}"
+                       IsVisible="{Binding IsDone}" />
+        </StackPanel>
+    </DockPanel>
+</Window>

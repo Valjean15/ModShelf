@@ -4,6 +4,7 @@ using ModelContextProtocol;
 using ModelContextProtocol.Server;
 
 using ModShelf.Application.Downloads;
+using ModShelf.Application.Requirements;
 using ModShelf.Application.Sources;
 using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Mods;
@@ -16,7 +17,12 @@ namespace ModShelf.Cli.Mcp;
 /// cancelling a download. The desktop app runs the queue when it runs; otherwise this server does (<see cref="McpQueue"/>).
 /// </summary>
 [McpServerToolType]
-internal sealed class DownloadTools(McpQueue queue, IDownloadService downloads, McpDeprecations deprecations, ISourceRegistry sources)
+internal sealed partial class DownloadTools(
+    McpQueue queue,
+    IDownloadService downloads,
+    McpDeprecations deprecations,
+    ISourceRegistry sources,
+    IRequirementDownloads requirements)
 {
     private const string DesktopApp = "desktop app";
     private const string ThisServer = "this MCP server";
@@ -41,10 +47,12 @@ internal sealed class DownloadTools(McpQueue queue, IDownloadService downloads, 
         });
 
     [McpServerTool(Name = "download", Title = "Download into the library", Idempotent = true, Destructive = false, OpenWorld = true, UseStructuredContent = true)]
-    [Description("Downloads mods' files into the library, where library.folders says, as ModShelf's links do: a file's link, such as an update's, gets that file; a mod's link, its main file. Give one link, or several, up to 50: they're downloaded in the order given, and one that can't be still lets the others go on, with its problem said in its result. A file the library has already isn't downloaded again, and an unfinished download of it goes on. Nothing is installed. With a free Nexus Mods account, the user starts each download on the site: the download waits, with the page to open.")]
+    [Description("Downloads mods' files into the library, where library.folders says, as ModShelf's links do: a file's link, such as an update's, gets that file; a mod's link, its main file. Give one link, or several, up to 50: they're downloaded in the order given, and one that can't be still lets the others go on, with its problem said in its result. A file the library has already isn't downloaded again, and an unfinished download of it goes on. With withRequirements, when the user asks for what the mods need too, so do the mods each link's mod needs that the library lacks, as its site lists them; things off the site, such as a script extender, are only listed, with their pages, for the user to get. Nothing is installed. With a free Nexus Mods account, the user starts each download on the site: the download waits, with the page to open.")]
     public Task<DownloadsResult> DownloadAsync(
         McpServer server,
         [Description("Links to files or mods, one or more, up to 50, such as updates' links from library_updates, files' from mod_show, or nxm:// links the site handed over. (link, a single link, still works but is deprecated.)")] string[]? links = null,
+        [Description("Also download the mods each link's mod needs that the library lacks, as its site lists them, each by its newest main file; only when the user asks for them. The site's list can be wrong or out of date.")] bool withRequirements = false,
+        [Description("With withRequirements, also what those mods need in turn, down to three levels, each mod once.")] bool deep = false,
         [Description("Deprecated, and stops working in ModShelf 2.0: one link, as download took before 0.9.3. Pass links, a list, instead.")][Deprecated("DL_LINK_ARG")] string? link = null,
         CancellationToken cancellationToken = default)
         => McpProblems.GuardAsync(async () =>
@@ -71,16 +79,40 @@ internal sealed class DownloadTools(McpQueue queue, IDownloadService downloads, 
                 throw new McpException($"Give from 1 to {MostLinks} links.");
             }
 
+            if (deep && !withRequirements)
+            {
+                throw new McpException("deep works with withRequirements only.");
+            }
+
             List<LinkDownloadResult> results = [];
             foreach (string each in links)
             {
                 results.Add(await DownloadOneAsync(each, cancellationToken).ConfigureAwait(false));
             }
 
-            results = await AsTheyAreNowAsync(results, cancellationToken).ConfigureAwait(false);
+            // What the mods need is read once the links' own files are queued, so a mod one link gets and another's needs
+            // is downloading already, rather than downloaded twice.
+            List<LinkRequirements>? required = null;
+            if (withRequirements)
+            {
+                required = [];
+                HashSet<ModRef> queued = [];
+                for (int index = 0; index < links.Length; index++)
+                {
+                    required.Add(await RequirementsAsync(links[index], results[index], deep, queued, cancellationToken).ConfigureAwait(false));
+                }
+            }
+
+            (results, required) = await AsTheyAreNowAsync(results, required, cancellationToken).ConfigureAwait(false);
             string message = Summarize(results);
+            if (required is not null)
+            {
+                message += $" {SummarizeRequirements(required)}";
+            }
+
             return new DownloadsResult(
                 results,
+                required,
                 deprecated,
                 deprecated is null ? message : McpDeprecations.Message(Deprecations.DownloadLink, message));
         });

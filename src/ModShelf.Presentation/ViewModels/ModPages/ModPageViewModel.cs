@@ -104,6 +104,8 @@ public sealed partial class ModPageViewModel : ObservableObject
         SiteFilesHeading = Text.Format(Strings.ModPageSiteFiles, site);
         OfflineText = Text.Format(Strings.ModPageShownOnline, site);
         Requirements = [.. page.Requirements.Select(requirement => new RequirementViewModel(requirement, services, open))];
+        NeedsMods = page.Requirements.Any(requirement => requirement.Mod is not null);
+        Func<ModFile, CancellationToken, Task>? withRequirements = NeedsMods ? (file, cancellationToken) => ShowRequirementsAsync(file, cancellationToken) : null;
 
         foreach (ModFileCategory category in CurrentSections.Concat(OtherSections))
         {
@@ -113,7 +115,7 @@ public sealed partial class ModPageViewModel : ObservableObject
                     .Where(file => file.Category == category)
                     .OrderByDescending(file => file.UploadedAt)
                     .ThenByDescending(file => file.Reference.Id, StringComparer.Ordinal)
-                    .Select(file => new ModFileViewModel(file, file.Reference == page.LinkedFile, page.Mod.IsAvailable, services)),
+                    .Select(file => new ModFileViewModel(file, file.Reference == page.LinkedFile, page.Mod.IsAvailable, services, withRequirements)),
             ];
             if (files.Length > 0)
             {
@@ -145,6 +147,7 @@ public sealed partial class ModPageViewModel : ObservableObject
         Remove,
         CopySha256,
         DeleteFile,
+        DownloadRequirements,
     }
 
     public ModRef Mod { get; }
@@ -305,6 +308,11 @@ public sealed partial class ModPageViewModel : ObservableObject
     public IReadOnlyList<RequirementViewModel> Requirements { get; }
 
     public bool HasRequirements => Requirements.Count > 0;
+
+    /// <summary>
+    /// Whether it needs other mods of its site, which Download with requirements… downloads with it.
+    /// </summary>
+    public bool NeedsMods { get; }
 
     /// <summary>
     /// The library's files of the mod, the latest downloaded first: the current ones, and the archived ones when asked.
@@ -603,6 +611,12 @@ public sealed partial class ModPageViewModel : ObservableObject
                 ? Pages.OpenAsync(page, _services.Browser, _services.Dialogs, Strings.OpenPageByHand, cancellationToken)
                 : Task.CompletedTask,
             cancellationToken);
+
+    /// <summary>
+    /// Shows the dialog that downloads what the mod needs, as the user ticks it (ADR 0102), without a file of its own.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(NeedsMods))]
+    private Task DownloadRequirementsAsync(CancellationToken cancellationToken) => ShowRequirementsAsync(null, cancellationToken);
 
     /// <summary>
     /// Watches the mod for updates, adding it to the library with its details from its site, or stops watching it,
@@ -984,6 +998,22 @@ public sealed partial class ModPageViewModel : ObservableObject
         Note = note;
         IsNoteAProblem = isProblem;
     }
+
+    /// <summary>
+    /// Shows the dialog that downloads what the mod needs, with <paramref name="file"/> when given, reading the list as it
+    /// opens.
+    /// </summary>
+    private Task ShowRequirementsAsync(ModFile? file, CancellationToken cancellationToken)
+        => RunAsync(
+            PageAction.DownloadRequirements,
+            async () =>
+            {
+                DownloadRequirementsViewModel downloading = new(Mod, Name, file, _services);
+                Task reading = downloading.ReadAsync(cancellationToken);
+                await _services.Dialogs.DownloadRequirementsAsync(downloading, cancellationToken);
+                await reading;
+            },
+            cancellationToken);
 
     private Task RunAsync(PageAction action, Func<Task> work, CancellationToken cancellationToken)
         => UserCommands.RunAsync(work, _services.Dialogs, exception => LogActionFailed(_services.Logger, exception, action, Mod.Id, Mod.Game.Key), cancellationToken);

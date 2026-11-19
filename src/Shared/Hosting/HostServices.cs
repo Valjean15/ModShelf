@@ -97,6 +97,7 @@ internal static class HostServices
         services.AddLibraryMover();
         services.AddModLists();
         services.AddArchiveImport();
+        services.AddRequirementDownloads();
         services.AddUpdateChecks();
         services.AddSettings();
         services.AddInstalledGames();

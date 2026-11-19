@@ -459,6 +459,27 @@ Get-ChildItem $mo2 | Select-Object Name, Length, LastWriteTime
   "There's no folder at …", exit code 2; then "… is in the library, whose files can't be imported into it. …", exit
   code 2.
 
+## 21. Download with requirements
+
+Run it once, in the Premium run, after 7.5b, so SMAPI is in the library. Pick a Stardew Valley Content Patcher pack whose
+page's Requirements list Content Patcher (mod 1915) and SMAPI, and that the library doesn't have, and copy its page's
+link into `$needs`. If the library has Content Patcher, `ms library forget "https://www.nexusmods.com/stardewvalley/mods/1915"`
+first.
+
+- [ ] **21.1 Only listed.** `ms download $needs --with-requirements`.
+  "What mod *ID* of stardewvalley needs, as Nexus Mods lists it:", then each requirement, as on its page:
+  "Content Patcher: downloads its newest main file, …", "SMAPI …: in the library already", anything off the site with
+  its page. Then "The site's list can be wrong or out of date: …" and "Run the command again with --yes …". Exit code 0;
+  `ms queue list` and `ms library list` are as they were.
+- [ ] **21.2 Deeper, and downloaded.** The same with `--deep --yes`.
+  The list again, with anything Content Patcher needs that isn't listed already indented under it, "(needed by Content
+  Patcher)"; SMAPI isn't listed twice. The pack's
+  file downloads, then "Downloading …, which it needs, to …\Content Patcher (1915)" and its progress. Exit code 0.
+  `ms library list` lists the pack and Content Patcher, both watched. Nothing was extracted.
+- [ ] **21.3 Refusals.** `ms download $needs --deep`, then `ms download $needs --with-requirements --to $downloads`.
+  "--deep and --yes work with --with-requirements only.", exit code 2; then "--with-requirements downloads into the
+  library only: leave out --to.", exit code 2.
+
 ## Clean up
 
 After both accounts:
@@ -602,3 +623,6 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 20.3 Import | | – | |
 | 20.4 Again | | – | |
 | 20.5 Refusals | | – | |
+| 21.1 Only listed | | – | |
+| 21.2 Deeper, and downloaded | | – | |
+| 21.3 Refusals | | – | |

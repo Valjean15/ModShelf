@@ -12,6 +12,7 @@ using ModShelf.Application.Library;
 using ModShelf.Application.Links;
 using ModShelf.Application.Lists;
 using ModShelf.Application.Releases;
+using ModShelf.Application.Requirements;
 using ModShelf.Application.Settings;
 using ModShelf.Application.State;
 using ModShelf.Application.Sources;
@@ -370,6 +371,21 @@ public static class ApplicationServiceCollectionExtensions
         services.AddLibraryDownloads();
         services.TryAddSingleton<IModLists, ModLists>();
         services.TryAddSingleton(TimeProvider.System);
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers <see cref="IRequirementDownloads"/>, which plans a mod's requirements and queues the chosen ones for the
+    /// library, over the library and its downloads (<see cref="AddLibraryDownloads"/>).
+    /// </summary>
+    public static IServiceCollection AddRequirementDownloads(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddLibrary();
+        services.AddLibraryDownloads();
+        services.TryAddSingleton<IRequirementDownloads, SiteRequirements>();
 
         return services;
     }

@@ -539,6 +539,29 @@ elsewhere.
   No game is asked; **Identify** says each copied archive is "In the library already, as …"; **To copy** says "None",
   and **Copy into the library** is off.
 
+## 23. Download with requirements
+
+Run it once, in the Premium run, with SMAPI in the library, and a Stardew Valley Content Patcher pack whose page's
+Requirements list Content Patcher and SMAPI, neither the pack nor Content Patcher in the library (as for the command
+line's section 21).
+
+- [ ] **23.1 The menu beside Download.** Open the pack's page in Browse. Beside its main file's **Download**, open the
+  menu, then **Download with requirements…**.
+  "Download *pack* with its requirements", "With *file*, and the mods it needs that you tick.", "Reading what it
+  needs…" for a moment; then each requirement: Content Patcher ticked, "Newest main file: …"; SMAPI "In library", not
+  tickable; anything off the site "Off the site", with **Open page**. The note says the site's list can be wrong, and
+  nothing is installed. **Download (1)**.
+- [ ] **23.2 Deeper.** Tick **Include their requirements too**, then untick it.
+  It reads again: anything Content Patcher needs that isn't listed already shows under it, "Needed by Content Patcher";
+  SMAPI isn't listed twice. Unticked, those go, and Content Patcher stays ticked as it was.
+- [ ] **23.3 Download.** **Download (1)**.
+  It says what it queued; the Downloads screen has the pack's file and Content Patcher's. Once done, the Library lists
+  both mods, watched. The dialog's button says **OK**.
+- [ ] **23.4 What's missing.** Open Content Patcher's page from the Library, then **Download what's missing…** in its
+  Requirements.
+  "Download what Content Patcher needs": SMAPI "In library", "The library has every mod it needs, or is downloading
+  them.", and **Download** off.
+
 ## Clean up
 
 If a run stopped before 12.7, give the links back on the Settings screen first: their registration starts ModShelf on the test folder. After both accounts, quit the app from the tray menu, then:
@@ -746,3 +769,7 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 22.2 Identify | | – | |
 | 22.3 Copy | | – | |
 | 22.4 On the game's page | | – | |
+| 23.1 The menu beside Download | | – | |
+| 23.2 Deeper | | – | |
+| 23.3 Download | | – | |
+| 23.4 What's missing | | – | |

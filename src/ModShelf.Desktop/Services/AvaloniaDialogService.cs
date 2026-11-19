@@ -10,6 +10,7 @@ using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.Dialogs;
 using ModShelf.Presentation.ViewModels.FirstRun;
+using ModShelf.Presentation.ViewModels.ModPages;
 using ModShelf.Presentation.ViewModels.Settings;
 
 namespace ModShelf.Desktop.Services;
@@ -175,6 +176,14 @@ internal sealed class AvaloniaDialogService : IDialogService
         cancellationToken.ThrowIfCancellationRequested();
 
         return Dispatcher.UIThread.InvokeAsync(() => ShowAsync(new ImportArchivesDialog { DataContext = importing }, () => true, cancellationToken));
+    }
+
+    public Task DownloadRequirementsAsync(DownloadRequirementsViewModel downloading, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(downloading);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Dispatcher.UIThread.InvokeAsync(() => ShowAsync(new DownloadRequirementsDialog { DataContext = downloading }, () => true, cancellationToken));
     }
 
     public Task ShowFirstRunAsync(FirstRunViewModel setup, CancellationToken cancellationToken)

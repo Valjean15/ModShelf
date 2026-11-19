@@ -4527,4 +4527,80 @@
     <value>Not copied:</value>
     <comment>The heading of the archives that couldn't be copied.</comment>
   </data>
+  <data name="FileDownloadWithRequirements" xml:space="preserve">
+    <value>Download with requirements…</value>
+    <comment>A file's menu item: downloads it with what its mod needs.</comment>
+  </data>
+  <data name="ModPageDownloadRequirements" xml:space="preserve">
+    <value>Download what's missing…</value>
+    <comment>The mod page's button that downloads the mods it needs.</comment>
+  </data>
+  <data name="RequirementsTitle" xml:space="preserve">
+    <value>Download {0} with its requirements</value>
+    <comment>The dialog's title: {0} the mod.</comment>
+  </data>
+  <data name="RequirementsTitleMissing" xml:space="preserve">
+    <value>Download what {0} needs</value>
+    <comment>The dialog's title, without a file of the mod: {0} the mod.</comment>
+  </data>
+  <data name="RequirementsWithFile" xml:space="preserve">
+    <value>With {0}, and the mods it needs that you tick.</value>
+    <comment>Under the title: {0} the mod's file downloaded with them.</comment>
+  </data>
+  <data name="RequirementsReading" xml:space="preserve">
+    <value>Reading what it needs…</value>
+    <comment>While the requirements are read.</comment>
+  </data>
+  <data name="RequirementsReadFailed" xml:space="preserve">
+    <value>{0} couldn't say what it needs: {1}</value>
+    <comment>{0} the site, {1} what went wrong.</comment>
+  </data>
+  <data name="RequirementsNotListed" xml:space="preserve">
+    <value>{0} doesn't list what mods need.</value>
+    <comment>For a site without requirements: {0} the site.</comment>
+  </data>
+  <data name="RequirementsNone" xml:space="preserve">
+    <value>{0} lists nothing it needs.</value>
+    <comment>{0} the site.</comment>
+  </data>
+  <data name="RequirementsNothingMissing" xml:space="preserve">
+    <value>The library has every mod it needs, or is downloading them.</value>
+    <comment>When nothing is left to download.</comment>
+  </data>
+  <data name="RequirementsDeeper" xml:space="preserve">
+    <value>Include their requirements too</value>
+    <comment>Lists what the mods to download need, down to three levels.</comment>
+  </data>
+  <data name="RequirementsDeeperTip" xml:space="preserve">
+    <value>Also lists what the mods to download need, and what those need, three levels down; a mod is listed once.</value>
+    <comment>Tooltip of Include their requirements too.</comment>
+  </data>
+  <data name="RequirementsNote" xml:space="preserve">
+    <value>The site's list can be wrong or out of date: check the mod's description too. Only what's ticked is downloaded, into the library, and nothing is installed.</value>
+    <comment>The note under the requirements.</comment>
+  </data>
+  <data name="RequirementsDownload" xml:space="preserve">
+    <value>Download ({0:N0})</value>
+    <comment>The dialog's button: {0} how many files.</comment>
+  </data>
+  <data name="RequirementFile" xml:space="preserve">
+    <value>Newest main file: {0}</value>
+    <comment>A requirement to download: {0} its file's name.</comment>
+  </data>
+  <data name="RequirementDownloading" xml:space="preserve">
+    <value>Downloading</value>
+    <comment>A requirement whose download is under way.</comment>
+  </data>
+  <data name="RequirementElsewhere" xml:space="preserve">
+    <value>Off the site</value>
+    <comment>A requirement that isn't a mod of the site.</comment>
+  </data>
+  <data name="RequirementCantDownload" xml:space="preserve">
+    <value>Can't download: {0}</value>
+    <comment>A requirement that can't be downloaded: {0} why.</comment>
+  </data>
+  <data name="RequirementNeededBy" xml:space="preserve">
+    <value>Needed by {0}</value>
+    <comment>A requirement of a requirement: {0} the mod that needs it.</comment>
+  </data>
 </root>

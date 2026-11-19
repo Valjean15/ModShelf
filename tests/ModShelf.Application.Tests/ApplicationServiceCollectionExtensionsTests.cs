@@ -9,6 +9,7 @@ using ModShelf.Application.Downloads;
 using ModShelf.Application.Endorsements;
 using ModShelf.Application.Installed;
 using ModShelf.Application.Library;
+using ModShelf.Application.Requirements;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
 using ModShelf.Application.Tests.Accounts;
@@ -262,6 +263,18 @@ public sealed class ApplicationServiceCollectionExtensionsTests
 
         Assert.Equal(typeof(SiteEndorsements), Single<IEndorsements>(services).ImplementationType);
         Assert.Equal(typeof(SourceRegistry), Single<ISourceRegistry>(services).ImplementationType);
+        Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
+    }
+
+    [Fact]
+    public void AddRequirementDownloadsRegistersItOnceWithTheLibrarysDownloads()
+    {
+        ServiceCollection services = new();
+        services.AddRequirementDownloads();
+        services.AddRequirementDownloads();
+
+        Assert.Equal(typeof(SiteRequirements), Single<IRequirementDownloads>(services).ImplementationType);
+        Single<ILibraryDownloads>(services);
         Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
     }
 

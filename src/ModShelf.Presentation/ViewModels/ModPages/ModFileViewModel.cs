@@ -16,10 +16,19 @@ public sealed partial class ModFileViewModel : ObservableObject
 {
     private readonly ModFile _file;
     private readonly ModPageServices _services;
+    private readonly Func<ModFile, CancellationToken, Task>? _withRequirements;
 
     /// <param name="isLinked">Whether it's the file the link the user gave is to.</param>
     /// <param name="modIsAvailable">Whether its mod can be downloaded from, rather than hidden or removed.</param>
-    internal ModFileViewModel(ModFile file, bool isLinked, bool modIsAvailable, ModPageServices services)
+    /// <param name="withRequirements">
+    /// Shows the dialog that downloads it with what its mod needs; null when its site lists no mods it needs.
+    /// </param>
+    internal ModFileViewModel(
+        ModFile file,
+        bool isLinked,
+        bool modIsAvailable,
+        ModPageServices services,
+        Func<ModFile, CancellationToken, Task>? withRequirements = null)
     {
         ArgumentNullException.ThrowIfNull(file);
         ArgumentNullException.ThrowIfNull(services);
@@ -33,6 +42,8 @@ public sealed partial class ModFileViewModel : ObservableObject
         UploadedText = Text.Format(Strings.FileUploaded, Dates.Day(file.UploadedAt, services.TimeProvider));
         IsLinked = isLinked;
         CanDownload = modIsAvailable && file.PageUrl is not null;
+        _withRequirements = withRequirements;
+        CanDownloadWithRequirements = CanDownload && withRequirements is not null;
     }
 
     /// <summary>
@@ -79,6 +90,11 @@ public sealed partial class ModFileViewModel : ObservableObject
     public bool CanDownload { get; }
 
     /// <summary>
+    /// Whether it can be downloaded with what its mod needs: it can be downloaded, and its mod needs other mods.
+    /// </summary>
+    public bool CanDownloadWithRequirements { get; }
+
+    /// <summary>
     /// Whether the library has it.
     /// </summary>
     [ObservableProperty]
@@ -120,6 +136,12 @@ public sealed partial class ModFileViewModel : ObservableObject
             FileAction.Download,
             () => DownloadNotes.AddToLibraryAsync(_services.LibraryDownloads, _file.PageUrl!, Tell, cancellationToken),
             cancellationToken);
+
+    /// <summary>
+    /// Shows the dialog that downloads the file with what its mod needs, as the user ticks it (ADR 0102).
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanDownloadWithRequirements))]
+    private Task DownloadWithRequirementsAsync(CancellationToken cancellationToken) => _withRequirements!(_file, cancellationToken);
 
     /// <summary>
     /// Downloads the file into a folder the user picks, outside the library, as Save to a folder on the Downloads screen

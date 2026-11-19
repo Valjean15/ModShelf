@@ -254,6 +254,19 @@ Endorsing shows on Nexus Mods for everyone; abstaining afterwards records an abs
 - [ ] **10.2 Refused.** Ask it to endorse the second mod.
   The call fails with what Nexus Mods said, and the agent says so; nothing changes on the site.
 
+## 11. Download with requirements
+
+With a Stardew Valley Content Patcher pack the library doesn't have, whose page's Requirements list Content Patcher and
+SMAPI, and Content Patcher not in the library.
+
+- [ ] **11.1 With what it needs.** Ask the agent to download the pack with what it needs.
+  One call to `download` with the pack's link and `withRequirements` `true`. Its `requirements` lists Content Patcher
+  with `state` `download` and its download, SMAPI `inLibrary` (or `download` if the library lacks it), and anything off
+  the site `elsewhere`, with its page, which the agent passes on. Both files download into the library; nothing is
+  installed.
+- [ ] **11.2 Only when asked.** Ask it to download another mod, without mentioning requirements.
+  The call has no `withRequirements`, and its result no `requirements`.
+
 ## Results
 
 Copy this table into the release's notes or issue, and mark each check ✅, ❌ or – (not run). For a ❌, add what you
@@ -313,3 +326,5 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 9.2 A collection | | |
 | 10.1 Endorse, then abstain | | |
 | 10.2 Refused | | |
+| 11.1 With what it needs | | |
+| 11.2 Only when asked | | |

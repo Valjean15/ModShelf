@@ -73,6 +73,7 @@ internal sealed class BrowseHarness : IDisposable
             Links,
             Watchlists,
             new EndorsedMods(Endorsements),
+            Requirements,
             Rescan,
             Storage,
             Settings,
@@ -129,6 +130,8 @@ internal sealed class BrowseHarness : IDisposable
     public ScriptedWatchlists Watchlists { get; } = new();
 
     public ScriptedEndorsements Endorsements { get; } = new();
+
+    public ScriptedRequirementDownloads Requirements { get; } = new();
 
     public ScriptedRescan Rescan { get; } = new();
 
