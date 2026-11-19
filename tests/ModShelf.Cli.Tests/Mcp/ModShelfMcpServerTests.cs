@@ -94,7 +94,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
         Assert.Equal(
             [
                 "accounts_status", "diagnostics", "download", "downloads_cancel", "downloads_list", "downloads_pause",
-                "downloads_resume", "downloads_retry", "downloads_take", "library_changes", "library_check", "library_export",
+                "downloads_resume", "downloads_retry", "downloads_take", "library_changes", "library_check", "library_cleanup", "library_export",
                 "library_forget", "library_import", "library_list", "library_note", "library_pin", "library_rescan", "library_skip",
                 "library_unwatch", "library_updates", "library_watch",
                 "mod_endorse", "mod_games", "mod_search", "mod_show", "settings_reset", "settings_set", "settings_show",
@@ -1637,7 +1637,7 @@ public sealed class ModShelfMcpServerTests : IAsyncDisposable
             await mcp.CloseAsync(Cancellation);
         }
 
-        Assert.Contains(Cli.Logs.Entries, entry => entry.Contains("The MCP server started, with 29 tools", StringComparison.Ordinal));
+        Assert.Contains(Cli.Logs.Entries, entry => entry.Contains("The MCP server started, with 30 tools", StringComparison.Ordinal));
         Assert.DoesNotContain(Cli.Logs.Entries, entry => entry.Contains(GoodKey, StringComparison.Ordinal));
         Assert.DoesNotContain(Cli.Logs.Entries, entry => entry.Contains("handoff.example", StringComparison.Ordinal));
     }
