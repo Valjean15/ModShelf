@@ -2,6 +2,7 @@ using System.Net;
 
 using Microsoft.Extensions.Logging;
 
+using ModShelf.Application.Common;
 using ModShelf.Application.Library;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Settings;
@@ -145,12 +146,6 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
     private static bool IsDue(LibraryMod mod, DateTimeOffset now) => !mod.IsGone || now - LastChecked(mod, now) >= GoneRecheck;
 
     /// <summary>
-    /// Whether a failure to list a mod's files might mean the site no longer has the mod, so it's worth asking.
-    /// </summary>
-    private static bool MightBeGone(Exception exception)
-        => exception is HttpRequestException { StatusCode: HttpStatusCode.NotFound or HttpStatusCode.Gone or HttpStatusCode.Forbidden };
-
-    /// <summary>
     /// When <paramref name="mod"/> was last checked, as far as can be told: a check later than <paramref name="now"/>,
     /// recorded before the clock moved back, is taken as none, and a mod never checked was last checked when it was added.
     /// </summary>
@@ -160,26 +155,13 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
             : now;
 
     /// <summary>
-    /// Whether the site says the mod is gone, asked once when it wouldn't list the mod's files: it describes the mod as
-    /// hidden or removed, or doesn't know it at all. Anything else, such as a site that can't be reached, isn't taken
-    /// to mean so, and the check fails as it would have.
+    /// Whether the site says the mod is gone, asked once when it wouldn't list the mod's files; the check fails as it
+    /// would have otherwise.
     /// </summary>
-    private static async Task<bool> IsGoneAsync(IModCatalog catalog, ModRef mod, Check check, CancellationToken cancellationToken)
+    private static Task<bool> IsGoneAsync(IModCatalog catalog, ModRef mod, Check check, CancellationToken cancellationToken)
     {
-        try
-        {
-            check.Requests++;
-            ModInfo info = await catalog.GetModAsync(mod, cancellationToken).ConfigureAwait(false);
-            return !info.IsAvailable;
-        }
-        catch (HttpRequestException exception) when (exception.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Gone)
-        {
-            return true;
-        }
-        catch (Exception exception) when (exception is HttpRequestException or AuthenticationFailedException or ArgumentException)
-        {
-            return false;
-        }
+        check.Requests++;
+        return GoneMods.IsGoneAsync(catalog, mod, cancellationToken);
     }
 
     private async Task CheckGameAsync(Check check, GameRef game, IReadOnlyList<LibraryMod> mods, CancellationToken cancellationToken)
@@ -268,7 +250,7 @@ internal sealed partial class UpdateChecker : IUpdateChecker, IDisposable
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                if (MightBeGone(exception) && await IsGoneAsync(catalog, mod.Mod, check, cancellationToken).ConfigureAwait(false))
+                if (GoneMods.MightBe(exception) && await IsGoneAsync(catalog, mod.Mod, check, cancellationToken).ConfigureAwait(false))
                 {
                     await LeftSiteAsync(check, mod.Mod, cancellationToken).ConfigureAwait(false);
                     continue;
