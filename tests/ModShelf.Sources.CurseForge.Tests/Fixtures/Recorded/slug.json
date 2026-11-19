@@ -1,0 +1,294 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/v1/mods/search",
+    "query": "gameId=432&classId=6&slug=modmenu"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": [
+        {
+          "id": 308702,
+          "gameId": 432,
+          "name": "Mod Menu",
+          "slug": "modmenu",
+          "links": {
+            "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/modmenu",
+            "wikiUrl": "https://github.com/terraformersmc/modmenu?tab=readme-ov-file#developers",
+            "issuesUrl": "https://github.com/Prospector/ModMenu/issues",
+            "sourceUrl": "https://github.com/Prospector/ModMenu"
+          },
+          "summary": "Adds a mod menu to view the list of mods you have installed.",
+          "status": 4,
+          "downloadCount": 85686439,
+          "favoriteCount": 5912,
+          "isFeatured": false,
+          "primaryCategoryId": 425,
+          "categories": [
+            {
+              "id": 425,
+              "gameId": 432,
+              "name": "Miscellaneous",
+              "slug": "mc-miscellaneous",
+              "url": "https://www.curseforge.com/minecraft/mc-mods/mc-miscellaneous",
+              "iconUrl": "https://media.forgecdn.net/avatars/6/40/635351497693711265.png",
+              "dateModified": "2014-06-15T04:27:14.543Z",
+              "isClass": false,
+              "classId": 6,
+              "parentCategoryId": 6
+            }
+          ],
+          "classId": 6,
+          "authors": [
+            {
+              "id": 18470197,
+              "name": "Prospector",
+              "url": "https://www.curseforge.com/members/prospector",
+              "avatarUrl": "https://static-cdn.jtvnw.net/jtv_user_pictures/d6a6ebf2-6010-43b2-8fe9-6c74708fdfaf-profile_image-150x150.png",
+              "userTierInfo": {
+                "tierLevel": 4,
+                "downloadsThreshold": 10000000
+              }
+            }
+          ],
+          "logo": {
+            "id": 1577189,
+            "modId": 308702,
+            "title": "639021849968664892.png",
+            "description": "",
+            "thumbnailUrl": "https://media.forgecdn.net/avatars/thumbnails/1577/189/256/256/639021849968664892.png",
+            "url": "https://media.forgecdn.net/avatars/1577/189/639021849968664892.png"
+          },
+          "mainFileId": 9572671,
+          "latestFiles": [
+            {
+              "id": 2810461,
+              "gameId": 432,
+              "modId": 308702,
+              "isAvailable": true,
+              "displayName": "ModMenu v1.7.14.1.14.4+build.126 for 1.14.4",
+              "fileName": "modmenu-1.7.14.1.14.4+build.126.jar",
+              "releaseType": 1,
+              "fileStatus": 4,
+              "hashes": [
+                {
+                  "value": "45bb4929b145c6bc123142067f1f48685f9657f6",
+                  "algo": 1
+                },
+                {
+                  "value": "2b148dc4f44320aabecdc13b3a845e45",
+                  "algo": 2
+                }
+              ],
+              "fileDate": "2019-10-16T12:39:52.21Z",
+              "fileLength": 109147,
+              "downloadCount": 58279,
+              "downloadUrl": "https://edge.forgecdn.net/files/2810/461/modmenu-1.7.14.1.14.4%2bbuild.126.jar",
+              "gameVersions": [
+                "1.14.4"
+              ],
+              "dependencies": [],
+              "alternateFileId": 0,
+              "isServerPack": false,
+              "fileFingerprint": 1702489160
+            },
+            {
+              "id": 2837461,
+              "gameId": 432,
+              "modId": 308702,
+              "isAvailable": true,
+              "displayName": "ModMenu v1.8.0.1.15-pre6+build.15 for 1.15-pre6",
+              "fileName": "modmenu-1.8.0.1.15-pre6+build.15.jar",
+              "releaseType": 2,
+              "fileStatus": 4,
+              "hashes": [
+                {
+                  "value": "45c56381e23a3ed430cdb1271d9fedeeda341b60",
+                  "algo": 1
+                },
+                {
+                  "value": "670ab5ebfd95f42e2afd250270cd887b",
+                  "algo": 2
+                }
+              ],
+              "fileDate": "2019-12-06T14:29:19.467Z",
+              "fileLength": 81418,
+              "downloadCount": 5844,
+              "downloadUrl": "https://edge.forgecdn.net/files/2837/461/modmenu-1.8.0.1.15-pre6%2bbuild.15.jar",
+              "gameVersions": [
+                "1.15-Snapshot"
+              ],
+              "dependencies": [],
+              "alternateFileId": 0,
+              "isServerPack": false,
+              "fileFingerprint": 3059515087
+            },
+            {
+              "id": 7813924,
+              "gameId": 432,
+              "modId": 308702,
+              "isAvailable": true,
+              "displayName": "v18.0.0-alpha.8 for 26.1",
+              "fileName": "modmenu-18.0.0-alpha.8.jar",
+              "releaseType": 3,
+              "fileStatus": 4,
+              "hashes": [
+                {
+                  "value": "996783ff7b322e73c3a6799fecc5ca3023958514",
+                  "algo": 1
+                },
+                {
+                  "value": "a90a4e09c1880ea7c2bea73802a0791c",
+                  "algo": 2
+                }
+              ],
+              "fileDate": "2026-03-25T22:45:18.337Z",
+              "fileLength": 847389,
+              "downloadCount": 122357,
+              "fileSizeOnDisk": 1529608,
+              "downloadUrl": "https://edge.forgecdn.net/files/7813/924/modmenu-18.0.0-alpha.8.jar",
+              "gameVersions": [
+                "Fabric",
+                "Quilt",
+                "26.1",
+                "26.1.1",
+                "26.1.2"
+              ],
+              "dependencies": [
+                {
+                  "modId": 306612,
+                  "relationType": 3
+                },
+                {
+                  "modId": 1037459,
+                  "relationType": 3
+                }
+              ],
+              "alternateFileId": 0,
+              "isServerPack": false,
+              "fileFingerprint": 2662170374
+            },
+            {
+              "id": 8854511,
+              "gameId": 432,
+              "modId": 308702,
+              "isAvailable": true,
+              "displayName": "v21.0.0-beta.1 for 26.3-rc-1",
+              "fileName": "modmenu-21.0.0-beta.1.jar",
+              "releaseType": 2,
+              "fileStatus": 4,
+              "hashes": [
+                {
+                  "value": "e75cdab1860f1efd2ac29876512f6d7da9edefdb",
+                  "algo": 1
+                },
+                {
+                  "value": "79f289bc9aad715e7a4ba48d72a645f7",
+                  "algo": 2
+                }
+              ],
+              "fileDate": "2026-09-11T00:58:08.72Z",
+              "fileLength": 856788,
+              "downloadCount": 51658,
+              "fileSizeOnDisk": 1540609,
+              "downloadUrl": "https://edge.forgecdn.net/files/8854/511/modmenu-21.0.0-beta.1.jar",
+              "gameVersions": [
+                "Client",
+                "Fabric",
+                "Quilt",
+                "26.3-snapshot",
+                "26.3"
+              ],
+              "dependencies": [
+                {
+                  "modId": 306612,
+                  "relationType": 3
+                },
+                {
+                  "modId": 1037459,
+                  "relationType": 3
+                }
+              ],
+              "alternateFileId": 0,
+              "isServerPack": false,
+              "fileFingerprint": 3083111728
+            },
+            {
+              "id": 9572671,
+              "gameId": 432,
+              "modId": 308702,
+              "isAvailable": true,
+              "displayName": "v21.0.1 for 26.3",
+              "fileName": "modmenu-21.0.1.jar",
+              "releaseType": 1,
+              "fileStatus": 4,
+              "hashes": [
+                {
+                  "value": "884ab621735264187ccbfc87017cf55bb54d47ee",
+                  "algo": 1
+                },
+                {
+                  "value": "144978805a3c9d97652d3e20a3671014",
+                  "algo": 2
+                }
+              ],
+              "fileDate": "2026-11-12T11:08:14.793Z",
+              "fileLength": 862761,
+              "downloadCount": 14301,
+              "fileSizeOnDisk": 1544054,
+              "downloadUrl": "https://edge.forgecdn.net/files/9572/671/modmenu-21.0.1.jar",
+              "gameVersions": [
+                "Client",
+                "Fabric",
+                "Server",
+                "Quilt",
+                "26.3"
+              ],
+              "dependencies": [
+                {
+                  "modId": 1037459,
+                  "relationType": 3
+                },
+                {
+                  "modId": 306612,
+                  "relationType": 3
+                }
+              ],
+              "alternateFileId": 0,
+              "isServerPack": false,
+              "fileFingerprint": 3862695729
+            }
+          ],
+          "dateCreated": "2018-12-10T16:47:08.667Z",
+          "dateModified": "2026-11-12T11:14:32.08Z",
+          "dateReleased": "2026-11-12T11:08:14.793Z",
+          "allowModDistribution": true,
+          "gamePopularityRank": 166,
+          "isAvailable": true,
+          "hasCommentsEnabled": false,
+          "licenseType": "MIT License",
+          "thumbsUpCount": 0,
+          "serverAffiliation": {
+            "isEnabled": true,
+            "isDefaultBanner": false,
+            "hasDiscount": false,
+            "affiliationService": 2,
+            "customImageUrl": "https://media.forgecdn.net/banner/console-affiliation-banners/banner_f3d90a3a-060e-4cf6-ae04-a44ab391219d.png",
+            "affiliationLink": "https://modrinth.host?from=modmenu"
+          },
+          "featuredProjectTag": 0
+        }
+      ],
+      "pagination": {
+        "index": 0,
+        "pageSize": 50,
+        "resultCount": 1,
+        "totalCount": 1
+      }
+    }
+  }
+}

@@ -101,7 +101,9 @@ Other projects see a project only through what it makes public, so keep that to 
 | 2500–2599 | Application: downloads with requirements |
 | 2600–2699 | Sources.Thunderstore |
 | 2700–2799 | Application: freeing up space |
-| 2800 onward | Next free block |
+| 2800–2899 | Application: showing archives' contents |
+| 2900–2999 | Sources.CurseForge |
+| 3000 onward | Next free block |
 
 ## 7. Files
 

@@ -13,7 +13,7 @@ library on your disk, remembers which version of each file you have, and tells y
 
 ## What it does
 
-- **Downloads from several sites:** Nexus Mods, GameBanana, mod.io, DEG Mods and Thunderstore, plus plain web links,
+- **Downloads from several sites:** Nexus Mods, GameBanana, mod.io, DEG Mods, Thunderstore and CurseForge, plus plain web links,
   with a speed limit you can turn on and off when the connection is shared.
 - **Keeps a library:** each file goes into a folder for its game and mod, with its version and SHA-256. Old versions
   are kept, archived or cleaned up, as you choose, and **Free up space** finds archived versions, duplicates and
@@ -43,8 +43,8 @@ whenever a new version is released.
 ## Getting started
 
 1. **Open ModShelf.** A short setup asks where to keep your library and offers to link an account.
-2. **Link your accounts** in **Settings › Accounts**. Nexus Mods and mod.io need one (an API key works). GameBanana,
-   DEG Mods and Thunderstore work without one.
+2. **Link your accounts** in **Settings › Accounts**. Nexus Mods and mod.io need one (an API key works), and CurseForge
+   needs your own API key, from the CurseForge for Studios console. GameBanana, DEG Mods and Thunderstore work without one.
 3. **Find a mod** on the **Browse** screen: pick a game, search, and choose **Download**. You can also paste any link on
    the **Downloads** screen.
 4. **Stay up to date** on the **Updates** screen. ModShelf checks the mods you watch every 6 hours; choose **Download**

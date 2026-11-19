@@ -84,7 +84,7 @@ internal static partial class ModCommand
         };
         Option<string?> source = new("--source")
         {
-            Description = "The site to search: nexus, gamebanana, modio, degmods or thunderstore. Needed only when the game's key could be more than one site's.",
+            Description = "The site to search: nexus, gamebanana, modio, degmods, thunderstore or curseforge. Needed only when the game's key could be more than one site's.",
             HelpName = "source",
         };
 

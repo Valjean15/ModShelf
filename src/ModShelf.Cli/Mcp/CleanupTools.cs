@@ -26,7 +26,7 @@ internal sealed class CleanupTools(ILibraryCleanup cleanup, IModLibrary library)
     [Description("Lists what could go from ModShelf's library folders to free up space, a page at a time (offset and limit; hasMore says whether there's another page), and deletes nothing. The groups: archived, old versions moved to _archive folders; duplicates, library files with the same SHA-256 and size as another, the copy kept (sameAs); unwatched, files of mods no longer watched; and unmatched, files in the mods' folders that the library doesn't have and that match none of the mod's files on its site. A file that may be the only copy left is kept, saying why: its mod left its site, or the site no longer offers it, or couldn't be asked; so is a file that's one of the mod's files on its site, which library_rescan adds. Each mod's site is asked at most once which files it still offers. Deleting is for the user, in the desktop app (Library, Free up space…) or with ms library cleanup --delete.")]
     public Task<CleanupListing> ListAsync(
         [Description("Only this game's files, as the site names it in its links, such as stardewvalley.")] string? game = null,
-        [Description("Only this site's files: nexus, gamebanana, modio, degmods or thunderstore.")] string? source = null,
+        [Description("Only this site's files: nexus, gamebanana, modio, degmods, thunderstore or curseforge.")] string? source = null,
         [Description("Only the files that can go, leaving out the ones kept.")] bool canGoOnly = false,
         [Description("How many files to skip: the offset of the page.")] int offset = 0,
         [Description("How many files a page lists, from 1 to 500.")] int limit = 200,

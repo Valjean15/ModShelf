@@ -13,6 +13,7 @@
     <Project Path="src/ModShelf.Sources.GameBanana/ModShelf.Sources.GameBanana.csproj" />
     <Project Path="src/ModShelf.Sources.ModIo/ModShelf.Sources.ModIo.csproj" />
     <Project Path="src/ModShelf.Sources.Nexus/ModShelf.Sources.Nexus.csproj" />
+    <Project Path="src/ModShelf.Sources.CurseForge/ModShelf.Sources.CurseForge.csproj" />
     <Project Path="src/ModShelf.Sources.Thunderstore/ModShelf.Sources.Thunderstore.csproj" />
   </Folder>
   <Folder Name="/tests/">
@@ -29,6 +30,7 @@
     <Project Path="tests/ModShelf.Sources.GameBanana.Tests/ModShelf.Sources.GameBanana.Tests.csproj" />
     <Project Path="tests/ModShelf.Sources.ModIo.Tests/ModShelf.Sources.ModIo.Tests.csproj" />
     <Project Path="tests/ModShelf.Sources.Nexus.Tests/ModShelf.Sources.Nexus.Tests.csproj" />
+    <Project Path="tests/ModShelf.Sources.CurseForge.Tests/ModShelf.Sources.CurseForge.Tests.csproj" />
     <Project Path="tests/ModShelf.Sources.Thunderstore.Tests/ModShelf.Sources.Thunderstore.Tests.csproj" />
   </Folder>
 </Solution>

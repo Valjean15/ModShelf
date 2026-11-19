@@ -1,0 +1,2226 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/v1/mods/308702/files",
+    "query": "index=0&pageSize=50"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": [
+        {
+          "id": 9572671,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v21.0.1 for 26.3",
+          "fileName": "modmenu-21.0.1.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "884ab621735264187ccbfc87017cf55bb54d47ee",
+              "algo": 1
+            },
+            {
+              "value": "144978805a3c9d97652d3e20a3671014",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-11-12T11:08:14.793Z",
+          "fileLength": 862761,
+          "downloadCount": 14301,
+          "fileSizeOnDisk": 1544054,
+          "downloadUrl": "https://edge.forgecdn.net/files/9572/671/modmenu-21.0.1.jar",
+          "gameVersions": [
+            "Client",
+            "Fabric",
+            "Server",
+            "Quilt",
+            "26.3"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 3862695729
+        },
+        {
+          "id": 8966634,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v20.0.3 for 26.2",
+          "fileName": "modmenu-20.0.3.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "9fc381627b471c18d67156e846228f51ff2ea5b4",
+              "algo": 1
+            },
+            {
+              "value": "191be5a18876d0605ba5118ff90ea92e",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-09-24T19:34:22.203Z",
+          "fileLength": 616919,
+          "downloadCount": 9277,
+          "fileSizeOnDisk": 1276791,
+          "downloadUrl": "https://edge.forgecdn.net/files/8966/634/modmenu-20.0.3.jar",
+          "gameVersions": [
+            "Client",
+            "Fabric",
+            "Server",
+            "Quilt",
+            "26.2"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 1494587593
+        },
+        {
+          "id": 8966566,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v18.0.2 for 26.1",
+          "fileName": "modmenu-18.0.2.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "8fa5f0c6e844f44bfd836197b680ee6ea0006bcd",
+              "algo": 1
+            },
+            {
+              "value": "4cba8a76fe661e8c3b5dcef3697c28d5",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-09-24T19:22:28.01Z",
+          "fileLength": 859999,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 1556786,
+          "downloadUrl": "https://edge.forgecdn.net/files/8966/566/modmenu-18.0.2.jar",
+          "gameVersions": [
+            "Client",
+            "Fabric",
+            "Server",
+            "Quilt",
+            "26.1",
+            "26.1.1",
+            "26.1.2"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 1945219825
+        },
+        {
+          "id": 8966499,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v17.0.1 for 1.21.11",
+          "fileName": "modmenu-17.0.1.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "d5612d70bda58e0179b177ca9990e57471e67d19",
+              "algo": 1
+            },
+            {
+              "value": "83193b9ef9bcb677f5c7ed57da75b3cf",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-09-24T19:10:40.423Z",
+          "fileLength": 960882,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 1647142,
+          "downloadUrl": "https://edge.forgecdn.net/files/8966/499/modmenu-17.0.1.jar",
+          "gameVersions": [
+            "Client",
+            "Fabric",
+            "Server",
+            "Quilt",
+            "1.21.11"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 3579042828
+        },
+        {
+          "id": 8966434,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v11.0.5 for 1.21",
+          "fileName": "modmenu-11.0.5.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "2321d890a25b5985eba576d7cd8fe9a9c136e33d",
+              "algo": 1
+            },
+            {
+              "value": "52ed39a3015ef3e6b02915d87a8aabae",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-09-24T19:00:04.677Z",
+          "fileLength": 975846,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 2076036,
+          "downloadUrl": "https://edge.forgecdn.net/files/8966/434/modmenu-11.0.5.jar",
+          "gameVersions": [
+            "1.21",
+            "Client",
+            "Fabric",
+            "1.21.1",
+            "Server",
+            "Quilt"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 541471270
+        },
+        {
+          "id": 8958984,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v21.0.0 for 26.3",
+          "fileName": "modmenu-21.0.0.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "66ec40f1cd0c037ddca2b5fc6b4b976d479c18e8",
+              "algo": 1
+            },
+            {
+              "value": "d2b9c21cb592b8723d3d443589aabc8a",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-09-23T21:31:05.287Z",
+          "fileLength": 856779,
+          "downloadCount": 6663,
+          "fileSizeOnDisk": 1540651,
+          "downloadUrl": "https://edge.forgecdn.net/files/8958/984/modmenu-21.0.0.jar",
+          "gameVersions": [
+            "Client",
+            "Fabric",
+            "Server",
+            "Quilt",
+            "26.3"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 109305423
+        },
+        {
+          "id": 8854511,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v21.0.0-beta.1 for 26.3-rc-1",
+          "fileName": "modmenu-21.0.0-beta.1.jar",
+          "releaseType": 2,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "e75cdab1860f1efd2ac29876512f6d7da9edefdb",
+              "algo": 1
+            },
+            {
+              "value": "79f289bc9aad715e7a4ba48d72a645f7",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-09-11T00:58:08.72Z",
+          "fileLength": 856788,
+          "downloadCount": 51658,
+          "fileSizeOnDisk": 1540609,
+          "downloadUrl": "https://edge.forgecdn.net/files/8854/511/modmenu-21.0.0-beta.1.jar",
+          "gameVersions": [
+            "Client",
+            "Fabric",
+            "Quilt",
+            "26.3-snapshot",
+            "26.3"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 3083111728
+        },
+        {
+          "id": 8854488,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v20.0.2 for 26.2",
+          "fileName": "modmenu-20.0.2.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "4e02b8bfb7f4eb693f22b611b02bc2b7385614a7",
+              "algo": 1
+            },
+            {
+              "value": "d934d860222aa4cb50dae97542cd31e3",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-09-11T00:48:29.36Z",
+          "fileLength": 616610,
+          "downloadCount": 82501,
+          "fileSizeOnDisk": 1275621,
+          "downloadUrl": "https://edge.forgecdn.net/files/8854/488/modmenu-20.0.2.jar",
+          "gameVersions": [
+            "Client",
+            "Fabric",
+            "Server",
+            "Quilt",
+            "26.2"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 2677430032
+        },
+        {
+          "id": 8854447,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v18.0.1 for 26.1",
+          "fileName": "modmenu-18.0.1.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "fa3fda3ed7941200190e146ecd39485166b01773",
+              "algo": 1
+            },
+            {
+              "value": "b86e5e1932317cffed0f57b88b1f4e4d",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-09-11T00:41:04.647Z",
+          "fileLength": 859754,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 1555897,
+          "downloadUrl": "https://edge.forgecdn.net/files/8854/447/modmenu-18.0.1.jar",
+          "gameVersions": [
+            "Client",
+            "Fabric",
+            "Quilt",
+            "26.1",
+            "26.1.1",
+            "26.1.2"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 2928900384
+        },
+        {
+          "id": 8613102,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "Mod Menu v1.7.18 for 1.14.4",
+          "fileName": "modmenu-1.7.18.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "2d1e76e199bfc05cb8f8783a642c60c525e0f4a3",
+              "algo": 1
+            },
+            {
+              "value": "ae1eb755bf94b8a3df3e8faec05da136",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-08-10T00:49:07.343Z",
+          "fileLength": 105591,
+          "downloadCount": 13006,
+          "fileSizeOnDisk": 173919,
+          "downloadUrl": "https://edge.forgecdn.net/files/8613/102/modmenu-1.7.18.jar",
+          "gameVersions": [
+            "Client",
+            "Fabric",
+            "1.14.4"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 1347358694
+        },
+        {
+          "id": 8402669,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v20.0.1 for 26.2",
+          "fileName": "modmenu-20.0.1.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "8562dee49eae1a6bdd14b026be1b300aedb5ce0f",
+              "algo": 1
+            },
+            {
+              "value": "87749d37d34f7e3b9d41f93135474346",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-07-09T21:54:23.997Z",
+          "fileLength": 614002,
+          "downloadCount": 10184,
+          "fileSizeOnDisk": 1266242,
+          "downloadUrl": "https://edge.forgecdn.net/files/8402/669/modmenu-20.0.1.jar",
+          "gameVersions": [
+            "Fabric",
+            "Quilt",
+            "26.2"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 4202657052
+        },
+        {
+          "id": 8397851,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v17.0.1-beta.1 for 1.21.11",
+          "fileName": "modmenu-17.0.1-beta.1.jar",
+          "releaseType": 2,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "3fdcb2b8ec85ebdab1c344f0eec19ddf37512ca1",
+              "algo": 1
+            },
+            {
+              "value": "783391fc50141119bec2eff784b0b410",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-07-09T02:48:14.53Z",
+          "fileLength": 958351,
+          "downloadCount": 28048,
+          "fileSizeOnDisk": 1637936,
+          "downloadUrl": "https://edge.forgecdn.net/files/8397/851/modmenu-17.0.1-beta.1.jar",
+          "gameVersions": [
+            "Fabric",
+            "Quilt",
+            "1.21.11"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 1645864
+        },
+        {
+          "id": 8397574,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v18.0.0 for 26.1",
+          "fileName": "modmenu-18.0.0.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "0b5cd2531cd3506e431cd2d739da3abceed08ea6",
+              "algo": 1
+            },
+            {
+              "value": "8e8e0702a41de5e10fb9676595cb1bce",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-07-09T01:34:03.277Z",
+          "fileLength": 857151,
+          "downloadCount": 27754,
+          "fileSizeOnDisk": 1546517,
+          "downloadUrl": "https://edge.forgecdn.net/files/8397/574/modmenu-18.0.0.jar",
+          "gameVersions": [
+            "Fabric",
+            "Quilt",
+            "26.1",
+            "26.1.1",
+            "26.1.2"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 674007397
+        },
+        {
+          "id": 8397259,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v20.0.0 for 26.2",
+          "fileName": "modmenu-20.0.0.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "023bcb509fb58930aae99ab24493ebbba8b0f45d",
+              "algo": 1
+            },
+            {
+              "value": "60da381dd135306e5a245fd6e7641f9a",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-07-08T23:59:10.703Z",
+          "fileLength": 614003,
+          "downloadCount": 10253,
+          "fileSizeOnDisk": 1266245,
+          "downloadUrl": "https://edge.forgecdn.net/files/8397/259/modmenu-20.0.0.jar",
+          "gameVersions": [
+            "Fabric",
+            "Quilt",
+            "26.2"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 1178569471
+        },
+        {
+          "id": 8302403,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v20.0.0-beta.4 for 26.2",
+          "fileName": "modmenu-20.0.0-beta.4.jar",
+          "releaseType": 2,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "eccb69023a351a8a1531ea70d04732120c1167aa",
+              "algo": 1
+            },
+            {
+              "value": "f303568e138de17afef9c37fb080c461",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-06-22T19:40:20.663Z",
+          "fileLength": 613011,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 1262624,
+          "downloadUrl": "https://edge.forgecdn.net/files/8302/403/modmenu-20.0.0-beta.4.jar",
+          "gameVersions": [
+            "Fabric",
+            "Quilt",
+            "26.2"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 2625262842
+        },
+        {
+          "id": 8276295,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v20.0.0-beta.3 for 26.2",
+          "fileName": "modmenu-20.0.0-beta.3.jar",
+          "releaseType": 2,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "606811c5f2cb4e66f4ca1b13b603febf97710014",
+              "algo": 1
+            },
+            {
+              "value": "9776c7754fbd49ad7d09541bfd924597",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-06-18T23:33:18.453Z",
+          "fileLength": 635877,
+          "downloadCount": 1,
+          "fileSizeOnDisk": 1300728,
+          "downloadUrl": "https://edge.forgecdn.net/files/8276/295/modmenu-20.0.0-beta.3.jar",
+          "gameVersions": [
+            "Fabric",
+            "Quilt",
+            "26.2"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 1907714170
+        },
+        {
+          "id": 8065321,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v18.0.0-beta.1 for 26.1",
+          "fileName": "modmenu-18.0.0-beta.1.jar",
+          "releaseType": 2,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "52fff4a942dd42d4bdb6d149d0396cbf2ce69016",
+              "algo": 1
+            },
+            {
+              "value": "29f02920e93a9b122a2f8addd81aa784",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-05-09T21:31:02.543Z",
+          "fileLength": 855297,
+          "downloadCount": 463767,
+          "fileSizeOnDisk": 1539574,
+          "downloadUrl": "https://edge.forgecdn.net/files/8065/321/modmenu-18.0.0-beta.1.jar",
+          "gameVersions": [
+            "Fabric",
+            "Quilt",
+            "26.1",
+            "26.1.1",
+            "26.1.2"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 3384162547
+        },
+        {
+          "id": 7813924,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v18.0.0-alpha.8 for 26.1",
+          "fileName": "modmenu-18.0.0-alpha.8.jar",
+          "releaseType": 3,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "996783ff7b322e73c3a6799fecc5ca3023958514",
+              "algo": 1
+            },
+            {
+              "value": "a90a4e09c1880ea7c2bea73802a0791c",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-03-25T22:45:18.337Z",
+          "fileLength": 847389,
+          "downloadCount": 122357,
+          "fileSizeOnDisk": 1529608,
+          "downloadUrl": "https://edge.forgecdn.net/files/7813/924/modmenu-18.0.0-alpha.8.jar",
+          "gameVersions": [
+            "Fabric",
+            "Quilt",
+            "26.1",
+            "26.1.1",
+            "26.1.2"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 2662170374
+        },
+        {
+          "id": 7808841,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v17.0.0 for 1.21.11",
+          "fileName": "modmenu-17.0.0.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "544a8b340ac3918d85bcc7d02eaff5372814354b",
+              "algo": 1
+            },
+            {
+              "value": "c46182d61ea8f99e68f5d86af1b3fdd8",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-03-25T02:08:53.107Z",
+          "fileLength": 1115809,
+          "downloadCount": 943874,
+          "fileSizeOnDisk": 2235169,
+          "downloadUrl": "https://edge.forgecdn.net/files/7808/841/modmenu-17.0.0.jar",
+          "gameVersions": [
+            "Fabric",
+            "Quilt",
+            "1.21.11"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 2743836043
+        },
+        {
+          "id": 7808781,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v16.0.1 for 1.21.9",
+          "fileName": "modmenu-16.0.1.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "f49f423d397fa05218d0aede4e07cd878d6a81ea",
+              "algo": 1
+            },
+            {
+              "value": "e38e96e083862ceb1c530e992e4013ef",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-03-25T01:55:40.153Z",
+          "fileLength": 1083558,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 2198156,
+          "downloadUrl": "https://edge.forgecdn.net/files/7808/781/modmenu-16.0.1.jar",
+          "gameVersions": [
+            "Fabric",
+            "Quilt",
+            "1.21.9",
+            "1.21.10"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 2670004237
+        },
+        {
+          "id": 7808770,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v15.0.2 for 1.21.8",
+          "fileName": "modmenu-15.0.2.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "25230ceed86d58915532d935bae6132364b530eb",
+              "algo": 1
+            },
+            {
+              "value": "0f70ab88677a7404dbc95798604c7833",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-03-25T01:50:55.83Z",
+          "fileLength": 1087256,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 2199601,
+          "downloadUrl": "https://edge.forgecdn.net/files/7808/770/modmenu-15.0.2.jar",
+          "gameVersions": [
+            "Fabric",
+            "1.21.8",
+            "1.21.6",
+            "1.21.7",
+            "Quilt"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 4090263406
+        },
+        {
+          "id": 7808731,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v14.0.2 for 1.21.5",
+          "fileName": "modmenu-14.0.2.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "37de7f1496d379a7df98f4b400a790ecafc005ff",
+              "algo": 1
+            },
+            {
+              "value": "c6539b9cbb1285e5600dd8838dbd99a9",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-03-25T01:41:13.627Z",
+          "fileLength": 1069803,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 2177796,
+          "downloadUrl": "https://edge.forgecdn.net/files/7808/731/modmenu-14.0.2.jar",
+          "gameVersions": [
+            "Fabric",
+            "1.21.5",
+            "Quilt"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 3194470662
+        },
+        {
+          "id": 7808596,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v13.0.4 for 1.21.4",
+          "fileName": "modmenu-13.0.4.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "b5d816f6df9ffb9af8f9c2b43dfb15d9bbfcf400",
+              "algo": 1
+            },
+            {
+              "value": "79856b4ad839616c9b4318952ba44fd1",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-03-25T01:16:45.913Z",
+          "fileLength": 1050885,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 2155144,
+          "downloadUrl": "https://edge.forgecdn.net/files/7808/596/modmenu-13.0.4.jar",
+          "gameVersions": [
+            "Fabric",
+            "1.21.4",
+            "Quilt"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 3510931829
+        },
+        {
+          "id": 7808559,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v12.0.1 for 1.21.3",
+          "fileName": "modmenu-12.0.1.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "32a4d57de36fb741d69676c158bcca1888ade384",
+              "algo": 1
+            },
+            {
+              "value": "79b9a6babf21c413e47ad53adf5e88a2",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-03-25T01:11:20.863Z",
+          "fileLength": 986251,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 2083462,
+          "downloadUrl": "https://edge.forgecdn.net/files/7808/559/modmenu-12.0.1.jar",
+          "gameVersions": [
+            "Fabric",
+            "1.21.3",
+            "Quilt",
+            "1.21.2"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 387176200
+        },
+        {
+          "id": 7808443,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v11.0.4 for 1.21",
+          "fileName": "modmenu-11.0.4.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "8af1b0b9ee18eab5cd5e5c97c497f0e473c49e9a",
+              "algo": 1
+            },
+            {
+              "value": "b2b9c53a887c100f780708c4f36db6c4",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-03-25T00:45:05.477Z",
+          "fileLength": 973059,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 2065523,
+          "downloadUrl": "https://edge.forgecdn.net/files/7808/443/modmenu-11.0.4.jar",
+          "gameVersions": [
+            "1.21",
+            "Fabric",
+            "1.21.1",
+            "Quilt"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 2045004126
+        },
+        {
+          "id": 7808230,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v18.0.0-alpha.7 for 26.1",
+          "fileName": "modmenu-18.0.0-alpha.7.jar",
+          "releaseType": 3,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "99a5d71948c358261a0e3cbf898ed0368727d36f",
+              "algo": 1
+            },
+            {
+              "value": "4a6c522a8e3464f0f08dab7b28750ba2",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-03-24T23:49:37.6Z",
+          "fileLength": 847123,
+          "downloadCount": 83,
+          "fileSizeOnDisk": 1528999,
+          "downloadUrl": "https://edge.forgecdn.net/files/7808/230/modmenu-18.0.0-alpha.7.jar",
+          "gameVersions": [
+            "Fabric",
+            "Quilt",
+            "26.1"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 1141171169
+        },
+        {
+          "id": 7758159,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v18.0.0-alpha.6 for 26.1-pre-2",
+          "fileName": "modmenu-18.0.0-alpha.6.jar",
+          "releaseType": 3,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "7090c5660fc4621128f42ea880c99081a36b3502",
+              "algo": 1
+            },
+            {
+              "value": "426ed8dd19c1c84a81a71164b186c801",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-03-14T20:38:38.723Z",
+          "fileLength": 616431,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 1271101,
+          "downloadUrl": "https://edge.forgecdn.net/files/7758/159/modmenu-18.0.0-alpha.6.jar",
+          "gameVersions": [
+            "Fabric",
+            "Quilt",
+            "26.1-snapshot"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 2748131758
+        },
+        {
+          "id": 7504428,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v18.0.0-alpha.5 for 26.1-snapshot-4",
+          "fileName": "modmenu-18.0.0-alpha.5.jar",
+          "releaseType": 3,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "8c3f58a4de3c849da49bf3d6f66e5c27cd1bbaaf",
+              "algo": 1
+            },
+            {
+              "value": "b352cff3f2da57a4f9ca56936daa7544",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-01-22T02:24:44.903Z",
+          "fileLength": 614803,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 1268980,
+          "downloadUrl": "https://edge.forgecdn.net/files/7504/428/modmenu-18.0.0-alpha.5.jar",
+          "gameVersions": [
+            "Fabric",
+            "Quilt",
+            "26.1-snapshot"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 638986289
+        },
+        {
+          "id": 7444262,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v16.0.0 for 1.21.9",
+          "fileName": "modmenu-16.0.0.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "55994722875c4b071b31dcb6f3c9cba8818f3391",
+              "algo": 1
+            },
+            {
+              "value": "796fbe44d12e83c7ac28e0c82b515649",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-01-11T01:22:27.587Z",
+          "fileLength": 1083564,
+          "downloadCount": 243398,
+          "fileSizeOnDisk": 2198167,
+          "downloadUrl": "https://edge.forgecdn.net/files/7444/262/modmenu-16.0.0.jar",
+          "gameVersions": [
+            "Fabric",
+            "Quilt",
+            "1.21.9",
+            "1.21.10"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 1826344725
+        },
+        {
+          "id": 7444091,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v15.0.1 for 1.21.8",
+          "fileName": "modmenu-15.0.1.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "cdcf04df75f5c5cb85510807840d19fee0a2a9c5",
+              "algo": 1
+            },
+            {
+              "value": "7dac3316c9e53d1470e6f229df1a66b1",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-01-11T00:21:25.617Z",
+          "fileLength": 1087261,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 2199612,
+          "downloadUrl": "https://edge.forgecdn.net/files/7444/91/modmenu-15.0.1.jar",
+          "gameVersions": [
+            "Fabric",
+            "1.21.8",
+            "1.21.6",
+            "1.21.7",
+            "Quilt"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 2019544586
+        },
+        {
+          "id": 7443629,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v14.0.1 for 1.21.5",
+          "fileName": "modmenu-14.0.1.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "a2b1d3a94c1b8574204a793708d3992074b70951",
+              "algo": 1
+            },
+            {
+              "value": "2048915a11a8e0e0dae7c67ba65f21b0",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-01-10T22:20:55.637Z",
+          "fileLength": 1069808,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 2177807,
+          "downloadUrl": "https://edge.forgecdn.net/files/7443/629/modmenu-14.0.1.jar",
+          "gameVersions": [
+            "Fabric",
+            "1.21.5",
+            "Quilt"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 259677972
+        },
+        {
+          "id": 7441070,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v17.0.0-beta.2 for 1.21.11",
+          "fileName": "modmenu-17.0.0-beta.2.jar",
+          "releaseType": 2,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "632c7565ba0fbc033aa4574e1ae6919f277fe03b",
+              "algo": 1
+            },
+            {
+              "value": "876eca2ec6fa50d36b4bd9320ec680a1",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-01-10T09:08:05.037Z",
+          "fileLength": 1115052,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 2234436,
+          "downloadUrl": "https://edge.forgecdn.net/files/7441/70/modmenu-17.0.0-beta.2.jar",
+          "gameVersions": [
+            "Fabric",
+            "Quilt",
+            "1.21.11"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 3802674030
+        },
+        {
+          "id": 7440695,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v18.0.0-alpha.4 for 26.1-snapshot-2",
+          "fileName": "modmenu-18.0.0-alpha.4.jar",
+          "releaseType": 3,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "81c30c44228543f940183fba8fdeee8081cb943e",
+              "algo": 1
+            },
+            {
+              "value": "b2d4beedb5f318593f2d7d57b308900a",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2026-01-10T06:24:37.33Z",
+          "fileLength": 771353,
+          "downloadCount": 2,
+          "fileSizeOnDisk": 1865680,
+          "downloadUrl": "https://edge.forgecdn.net/files/7440/695/modmenu-18.0.0-alpha.4.jar",
+          "gameVersions": [
+            "Fabric",
+            "Quilt",
+            "26.1-snapshot"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 153725706
+        },
+        {
+          "id": 7374588,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v18.0.0-alpha.3 for 26.1-snapshot-1",
+          "fileName": "modmenu-18.0.0-alpha.3.jar",
+          "releaseType": 3,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "953b88a758f4d60b97cf20e99181d47446ef0ace",
+              "algo": 1
+            },
+            {
+              "value": "e2a3aeeef123f9c9f840e160dd03f71e",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2025-12-24T22:55:29.817Z",
+          "fileLength": 768178,
+          "downloadCount": 366,
+          "fileSizeOnDisk": 1856676,
+          "downloadUrl": "https://edge.forgecdn.net/files/7374/588/modmenu-18.0.0-alpha.3.jar",
+          "gameVersions": [
+            "Fabric",
+            "Quilt",
+            "26.1-snapshot"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 678018126
+        },
+        {
+          "id": 7371974,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v18.0.0-alpha.2 for 26.1-snapshot-1",
+          "fileName": "modmenu-18.0.0-alpha.2.jar",
+          "releaseType": 3,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "1d06154fad7b66ae782770bd7d72e0220462b0aa",
+              "algo": 1
+            },
+            {
+              "value": "e53f9300aa1bd697eba7deb965baeb71",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2025-12-24T03:46:22.187Z",
+          "fileLength": 1014803,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 2125556,
+          "downloadUrl": "https://edge.forgecdn.net/files/7371/974/modmenu-18.0.0-alpha.2.jar",
+          "gameVersions": [
+            "Fabric",
+            "Quilt",
+            "26.1-snapshot"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 963211460
+        },
+        {
+          "id": 7368052,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v16.0.0-rc.2 for 1.21.9",
+          "fileName": "modmenu-16.0.0-rc.2.jar",
+          "releaseType": 2,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "feae6f4e5df7a7ec91328146834ae40801bbbc9a",
+              "algo": 1
+            },
+            {
+              "value": "82ccb7c8fa1ec8665be08c877e1c53c1",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2025-12-23T03:45:37.937Z",
+          "fileLength": 1081055,
+          "downloadCount": 781,
+          "fileSizeOnDisk": 2189886,
+          "downloadUrl": "https://edge.forgecdn.net/files/7368/52/modmenu-16.0.0-rc.2.jar",
+          "gameVersions": [
+            "Fabric",
+            "Quilt",
+            "1.21.9",
+            "1.21.10"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 4166208621
+        },
+        {
+          "id": 7363966,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v17.0.0-beta.1 for 1.21.11",
+          "fileName": "modmenu-17.0.0-beta.1.jar",
+          "releaseType": 2,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "a409614af507ec8b31185d00d45cee1682097fe1",
+              "algo": 1
+            },
+            {
+              "value": "92bc7bcaba409f52eacce8f10b72d827",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2025-12-22T02:45:08.847Z",
+          "fileLength": 1112540,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 2226052,
+          "downloadUrl": "https://edge.forgecdn.net/files/7363/966/modmenu-17.0.0-beta.1.jar",
+          "gameVersions": [
+            "Fabric",
+            "Quilt",
+            "1.21.11"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 2178709859
+        },
+        {
+          "id": 7216457,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v14.0.0 for 1.21.5",
+          "fileName": "modmenu-14.0.0.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "76dce311dfbbff04dea8be0797ed0f2959777d0c",
+              "algo": 1
+            },
+            {
+              "value": "4990a479eb401d1e2d7e89edbbafdef6",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2025-11-13T02:15:34.913Z",
+          "fileLength": 1073175,
+          "downloadCount": 123143,
+          "fileSizeOnDisk": 2185573,
+          "downloadUrl": "https://edge.forgecdn.net/files/7216/457/modmenu-14.0.0.jar",
+          "gameVersions": [
+            "Fabric",
+            "1.21.5",
+            "Quilt"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 3224048295
+        },
+        {
+          "id": 7215733,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v17.0.0-alpha.1 for 25w46a",
+          "fileName": "modmenu-17.0.0-alpha.1.jar",
+          "releaseType": 3,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "b8582a34b433aed24478c9bb43156b66340d0f1f",
+              "algo": 1
+            },
+            {
+              "value": "a010406289e7945534d4b21b4bf6857a",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2025-11-12T22:02:56.79Z",
+          "fileLength": 1081654,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 2186070,
+          "downloadUrl": "https://edge.forgecdn.net/files/7215/733/modmenu-17.0.0-alpha.1.jar",
+          "gameVersions": [
+            "Fabric",
+            "Quilt",
+            "1.21.11-snapshot"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 1908857229
+        },
+        {
+          "id": 7059741,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v16.0.0-rc.1 for 1.21.9",
+          "fileName": "modmenu-16.0.0-rc.1.jar",
+          "releaseType": 2,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "c927187d11cb6db2d3daad2a24899f1a70a1618f",
+              "algo": 1
+            },
+            {
+              "value": "74c349a72ddd8010f67b5cece9aed277",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2025-10-02T23:13:08.507Z",
+          "fileLength": 1077403,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 2182279,
+          "downloadUrl": "https://edge.forgecdn.net/files/7059/741/modmenu-16.0.0-rc.1.jar",
+          "gameVersions": [
+            "Fabric",
+            "1.21.9",
+            "Quilt"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 1711390982
+        },
+        {
+          "id": 6946098,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v15.0.0 for 1.21.8",
+          "fileName": "modmenu-15.0.0.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "b22a1a02a13642ec707d01bb8b14a21188d6d6fa",
+              "algo": 1
+            },
+            {
+              "value": "f8a86f5d8faf85c41150481d816b4adf",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2025-08-30T20:06:41.493Z",
+          "fileLength": 1083202,
+          "downloadCount": 409471,
+          "fileSizeOnDisk": 2188886,
+          "downloadUrl": "https://edge.forgecdn.net/files/6946/98/modmenu-15.0.0.jar",
+          "gameVersions": [
+            "Fabric",
+            "1.21.8",
+            "1.21.6",
+            "1.21.7",
+            "Quilt"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 3975722684
+        },
+        {
+          "id": 6676751,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v15.0.0-beta.3 for 1.21.6",
+          "fileName": "modmenu-15.0.0-beta.3.jar",
+          "releaseType": 2,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "84089aea3ca333e23df7f409d4daf497cc2660d1",
+              "algo": 1
+            },
+            {
+              "value": "94accd41c1d3b1fa84a70822d7b36e04",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2025-06-20T23:35:24.09Z",
+          "fileLength": 1076199,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 2180139,
+          "downloadUrl": "https://edge.forgecdn.net/files/6676/751/modmenu-15.0.0-beta.3.jar",
+          "gameVersions": [
+            "Fabric",
+            "1.21.6",
+            "Quilt"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 2758182425
+        },
+        {
+          "id": 6664210,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v15.0.0-beta.2 for 1.21.6",
+          "fileName": "modmenu-15.0.0-beta.2.jar",
+          "releaseType": 2,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "8a0767e29d46aa4c40b6cd4e35ebff667adf212b",
+              "algo": 1
+            },
+            {
+              "value": "b87292088706996438af7035b355b109",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2025-06-18T02:15:37.48Z",
+          "fileLength": 1083229,
+          "downloadCount": 0,
+          "fileSizeOnDisk": 2196133,
+          "downloadUrl": "https://edge.forgecdn.net/files/6664/210/modmenu-15.0.0-beta.2.jar",
+          "gameVersions": [
+            "Fabric",
+            "1.21.6",
+            "Quilt"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 81760084
+        },
+        {
+          "id": 6659837,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v15.0.0-beta.1 for 1.21.6-rc1",
+          "fileName": "modmenu-15.0.0-beta.1.jar",
+          "releaseType": 2,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "03727fda3d9a3ac75d3ba7cbbc9d0d338e657054",
+              "algo": 1
+            },
+            {
+              "value": "f6d2f944b1185a012c147d8e16128322",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2025-06-17T04:06:55.107Z",
+          "fileLength": 1078721,
+          "downloadCount": 91,
+          "fileSizeOnDisk": 2186401,
+          "downloadUrl": "https://edge.forgecdn.net/files/6659/837/modmenu-15.0.0-beta.1.jar",
+          "gameVersions": [
+            "1.21.6-snapshot",
+            "Fabric",
+            "1.21.6",
+            "Quilt"
+          ],
+          "dependencies": [
+            {
+              "modId": 306612,
+              "relationType": 3
+            },
+            {
+              "modId": 1037459,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 1394644712
+        },
+        {
+          "id": 6347337,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v14.0.0-rc.2 for 1.21.5-rc1",
+          "fileName": "modmenu-14.0.0-rc.2.jar",
+          "releaseType": 2,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "cdcbe5d129ca9939c3c95a09b3d6fd1ed5513edd",
+              "algo": 1
+            },
+            {
+              "value": "5a262391236708f6bf39dc8df44e8945",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2025-03-25T18:32:25Z",
+          "fileLength": 1069680,
+          "downloadCount": 379962,
+          "fileSizeOnDisk": 2181499,
+          "downloadUrl": "https://edge.forgecdn.net/files/6347/337/modmenu-14.0.0-rc.2.jar",
+          "gameVersions": [
+            "1.21.5",
+            "Fabric",
+            "1.21.5-Snapshot",
+            "Quilt"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 1576561161
+        },
+        {
+          "id": 6294020,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v14.0.0-beta.2 for 25w10a",
+          "fileName": "modmenu-14.0.0-beta.2.jar",
+          "releaseType": 2,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "8b5799561a70dc13961f635675079430e8b4a776",
+              "algo": 1
+            },
+            {
+              "value": "edf43765397b700de566382650cb0a78",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2025-03-11T22:44:57.03Z",
+          "fileLength": 1055354,
+          "downloadCount": 687,
+          "fileSizeOnDisk": 2164935,
+          "downloadUrl": "https://edge.forgecdn.net/files/6294/20/modmenu-14.0.0-beta.2.jar",
+          "gameVersions": [
+            "Fabric",
+            "1.21.5-Snapshot",
+            "Quilt"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 1677737676
+        },
+        {
+          "id": 6293895,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v13.0.3 for 1.21.4",
+          "fileName": "modmenu-13.0.3.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "4cab0014a7223c6988fde70064579dc66ef8f000",
+              "algo": 1
+            },
+            {
+              "value": "e8884b37fe775f30a0121c4fbdfb32ac",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2025-03-11T21:49:44.383Z",
+          "fileLength": 1050777,
+          "downloadCount": 394994,
+          "fileSizeOnDisk": 2154861,
+          "downloadUrl": "https://edge.forgecdn.net/files/6293/895/modmenu-13.0.3.jar",
+          "gameVersions": [
+            "Fabric",
+            "1.21.4",
+            "Quilt"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 1100960516
+        },
+        {
+          "id": 6183605,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v14.0.0-beta.1 for 25w06a",
+          "fileName": "modmenu-14.0.0-beta.1.jar",
+          "releaseType": 2,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "521cfd9e854729e85717e1263aa15661a44d4ced",
+              "algo": 1
+            },
+            {
+              "value": "c3de7cbd540a84513ce59cbf6f984099",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2025-02-12T02:07:24.137Z",
+          "fileLength": 996184,
+          "downloadCount": 1120,
+          "fileSizeOnDisk": 2100452,
+          "downloadUrl": "https://edge.forgecdn.net/files/6183/605/modmenu-14.0.0-beta.1.jar",
+          "gameVersions": [
+            "Fabric",
+            "1.21.5-Snapshot",
+            "Quilt"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 4184977599
+        },
+        {
+          "id": 6183599,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v13.0.2 for 1.21.4",
+          "fileName": "modmenu-13.0.2.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "ef2512f29363f3a8d3a9cb92ba43eca3c689b8c4",
+              "algo": 1
+            },
+            {
+              "value": "b6ee380209ec870e204376f09374e319",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2025-02-12T02:02:44.73Z",
+          "fileLength": 993944,
+          "downloadCount": 201904,
+          "fileSizeOnDisk": 2096357,
+          "downloadUrl": "https://edge.forgecdn.net/files/6183/599/modmenu-13.0.2.jar",
+          "gameVersions": [
+            "Fabric",
+            "1.21.4",
+            "Quilt"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 91915803
+        },
+        {
+          "id": 6111161,
+          "gameId": 432,
+          "modId": 308702,
+          "isAvailable": true,
+          "displayName": "v13.0.1 for 1.21.4",
+          "fileName": "modmenu-13.0.1.jar",
+          "releaseType": 1,
+          "fileStatus": 4,
+          "hashes": [
+            {
+              "value": "0ddb327640b1b766155e489852378950ef16da8d",
+              "algo": 1
+            },
+            {
+              "value": "6bce151da830ee0334f98095c35305fe",
+              "algo": 2
+            }
+          ],
+          "fileDate": "2025-01-21T21:02:06.3Z",
+          "fileLength": 992893,
+          "downloadCount": 116491,
+          "fileSizeOnDisk": 2092067,
+          "downloadUrl": "https://edge.forgecdn.net/files/6111/161/modmenu-13.0.1.jar",
+          "gameVersions": [
+            "Fabric",
+            "1.21.4",
+            "Quilt"
+          ],
+          "dependencies": [
+            {
+              "modId": 1037459,
+              "relationType": 3
+            },
+            {
+              "modId": 306612,
+              "relationType": 3
+            }
+          ],
+          "alternateFileId": 0,
+          "isServerPack": false,
+          "fileFingerprint": 1036654085
+        }
+      ],
+      "pagination": {
+        "index": 0,
+        "pageSize": 50,
+        "resultCount": 50,
+        "totalCount": 286
+      }
+    }
+  }
+}

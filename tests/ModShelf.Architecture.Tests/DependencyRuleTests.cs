@@ -25,6 +25,7 @@ public sealed class DependencyRuleTests
         ProjectNames.SourcesModIo,
         ProjectNames.SourcesDegMods,
         ProjectNames.SourcesThunderstore,
+        ProjectNames.SourcesCurseForge,
         ProjectNames.SourcesDirectUrl,
         ProjectNames.Cli,
     ];

@@ -19,6 +19,7 @@ internal static class ProjectNames
     public const string SourcesModIo = "ModShelf.Sources.ModIo";
     public const string SourcesDegMods = "ModShelf.Sources.DegMods";
     public const string SourcesThunderstore = "ModShelf.Sources.Thunderstore";
+    public const string SourcesCurseForge = "ModShelf.Sources.CurseForge";
     public const string SourcesDirectUrl = "ModShelf.Sources.DirectUrl";
     public const string Desktop = "ModShelf.Desktop";
     public const string Cli = "ModShelf.Cli";

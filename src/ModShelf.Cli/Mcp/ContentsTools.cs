@@ -26,7 +26,7 @@ internal sealed class ContentsTools(ILibraryContents contents)
     [McpServerTool(Name = "library_contents", Title = "Show what an archive holds", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
     [Description("Lists the folders and files in one of the library's downloaded archives (.zip, .7z or .rar), with their sizes once unpacked, a page at a time (offset and limit; hasMore says whether there's another page), and gives its readme's text, or another text file's when read names it, such as an .ini or a .txt. The archive is read where it is: nothing is extracted, installed or changed, and an archive or a file that needs a password, or a damaged one, is reported, not retried. A mod with more than one archive in the library needs file to name one.")]
     public Task<ContentsListing> ListAsync(
-        [Description("A link to the mod or one of its files, such as its page on Nexus Mods, GameBanana, mod.io, DEG Mods or Thunderstore.")] string link,
+        [Description("A link to the mod or one of its files, such as its page on Nexus Mods, GameBanana, mod.io, DEG Mods, Thunderstore or CurseForge.")] string link,
         [Description("The archive, by its file name or its ID on the site, when the mod has more than one in the library; library_list gives them.")] string? file = null,
         [Description("A text file in the archive to give, by its path as listed, in place of the readme.")] string? read = null,
         [Description("How many entries to skip: the offset of the page.")] int offset = 0,

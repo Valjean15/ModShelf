@@ -88,7 +88,7 @@ public sealed class HostServicesTests
 
         IEnumerable<string> sites = provider.GetServices<IModSource>().Select(source => source.Id.Value);
 
-        Assert.Equal(["degmods", "direct", "gamebanana", "modio", "nexus", "thunderstore"], sites.Order(StringComparer.Ordinal));
+        Assert.Equal(["curseforge", "degmods", "direct", "gamebanana", "modio", "nexus", "thunderstore"], sites.Order(StringComparer.Ordinal));
     }
 
     [Fact]

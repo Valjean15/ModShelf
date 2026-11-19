@@ -8,6 +8,7 @@ using ModShelf.Platform;
 using ModShelf.Platform.Agents;
 using ModShelf.Platform.Links;
 using ModShelf.Platform.Secrets;
+using ModShelf.Sources.CurseForge;
 using ModShelf.Sources.DegMods;
 using ModShelf.Sources.DirectUrl;
 using ModShelf.Sources.GameBanana;
@@ -115,6 +116,7 @@ internal static class HostServices
         services.AddModIoSource();
         services.AddDegModsSource(new DegModsOptions { ReadsGameCovers = showsCovers });
         services.AddThunderstoreSource();
+        services.AddCurseForgeSource();
         return folder;
     }
 

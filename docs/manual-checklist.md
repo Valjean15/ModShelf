@@ -576,6 +576,33 @@ Run it once, after 22, with DamageMeter's zip in the library.
   "DamageMeter has no archive in the library called nothing.zip." and the table of its archives, exit code 2; then "The
   library has no mod at …", exit code 1.
 
+## 25. CurseForge
+
+CurseForge needs your own API key: make one on the API keys page of the CurseForge for Studios console
+(console.curseforge.com). The checks use Minecraft and Mod Menu, which needs Fabric API.
+
+```powershell
+$modmenu = 'https://www.curseforge.com/minecraft/mc-mods/modmenu'
+```
+
+- [ ] **25.1 Link the key.** `ms account link curseforge`, paste the key, then `ms account list`.
+  It opens the console's API keys page and asks for the key without showing it. "Linked CurseForge API key". The list
+  shows CurseForge with "API key". A wrong key, such as `ms account link curseforge` with `not-a-key`, is refused
+  before CurseForge is asked.
+- [ ] **25.2 Games and a search.** `ms mod games mine --source curseforge`, then
+  `ms mod search map --game curseforge/minecraft --category Mods --page-size 5`, then the same with `--sort Downloads`.
+  "Minecraft" with the key `minecraft`; then five mods of Minecraft's Mods with their downloads, CurseForge's most popular
+  first, then the most downloaded first. `ms mod search map --game minecraft` searches Nexus Mods' Minecraft, not
+  CurseForge's.
+- [ ] **25.3 A mod.** `ms mod show $modmenu --all`.
+  "Mod Menu" by Prospector, its builds for each Minecraft version and loader under "Main files", betas and alphas under
+  optional files, each with its page as its link.
+- [ ] **25.4 Download, with what it needs.** `ms download $modmenu --with-requirements --yes`.
+  Fabric API is listed as needed, then both download into the library, under `curseforge\minecraft\`, their SHA-1s
+  checked: "Added to the library."
+- [ ] **25.5 A refused key.** `ms account unlink curseforge`, then `ms mod show $modmenu`.
+  It says CurseForge needs a linked account, exit code 1. Link the key again afterwards.
+
 ## Clean up
 
 After both accounts:
@@ -736,3 +763,8 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 24.1 What it holds | | – | |
 | 24.2 Its readme, and a file that isn't text | | – | |
 | 24.3 A file that isn't an archive, and a mod not in the library | | – | |
+| 25.1 Link the key | | – | |
+| 25.2 Games and a search | | – | |
+| 25.3 A mod | | – | |
+| 25.4 Download, with what it needs | | – | |
+| 25.5 A refused key | | – | |

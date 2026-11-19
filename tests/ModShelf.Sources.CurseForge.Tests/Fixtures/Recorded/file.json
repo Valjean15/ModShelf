@@ -1,0 +1,60 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/v1/mods/308702/files/9572671",
+    "query": ""
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": {
+        "id": 9572671,
+        "gameId": 432,
+        "modId": 308702,
+        "isAvailable": true,
+        "displayName": "v21.0.1 for 26.3",
+        "fileName": "modmenu-21.0.1.jar",
+        "releaseType": 1,
+        "fileStatus": 4,
+        "hashes": [
+          {
+            "value": "884ab621735264187ccbfc87017cf55bb54d47ee",
+            "algo": 1
+          },
+          {
+            "value": "144978805a3c9d97652d3e20a3671014",
+            "algo": 2
+          }
+        ],
+        "fileDate": "2026-11-12T11:08:14.793Z",
+        "fileLength": 862761,
+        "downloadCount": 14301,
+        "fileSizeOnDisk": 1544054,
+        "downloadUrl": "https://edge.forgecdn.net/files/9572/671/modmenu-21.0.1.jar",
+        "gameVersions": [
+          "Client",
+          "Fabric",
+          "Server",
+          "Quilt",
+          "26.3"
+        ],
+        "dependencies": [
+          {
+            "modId": 1037459,
+            "relationType": 3
+          },
+          {
+            "modId": 306612,
+            "relationType": 3
+          }
+        ],
+        "alternateFileId": 0,
+        "isServerPack": false,
+        "fileFingerprint": 3862695729
+      }
+    }
+  }
+}

@@ -630,6 +630,18 @@ Run it once, after 24, with DamageMeter's zip in the library.
   if the library has one; and a file missing from disk, if one is.
   Its **…** menu has no **Show contents…**.
 
+## 27. CurseForge
+
+With your own CurseForge API key, made on the console's API keys page (console.curseforge.com).
+
+- [ ] **27.1 Link the key.** Settings › Accounts: CurseForge under "Needs an account". **Link…**.
+  It opens the console's API keys page and asks for the key. Pasted, the row says "CurseForge API key" with "API key".
+- [ ] **27.2 Browse.** On Browse, pick CurseForge's Minecraft, choose the class **Mods**, and search `map`.
+  Minecraft's Mods with their downloads, the most popular first; the orders are popularity, downloads, when updated, when
+  released and name. A mod's page lists its builds for each Minecraft version and loader.
+- [ ] **27.3 Download.** On Mod Menu's page, **Download** its newest main file.
+  It downloads into the library, its SHA-1 checked. The Library shows it under CurseForge's Minecraft.
+
 ## Clean up
 
 If a run stopped before 12.7, give the links back on the Settings screen first: their registration starts ModShelf on the test folder. After both accounts, quit the app from the tray menu, then:
@@ -853,3 +865,6 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 26.1 What it holds | | – | |
 | 26.2 Other files | | – | |
 | 26.3 Only for archives | | – | |
+| 27.1 Link the key | | – | |
+| 27.2 Browse | | – | |
+| 27.3 Download | | – | |

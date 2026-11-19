@@ -5,7 +5,7 @@ follows from it.
 
 ## Writing a new one
 
-Add `docs/adr/NNNN-short-title.md`, numbered after the last one. Numbering continues from **0106**, so the numbers
+Add `docs/adr/NNNN-short-title.md`, numbered after the last one. Numbering continues from **0107**, so the numbers
 the code's comments cite stay unique. Use the sections the earlier records used: **Context**, **Decision**,
 **Consequences**, and **Testing**. When a decision changes how ModShelf works, update
 [architecture.md](../architecture.md) too, so it keeps describing the app as it is.
@@ -24,6 +24,7 @@ the code's comments cite stay unique. Use the sections the earlier records used:
 | 0104 | [Free up space, keeping what may be the only copy](0104-free-up-space.md) |
 | 0105 | [A download speed limit all downloads share](0105-download-speed-limit.md) |
 | 0106 | [Show what an archive holds, extracting nothing](0106-show-contents-of-archives.md) |
+| 0107 | [CurseForge, the sixth site](0107-curseforge-source.md) |
 
 ## The records of 1.0 (0001–0096)
 

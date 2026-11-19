@@ -1,0 +1,300 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/v1/mods",
+    "query": "",
+    "body": {
+      "modIds": [
+        1037459,
+        306612
+      ]
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "data": [
+        {
+          "id": 1037459,
+          "gameId": 432,
+          "name": "Text Placeholder API",
+          "slug": "text-placeholder-api",
+          "links": {
+            "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/text-placeholder-api",
+            "wikiUrl": null,
+            "issuesUrl": null,
+            "sourceUrl": null
+          },
+          "summary": "Placeholder and Text manipulation library for your Minecraft mods.",
+          "status": 4,
+          "downloadCount": 17365009,
+          "favoriteCount": 429,
+          "isFeatured": false,
+          "primaryCategoryId": 421,
+          "categories": [
+            {
+              "id": 421,
+              "gameId": 432,
+              "name": "API and Library",
+              "slug": "library-api",
+              "url": "https://www.curseforge.com/minecraft/mc-mods/library-api",
+              "iconUrl": "https://media.forgecdn.net/avatars/6/36/635351496947765531.png",
+              "dateModified": "2014-05-23T03:21:44.06Z",
+              "isClass": false,
+              "classId": 6,
+              "parentCategoryId": 6
+            }
+          ],
+          "classId": 6,
+          "authors": [
+            {
+              "id": 61679721,
+              "name": "Patbox",
+              "url": "https://www.curseforge.com/members/patbox",
+              "avatarUrl": "https://static-cdn.jtvnw.net/jtv_user_pictures/69546c4f-5126-4c0b-ab45-14e83c168fc7-profile_image-150x150.png",
+              "userTierInfo": {
+                "tierLevel": 4,
+                "downloadsThreshold": 10000000
+              }
+            }
+          ],
+          "logo": {
+            "id": 1015016,
+            "modId": 1037459,
+            "title": "638540602996666426.png",
+            "description": "",
+            "thumbnailUrl": "https://media.forgecdn.net/avatars/thumbnails/1015/16/256/256/638540602996666426.png",
+            "url": "https://media.forgecdn.net/avatars/1015/16/638540602996666426.png"
+          },
+          "mainFileId": 8271471,
+          "latestFiles": [
+            {
+              "id": 8271471,
+              "gameId": 432,
+              "modId": 1037459,
+              "isAvailable": true,
+              "displayName": "placeholder-api-3.1.0-beta.1+26.2.jar",
+              "fileName": "placeholder-api-3.1.0-beta.1+26.2.jar",
+              "releaseType": 1,
+              "fileStatus": 4,
+              "hashes": [
+                {
+                  "value": "99b57ccc1d4323c4ef71887828dac25ce4ce2103",
+                  "algo": 1
+                },
+                {
+                  "value": "2acee95d87c4e626781880017e3ee03d",
+                  "algo": 2
+                }
+              ],
+              "fileDate": "2026-06-18T08:29:11.28Z",
+              "fileLength": 254973,
+              "downloadCount": 3676,
+              "fileSizeOnDisk": 614417,
+              "downloadUrl": "https://edge.forgecdn.net/files/8271/471/placeholder-api-3.1.0-beta.1%2b26.2.jar",
+              "gameVersions": [
+                "Fabric",
+                "26.2"
+              ],
+              "dependencies": [],
+              "alternateFileId": 0,
+              "isServerPack": false,
+              "fileFingerprint": 600247438
+            }
+          ],
+          "dateCreated": "2024-06-16T09:53:36.587Z",
+          "dateModified": "2026-06-18T08:36:38.04Z",
+          "dateReleased": "2026-06-18T08:29:11.28Z",
+          "allowModDistribution": true,
+          "gamePopularityRank": 496,
+          "isAvailable": true,
+          "hasCommentsEnabled": true,
+          "licenseType": "GNU Lesser General Public License version 3 (LGPLv3)",
+          "thumbsUpCount": 0,
+          "featuredProjectTag": 0
+        },
+        {
+          "id": 306612,
+          "gameId": 432,
+          "name": "Fabric API",
+          "slug": "fabric-api",
+          "links": {
+            "websiteUrl": "https://www.curseforge.com/minecraft/mc-mods/fabric-api",
+            "wikiUrl": "https://fabricmc.net/wiki/",
+            "issuesUrl": "https://github.com/FabricMC/fabric/issues",
+            "sourceUrl": "https://github.com/FabricMC/fabric"
+          },
+          "summary": "Core API library for the Fabric toolchain",
+          "status": 4,
+          "downloadCount": 244222834,
+          "favoriteCount": 12449,
+          "isFeatured": false,
+          "primaryCategoryId": 421,
+          "categories": [
+            {
+              "id": 421,
+              "gameId": 432,
+              "name": "API and Library",
+              "slug": "library-api",
+              "url": "https://www.curseforge.com/minecraft/mc-mods/library-api",
+              "iconUrl": "https://media.forgecdn.net/avatars/6/36/635351496947765531.png",
+              "dateModified": "2014-05-23T03:21:44.06Z",
+              "isClass": false,
+              "classId": 6,
+              "parentCategoryId": 6
+            }
+          ],
+          "classId": 6,
+          "authors": [
+            {
+              "id": 9548223,
+              "name": "modmuss50",
+              "url": "https://www.curseforge.com/members/modmuss50",
+              "avatarUrl": "https://static-cdn.jtvnw.net/jtv_user_pictures/modmuss50-profile_image-ea26560dd3c31d30-150x150.png",
+              "userTierInfo": {
+                "tierLevel": 6,
+                "downloadsThreshold": 500000000
+              }
+            },
+            {
+              "id": 7025176,
+              "name": "sfPlayer1",
+              "url": "https://www.curseforge.com/members/sfplayer1",
+              "avatarUrl": "https://static-cdn.jtvnw.net/user-default-pictures-uv/ce57700a-def9-11e9-842d-784f43822e80-profile_image-150x150.png",
+              "userTierInfo": {
+                "tierLevel": 4,
+                "downloadsThreshold": 10000000
+              }
+            }
+          ],
+          "logo": {
+            "id": 185822,
+            "modId": 306612,
+            "title": "636829723898798601.png",
+            "description": "",
+            "thumbnailUrl": "https://media.forgecdn.net/avatars/thumbnails/185/822/256/256/636829723898798601.png",
+            "url": "https://media.forgecdn.net/avatars/185/822/636829723898798601.png"
+          },
+          "mainFileId": 9557683,
+          "latestFiles": [
+            {
+              "id": 4090886,
+              "gameId": 432,
+              "modId": 306612,
+              "isAvailable": true,
+              "displayName": "[22w46a] Fabric API 0.66.3+1.19.3",
+              "fileName": "fabric-api-0.66.3+1.19.3.jar",
+              "releaseType": 3,
+              "fileStatus": 4,
+              "hashes": [
+                {
+                  "value": "6cfb9d593cedab89103c3dc8c54bc1cec79c161a",
+                  "algo": 1
+                },
+                {
+                  "value": "76250796cd31d38922d8f12a1c2ee832",
+                  "algo": 2
+                }
+              ],
+              "fileDate": "2022-11-16T16:25:18.507Z",
+              "fileLength": 1764991,
+              "downloadCount": 17347,
+              "downloadUrl": "https://edge.forgecdn.net/files/4090/886/fabric-api-0.66.3%2b1.19.3.jar",
+              "gameVersions": [
+                "1.19.3",
+                "Fabric"
+              ],
+              "dependencies": [],
+              "alternateFileId": 0,
+              "isServerPack": false,
+              "fileFingerprint": 748634725
+            },
+            {
+              "id": 9557683,
+              "gameId": 432,
+              "modId": 306612,
+              "isAvailable": true,
+              "displayName": "[26.3] Fabric API 0.166.2+26.3",
+              "fileName": "fabric-api-0.166.2-26.3.jar",
+              "releaseType": 1,
+              "fileStatus": 4,
+              "hashes": [
+                {
+                  "value": "65636253571429971f25f5619692e6c1a6362028",
+                  "algo": 1
+                },
+                {
+                  "value": "6e761f94379e46dc0fe03b49b063a386",
+                  "algo": 2
+                }
+              ],
+              "fileDate": "2026-11-11T13:38:40.42Z",
+              "fileLength": 1797523,
+              "downloadCount": 368494,
+              "fileSizeOnDisk": 7867084,
+              "downloadUrl": "https://edge.forgecdn.net/files/9557/683/fabric-api-0.166.2-26.3.jar",
+              "gameVersions": [
+                "Client",
+                "Fabric",
+                "Server",
+                "26.3"
+              ],
+              "dependencies": [],
+              "alternateFileId": 0,
+              "isServerPack": false,
+              "fileFingerprint": 246215867
+            },
+            {
+              "id": 9669740,
+              "gameId": 432,
+              "modId": 306612,
+              "isAvailable": true,
+              "displayName": "[26.4-snapshot-10] Fabric API 0.166.3+26.4",
+              "fileName": "fabric-api-0.166.3-26.4.jar",
+              "releaseType": 2,
+              "fileStatus": 4,
+              "hashes": [
+                {
+                  "value": "9019956a20a7ed22543b0aadd1aadfe112bbe25d",
+                  "algo": 1
+                },
+                {
+                  "value": "5f80f0972bae2afb235cbd341ab86888",
+                  "algo": 2
+                }
+              ],
+              "fileDate": "2026-11-17T17:35:13.283Z",
+              "fileLength": 1584334,
+              "downloadCount": 0,
+              "fileSizeOnDisk": 6955242,
+              "downloadUrl": "https://edge.forgecdn.net/files/9669/740/fabric-api-0.166.3-26.4.jar",
+              "gameVersions": [
+                "Client",
+                "Fabric",
+                "Server",
+                "26.1-snapshot"
+              ],
+              "dependencies": [],
+              "alternateFileId": 0,
+              "isServerPack": false,
+              "fileFingerprint": 404480649
+            }
+          ],
+          "dateCreated": "2018-12-12T17:12:41.427Z",
+          "dateModified": "2026-11-17T17:42:41.403Z",
+          "dateReleased": "2026-11-17T17:35:13.283Z",
+          "allowModDistribution": true,
+          "gamePopularityRank": 29,
+          "isAvailable": true,
+          "hasCommentsEnabled": false,
+          "licenseType": "Apache License version 2.0",
+          "thumbsUpCount": 0,
+          "featuredProjectTag": 0
+        }
+      ]
+    }
+  }
+}
