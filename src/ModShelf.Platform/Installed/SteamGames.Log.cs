@@ -24,4 +24,7 @@ internal sealed partial class SteamGames
 
     [LoggerMessage(EventId = 2206, Level = LogLevel.Debug, Message = "Steam app {App} isn't fully installed, so it's left out")]
     private static partial void LogNotInstalled(ILogger logger, string app);
+
+    [LoggerMessage(EventId = 2207, Level = LogLevel.Debug, Message = "Steam still has {Games} games installed in {Libraries} library folders")]
+    private static partial void LogReadAgain(ILogger logger, int games, int libraries);
 }

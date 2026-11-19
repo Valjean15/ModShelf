@@ -11,7 +11,8 @@ namespace ModShelf.Platform.Installed;
 /// has a <c>steamapps</c> folder is Steam's; <c>steamapps/libraryfolders.vdf</c> there names its other library folders;
 /// and each library's <c>steamapps/appmanifest_&lt;app ID&gt;.acf</c> names a game, its app ID and its folder under
 /// <c>steamapps/common</c>. A game still downloading, and Steam's own tools (Proton, its runtimes and redistributables),
-/// are left out. Nothing is written, and nothing is sent anywhere.
+/// are left out. Nothing is written, and nothing is sent anywhere. The screens read them each time they show them, so
+/// what was found is logged when it differs from the read before.
 /// </summary>
 internal sealed partial class SteamGames : IInstalledGames
 {
@@ -28,6 +29,11 @@ internal sealed partial class SteamGames : IInstalledGames
 
     private readonly Func<IReadOnlyList<string>> _folders;
     private readonly ILogger _logger;
+    private readonly Lock _gate = new();
+
+    // What the last read found, as logged: null before any, or when Steam wasn't found.
+    private (int Games, int Libraries)? _found;
+    private bool _read;
 
     /// <param name="folders">Where Steam may be, in the order to look; read each time the games are.</param>
     public SteamGames(Func<IReadOnlyList<string>> folders, ILogger<SteamGames> logger)
@@ -45,12 +51,30 @@ internal sealed partial class SteamGames : IInstalledGames
     private static bool IsTool(string name)
         => ToolNames.Any(tool => name.StartsWith(tool, StringComparison.OrdinalIgnoreCase));
 
+    /// <summary>
+    /// Notes what a read found, and says whether it differs from the read before, or is the first.
+    /// </summary>
+    private bool Changed((int Games, int Libraries)? found)
+    {
+        lock (_gate)
+        {
+            bool changed = !_read || _found != found;
+            _read = true;
+            _found = found;
+            return changed;
+        }
+    }
+
     private InstalledGames Read(CancellationToken cancellationToken)
     {
         string? steam = _folders().FirstOrDefault(folder => Directory.Exists(Path.Combine(folder, "steamapps")));
         if (steam is null)
         {
-            LogNotFound(_logger);
+            if (Changed(null))
+            {
+                LogNotFound(_logger);
+            }
+
             return InstalledGames.None;
         }
 
@@ -66,7 +90,14 @@ internal sealed partial class SteamGames : IInstalledGames
             }
         }
 
-        LogRead(_logger, games.Count, libraries);
+        if (Changed((games.Count, libraries)))
+        {
+            LogRead(_logger, games.Count, libraries);
+        }
+        else
+        {
+            LogReadAgain(_logger, games.Count, libraries);
+        }
         StringComparer byName = StringComparer.Create(CultureInfo.InvariantCulture, ignoreCase: true);
         return new InstalledGames([new GameStore(StoreId, StoreName, steam)], [.. games.Values.OrderBy(game => game.Name, byName)]);
     }

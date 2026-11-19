@@ -50,6 +50,23 @@ public sealed class SteamGamesTests : IDisposable
     }
 
     [Fact]
+    public async Task SaysWhatItFoundOnlyWhenItDiffersFromTheReadBefore()
+    {
+        LibraryFolders(Steam, Library);
+        Manifest(Steam, "413150", "Stardew Valley");
+        SteamGames steam = Read(Steam);
+
+        await steam.ReadAsync(Cancellation);
+        await steam.ReadAsync(Cancellation);
+        Manifest(Library, "1091500", "Cyberpunk 2077");
+        await steam.ReadAsync(Cancellation);
+
+        Assert.Equal(
+            ["Information: Steam has 1 games installed in 2 library folders", "Information: Steam has 2 games installed in 2 library folders"],
+            _logger.Entries.Where(entry => entry.StartsWith("Information: ", StringComparison.Ordinal)).Select(entry => entry.TrimEnd()));
+    }
+
+    [Fact]
     public async Task ReadsTheLibraryFoldersListAsSteamWroteItBefore2021()
     {
         File.WriteAllText(
