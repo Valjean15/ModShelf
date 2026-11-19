@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Archives;
 using ModShelf.Application.Catalog;
+using ModShelf.Application.Cleanup;
 using ModShelf.Application.Common;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Library;
@@ -46,6 +47,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
     private readonly IModLookup _lookup;
     private readonly IModLists _lists;
     private readonly IArchiveImport _archives;
+    private readonly ILibraryCleanup _cleanup;
     private readonly ISourceRegistry _sources;
     private readonly IHiddenGames _hiddenGames;
     private readonly IGameSettingsOpener _gameSettings;
@@ -77,6 +79,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         ILibraryDownloads libraryDownloads,
         IModLists lists,
         IArchiveImport archives,
+        ILibraryCleanup cleanup,
         ILinkDownloads links,
         IWatchlists watchlists,
         EndorsedMods endorsed,
@@ -103,6 +106,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(lookup);
         ArgumentNullException.ThrowIfNull(lists);
         ArgumentNullException.ThrowIfNull(archives);
+        ArgumentNullException.ThrowIfNull(cleanup);
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(hiddenGames);
         ArgumentNullException.ThrowIfNull(gameSettings);
@@ -118,6 +122,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         _lookup = lookup;
         _lists = lists;
         _archives = archives;
+        _cleanup = cleanup;
         _sources = sources;
         _hiddenGames = hiddenGames;
         _gameSettings = gameSettings;

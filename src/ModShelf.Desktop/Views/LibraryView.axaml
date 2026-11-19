@@ -76,6 +76,10 @@
                             Command="{Binding ImportArchivesCommand}"
                             ToolTip.Tip="{x:Static res:Strings.LibraryImportArchivesTip}" />
                     <Button Content="{x:Static res:Strings.LibraryExportList}" Command="{Binding ExportListCommand}" IsVisible="{Binding !IsEmpty}" />
+                    <Button Content="{x:Static res:Strings.LibraryFreeUpSpace}"
+                            Command="{Binding FreeUpSpaceCommand}"
+                            IsVisible="{Binding !IsEmpty}"
+                            ToolTip.Tip="{x:Static res:Strings.LibraryFreeUpSpaceTip}" />
                 </StackPanel>
             </Grid>
 
@@ -420,6 +424,9 @@
                             Command="{Binding ImportArchivesCommand}"
                             ToolTip.Tip="{x:Static res:Strings.LibraryImportArchivesTip}" />
                     <Button Content="{x:Static res:Strings.LibraryExportList}" Command="{Binding ExportListCommand}" />
+                    <Button Content="{x:Static res:Strings.LibraryFreeUpSpace}"
+                            Command="{Binding FreeUpSpaceCommand}"
+                            ToolTip.Tip="{x:Static res:Strings.LibraryFreeUpSpaceTip}" />
                     <Button Classes="accent"
                             Content="{Binding OpenGame.UpdateAllText, FallbackValue=''}"
                             Command="{Binding OpenGame.UpdateAllCommand, FallbackValue={x:Null}}"

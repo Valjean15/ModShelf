@@ -2911,6 +2911,10 @@
     <value>Deleted {0} from disk and the library.</value>
     <comment>{0} the file the user deleted.</comment>
   </data>
+  <data name="ActivityDeletedUnmatched" xml:space="preserve">
+    <value>Deleted {0}, which matched none of the mod's files, from disk.</value>
+    <comment>{0} the file in the mod's folder that the library didn't have, which the user deleted to free up space.</comment>
+  </data>
   <data name="ActivityDeletedByRule" xml:space="preserve">
     <value>Deleted {0}, an old version, as the setting for old versions says.</value>
     <comment>{0} the file the setting for old versions deleted.</comment>
@@ -4602,5 +4606,189 @@
   <data name="RequirementNeededBy" xml:space="preserve">
     <value>Needed by {0}</value>
     <comment>A requirement of a requirement: {0} the mod that needs it.</comment>
+  </data>
+  <data name="LibraryFreeUpSpace" xml:space="preserve">
+    <value>Free up space…</value>
+    <comment>The Library's button that lists what could go from the library's folders.</comment>
+  </data>
+  <data name="LibraryFreeUpSpaceTip" xml:space="preserve">
+    <value>List what could go from the library's folders, such as archived old versions and duplicates, keeping the files that may be the only copies left; then delete the ones you choose.</value>
+    <comment>Tooltip of the Library's Free up space… button.</comment>
+  </data>
+  <data name="CleanupTitle" xml:space="preserve">
+    <value>Free up space</value>
+    <comment>The Free up space dialog's title, for every game.</comment>
+  </data>
+  <data name="CleanupTitleGame" xml:space="preserve">
+    <value>Free up space in {0}</value>
+    <comment>The Free up space dialog's title, for one game: {0} the game's name.</comment>
+  </data>
+  <data name="CleanupListing" xml:space="preserve">
+    <value>Looking through the library's folders…</value>
+    <comment>Said as Free up space starts listing what could go.</comment>
+  </data>
+  <data name="CleanupAsking" xml:space="preserve">
+    <value>Asking the sites which files they still offer: {0:N0} of {1:N0} mods…</value>
+    <comment>Progress of listing what could go: {0} the mods asked about so far, {1} how many there are.</comment>
+  </data>
+  <data name="CleanupDeleting" xml:space="preserve">
+    <value>Deleting {0:N0} of {1:N0}…</value>
+    <comment>Progress of deleting the files chosen to free up space.</comment>
+  </data>
+  <data name="CleanupArchived" xml:space="preserve">
+    <value>Archived old versions</value>
+    <comment>Free up space: the heading of the old versions in _archive folders.</comment>
+  </data>
+  <data name="CleanupArchivedNote" xml:space="preserve">
+    <value>Older versions moved into _archive folders. Those their sites still offer can be downloaded again.</value>
+    <comment>Free up space: what the archived old versions are.</comment>
+  </data>
+  <data name="CleanupDuplicates" xml:space="preserve">
+    <value>Duplicates</value>
+    <comment>Free up space: the heading of the files the library has twice.</comment>
+  </data>
+  <data name="CleanupDuplicatesNote" xml:space="preserve">
+    <value>Files the library has twice, the same content in two places. One copy of each stays.</value>
+    <comment>Free up space: what the duplicates are.</comment>
+  </data>
+  <data name="CleanupUnwatched" xml:space="preserve">
+    <value>Files of mods not watched</value>
+    <comment>Free up space: the heading of the files of mods no longer watched.</comment>
+  </data>
+  <data name="CleanupUnwatchedNote" xml:space="preserve">
+    <value>Files of mods you no longer watch for updates. Those their sites still offer can be downloaded again.</value>
+    <comment>Free up space: what the files of mods not watched are.</comment>
+  </data>
+  <data name="CleanupUnmatched" xml:space="preserve">
+    <value>Files that match nothing</value>
+    <comment>Free up space: the heading of the files in the mods' folders that the library doesn't have.</comment>
+  </data>
+  <data name="CleanupUnmatchedNote" xml:space="preserve">
+    <value>Files in the mods' folders that the library doesn't have and that match none of the mods' files on their sites, such as ones placed there by hand. They can't be downloaded again.</value>
+    <comment>Free up space: what the files that match nothing are.</comment>
+  </data>
+  <data name="CleanupCopyOf" xml:space="preserve">
+    <value>Same as {0}, of {1}, which stays.</value>
+    <comment>Free up space: a duplicate, {0} where the copy that stays is, {1} its mod's name.</comment>
+  </data>
+  <data name="CleanupKeptGone" xml:space="preserve">
+    <value>Kept: the mod is gone from {0}, so this may be the only copy.</value>
+    <comment>Free up space: why a file is kept, {0} the site's name.</comment>
+  </data>
+  <data name="CleanupKeptNotOffered" xml:space="preserve">
+    <value>Kept: {0} no longer offers it, so this may be the only copy.</value>
+    <comment>Free up space: why a file is kept, {0} the site's name.</comment>
+  </data>
+  <data name="CleanupKeptMatches" xml:space="preserve">
+    <value>Kept: it's {0} on {1}. Rescan adds it to the library.</value>
+    <comment>Free up space: why a file is kept, {0} the site's name of the file it matches, {1} the site's name.</comment>
+  </data>
+  <data name="CleanupKeptNotChecked" xml:space="preserve">
+    <value>Kept: {0} couldn't be asked whether it still offers it. {1}</value>
+    <comment>Free up space: why a file is kept, {0} the site's name, {1} why it couldn't be asked.</comment>
+  </data>
+  <data name="CleanupGroupNone" xml:space="preserve">
+    <value>None can go.</value>
+    <comment>Free up space: a group whose files are all kept.</comment>
+  </data>
+  <data name="CleanupGroupOne" xml:space="preserve">
+    <value>1 file can go, {1}.</value>
+    <comment>Free up space: a group with one file that can go, {1} its size.</comment>
+  </data>
+  <data name="CleanupGroup" xml:space="preserve">
+    <value>{0:N0} files can go, {1}.</value>
+    <comment>Free up space: a group's files that can go, {0} how many, {1} their size.</comment>
+  </data>
+  <data name="CleanupGroupKeptOne" xml:space="preserve">
+    <value>1 is kept.</value>
+    <comment>Free up space: after a group's files that can go, one kept.</comment>
+  </data>
+  <data name="CleanupGroupKept" xml:space="preserve">
+    <value>{0:N0} are kept.</value>
+    <comment>Free up space: after a group's files that can go, {0} how many are kept.</comment>
+  </data>
+  <data name="CleanupNothing" xml:space="preserve">
+    <value>Nothing to free up: there are no archived old versions, duplicates, files of mods not watched or files that match nothing.</value>
+    <comment>Free up space: said when nothing could go.</comment>
+  </data>
+  <data name="CleanupCanGoNone" xml:space="preserve">
+    <value>Nothing can go.</value>
+    <comment>Free up space: said when every file listed is kept.</comment>
+  </data>
+  <data name="CleanupCanGoOne" xml:space="preserve">
+    <value>1 file can go, {1}.</value>
+    <comment>Free up space: the summary, {1} the file's size.</comment>
+  </data>
+  <data name="CleanupCanGo" xml:space="preserve">
+    <value>{0:N0} files can go, {1}.</value>
+    <comment>Free up space: the summary, {0} how many files can go, {1} their size.</comment>
+  </data>
+  <data name="CleanupKeptOne" xml:space="preserve">
+    <value>1 file is kept, saying why.</value>
+    <comment>Free up space: after the summary, one file kept.</comment>
+  </data>
+  <data name="CleanupKept" xml:space="preserve">
+    <value>{0:N0} files are kept, each saying why.</value>
+    <comment>Free up space: after the summary, {0} how many files are kept.</comment>
+  </data>
+  <data name="CleanupDeleteNone" xml:space="preserve">
+    <value>Delete selected…</value>
+    <comment>Free up space: the button that deletes the chosen files, while none is chosen.</comment>
+  </data>
+  <data name="CleanupDelete" xml:space="preserve">
+    <value>Delete selected ({0})…</value>
+    <comment>Free up space: the button that deletes the chosen files, {0} their size.</comment>
+  </data>
+  <data name="CleanupNote" xml:space="preserve">
+    <value>Deleted files go for good, not to the trash, and each is recorded in Recent activity.</value>
+    <comment>Free up space: the note under the files.</comment>
+  </data>
+  <data name="CleanupConfirmTitle" xml:space="preserve">
+    <value>Delete the selected files?</value>
+    <comment>The title of the question before Free up space deletes files.</comment>
+  </data>
+  <data name="CleanupConfirmOne" xml:space="preserve">
+    <value>Delete 1 file, {1}, for good? It doesn't go to the trash.</value>
+    <comment>The question before Free up space deletes one file, {1} its size.</comment>
+  </data>
+  <data name="CleanupConfirm" xml:space="preserve">
+    <value>Delete {0:N0} files, {1}, for good? They don't go to the trash.</value>
+    <comment>The question before Free up space deletes files, {0} how many, {1} their size.</comment>
+  </data>
+  <data name="CleanupConfirmDelete" xml:space="preserve">
+    <value>Delete</value>
+    <comment>The button that confirms deleting the files chosen to free up space.</comment>
+  </data>
+  <data name="CleanupDeletedNone" xml:space="preserve">
+    <value>Deleted nothing.</value>
+    <comment>What Free up space did when no file could be deleted.</comment>
+  </data>
+  <data name="CleanupDeletedOne" xml:space="preserve">
+    <value>Deleted 1 file, freeing {1}.</value>
+    <comment>What Free up space did, {1} the space freed.</comment>
+  </data>
+  <data name="CleanupDeleted" xml:space="preserve">
+    <value>Deleted {0:N0} files, freeing {1}.</value>
+    <comment>What Free up space did, {0} how many files, {1} the space freed.</comment>
+  </data>
+  <data name="CleanupProblems" xml:space="preserve">
+    <value>Not deleted:</value>
+    <comment>Free up space: the heading of the files that weren't deleted.</comment>
+  </data>
+  <data name="CleanupListStopped" xml:space="preserve">
+    <value>Stopped. Nothing was deleted.</value>
+    <comment>Said when listing what could go was stopped.</comment>
+  </data>
+  <data name="CleanupDeleteStopped" xml:space="preserve">
+    <value>Stopped. The files deleted so far are gone; the rest are where they were.</value>
+    <comment>Said when deleting the files chosen to free up space was stopped.</comment>
+  </data>
+  <data name="CleanupFailed" xml:space="preserve">
+    <value>Freeing up space failed. The log says why.</value>
+    <comment>Said when listing or deleting failed unexpectedly.</comment>
+  </data>
+  <data name="CleanupFileWhere" xml:space="preserve">
+    <value>{0} · {1}</value>
+    <comment>Free up space: under a file's name, {0} its mod's name, {1} the folder it's in.</comment>
   </data>
 </root>

@@ -88,6 +88,13 @@ public interface IDialogService
     Task ImportArchivesAsync(ImportArchivesViewModel importing, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Shows the dialog that frees up space in the library's folders, until it asks to close
+    /// (<see cref="FreeUpSpaceViewModel.CloseRequested"/>) or the user closes it, which can't happen while it lists or
+    /// deletes files.
+    /// </summary>
+    Task FreeUpSpaceAsync(FreeUpSpaceViewModel freeing, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Shows the dialog that downloads a mod with what it needs, until it asks to close
     /// (<see cref="DownloadRequirementsViewModel.CloseRequested"/>) or the user closes it.
     /// </summary>

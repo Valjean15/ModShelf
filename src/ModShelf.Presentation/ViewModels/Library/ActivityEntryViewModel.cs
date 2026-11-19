@@ -84,6 +84,7 @@ public sealed partial class ActivityEntryViewModel
             => Common.Text.Format(Strings.ActivityDownloadedReplacing, FileOf(happened), happened.ReplacesVersion ?? Strings.ActivityAnOlderVersion),
         LibraryEventKind.Downloaded => Common.Text.Format(Strings.ActivityDownloaded, FileOf(happened)),
         LibraryEventKind.Archived => Common.Text.Format(Strings.ActivityArchived, FileOf(happened)),
+        LibraryEventKind.Deleted when happened.File is null => Common.Text.Format(Strings.ActivityDeletedUnmatched, FileOf(happened)),
         LibraryEventKind.Deleted => Common.Text.Format(happened.ByRule ? Strings.ActivityDeletedByRule : Strings.ActivityDeleted, FileOf(happened)),
         LibraryEventKind.Found => Common.Text.Format(Strings.ActivityFound, FileOf(happened)),
         LibraryEventKind.LeftSite => Strings.ActivityLeftSite,

@@ -1,0 +1,102 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="using:System"
+        xmlns:vm="using:ModShelf.Presentation.ViewModels.Dialogs"
+        xmlns:res="using:ModShelf.Presentation.Resources"
+        x:Class="ModShelf.Desktop.Views.Dialogs.FreeUpSpaceDialog"
+        x:DataType="vm:FreeUpSpaceViewModel"
+        Title="{Binding Title}"
+        Width="720"
+        Classes="dialog">
+
+    <DockPanel>
+        <!-- Cancel, or OK once it's done, first, so the main button sits in the corner: Delete selected once listed;
+             Stop while it works. -->
+        <StackPanel DockPanel.Dock="Bottom" Classes="dialogButtons">
+            <Button IsCancel="True" Content="{Binding CloseText}" Command="{Binding CloseCommand}" IsVisible="{Binding CanClose}" />
+            <Button Classes="accent" Content="{Binding DeleteText}" Command="{Binding DeleteCommand}" IsVisible="{Binding IsListed}" />
+            <Button Content="{x:Static res:Strings.ListImportStop}" Command="{Binding StopCommand}" IsVisible="{Binding IsWorking}" />
+        </StackPanel>
+        <TextBlock DockPanel.Dock="Top" Classes="dialogTitle" TextWrapping="Wrap" Text="{Binding Title}" />
+        <StackPanel Spacing="12" Margin="0,0,0,8">
+            <StackPanel Spacing="6" IsVisible="{Binding IsWorking}">
+                <ProgressBar MinHeight="6" Minimum="0" Maximum="100" Value="{Binding ProgressPercent}" IsIndeterminate="{Binding IsListing}" />
+                <TextBlock Classes="note" Text="{Binding ProgressText}" />
+            </StackPanel>
+
+            <SelectableTextBlock TextWrapping="Wrap" Text="{Binding SummaryText}" IsVisible="{Binding IsListed}" />
+
+            <!-- Each group's heading, with a box that chooses all its files that can go, then its files, each with its
+                 own box; a kept file's box can't be ticked, and it says why it's kept. Only the rows in view are made. -->
+            <Border Classes="compactList" IsVisible="{Binding ShowsRows}">
+                <ScrollViewer MaxHeight="400" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding Rows}" AutomationProperties.Name="{Binding Title}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel CacheLength="1" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.DataTemplates>
+                            <DataTemplate DataType="vm:CleanupGroupRow">
+                                <Border Padding="12,12,14,8" Background="{DynamicResource ShelfRaisedBrush}" BorderBrush="{DynamicResource ShelfLineBrush}" BorderThickness="0,0,0,1">
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                        <CheckBox IsChecked="{Binding IsSelected}"
+                                                  IsEnabled="{Binding CanSelect}"
+                                                  VerticalAlignment="Top"
+                                                  AutomationProperties.Name="{Binding Heading}" />
+                                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                            <TextBlock FontWeight="SemiBold" Text="{Binding Heading}" />
+                                            <TextBlock Classes="note" FontSize="12.5" TextWrapping="Wrap" Text="{Binding Note}" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="2" Classes="note" VerticalAlignment="Top" Margin="0,4,0,0" Text="{Binding TotalText}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                            <DataTemplate DataType="vm:CleanupFileRow">
+                                <Border Classes="compactRow">
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                        <CheckBox IsChecked="{Binding IsSelected}"
+                                                  IsEnabled="{Binding CanGo}"
+                                                  VerticalAlignment="Center"
+                                                  AutomationProperties.Name="{Binding FileName}" />
+                                        <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
+                                            <TextBlock Classes="rowName" Text="{Binding FileName}" ToolTip.Tip="{Binding FullPath}" />
+                                            <TextBlock Classes="note" FontSize="12.5" TextTrimming="CharacterEllipsis" Text="{Binding Where}" ToolTip.Tip="{Binding FullPath}" />
+                                            <TextBlock Classes="note"
+                                                       FontSize="12.5"
+                                                       TextWrapping="Wrap"
+                                                       Text="{Binding Said}"
+                                                       IsVisible="{Binding HasSaid}" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="2" Classes="note" VerticalAlignment="Center" Text="{Binding SizeText}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.DataTemplates>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Border>
+            <TextBlock Classes="note" FontSize="12.5" TextWrapping="Wrap" Text="{x:Static res:Strings.CleanupNote}" IsVisible="{Binding ShowsRows}" />
+
+            <!-- What it did, then what it couldn't, a sentence each, scrolling when there are many. -->
+            <SelectableTextBlock TextWrapping="Wrap" Text="{Binding ResultText}" IsVisible="{Binding IsDone}" />
+            <StackPanel Spacing="6" IsVisible="{Binding HasProblems}">
+                <TextBlock Classes="note" Text="{x:Static res:Strings.CleanupProblems}" />
+                <ScrollViewer MaxHeight="220">
+                    <ItemsControl ItemsSource="{Binding Problems}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="4" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="sys:String">
+                                <SelectableTextBlock TextWrapping="Wrap" Text="{Binding}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </StackPanel>
+        </StackPanel>
+    </DockPanel>
+</Window>

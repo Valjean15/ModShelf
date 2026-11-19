@@ -112,6 +112,7 @@ public sealed class LibraryActivityTests : IDisposable
             Downloaded(TestData.Now) with { Replaces = null, ReplacesVersion = null, VersionLabel = null },
             new(TestData.Now, LibraryEventKind.Archived, SkyUi, "SkyUI", File("52"), "SkyUI 5.2", "5.2"),
             new(TestData.Now, LibraryEventKind.Deleted, SkyUi, "SkyUI", File("51"), null, null),
+            new(TestData.Now, LibraryEventKind.Deleted, SkyUi, "SkyUI", FileName: "Readme.txt", RelativePath: "SkyUI/Readme.txt"),
         ]);
         await _harness.StartAsync(InLibrary);
 
@@ -123,9 +124,10 @@ public sealed class LibraryActivityTests : IDisposable
                 "Downloaded SkyUI 5.3.",
                 "Moved SkyUI 5.2 (5.2) to its _archive folder.",
                 "Deleted 51 from disk and the library.",
+                "Deleted Readme.txt, which matched none of the mod's files, from disk.",
             ],
             Assert.Single(Activity.Days).Entries.Select(entry => entry.Text));
-        Assert.Equal(["Downloaded", "Downloaded", "Archived", "Deleted"], Activity.Days[0].Entries.Select(entry => entry.KindText));
+        Assert.Equal(["Downloaded", "Downloaded", "Archived", "Deleted", "Deleted"], Activity.Days[0].Entries.Select(entry => entry.KindText));
     }
 
     [Fact]

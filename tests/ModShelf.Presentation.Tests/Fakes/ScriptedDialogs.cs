@@ -281,6 +281,37 @@ internal sealed class ScriptedDialogs : IDialogService
     }
 
     /// <summary>
+    /// Each Free up space dialog shown.
+    /// </summary>
+    public List<FreeUpSpaceViewModel> FreeingSpace { get; } = [];
+
+    /// <summary>
+    /// What the user does in the Free up space dialog; by default, they close it once it has listed what could go. Once
+    /// this is done, unless the dialog closed itself, the user closes it.
+    /// </summary>
+    public Func<FreeUpSpaceViewModel, Task>? InFreeUpSpace { get; set; }
+
+    public async Task FreeUpSpaceAsync(FreeUpSpaceViewModel freeing, CancellationToken cancellationToken)
+    {
+        FreeingSpace.Add(freeing);
+        bool closed = false;
+        void Close(object? sender, EventArgs e) => closed = true;
+        freeing.CloseRequested += Close;
+        try
+        {
+            await (InFreeUpSpace ?? (opened => opened.Listing))(freeing);
+            if (!closed && freeing.CloseCommand.CanExecute(null))
+            {
+                freeing.CloseCommand.Execute(null);
+            }
+        }
+        finally
+        {
+            freeing.CloseRequested -= Close;
+        }
+    }
+
+    /// <summary>
     /// Each first-run setup shown.
     /// </summary>
     public List<FirstRunViewModel> FirstRuns { get; } = [];
