@@ -35,7 +35,10 @@ there. A file is in the first group that fits:
 
 An archived or unwatched file is kept when it may be the only copy left (`KeptBecause`):
 
-- **ModGone:** its mod is gone from its site (`LibraryMod.IsGone`). Such a mod's site isn't asked.
+- **ModGone:** its mod is gone from its site: a check found it so (`LibraryMod.IsGone`), and its site isn't asked; or
+  the site refuses to list its files, `403`, `404` or `410`, and, asked once about the mod, describes it as hidden or
+  removed, or doesn't know it, as an update check finds a mod gone (ADR 0099). Listing doesn't mark the mod gone in the
+  library; its next check does, if it's watched.
 - **NotOffered:** the site doesn't list the file, or lists it as archived, which it no longer offers for download, as
   the mod page's "only copy" mark has it.
 - **NotChecked:** the site couldn't be asked; the reason is kept.
@@ -87,13 +90,14 @@ need asking until it has looked through their folders, and a site that asks it t
 - New public types, approved: `ILibraryCleanup` and its records and enums in Application. `FoldersOf`, which rescanning
   used, became the shared `ModFolders`. No schema change, no new package.
 - `LibraryViewModel` takes `ILibraryCleanup`; `IDialogService` gains `FreeUpSpaceAsync`. The MCP server has 30 tools.
-- Log events 2700–2705 are new, in Application's new block for freeing up space; 987 and 988 in Presentation's.
+- Log events 2700–2706 are new, in Application's new block for freeing up space; 987 and 988 in Presentation's. A mod
+  found gone is logged as information, not as a failure to ask its site.
 
 ## Testing
 
 - Application: archived files offered or not; a duplicate archived, and which copy is kept; sizes, hashes and empty
-  files that aren't duplicates; files of mods not watched; a gone mod not asked; a refusal stopping the site, another
-  problem only its mod; unmatched files, one matching a site file, a second copy of a library file, and a folder mods
+  files that aren't duplicates; files of mods not watched; a gone mod not asked, and one the site hid since; a refusal
+  stopping the site, another problem only its mod; unmatched files, one matching a site file, a second copy of a library file, and a folder mods
   share; one game, with the copy kept in another and a file missing from disk; progress; deleting while holding,
   recording each and removing emptied folders; every way a file changed since it was listed; a file that can't be
   deleted; a kept file refused.

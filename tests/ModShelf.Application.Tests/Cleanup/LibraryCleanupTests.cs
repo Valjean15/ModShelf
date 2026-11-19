@@ -197,6 +197,35 @@ public sealed class LibraryCleanupTests : IDisposable
     }
 
     [Fact]
+    public async Task AModTheSiteHidSinceIsGoneAndAnUnexplainedRefusalIsntChecked()
+    {
+        // As Nexus Mods answers for a mod hidden since: 403 for its files, and the mod described as unavailable.
+        Have(SkyUi, watched: true, Stored(SkyUi, "35407", $"{SkyUiFolder}/_archive/SkyUI_5_2_SE.7z"), Stored(SkyUi, "35408", $"{SkyUiFolder}/SkyUI_5_3_SE.7z"));
+        Have(Survival, watched: false, Stored(Survival, "1", $"{SurvivalFolder}/Survival.7z"));
+        _storage.Add(InRoot($"{SkyUiFolder}/Readme.txt"));
+        _site.Hidden[SkyUi] = true;
+        _site.Failures[nameof(FakeModSite.GetFilesAsync)] = new HttpRequestException("Mod not available: 12604", null, HttpStatusCode.Forbidden);
+        _site.ModFailures[Survival] = new HttpRequestException("Forbidden.", null, HttpStatusCode.Forbidden);
+
+        CleanupPlan plan = await Cleanup().PlanAsync(null, null, Cancellation);
+
+        Assert.Equal(
+            [
+                (CleanupGroup.Archived, "SkyUI_5_2_SE.7z", (KeptBecause?)KeptBecause.ModGone, (string?)null),
+                (CleanupGroup.Unwatched, "Survival.7z", KeptBecause.NotChecked, "Forbidden."),
+                (CleanupGroup.Unmatched, "Readme.txt", KeptBecause.ModGone, null),
+            ],
+            plan.Entries.Select(entry => (entry.Group, entry.FileName, entry.Kept, entry.KeptDetail)));
+        Assert.Equal(["GetFilesAsync 12604", "GetModAsync 12604", "GetFilesAsync 3863", "GetModAsync 3863"], _site.AskedFor);
+        Assert.Equal(2, plan.Asked);
+        Assert.Equal("Information: Mod 12604 of skyrimspecialedition is gone from its site, so its files are kept ", _logger.Entries.First());
+        Assert.Single(_logger.Entries, entry => entry.StartsWith("Warning: ", StringComparison.Ordinal));
+
+        // Listing changes nothing: the library learns the mod is gone when it's checked for updates.
+        Assert.Null(Assert.Single(_library.Mods, mod => mod.Mod == Mod(SkyUi)).GoneSince);
+    }
+
+    [Fact]
     public async Task ASiteThatRefusesKeepsTheFilesAndIsntAskedAgain()
     {
         Have(SkyUi, watched: true, Stored(SkyUi, "35407", $"{SkyUiFolder}/_archive/SkyUI_5_2_SE.7z"), Stored(SkyUi, "35408", $"{SkyUiFolder}/SkyUI_5_3_SE.7z"));

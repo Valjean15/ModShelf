@@ -2,6 +2,7 @@ using System.Net;
 
 using Microsoft.Extensions.Logging;
 
+using ModShelf.Application.Common;
 using ModShelf.Application.Library;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Settings;
@@ -271,7 +272,7 @@ internal sealed partial class LibraryCleanup : ILibraryCleanup
             }
         }
 
-        if (holders.Any(holder => holder.IsGone))
+        if (holders.Any(holder => holder.IsGone || answers.GetValueOrDefault(holder)?.Gone == true))
         {
             return entry with { Kept = KeptBecause.ModGone };
         }
@@ -286,15 +287,15 @@ internal sealed partial class LibraryCleanup : ILibraryCleanup
     /// </summary>
     private static CleanupEntry Kept(CleanupEntry entry, LibraryMod mod, Dictionary<LibraryMod, Answer> answers, Func<ModFile, bool> isIt)
     {
-        if (mod.IsGone)
+        Answer? answer = answers.GetValueOrDefault(mod);
+        if (mod.IsGone || answer?.Gone == true)
         {
             return entry with { Kept = KeptBecause.ModGone };
         }
 
-        Answer answer = answers[mod];
-        if (answer.Files is not { } files)
+        if (answer?.Files is not { } files)
         {
-            return entry with { Kept = KeptBecause.NotChecked, KeptDetail = answer.Failure };
+            return entry with { Kept = KeptBecause.NotChecked, KeptDetail = answer?.Failure };
         }
 
         // An archived file is listed, but can't be downloaded.
@@ -337,6 +338,13 @@ internal sealed partial class LibraryCleanup : ILibraryCleanup
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
+            // A mod the site hid or removed, as update checks find them: its files may be the only copies left.
+            if (GoneMods.MightBe(exception) && await GoneMods.IsGoneAsync(catalog, mod, cancellationToken).ConfigureAwait(false))
+            {
+                LogGone(_logger, mod.Id, mod.Game.Key);
+                return new Answer(null, null, Asked: true, Gone: true);
+            }
+
             LogCantAsk(_logger, exception, mod.Id, mod.Game.Key);
             if (StopsTheSource(exception))
             {
@@ -466,9 +474,10 @@ internal sealed partial class LibraryCleanup : ILibraryCleanup
     private sealed record OnDisk(LibraryMod Mod, LibraryFile File, string Path, long Size);
 
     /// <summary>
-    /// What a mod's site said: the files it lists, or why it couldn't be asked; and whether it was asked.
+    /// What a mod's site said: the files it lists, that the mod is gone from it, or why it couldn't be asked; and whether
+    /// it was asked.
     /// </summary>
-    private sealed record Answer(IReadOnlyList<ModFile>? Files, string? Failure, bool Asked = false)
+    private sealed record Answer(IReadOnlyList<ModFile>? Files, string? Failure, bool Asked = false, bool Gone = false)
     {
         public static Answer Failed(string why) => new(null, why);
     }

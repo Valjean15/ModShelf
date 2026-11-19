@@ -24,4 +24,7 @@ internal sealed partial class LibraryCleanup
 
     [LoggerMessage(EventId = 2705, Level = LogLevel.Information, Message = "Freed up {Bytes} bytes, deleting {Deleted} files, and left {Failed}")]
     private static partial void LogDeleted(ILogger logger, int deleted, long bytes, int failed);
+
+    [LoggerMessage(EventId = 2706, Level = LogLevel.Information, Message = "Mod {ModId} of {Game} is gone from its site, so its files are kept")]
+    private static partial void LogGone(ILogger logger, string modId, string game);
 }
