@@ -186,6 +186,14 @@ internal sealed class AvaloniaDialogService : IDialogService
         return Dispatcher.UIThread.InvokeAsync(() => ShowAsync(new FreeUpSpaceDialog { DataContext = freeing }, () => true, cancellationToken));
     }
 
+    public Task ShowContentsAsync(FileContentsViewModel contents, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(contents);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Dispatcher.UIThread.InvokeAsync(() => ShowAsync(new FileContentsDialog { DataContext = contents }, () => true, cancellationToken));
+    }
+
     public Task DownloadRequirementsAsync(DownloadRequirementsViewModel downloading, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(downloading);

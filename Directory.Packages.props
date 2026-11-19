@@ -39,6 +39,11 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.13" />
   </ItemGroup>
 
+  <ItemGroup Label="Archives">
+    <!-- Reads .7z and .rar archives to show what they hold; .zip goes through System.IO.Compression (ADR 0106). -->
+    <PackageVersion Include="SharpCompress" Version="0.50.8" />
+  </ItemGroup>
+
   <ItemGroup Label="Security">
     <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="10.0.13" />
   </ItemGroup>

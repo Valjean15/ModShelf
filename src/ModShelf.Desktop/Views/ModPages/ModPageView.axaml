@@ -238,7 +238,7 @@
                                                     <Path Classes="line" StrokeThickness="1.8" Data="{StaticResource CopyGlyph}" />
                                                 </Button>
                                             </StackPanel>
-                                            <!-- What else to do with the file: delete it, once asked whether to. -->
+                                            <!-- What else to do with the file: show what an archive holds; delete it, once asked whether to. -->
                                             <Button Grid.Column="2"
                                                     Classes="more"
                                                     VerticalAlignment="Center"
@@ -247,6 +247,7 @@
                                                 <PathIcon Width="18" Height="18" Data="{StaticResource MoreIcon}" />
                                                 <Button.Flyout>
                                                     <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                                        <MenuItem Header="{x:Static res:Strings.LibraryShowContents}" Command="{Binding ShowContentsCommand}" IsVisible="{Binding CanShowContents}" />
                                                         <MenuItem Header="{x:Static res:Strings.LibraryDeleteFile}" Command="{Binding DeleteCommand}" />
                                                     </MenuFlyout>
                                                 </Button.Flyout>

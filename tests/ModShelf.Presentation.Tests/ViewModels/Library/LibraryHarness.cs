@@ -43,6 +43,7 @@ internal sealed class LibraryHarness : IDisposable
             new EndorsedMods(Endorsements),
             Requirements,
             Storage,
+            Contents,
             Settings,
             Browser,
             Folders,
@@ -105,6 +106,11 @@ internal sealed class LibraryHarness : IDisposable
     public ScriptedRequirementDownloads Requirements { get; } = new();
 
     public FakeLibraryStorage Storage { get; } = new();
+
+    /// <summary>
+    /// What the library's archives hold (ADR 0106).
+    /// </summary>
+    public ScriptedContents Contents { get; } = new();
 
     public FakeSettingsService Settings { get; } = new();
 

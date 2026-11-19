@@ -8,6 +8,11 @@
     <ProjectReference Include="..\..\src\ModShelf.Infrastructure\ModShelf.Infrastructure.csproj" />
   </ItemGroup>
 
+  <!-- The archives ArchiveReaderTests reads (Archives/Fixtures/README.md). -->
+  <ItemGroup>
+    <None Include="Archives\Fixtures\*.7z;Archives\Fixtures\*.rar;Archives\Fixtures\*.zip" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <!-- Test helpers several test projects share (tests/Shared). -->
   <ItemGroup>
     <Compile Include="..\Shared\RecordingLogger.cs" Link="Shared\RecordingLogger.cs" />

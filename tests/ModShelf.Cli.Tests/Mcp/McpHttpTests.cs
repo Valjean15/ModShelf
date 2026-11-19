@@ -48,7 +48,7 @@ public sealed partial class McpHttpTests : IDisposable
         CallToolResult settings = await client.CallToolAsync("settings_show", cancellationToken: Cancellation);
 
         Assert.Matches(@"^http://127\.0\.0\.1:\d+/mcp$", server.Address.ToString());
-        Assert.Equal(30, tools.Count);
+        Assert.Equal(31, tools.Count);
         Assert.Equal(ModShelfMcpServer.Instructions, client.ServerInstructions);
         Assert.NotEqual(true, settings.IsError);
     }

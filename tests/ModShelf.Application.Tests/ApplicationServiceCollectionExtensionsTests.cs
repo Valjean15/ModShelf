@@ -6,6 +6,7 @@ using ModShelf.Application.Accounts;
 using ModShelf.Application.Archives;
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Cleanup;
+using ModShelf.Application.Contents;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Endorsements;
 using ModShelf.Application.Installed;
@@ -303,6 +304,18 @@ public sealed class ApplicationServiceCollectionExtensionsTests
         Single<IModLibrary>(services);
         Single<ILibraryHold>(services);
         Single<LibraryHistory>(services);
+        Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
+    }
+
+    [Fact]
+    public void AddLibraryContentsRegistersItOnceWithTheLibrary()
+    {
+        ServiceCollection services = new();
+        services.AddLibraryContents();
+        services.AddLibraryContents();
+
+        Assert.Equal(typeof(LibraryContents), Single<ILibraryContents>(services).ImplementationType);
+        Single<IModLibrary>(services);
         Assert.All(services, descriptor => Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime));
     }
 

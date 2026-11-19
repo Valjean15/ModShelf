@@ -100,6 +100,8 @@ internal static class HostServices
         services.AddArchiveImport();
         services.AddRequirementDownloads();
         services.AddLibraryCleanup();
+        services.AddArchiveReader();
+        services.AddLibraryContents();
         services.AddUpdateChecks();
         services.AddSettings();
         services.AddInstalledGames();

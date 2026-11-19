@@ -30,6 +30,7 @@ one project each, such as Modrinth or CurseForge (see [adding-a-source.md](addin
 | Data | SQLite through EF Core 10, in write-ahead (WAL) mode |
 | Agents | The official MCP SDK (`ModelContextProtocol.Core`, and `.AspNetCore` for the HTTP address) |
 | DEG Mods | NBitcoin.Secp256k1, to check the Nostr events' signatures |
+| Archives | `System.IO.Compression` for .zip, SharpCompress for .7z and .rar, only to list and read them (ADR 0106) |
 | Secrets | DPAPI (`ProtectedData`) on Windows, the Keychain on macOS, the Secret Service on Linux |
 | Packaging | Velopack: installers, delta updates and self-update; MinVer for versions from git tags |
 | Tests | xUnit v3 on Microsoft.Testing.Platform, WireMock.Net, `FakeTimeProvider` |
@@ -160,7 +161,7 @@ GameBanana).
 
 ## The library
 
-*ADRs 0005, 0018–0020, 0034, 0042, 0044, 0045, 0056, 0057, 0067, 0076, 0081–0083, 0098, 0101, 0102.*
+*ADRs 0005, 0018–0020, 0034, 0042, 0044, 0045, 0056, 0057, 0067, 0076, 0081–0083, 0098, 0101, 0102, 0106.*
 
 - **One SQLite database**, `library.db` in the user's local application data folder, holds the jobs, the library
   and the linked accounts. EF Core migrations shape it (ten so far, `InitialCreate` to `AddGoneSince`); a
@@ -188,6 +189,10 @@ GameBanana).
   archived or unwatched file is kept when it may be the only copy left: its mod left its site, or the site, asked once
   a mod, no longer offers it. Deleting holds the library, checks each file is as it was listed, and goes through the
   library's own delete.
+- **Show contents** (`ILibraryContents`, ADR 0106) lists what a library .zip, .7z or .rar holds, every folder once, and
+  reads a text file in it up to 256 KB, through the `IArchiveReader` port, read where the archive is: nothing is
+  extracted or written, and an entry's path is only ever shown. An archive or a file that needs a password, or a
+  damaged one, is said, never retried.
 - **History:** each download, archive, deletion, file found, mod removed, and mod leaving its site or coming back is a
   `LibraryEvent`, kept for a year.
 - **Pins, skipped updates and notes** belong to the mod. **Forget** removes a mod and leaves its files on disk.

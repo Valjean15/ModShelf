@@ -312,6 +312,17 @@ internal sealed class ScriptedDialogs : IDialogService
     }
 
     /// <summary>
+    /// Each Show contents dialog shown; the user closes it once it has listed the archive.
+    /// </summary>
+    public List<FileContentsViewModel> Contents { get; } = [];
+
+    public async Task ShowContentsAsync(FileContentsViewModel contents, CancellationToken cancellationToken)
+    {
+        Contents.Add(contents);
+        await contents.Listing;
+    }
+
+    /// <summary>
     /// Each first-run setup shown.
     /// </summary>
     public List<FirstRunViewModel> FirstRuns { get; } = [];

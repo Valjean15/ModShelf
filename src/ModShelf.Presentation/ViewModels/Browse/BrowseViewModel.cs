@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Common;
+using ModShelf.Application.Contents;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Installed;
 using ModShelf.Application.Library;
@@ -100,6 +101,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
         IRequirementDownloads requirements,
         ILibraryRescan rescan,
         ILibraryStorage storage,
+        ILibraryContents contents,
         ISettingsService settings,
         ISourceRegistry sources,
         IBrowserLauncher browser,
@@ -165,6 +167,7 @@ public sealed partial class BrowseViewModel : ScreenViewModel
             libraryDownloads,
             rescan,
             storage,
+            contents,
             settings,
             new FolderDownloads(links, dialogs),
             new TrackedMods(watchlists),

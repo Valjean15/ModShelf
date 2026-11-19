@@ -559,6 +559,23 @@ Then put a text file, `Readme.txt`, in ModUtil's folder, the one `ms library lis
 
 Then `ms settings reset library.oldVersions`.
 
+## 24. Show contents
+
+Run it once, after 22, with DamageMeter's zip in the library.
+
+- [ ] **24.1 What it holds.** `ms library contents $meter`.
+  "Jowday-DamageMeter-<version>.zip, a zip archive: *N* files in *M* folders, … unpacked.", then its tree, each file
+  with its size: `README.md`, `manifest.json`, `icon.png` and the package's own folders. Last, "Its readme is README.md.
+  To show it: …". Nothing new is in DamageMeter's folder.
+- [ ] **24.2 Its readme, and a file that isn't text.** `ms library contents $meter --read README.md`, then the same with
+  `--read icon.png`.
+  The readme's text, as its Thunderstore page shows it, exit code 0; then "icon.png in Jowday-DamageMeter-<version>.zip
+  isn't text.", exit code 1.
+- [ ] **24.3 A file that isn't an archive, and a mod not in the library.** `ms library contents $meter --file
+  nothing.zip`, then `ms library contents "https://thunderstore.io/c/hades-ii/p/Jowday/NotAPackage/"`.
+  "DamageMeter has no archive in the library called nothing.zip." and the table of its archives, exit code 2; then "The
+  library has no mod at …", exit code 1.
+
 ## Clean up
 
 After both accounts:
@@ -716,3 +733,6 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 23.2 What deleting would do | | – | |
 | 23.3 Delete | | – | |
 | 23.4 Refusals | | – | |
+| 24.1 What it holds | | – | |
+| 24.2 Its readme, and a file that isn't text | | – | |
+| 24.3 A file that isn't an archive, and a mod not in the library | | – | |

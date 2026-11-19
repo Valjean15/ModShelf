@@ -615,6 +615,21 @@ before its checks: ModUtil 4.0.0 archived, SJSON not watched, and `Readme.txt` i
 
 Then, in Settings › Library, set old versions back as they were.
 
+## 26. Show contents
+
+Run it once, after 24, with DamageMeter's zip in the library.
+
+- [ ] **26.1 What it holds.** On DamageMeter's page, its zip's **…**, then **Show contents…**.
+  "What's in Jowday-DamageMeter-<version>.zip", "*N* files in *M* folders, … unpacked, in a zip archive. Nothing is
+  extracted.", the tree with README.md chosen and its text beside it, in a fixed-width font. Each folder's arrow opens
+  and closes it, its size its files' together; **Open or close every folder** opens them all, then closes them.
+- [ ] **26.2 Other files.** Choose `manifest.json`, then `icon.png`.
+  The manifest's JSON shows in place of the readme; `icon.png` isn't text, so the readme or manifest stays. Nothing new
+  is in DamageMeter's folder. **Close**, or Escape, closes it.
+- [ ] **26.3 Only for archives.** A file of a mod that isn't a `.zip`, `.7z` or `.rar`, such as a `.esp` or a `.json`,
+  if the library has one; and a file missing from disk, if one is.
+  Its **…** menu has no **Show contents…**.
+
 ## Clean up
 
 If a run stopped before 12.7, give the links back on the Settings screen first: their registration starts ModShelf on the test folder. After both accounts, quit the app from the tray menu, then:
@@ -835,3 +850,6 @@ Copy this table into the release's notes or issue, and mark each check ✅, ❌ 
 | 25.2 Ticking | | – | |
 | 25.3 Delete | | – | |
 | 25.4 Every game | | – | |
+| 26.1 What it holds | | – | |
+| 26.2 Other files | | – | |
+| 26.3 Only for archives | | – | |

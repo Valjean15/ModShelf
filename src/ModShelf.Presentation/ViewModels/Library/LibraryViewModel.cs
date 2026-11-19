@@ -11,6 +11,7 @@ using ModShelf.Application.Archives;
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Cleanup;
 using ModShelf.Application.Common;
+using ModShelf.Application.Contents;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Library;
 using ModShelf.Application.Library.Ports;
@@ -85,6 +86,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
         EndorsedMods endorsed,
         IRequirementDownloads requirements,
         ILibraryStorage storage,
+        ILibraryContents contents,
         ISettingsService settings,
         IBrowserLauncher browser,
         IFolderOpener folders,
@@ -137,6 +139,7 @@ public sealed partial class LibraryViewModel : ScreenViewModel
             libraryDownloads,
             rescan,
             storage,
+            contents,
             settings,
             new FolderDownloads(links, dialogs),
             new TrackedMods(watchlists),

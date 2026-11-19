@@ -1,7 +1,9 @@
+using ModShelf.Application.Contents;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Tests.Common;
 using ModShelf.Presentation.Tests.ViewModels.Browse;
+using ModShelf.Presentation.ViewModels.Dialogs;
 using ModShelf.Presentation.ViewModels.ModPages;
 
 namespace ModShelf.Presentation.Tests.ViewModels.ModPages;
@@ -127,6 +129,41 @@ public sealed class OwnFileViewModelTests : IDisposable
         Assert.Contains(
             _harness.Logger.Entries,
             entry => entry.StartsWith("Error: DeleteFile of mod 12604 of skyrimspecialedition failed System.InvalidOperationException", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task AnArchiveOnDiskShowsWhatItHoldsInItsDialog()
+    {
+        ArchiveContents listed = new(
+            File.File, File.FileName, "7z", [new ArchiveEntry("SkyUI", 0, IsFolder: true), new ArchiveEntry("SkyUI/SkyUI_SE.esp", 300, IsFolder: false)], 1, 300, Readme: null);
+        _harness.Contents.Listings[File.File] = listed;
+        OwnFileViewModel row = await ShowAsync(File);
+
+        await row.ShowContentsCommand.ExecuteAsync(null);
+
+        FileContentsViewModel shown = Assert.Single(_harness.Dialogs.Contents);
+        Assert.True(row.CanShowContents);
+        Assert.Equal("What's in SkyUI_5_2_SE.7z", shown.Title);
+        Assert.Equal(["SkyUI", "SkyUI_SE.esp"], shown.Rows.Select(entry => entry.Name));
+    }
+
+    [Theory]
+    [InlineData("SkyUI.esp", false)]
+    [InlineData("SkyUI.7z", true)]
+    public async Task OnlyAnArchiveOnDiskCanShowWhatItHolds(string name, bool missing)
+    {
+        LibraryFile file = TestData.LibraryFile(SkyUi, "35408", name, "5.2");
+        OwnFileViewModel row = missing ? await ShowMissingAsync(file) : await ShowAsync(file);
+
+        Assert.False(row.CanShowContents);
+        Assert.False(row.ShowContentsCommand.CanExecute(null));
+    }
+
+    private async Task<OwnFileViewModel> ShowMissingAsync(LibraryFile file)
+    {
+        await _harness.StartAsync(TestData.LibraryMod(SkyUi, "SkyUI", watched: true, file));
+        ModPageViewModel page = await _harness.OpenAsync(BrowseHarness.Page(BrowseHarness.Info(SkyUi, "SkyUI")));
+        return Assert.Single(page.OwnFiles);
     }
 
     private async Task<OwnFileViewModel> ShowAsync(LibraryFile file)

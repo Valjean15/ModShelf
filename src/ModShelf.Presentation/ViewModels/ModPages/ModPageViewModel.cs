@@ -9,6 +9,7 @@ using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
+using ModShelf.Presentation.ViewModels.Dialogs;
 using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Sources.Abstractions.Catalog;
 using ModShelf.Sources.Abstractions.Common;
@@ -921,9 +922,11 @@ public sealed partial class ModPageViewModel : ObservableObject
                     file,
                     _roots is { } roots && !_services.Storage.FileExists(roots.Resolve(file)),
                     IsOnlyCopy(file),
+                    _services.Contents.CanList(file.FileName),
                     _services.TimeProvider,
                     CopyAsync,
-                    DeleteFileAsync)),
+                    DeleteFileAsync,
+                    ShowContentsAsync)),
         ];
         int archived = files.Count(file => file.IsArchived);
         OwnFiles.Clear();
@@ -957,6 +960,16 @@ public sealed partial class ModPageViewModel : ObservableObject
         }
 
         Facts.SyncWith(facts);
+    }
+
+    /// <summary>
+    /// Shows what one of the library's archives of the mod holds, listing it as the dialog opens (ADR 0106).
+    /// </summary>
+    private Task ShowContentsAsync(OwnFileViewModel file, CancellationToken cancellationToken)
+    {
+        FileContentsViewModel contents = new(_services.Contents, file.File, file.SavedAs, _services.Logger);
+        contents.StartListing();
+        return _services.Dialogs.ShowContentsAsync(contents, cancellationToken);
     }
 
     /// <summary>

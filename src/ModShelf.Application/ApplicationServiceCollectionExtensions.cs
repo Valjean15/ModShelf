@@ -5,6 +5,7 @@ using ModShelf.Application.Accounts;
 using ModShelf.Application.Archives;
 using ModShelf.Application.Catalog;
 using ModShelf.Application.Cleanup;
+using ModShelf.Application.Contents;
 using ModShelf.Application.Diagnostics;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Endorsements;
@@ -403,6 +404,21 @@ public static class ApplicationServiceCollectionExtensions
         services.AddLibraryDownloads();
         services.TryAddSingleton<IArchiveImport, ArchiveImport>();
         services.TryAddSingleton(TimeProvider.System);
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers <see cref="ILibraryContents"/>, which shows what the library's archives hold, over the library
+    /// (<see cref="AddLibrary"/>), the host's <see cref="Library.Ports.ILibraryStorage"/> and its
+    /// <see cref="Contents.Ports.IArchiveReader"/>.
+    /// </summary>
+    public static IServiceCollection AddLibraryContents(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddLibrary();
+        services.TryAddSingleton<ILibraryContents, LibraryContents>();
 
         return services;
     }

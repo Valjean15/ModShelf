@@ -17,7 +17,8 @@ library on your disk, remembers which version of each file you have, and tells y
   with a speed limit you can turn on and off when the connection is shared.
 - **Keeps a library:** each file goes into a folder for its game and mod, with its version and SHA-256. Old versions
   are kept, archived or cleaned up, as you choose, and **Free up space** finds archived versions, duplicates and
-  leftovers to delete, keeping any file that may be the only copy left.
+  leftovers to delete, keeping any file that may be the only copy left. **Show contents** lists what a .zip, .7z or
+  .rar holds and shows its readme, without extracting anything.
 - **Finds updates:** checks the mods you watch every few hours and shows what changed. Pin a mod, skip an update, or
   update everything at once.
 - **Browse and search:** find a game's mods on each site, with filters, and download several at once.

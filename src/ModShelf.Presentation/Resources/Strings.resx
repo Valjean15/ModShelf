@@ -4823,4 +4823,80 @@
     <value>Limit downloads to</value>
     <comment>Settings › Library: the box that turns the download speed limit on, before the speed and its unit.</comment>
   </data>
+  <data name="LibraryShowContents" xml:space="preserve">
+    <value>Show contents…</value>
+    <comment>Menu item on a library file that's an archive: show what it holds, without extracting it.</comment>
+  </data>
+  <data name="ContentsTitle" xml:space="preserve">
+    <value>What's in {0}</value>
+    <comment>The Show contents dialog's title. {0} is the archive's file name.</comment>
+  </data>
+  <data name="ContentsSummary" xml:space="preserve">
+    <value>{0} in {1}, {2} unpacked, in a {3} archive. Nothing is extracted.</value>
+    <comment>Under the Show contents dialog's title. {0} is a count of files, {1} of folders, {2} a size, {3} the archive's kind, such as 7z.</comment>
+  </data>
+  <data name="ContentsOneFile" xml:space="preserve">
+    <value>1 file</value>
+    <comment>A count of files in an archive.</comment>
+  </data>
+  <data name="ContentsFiles" xml:space="preserve">
+    <value>{0:N0} files</value>
+    <comment>A count of files in an archive.</comment>
+  </data>
+  <data name="ContentsOneFolder" xml:space="preserve">
+    <value>1 folder</value>
+    <comment>A count of folders in an archive.</comment>
+  </data>
+  <data name="ContentsFolders" xml:space="preserve">
+    <value>{0:N0} folders</value>
+    <comment>A count of folders in an archive.</comment>
+  </data>
+  <data name="ContentsListing" xml:space="preserve">
+    <value>Reading the archive…</value>
+    <comment>While the Show contents dialog reads the archive's list of files.</comment>
+  </data>
+  <data name="ContentsReading" xml:space="preserve">
+    <value>Reading…</value>
+    <comment>While a text file in an archive is read.</comment>
+  </data>
+  <data name="ContentsPickText" xml:space="preserve">
+    <value>Choose a text file, such as a readme, to read it here.</value>
+    <comment>The Show contents dialog's text pane, before a text file is chosen.</comment>
+  </data>
+  <data name="ContentsTextCut" xml:space="preserve">
+    <value>Only its first {0} is shown: it's {1}.</value>
+    <comment>Under a text file shown from an archive, when it's larger than ModShelf reads. {0} and {1} are sizes.</comment>
+  </data>
+  <data name="ContentsToggleAll" xml:space="preserve">
+    <value>Open or close every folder</value>
+    <comment>Button in the Show contents dialog.</comment>
+  </data>
+  <data name="ContentsToggleFolder" xml:space="preserve">
+    <value>Open or close the folder</value>
+    <comment>Accessible name of a folder's arrow in the Show contents dialog.</comment>
+  </data>
+  <data name="ContentsEncrypted" xml:space="preserve">
+    <value>It needs a password, which ModShelf doesn't ask for.</value>
+    <comment>Why an archive, or a file in it, can't be shown.</comment>
+  </data>
+  <data name="ContentsBroken" xml:space="preserve">
+    <value>It can't be read: it's damaged, cut short, or isn't the kind of archive its name says.</value>
+    <comment>Why an archive can't be shown.</comment>
+  </data>
+  <data name="ContentsNotAnArchive" xml:space="preserve">
+    <value>ModShelf shows what .zip, .7z and .rar archives hold, not other files.</value>
+    <comment>Why a file's contents can't be shown.</comment>
+  </data>
+  <data name="ContentsNotText" xml:space="preserve">
+    <value>It isn't text.</value>
+    <comment>Why a file in an archive can't be shown as text.</comment>
+  </data>
+  <data name="ContentsMissing" xml:space="preserve">
+    <value>The file isn't in the library's folder any more. Rescan the library if it was moved.</value>
+    <comment>Why an archive's contents can't be shown.</comment>
+  </data>
+  <data name="ContentsCantRead" xml:space="preserve">
+    <value>It couldn't be read: {0}</value>
+    <comment>Why an archive's contents can't be shown. {0} is the system's reason.</comment>
+  </data>
 </root>

@@ -278,6 +278,12 @@ With the library cluttered as the command line's section 23 does, before its del
   agent lists them, and says it can't delete files: that's for you, in the desktop app's **Free up space…** or with
   `ms library cleanup --delete`. Every file is still on disk.
 
+## 13. Show contents
+
+- [ ] **13.1 What an archive holds.** Ask the agent what DamageMeter's zip holds, and what its readme says.
+  A call to `library_contents` with DamageMeter's link: its `entries` give the package's folders and files, with their
+  `bytes`, and its `text` the README.md's text, which the agent sums up. Nothing new is in DamageMeter's folder.
+
 ## Results
 
 Copy this table into the release's notes or issue, and mark each check ✅, ❌ or – (not run). For a ❌, add what you
@@ -340,3 +346,4 @@ asked, what the agent and the app showed, and the matching lines of the log.
 | 11.1 With what it needs | | |
 | 11.2 Only when asked | | |
 | 12.1 What could go, and nothing deleted | | |
+| 13.1 What an archive holds | | |

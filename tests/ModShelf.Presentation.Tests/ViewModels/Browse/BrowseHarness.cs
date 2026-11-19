@@ -76,6 +76,7 @@ internal sealed class BrowseHarness : IDisposable
             Requirements,
             Rescan,
             Storage,
+            Contents,
             Settings,
             new FakeSourceRegistry(
             [
@@ -136,6 +137,11 @@ internal sealed class BrowseHarness : IDisposable
     public ScriptedRescan Rescan { get; } = new();
 
     public FakeLibraryStorage Storage { get; } = new();
+
+    /// <summary>
+    /// What the library's archives hold (ADR 0106).
+    /// </summary>
+    public ScriptedContents Contents { get; } = new();
 
     public FakeSettingsService Settings { get; } = new();
 

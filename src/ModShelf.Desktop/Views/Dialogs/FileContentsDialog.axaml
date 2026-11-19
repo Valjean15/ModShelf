@@ -1,0 +1,111 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ModShelf.Presentation.ViewModels.Dialogs"
+        xmlns:local="using:ModShelf.Desktop.Views.Dialogs"
+        xmlns:res="using:ModShelf.Presentation.Resources"
+        x:Class="ModShelf.Desktop.Views.Dialogs.FileContentsDialog"
+        x:DataType="vm:FileContentsViewModel"
+        Title="{Binding Title}"
+        Width="980"
+        Height="600"
+        MinWidth="640"
+        MinHeight="400"
+        SizeToContent="Manual"
+        CanResize="True"
+        Classes="dialog">
+
+    <Window.Styles>
+        <!-- A folder's arrow points down while it's open. -->
+        <Style Selector="Path.chevron">
+            <Setter Property="RenderTransform" Value="rotate(0deg)" />
+        </Style>
+        <Style Selector="Path.chevron.open">
+            <Setter Property="RenderTransform" Value="rotate(90deg)" />
+        </Style>
+    </Window.Styles>
+
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Bottom" Classes="dialogButtons">
+            <Button IsCancel="True" IsDefault="True" Content="{x:Static res:Strings.DialogClose}" Command="{Binding CloseCommand}" />
+        </StackPanel>
+        <TextBlock DockPanel.Dock="Top" Classes="dialogTitle" TextWrapping="Wrap" Text="{Binding Title}" />
+
+        <!-- Reading the list; or why it can't be shown. -->
+        <StackPanel DockPanel.Dock="Top" Spacing="6" Margin="0,0,0,8" IsVisible="{Binding IsListing}">
+            <ProgressBar MinHeight="6" IsIndeterminate="True" />
+            <TextBlock Classes="note" Text="{x:Static res:Strings.ContentsListing}" />
+        </StackPanel>
+        <SelectableTextBlock DockPanel.Dock="Top"
+                             Classes="message problem"
+                             TextWrapping="Wrap"
+                             Text="{Binding Problem}"
+                             IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,8" IsVisible="{Binding IsListed}">
+            <TextBlock Classes="note" VerticalAlignment="Center" TextWrapping="Wrap" Text="{Binding SummaryText}" />
+            <Button Grid.Column="1" Classes="quiet" Content="{x:Static res:Strings.ContentsToggleAll}" Command="{Binding ToggleAllCommand}" />
+        </Grid>
+
+        <!-- The tree on the left, only the rows in view made, so an archive of 100,000 files stays quick; the text file
+             chosen on the right. The window keeps its size while the archive is read, so it opens centred, and can be
+             made larger for a large archive. -->
+        <Grid ColumnDefinitions="5*,6*" ColumnSpacing="12" IsVisible="{Binding IsListed}" Margin="0,0,0,8">
+            <Border Classes="compactList">
+                <ListBox ItemsSource="{Binding Rows}"
+                         SelectedItem="{Binding SelectedRow}"
+                         SelectionMode="Single"
+                         AutomationProperties.Name="{Binding Title}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ContentRowViewModel">
+                            <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="6" Margin="{Binding Depth, Converter={x:Static local:DepthIndentConverter.Instance}}">
+                                <Button Classes="icon"
+                                        Width="22"
+                                        Height="22"
+                                        Padding="0"
+                                        Command="{Binding ToggleCommand}"
+                                        IsVisible="{Binding IsFolder}"
+                                        ToolTip.Tip="{x:Static res:Strings.ContentsToggleFolder}"
+                                        AutomationProperties.Name="{x:Static res:Strings.ContentsToggleFolder}">
+                                    <Path Classes="line chevron" Classes.open="{Binding IsExpanded}" StrokeThickness="1.8" Width="12" Height="12" Stretch="Uniform" Data="{StaticResource ChevronGlyph}" />
+                                </Button>
+                                <Border Width="22" IsVisible="{Binding !IsFolder}" />
+                                <Path Grid.Column="1"
+                                      Classes="line"
+                                      StrokeThickness="1.6"
+                                      Width="14"
+                                      Height="14"
+                                      Stretch="Uniform"
+                                      VerticalAlignment="Center"
+                                      Data="{StaticResource FolderGlyph}"
+                                      IsVisible="{Binding IsFolder}" />
+                                <TextBlock Grid.Column="2"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis"
+                                           FontWeight="{Binding IsText, Converter={x:Static local:TextWeightConverter.Instance}}"
+                                           Text="{Binding Name}"
+                                           ToolTip.Tip="{Binding Path}" />
+                                <TextBlock Grid.Column="3" Classes="note" VerticalAlignment="Center" Text="{Binding SizeText}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+
+            <Border Grid.Column="1" Classes="compactList" Padding="12">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Text="{Binding TextTitle}" IsVisible="{Binding HasText}" />
+                    <TextBlock DockPanel.Dock="Top"
+                               Classes="note"
+                               Margin="0,4,0,8"
+                               TextWrapping="Wrap"
+                               Text="{Binding TextNote}"
+                               IsVisible="{Binding TextNote, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                    <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.ContentsPickText}" IsVisible="{Binding !HasText}" />
+                    <ScrollViewer Margin="0,8,0,0" IsVisible="{Binding HasText}" HorizontalScrollBarVisibility="Auto">
+                        <SelectableTextBlock FontFamily="{DynamicResource ShelfMonoFont}" FontSize="12.5" Text="{Binding TextContent}" />
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </DockPanel>
+</Window>

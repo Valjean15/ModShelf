@@ -18,7 +18,8 @@ internal sealed class ListedLibrary : IModLibrary
 
     public Task<IReadOnlyList<LibraryGameTotals>> ListGamesAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
 
-    public Task<LibraryMod?> FindAsync(ModRef modRef, CancellationToken cancellationToken) => throw new NotSupportedException();
+    public Task<LibraryMod?> FindAsync(ModRef modRef, CancellationToken cancellationToken)
+        => Failure is null ? Task.FromResult(Mods.FirstOrDefault(mod => mod.Mod == modRef)) : Task.FromException<LibraryMod?>(Failure);
 
     public Task<LibraryMod> WatchAsync(Uri link, CancellationToken cancellationToken) => throw new NotSupportedException();
 

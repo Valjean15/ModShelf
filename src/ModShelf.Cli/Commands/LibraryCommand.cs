@@ -42,7 +42,7 @@ internal static partial class LibraryCommand
         };
         move.SetAction((parsed, cancellationToken) => MoveAsync(environment, parsed.GetValue(folder)!, cancellationToken));
 
-        return new Command("library", "Shows the library of watched and downloaded mods, watches mods and checks them for updates, pins mods, skips updates, keeps notes, forgets and rescans mods, moves the library or a game's files, exports or imports it as a list, imports another mod manager's archives, and frees up space.")
+        return new Command("library", "Shows the library of watched and downloaded mods, watches mods and checks them for updates, pins mods, skips updates, keeps notes, forgets and rescans mods, moves the library or a game's files, exports or imports it as a list, imports another mod manager's archives, frees up space, and shows what an archive holds.")
         {
             list,
             CreateWatch(environment, watch: true),
@@ -61,6 +61,7 @@ internal static partial class LibraryCommand
             CreateImport(environment),
             CreateImportArchives(environment),
             CreateCleanup(environment),
+            CreateContents(environment),
         };
     }
 

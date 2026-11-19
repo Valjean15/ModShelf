@@ -95,6 +95,11 @@ public interface IDialogService
     Task FreeUpSpaceAsync(FreeUpSpaceViewModel freeing, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Shows what one of the library's archives holds, and its text files, until the user closes it (ADR 0106).
+    /// </summary>
+    Task ShowContentsAsync(FileContentsViewModel contents, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Shows the dialog that downloads a mod with what it needs, until it asks to close
     /// (<see cref="DownloadRequirementsViewModel.CloseRequested"/>) or the user closes it.
     /// </summary>

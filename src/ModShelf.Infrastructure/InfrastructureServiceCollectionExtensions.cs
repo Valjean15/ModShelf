@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using ModShelf.Application.Accounts;
 using ModShelf.Application.Accounts.Ports;
 using ModShelf.Application.Catalog.Ports;
+using ModShelf.Application.Contents.Ports;
 using ModShelf.Application.Diagnostics.Ports;
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Library.Ports;
@@ -19,6 +20,7 @@ using ModShelf.Application.Pictures;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Application.State.Ports;
+using ModShelf.Infrastructure.Archives;
 using ModShelf.Infrastructure.Diagnostics;
 using ModShelf.Infrastructure.Downloads;
 using ModShelf.Infrastructure.Library;
@@ -215,6 +217,19 @@ public static class InfrastructureServiceCollectionExtensions
         }
 
         services.AddSingleton<IDeprecatedCallStore>(provider => new JsonDeprecatedCallStore(path, provider.GetRequiredService<ILogger<JsonDeprecatedCallStore>>()));
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the <see cref="IArchiveReader"/>, which lists .zip, .7z and .rar archives and reads the start of a file
+    /// in one, where they are, extracting nothing (ADR 0106).
+    /// </summary>
+    public static IServiceCollection AddArchiveReader(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.TryAddSingleton<IArchiveReader, ArchiveReader>();
 
         return services;
     }

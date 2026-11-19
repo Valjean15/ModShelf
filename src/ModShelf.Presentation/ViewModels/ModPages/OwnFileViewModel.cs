@@ -24,23 +24,29 @@ public sealed partial class OwnFileViewModel
 
     private readonly Func<string, CancellationToken, Task> _copy;
     private readonly Func<OwnFileViewModel, CancellationToken, Task> _delete;
+    private readonly Func<OwnFileViewModel, CancellationToken, Task> _showContents;
 
     /// <param name="isMissing">Whether the file isn't on disk where the library says it is.</param>
     /// <param name="copy">Puts text on the clipboard, saying so when it can't.</param>
     /// <param name="delete">Deletes the file from disk and the library, once the user confirms.</param>
     /// <param name="isOnlyCopy">Whether its site no longer offers it, so this copy may be the only one left.</param>
+    /// <param name="isArchive">Whether it's an archive whose contents can be shown, a .zip, .7z or .rar.</param>
+    /// <param name="showContents">Shows what the archive holds (ADR 0106).</param>
     internal OwnFileViewModel(
         LibraryFile file,
         bool isMissing,
         bool isOnlyCopy,
+        bool isArchive,
         TimeProvider timeProvider,
         Func<string, CancellationToken, Task> copy,
-        Func<OwnFileViewModel, CancellationToken, Task> delete)
+        Func<OwnFileViewModel, CancellationToken, Task> delete,
+        Func<OwnFileViewModel, CancellationToken, Task> showContents)
     {
         ArgumentNullException.ThrowIfNull(file);
         ArgumentNullException.ThrowIfNull(timeProvider);
         ArgumentNullException.ThrowIfNull(copy);
         ArgumentNullException.ThrowIfNull(delete);
+        ArgumentNullException.ThrowIfNull(showContents);
 
         File = file.File;
         Name = file.Name;
@@ -55,6 +61,9 @@ public sealed partial class OwnFileViewModel
         IsOnlyCopy = isOnlyCopy;
         _copy = copy;
         _delete = delete;
+        _showContents = showContents;
+        SavedAs = file.FileName;
+        CanShowContents = isArchive && !isMissing;
     }
 
     public ModFileRef File { get; }
@@ -74,7 +83,17 @@ public sealed partial class OwnFileViewModel
     /// </summary>
     public string FileName { get; }
 
+    /// <summary>
+    /// The name it's saved under, without the <c>_archive</c> folder an old version is in.
+    /// </summary>
+    internal string SavedAs { get; }
+
     public string SizeText { get; }
+
+    /// <summary>
+    /// Whether it's an archive on disk whose contents can be shown: a .zip, .7z or .rar.
+    /// </summary>
+    public bool CanShowContents { get; }
 
     /// <summary>
     /// Such as "Downloaded 10/12/2026", in the user's time zone and culture.
@@ -115,6 +134,12 @@ public sealed partial class OwnFileViewModel
     /// </summary>
     [RelayCommand(CanExecute = nameof(HasSha256))]
     private Task CopySha256Async(CancellationToken cancellationToken) => _copy(Sha256, cancellationToken);
+
+    /// <summary>
+    /// Shows what the archive holds, and its readme, without extracting it (ADR 0106).
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanShowContents))]
+    private Task ShowContentsAsync(CancellationToken cancellationToken) => _showContents(this, cancellationToken);
 
     /// <summary>
     /// Deletes the file from disk, for good, and from the library, once the user confirms.

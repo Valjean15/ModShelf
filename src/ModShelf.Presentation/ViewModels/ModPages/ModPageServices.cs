@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 
 using ModShelf.Application.Accounts.Ports;
+using ModShelf.Application.Contents;
 using ModShelf.Application.Library;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Requirements;
@@ -21,6 +22,7 @@ internal sealed class ModPageServices(
     ILibraryDownloads libraryDownloads,
     ILibraryRescan rescan,
     ILibraryStorage storage,
+    ILibraryContents contents,
     ISettingsService settings,
     FolderDownloads folders,
     TrackedMods tracked,
@@ -43,6 +45,11 @@ internal sealed class ModPageServices(
     public ILibraryRescan Rescan { get; } = rescan ?? throw new ArgumentNullException(nameof(rescan));
 
     public ILibraryStorage Storage { get; } = storage ?? throw new ArgumentNullException(nameof(storage));
+
+    /// <summary>
+    /// What the library's archives hold (ADR 0106).
+    /// </summary>
+    public ILibraryContents Contents { get; } = contents ?? throw new ArgumentNullException(nameof(contents));
 
     public ISettingsService Settings { get; } = settings ?? throw new ArgumentNullException(nameof(settings));
 
