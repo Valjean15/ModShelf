@@ -9,7 +9,8 @@ internal sealed class Listing
     private readonly Dictionary<string, ListedPackage> _byName;
 
     /// <param name="lastModified">When Thunderstore built the listing, as its index said; null when it didn't say.</param>
-    public Listing(string community, IReadOnlyList<ListedPackage> packages, DateTimeOffset readAt, DateTimeOffset? lastModified)
+    /// <param name="blob">The blob its index pointed to; null when the index listed the chunks itself.</param>
+    public Listing(string community, IReadOnlyList<ListedPackage> packages, DateTimeOffset readAt, DateTimeOffset? lastModified, Uri? blob = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(community);
         ArgumentNullException.ThrowIfNull(packages);
@@ -18,6 +19,7 @@ internal sealed class Listing
         Packages = packages;
         ReadAt = readAt;
         LastModified = lastModified;
+        Blob = blob;
 
         // Thunderstore takes a team's name in any case, and so do links to its packages.
         _byName = new Dictionary<string, ListedPackage>(packages.Count, StringComparer.OrdinalIgnoreCase);
@@ -33,6 +35,7 @@ internal sealed class Listing
         Packages = read.Packages;
         ReadAt = readAt;
         LastModified = read.LastModified;
+        Blob = read.Blob;
         _byName = read._byName;
     }
 
@@ -46,6 +49,12 @@ internal sealed class Listing
     public DateTimeOffset ReadAt { get; }
 
     public DateTimeOffset? LastModified { get; }
+
+    /// <summary>
+    /// The blob on the CDN its index pointed to, whose link names its SHA-256, so an index pointing there again is
+    /// unchanged; null when the index listed the chunks itself.
+    /// </summary>
+    public Uri? Blob { get; }
 
     /// <summary>
     /// The package named <paramref name="fullName"/>, <c>Team-Name</c>, in any case; null when the community doesn't

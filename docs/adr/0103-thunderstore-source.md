@@ -18,8 +18,8 @@ taking over Thunderstore's own link scheme, `ror2mm://`, once the user says so, 
   `/c/{community}/api/v1/package-listing-index/`, which mod managers read. It answers `302` to a blob on Thunderstore's
   CDN (`ccdn.thunderstore.io`): gzip-compressed JSON, an array of the URLs of the listing's chunks, each a gzip-compressed
   JSON array of packages in the old endpoint's format, at most 14 MB unpacked. The index is rebuilt once an hour, at the
-  hour; it takes `If-Modified-Since` and answers `304` when it hasn't changed since. A chunk's URL names its SHA-256, so
-  a chunk never changes. The largest community, Lethal Company, is 26 chunks, about 38 MB to download and 350 MB of JSON;
+  hour. Asked with `If-Modified-Since`, it still answers `302`, to the same blob while the listing is unchanged: the
+  blob's URL, like each chunk's, names its SHA-256, so a blob never changes. The largest community, Lethal Company, is 26 chunks, about 38 MB to download and 350 MB of JSON;
   R.E.P.O. is 3, about 4 MB; most are one small chunk.
 - **A package** in the listing: its name, team (`owner`), `full_name` (`Team-Name`), page, creation and update times,
   likes (`rating_score`), whether it's pinned, deprecated or has adult content (`has_nsfw_content`), its categories, and
@@ -64,7 +64,7 @@ already. Following the guide's rule for keys two sites share would have made eve
   background, which frames the page and is dark in its middle, when it has none) and its icon; a game's categories from its filters. A mod, its files and its requirements come from the community's
   listing (below); its changelog from the newest version's `CHANGELOG.md`.
 - **The listing**, per community, kept in memory and read again at most once an hour, with `If-Modified-Since`: the index,
-  then its chunks, a few at a time, each parsed as it streams, and kept small: of each package, what ModShelf shows, and
+  which is unchanged when it answers `304` or points to the blob the listing was read from, then the blob and its chunks, a few at a time, each parsed as it streams, and kept small: of each package, what ModShelf shows, and
   of each version, its number, upload time, size and downloads; the dependencies of the newest only. Callers waiting for
   the same community share one read. The index's and chunks' links are followed only to Thunderstore's own hosts, over
   HTTPS. A package not in the listing, such as one removed, is a `404`: its mod has left its site (ADR 0099).
@@ -111,7 +111,7 @@ The link scheme is registered on Windows and Linux as `nxm` is; on macOS, the ap
   updates, with their dependencies downloaded by **Download with requirements**.
 - The first look at a community in a run reads its whole listing: seconds for most, but tens of seconds and about 38 MB
   for Lethal Company, in each run of the command line, which keeps nothing between runs. The desktop app then reads it
-  at most hourly, mostly as a `304`. A community's listing in memory takes tens of megabytes at most.
+  at most hourly, mostly as one redirect to the same blob. A community's listing in memory takes tens of megabytes at most.
 - A key typed alone still means a Nexus Mods game; Thunderstore's games are named with their site.
 - No hash is checked: Thunderstore gives none.
 - No change to Domain, Application, Presentation or `Sources.Abstractions`; no schema change; no new package.
@@ -121,8 +121,9 @@ The link scheme is registered on Windows and Linux as `nxm` is; on macOS, the ap
 
 - `SourceContractTests<ThunderstoreSource>`, against answers recorded by `Fixtures/Record-ThunderstoreFixtures.ps1`
   from a small community, cut down, and served gzip-compressed as the CDN serves them.
-- The listing: several chunks; gzip whether or not the headers say; `304`; read again only after an hour, by a
-  `FakeTimeProvider`; one read for callers at once; a link to another host refused; a large listing parsed as it streams.
+- The listing: several chunks; gzip whether or not the headers say; unchanged by a `304` or a redirect to the same
+  blob, as recorded; read again only after an hour, by a `FakeTimeProvider`; one read for callers at once; a link to
+  another host refused; a large listing parsed as it streams.
 - Links of each kind, a package in several communities, and the IDs' edge cases, such as a team with a hyphen.
 - Search in each order and filter, deprecated and adult packages left out; requirements in and out of the community;
   changelogs with and without version headings.

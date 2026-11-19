@@ -121,10 +121,10 @@ GameBanana).
   sexualizing minors, are left out. Game covers come from the games database its admin publishes (desktop only).
 - **Thunderstore** — needs no account. Its communities are the games, and its packages the mods, named `Team-Name`,
   each version a file. A community's packages come from its listing, the gzip-compressed chunks its
-  `package-listing-index` points to on the CDN, kept in memory and asked again at most hourly with `If-Modified-Since`;
-  search, updates and requirements (the newest version's dependencies) are read from it. Its `ror2mm://` links, from
-  **Install with Mod Manager**, name no community, which is asked of Thunderstore; a package listed in several needs
-  its page's link. No hashes.
+  `package-listing-index` points to on the CDN, kept in memory and asked again at most hourly, unchanged while the index
+  points to the same blob; search, updates and requirements (the newest version's dependencies) are read from it. Its
+  `ror2mm://` links, from **Install with Mod Manager**, name no community, which is asked of Thunderstore; a package
+  listed in several needs its page's link. No hashes.
 - **Web links** — any `http(s)` file, saved to a folder of your own, never into the library. A `#sha256=` (or `md5`,
   `sha1`, `sha512`) fragment checks the file and is never sent.
 

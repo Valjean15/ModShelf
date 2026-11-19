@@ -78,14 +78,16 @@ internal sealed class ThunderstoreApiClient(IHttpClientFactory clients, Uri base
 
     /// <summary>
     /// Asks a community's listing index, <c>c/{community}/api/v1/package-listing-index/</c>, for its chunks, unless it's
-    /// unchanged since <paramref name="since"/>.
+    /// unchanged: it answers <c>304</c> since <paramref name="since"/>, or points to <paramref name="readFrom"/>, the blob
+    /// the listing was read from, whose link names its SHA-256, as Thunderstore answers whatever it's asked.
     /// </summary>
+    /// <param name="readFrom">The blob the listing was last read from; null when it wasn't.</param>
     /// <exception cref="HttpRequestException">
     /// As <see cref="GetAsync{T}(string, CancellationToken)"/>; 404 for a community Thunderstore doesn't have, 503 while it
     /// hasn't built the community's listing; with no status when the index or a chunk's link isn't Thunderstore's, or the
     /// index isn't a list of links.
     /// </exception>
-    public async Task<ListingIndex> GetListingIndexAsync(string community, DateTimeOffset? since, CancellationToken cancellationToken)
+    public async Task<ListingIndex> GetListingIndexAsync(string community, DateTimeOffset? since, Uri? readFrom, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(community);
 
@@ -95,7 +97,7 @@ internal sealed class ThunderstoreApiClient(IHttpClientFactory clients, Uri base
         switch (status)
         {
             case HttpStatusCode.NotModified:
-                return new ListingIndex(Unchanged: true, [], lastModified ?? since);
+                return new ListingIndex(Unchanged: true, [], lastModified ?? since, readFrom);
             case HttpStatusCode.ServiceUnavailable:
                 throw new HttpRequestException($"Thunderstore hasn't built the listing of {community} yet. Try again in a while.", null, status);
             case HttpStatusCode.NotFound:
@@ -103,11 +105,17 @@ internal sealed class ThunderstoreApiClient(IHttpClientFactory clients, Uri base
         }
 
         byte[] index;
+        Uri? blob = null;
         if ((int)status is >= 300 and <= 399)
         {
-            Uri blob = location is null
+            blob = location is null
                 ? throw new HttpRequestException(HttpRequestError.InvalidResponse, "Thunderstore's listing index pointed nowhere.")
                 : location.IsAbsoluteUri ? location : new Uri(asked, location);
+            if (blob == readFrom)
+            {
+                return new ListingIndex(Unchanged: true, [], lastModified ?? since, blob);
+            }
+
             index = await GetBlobAsync(blob, cancellationToken).ConfigureAwait(false);
         }
         else
@@ -139,7 +147,7 @@ internal sealed class ThunderstoreApiClient(IHttpClientFactory clients, Uri base
             chunks.Add(chunk);
         }
 
-        return new ListingIndex(Unchanged: false, chunks, lastModified);
+        return new ListingIndex(Unchanged: false, chunks, lastModified, blob);
     }
 
     /// <summary>

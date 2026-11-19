@@ -125,6 +125,24 @@ public sealed class ThunderstoreListingsTests : IDisposable
     }
 
     [Fact]
+    public async Task AnIndexPointingToTheBlobItWasReadFromIsUnchanged()
+    {
+        // As Thunderstore answers: a redirect whatever it's asked, to a blob whose link names its SHA-256.
+        _server.ServeListing(Community, [TestPackage.Chunk(Package("A"))], changed: true);
+        Listing first = await Listings.GetAsync(Community, Cancellation);
+        int asked = _server.Requests.Count;
+
+        _server.Clock.Advance(TimeSpan.FromHours(1));
+        Listing again = await Listings.GetAsync(Community, Cancellation);
+
+        Assert.Equal(asked + 1, _server.Requests.Count);
+        Assert.Same(first.Packages, again.Packages);
+        Assert.Equal((_server.Clock.GetUtcNow(), first.Blob), (again.ReadAt, again.Blob));
+        Assert.EndsWith("/live/blob-storage/game-index.blob", first.Blob!.AbsolutePath, StringComparison.Ordinal);
+        Assert.Contains(_server.Logs.Entries, entry => entry.Contains("is unchanged since", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public async Task ReadsAChangedListingAfterAnHour()
     {
         _server.ServeListing(Community, [TestPackage.Chunk(Package("A"))]);

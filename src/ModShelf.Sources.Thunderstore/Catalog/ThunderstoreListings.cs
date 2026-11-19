@@ -9,9 +9,10 @@ namespace ModShelf.Sources.Thunderstore.Catalog;
 
 /// <summary>
 /// Each community's listing, read through its <c>package-listing-index</c> and kept in memory: read again once it's older
-/// than the lifetime, with <c>If-Modified-Since</c>, so an unchanged listing costs one small answer. Callers asking for
-/// the same community at once share one read. A read that fails leaves the listing read before in use, and is tried
-/// again a few minutes later; with none, it fails the caller (ADR 0103).
+/// than the lifetime, with <c>If-Modified-Since</c>, so an unchanged listing costs one small answer: a <c>304</c>, or a
+/// redirect to the blob it was read from. Callers asking for the same community at once share one read. A read that
+/// fails leaves the listing read before in use, and is tried again a few minutes later; with none, it fails the caller
+/// (ADR 0103).
 /// </summary>
 internal sealed partial class ThunderstoreListings : IDisposable
 {
@@ -132,7 +133,7 @@ internal sealed partial class ThunderstoreListings : IDisposable
 
     private async Task<Listing> ReadAsync(string community, Listing? before, CancellationToken cancellationToken)
     {
-        ListingIndex index = await _api.GetListingIndexAsync(community, before?.LastModified, cancellationToken).ConfigureAwait(false);
+        ListingIndex index = await _api.GetListingIndexAsync(community, before?.LastModified, before?.Blob, cancellationToken).ConfigureAwait(false);
         DateTimeOffset now = _time.GetUtcNow();
         if (index.Unchanged && before is not null)
         {
@@ -177,7 +178,7 @@ internal sealed partial class ThunderstoreListings : IDisposable
         }
 
         LogRead(_logger, community, packages.Count, index.Chunks.Count);
-        return new Listing(community, packages, now, index.LastModified);
+        return new Listing(community, packages, now, index.LastModified, index.Blob);
     }
 
     /// <summary>
