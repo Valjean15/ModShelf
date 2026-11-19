@@ -58,6 +58,7 @@ public static class PresentationServiceCollectionExtensions
         services.TryAddSingleton<QuickSearchViewModel>();
         services.TryAddSingleton<PicturesViewModel>();
         services.TryAddSingleton<BrowserFolderViewModel>();
+        services.TryAddSingleton<DownloadSpeedLimitViewModel>();
         services.TryAddSingleton<InstalledGamesViewModel>();
         services.TryAddSingleton<LinksViewModel>();
         services.TryAddSingleton<AgentsViewModel>();

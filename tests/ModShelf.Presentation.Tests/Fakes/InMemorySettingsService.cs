@@ -134,6 +134,11 @@ internal sealed class InMemorySettingsService : ISettingsService
     public Task SetBrowserDownloadsFolderAsync(string? folder, CancellationToken cancellationToken)
         => ChangeAsync($"browserDownloadsFolder {folder ?? "null"}", settings => settings with { BrowserDownloadsFolder = folder });
 
+    public Task SetDownloadSpeedLimitAsync(long? bytesPerSecond, bool applies, CancellationToken cancellationToken)
+        => ChangeAsync(
+            $"downloadSpeedLimit {bytesPerSecond?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "null"} {(applies ? "on" : "off")}",
+            settings => settings with { DownloadSpeedLimit = bytesPerSecond, DownloadSpeedLimitOn = bytesPerSecond is null || applies ? null : false });
+
     /// <summary>
     /// The settings with the game's own as <paramref name="own"/>; without the game when it has none.
     /// </summary>

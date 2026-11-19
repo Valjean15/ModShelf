@@ -81,6 +81,7 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         Assert.Equal("false (default)", Value(shown, "agents.enabled"));
         Assert.Equal("47823 (default)", Value(shown, "agents.port"));
         Assert.Equal(_cli.Downloads + " (default)", Value(shown, "downloads.browserFolder"));
+        Assert.Equal("off (default)", Value(shown, "downloads.speedLimit"));
         Assert.Contains("To change a setting: settings set <setting> <value>", shown.Output, StringComparison.Ordinal);
     }
 
@@ -275,7 +276,7 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     [InlineData("set", "library.root", "Mods", "isn't a full path")]
     [InlineData("set", "library.folders", "{mod}", "The last part must be exactly {file}.")]
     [InlineData("set", "library.folders.skyrimspecialedition", "{name}/{file}", "{name} isn't a folder's part.")]
-    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<site>/<game>, library.oldVersions, updates.interval, updates.notify, appearance.theme, window.closeToTray, setup.done, app.checkForUpdates, previews.library, previews.updates, previews.browse, previews.downloads, pictures.maxSize, pictures.adult, details.maxAge, quota.warnBelow, agents.enabled, agents.port, downloads.browserFolder, games.<site>/<game>.root, games.<site>/<game>.folders, games.<site>/<game>.oldVersions, games.<site>/<game>.checkUpdates, games.<site>/<game>.updateInterval, games.<site>/<game>.notify, games.<site>/<game>.previews, games.<site>/<game>.hidden, games.<site>/<game>.browse.sort, games.<site>/<game>.browse.direction, games.<site>/<game>.browse.window, games.<site>/<game>.browse.pageSize, such as games.nexus/stardewvalley.notify; a game's key alone, as games.stardewvalley.notify, does while only one site's game has it.")]
+    [InlineData("set", "library.colour", "blue", "There's no setting called library.colour. Settings: library.root, library.folders, library.folders.<site>/<game>, library.oldVersions, updates.interval, updates.notify, appearance.theme, window.closeToTray, setup.done, app.checkForUpdates, previews.library, previews.updates, previews.browse, previews.downloads, pictures.maxSize, pictures.adult, details.maxAge, quota.warnBelow, agents.enabled, agents.port, downloads.browserFolder, downloads.speedLimit, games.<site>/<game>.root, games.<site>/<game>.folders, games.<site>/<game>.oldVersions, games.<site>/<game>.checkUpdates, games.<site>/<game>.updateInterval, games.<site>/<game>.notify, games.<site>/<game>.previews, games.<site>/<game>.hidden, games.<site>/<game>.browse.sort, games.<site>/<game>.browse.direction, games.<site>/<game>.browse.window, games.<site>/<game>.browse.pageSize, such as games.nexus/stardewvalley.notify; a game's key alone, as games.stardewvalley.notify, does while only one site's game has it.")]
     [InlineData("reset", "library.folders.", null, "There's no setting called library.folders.")]
     [InlineData("set", "library.oldVersions", "0", "'0' isn't a rule for old versions. Use all, archive, or how many versions to keep, from 1 to 99, such as 2.")]
     [InlineData("set", "appearance.theme", "blue", "'blue' isn't system, light or dark.")]
@@ -289,6 +290,10 @@ public sealed class SettingsCommandTests : IAsyncDisposable
     [InlineData("set", "quota.warnBelow", "91", "'91' isn't a percent from 0 to 90.")]
     [InlineData("set", "quota.warnBelow", "-1", "'-1' isn't a percent from 0 to 90.")]
     [InlineData("set", "agents.enabled", "yes", "'yes' isn't true or false.")]
+    [InlineData("set", "downloads.speedLimit", "fast", "'fast' isn't a speed. Use kilobytes or megabytes a second, such as 512KB or 2MB, from 16KB to 10000MB.")]
+    [InlineData("set", "downloads.speedLimit", "8KB", "'8KB' isn't a speed.")]
+    [InlineData("set", "downloads.speedLimit", "2", "'2' isn't a speed.")]
+    [InlineData("set", "downloads.speedLimit", "on", "downloads.speedLimit has no speed to turn on: set one, such as 2MB.")]
     [InlineData("set", "agents.port", "80", "'80' isn't a port from 1024 to 65535.")]
     [InlineData("set", "agents.port", "65536", "'65536' isn't a port from 1024 to 65535.")]
     [InlineData("set", "games.fallout4.hidden", "yes", "'yes' isn't true or false.")]
@@ -381,6 +386,32 @@ public sealed class SettingsCommandTests : IAsyncDisposable
         Assert.Equal("downloads.browserFolder is back to its default, the system's Downloads folder: a download waiting on a site's page takes the file your browser saves there.", reset.Output.Trim());
         Assert.Contains("'Downloads' isn't a full path", relative.Errors, StringComparison.Ordinal);
         Assert.DoesNotContain("downloads", await File.ReadAllTextAsync(SettingsFile, Cancellation), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task LimitsTheDownloadSpeedTurnsTheLimitOffAndOnKeepingItAndResetsIt()
+    {
+        CliResult set = await RunAsync("set", "downloads.speedLimit", " 1.5 mb/s ");
+        string file = await File.ReadAllTextAsync(SettingsFile, Cancellation);
+        CliResult off = await RunAsync("set", "downloads.speedLimit", "OFF");
+        string shownOff = Value(await RunAsync("show"), "downloads.speedLimit");
+        CliResult on = await RunAsync("set", "downloads.speedLimit", "on");
+        string shownOn = Value(await RunAsync("show"), "downloads.speedLimit");
+        CliResult reset = await RunAsync("reset", "downloads.speedLimit");
+        CliResult offAgain = await RunAsync("set", "downloads.speedLimit", "off");
+
+        Assert.Equal(Done, set.ExitCode);
+        Assert.Equal("downloads.speedLimit is now 1536KB: ModShelf's downloads take at most 1536KB a second together.", set.Output.Trim());
+        Assert.Contains("\"downloads\": {\n    \"speedLimit\": \"1536KB\"\n  }", file.ReplaceLineEndings("\n"), StringComparison.Ordinal);
+        Assert.Equal(
+            "downloads.speedLimit is now 1536KB (off): ModShelf's downloads take what the connection gives. Set it to on to limit them to 1536KB a second again.",
+            off.Output.Trim());
+        Assert.Equal("1536KB (off)", shownOff);
+        Assert.Equal("downloads.speedLimit is now 1536KB: ModShelf's downloads take at most 1536KB a second together.", on.Output.Trim());
+        Assert.Equal("1536KB", shownOn);
+        Assert.Equal("downloads.speedLimit is back to its default, off: ModShelf's downloads take what the connection gives.", reset.Output.Trim());
+        Assert.Equal("downloads.speedLimit is off: ModShelf's downloads take what the connection gives.", offAgain.Output.Trim());
+        Assert.DoesNotContain("speedLimit", await File.ReadAllTextAsync(SettingsFile, Cancellation), StringComparison.Ordinal);
     }
 
     [Fact]

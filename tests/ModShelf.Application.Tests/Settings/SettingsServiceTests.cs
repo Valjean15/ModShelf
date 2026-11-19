@@ -299,6 +299,35 @@ public sealed class SettingsServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task SetsTheDownloadSpeedLimitTurnsItOffKeepingItAndClearsIt()
+    {
+        await _settings.SetDownloadSpeedLimitAsync(2 * 1024 * 1024, applies: true, Cancellation);
+        AppSettings on = await _settings.GetAsync(Cancellation);
+        await _settings.SetDownloadSpeedLimitAsync(2 * 1024 * 1024, applies: false, Cancellation);
+        AppSettings off = await _settings.GetAsync(Cancellation);
+        await _settings.SetDownloadSpeedLimitAsync(null, applies: true, Cancellation);
+        AppSettings cleared = await _settings.GetAsync(Cancellation);
+
+        Assert.Equal((2L * 1024 * 1024, (bool?)null, 2L * 1024 * 1024), (on.DownloadSpeedLimit!.Value, on.DownloadSpeedLimitOn, on.DownloadSpeedCap!.Value));
+        Assert.Equal((2L * 1024 * 1024, (bool?)false, (long?)null), (off.DownloadSpeedLimit!.Value, off.DownloadSpeedLimitOn, off.DownloadSpeedCap));
+        Assert.Equal(((long?)null, (bool?)null, (long?)null), (cleared.DownloadSpeedLimit, cleared.DownloadSpeedLimitOn, cleared.DownloadSpeedCap));
+    }
+
+    [Theory]
+    [InlineData(DownloadSpeed.Minimum - 1)]
+    [InlineData(DownloadSpeed.Maximum + 1)]
+    public async Task RefusesADownloadSpeedLimitOutOfRange(long bytesPerSecond)
+    {
+        await _settings.SetDownloadSpeedLimitAsync(DownloadSpeed.Minimum, applies: true, Cancellation);
+
+        ArgumentOutOfRangeException refused = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
+            () => _settings.SetDownloadSpeedLimitAsync(bytesPerSecond, applies: true, Cancellation));
+
+        Assert.StartsWith("The download speed limit can be from 16KB to 10000MB a second.", refused.Message, StringComparison.Ordinal);
+        Assert.Equal(DownloadSpeed.Minimum, (await _settings.GetAsync(Cancellation)).DownloadSpeedLimit);
+    }
+
+    [Fact]
     public async Task SetsTheQuotaWarningAndBackToItsDefault()
     {
         await _settings.SetQuotaWarnBelowAsync(0, Cancellation);

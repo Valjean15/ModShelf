@@ -2,6 +2,7 @@ using ModShelf.Application.Diagnostics;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.Tests.Fakes;
 using ModShelf.Presentation.Tests.ViewModels.Accounts;
+using ModShelf.Presentation.ViewModels.Downloads;
 using ModShelf.Presentation.ViewModels.Settings;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Testing;
@@ -29,6 +30,7 @@ internal sealed class SettingsHarness
         Pictures = new TestPictures(Settings);
         PicturesCard = new PicturesViewModel(Settings, Pictures.Pictures, PicturesLogger);
         BrowserFolder = new BrowserFolderViewModel(Settings, Folders, Dialogs, BrowserFolderLogger);
+        SpeedLimit = new DownloadSpeedLimitViewModel(Settings, UiThread, SpeedLimitLogger);
         GameSettings = new GameSettingsOpener(Navigation);
         Screens = new ScreenOpener(Navigation);
         InstalledCard = new InstalledGamesViewModel(Installed, Lookup, Registry, Pictures.Pictures, Dialogs, InstalledLogger);
@@ -51,6 +53,7 @@ internal sealed class SettingsHarness
             UiThread,
             PicturesCard,
             BrowserFolder,
+            SpeedLimit,
             Pictures.Pictures,
             Links,
             Agents,
@@ -94,6 +97,13 @@ internal sealed class SettingsHarness
     public BrowserFolderViewModel BrowserFolder { get; }
 
     public RecordingLogger<BrowserFolderViewModel> BrowserFolderLogger { get; } = new();
+
+    /// <summary>
+    /// The download speed limit's box.
+    /// </summary>
+    public DownloadSpeedLimitViewModel SpeedLimit { get; }
+
+    public RecordingLogger<DownloadSpeedLimitViewModel> SpeedLimitLogger { get; } = new();
 
     public PicturesViewModel PicturesCard { get; }
 

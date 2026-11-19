@@ -4791,4 +4791,36 @@
     <value>{0} · {1}</value>
     <comment>Free up space: under a file's name, {0} its mod's name, {1} the folder it's in.</comment>
   </data>
+  <data name="SpeedUnitKilobytes" xml:space="preserve">
+    <value>KB/s</value>
+    <comment>The download speed limit's unit: kilobytes a second.</comment>
+  </data>
+  <data name="SpeedUnitMegabytes" xml:space="preserve">
+    <value>MB/s</value>
+    <comment>The download speed limit's unit: megabytes a second.</comment>
+  </data>
+  <data name="DownloadsSpeedLimited" xml:space="preserve">
+    <value>Limited to {0}/s</value>
+    <comment>The Downloads screen's line while downloads are limited: {0} the limit, such as 2.00 MB.</comment>
+  </data>
+  <data name="DownloadsSpeedNotLimited" xml:space="preserve">
+    <value>Not limited ({0}/s when on)</value>
+    <comment>The Downloads screen's line while the limit is off: {0} the limit kept, such as 2.00 MB.</comment>
+  </data>
+  <data name="DownloadsSpeedSwitch" xml:space="preserve">
+    <value>Limit download speed</value>
+    <comment>The name of the Downloads screen's switch that turns the speed limit on and off.</comment>
+  </data>
+  <data name="SettingsSpeedHeading" xml:space="preserve">
+    <value>Download speed</value>
+    <comment>Settings › Library: the heading of the download speed limit.</comment>
+  </data>
+  <data name="SettingsSpeedNote" xml:space="preserve">
+    <value>ModShelf's downloads take what the connection gives unless you limit them. The limit is shared by all of them together, so a slow or shared connection stays usable, and the Downloads screen turns it on and off. Files your browser downloads aren't limited.</value>
+    <comment>Settings › Library: what the download speed limit does.</comment>
+  </data>
+  <data name="SettingsSpeedLimit" xml:space="preserve">
+    <value>Limit downloads to</value>
+    <comment>Settings › Library: the box that turns the download speed limit on, before the speed and its unit.</comment>
+  </data>
 </root>

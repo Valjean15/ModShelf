@@ -17,6 +17,7 @@ using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
 using ModShelf.Presentation.ViewModels.Accounts;
+using ModShelf.Presentation.ViewModels.Downloads;
 using ModShelf.Presentation.ViewModels.Pictures;
 
 namespace ModShelf.Presentation.ViewModels.Settings;
@@ -91,6 +92,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
         IUiThread uiThread,
         PicturesViewModel pictures,
         BrowserFolderViewModel browserFolder,
+        DownloadSpeedLimitViewModel speedLimit,
         ModPictures covers,
         LinksViewModel links,
         AgentsViewModel agents,
@@ -118,6 +120,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(browserFolder);
+        ArgumentNullException.ThrowIfNull(speedLimit);
         ArgumentNullException.ThrowIfNull(covers);
         ArgumentNullException.ThrowIfNull(links);
         ArgumentNullException.ThrowIfNull(agents);
@@ -143,6 +146,7 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
         _logger = logger;
         Pictures = pictures;
         BrowserFolder = browserFolder;
+        SpeedLimit = speedLimit;
         ScreenPreviews =
         [
             new(PreviewScreen.Library, Strings.LibraryTitle, Strings.SettingsPreviewsLibraryNote, ChoosePreviews),
@@ -205,6 +209,11 @@ public sealed partial class SettingsViewModel : ScreenViewModel, ISettingsIndex
     /// The folder the browser saves downloads to, where the file of a download waiting on a site's page is taken from.
     /// </summary>
     public BrowserFolderViewModel BrowserFolder { get; }
+
+    /// <summary>
+    /// The most ModShelf's downloads take together, which the Downloads screen turns on and off too.
+    /// </summary>
+    public DownloadSpeedLimitViewModel SpeedLimit { get; }
 
     /// <summary>
     /// How each screen shows mods: the Library, Browse, Updates and Downloads.

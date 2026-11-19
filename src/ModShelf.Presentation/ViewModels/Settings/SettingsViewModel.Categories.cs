@@ -166,6 +166,15 @@ public sealed partial class SettingsViewModel
         Strings.SettingsKeepLatest);
 
     /// <summary>
+    /// The download speed limit: Library.
+    /// </summary>
+    public SettingsSectionViewModel SpeedLimitSection { get; } = new(
+        SettingsCategory.Library,
+        Strings.SettingsSpeedHeading,
+        Strings.SettingsSpeedNote,
+        Strings.SettingsSpeedLimit);
+
+    /// <summary>
     /// Rescanning the library: Library.
     /// </summary>
     public SettingsSectionViewModel RescanSection { get; } = new(
@@ -273,6 +282,7 @@ public sealed partial class SettingsViewModel
         BrowserFolderSection,
         FolderPatternSection,
         OldVersionsSection,
+        SpeedLimitSection,
         RescanSection,
         UpdatesSection,
         QuotaSection,

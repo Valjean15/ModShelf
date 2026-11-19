@@ -13,7 +13,8 @@ library on your disk, remembers which version of each file you have, and tells y
 
 ## What it does
 
-- **Downloads from several sites:** Nexus Mods, GameBanana, mod.io, DEG Mods and Thunderstore, plus plain web links.
+- **Downloads from several sites:** Nexus Mods, GameBanana, mod.io, DEG Mods and Thunderstore, plus plain web links,
+  with a speed limit you can turn on and off when the connection is shared.
 - **Keeps a library:** each file goes into a folder for its game and mod, with its version and SHA-256. Old versions
   are kept, archived or cleaned up, as you choose, and **Free up space** finds archived versions, duplicates and
   leftovers to delete, keeping any file that may be the only copy left.

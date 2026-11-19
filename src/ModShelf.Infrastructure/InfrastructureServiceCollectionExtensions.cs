@@ -16,6 +16,7 @@ using ModShelf.Application.Diagnostics.Ports;
 using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Pictures;
+using ModShelf.Application.Settings;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Application.State.Ports;
 using ModShelf.Infrastructure.Diagnostics;
@@ -44,7 +45,8 @@ public static class InfrastructureServiceCollectionExtensions
     /// <summary>
     /// Registers <see cref="HttpFileTransfer"/> as the <see cref="IFileTransfer"/>, with an HTTP client that
     /// retries transient failures with exponential backoff. The pipeline has no overall timeout on purpose:
-    /// a large download can take hours, and stalls are caught by <see cref="FileTransferOptions.ReadTimeout"/>.
+    /// a large download can take hours, and stalls are caught by <see cref="FileTransferOptions.ReadTimeout"/>. Downloads
+    /// share the speed limit the settings set (<see cref="DownloadSpeedLimiter"/>), when the host has settings.
     /// </summary>
     public static IServiceCollection AddHttpFileTransfer(this IServiceCollection services, FileTransferOptions? options = null)
     {
@@ -53,6 +55,12 @@ public static class InfrastructureServiceCollectionExtensions
 
         services.TryAddSingleton(TimeProvider.System);
         services.AddSingleton(settings);
+        services.TryAddSingleton(provider => provider.GetService<ISettingsService>() is { } appSettings
+            ? new DownloadSpeedLimiter(
+                async cancellationToken => (await appSettings.GetAsync(cancellationToken).ConfigureAwait(false)).DownloadSpeedCap,
+                provider.GetRequiredService<TimeProvider>(),
+                provider.GetRequiredService<ILogger<DownloadSpeedLimiter>>())
+            : DownloadSpeedLimiter.None(provider.GetRequiredService<TimeProvider>()));
         services.AddSingleton<IFileTransfer, HttpFileTransfer>();
 
         services

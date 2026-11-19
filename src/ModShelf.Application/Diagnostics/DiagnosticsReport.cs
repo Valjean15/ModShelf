@@ -97,6 +97,11 @@ internal sealed partial class DiagnosticsReport(
                 $"closing the window {close}",
                 $"folders for {Count(folders, "game")} set apart",
                 .. others == 0 ? Array.Empty<string>() : [$"other settings for {Count(others, "game")} set apart"],
+
+                // Said once set, as a reason downloads are slow.
+                .. stored.DownloadSpeedLimit is not { } limit ? Array.Empty<string>()
+                    : stored.DownloadSpeedCap is null ? [$"downloads not limited ({DownloadSpeed.Format(limit)} a second when on)"]
+                    : [$"downloads limited to {DownloadSpeed.Format(limit)} a second"],
             ]);
     }
 

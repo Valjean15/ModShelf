@@ -184,4 +184,14 @@ public interface ISettingsService
     /// </summary>
     /// <exception cref="ArgumentException"><paramref name="folder"/> isn't a full path.</exception>
     Task SetBrowserDownloadsFolderAsync(string? folder, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets the most bytes a second ModShelf's downloads take together, and whether that limit applies; null clears the
+    /// limit, so downloads take what they can (ADR 0105). A running queue takes a change within seconds.
+    /// </summary>
+    /// <param name="bytesPerSecond">The limit, from <see cref="Domain.Downloads.DownloadSpeed.Minimum"/> to
+    /// <see cref="Domain.Downloads.DownloadSpeed.Maximum"/>; null for none.</param>
+    /// <param name="applies">Whether it applies; the limit is kept while it doesn't, to turn on again. Ignored without a limit.</param>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="bytesPerSecond"/> is out of range.</exception>
+    Task SetDownloadSpeedLimitAsync(long? bytesPerSecond, bool applies, CancellationToken cancellationToken);
 }

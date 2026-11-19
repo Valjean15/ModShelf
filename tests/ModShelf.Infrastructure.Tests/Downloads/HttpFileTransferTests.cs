@@ -48,6 +48,33 @@ public sealed class HttpFileTransferTests : IDisposable
     }
 
     [Fact]
+    public async Task DownloadsUnderTheSpeedLimitCountingEachReadBeforeItWaits()
+    {
+        _server.Respond(Responses.Whole(File1000));
+        FakeTimeProvider time = new();
+        DownloadSpeedLimiter limiter = new(_ => Task.FromResult<long?>(400), time, new RecordingLogger<DownloadSpeedLimiter>());
+
+        Task<TransferOutcome> download = CreateTransfer(timeProvider: time, limiter: limiter)
+            .DownloadAsync(Ticket(), Destination, _progress, TestContext.Current.CancellationToken);
+        Stopwatch waited = Stopwatch.StartNew();
+        while (!_progress.Events.Contains("Advanced 1000") && waited.Elapsed < TimeSpan.FromSeconds(10))
+        {
+            await Task.Delay(10, TestContext.Current.CancellationToken);
+        }
+
+        // At 400 bytes a second, with a hundred the bucket holds: the thousand bytes, counted, then 2.25 seconds' wait.
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+        time.Advance(TimeSpan.FromMilliseconds(2249));
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+        Assert.False(download.IsCompleted);
+        time.Advance(TimeSpan.FromMilliseconds(1));
+
+        Assert.Equal(TransferOutcome.Completed, await download.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken));
+        Assert.Equal(File1000, File.ReadAllBytes(Destination));
+        Assert.Equal(["Started 0/1000", "Advanced 1000", "Verifying"], _progress.Events);
+    }
+
+    [Fact]
     public async Task ResumesThePartialFileWithARangeRequest()
     {
         File.WriteAllBytes(PartialFile, File1000[..400]);
@@ -741,14 +768,21 @@ public sealed class HttpFileTransferTests : IDisposable
     /// <param name="freeSpace">The disk's room, for a folder; null for the system's own disk.</param>
     /// <param name="move">Moves the finished file into place, in place of the system; null for the system's.</param>
     /// <param name="delete">Deletes a partial file, in place of the system; null for the system's.</param>
+    /// <param name="limiter">The speed limit downloads share; null for none.</param>
     private HttpFileTransfer CreateTransfer(
         FileTransferOptions? options = null,
         TimeProvider? timeProvider = null,
         Func<string, long?>? freeSpace = null,
         Action<string, string>? move = null,
-        Action<string>? delete = null)
-        => freeSpace is null && move is null && delete is null
-            ? new(new SingleHandlerHttpClientFactory(_server), timeProvider ?? TimeProvider.System, options ?? new FileTransferOptions(), _logger)
+        Action<string>? delete = null,
+        DownloadSpeedLimiter? limiter = null)
+        => freeSpace is null && move is null && delete is null && limiter is null
+            ? new(
+                new SingleHandlerHttpClientFactory(_server),
+                timeProvider ?? TimeProvider.System,
+                options ?? new FileTransferOptions(),
+                DownloadSpeedLimiter.None(timeProvider ?? TimeProvider.System),
+                _logger)
             : new(
                 new SingleHandlerHttpClientFactory(_server),
                 timeProvider ?? TimeProvider.System,
@@ -756,7 +790,8 @@ public sealed class HttpFileTransferTests : IDisposable
                 _logger,
                 freeSpace ?? FreeSpace.Available,
                 move,
-                delete);
+                delete,
+                limiter);
 
     private Task<TransferOutcome> DownloadAsync(
         FileTransferOptions? options = null,

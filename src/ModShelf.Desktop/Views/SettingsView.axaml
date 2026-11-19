@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:ModShelf.Presentation.ViewModels.Settings"
+             xmlns:downloads="using:ModShelf.Presentation.ViewModels.Downloads"
              xmlns:views="using:ModShelf.Desktop.Views"
              xmlns:pictures="using:ModShelf.Desktop.Views.Pictures"
              xmlns:res="using:ModShelf.Presentation.Resources"
@@ -318,6 +319,31 @@
                                                    Value="{Binding KeepCount}"
                                                    IsEnabled="{Binding IsKeepLatest}" />
                                 </WrapPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- The most ModShelf's downloads take together: the box turns it on, and the speed is kept while it's off. -->
+                        <Border Classes="card" IsVisible="{Binding SpeedLimitSection.IsShown}">
+                            <StackPanel Spacing="8" DataContext="{Binding SpeedLimit}" x:DataType="downloads:DownloadSpeedLimitViewModel">
+                                <TextBlock Classes="subheading" Text="{x:Static res:Strings.SettingsSpeedHeading}" />
+                                <TextBlock Classes="note" TextWrapping="Wrap" Text="{x:Static res:Strings.SettingsSpeedNote}" />
+                                <WrapPanel ItemSpacing="12" LineSpacing="4">
+                                    <CheckBox VerticalAlignment="Center" Content="{x:Static res:Strings.SettingsSpeedLimit}" IsChecked="{Binding IsLimited}" />
+                                    <NumericUpDown Minimum="{Binding Minimum}"
+                                                   Maximum="{Binding Maximum}"
+                                                   Increment="{Binding Increment}"
+                                                   FormatString="0.#"
+                                                   Width="140"
+                                                   Value="{Binding Amount}"
+                                                   IsEnabled="{Binding IsLimited}"
+                                                   AutomationProperties.Name="{x:Static res:Strings.SettingsSpeedLimit}" />
+                                    <ComboBox MinWidth="90"
+                                              VerticalAlignment="Center"
+                                              ItemsSource="{Binding Units}"
+                                              SelectedItem="{Binding Unit}"
+                                              IsEnabled="{Binding IsLimited}" />
+                                </WrapPanel>
+                                <TextBlock Classes="note message problem" Text="{Binding Problem}" IsVisible="{Binding Problem, Converter={x:Static ObjectConverters.IsNotNull}}" />
                             </StackPanel>
                         </Border>
 

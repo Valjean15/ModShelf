@@ -402,6 +402,26 @@ public sealed class JsonSettingsStoreTests : IDisposable
     }
 
     [Fact]
+    public async Task KeepsTheDownloadSpeedLimitAsWrittenAndWhetherItsOn()
+    {
+        await WriteAsync("""{ "downloads": { "speedLimit": "1.5 mb", "later": true } }""");
+        AppSettings handWritten = await Store().LoadAsync(Cancellation);
+
+        await Store().SaveAsync(handWritten with { DownloadSpeedLimitOn = false }, Cancellation);
+        string off = await File.ReadAllTextAsync(FilePath, Cancellation);
+        AppSettings loaded = await Store().LoadAsync(Cancellation);
+        await Store().SaveAsync(new AppSettings(), Cancellation);
+        string reset = await File.ReadAllTextAsync(FilePath, Cancellation);
+
+        Assert.Equal((1536L * 1024, (bool?)null), (handWritten.DownloadSpeedLimit!.Value, handWritten.DownloadSpeedLimitOn));
+        Assert.Contains("\"speedLimit\": \"1536KB\"", off, StringComparison.Ordinal);
+        Assert.Contains("\"speedLimitOn\": false", off, StringComparison.Ordinal);
+        Assert.Equal((1536L * 1024, (bool?)false), (loaded.DownloadSpeedLimit!.Value, loaded.DownloadSpeedLimitOn));
+        Assert.DoesNotContain("speedLimit", reset, StringComparison.Ordinal);
+        Assert.Contains("\"later\": true", reset, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task KeepsTheBrowsersDownloadsFolderAndItsDefaultLeavesTheFile()
     {
         string folder = Path.Combine(Path.GetTempPath(), "Browser downloads");
@@ -486,6 +506,9 @@ public sealed class JsonSettingsStoreTests : IDisposable
     [InlineData("""{ "agents": { "port": 65536 } }""", "agents.port must be a port from 1024 to 65535.")]
     [InlineData("""{ "agents": { "port": "47823" } }""", "agents.port must be a port from 1024 to 65535.")]
     [InlineData("""{ "downloads": { "browserFolder": 3 } }""", "downloads.browserFolder must be text.")]
+    [InlineData("""{ "downloads": { "speedLimit": "fast" } }""", "'fast' isn't a speed.")]
+    [InlineData("""{ "downloads": { "speedLimit": 2048 } }""", "downloads.speedLimit must be text.")]
+    [InlineData("""{ "downloads": { "speedLimitOn": "yes" } }""", "downloads.speedLimitOn must be true or false.")]
     [InlineData("""{ "downloads": { "browserFolder": "Downloads" } }""", "downloads.browserFolder must be a full path, not 'Downloads'.")]
     public async Task SaysWhenAPreviewPictureOrDetailsSettingIsWrong(string content, string message)
     {

@@ -62,6 +62,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         ISourceRegistry sources,
         ISitesInUse sitesInUse,
         SitesWantingAccounts wantingAccounts,
+        DownloadSpeedLimitViewModel speedLimit,
         ModPictures pictures,
         IUiThread uiThread,
         TimeProvider timeProvider,
@@ -77,6 +78,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(sitesInUse);
         ArgumentNullException.ThrowIfNull(wantingAccounts);
+        ArgumentNullException.ThrowIfNull(speedLimit);
         ArgumentNullException.ThrowIfNull(pictures);
         ArgumentNullException.ThrowIfNull(uiThread);
         ArgumentNullException.ThrowIfNull(logger);
@@ -84,6 +86,7 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
         _downloads = downloads;
         _sitesInUse = sitesInUse;
         _wantingAccounts = wantingAccounts;
+        SpeedLimit = speedLimit;
         _library = library;
         _opened = opened;
         _settings = settings;
@@ -114,6 +117,11 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
     }
 
     public override Screen Screen => Screen.Downloads;
+
+    /// <summary>
+    /// The most the downloads take together, which the line under the heading says and turns on and off.
+    /// </summary>
+    public DownloadSpeedLimitViewModel SpeedLimit { get; }
 
     public override string Title => Strings.DownloadsTitle;
 
@@ -269,9 +277,19 @@ public sealed partial class DownloadsViewModel : ScreenViewModel
     }
 
     /// <summary>
-    /// Finds whether two sites are in use, which can change while another screen shows, such as an account linked.
+    /// Finds whether two sites are in use, which can change while another screen shows, such as an account linked; and
+    /// reads the speed limit again, which may have changed from the command line.
     /// </summary>
-    public override void OnShown() => SitesWork = ShowSitesAsync();
+    public override void OnShown()
+    {
+        SitesWork = ShowSitesAsync();
+        SpeedLimitWork = SpeedLimit.RefreshAsync(_stopping);
+    }
+
+    /// <summary>
+    /// Reading the speed limit again, each time the screen is shown.
+    /// </summary>
+    internal Task SpeedLimitWork { get; private set; } = Task.CompletedTask;
 
     /// <summary>
     /// Shows the site of each download from a mod site, or no longer does.

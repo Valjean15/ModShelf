@@ -254,6 +254,22 @@ public sealed class SettingsViewModelTests
     }
 
     [Fact]
+    public async Task ShowsTheDownloadSpeedLimitAsStoredAndSavesItsChanges()
+    {
+        _harness.Settings.Stored = new AppSettings { DownloadSpeedLimit = 512 * 1024, DownloadSpeedLimitOn = false };
+
+        await _harness.StartAsync();
+        (bool, decimal?, string) shown = (Screen.SpeedLimit.IsLimited, Screen.SpeedLimit.Amount, Screen.SpeedLimit.Unit.Label);
+        Screen.SpeedLimit.IsLimited = true;
+        await Screen.SpeedLimit.Saving;
+
+        Assert.Equal((false, 512m, "KB/s"), shown);
+        Assert.Equal(SettingsCategory.Library, Screen.SpeedLimitSection.Category);
+        Assert.Equal(["downloadSpeedLimit 524288 on"], _harness.Settings.Changes);
+        Assert.Equal(512 * 1024, _harness.Settings.Stored.DownloadSpeedCap);
+    }
+
+    [Fact]
     public async Task OffersWhenToWarnThatRequestsRunLowAndSavesIt()
     {
         _harness.Settings.Stored = new AppSettings { QuotaWarnBelow = 15 };

@@ -45,13 +45,15 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
     private readonly Func<string, long?> _freeSpace;
     private readonly Action<string, string> _move;
     private readonly Action<string> _delete;
+    private readonly DownloadSpeedLimiter _limiter;
 
     public HttpFileTransfer(
         IHttpClientFactory httpClientFactory,
         TimeProvider timeProvider,
         FileTransferOptions options,
+        DownloadSpeedLimiter limiter,
         ILogger<HttpFileTransfer> logger)
-        : this(httpClientFactory, timeProvider, options, logger, FreeSpace.Available)
+        : this(httpClientFactory, timeProvider, options, logger, FreeSpace.Available, limiter: limiter)
     {
     }
 
@@ -60,6 +62,7 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
     /// </param>
     /// <param name="move">Moves the finished file into place without overwriting; null for the system's own move.</param>
     /// <param name="delete">Deletes a partial file; null for the system's own delete.</param>
+    /// <param name="limiter">The speed limit downloads share; null for none.</param>
     internal HttpFileTransfer(
         IHttpClientFactory httpClientFactory,
         TimeProvider timeProvider,
@@ -67,7 +70,8 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
         ILogger<HttpFileTransfer> logger,
         Func<string, long?> freeSpace,
         Action<string, string>? move = null,
-        Action<string>? delete = null)
+        Action<string>? delete = null,
+        DownloadSpeedLimiter? limiter = null)
     {
         ArgumentNullException.ThrowIfNull(httpClientFactory);
         ArgumentNullException.ThrowIfNull(timeProvider);
@@ -84,6 +88,7 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
         _freeSpace = freeSpace;
         _move = move ?? ((from, to) => File.Move(from, to, overwrite: false));
         _delete = delete ?? File.Delete;
+        _limiter = limiter ?? DownloadSpeedLimiter.None(timeProvider);
     }
 
     private enum ResponseKind
@@ -524,10 +529,11 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
                     while (true)
                     {
                         int read;
+                        int size = await _limiter.ReadSizeAsync(BufferSize, cancellationToken).ConfigureAwait(false);
                         readTimeout.CancelAfter(_options.ReadTimeout);
                         try
                         {
-                            read = await body.ReadAsync(buffer, readTimeout.Token).ConfigureAwait(false);
+                            read = await body.ReadAsync(buffer.AsMemory(0, size), readTimeout.Token).ConfigureAwait(false);
                         }
                         catch (Exception exception) when (IsNetworkFailure(exception, cancellationToken))
                         {
@@ -551,6 +557,9 @@ internal sealed partial class HttpFileTransfer : IFileTransfer
 
                         position += read;
                         reporter.Report(position);
+
+                        // After the bytes are written and counted, so a wait under the limit never loses them.
+                        await _limiter.TakeAsync(read, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }

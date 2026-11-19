@@ -123,6 +123,20 @@ public sealed class DiagnosticsReportTests
     }
 
     [Fact]
+    public async Task SaysTheDownloadSpeedLimitOnceOneIsSetAndWhetherItsOn()
+    {
+        _store.Settings = new AppSettings { DownloadSpeedLimit = 2 * 1024 * 1024 };
+        string on = Line(await LinesAsync(), "Settings");
+        _store.Settings = new AppSettings { DownloadSpeedLimit = 1536 * 1024, DownloadSpeedLimitOn = false };
+
+        Assert.EndsWith("folders for 0 games set apart, downloads limited to 2MB a second", on, StringComparison.Ordinal);
+        Assert.EndsWith(
+            "folders for 0 games set apart, downloads not limited (1536KB a second when on)",
+            Line(await LinesAsync(), "Settings"),
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task CountsGamesWithOtherSettingsOfTheirOwn()
     {
         _store.Settings = new AppSettings

@@ -162,6 +162,22 @@ public sealed record AppSettings
     public string? BrowserDownloadsFolder { get; init; }
 
     /// <summary>
+    /// The most bytes a second ModShelf's downloads take together, from <see cref="Domain.Downloads.DownloadSpeed.Minimum"/>
+    /// to <see cref="Domain.Downloads.DownloadSpeed.Maximum"/>, kept while the limit is off; null for none set (ADR 0105).
+    /// </summary>
+    public long? DownloadSpeedLimit { get; init; }
+
+    /// <summary>
+    /// Whether <see cref="DownloadSpeedLimit"/> applies, which the Downloads screen turns on and off; null for yes.
+    /// </summary>
+    public bool? DownloadSpeedLimitOn { get; init; }
+
+    /// <summary>
+    /// The limit in force: <see cref="DownloadSpeedLimit"/> while it's on; null for none.
+    /// </summary>
+    public long? DownloadSpeedCap => DownloadSpeedLimitOn != false ? DownloadSpeedLimit : null;
+
+    /// <summary>
     /// The sites' games picked for games installed on this computer: by the installed game's store and ID
     /// (<see cref="Installed.Ports.InstalledGame.Key"/>, such as "steam/489830"), then by site, the game's key there, or
     /// null when the installed game has none there. A site not named matches the installed game by its name.

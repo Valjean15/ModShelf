@@ -6,6 +6,7 @@ using System.Text.Json.Nodes;
 
 using ModShelf.Application.Settings;
 using ModShelf.Application.Settings.Ports;
+using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Domain.Updates;
@@ -45,7 +46,7 @@ namespace ModShelf.Infrastructure.Settings;
 ///   "details": { "maxAge": "7d" },
 ///   "quota": { "warnBelow": 15 },
 ///   "agents": { "enabled": true, "port": 47823 },
-///   "downloads": { "browserFolder": "C:\\Users\\Me\\Downloads" },
+///   "downloads": { "browserFolder": "C:\\Users\\Me\\Downloads", "speedLimit": "2MB", "speedLimitOn": false },
 ///   "installedGames": {
 ///     "steam/489830": { "nexus": "skyrimspecialedition", "modio": null }
 ///   }
@@ -90,6 +91,8 @@ internal sealed partial class JsonSettingsStore : ISettingsStore
     private const string Port = "port";
     private const string Downloads = "downloads";
     private const string BrowserFolder = "browserFolder";
+    private const string SpeedLimit = "speedLimit";
+    private const string SpeedLimitOn = "speedLimitOn";
     private const string Games = "games";
     private const string CheckUpdates = "checkUpdates";
     private const string UpdateIntervalName = "updateInterval";
@@ -179,6 +182,8 @@ internal sealed partial class JsonSettingsStore : ISettingsStore
                 AgentsEnabled = Flag(agents, Enabled, Agents),
                 AgentsPort = ReadPort(agents),
                 BrowserDownloadsFolder = browserFolder,
+                DownloadSpeedLimit = Text(downloads, SpeedLimit, Downloads) is { } speed ? DownloadSpeed.Parse(speed) : null,
+                DownloadSpeedLimitOn = Flag(downloads, SpeedLimitOn, Downloads),
                 InstalledMatches = ReadInstalledGames(file?[InstalledGames]),
             };
         }
@@ -343,6 +348,8 @@ internal sealed partial class JsonSettingsStore : ISettingsStore
 
         JsonObject downloadsSection = file[Downloads] as JsonObject ?? [];
         Set(downloadsSection, BrowserFolder, settings.BrowserDownloadsFolder);
+        Set(downloadsSection, SpeedLimit, settings.DownloadSpeedLimit is { } limit ? DownloadSpeed.Format(limit) : null);
+        SetFlag(downloadsSection, SpeedLimitOn, settings.DownloadSpeedLimitOn);
         Keep(file, Downloads, downloadsSection);
 
         WriteInstalledGames(file, settings.InstalledMatches);

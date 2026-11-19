@@ -27,7 +27,7 @@ public sealed class SettingsCategoriesTests
         Assert.Equal(["Accounts", "General", "Library", "Updates", "Links", "Agents", "Games", "About"], Screen.Categories.Select(category => category.ToString()));
         Assert.Equal(["Accounts"], shown["Accounts"]);
         Assert.Equal(["Theme", "Window", "Pictures"], shown["General"]);
-        Assert.Equal(["LibraryFolder", "BrowserFolder", "FolderPattern", "OldVersions", "Rescan"], shown["Library"]);
+        Assert.Equal(["LibraryFolder", "BrowserFolder", "FolderPattern", "OldVersions", "SpeedLimit", "Rescan"], shown["Library"]);
         Assert.Equal(["Updates", "Quota"], shown["Updates"]);
         Assert.Equal(["Links"], shown["Links"]);
         Assert.Equal(["Agents"], shown["Agents"]);
@@ -102,6 +102,14 @@ public sealed class SettingsCategoriesTests
     }
 
     [Fact]
+    public void ASearchFindsTheDownloadSpeedLimit()
+    {
+        Screen.SearchText = "limit speed";
+
+        Assert.Equal(["SpeedLimit"], Shown());
+    }
+
+    [Fact]
     public void ASearchFindsASectionsHeading()
     {
         Screen.SearchText = "appearance";
@@ -128,7 +136,7 @@ public sealed class SettingsCategoriesTests
         Screen.ClearSearchCommand.Execute(null);
 
         Assert.Equal((string.Empty, false), (Screen.SearchText, Screen.IsSearching));
-        Assert.Equal(["LibraryFolder", "BrowserFolder", "FolderPattern", "OldVersions", "Rescan"], Shown());
+        Assert.Equal(["LibraryFolder", "BrowserFolder", "FolderPattern", "OldVersions", "SpeedLimit", "Rescan"], Shown());
         Assert.All(Screen.Categories, category => Assert.True(category.HasMatches));
     }
 
@@ -205,6 +213,7 @@ public sealed class SettingsCategoriesTests
             ("BrowserFolder", Screen.BrowserFolderSection),
             ("FolderPattern", Screen.FolderPatternSection),
             ("OldVersions", Screen.OldVersionsSection),
+            ("SpeedLimit", Screen.SpeedLimitSection),
             ("Rescan", Screen.RescanSection),
             ("Updates", Screen.UpdatesSection),
             ("Quota", Screen.QuotaSection),

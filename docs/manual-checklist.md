@@ -116,6 +116,9 @@ Use a file of a few hundred MB, so there's time to stop it: for example a textur
 - [ ] **6.3 It survives a crash** (Premium only). Start another large file, and close the terminal window halfway. Open a new terminal, run the setup lines again, then the same command.
   It continues from where it was, and ends with "Saved …".
 
+- [ ] **6.4 A speed limit.** `ms settings set downloads.speedLimit 1MB`, then download another large file as in 6.1. A few seconds in, in a second terminal with the same setup lines, `ms settings set downloads.speedLimit off`. Then `ms settings show`, `ms settings set downloads.speedLimit on`, `ms settings set downloads.speedLimit 8KB` and `ms settings reset downloads.speedLimit`.
+  "downloads.speedLimit is now 1MB: ModShelf's downloads take at most 1MB a second together." The download's progress moves about 1 MB a second until the limit is off, then as fast as the connection allows, within a couple of seconds. The off says "… is now 1MB (off): ModShelf's downloads take what the connection gives. …"; `show` lists `downloads.speedLimit 1MB (off)`; `on` says it's 1MB again; `8KB` is refused, "'8KB' isn't a speed. …", exit code 2. The log has "Downloads are limited to 1048576 bytes a second together" and "Downloads are no longer limited". After the reset, `settings.json` has no `"speedLimit"`.
+
 ## 7. Updates
 
 - [ ] **7.1 The last day.** `ms mod updates --game stardewvalley`.

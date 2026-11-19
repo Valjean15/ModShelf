@@ -21,6 +21,7 @@ internal sealed class DownloadsHarness : IDisposable
     /// <param name="others">Sources beside Nexus Mods, such as direct links.</param>
     public DownloadsHarness(params IModSource[] others)
     {
+        SpeedLimit = new DownloadSpeedLimitViewModel(Settings, UiThread, SpeedLimitLogger);
         Screen = new DownloadsViewModel(
             Downloads,
             Library,
@@ -33,6 +34,7 @@ internal sealed class DownloadsHarness : IDisposable
             new FakeSourceRegistry([new ScriptedCatalog(TestData.Nexus, "Nexus Mods"), .. others]),
             Sites,
             Wanting,
+            SpeedLimit,
             Pictures.Pictures,
             UiThread,
             Time,
@@ -57,6 +59,13 @@ internal sealed class DownloadsHarness : IDisposable
     public ScriptedOpenedLinks Opened { get; } = new();
 
     public FakeSettingsService Settings { get; } = new();
+
+    /// <summary>
+    /// The speed limit's line, over <see cref="Settings"/>.
+    /// </summary>
+    public DownloadSpeedLimitViewModel SpeedLimit { get; }
+
+    public RecordingLogger<DownloadSpeedLimitViewModel> SpeedLimitLogger { get; } = new();
 
     public FixedUserFolders Folders { get; } = new();
 

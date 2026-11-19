@@ -4,6 +4,7 @@ using ModShelf.Application.Agents;
 using ModShelf.Application.Library;
 using ModShelf.Application.Settings;
 using ModShelf.Application.Sources;
+using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Domain.Updates;
@@ -37,8 +38,9 @@ internal static class SettingChanges
     public const string AgentsEnabled = "agents.enabled";
     public const string AgentsPort = "agents.port";
     public const string BrowserFolder = "downloads.browserFolder";
+    public const string SpeedLimit = "downloads.speedLimit";
     public const string GamesPrefix = "games.";
-    public const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<site>/<game>, {OldVersions}, {Interval}, {Notify}, {Theme}, {CloseToTray}, {SetupDone}, {CheckForAppUpdates}, {PreviewsPrefix}library, {PreviewsPrefix}updates, {PreviewsPrefix}browse, {PreviewsPrefix}downloads, {PicturesMaxSize}, {AdultPictures}, {DetailsMaxAge}, {QuotaWarnBelow}, {AgentsEnabled}, {AgentsPort}, {BrowserFolder}, "
+    public const string Names = $"{LibraryRoot}, {LibraryFolders}, {GamePrefix}<site>/<game>, {OldVersions}, {Interval}, {Notify}, {Theme}, {CloseToTray}, {SetupDone}, {CheckForAppUpdates}, {PreviewsPrefix}library, {PreviewsPrefix}updates, {PreviewsPrefix}browse, {PreviewsPrefix}downloads, {PicturesMaxSize}, {AdultPictures}, {DetailsMaxAge}, {QuotaWarnBelow}, {AgentsEnabled}, {AgentsPort}, {BrowserFolder}, {SpeedLimit}, "
         + $"{GamesPrefix}<site>/<game>.{GameRoot}, {GamesPrefix}<site>/<game>.{GameFolders}, {GamesPrefix}<site>/<game>.{GameOldVersions}, {GamesPrefix}<site>/<game>.{GameCheckUpdates}, {GamesPrefix}<site>/<game>.{GameInterval}, {GamesPrefix}<site>/<game>.{GameNotify}, {GamesPrefix}<site>/<game>.{GamePreviews}, {GamesPrefix}<site>/<game>.{GameHidden}, "
         + $"{GamesPrefix}<site>/<game>.{BrowseSort}, {GamesPrefix}<site>/<game>.{BrowseDirection}, {GamesPrefix}<site>/<game>.{BrowseWindow}, {GamesPrefix}<site>/<game>.{BrowsePageSize}, "
         + "such as games.nexus/stardewvalley.notify; a game's key alone, as games.stardewvalley.notify, does while only one site's game has it";
@@ -56,6 +58,10 @@ internal static class SettingChanges
     private const string BrowseWindow = "browse.window";
     private const string BrowsePageSize = "browse.pageSize";
 
+    // The values that turn the download speed limit off, keeping its speed, and on again.
+    private const string Off = "off";
+    private const string On = "on";
+
     /// <summary>
     /// The settings a game can have of its own, by the names that follow <c>games.&lt;site&gt;/&lt;game&gt;.</c>.
     /// </summary>
@@ -70,7 +76,7 @@ internal static class SettingChanges
         + "library.oldVersions; minutes, hours or days, such as 30m, 6h or 1d, for updates.interval and details.maxAge; true or false for "
         + "updates.notify, window.closeToTray, setup.done and app.checkForUpdates; system, light or dark for appearance.theme; "
         + "off, thumbnails or cards for previews.<screen> and games.<site>/<game>.previews; a number of megabytes from 64 to 8192 for pictures.maxSize; "
-        + "hidden, blurred or shown for pictures.adult; a percent from 0, for never, to 90 for quota.warnBelow; true or false for agents.enabled; a port from 1024 to 65535 for agents.port; for a game of its own, as every game's for games.<site>/<game>.oldVersions, "
+        + "hidden, blurred or shown for pictures.adult; a speed in kilobytes or megabytes a second from 16KB to 10000MB, such as 512KB or 2MB, or off or on to turn the speed set off or on again, for downloads.speedLimit; a percent from 0, for never, to 90 for quota.warnBelow; true or false for agents.enabled; a port from 1024 to 65535 for agents.port; for a game of its own, as every game's for games.<site>/<game>.oldVersions, "
         + "games.<site>/<game>.updateInterval and games.<site>/<game>.notify, true or false for games.<site>/<game>.checkUpdates and games.<site>/<game>.hidden, "
         + "relevance, endorsements, downloads, updated, newest, name, size or uniquedownloads for games.<site>/<game>.browse.sort, ascending or descending "
         + "for games.<site>/<game>.browse.direction, 1d, 7d or 30d for games.<site>/<game>.browse.window, and 20, 50 or 100 for games.<site>/<game>.browse.pageSize; "
@@ -91,6 +97,7 @@ internal static class SettingChanges
             || setting.Equals(QuotaWarnBelow, StringComparison.OrdinalIgnoreCase)
             || IsAgentSetting(setting)
             || setting.Equals(BrowserFolder, StringComparison.OrdinalIgnoreCase)
+            || setting.Equals(SpeedLimit, StringComparison.OrdinalIgnoreCase)
             || setting.Equals(CloseToTray, StringComparison.OrdinalIgnoreCase)
             || setting.Equals(CheckForAppUpdates, StringComparison.OrdinalIgnoreCase)
             || setting.Equals(OldVersions, StringComparison.OrdinalIgnoreCase)
@@ -160,6 +167,7 @@ internal static class SettingChanges
             Of(AgentsEnabled, stored.AgentsEnabled is { } agents ? Text(agents) : null, Text(false)),
             Of(AgentsPort, stored.AgentsPort?.ToString(CultureInfo.InvariantCulture), AppSettings.DefaultAgentsPort.ToString(CultureInfo.InvariantCulture)),
             Of(BrowserFolder, stored.BrowserDownloadsFolder, systemsDownloads),
+            Of(SpeedLimit, stored.DownloadSpeedLimit is { } limit ? SpeedText(limit, stored.DownloadSpeedCap is not null) : null, Off),
             .. stored.Games
                 .OrderBy(game => game.Key.ToString(), StringComparer.OrdinalIgnoreCase)
                 .SelectMany(game => GameValues(game.Key, game.Value)),
@@ -321,6 +329,11 @@ internal static class SettingChanges
                 : $"{BrowserFolder} is now {folder}: a download waiting on a site's page takes the file your browser saves there.";
         }
 
+        if (setting.Equals(SpeedLimit, StringComparison.OrdinalIgnoreCase))
+        {
+            return await ChangeSpeedLimitAsync(settings, value, cancellationToken).ConfigureAwait(false);
+        }
+
         if (setting.Equals(CheckForAppUpdates, StringComparison.OrdinalIgnoreCase))
         {
             bool? check = value is null ? null : ParseBool(value);
@@ -370,6 +383,46 @@ internal static class SettingChanges
 
     private static SettingValue Of(string name, string? value, string defaultValue)
         => new(name, value ?? defaultValue, IsDefault: value is null);
+
+    /// <summary>
+    /// Limits ModShelf's downloads to a speed, which turns the limit on; turns the speed set off, keeping it, or on
+    /// again; or, for null, takes it away.
+    /// </summary>
+    /// <exception cref="ArgumentException"><paramref name="value"/> isn't a speed, off or on; or it's on, with no speed set.</exception>
+    private static async Task<string> ChangeSpeedLimitAsync(ISettingsService settings, string? value, CancellationToken cancellationToken)
+    {
+        const string Unlimited = "ModShelf's downloads take what the connection gives.";
+        string? typed = value?.Trim();
+        if (typed is null)
+        {
+            await settings.SetDownloadSpeedLimitAsync(null, applies: true, cancellationToken).ConfigureAwait(false);
+            return $"{SpeedLimit} is back to its default, {Off}: {Unlimited}";
+        }
+
+        long? kept = (await settings.GetAsync(cancellationToken).ConfigureAwait(false)).DownloadSpeedLimit;
+        if (typed.Equals(Off, StringComparison.OrdinalIgnoreCase))
+        {
+            if (kept is not { } speed)
+            {
+                return $"{SpeedLimit} is {Off}: {Unlimited}";
+            }
+
+            await settings.SetDownloadSpeedLimitAsync(speed, applies: false, cancellationToken).ConfigureAwait(false);
+            return $"{SpeedLimit} is now {SpeedText(speed, applies: false)}: {Unlimited} Set it to on to limit them to {DownloadSpeed.Format(speed)} a second again.";
+        }
+
+        long bytes = typed.Equals(On, StringComparison.OrdinalIgnoreCase)
+            ? kept ?? throw new ArgumentException($"{SpeedLimit} has no speed to turn on: set one, such as 2MB.", nameof(value))
+            : DownloadSpeed.Parse(typed);
+        await settings.SetDownloadSpeedLimitAsync(bytes, applies: true, cancellationToken).ConfigureAwait(false);
+        return $"{SpeedLimit} is now {DownloadSpeed.Format(bytes)}: ModShelf's downloads take at most {DownloadSpeed.Format(bytes)} a second together.";
+    }
+
+    /// <summary>
+    /// A speed limit as <c>settings show</c> lists it, such as 2MB, or 2MB (off) while it's kept but off.
+    /// </summary>
+    private static string SpeedText(long bytesPerSecond, bool applies)
+        => applies ? DownloadSpeed.Format(bytesPerSecond) : $"{DownloadSpeed.Format(bytesPerSecond)} ({Off})";
 
     /// <summary>
     /// The game a setting's name gives: its site and its key there, such as nexus/stardewvalley; or its key alone, which

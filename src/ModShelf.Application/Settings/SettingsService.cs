@@ -5,6 +5,7 @@ using ModShelf.Application.Library;
 using ModShelf.Application.Library.Ports;
 using ModShelf.Application.Settings.Ports;
 using ModShelf.Domain.Common;
+using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Domain.Updates;
@@ -244,6 +245,25 @@ internal sealed class SettingsService : ISettingsService, IDisposable
     {
         string? normalized = folder is null ? null : FullRoot(folder, nameof(folder));
         return ChangeAsync((settings, _) => Task.FromResult(settings with { BrowserDownloadsFolder = normalized }), cancellationToken);
+    }
+
+    public Task SetDownloadSpeedLimitAsync(long? bytesPerSecond, bool applies, CancellationToken cancellationToken)
+    {
+        if (bytesPerSecond is < DownloadSpeed.Minimum or > DownloadSpeed.Maximum)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(bytesPerSecond),
+                bytesPerSecond,
+                $"The download speed limit can be from {DownloadSpeed.Format(DownloadSpeed.Minimum)} to {DownloadSpeed.Format(DownloadSpeed.Maximum)} a second.");
+        }
+
+        return ChangeAsync(
+            (settings, _) => Task.FromResult(settings with
+            {
+                DownloadSpeedLimit = bytesPerSecond,
+                DownloadSpeedLimitOn = bytesPerSecond is null || applies ? null : false,
+            }),
+            cancellationToken);
     }
 
     public Task SetAdultPicturesAsync(AdultPictures? pictures, CancellationToken cancellationToken)

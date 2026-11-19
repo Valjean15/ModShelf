@@ -90,4 +90,16 @@ internal sealed class FakeSettingsService : ISettingsService
     public Task SetAgentsPortAsync(int? port, CancellationToken cancellationToken) => throw new NotSupportedException();
 
     public Task SetBrowserDownloadsFolderAsync(string? folder, CancellationToken cancellationToken) => throw new NotSupportedException();
+
+    /// <summary>
+    /// Each change of the download speed limit, as (bytes a second, applies).
+    /// </summary>
+    public List<(long? BytesPerSecond, bool Applies)> SpeedLimits { get; } = [];
+
+    public Task SetDownloadSpeedLimitAsync(long? bytesPerSecond, bool applies, CancellationToken cancellationToken)
+    {
+        SpeedLimits.Add((bytesPerSecond, applies));
+        Stored = Stored with { DownloadSpeedLimit = bytesPerSecond, DownloadSpeedLimitOn = bytesPerSecond is null || applies ? null : false };
+        return Task.CompletedTask;
+    }
 }

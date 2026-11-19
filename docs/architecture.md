@@ -130,7 +130,7 @@ GameBanana).
 
 ## Downloads
 
-*ADRs 0002–0004, 0014, 0024, 0027, 0091.*
+*ADRs 0002–0004, 0014, 0024, 0027, 0091, 0105.*
 
 - **A job is a state machine** (`DownloadJob`, in Domain): it allows only its listed transitions, between queued,
   resolving, awaiting a handoff, downloading, verifying, paused, failed, completed and cancelled; any other call throws
@@ -145,6 +145,9 @@ GameBanana).
   partial file and asks the site for a new ticket. The resilience pipeline retries a request that fails before its
   body starts; once the body streams, a dropped or stalled connection is resumed with a new `Range` request, a few
   times, before the job fails. A file that won't fit on the disk fails before writing.
+- **One speed limit for all of them** (`downloads.speedLimit`): `HttpFileTransfer` takes each read's bytes from a
+  token bucket the process shares, `DownloadSpeedLimiter`, waiting when they don't fit. The limit is read from the
+  settings again every 2 seconds, so a change from the desktop app, the CLI or an agent reaches running downloads.
 - **One process runs the queue.** It holds `<database>.downloads.lock`. Another process (the CLI, an MCP server)
   lists the queue from the database, refuses changes, and retries the lock every 2 seconds. While the desktop app
   runs, MCP servers ask it to download instead.
