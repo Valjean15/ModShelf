@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ModShelf.Sources.Thunderstore\ModShelf.Sources.Thunderstore.csproj" />
+  </ItemGroup>
+
+  <!-- The source's client set up as the hosts set it up: the app's retries, time limits and refusal of redirects. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ModShelf.Infrastructure\ModShelf.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <!--
+    Serves the recorded Thunderstore answers and hand-written ones, so the tests never call Thunderstore; and the clock
+    the listings' lifetime is read from.
+  -->
+  <ItemGroup>
+    <PackageReference Include="WireMock.Net" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+  </ItemGroup>
+
+  <!-- The checks every source shares, and the helpers several test projects use. -->
+  <ItemGroup>
+    <Compile Include="..\Shared\RecordingLoggerProvider.cs" Link="Shared\RecordingLoggerProvider.cs" />
+    <Compile Include="..\Shared\SourceContractTests.cs" Link="Shared\SourceContractTests.cs" />
+  </ItemGroup>
+
+  <!-- The recordings Fixtures/Record-ThunderstoreFixtures.ps1 makes. -->
+  <ItemGroup>
+    <None Include="Fixtures\Recorded\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
