@@ -61,6 +61,7 @@ public static class DegModsServiceCollectionExtensions
         services.AddSingleton(provider => new DegModsRelays(
             provider.GetRequiredService<RelayClient>(),
             settings.Relays,
+            provider.GetService<TimeProvider>() ?? TimeProvider.System,
             provider.GetRequiredService<ILogger<DegModsRelays>>()));
         services.AddSingleton(provider => new ModIndex(
             provider.GetRequiredService<DegModsRelays>(),

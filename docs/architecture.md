@@ -115,7 +115,8 @@ GameBanana).
 - **mod.io** — needs an API key or a personal access token (the token also lists subscriptions, read-only; ModShelf
   never subscribes, since games install what's subscribed). At most 60 requests a minute, and none while mod.io asks
   to slow down. Files flagged malicious by its virus scan are refused; the MD5 is checked.
-- **DEG Mods** — mods are Nostr events on its relays, each signature checked. Files are on Blossom servers, named by
+- **DEG Mods** — mods are Nostr events on its relays, each signature checked, all of them asked at once and what
+  they hold put together; a relay that doesn't answer in 30 seconds isn't asked for 5 minutes, unless none answers. Files are on Blossom servers, named by
   their SHA-256, and taken from a server other than DEG Mods' own. Files elsewhere (MediaFire, Google Drive, Mega)
   open in the browser and come back through the browser's downloads folder. Hidden or blocked mods, and any mod
   sexualizing minors, are left out. Game covers come from the games database its admin publishes (desktop only).
