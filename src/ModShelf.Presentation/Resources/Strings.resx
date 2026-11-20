@@ -758,10 +758,6 @@
     <value>Search</value>
     <comment>Searches the chosen game's mods, or opens the mod a link is to.</comment>
   </data>
-  <data name="BrowseAuthorHint" xml:space="preserve">
-    <value>Author</value>
-    <comment>The box for searching by author.</comment>
-  </data>
   <data name="BrowseAdultContent" xml:space="preserve">
     <value>Include adult content</value>
     <comment>Whether a search includes mods with adult content.</comment>

@@ -25,7 +25,6 @@ public sealed class ModCommandInstalledTests : IAsyncDisposable
     private readonly ScriptedInstalledGames _installed = new();
     private readonly InProcessCli _cli;
     private readonly InstalledGame _example;
-    private readonly InstalledGame _abyss;
     private readonly InstalledGame _picked;
     private readonly InstalledGame _none;
 
@@ -38,7 +37,7 @@ public sealed class ModCommandInstalledTests : IAsyncDisposable
             new GameInfo(new GameRef(FakeCatalogSite.SourceId, "zoo"), "Zoo"),
         ]);
         _example = _installed.Add("1", "Example Game");
-        _abyss = _installed.Add("2", "Abyss Game");
+        _installed.Add("2", "Abyss Game");
         _picked = _installed.Add("3", "Zoo Tycoon Deluxe");
         _none = _installed.Add("4", "Zoo Story");
         _installed.Add("5", "Unmatched");

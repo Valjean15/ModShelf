@@ -1,5 +1,3 @@
-using System.Collections.Concurrent;
-
 using ModShelf.Application.Downloads;
 using ModShelf.Domain.Downloads;
 using ModShelf.Domain.Mods;
@@ -11,8 +9,6 @@ namespace ModShelf.Cli.Tests.Fakes;
 /// </summary>
 internal sealed class ScriptedDownloads : IDownloadService
 {
-    private readonly ConcurrentQueue<DownloadJobSnapshot> _jobs = new();
-
     public bool IsQueueBusyElsewhere { get; set; }
 
     /// <summary>

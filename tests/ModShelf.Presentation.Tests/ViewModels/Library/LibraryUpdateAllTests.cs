@@ -20,8 +20,6 @@ public sealed class LibraryUpdateAllTests : IDisposable
 
     private readonly LibraryHarness _harness = new();
 
-    private LibraryViewModel Screen => _harness.Screen;
-
     public void Dispose() => _harness.Dispose();
 
     [Fact]
