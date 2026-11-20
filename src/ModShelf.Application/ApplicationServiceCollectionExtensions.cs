@@ -16,8 +16,8 @@ using ModShelf.Application.Lists;
 using ModShelf.Application.Releases;
 using ModShelf.Application.Requirements;
 using ModShelf.Application.Settings;
-using ModShelf.Application.State;
 using ModShelf.Application.Sources;
+using ModShelf.Application.State;
 using ModShelf.Application.Updates;
 using ModShelf.Application.Watchlist;
 

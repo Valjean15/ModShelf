@@ -6,8 +6,8 @@ using ModShelf.Domain.Library;
 using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
-using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Presentation.ViewModels.Downloads;
+using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Sources.Abstractions.Accounts;
 
 namespace ModShelf.Presentation.ViewModels.Updates;

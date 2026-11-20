@@ -1,4 +1,5 @@
 using System.CommandLine;
+
 using Microsoft.Extensions.DependencyInjection;
 
 using ModShelf.Application.Catalog;

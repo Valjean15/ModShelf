@@ -12,9 +12,9 @@ using ModShelf.Application.Settings.Ports;
 using ModShelf.Cli.Hosting;
 using ModShelf.Cli.Tests.Fakes;
 using ModShelf.Domain.Mods;
+using ModShelf.Hosting;
 using ModShelf.Sources.Abstractions;
 using ModShelf.Testing;
-using ModShelf.Hosting;
 
 namespace ModShelf.Cli.Tests.Common;
 

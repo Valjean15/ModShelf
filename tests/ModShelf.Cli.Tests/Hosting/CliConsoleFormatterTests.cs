@@ -6,8 +6,8 @@ using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Options;
 
 using ModShelf.Cli.Hosting;
-using ModShelf.Testing;
 using ModShelf.Hosting;
+using ModShelf.Testing;
 
 namespace ModShelf.Cli.Tests.Hosting;
 

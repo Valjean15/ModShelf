@@ -6,12 +6,12 @@ using CommunityToolkit.Mvvm.Input;
 using ModShelf.Application.Downloads;
 using ModShelf.Application.Library;
 using ModShelf.Domain.Downloads;
-using ModShelf.Domain.Mods;
 using ModShelf.Domain.Library;
+using ModShelf.Domain.Mods;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
-using ModShelf.Presentation.ViewModels.Pictures;
 using ModShelf.Presentation.Services;
+using ModShelf.Presentation.ViewModels.Pictures;
 
 namespace ModShelf.Presentation.ViewModels.Downloads;
 

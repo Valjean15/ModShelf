@@ -134,8 +134,10 @@ public sealed class LibraryModPageTests : IDisposable
     [Fact]
     public async Task ShowsTheLibrarysChangesOnTheOpenMod()
     {
-        _harness.Lookup.Pages[SkyUi] = BrowseHarness.Page(BrowseHarness.Info(SkyUi, "SkyUI"), BrowseHarness.File(SkyUi, "1"), BrowseHarness.File(SkyUi, "2"))
-            with { Requirements = [new ModRequirement("Address Library", Address)] };
+        _harness.Lookup.Pages[SkyUi] = BrowseHarness.Page(BrowseHarness.Info(SkyUi, "SkyUI"), BrowseHarness.File(SkyUi, "1"), BrowseHarness.File(SkyUi, "2")) with
+        {
+            Requirements = [new ModRequirement("Address Library", Address)],
+        };
         await _harness.StartAsync(InLibrary);
         await _harness.Row(InLibrary).OpenCommand.ExecuteAsync(null);
         ModPageViewModel mod = Screen.Mod!;

@@ -7,10 +7,10 @@ using ModShelf.Application.State;
 using ModShelf.Presentation.Common;
 using ModShelf.Presentation.Resources;
 using ModShelf.Presentation.Services;
-using ModShelf.Presentation.ViewModels.Quota;
-using ModShelf.Presentation.ViewModels.QuickSearch;
-using ModShelf.Presentation.ViewModels.Undo;
 using ModShelf.Presentation.ViewModels.Downloads;
+using ModShelf.Presentation.ViewModels.QuickSearch;
+using ModShelf.Presentation.ViewModels.Quota;
+using ModShelf.Presentation.ViewModels.Undo;
 
 namespace ModShelf.Presentation.ViewModels;
 

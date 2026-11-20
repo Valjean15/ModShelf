@@ -1,7 +1,7 @@
 using ModShelf.Application.Downloads;
+using ModShelf.Application.Downloads.Ports;
 using ModShelf.Application.Tests.Common;
 using ModShelf.Application.Tests.Fakes;
-using ModShelf.Application.Downloads.Ports;
 using ModShelf.Domain.Downloads;
 
 using static ModShelf.Domain.Downloads.DownloadJobStatus;

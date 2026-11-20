@@ -8,8 +8,8 @@ using ModShelf.Application.Accounts.Ports;
 using ModShelf.Cli.Hosting;
 using ModShelf.Cli.Tests.Common;
 using ModShelf.Cli.Tests.Fakes;
-using ModShelf.Platform;
 using ModShelf.Hosting;
+using ModShelf.Platform;
 
 namespace ModShelf.Cli.Tests.Commands;
 

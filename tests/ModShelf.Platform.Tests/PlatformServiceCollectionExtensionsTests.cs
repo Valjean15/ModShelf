@@ -199,7 +199,7 @@ public sealed class PlatformServiceCollectionExtensionsTests : IDisposable
         Assert.Throws<ArgumentException>(() => new ServiceCollection().AddPlatformServices(new SecretStoreOptions { Scope = " " }));
     }
 
-        private static ServiceDescriptor Single<TService>(ServiceCollection services)
+    private static ServiceDescriptor Single<TService>(ServiceCollection services)
         => Assert.Single(services, descriptor => descriptor.ServiceType == typeof(TService));
 
     private sealed class StubServiceProvider : IServiceProvider
