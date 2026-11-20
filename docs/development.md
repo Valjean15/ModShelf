@@ -44,10 +44,13 @@ src/
   ModShelf.Sources.GameBanana     the GameBanana source
   ModShelf.Sources.ModIo          the mod.io source
   ModShelf.Sources.DegMods        the DEG Mods source
+  ModShelf.Sources.Thunderstore   the Thunderstore source
+  ModShelf.Sources.CurseForge     the CurseForge source
   ModShelf.Sources.DirectUrl      plain web links, with no mod site involved
   ModShelf.Presentation           ViewModels, no Avalonia reference
   ModShelf.Desktop                Avalonia views and the desktop composition root
   ModShelf.Cli                    headless composition root: the commands, and the MCP server
+  Shared/Hosting                  what the two composition roots register alike, linked into both
 tests/
   ModShelf.<Library>.Tests        one test project per library
   ModShelf.Architecture.Tests     enforces the dependency rules, keeps the installer out of ModShelf's data folder, and checks the release notes

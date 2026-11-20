@@ -1,7 +1,8 @@
 # Adding a source
 
-A source is how ModShelf works with one mod site. Nexus Mods (`ModShelf.Sources.Nexus`) and plain web links
-(`ModShelf.Sources.DirectUrl`) are the two so far. From 1.0.1, each patch release adds one site, following this guide.
+A source is how ModShelf works with one mod site. There are seven, each one project: Nexus Mods
+(`ModShelf.Sources.Nexus`), plain web links (`ModShelf.Sources.DirectUrl`), and, added one release after another from
+1.0.1 following this guide, GameBanana, mod.io, DEG Mods, Thunderstore and, in 1.1.0, CurseForge.
 A site that doesn't fit the guide changes the guide first, before any code: see
 [When the site doesn't fit](#when-the-site-doesnt-fit).
 

@@ -1,6 +1,6 @@
 # Manual checklist
 
-CI never calls a live mod site, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 13 checks GameBanana, once, without an account and then with a profile linked; section 14 checks mod.io, once, with an API key and then with an access token; section 15 checks DEG Mods, once, without an account; section 22 checks Thunderstore, once, without an account. Section 16 checks the games Steam installed on this computer, once, on a computer with Steam and a few games installed. A release is ready when they all pass.
+CI never calls a live mod site, so before each release someone runs these checks by hand against Nexus Mods: once with a **Premium** account and once with a **free** one. Section 13 checks GameBanana, once, without an account and then with a profile linked; section 14 checks mod.io, once, with an API key and then with an access token; section 15 checks DEG Mods, once, without an account; section 22 checks Thunderstore, once, without an account; section 25 checks CurseForge, once, with your own API key. Section 16 checks the games Steam installed on this computer, once, on a computer with Steam and a few games installed. A release is ready when they all pass.
 
 The checks use the CLI. They download files into a temporary folder, and keep the library database and credentials apart from your own. One section changes your account: it tracks SMAPI and untracks it again, leaving your tracked mods as they were.
 

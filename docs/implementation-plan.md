@@ -1,6 +1,6 @@
 # ModHub — Implementation Plan
 
-> **Status: complete.** Phases 0 to 7 shipped as ModShelf 1.0 in November 2026, and 1.0.6 is the latest release.
+> **Status: complete.** Phases 0 to 7 shipped as ModShelf 1.0 in November 2026, and 1.1.0 is the latest release.
 > This plan stays as the record of how 1.0 was planned. How ModShelf works now is in [architecture.md](architecture.md).
 
 Oct 20, 2026 · @Jean

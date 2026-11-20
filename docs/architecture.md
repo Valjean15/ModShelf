@@ -1,6 +1,6 @@
 # Architecture
 
-This page describes how ModShelf is built as of 1.0.7, and why. It replaces the 96 decision records (ADRs) written
+This page describes how ModShelf is built as of 1.1.0, and why. It replaces the 96 decision records (ADRs) written
 while building 1.0: their decisions are summarized here, each section naming the ADRs it draws on. The full records
 are listed in [adr/README.md](adr/README.md) and kept in git history at tag `v1.0.6`.
 
